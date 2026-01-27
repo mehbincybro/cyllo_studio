@@ -13,4 +13,8 @@
         <field name="name">Child Support</field>
         <field name="code">CHILD_SUPPORT</field>
     </record>
+    <record id="employee_payslip_other_input_expense_reimbursement" model="employee.payslip.other.input">
+        <field name="name">Expense Reimbursement</field>
+        <field name="code">EXPENSE</field>
+    </record>
 </odoo>
