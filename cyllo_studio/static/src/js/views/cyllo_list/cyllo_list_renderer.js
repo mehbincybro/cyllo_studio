@@ -50,6 +50,7 @@
  */
 import { listView } from "@web/views/list/list_view";
 import { onMounted,useRef,useState ,onWillRender} from "@odoo/owl";
+import { useBus } from "@web/core/utils/hooks";
 import {useService} from "@web/core/utils/hooks";
 
 
@@ -66,10 +67,28 @@ export class CylloListRenderer extends listView.Renderer {
             invisible_session: false,
             editable_field: false
        })
+       this.state.invisible_session = sessionStorage.getItem("invisible");
+       document.body.classList.toggle("cy-hide-invisible", !this.state.invisible_session);
+//       try {
+//    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", !!this.state.invisible_session);
+//} catch (e) {}
     onWillRender(()=>{
         this.state.invisible_session = sessionStorage.getItem('invisible')
     })
     onMounted(() => {
+      console.log('thato',this.env.config.viewType)
+      const checked = !!sessionStorage.getItem("invisible");
+      document.body.classList.toggle("cy-hide-invisible", !checked);
+      // Listen for invisible toggle and update state instantly
+      try {
+ useBus(this.env.bus, "CYLLO:SHOW_INVISIBLE_TOGGLED", (ev) => {
+                const isChecked = ev.detail ? ev.detail[0] : ev;
+                console.log("is chck",isChecked)
+                this.state.invisible_session = isChecked;
+                });
+      } catch(e){
+       console.warn("Bus listener setup failed:", e);
+      }
       sessionStorage.removeItem("newListElement");
       this.env.bus.trigger("LIST_DETAILS", {
         mode: this.props.archInfo,
@@ -82,7 +101,7 @@ export class CylloListRenderer extends listView.Renderer {
       const isGrouped = this.props.list.isGrouped;
        const self = this
        const treeEl = self.list_trRef.el
-       if (self.props.activeActions.type === "view"  && treeEl) {
+       if (self.props.activeActions.type === "view" && !isGrouped && treeEl) {
                 var drake = dragula([treeEl], {
                     revertOnSpill: true,
                     moves: (el, container, handle) => {
@@ -160,25 +179,36 @@ export class CylloListRenderer extends listView.Renderer {
    * @returns {Array} - Array of active/visible columns.
    */
     getActiveColumns(list) {
-        const invisible_session = sessionStorage.getItem('invisible');
-        return this.allColumns.filter((col) => {
-            if (!invisible_session) {
-                if (list.isGrouped && col.widget === "handle") {
-                    return false; // no handle column if the list is grouped
-                }
-                if (col.optional === 'hide') {
-                    return false
-                }
-                if (col.optional && !this.optionalActiveFields[col.name]) {
-                    return false;
-                }
-                if (this.evalColumnInvisible(col.column_invisible)) {
-                    return false;
-                }
-            }
-            return true;
-        });
-    }
+//        const invisible_session = sessionStorage.getItem('invisible');
+//        return this.allColumns.filter((col) => {
+//            if (!invisible_session) {
+//                if (list.isGrouped && col.widget === "handle") {
+//                    return false; // no handle column if the list is grouped
+//                }
+//                if (col.optional === 'hide') {
+//                    return false
+//                }
+//                if (col.optional && !this.optionalActiveFields[col.name]) {
+//                    return false;
+//                }
+//                if (this.evalColumnInvisible(col.column_invisible)) {
+//                    return false;
+//                }
+//            }
+//            return true;
+//        });
+//    }
+    return this.allColumns.filter((col) => {
+        if (list.isGrouped && col.widget === "handle") {
+            return false; // no handle column if the list is grouped
+        }
+
+        // Don't filter out optional or invisible columns
+        // Let them render with the cy-studio-striped class
+
+        return true;
+    });
+}
 
     /**
    * Safely evaluates column invisibility expressions.

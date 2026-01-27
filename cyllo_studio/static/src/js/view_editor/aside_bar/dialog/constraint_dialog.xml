@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_studio.ConstraintDialog">
+        <Dialog title="'Add SQL Constraint'" size="'lg'">
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div class="mb-3">
+                    <label class="form-label">Field Name</label>
+                    <input type="text"
+                           class="form-control"
+                           t-model="state.fieldLabel"
+                           readonly="1"
+                           style="background-color:#f5f5f5;"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Technical Name</label>
+                    <input type="text"
+                           class="form-control"
+                           t-model="state.fieldName"
+                           readonly="1"
+                           style="background-color:#f5f5f5;"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Constraint Type</label>
+                    <select class="form-select"
+                            t-model="state.constraintType"
+                            t-on-change="(ev)=>this.onConstraintTypeChange(ev.target.value)">
+                        <t t-foreach="constraintTypes" t-as="type" t-key="type.value">
+                            <option t-att-value="type.value"
+                                    t-att-selected="type.value===state.constraintType ? 'selected' : null">
+                                <t t-esc="type.label"/>
+                            </option>
+                        </t>
+                    </select>
+                </div>
+                <div t-if="state.nullWarning.show and state.isLoadingDataCheck === false"
+                     t-att-class="'alert alert-' + (getWarningSeverity() || 'info') + ' d-flex gap-2 mb-3'"
+                     role="alert">
+                    <div style="flex-shrink: 0;">
+                        <i t-if="getWarningSeverity() === 'danger'" class="fa fa-exclamation-circle fa-lg"
+                           style="color: #dc3545;"></i>
+                        <i t-elif="getWarningSeverity() === 'warning'" class="fa fa-exclamation-triangle fa-lg"
+                           style="color: #ffc107;"></i>
+                        <i t-else="" class="fa fa-info-circle fa-lg" style="color: #17a2b8;"></i>
+                    </div>
+                    <div style="flex: 1;">
+                        <strong style="font-size: 16px;">Constraint Conflict Detected</strong>
+                        <p class="mb-2" style="margin-top: 8px;">
+                            This field contains
+                            <strong>
+                                <t t-esc="state.nullWarning.nullCount + state.nullWarning.emptyCount"/>
+                            </strong>
+                            NULL/empty values out of
+                            <strong>
+                                <t t-esc="state.nullWarning.totalRecords"/>
+                            </strong>
+                            total records
+                            (
+                            <strong style="color: #dc3545;"><t t-esc="state.nullWarning.affectedPercentage"/>%
+                            </strong>
+                            affected).
+                        </p>
+                        <div style="background-color: rgba(220, 53, 69, 0.1); padding: 10px 12px; border-radius: 4px; margin-top: 12px; border-left: 3px solid #dc3545;">
+                            <p class="mb-0 small">
+                                <strong style="color: #721c24;">Critical Issue:</strong>
+                                Applying this constraint may cause the field save to <strong>FAIL</strong> due to
+                                existing data conflicts.
+                                <br/>
+                                <span style="margin-top: 6px; display: block;">Please clean up NULL/empty values in your
+                                    records before proceeding, or the constraint application will be rolled back.
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading indicator for data check -->
+                <div t-if="state.isLoadingDataCheck" class="alert alert-info d-flex gap-2 mb-3">
+                    <div>
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        Checking field data...
+                    </div>
+                </div>
+
+                <div class="mb-3" t-if="state.constraintType==='check'">
+                    <label class="form-label">Check Condition</label>
+                    <div class="input-group">
+                        <input type="text"
+                               id="condition-input"
+                               class="form-control"
+                               t-model="state.condition"/>
+<!--                        <button class="btn btn-outline-secondary"-->
+<!--                                type="button"-->
+<!--                                t-on-click="openConditionBuilder">-->
+<!--                            <i class="fa fa-code"></i>-->
+<!--                            Builder-->
+<!--                        </button>-->
+                    </div>
+                    <small class="form-text text-muted">
+                        Eg: amount_total > 0
+                    </small>
+                </div>
+                <div class="mb-3" t-if="state.constraintType==='foreign_key'">
+                    <label class="form-label">Foreign Key Definition</label>
+                    <input type="text"
+                           class="form-control"
+                           t-model="state.condition"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Error Message
+                        <span style="color:red">*</span>
+                    </label>
+                    <textarea class="form-control"
+                              t-model="state.errorMessage"
+                              rows="3"></textarea>
+                </div>
+                <div class="alert alert-info" role="alert">
+                    <strong>SQL Preview:</strong>
+                    <code style="word-break: break-word;">
+                        (
+                        '<t t-esc="state.constraintKey"/>',
+                        '<t t-esc="state.constraintType==='unique' ? 'UNIQUE('+state.fieldName+')' :
+                                 state.constraintType==='not_null'? 'CHECK('+state.fieldName+' IS NOT NULL)' :
+                                 state.constraintType==='check'? 'CHECK('+state.condition+')' :
+                                 state.condition"/>',
+                        '<t t-esc="state.errorMessage"/>'
+                        )
+                    </code>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <button type="button"
+                        class="btn btn-secondary"
+                        t-on-click="cancel">Cancel
+                </button>
+                <button type="button"
+                        class="btn btn-primary"
+                        t-on-click="confirm">Save
+                </button>
+            </t>
+
+        </Dialog>
+
+    </t>
+</templates>

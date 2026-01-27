@@ -196,6 +196,43 @@ export class AsideBar extends Component {
             ...(this.props.ExistingFieldProperties || {}),
         };
     }
+
+// NEW GETTERS FOR RIBBON VIEW TYPE DIFFERENTIATION
+    get showFormRibbon() {
+        return (
+            this.state.type === "ribbon" &&
+            this.props.viewDetails?.view_type === "form"
+        );
+    }
+
+    get showKanbanRibbon() {
+        return (
+            this.state.type === "ribbon" &&
+            this.props.viewDetails?.view_type === "kanban"
+        );
+    }
+
+    get FormRibbonProps() {
+        return {
+                ...(this.props.kanbanComponent || {}),
+                viewDetails: {
+                    ...(this.props.viewDetails || {})
+                },
+
+            };
+        }
+
+    get KanbanRibbonProps() {
+        return {
+            ...(this.props.kanbanComponent || {}),
+            viewDetails: {
+                ...(this.props.viewDetails || {}),
+                view_type: 'kanban',
+            },
+        };
+    }
+
+
     get KanbanDivPropertiesProps() {
        return {
             ...(this.props.viewDetails || {}),
@@ -230,12 +267,37 @@ export class AsideBar extends Component {
 
         };
     }
+
+//    get KanbanSpanProps() {
+//        console.log("12121")
+//        return {
+//            ...(this.props.overall || {}),
+//            ...(this.props.kanbanComponent || {}),
+//            span_properties: {
+//            ...(this.props.KanbanSpanProperties || {})},
+//            viewDetails: {
+//                ...(this.props.viewDetails || {})
+//            }
+//        }
+//    }
+
+
     get KanbanSpanProps() {
         return {
             ...(this.props.overall || {}),
             ...(this.props.kanbanComponent || {}),
             span_properties: {
-            ...(this.props.KanbanSpanProperties || {})},
+                ...(this.props.KanbanSpanProperties || {}),
+                properties: {
+                    ...(this.props.KanbanSpanProperties?.properties || {}),
+                    elementInfo: {
+                        ...(this.props.KanbanSpanProperties?.properties?.elementInfo || {}),
+                        path: this.props.KanbanSpanProperties?.properties?.elementInfo?.path ||
+                              this.props.kanbanComponent?.path ||
+                              this.props.KanbanSpanProperties?.path
+                    }
+                }
+            },
             viewDetails: {
                 ...(this.props.viewDetails || {})
             }

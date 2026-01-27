@@ -68,15 +68,22 @@ td.border-class-list {
     background-color: #f8f9e5;/* Changed border into background */
     border:unset !important;
 }
-/* striped for invisible */
+/* HIDE invisible table cells by default */
 .cy-studio-striped {
-  background-image: repeating-linear-gradient(
-    45deg,
-    #7c7c7c69 0,
-    #7c7c7c69 6px,
-    transparent 6px,
-    transparent 12px
-  ) !important;
+    display: none !important;
+}
+
+/* SHOW invisible table cells when checkbox is checked */
+body.cy-show-invisible .cy-studio-striped {
+    display: table-cell !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* For table cells (td), add a subtle left border instead of striped background */
+body.cy-show-invisible td.cy-studio-striped {
+    border-left: 3px solid #7c7c7c69 !important;
+    background-color: transparent !important;
 }
 /* Search View */
 .cy-content-header-icon {
@@ -602,3 +609,19 @@ div[data-drag="1"]:empty {
     width: 17% !important;
     min-width: unset !important;
 }
+
+
+/* Hide striped (invisible) nodes when toggle is OFF */
+.cy-hide-invisible .cy-studio-striped,
+.cy-hide-invisible .cy-studio-invisible-element {
+    display: none !important;
+}
+.cy-shadow-kanban {
+    opacity: .70;
+    pointer-events: none;
+    transform: scale(.98);
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.15));
+}
+
+
+

@@ -219,14 +219,14 @@ export class CylloFormCompiler extends FormCompiler {
      */
     compileNode(node, params = {}, evalInvisible = true) {
         const invisible_session = sessionStorage.getItem('invisible');
-        if (invisible_session) {
+//        if (invisible_session) {
             evalInvisible = false;
-        }
+//        }
         let compiledNode = super.compileNode(node, params, evalInvisible);
         if (!compiledNode) {
             return compiledNode;
         }
-        if (invisible_session && node.nodeType === 1) {
+        if (node.nodeType === 1) {
             const invisible = getModifier(node, "invisible");
 
             if (invisible && invisible !== "False" && invisible !== "0") {
@@ -269,7 +269,7 @@ export class CylloFormCompiler extends FormCompiler {
                 AttrArray.some(nodeAttr => nodeAttr.name === attr)
             );
             if (compiledNode.tagName.toLowerCase() === 'span' && !compiledNode.children.length > 0){
-                compiledNode.setAttribute("t-on-click", `(el)=>__comp__.handleSelectSpan && __comp__.handleSelectSpan(el)`);
+                compiledNode.setAttribute("t-on-click", `(el)=>__comp__.handleSelectSpan(el)`);
             }
             if (hasValidAttribute) {
                 AttrArray.forEach(nodeAttr => {

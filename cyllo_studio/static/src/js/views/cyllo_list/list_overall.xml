@@ -61,7 +61,7 @@
                         <div class="checkbox-item">
                             <input class="checkbox-input d-none ViewCheck"
                                    type="checkbox" id="showInvisibleElements"
-                                   t-att-checked="state.invisible ? 'checked' : null"
+                                   t-att-checked="state.showInvisible"
                                    t-on-click="(ev)=> this.props.showInvisibleFields(ev)"
                                    name="checkbox4"/>
                             <label class="checkbox-label"
@@ -172,6 +172,23 @@
                                                          searchable="true"/>
                                 </div>
                             </div>
+                            <t t-if="state.isStudioModel">
+                                <div class="input-overall">
+                                    <label class="cy-overall-label"
+                                           for="sort_select_by_input">Display Name:
+                                    </label>
+                                    <div class="cy-studio-custom-dropdown">
+                                        <CylloStudioDropdown
+                                                t-props="{
+                                                    defaultValue: state.currentRecName,
+                                                    options: state.recordNameOptions,
+                                                    onChange: onRecordNameChange,
+                                                    searchable: true,
+                                                }"/>
+                                    </div>
+                                </div>
+                            </t>
+
                             <div class="checkbox-item" t-if="defaultPosition">
                                 <input class="checkbox-input d-none ViewCheck"
                                        type="checkbox" id="showLink"

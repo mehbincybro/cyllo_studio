@@ -70,7 +70,8 @@ export class CylloKanbanRenderer extends KanbanRenderer {
     }
 
     onMounted(() => {
-      const ribbonElement = document.querySelectorAll('[data-ribbon="1"]');
+      const ribbonElement = document.querySelectorAll('div.ribbon[cy-xpath]');  //[data-ribbon="1"]
+      console.log('ww',ribbonElement)
       this.env.bus.trigger("KANBAN_DETAILS", {
         viewType: this.env.config.viewType,
         model: this.props.list._config.resModel,
