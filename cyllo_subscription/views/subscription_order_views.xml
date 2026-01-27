@@ -85,6 +85,7 @@
                             <field name="partner_state" invisible="not partner_state"/>
                             <field name="sale_order_template_id" domain="[('is_subscription', '=', True)]"/>
                             <field name="time_based_price_id"/>
+                            <field name="end_date"/>
                         </group>
                         <group>
                             <field name="trial_end"/>

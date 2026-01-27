@@ -20,8 +20,8 @@
 #
 #############################################################################
 from dateutil.relativedelta import relativedelta
-
-from odoo import api, fields, models
+from odoo.exceptions import ValidationError
+from odoo import api, fields, models,_
 
 
 class SaleOrderLine(models.Model):

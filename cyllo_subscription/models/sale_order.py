@@ -76,9 +76,10 @@ class SaleOrder(models.Model):
         return res
 
     def action_confirm(self):
-        """Check if the order line has a subscription and non-subscription
-        product if it is so needed to block it.
-        Create subscription orders from each order line"""
+        sub_lines = self.order_line.filtered(lambda l: l.product_id.is_subscription)
+        non_sub_lines = self.order_line.filtered(lambda l: not l.product_id.is_subscription and not(self.website_id and l.is_delivery))
+        if sub_lines and non_sub_lines:
+            raise ValidationError(_('Cannot add subscription product with non-subscription product.'))
 
         status = [True if order.product_template_id.is_subscription else False
                   for order in self.order_line]
