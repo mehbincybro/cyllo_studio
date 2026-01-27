@@ -3,3 +3,5 @@ access_asset_maintenance_manager,access.asset.maintenance.manager,model_asset_ma
 access_account_asset_maintenance_user,access.account.asset.maintenance.user,model_account_asset_maintenance,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,1,1,1
 access_asset_asset_user,access.asset.maintenance.user,cyllo_asset_management.model_asset_asset,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,1,0,0
 access_asset_item_user,access.asset.item.manager,cyllo_asset_management.model_asset_item,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,0,0,0
+
+access_asset_sell_dispose_maintenance_user,access.asset.sell.dispose.maintenance.user,cyllo_asset_management.model_asset_sell_dispose,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,1,1,0

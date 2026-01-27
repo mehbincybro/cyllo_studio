@@ -68,7 +68,8 @@
               action="action_vendor_batch_payment"
               parent="account.menu_finance_payables"/>
     <menuitem id="menu_fiscal_years_and_periods_categ" name="Fiscal Years and Lock Dates"
-              parent="account.menu_finance_configuration"/>
+              parent="account.menu_finance_configuration"
+              groups="account.group_account_manager"/>
     <menuitem id="menu_account_move_lock"
               name="Lock Dates"
               parent="menu_fiscal_years_and_periods_categ"

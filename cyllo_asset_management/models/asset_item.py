@@ -64,6 +64,7 @@ class AssetItem(models.Model):
     company_id = fields.Many2one(
         'res.company', required=True,
         default=lambda self: self.env.company, help='Select the company')
+    asset_loss_account_id = fields.Many2one('account.account', required=True)
 
 
     @api.depends('asset_type_id')

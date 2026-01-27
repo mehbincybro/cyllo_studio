@@ -34,7 +34,7 @@ class AssetAssign(models.Model):
     employee_id = fields.Many2one('hr.employee', required=True, tracking=True)
     department_id = fields.Many2one('hr.department', related='employee_id.department_id')
     email = fields.Char(related='employee_id.work_email')
-    assign_date = fields.Date(required=True, tracking=True)
+    assign_date = fields.Date(required=True, tracking=True, default=fields.date.today())
     reservation_id = fields.Many2one('asset.reservation')
     assign_note = fields.Text(string="Note")
     company_id = fields.Many2one('res.company',
@@ -44,14 +44,40 @@ class AssetAssign(models.Model):
     status = fields.Selection(
         [('draft', 'Draft'), ('assign', 'Assign'), ('cancel', 'Cancel')], default='draft', tracking=True, copy=False)
     active = fields.Boolean(default=True)
+    asset_ids = fields.Many2many('asset.asset', compute="_compute_asset_ids")
 
-    @api.onchange('assign_date')
-    def _onchange_assign_date(self):
+    @api.depends('company_id')
+    def _compute_asset_ids(self):
+        for record in self:
+            if (self.env.user.has_group('account.group_account_manager') or
+                    self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_admin')):
+                record.asset_ids = self.env['asset.asset'].search([])
+            elif self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_users'):
+                record.asset_ids = self.env['asset.reservation'].search([('employee_id.user_id', '=', self.env.user.id),
+                                                                         ('status', '=', 'reserve')]).mapped('asset_id')
+            else:
+                record.asset_ids = False
+
+    @api.onchange('asset_id')
+    def _onchange_assign_employee(self):
+        """Function for assigning the employee if reserved"""
+        if self.asset_id.is_reserve == True:
+            reserved_asset = self.env['asset.reservation'].search(
+                [('asset_id', '=', self.asset_id.id), ('status', '=', 'reserve')])
+            self.employee_id = reserved_asset.employee_id.id
+
+    @api.constrains('assign_date')
+    def _check_assign_date(self):
         """Function for checking the assign date"""
-        purchase_date = self.asset_id.asset_item_id.purchase_date
+        purchase_date = self.asset_id.sudo().date
         if self.assign_date and self.assign_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}. The Assign Date should be greater than the Purchase Date'))
+        if self.reservation_id:
+            reserved_date = self.reservation_id.start_date
+            if self.assign_date and self.assign_date < reserved_date:
+                raise UserError(
+                    _(f'The Asset is Reserved on {reserved_date}. The Assign Date should be greater than the Reserved start Date'))
 
     def unlink(self):
         """Function for unlink the assign records"""
@@ -64,11 +90,12 @@ class AssetAssign(models.Model):
 
     def action_assign(self):
         """Button action for assign the asset"""
-        if self.asset_id.is_assign:
+        asset_id = self.sudo().asset_id
+        if asset_id.is_assign:
             raise UserError(_('You cannot complete this operation, The related asset is already Assigned.'))
-        repair_asset = self.env['account.asset.repair'].search(
+        repair_asset = self.sudo().env['account.asset.repair'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'repairing'])])
-        maintenance_asset = self.env['account.asset.maintenance'].search(
+        maintenance_asset = self.sudo().env['account.asset.maintenance'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'ongoing'])])
         if (maintenance_asset and self.assign_date <= maintenance_asset.scheduled_date) or (
                 repair_asset and self.assign_date <= repair_asset.scheduled_date):
@@ -77,11 +104,12 @@ class AssetAssign(models.Model):
                   'operation'))
         else:
             self.status = 'assign'
-            self.asset_id.is_assign = True
+            asset_id.is_assign = True
+            asset_id.status = 'assigned'
             context = {
-                'asset': self.asset_id.name,
-                'assign_date': self.assign_date,
-                'employee': self.employee_id.name
+                'asset': asset_id.name,
+                'assign_date': self.sudo().assign_date,
+                'employee': self.sudo().employee_id.name
             }
             template = self.env.ref(
                 'cyllo_asset_management.mail_template_asset_assignment',
@@ -91,19 +119,31 @@ class AssetAssign(models.Model):
             }
             template.with_context(**context).send_mail(res_id=self.id, email_values=email_values, force_send=True)
             if self.reservation_id:
-                self.asset_id.is_reserve = False
+                asset_id.is_reserve = True
+                asset_id.status = 'reserved'
                 self.reservation_id.write({
                     'status': 'assign'})
 
     def action_unassign(self):
         """Button action for unassign the asset"""
+        asset_id = self.sudo().asset_id
         self.status = 'cancel'
-        self.asset_id.is_assign = False
-        asset_id = self.asset_id.id
-        reserved_asset = self.env['asset.reservation'].search(
-            [('asset_id', '=', asset_id), ('status', '=', 'assign')])
-        reserved_asset.write({
-            'status': 'cancel'})
+        asset_id.is_assign = False
+        if self.reservation_id:
+            if self.reservation_id.end_date > fields.date.today():
+                asset_id.is_reserve = True
+                self.reservation_id.write({
+                    'status': 'reserve'})
+            else:
+                asset_id.is_reserve = False
+                self.reservation_id.write({
+                    'status': 'cancel'})
+        if asset_id.is_reserve == True:
+            asset_id.status = 'reserved'
+        elif asset_id.is_confirm == True:
+            asset_id.status = 'running'
+        else:
+            asset_id.status = 'draft'
 
     def action_reset_to_draft(self):
         """Button action for reset the record in to draft state"""

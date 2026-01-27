@@ -117,7 +117,8 @@
                     <button type="object" name="action_unreserve" string="Unreserve" class="oe_highlight"
                             invisible="status != 'reserve'"/>
                     <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
-                            invisible="status != 'cancel'"/>
+                            invisible="status != 'cancel'"
+                            groups="account.group_account_manager,cyllo_asset_management.group_cyllo_asset_admin"/>
                     <field name="status" widget="statusbar" statusbar_visible="draft,reserve"/>
                 </header>
                 <sheet>

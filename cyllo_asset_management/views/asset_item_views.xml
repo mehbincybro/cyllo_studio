@@ -60,6 +60,7 @@
                             <field name="fixed_asset_account_id"/>
                             <field name="asset_depreciation_account_id"/>
                             <field name="asset_expense_account_id"/>
+                            <field name="asset_loss_account_id"/>
                         </group>
                     </group>
                     <!-- Chatter -->
@@ -81,11 +82,12 @@
     <menuitem id="menu_asset_categ"
               name="Asset"
               parent="account.menu_finance_configuration"
+              groups="cyllo_asset_management.group_cyllo_asset_admin,account.group_account_manager"
               sequence="20"/>
     <!--    Menuitem for the asset item-->
     <menuitem id="menu_asset_items"
               name="Asset Items"
               parent="cyllo_asset_management.menu_asset_categ"
-              action="action_view_asset_items" groups="account.group_account_manager"
+              action="action_view_asset_items"
               sequence="20"/>
 </odoo>

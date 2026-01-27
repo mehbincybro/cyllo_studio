@@ -51,6 +51,17 @@ class AssetLease(models.Model):
     is_return = fields.Boolean(copy=False)
     is_invoice = fields.Boolean(copy=False)
     active = fields.Boolean(default=True)
+    asset_ids = fields.Many2many('asset.asset', compute="_compute_asset_ids")
+
+    @api.depends('company_id')
+    def _compute_asset_ids(self):
+        for record in self:
+            if (self.env.user.has_group('account.group_account_manager') or
+                    self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_admin')):
+                record.asset_ids = self.env['asset.asset'].search([])
+            elif self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_users'):
+                record.asset_ids = self.env['asset.reservation'].search([('employee_id.user_id', '=', self.env.user.id),
+                                                                         ('status', '=', 'reserve')]).mapped('asset_id')
 
     @api.onchange('lease_amount')
     def _onchange_lease_amount(self):
@@ -61,13 +72,18 @@ class AssetLease(models.Model):
     @api.onchange('start_date', 'end_date')
     def _onchange_lease_date(self):
         """Function for checking the start and end date"""
-        purchase_date = self.asset_id.asset_item_id.purchase_date
+        purchase_date = self.sudo().asset_id.date
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
                 raise UserError(_('The End Date is greater than the Start Date'))
             elif (self.start_date < purchase_date) or (self.end_date < purchase_date):
                 raise UserError(
                     _(f'The Asset id Purchased on {purchase_date}.The Start Date and End Date should be greater than the Purchase Date'))
+            if self.reservation_id:
+                reserved_date = self.reservation_id.start_date
+                if self.start_date < reserved_date:
+                    raise UserError(
+                        _(f'The Asset is Reserved on {reserved_date}. The Start Date should be greater than the Reserved start Date'))
 
     def unlink(self):
         """Function for unlink the lease records"""
@@ -80,15 +96,16 @@ class AssetLease(models.Model):
 
     def action_create_lease(self):
         """Button action creating the lease"""
-        if not self.asset_id.is_lease_asset:
+        asset_id=self.sudo().asset_id
+        if not asset_id.is_lease_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a lease asset.'))
-        elif self.asset_id.is_lease:
+        elif asset_id.is_lease:
             raise UserError(_('You cannot complete this operation, The related asset is already taken for the Lease.'))
         elif self.lease_amount and self.lease_amount == 0:
             raise UserError(_('You cannot complete this operation, Please specify the lease amount.'))
-        repair_asset = self.env['account.asset.repair'].search(
+        repair_asset = self.sudo().env['account.asset.repair'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'repairing'])])
-        maintenance_asset = self.env['account.asset.maintenance'].search(
+        maintenance_asset = self.sudo().env['account.asset.maintenance'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'ongoing'])])
         if (maintenance_asset and self.start_date <= maintenance_asset.scheduled_date) or (
                 maintenance_asset and self.end_date <= maintenance_asset.scheduled_date) or (
@@ -100,7 +117,7 @@ class AssetLease(models.Model):
         else:
             self.status = 'lease'
             context = {
-                'asset': self.asset_id.name,
+                'asset': asset_id.name,
                 'start_date': self.start_date,
                 'end_date': self.end_date,
                 'customer': self.customer_id.name
@@ -112,9 +129,11 @@ class AssetLease(models.Model):
                 'email_to': self.email
             }
             template.with_context(**context).send_mail(res_id=self.id, email_values=email_values, force_send=True)
-            self.asset_id.is_lease = True
+            asset_id.is_lease = True
+            asset_id.status='leased'
             if self.reservation_id:
-                self.asset_id.is_reserve = False
+                asset_id.is_reserve = True
+                asset_id.status='reserved'
                 self.reservation_id.write({
                     'status': 'lease'})
             self.env['account.move'].create({
@@ -154,6 +173,7 @@ class AssetLease(models.Model):
 
     def action_return_asset(self):
         """Button action returning the leased assets"""
+        asset_id=self.sudo().asset_id
         invoice = self.env['account.move'].search([('lease_id', '=', self.id), ('payment_state', '!=', 'paid')])
         if invoice:
             raise UserError(
@@ -161,12 +181,22 @@ class AssetLease(models.Model):
         else:
             self.is_return = True
             self.status = 'cancel'
-            self.asset_id.is_lease = False
+            asset_id.is_lease = False
             if self.reservation_id:
-                self.asset_id.is_reserve = False
-                self.reservation_id.write({
-                    'status': 'cancel'})
-
+                if self.reservation_id.end_date > fields.date.today():
+                    asset_id.is_reserve = True
+                    self.reservation_id.write({
+                        'status': 'reserve'})
+                else:
+                    asset_id.is_reserve = False
+                    self.reservation_id.write({
+                        'status': 'cancel'})
+            if asset_id.is_reserve == True:
+                asset_id.status = 'reserved'
+            elif asset_id.is_confirm == True:
+                asset_id.status = 'running'
+            else:
+               asset_id.status = 'draft'
     def action_reset_to_draft(self):
         """Function for reset the leased assets to the draft state"""
         if self.asset_id.status in ('sell', 'disposed', 'cancel', 'lost'):
