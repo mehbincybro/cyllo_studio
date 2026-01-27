@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+    <menuitem name="User Profiles" id="user_profile_menu"
+              action="action_user_profile"  parent="base.menu_users" />
+    <menuitem name="Profile Management" id="profile_management_menu"
+              action="action_profile_management"  parent="base.menu_users" />
+    <menuitem name = "Buttons" action="action_ir_model_buttons" id="menu_buttons" parent="base.next_id_9"/>
+    <menuitem name = "Tabs" action="action_ir_model_tabs" id="menu_tabs" parent="base.next_id_9"/>
+    <menuitem name = "Filters" action="action_ir_model_filters" id="menu_filters" parent="base.next_id_9"/>
+    <menuitem name = "Hide Buttons and Tabs" action="action_hide_buttons_tabs"
+              id="menu_hide_buttons_tabs" parent="base.menu_security"/>
+    <menuitem name = "Hide Filters" action="action_hide_filters"
+              id="menu_hide_filters" parent="base.menu_security"/>
+    <menuitem name = "Field Access" action="action_field_access"
+              id="menu_field_access" parent="base.menu_security"/>
+    <menuitem name = "Model Access" action="action_model_access"
+              id="menu_model_access" parent="base.menu_security"/>
+    <menuitem name = "Domain Access" action="action_domain_access"
+              id="menu_domain_access" parent="base.menu_security"/>
+</odoo>

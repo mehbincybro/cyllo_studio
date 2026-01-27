@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_manager.access_user_profile,access_user_profile,cyllo_access_management.model_user_profile,base.group_system,1,1,1,1
+access_manager.access_profile_management,access_profile_management,cyllo_access_management.model_profile_management,base.group_system,1,1,1,1
+access_manager.access_hide_buttons_tabs,access_hide_buttons_tabs,cyllo_access_management.model_hide_buttons_tabs,base.group_system,1,1,1,1
+access_manager.access_hide_filters,access_hide_filters,cyllo_access_management.model_hide_filters,base.group_system,1,1,1,1
+access_manager.access_domain_access,access_domain_access,cyllo_access_management.model_domain_access,base.group_system,1,1,1,1
+access_manager.access_field_access,access_field_access,cyllo_access_management.model_field_access,base.group_system,1,1,1,1
+access_manager.access_model_access,access_model_access,cyllo_access_management.model_model_access,base.group_system,1,1,1,1
+access_manager.access_ir_model_buttons,access_ir_model_buttons,cyllo_access_management.model_ir_model_buttons,base.group_system,1,1,1,1
+access_manager.access_ir_model_tabs,access_ir_model_tabs,cyllo_access_management.model_ir_model_tabs,base.group_system,1,1,1,1
+access_manager.access_ir_model_filters,access_ir_model_filters,cyllo_access_management.model_ir_model_filters,base.group_system,1,1,1,1
