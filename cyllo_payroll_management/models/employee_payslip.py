@@ -94,6 +94,16 @@ class EmployeePayslip(models.Model):
     gratuity_settlement_id = fields.Many2one('gratuity.settlement')
     parent_id = fields.Many2one(comodel_name='employee.payslip')
     refund_count = fields.Integer(compute="_compute_refund_count", string="Refund Count", readonly=True)
+    expense_sheet_ids = fields.Many2many(
+        'hr.expense.sheet',
+        string='Expense Sheets',
+        help='Expense sheets included in this payslip'
+    )
+    expense_sheet_count = fields.Integer(
+        string='Expense Count',
+        compute='_compute_expense_sheet_count',
+        help='Number of expense sheets linked to this payslip'
+    )
 
     @api.depends('start_date')
     def _compute_to_date(self):
@@ -124,6 +134,22 @@ class EmployeePayslip(models.Model):
         """To compute the count of the refund of the particular payslip"""
         for record in self:
             record.refund_count= self.search_count([('parent_id', '=', self.id)])
+
+    @api.depends('expense_sheet_ids')
+    def _compute_expense_sheet_count(self):
+        """Compute the count of expense sheets linked to this payslip"""
+        for record in self:
+            record.expense_sheet_count = len(record.expense_sheet_ids)
+
+    def action_view_expense_sheets(self):
+        """To view corresponding expense sheets linked to the payslip"""
+        return {
+            'name': 'Expense Sheets',
+            'view_mode': 'tree,form',
+            'res_model': 'hr.expense.sheet',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.expense_sheet_ids.ids)],
+        }
 
     @api.depends('employee_id', 'start_date', 'to_date', 'contract_id', 'contract_id.work_entry_source')
     def _compute_work_entry_ids(self):
@@ -272,6 +298,10 @@ class EmployeePayslip(models.Model):
 
             # Proceed with posting and payment registration
             rec.account_move_id.write({'state': 'posted'})
+            if rec.expense_sheet_ids:
+                rec.expense_sheet_ids.write({
+                    'state': 'done'
+                })
             rec._compute_is_attachment_paid()
         return self.account_move_id.action_register_payment()
 
@@ -281,6 +311,14 @@ class EmployeePayslip(models.Model):
         updated to paid"""
         for slip in self:
             slip.write({'state': 'paid'})
+            if slip.expense_sheet_ids:
+                slip.expense_sheet_ids.write({
+                    'state': 'done',
+                    'payment_state': 'paid'
+                })
+                slip.expense_sheet_ids.expense_line_ids.write({
+                    'state': 'done',
+                })
             if slip.gratuity_settlement_id:
                 if slip.credit_note:
                     slip.gratuity_settlement_id.write({'state': 'cancel'})
@@ -446,6 +484,12 @@ class EmployeePayslip(models.Model):
             'domain': [('id', 'in', self.work_entry_ids.ids)],
         }
 
+    def action_link_expenses(self):
+        """Link expense sheets to this payslip after computation"""
+        for payslip in self:
+            if payslip.expense_sheet_ids:
+                payslip.expense_sheet_ids.write({'payslip_id': payslip.id})
+
     def action_compute_sheet(self):
         """Compute the salary details for the selected employee."""
         for payslip in self:
@@ -454,6 +498,7 @@ class EmployeePayslip(models.Model):
                 payslip.employee_payslip_line_ids.unlink()
                 contract_ids = payslip.contract_id.id or self.get_employee_contract(
                     payslip.employee_id, payslip.start_date, payslip.to_date)
+                payslip.action_link_expenses()
                 self.gratuity_settlement_id = False
                 if self.gratuity_settlement_ids:
                     self.gratuity_settlement_id = self.gratuity_settlement_ids[0]
@@ -499,6 +544,28 @@ class EmployeePayslip(models.Model):
                 'payslip_id': self.id,
                 'is_attachment': is_attachment
             })
+        expense_sheets = self.env['hr.expense.sheet'].sudo().search([
+            ('employee_id', '=', employee.id),
+            ('state', '=', 'approve'),
+            ('report_to_payslip', '=', True),
+            ('payslip_id', '=', False)  # Not yet included in any payslip
+        ])
+
+        if expense_sheets:
+            total_expense_amount = sum(expense_sheets.mapped('total_amount'))
+            expense_input_type = self.env.ref(
+                'cyllo_payroll_management.employee_payslip_other_input_expense_reimbursement'
+            )
+            input_line_values.append({
+                'type_id': expense_input_type.id,
+                'code': expense_input_type.code,
+                'amount': total_expense_amount,
+                'payslip_id': self.id,
+                'is_attachment': False
+            })
+            # Store expense sheets for reference
+            for expense in expense_sheets:
+                self.expense_sheet_ids = [(4,expense.id)]
         return input_line_values
 
     @api.model
@@ -667,28 +734,44 @@ class EmployeePayslip(models.Model):
             worked_days_dict[worked_days_line.code] = worked_days_line
         for input_line in payslip.employee_payslip_input_ids:
             if input_line.code:
+                print("input_code",input_line.code)
                 inputs_dict[input_line.code] = input_line.code
         inputs_dict = {line.code: line.amount for line in self.employee_payslip_input_ids if line.code}
+        print("inputs_dict",inputs_dict)
         categories = BrowsableObject(payslip.employee_id.id, {}, self.env)
+        print("categories",categories)
         inputs = InputLine(payslip.employee_id.id, inputs_dict, self.env)
+        print("inputs",inputs)
         worked_days = WorkedDays(payslip.employee_id.id, worked_days_dict, self.env)
+        print("worked_days",worked_days)
         payslips = Payslips(payslip.employee_id.id, payslip, self.env)
+        print("payslips",payslips)
         rules = BrowsableObject(payslip.employee_id.id, rules_dict, self.env)
+        print("rules",rules)
         baselocaldict = {'categories': categories, 'rules': rules, 'payslip': payslips,
                          'worked_days': worked_days, 'inputs': inputs}
+        print("baselocaldict",baselocaldict)
         contracts = self.env['hr.contract'].sudo().browse(contract_ids)
+        print("contracts",contracts)
         if len(contracts) == 1 and payslip.structure_id:
             structure_ids = list(set(payslip.structure_id._get_parent_structure().ids))
+            print("structure_ids",structure_ids)
         else:
             structure_ids = contracts.get_all_structures()
+            print("structure_ids", structure_ids)
         rule_ids = self.env['employee.salary.structure'].sudo().browse(structure_ids)._get_all_rules()
+        print("rule_ids",rule_ids)
         sorted_rule_ids = [id for id, sequence in sorted(rule_ids, key=lambda x: x[1])]
+        print("sorted_rule_ids",sorted_rule_ids)
         sorted_rules = self.env['employee.salary.rule'].browse(sorted_rule_ids)
+        print("sorted_rules",sorted_rules)
         for contract in contracts:
             employee = contract.employee_id
             localdict = dict(baselocaldict, employee=employee, contract=contract)
             for rule in sorted_rules:
+                print("rule",rule)
                 key = rule.code + '-' + str(contract.id)
+                print("key",key)
                 localdict['result'] = None
                 localdict['result_qty'] = 1.0
                 localdict['result_rate'] = 100
