@@ -1,0 +1,61 @@
+.cy-studio-new-menu{
+    .action-container{
+        margin-bottom: 16px !important;
+        }
+    .label-type{
+        width: 100% !important;
+        border: none !important;
+        border-bottom: 1px solid #ced4da !important;
+        box-shadow: none;
+        border-radius:0px !important;
+        padding:2px 4px !important;
+        color:black;
+        }
+    .menu-record-selector{
+        border-bottom: 1px solid #ced4da !important;
+        }
+    .form-check{
+        padding-left: 2.2rem !important;
+        }
+    }
+
+.cy-studio-update-menu-dialog{
+    .form-select{
+        box-shadow: none !important;
+        border-radius: 0px !important;
+        width: 50% !important;
+        border: none !important;
+        border-bottom: 1px solid #ced4da !important;
+        color:black;
+        }
+    .SiblingMenu{
+        border-bottom: 0px !important;
+        }
+    }
+.childMenus{
+    cursor: grab;
+    }
+.children-list {
+    max-height: 200px;  /* adjust height */
+    overflow-y: scroll;   /* enable scrolling */
+    border: 1px dashed #ccc;
+    padding: 6px;
+    border-radius: 6px;
+    background: #fafafa;
+}
+.cy-addChild {
+    background: #98b51e !important; /* green gradient */
+    color: #fff !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 4px 12 px !important;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+}
+.cy-addChild i {
+    font-size: 1rem;
+    color:#fff !important;
+}
+
+

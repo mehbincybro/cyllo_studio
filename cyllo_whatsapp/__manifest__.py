@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
-    'name': 'Cyllo Whatsapp',
+    'name': 'Whatsapp',
     'category': 'Extra tool',
     'version': '1.0',
     'author': 'Cyllo',
@@ -17,6 +37,7 @@
         of WhatsApp for business purposes, all within the Cyllo ERP environment.
     """,
     'depends': ['cyllo_base', 'sale', 'crm'],
+    'icon': '/cyllo_whatsapp/static/description/whatsapp.svg',
     'data': [
         'security/ir.model.access.csv',
         'security/cyllo_whatsapp_security.xml',
@@ -32,6 +53,8 @@
     ],
     'assets': {
         'web.assets_backend': [
+            'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/OpusMediaRecorder.umd.js',
+            'https://cdn.jsdelivr.net/npm/opus-media-recorder@latest/encoderWorker.umd.js',
             'cyllo_whatsapp/static/src/systray/*',
             'cyllo_whatsapp/static/src/chatter/*',
             'cyllo_whatsapp/static/src/css/*',

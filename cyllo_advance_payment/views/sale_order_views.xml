@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_sale_order_form" model="ir.ui.view">
-        <field name="name">view.sale.order.form</field>
+    <record id="view_sale_order_form_inherit_advance" model="ir.ui.view">
+        <field name="name">view.sale.order.form.inherit.advance</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
@@ -9,7 +9,7 @@
                 <field name="total_advance_amount" invisible="1"/>
                 <field name="amount_total" invisible="1"/>
                 <button name="action_advance_payment" string="Advance Payment" type="object"
-                        invisible="state != 'sale' or total_advance_amount >= amount_total or amount_total == 0"
+                        invisible="state != 'sale' or total_advance_amount >= amount_total"
                         class="btn-primary" groups="cyllo_advance_payment.group_cyllo_advance_payment_sale"/>
             </xpath>
             <xpath expr="//page[@name='customer_signature']" position="after">

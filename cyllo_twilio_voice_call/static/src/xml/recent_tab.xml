@@ -40,7 +40,7 @@
                                 <t t-else="">
                                     <t t-foreach="this.filteredPartners"
                                        t-as="recent"
-                                       t-key="recent['id']">
+                                       t-key="recent['serial']">
                                         <div class="cy-recent__list-item"
                                              t-on-click="() => this.getRecent(recent)">
                                             <div>

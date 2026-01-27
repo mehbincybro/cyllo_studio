@@ -2,12 +2,13 @@
 <odoo>
     <record id="dashboard_theme_macarons" model="dashboard.theme">
         <field name="name">Macarons</field>
-        <field name="background">rgba(0,0,0,0)</field>
+        <field name="background">#FFFFFF</field>
         <field name="title">#008acd</field>
         <field name="subtitle">#aaaaaa</field>
         <field name="label_text">#eeeeee</field>
         <field name="border_width">0</field>
         <field name="border_color">#cccccc</field>
+        <field name="body_header_background">#eaf9fa</field>
     </record>
     <record id="dashboard_theme_macarons_line" model="dashboard.theme.color">
         <field name="name">#2ec7c9</field>

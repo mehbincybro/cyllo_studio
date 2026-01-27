@@ -2,72 +2,104 @@
 <templates xml:space="preserve">
     <!-- This template represents the structure for displaying Facebook comments and replies. -->
     <t t-name="cyllo_facebook.FacebookComments" owl="1">
-        <div>
-            <div>
-                <div style="width:800px; margin:0 auto;">
-                    <br/>
-                    <textarea rows="4" name="comment" class="form-control" id="fb_comment_area"
-                              placeholder="Write a comment..." width="50px"/>
-                    <br/>
-                    <button class="btn btn-primary" t-on-click="onClickPost"
-                            title="Click to post" width="10px">Post</button>
-                    <br/><br/>
-                    <div id="extra_comment_div"/>
-                    <table width="100%" height="50%">
-                        <tbody bgcolor="#f6f7fa">
-                            <t t-if="FacebookCommentDetails">
-                                <t t-foreach="FacebookCommentDetails" t-as="fb_comment" t-key="fb_comment['id']">
-                                    <tr>
-                                        <td style="padding: 20px;">
-                                            <span style="font-weight:bold; color:#3CB371">
-                                                <t t-esc="fb_comment['username']"/>
-                                            </span>
-                                            <span class="text-muted">
-                                                <span t-esc="fb_comment['timestamp']" style="margin-left: 10px;font-size:13px;"/>
-                                            </span>
-                                            <br/>
-                                            <span t-esc="fb_comment['text']" style="color:#000"/>
-                                            <span class="badge rounded-pill text-bg-secondary float-end me-4">
-                                                <i class="fa fa-heart" style="color:red; padding:3px;"/>
-                                                <span t-esc="fb_comment['like_count']"/>
-                                            </span>
-                                            <div class="badge rounded-pill text-bg-secondary float-end me-4" t-on-click="convertToLead" t-att-id="fb_comment['id']">
-                                                <i class="fa fa-user" style="color:blue; padding:3px;"/>
-                                            </div>
-                                            <br/>
-                                            <div t-att-id="fb_comment['id']">
-                                                <a class="o_fb_comment_reply btn btn-sm btn-link px-0" href="#" t-att-id="fb_comment['id']" t-on-click="onClickReply">
-                                                    <i class="fa fa-comments me-1"/>Reply
-                                                </a>
-                                                <div id="reply_to_comments" t-att-id="fb_comment['id']" style="display:none;">
-                                                    <textarea rows="4" name="comment_reply" class="form-control" id="fb_comment_reply_area"
-                                                              t-ref="fb_comment_reply_area" placeholder="Write a reply..." width="30px"/>
-                                                    <button class="btn btn-primary" t-on-click="postReply"
-                                                            title="Click to Reply" width="3px">Reply</button>
-                                                </div>
-                                                <t t-if="fb_comment['replies']">
-                                                    <a class="o_fb_comment_replies btn btn-sm btn-link" href="#" t-att-id="fb_comment['id']"
-                                                       style="margin-left:10px;" t-on-click="onClickViewReplies"><i class="fa fa-reply me-1"/>
-                                                        View Replies (<t t-esc="fb_comment['replies']['data']['length']"/>)
-                                                    </a>
-                                                    <div id="view_replies" t-att-id="fb_comment['id']" style="display:none;">
-                                                    <t t-if="fb_comment['replies']">
-                                                        <t t-foreach="fb_comment['replies']['data']" t-as="replies" t-key="replies['id']">
-                                                            <span t-esc="replies['text']" style="margin-left: 35px;"/>
-                                                            <br/>
-                                                        </t>
-                                                    </t>
-                                                </div>
-                                                </t>
-                                            </div>
-                                        </td>
-                                    </tr>
+        <div class="cyllo_comment_template">
+            <div class="p-4">
+                <form class="pb-4 border-bottom mb-4">
+                    <div class="form-group d-flex overflow-hidden">
+                        <textarea
+                                class="form-control"
+                                id="fb_comment_area"
+                                rows="1" role="textbox"
+                                placeholder="Write a comment...."
+                                t-ref="new_message_ig"/>
+                        <div class="d-flex justify-content-end align-items-end">
+                            <button class="btn text-end" style="font-size: 20px"
+                                    t-on-click="(ev) => this.onClickPost(ev)"><i class="ri-send-plane-2-line"/></button>
+                        </div>
+                    </div>
+                </form>
+                <t t-foreach="FacebookCommentDetails" t-as="comment"
+                   t-key="comment.id" t-if="FacebookCommentDetails">
+                    <div class="cy-social_market-commentReply">
+                        <div class="cy-social_marketComment-box p-0">
+                            <div class="cy-comment-bubble">
+                                <div class="d-flex justify-content-between">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span>
+                                            <a t-on-click="() => this.DirectPartner(comment.partner_id)"
+                                               class="cy-main-sectionhead">
+                                                    <t t-esc="comment.username"/>
+                                            </a>
+                                        </span>
+                                        <div class="badge rounded-pill cursor-pointer"
+                                             t-on-click="convertToLead"
+                                             t-att-id="comment.id" data-tooltip="Create Lead" aria-label="Create Lead">
+                                            <i class="fa fa-user cy-cmt_rply"/>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-1">
+                                            <span class="cy-soical-market-count_txt cy-cmt_rply"><i class="ri-heart-line"/></span>
+                                            <span class="cy-soical-market-count_txt cy-cmt_rply"><t t-esc="comment.like_count"/></span>
+                                        </div>
+                                        <span class="cy-soical-comment_txt"><t t-esc="comment.timestamp"/></span>
+                                    </div>
+                                </div>
+                                <p class="cy-soical-market-cmnttile"><t t-esc="comment.text"/></p>
+                            </div>
+                            <div class="d-flex justify-content-start align-items-center mt-1">
+                                <a t-on-click="(ev) => this.onClickReply(ev)"
+                                   class="cursor-pointer d-flex align-items-center gap-1">
+                                    <span>
+                                        <i class="ri-chat-3-line cy-cmt_rply-icon"/>
+                                    </span>
+                                    <span class="cy-cmt_rply">
+                                        Reply
+                                    </span>
+                                </a>
+                                <t t-if="comment.replies?.length > 0">
+                                    <a class="o_fb_comment_replies btn btn-sm btn-link"
+                                       href="#"
+                                       t-att-id="comment.id"
+                                       style="margin-left:10px;"
+                                       t-on-click="onClickViewReplies">
+                                        View Replies (<t t-esc="comment.replies?.length"/>)
+                                    </a>
                                 </t>
-                            </t>
-                        </tbody>
-                        <br/>
-                    </table>
-                </div>
+                            </div>
+                            <div class="reply_div d-none">
+                                <input class="form-control mt-2"
+                                       type="text"
+                                       placeholder="Write a reply..."
+                                       name="" autocomplete="off"
+                                       t-attf-id="comment_{{comment.id}}"/>
+                                <span class="send_button">
+                                    <i class="ri-send-plane-2-line"
+                                       t-on-click="() => this.postReply(comment)"/>
+                                </span>
+                            </div>
+                            <div id="view_replies"
+                                 t-att-id="comment.id"
+                                 class="view_replies d-none">
+
+                                <t t-if="comment.replies">
+                                    <t t-foreach="comment.replies"
+                                       t-as="replies"
+                                       t-key="replies.id">
+                                            <div class="d-flex align-items-center">
+                                            <div class="cy-reply-line"/>
+                                                <div class="cy-comment-bubble mb-2">
+                                                <a t-on-click="() => this.DirectPartner(replies.partner_id)"
+                                                   class="cy-main-sectionhead">
+                                                    <span t-esc="replies.from?.name"/>
+                                                </a>
+                                                    <p t-esc="replies.message"/>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </t>
             </div>
         </div>
     </t>

@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, Command, fields, models
 
 
@@ -6,24 +26,25 @@ class ProductTemplate(models.Model):
     """Inherit the model to add some functions to get value to the dashboard"""
     _inherit = 'product.template'
 
-    state = fields.Selection(selection=[('draft', 'Draft'), ('to_approve', 'To Approve'),
-                                        ('approved', 'Approved'), ('rejected', 'Rejected')],
-                             help='State of the product', default='draft')
-    product_approver_line_ids = fields.One2many('product.approve', 'related_product_id', string='Product Approvers',
+    state = fields.Selection(
+        selection=[('draft', 'Draft'), ('to_approve', 'To Approve'),
+                   ('approved', 'Approved'), ('rejected', 'Rejected')],
+        help='State of the product', default='draft')
+    product_approver_line_ids = fields.One2many('product.approve',
+                                                'related_product_id',
+                                                string='Product Approvers',
                                                 help='Approvers assigned to this product for approval.')
-    approval_button_visibility = fields.Boolean(compute='_compute_approval_button_visibility',
-                                                string='Approval Visibility', help='Approval button visibility')
+    approval_button_visibility = fields.Boolean(
+        compute='_compute_approval_button_visibility',
+        string='Approval Visibility', help='Approval button visibility')
     approver_page_visibility = fields.Boolean(help='Approver page visibility')
-    status_approval = fields.Boolean(compute='_compute_status_approval', string='Approval Status')
+    status_approval = fields.Boolean(compute='_compute_status_approval',
+                                     string='Approval Status')
     type_approval = fields.Selection(
-        selection=[('to_write', 'Write'), ('to_create', 'Create'), ('to_unarchive', 'Un Archive'),
-                   ('to_archive', 'Archive'), ('to_delete', 'Delete')], default='to_write')
-
-    def _compute_status_approval(self):
-        """After approval of each manager the button to approve hides"""
-        for rec in self:
-            rec.status_approval = any(rec.product_approver_id.id == self.env.user.id and rec.status == 'approved'
-                                      for rec in rec.product_approver_line_ids)
+        selection=[('to_write', 'Write'), ('to_create', 'Create'),
+                   ('to_unarchive', 'Un Archive'),
+                   ('to_archive', 'Archive'), ('to_delete', 'Delete')],
+        default='to_write')
 
     def _compute_approval_button_visibility(self):
         """Checking the visibility of the button approve"""
@@ -32,6 +53,13 @@ class ProductTemplate(models.Model):
             if product.env.user.id in product.product_approver_line_ids.product_approver_id.ids and \
                     product.state == 'to_approve':
                 product.approval_button_visibility = True
+
+    def _compute_status_approval(self):
+        """After approval of each manager the button to approve hides"""
+        for rec in self:
+            rec.status_approval = any(
+                rec.product_approver_id.id == self.env.user.id and rec.status == 'approved'
+                for rec in rec.product_approver_line_ids)
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -43,14 +71,16 @@ class ProductTemplate(models.Model):
         """
         res = super().create(vals_list)
         res_company = self.env.company
-        for approvers in res_company.product_approver_ids:
-            res.write({'product_approver_line_ids': [
-                Command.create({
-                    'product_approver_id': approvers.id,
-                    'status': 'pending'
-                })]})
+        if not res.product_approver_line_ids:
+            for approvers in res_company.product_approver_ids:
+                res.write({'product_approver_line_ids': [
+                    Command.create({
+                        'product_approver_id': approvers.id,
+                        'status': 'pending'
+                    })]})
         if res_company.product_approver_ids:
-            if (res_company.minimum_cost_limit and res_company.cost_limit < res.standard_price
+            if (
+                    res_company.minimum_cost_limit and res_company.cost_limit < res.standard_price
                     or res_company.minimum_price_limit and res_company.price_limit < res.list_price):
                 self.write({
                     'state': 'to_approve',
@@ -70,109 +100,136 @@ class ProductTemplate(models.Model):
             res = super().write(vals)
             res_company = self.env.company
             if res_company.product_approver_ids:
-                if ((res_company.product_category and self.categ_id.id in res_company.category_ids.child_id.ids
-                     + res_company.category_ids.ids)
-                        or res_company.minimum_cost_limit and res_company.cost_limit < self.standard_price
-                        or res_company.minimum_price_limit and res_company.price_limit < self.list_price
-                        or not any([res_company.minimum_cost_limit, res_company.product_category,
-                                    res_company.minimum_price_limit])):
+                if not self.product_approver_line_ids:
+                    for approvers in res_company.product_approver_ids:
+                        line_ids = self.product_approver_line_ids
+                        if approvers.id in line_ids.mapped(
+                                'product_approver_id.id'):
+                            line_ids.filtered(lambda
+                                                  rec: rec.product_approver_id.id == approvers.id).update(
+                                {'status': 'pending'})
+                        else:
+                            self.write({'product_approver_line_ids': [
+                                Command.create({
+                                    'product_approver_id': approvers.id,
+                                    'status': 'pending'
+                                })]})
+
+                if self.check_approval_enabled():
+                    self._reset_approvals()
                     self.state = 'to_approve'
                     if self.type_approval in ['to_write', 'to_create']:
                         self.active = False
                     self.approver_page_visibility = True
-                elif not self.active:
+                elif not self.active or self.state == 'to_approve':
                     self.write({
                         'active': True,
+                        "state": "draft",
                         'approval_button_visibility': False,
                         'approver_page_visibility': False
                     })
             return res
         else:
+            if self.state == 'rejected':
+                vals['type_approval'] = 'to_write'
             return super().write(vals)
 
     def unlink(self):
         """Adding approval for the action unlink"""
-        if self.state == 'approved':
-            super().unlink()
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'reload',
-            }
-        if self.check_approval_enabled():
-            self.type_approval = 'to_delete'
-            res_company = self.env.company
-            for approvers in res_company.product_approver_ids:
-                line_ids = self.product_approver_line_ids
-                if approvers.id in line_ids.mapped('product_approver_id.id'):
-                    line_ids.filtered(lambda rec: rec.product_approver_id.id == approvers.id).update(
-                        {'status': 'pending'})
-                else:
-                    self.write({'product_approver_line_ids': [
-                        Command.create({
-                            'product_approver_id': approvers.id,
-                            'status': 'pending'
-                        })]})
-            self.write({'state': 'to_approve', 'approver_page_visibility': True})
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'type': 'warning',
-                    'title': _('Delete Record'),
-                    'message': _("Need approval for delete the product. Please refresh the page to see the approvers."),
+        for rec in self:
+            if rec.state == 'approved':
+                super().unlink()
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'reload',
                 }
-            }
-        else:
-            super().unlink()
-            return {
-                'type': 'ir.actions.act_window_close'
-            }
+            if rec.check_approval_enabled():
+                rec.type_approval = 'to_delete'
+                res_company = rec.env.company
+                for approvers in res_company.product_approver_ids:
+                    line_ids = rec.product_approver_line_ids
+                    if approvers.id in line_ids.mapped(
+                            'product_approver_id.id'):
+                        line_ids.filtered(lambda
+                                              rec: rec.product_approver_id.id == approvers.id).update(
+                            {'status': 'pending'})
+                    else:
+                        rec.write({'product_approver_line_ids': [
+                            Command.create({
+                                'product_approver_id': approvers.id,
+                                'status': 'pending'
+                            })]})
+                rec.write(
+                    {'state': 'to_approve', 'approver_page_visibility': True})
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'type': 'warning',
+                        'title': _('Delete Record'),
+                        'message': _(
+                            "Need approval for delete the product. Please refresh the page to see the approvers."),
+                    }
+                }
+            else:
+                super().unlink()
+                return {
+                    'type': 'ir.actions.act_window_close'
+                }
 
     def action_unarchive(self):
         """Adding approval for the action unarchive"""
-        if self.state == 'approved':
-            self.state = 'draft'
-            return super().action_unarchive()
-        if self.check_approval_enabled():
-            self.type_approval = 'to_unarchive'
-            res_company = self.env.company
-            line_ids = self.product_approver_line_ids
-            for approvers in res_company.product_approver_ids:
-                if approvers.id in line_ids.mapped('product_approver_id.id'):
-                    line_ids.filtered(lambda rec: rec.product_approver_id.id == approvers.id).update(
-                        {'status': 'pending', 'reason': False})
-                else:
-                    self.write({'product_approver_line_ids': [
-                        Command.create({
-                            'product_approver_id': approvers.id,
-                            'status': 'pending'
-                        })]})
-                self.write({'state': 'to_approve', 'approver_page_visibility': True})
-        else:
-            return super().action_unarchive()
+        for rec in self:
+            if rec.state == 'approved':
+                rec.state = 'draft'
+                return super().action_unarchive()
+            if rec.check_approval_enabled():
+                rec.type_approval = 'to_unarchive'
+                res_company = rec.env.company
+                line_ids = rec.product_approver_line_ids
+                for approvers in res_company.product_approver_ids:
+                    if approvers.id in line_ids.mapped(
+                            'product_approver_id.id'):
+                        line_ids.filtered(lambda
+                                              rec: rec.product_approver_id.id == approvers.id).update(
+                            {'status': 'pending', 'reason': False})
+                    else:
+                        rec.write({'product_approver_line_ids': [
+                            Command.create({
+                                'product_approver_id': approvers.id,
+                                'status': 'pending'
+                            })]})
+                    rec.write({'state': 'to_approve',
+                               'approver_page_visibility': True})
+            else:
+                return super().action_unarchive()
 
     def action_archive(self):
         """Adding approval for the action archive"""
-        if self.state == 'approved':
-            self.state = 'draft'
-            return super().action_archive()
-        if self.check_approval_enabled():
-            self.type_approval = 'to_archive'
-            res_company = self.env.company
-            line_ids = self.product_approver_line_ids
-            for approvers in res_company.product_approver_ids:
-                if approvers.id in line_ids.mapped('product_approver_id.id'):
-                    line_ids.filtered(lambda rec: rec.product_approver_id.id == approvers.id).update(
-                        {'status': 'pending', 'reason': False})
-                else:
-                    self.write({'product_approver_line_ids': [
-                        Command.create({
-                            'product_approver_id': approvers.id,
-                            'status': 'pending'
-                        })]})
-            self.write({'state': 'to_approve', 'approver_page_visibility': True})
-        else:
-            return super().action_archive()
+        for rec in self:
+            if rec.state == 'approved':
+                rec.state = 'draft'
+                return super().action_archive()
+            if rec.check_approval_enabled():
+                rec.type_approval = 'to_archive'
+                res_company = rec.env.company
+                line_ids = rec.product_approver_line_ids
+                for approvers in res_company.product_approver_ids:
+                    if approvers.id in line_ids.mapped(
+                            'product_approver_id.id'):
+                        line_ids.filtered(lambda
+                                              rec: rec.product_approver_id.id == approvers.id).update(
+                            {'status': 'pending', 'reason': False})
+                    else:
+                        rec.write({'product_approver_line_ids': [
+                            Command.create({
+                                'product_approver_id': approvers.id,
+                                'status': 'pending'
+                            })]})
+                rec.write(
+                    {'state': 'to_approve', 'approver_page_visibility': True})
+            else:
+                return super().action_archive()
 
     def action_product_reject(self):
         """Button for the product Rejection opening wizard"""
@@ -182,7 +239,8 @@ class ProductTemplate(models.Model):
             'res_model': 'product.reject',
             'view_mode': 'form',
             'context': {'default_button_visible': False},
-            'view_id': self.env.ref('cyllo_product.product_reject_view_form').id,
+            'view_id': self.env.ref(
+                'cyllo_product.view_product_reject_form').id,
             'target': 'new',
         }
 
@@ -193,7 +251,8 @@ class ProductTemplate(models.Model):
         approvers = company.product_approver_ids
         if approvers:
             user = self.env.user
-            line = self.product_approver_line_ids.filtered(lambda x: x.product_approver_id.id == user.id)
+            line = self.product_approver_line_ids.filtered(
+                lambda x: x.product_approver_id.id == user.id)
             if line and line.status == 'pending':
                 line.update({'status': 'approved'})
                 message = user.name + " Approved the " + self.name
@@ -228,10 +287,18 @@ class ProductTemplate(models.Model):
                     + res_company.category_ids.ids)
                     or res_company.minimum_cost_limit and res_company.cost_limit < self.standard_price
                     or res_company.minimum_price_limit and res_company.price_limit < self.list_price
-                    or not any([res_company.minimum_cost_limit, res_company.product_category,
+                    or not any([res_company.minimum_cost_limit,
+                                res_company.product_category,
                                 res_company.minimum_price_limit])):
                 return True
             else:
                 return False
         else:
             return False
+
+    def _reset_approvals(self):
+        """Reset all approver lines back to pending for a new approval cycle"""
+        for rec in self:
+            rec.product_approver_line_ids.write({
+                'status': 'pending',
+            })

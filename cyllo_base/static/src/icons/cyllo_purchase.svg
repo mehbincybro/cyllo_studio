@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>.purchase_cls-1{fill:#26261A;}.purchase_cls-2{fill:#c9c9b9;}.purchase_cls-3{fill:#BCBBA7;}.purchase_cls-4{fill:#a9a896;}</style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="purchase_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="purchase_cls-2" style="fill:#c9c9b9 !important;"
+                  d="M526.45,541.26,340.8,616.36l-1.93.79a43.89,43.89,0,0,1-57.37-23.72L172.37,330.58a43.89,43.89,0,0,1,23.71-57.37L362.7,204a43.89,43.89,0,0,1,57.38,23.7L433.28,256l77.5,166.1Z"/>
+            <path class="purchase_cls-3" style="fill:#BCBBA7 !important;"
+                  d="M526.45,541.26,340.8,616.36l-7.36-2.21a43.9,43.9,0,0,1-29.35-54.71L386.29,287a43.89,43.89,0,0,1,47-31l77.5,166.1Z"/>
+            <path class="purchase_cls-4" style="fill:#a9a896 !important;"
+                  d="M679.12,345.62,596.92,618.1a43.89,43.89,0,0,1-54.7,29.35L398.16,604l-28.67-8.65a43.89,43.89,0,0,1-29.35-54.71l82.2-272.46A43.89,43.89,0,0,1,477,238.81l172.74,52.12a41.82,41.82,0,0,1,4.59,1.68A43.87,43.87,0,0,1,679.12,345.62Z"/>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="ChatBot" owl="1">
+        <t t-if="state.chatOn">
+            <div class="chatbot-modal" t-att-style="state.dragStyle"
+                 t-att-class="{'chatbot-box': true, 'minimized': state.minimized, 'maximized': !state.minimized}"
+                 t-ref="chatbotDiv">
+                <t t-if="!state.minimized">
+                    <div class="chatbot-box" t-on-keydown="onKeyDown">
+                        <div class="chatbot-header">
+                            <img t-att-src="'/cyllo_ai/static/src/img/hamburger.svg'" class="hamburger-icon"
+                                 t-on-click="toggleHistory"/>
+                            <div class="navigation-bar">
+                                <i class="fa fa-times close-icon" t-on-click="_minimize_chatbot"/>
+                            </div>
+                        </div>
+                        <div class="upper-chatbot" t-ref="upperScroll" t-key="state.session_id"
+                             t-att-class="state.messages.length === 0 ? 'collapsed' : 'expanded'">
+                            <div t-ref="messageContainer" class="chat-messages flex-grow-1 mb-2">
+                                <t t-if="state.messages.length === 0">
+                                    <div class="chatbot-center">
+                                        <dotlottie-player
+                                                src="https://lottie.host/f44dd487-2810-485e-a159-fb4377a8db29/jODYvOf9p9.lottie"
+                                                background="transparent"
+                                                speed="1"
+                                                style="width: 300px; height: 150px;"
+                                                loop=""
+                                                autoplay="">
+                                        </dotlottie-player>
+                                        <p>How can I Help You Today?</p>
+                                    </div>
+                                </t>
+                                <t t-foreach="state.messages" t-as="msg" t-key="msg.id">
+                                    <t t-if="msg.from === 'user'">
+                                        <ChatUser t-props="{
+                                            text: msg.text,
+                                            html: msg.html,
+                                            userImage: state.user_image
+                                        }"/>
+                                    </t>
+                                    <t t-if="msg.from === 'bot'">
+                                        <ChatResponse t-props="{
+                                            text: msg.text,
+                                            id: msg.id,
+                                            html: msg.html,
+                                            chart_config: msg.chart_config,
+                                            interrupted: msg.interrupted,
+                                            onInterruptResponse: onInterruptResponse.bind(this),
+                                            onLoad: (api) => this.registerChartApi(msg_index, api)
+                                        }"/>
+                                    </t>
+                                </t>
+                                <t t-if="state.isTyping">
+                                    <div class="chat-message response-message">
+                                        <iframe src="https://lottie.host/embed/f44dd487-2810-485e-a159-fb4377a8db29/jODYvOf9p9.lottie"
+                                                class="bot-avatar"/>
+                                        <div class="chat-bubble bot" style="background:none; box-shadow:none">
+                                            <LottieAnimation src="'/cyllo_ai/static/src/animations/loading.json'"
+                                                             style="'margin-left: -15px; margin-top: -6px; width: 50px; height: auto; max-width: 200px;'"
+                                                             loop="true"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="bottom-chatbot"
+                             t-att-style="state.messages.length === 0 ? 'padding: 15px' : 'padding: 10px'">
+                            <t t-if="state.messages.length != 0 and !state.isTyping and !state.interrupted">
+                                <div class="new-chat-wrapper">
+                                    <button class="new-chat-btn" t-on-click="resetChat">New Chat</button>
+                                </div>
+                            </t>
+                            <div class="chatbot-input-wrapper d-flex" t-ref="input-wrapper">
+                                <t t-if="!state.isRecording">
+                                    <img t-att-src="'/cyllo_ai/static/src/img/owl-eye.svg'" class="robot-icon"/>
+                                </t>
+                                <t t-else="">
+                                    <span class="rec-timer-left" t-esc="state.recordingDisplay"/>
+                                </t>
+                                <textarea
+                                        name="chatText"
+                                        rows="1"
+                                        class="chat-input-box w-full"
+                                        style="resize: none; overflow-y: overlay;"
+                                        t-att-placeholder="state.isRecording ? '' : 'Hey, ask Cyllo!'"
+                                        t-model="state.inputText"
+                                        t-att-readonly="state.interrupted or state.convertVoice or state.isRecording"
+                                        t-att-class="{ 'text-muted': state.interrupted }"
+                                        t-on-keydown="onKeyDown"
+                                        t-on-input="autoResize"
+                                />
+                                <div class="mic-wrapper">
+                                    <span
+                                            t-att-class="'mic-btn ' + (state.isRecording ? 'recording' : '')"
+                                            t-on-click="state.isRecording ? stopRecording : recordVoice">
+                                        <img
+                                                t-att-src="'/cyllo_ai/static/src/img/mic-ai-line.svg'"
+                                                class="mic-icon"
+                                                t-att-style="'width:25px; height:25px; cursor:pointer;'"
+                                        />
+                                    </span>
+                                    <t t-if="state.convertVoice">
+                                        <div class="mic-loader"></div>
+                                    </t>
+                                </div>
+                                <button
+                                        t-att-disabled="state.isTyping or state.interrupted"
+                                        t-on-click="state.isRecording ? cancelRecording : handleSend"
+                                        t-attf-class="send-icon-btn {{ state.isRecording ? 'btn-danger' : '' }}">
+
+                                    <!-- Show trash icon when recording -->
+                                    <t t-if="state.isRecording">
+                                        <i class="fa fa-trash"/>
+                                    </t>
+
+                                    <!-- Show loading spinner when typing -->
+                                    <t t-elif="state.isTyping">
+                                        <i class="fa fa-spinner fa-spin"/>
+                                    </t>
+
+                                    <!-- Show send image by default -->
+                                    <t t-else="">
+                                        <img src="/cyllo_ai/static/src/img/sent.svg" alt="Send" class="icon-image"/>
+                                    </t>
+                                </button>
+                            </div>
+                            <t t-if="state.messages.length === 0">
+                                <div class="chatbot-actions mb-2 d-flex flex-wrap gap-1 justify-content-center">
+                                    <div t-on-click="() => handleQuickAction('Total sales of current year')">
+                                        <img src="/cyllo_ai/static/src/img/Group.svg" alt="" class="quick-action-icon"/>
+                                        Total sales of current year</div>
+                                    <div t-on-click="() => handleQuickAction('Total profit of current year')">
+                                        <img src="/cyllo_ai/static/src/img/investment.svg" alt=""
+                                             class="quick-action-icon"/>
+                                        Total profit of current year</div>
+                                    <div class="top-customers-div"
+                                         t-on-click="() => handleQuickAction('Top 10 customers')">
+                                        <img src="/cyllo_ai/static/src/img/customer.svg" alt=""
+                                             class="quick-action-icon"/>
+                                        Top 10 customers</div>
+                                </div>
+                           </t>
+                        </div>
+                    </div>
+                </t>
+                <t t-if="state.minimized">
+                    <a class="toggle-icon" type="button" tabindex="0" aria-expanded="false">
+                        <dotlottie-player
+                                src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                                background="transparent"
+                                speed="1"
+                                style="width: 50px; height: 50px"
+                                loop=""
+                                autoplay=""
+                                t-on-click="_maximize_chatbot"
+                        />
+                    </a>
+                </t>
+                <t t-if="state.historyOpen">
+                    <ChatSidebar
+                        onSelect="(session) => this.onSelectSession(session)"
+                        onClose="() => this.toggleHistory()"
+                    />
+                </t>
+            </div>
+        </t>
+    </t>
+</templates>

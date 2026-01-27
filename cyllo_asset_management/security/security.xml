@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Assets User Group-->
+    <record id="group_cyllo_asset_users" model="res.groups">
+        <field name="name">Asset Users</field>
+        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        <field name="implied_ids" eval="[Command.link(ref('account.group_account_invoice'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+    <!--    Record Rules for Multi Company on Asset-->
+    <record id="rule_asset_asset_company" model="ir.rule">
+        <field name="name">Asset multi-company</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Reservation-->
+    <record id="rule_asset_reservation_company" model="ir.rule">
+        <field name="name">Asset Reservation multi-company</field>
+        <field name="model_id" ref="model_asset_reservation"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Lease-->
+    <record id="rule_asset_lease_company" model="ir.rule">
+        <field name="name">Asset Lease multi-company</field>
+        <field name="model_id" ref="model_asset_lease"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Rental-->
+    <record id="rule_asset_rental_company" model="ir.rule">
+        <field name="name">Asset Rental multi-company</field>
+        <field name="model_id" ref="model_asset_rental"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Scrap-->
+    <record id="rule_asset_scrap_company" model="ir.rule">
+        <field name="name">Asset Scrap multi-company</field>
+        <field name="model_id" ref="model_asset_scrap"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Item-->
+    <record id="rule_asset_item_company" model="ir.rule">
+        <field name="name">Asset Item multi-company</field>
+        <field name="model_id" ref="model_asset_item"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Type-->
+    <record id="rule_asset_type_company" model="ir.rule">
+        <field name="name">Asset Type multi-company</field>
+        <field name="model_id" ref="model_asset_type"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Brand-->
+    <record id="rule_asset_brand_company" model="ir.rule">
+        <field name="name">Asset Brand multi-company</field>
+        <field name="model_id" ref="model_asset_brand"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Repair-->
+    <record id="rule_account_asset_repair_company" model="ir.rule">
+        <field name="name">Asset Repair multi-company</field>
+        <field name="model_id" ref="model_account_asset_repair"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Maintenance-->
+    <record id="rule_account_asset_maintenance_company" model="ir.rule">
+        <field name="name">Asset Maintenance multi-company</field>
+        <field name="model_id" ref="model_account_asset_maintenance"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on Asset Assign-->
+    <record id="rule_asset_assign_company" model="ir.rule">
+        <field name="name">Asset Assign multi-company</field>
+        <field name="model_id" ref="model_asset_assign"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--Record Rule  for Admin on Asset Reservation-->
+    <record id="rule_asset_reservation" model="ir.rule">
+        <field name="name">View All Asset Reservation</field>
+        <field name="model_id" ref="cyllo_asset_management.model_asset_reservation"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('account.group_account_manager'))]"/>
+    </record>
+    <!--Record Rule  for User on Asset Reservation-->
+    <record id="rule_asset_reservation_user" model="ir.rule">
+        <field name="name">Asset Reservation User</field>
+        <field name="model_id" ref="model_asset_reservation"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!--Record Rule  for Admin on Asset Assign-->
+    <record id="rule_asset_assign" model="ir.rule">
+        <field name="name">View All Asset Assign</field>
+        <field name="model_id" ref="model_asset_assign"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('account.group_account_manager'))]"/>
+    </record>
+    <!--Record Rule  for User on Asset Assign-->
+    <record id="rule_asset_assign_user" model="ir.rule">
+        <field name="name">Asset Assign User</field>
+        <field name="model_id" ref="model_asset_assign"/>
+        <field name="domain_force">[('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!--Record Rule  for Admin on Asset Lease-->
+    <record id="rule_asset_lease" model="ir.rule">
+        <field name="name">View All Asset Lease</field>
+        <field name="model_id" ref="model_asset_lease"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('account.group_account_manager'))]"/>
+    </record>
+    <!--Record Rule  for User on Asset Lease-->
+    <record id="rule_asset_lease_user" model="ir.rule">
+        <field name="name">Asset Lease User</field>
+        <field name="model_id" ref="model_asset_lease"/>
+        <field name="domain_force">[('customer_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <!--Record Rule  for Admin on Asset Rental-->
+    <record id="rule_asset_rental" model="ir.rule">
+        <field name="name">View All Asset Rental</field>
+        <field name="model_id" ref="model_asset_rental"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('account.group_account_manager'))]"/>
+    </record>
+    <!--Record Rule  for User on Asset Rental-->
+    <record id="rule_asset_rental_user" model="ir.rule">
+        <field name="name">Asset Rental User</field>
+        <field name="model_id" ref="model_asset_rental"/>
+        <field name="domain_force">[('customer_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
+        <field name="perm_read" eval="True"/>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+</odoo>

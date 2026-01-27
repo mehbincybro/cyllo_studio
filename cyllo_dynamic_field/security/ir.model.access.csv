@@ -1,4 +1,0 @@
-id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
-access_field_create,access.field.create.wizard,model_field_create,base.group_user,1,1,1,1
-access_field_selection,access.field.selection.access,model_field_selection,base.group_user,1,1,1,1
-access_field_widget,access.field.widget.access,model_field_widget,base.group_user,1,1,1,1

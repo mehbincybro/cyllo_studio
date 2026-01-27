@@ -3,6 +3,10 @@ import {registry} from "@web/core/registry";
 import {useState, useEffect, Component, useRef, onWillStart, onMounted, onWillUpdateProps, status} from "@odoo/owl";
 import {ChartMaker} from "../../chart_maker"
 import {useService} from "@web/core/utils/hooks";
+
+export const RE_RENDER_GRAPHS = ['map', 'heatmap', 'pictorialBar']
+export const NO_ZOOM_CHARTS = ["map", "gauge", "doughnut", "radar", "pie", "funnel"]
+
 /**
  * GraphTile class for displaying a graph in a dashboard view.
  * @class
@@ -24,16 +28,23 @@ export class GraphTile extends Component {
             theme,
             rec_id: false,
             hasData: true,
+            zoom: 0,
+            showZoom: false
         })
         this.orm = useService('orm')
         this.is_init = true
         this.rootRef = useRef('root')
+
         this.env.bus.addEventListener("REFRESH_GRAPH", async () => {
             this.setStyle()
             await this.reRender()
         })
+        let reRender = true
         useEffect(() => {
-            this.setupGraphData()
+            if (reRender) {
+                this.setupGraphData()
+            }
+            reRender = this.props.reRender
         }, () => [this.props.item?.query, this.props.value])
         useEffect(() => {
             this.setStyle()
@@ -57,9 +68,11 @@ export class GraphTile extends Component {
      */
     async reRender() {
         if (this.eChart) {
-            if (this.props.item?.type == 'map') {
+            if (this.props.item?.type && RE_RENDER_GRAPHS.includes(this.props.item?.type)) {
                 var params = this.props.themeColor ? {themeColor: this.props.themeColor} : {};
                 this.options = await this.maker.regenGraphOptions(params)
+            } else {
+                this.setOptions(this.props)
             }
             this.eChart.dispose()
             this.addElement()
@@ -79,6 +92,7 @@ export class GraphTile extends Component {
                 await this.setStyle()
                 this.is_init = false
             }
+
             this.options = await this.maker.makeGraphOptions()
             if (this.props.value.type == 'map') {
                 this.addElement()
@@ -100,13 +114,13 @@ export class GraphTile extends Component {
      */
     setStyle() {
         var cardStyle = Object.keys(this.props.style).map(key => {
-            return `${key}:${this.props.style[key]}`;
+            return key !== "width" ? `${key === 'card_width' ? 'width' : key}:${this.props.style[key]}` : ""
         }).join('');
         var style = Object.keys(this.props.style).filter(key => ['height', 'width'].includes(key)).map(key => {
-            return `${key}:${this.props.style[key]}`;
+            return key !== "card_width" ? `${key}:${this.props.style[key]}` : ""
         }).join('');
-        this.state.cardStyle = cardStyle
-        this.state.style = style
+        this.state.cardStyle = cardStyle + " border-radius: 12px;"
+        this.state.style = style + " border-radius: 12wpx;"
     }
 
     /**
@@ -114,14 +128,13 @@ export class GraphTile extends Component {
      * @param {Object} props - The props for configuring the graph.
      * @function
      */
-    async setOptions(props) {
+    setOptions(props) {
         var params = {
             toolFeatures: {},
         }
         if (this.props.themeColor) {
             params.themeColor = this.props.themeColor
         }
-        this.state.hasData = Boolean(props.data?.length)
         this.maker = new ChartMaker(props.data, props.dimension, props.measures,
             props.name, props.type, props.dimension_axis, params)
     }
@@ -144,16 +157,17 @@ export class GraphTile extends Component {
      * @async
      * @function
      */
-    async addElement() {
+    addElement() {
         if (status(this) === "destroyed") return
         try {
-            this.eChart = echarts.init(this.rootRef.el, this.state.theme)
+            const themeName = this.props.isDarkMode ? `${this.state.theme}_dark` : this.state.theme
+            this.eChart = echarts.init(this.rootRef.el, themeName)
             this.eChart.setOption(this.options)
             this.eChart.on('finished', () => {
                 this.props.setImage(this.Image, this.maker.name, this.props.item?.id || this.props.value?.id)
             })
+        } catch {
         }
-        catch { }
     }
 
     /**
@@ -175,7 +189,8 @@ export class GraphTile extends Component {
                 type: item.type,
                 id: item.id,
             }
-            await this.setOptions(props)
+            this.state.hasData = Boolean(res?.length)
+            this.setOptions(props)
             this.options = await this.maker.makeGraphOptions()
             if (item.type == 'map') {
                 this.addElement()
@@ -203,6 +218,31 @@ export class GraphTile extends Component {
         return imgSrc;
     }
 
+    get showZoom() {
+        const valueType = this.props.value?.type;
+        const itemType = this.props.item?.type;
+        return !NO_ZOOM_CHARTS.includes(valueType || itemType);
+    }
+
+    async zoom(arg) {
+        if (arg === 'in') {
+            if (this.options.dataZoom[0].start < 100) {
+                this.options.dataZoom[0].start += 1
+            }
+        } else {
+            if (this.options.dataZoom[0].start > 10) {
+                this.options.dataZoom[0].start -= 1
+            }
+        }
+        this.state.zoom = this.options.dataZoom[0].start
+        this.state.showZoom = true;
+        setTimeout(() => {
+            this.state.showZoom = false;
+        }, 500)
+        this.eChart.dispose()
+        this.addElement()
+    }
+
 }
 
 // Define the template for the GraphTile component
@@ -219,9 +259,14 @@ GraphTile.defaultProps = {
     setImage: () => {
     },
     theme: "",
+    reRender: true,
+    width: "",
+    isDarkMode: false,
 }
 GraphTile.props = {
     onClickChart: {type: Function, optional: true},
+    reRender: {type: Boolean, optional: true},
+    width: {type: String, optional: true},
     setImage: {type: Function, optional: true},
     style: {type: Object, optional: true},
     theme: {type: String, optional: true},
@@ -231,4 +276,6 @@ GraphTile.props = {
     footer: {type: Boolean, optional: true},
     slots: {type: Object, optional: true},
     toggleClass: {type: String, optional: true},
+    itemId: {type: Number, optional: true},
+    isDarkMode: {type: Boolean, optional: true},
 }

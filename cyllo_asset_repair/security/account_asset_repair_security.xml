@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Asset Repair User Group-->
+    <record id="group_cyllo_asset_repair" model="res.groups">
+        <field name="name">Asset Repair User</field>
+        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        <field name="implied_ids" eval="[Command.link(ref('account.group_account_invoice'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+    <!--Record Rule for Admin-->
+    <record id="rule_account_asset_repair_all" model="ir.rule">
+        <field name="name">View All Asset Repair</field>
+        <field name="model_id" ref="model_account_asset_repair"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('account.group_account_manager'))]"/>
+    </record>
+    <!--Record Rule for User-->
+    <record id="rule_account_asset_repair_user" model="ir.rule">
+        <field name="name">Asset Repair User</field>
+        <field name="model_id" ref="model_account_asset_repair"/>
+        <field name="domain_force">['|', ('user_id', '=', user.id), ('employee_id.user_id', '=', user.id)]</field>
+        <field name="groups" eval="[Command.link(ref('cyllo_asset_repair.group_cyllo_asset_repair'))]"/>
+    </record>
+</odoo>

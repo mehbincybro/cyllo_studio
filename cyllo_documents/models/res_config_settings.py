@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 
 
@@ -24,7 +44,12 @@ class ResConfigSettings(models.TransientModel):
     module_crm = fields.Boolean(string='Create lead', help='Enable to create lead from documents',
                                 config_parameter='cyllo_documents.module_crm')
     module_project = fields.Boolean(string='Create task', help='Enable to create task from documents',
-                                    config_parameter='cyllo_documents.module_crm')
+                                    config_parameter='cyllo_documents.module_project')
+    document_master_password = fields.Char(string='Master Password', help='Master Password',
+                                           config_parameter="cyllo_documents.document_master_password")
+    document_master_password_admin_only = fields.Boolean(string='Master Password Admin Only',
+                                                         help='Indicates if the locked records can only be opened by admins even with the Master password.',
+                                                         config_parameter="cyllo_documents.document_master_password_admin_only")
 
     def action_google_drive_accounts(self):
         """Action to redirect to the Google Drive Connector. This function defines an action to open the Google

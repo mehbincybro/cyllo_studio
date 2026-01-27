@@ -1,20 +1,54 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 
 from odoo import fields
-from odoo.addons.cyllo_accounting.tests.common import TestCylloAccounting
 from odoo.exceptions import UserError
+from odoo.addons.cyllo_accounting.tests.common import TestCylloAccounting
 
 
 class TestAccountPayment(TestCylloAccounting):
 
+    @classmethod
+    def setUpClass(self):
+        super().setUpClass()
+        self.fiscal_year_id = self.env['account.fiscal.year'].create([{
+            'name': 'Test Fiscal Year 2023',
+            'start_date': '2023-01-01',
+            'end_date': '2023-12-31',
+            'company_id': self.env.company.id,
+            'state': 'draft'
+        }])
+        self.fiscal_year_id.action_open()
+
     def test_compute_total_invoice_amount(self):
-        account_move = self.env['account.move'].create({
+        self.account_move = self.env['account.move'].create({
             'partner_id': self.partner.id,
             'move_type': 'out_invoice',
             'state': 'draft',
-            'invoice_date': '2023-12-05',
+            'invoice_date': '2023-05-05',
+            'date': '2023-05-05',
             'amount_residual': 1000,
+            'fiscal_year_id': self.fiscal_year_id.id,
             'line_ids': [fields.Command.create({
                 'product_id': self.product_tem.id,
                 'amount_residual_currency': 100,
@@ -25,7 +59,7 @@ class TestAccountPayment(TestCylloAccounting):
             'payment_type': 'outbound',
             'partner_type': 'customer',
             'partner_id': self.partner.id,
-            'move_ids': account_move.ids
+            'move_ids': self.account_move.ids
         })
         payment._compute_total_invoice_amount()
         self.assertEqual(payment.total_invoice_amount, 1.1500000000000001)
@@ -37,8 +71,39 @@ class TestAccountPayment(TestCylloAccounting):
         self.assertEqual(self.payment.payment_line_ids.paid_amount, 0.0)
 
     def test_compute_payment_line_ids(self):
+        invoice = self.env['account.move'].create({
+            'move_type': 'out_invoice',
+            'partner_id': self.partner.id,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [(0, 0, {
+                'name': 'Test Product',
+                'quantity': 1,
+                'price_unit': 10.0,
+                'account_id': self.env['account.account'].search([
+                    ('account_type', '=', 'income')
+                ], limit=1).id,
+            })]
+        })
+        invoice.action_post()
+
+        self.payment.action_post()
+        invoice_receivable_line = invoice.line_ids.filtered(
+            lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable')
+        )
+
+        payment_receivable_line = self.payment.move_id.line_ids.filtered(
+            lambda l: l.account_id.account_type in ('asset_receivable', 'liability_payable')
+        )
+        # Manual reconciliation
+        if invoice_receivable_line.debit > 0 and payment_receivable_line.credit > 0:
+            reconcile = self.env['account.partial.reconcile'].create({
+                'debit_move_id': invoice_receivable_line.id,
+                'credit_move_id': payment_receivable_line.id,
+                'amount': min(invoice_receivable_line.debit, payment_receivable_line.credit),
+            })
+        self.payment.reconciled_invoice_ids = invoice
         self.payment._compute_payment_line_ids()
-        self.assertTrue(self.payment.payment_line_ids)
+        self.assertTrue(self.payment.payment_line_ids, "Should have payment lines")
 
     def test_onchange_partner_id(self):
         with self.assertRaises(UserError, msg='There are already some invoice '
@@ -88,6 +153,7 @@ class TestAccountPayment(TestCylloAccounting):
         self.assertEqual(self.payment.state, 'posted')
 
     def test_action_confirm_invoice_payment(self):
+        self.account_move._compute_fiscal_year_id()
         self.account_move.action_post()
         self.payment.action_confirm_invoice_payment()
         self.assertEqual(self.payment.move_ids.residual_amount, 0.0)

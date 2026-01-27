@@ -25,135 +25,63 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <section id="cy-main-section">
-                        <div class="cy-form-settings-main-content flex-grow-1 ">
-                            <div class="row cy-form-settings_content">
-                                <div>
-                                    <form class="py-2">
-                                        <div class="mb-4">
-                                            <label for="name"
-                                                   class="form-label cy-form_label cy-form_label-sm">
-                                                Name
-                                            </label>
-                                            <div class="input-group cy-inputbox-container"
-                                                    style="flex-wrap:nowrap;">
-                                                <field name="name"
-                                                       class="cy-form-inputbox"
-                                                       style="padding:1rem; margin-bottom:0px"/>
-                                                <select class="cy-selection_box"
-                                                        style="padding:12px; width:1%"
-                                                        id="language">
-                                                    <option value="english">
-                                                        EN
-                                                    </option>
-                                                    <option value="spanish">
-                                                        SN
-                                                    </option>
-                                                    <option value="french">FH
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <p class="cy-form-settings-txt cy-checkbox-undertxt">
-                                            Team Manager
-                                        </p>
-                                        <field name="manager_id"/>
-                                        <field name="description"
-                                               placeholder="Describe the team"/>
-                                        <field name="company_id"/>
-                                        <div>
-                                            <div class="mb-3 cy-border-btm">
-                                                <h4 class="cy-form_label">
-                                                    Track and Bill Time
-                                                </h4>
-                                            </div>
-                                            <div class="mb-4">
-                                                <div class="form-check">
-                                                    <field name="is_timesheet"/>
-                                                    <label class="form-check-label cy-form_label cy-form_label-sm"
-                                                           for="is_timesheet">
-                                                        Timesheet
-                                                    </label>
-                                                </div>
-                                                <p class="cy-form-settings-txt cy-checkbox-undertxt">
-                                                    Set timesheet needed or not
-                                                </p>
-                                            </div>
-                                            <div class="mb-4">
-                                                <div class="form-check">
-                                                    <field name="is_paid"/>
-                                                    <label class="form-check-label cy-form_label cy-form_label-sm"
-                                                           for="is_paid">
-                                                        Is Paid
-                                                    </label>
-                                                </div>
-                                                <p class="cy-form-settings-txt cy-checkbox-undertxt">
-                                                    Choose: group works for
-                                                    free ticket or pays.
-                                                </p>
-                                            </div>
-                                            <div class="mb-4">
-                                                    <field name="project_id" invisible="1"/>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="mb-3 cy-border-btm">
-                                                <p class="cy-form_label">
-                                                    Performance
-                                                </p>
-                                            </div>
-                                            <div class="mb-4">
-                                                <div class="form-check">
-                                                    <label class="form-check-label cy-form_label cy-form_label-sm"
-                                                           for="working_hour_id">
-                                                        Working Hours
-                                                    </label>
-                                                    <field name="working_hour_id"/>
-                                                </div>
-                                                <p class="cy-form-settings-txt cy-checkbox-undertxt">
-                                                    Set the working hours of
-                                                    the team
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <div class="mb-3 cy-border-btm">
-                                                <h4 class="cy-form_label">
-                                                    Ticket Closing
-                                                </h4>
-                                            </div>
-                                            <div class="mb-4">
-                                                <div class="form-check">
-                                                    <field name="closing_inactive_tickets"/>
-                                                    <label class="form-check-label cy-form_label cy-form_label-sm"
-                                                           for="closing_inactive_tickets">
-                                                        Ticket Closing Due to
-                                                        inactivity
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="mb-4" invisible="closing_inactive_tickets != True">
-                                                <div class="form-check">
-                                                    <div>
-                                                        <field name="inactivity_ids">
-                                                            <tree editable="bottom">
-                                                                <field name="stage_id"/>
-                                                                <field name="no_of_inactive_days"/>
-                                                                <field name="state_id"/>
-                                                            </tree>
-                                                        </field>
-                                                    </div>
-                                                </div>
-                                                <p class="cy-form-settings-txt cy-checkbox-undertxt">
-                                                   Select the initial and final stages for moving the ticket and specify the number of inactive days.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </form>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"
+                               string="Support Team"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="Support Team name..."/>
+                        </h1>
+                        <div name="options_active"/>
+                    </div>
+                    <group>
+                        <group name="left" string="Team Details">
+                            <field name="manager_id"
+                                   widget="many2one_avatar_user"/>
+                            <field name="company_id"/>
+                            <label for="alias_name" string="Email Alias"/>
+                            <div name="alias_def">
+                                <field name="alias_id" string="Email Alias"
+                                       class="oe_read_only" required="0"/>
+                                <div class="oe_edit_only" name="edit_alias">
+                                    <field name="alias_name" class="oe_inline"/>
+                                    @
+                                    <field name="alias_domain_id"
+                                           class="oe_inline"
+                                           placeholder="e.g. domain.com"
+                                           options="{'no_create': True, 'no_open': True}"/>
                                 </div>
                             </div>
-                        </div>
-                    </section>
+                            <field name="alias_contact"
+                                   string="Accept Emails From"/>
+                        </group>
+                        <group name="right"/>
+                    </group>
+                    <notebook>
+                        <page string="Track and Bill Time" name="track_bill">
+                            <group>
+                                <field name="is_timesheet"/>
+                                <field name="is_paid"/>
+                                <field name="working_hour_id"/>
+                                <field name="project_id" invisible="1"/>
+                                <field name="description"
+                                       placeholder="Describe the team"/>
+                            </group>
+                        </page>
+                        <page string="Ticket Closing" name="ticket_closing">
+                            <group>
+                                <field name="closing_inactive_tickets"/>
+                            </group>
+                            <field name="inactivity_ids"
+                                   invisible="closing_inactive_tickets != True">
+                                <tree editable="bottom">
+                                    <field name="stage_id"/>
+                                    <field name="no_of_inactive_days"/>
+                                    <field name="state_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>

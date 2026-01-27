@@ -44,7 +44,7 @@
                     </div>
                     <group>
                         <group>
-                            <field name="document_id" options="{'no_create': True,'no_create_edit': True}" readonly="state != 'new'"/>
+                            <field hotkey="d" name="document_id" options="{'no_create': True,'no_create_edit': True}" readonly="state != 'new'"/>
                             <field name="requested_date" readonly="state != 'new'"/>
                         </group>
                         <group>

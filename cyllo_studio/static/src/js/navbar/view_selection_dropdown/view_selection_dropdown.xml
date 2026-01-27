@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.ViewSelectionDropDown">
+        <div t-ref="root">
+            <div class="hnk-selected d-flex gap-2" t-if="props.view">
+                <t t-if="state.activatedViews">
+                    <t t-foreach="state.activatedViews" t-as="view" t-key="view_index">
+                        <t t-if="ViewTypes.includes(view)">
+                            <i class="view-icons" t-att-class="state.currentViewType == view ? 'active' : ''"
+                               t-attf-class="{{viewIcons[view]}}"
+                               t-att-data-tooltip="view.replace(/^./, c => c.toUpperCase())"
+                               t-on-click="(e) => view == 'search' ? this.onSearchClick(e) : this.onViewClicked(view, e)"/>
+                        </t>
+                    </t>
+                </t>
+                <div class="hnk-dropdown">
+                    <i class="fa fa-caret-down view-icons" t-on-click="(e) => this.toggleViewDropdown(e)"
+                       style="padding:0.6rem;"/>
+                    <div class="hnk-dropdown__container">
+                        <div style="overflow: hidden;height:210px; padding-left:5%;">
+                            <ul class="hnk-dropdown__options scroll-container">
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container" target="list">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="list"
+                                               t-att-checked="state.activatedViews.includes('list')"
+                                               target="list"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="list"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-align-justify"/>
+                                        <span class="hnk-dropdown__label-text">List</span>
+
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('list') and state.defaultView == 'list'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('list')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container " target="form">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="form"
+                                               t-att-checked="state.activatedViews.includes('form')"
+                                               target="form"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="form"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-profile-line"/>
+                                        <span class="hnk-dropdown__label-text">Form</span>
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('form') and state.defaultView == 'form'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('form')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container" target="kanban">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="kanban"
+                                               t-att-checked="state.activatedViews.includes('kanban')"
+                                               target="kanban"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="kanban"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-bar-chart-2-line"/>
+                                        <span class="hnk-dropdown__label-text">Kanban</span>
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('kanban') and state.defaultView == 'kanban'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('kanban')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <t t-if="state.activity">
+                                        <div class="hnk-dropdown__radio-container" target="activity">
+                                            <input type="checkbox"
+                                                   t-on-click="(e) => this.onClickBox(e)"
+                                                   class="hnk-dropdown__radio CheckView"
+                                                   id="activity"
+                                                   target="activity"
+                                                   t-att-checked="state.activatedViews.includes('activity')"
+                                                   name="type"/>
+                                            <label class="hnk-dropdown__radio-label" for="activity"/>
+                                        </div>
+                                        <div class="hnk-dropdown__label">
+                                            <i class="ri-time-line"/>
+                                            <span class="hnk-dropdown__label-text">Activity</span>
+                                        </div>
+                                        <t t-if="state.activatedViews.includes('activity') and state.defaultView == 'activity'">
+                                            <i class="ri-pushpin-fill cy-pushpin-fill"
+                                               data-tooltip="Default View"/>
+                                        </t>
+                                        <i t-elif="state.activatedViews.includes('activity')"
+                                           class="cy-studio-view-pin ri-pushpin-fill "
+                                           data-tooltip="Set as Default View"
+                                           t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                    </t>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container" target="calendar">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="calendar"
+                                               target="calendar"
+                                               t-att-checked="state.activatedViews.includes('calendar')"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="calendar"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-calendar-2-fill"/>
+                                        <span class="hnk-dropdown__label-text">Calendar</span>
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('calendar') and state.defaultView == 'calendar'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('calendar')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container" target="pivot">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="pivot"
+                                               target="pivot"
+                                               t-att-checked="state.activatedViews.includes('pivot')"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="pivot"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-table-2"/>
+                                        <span class="hnk-dropdown__label-text">Pivot</span>
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('pivot') and state.defaultView == 'pivot'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('pivot')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view">
+                                    <div class="hnk-dropdown__radio-container" target="graph">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="graph"
+                                               target="graph"
+                                               t-att-checked="state.activatedViews.includes('graph')"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="graph"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label">
+                                        <i class="ri-line-chart-line"/>
+                                        <span class="hnk-dropdown__label-text">Graph</span>
+                                    </div>
+                                    <t t-if="state.activatedViews.includes('graph') and state.defaultView == 'graph'">
+                                        <i class="ri-pushpin-fill cy-pushpin-fill"
+                                           data-tooltip="Default View"/>
+                                    </t>
+                                    <i t-elif="state.activatedViews.includes('graph')"
+                                       class="cy-studio-view-pin ri-pushpin-fill "
+                                       data-tooltip="Set as Default View"
+                                       t-on-click="(ev)=>this.handleDefaultView(ev)"/>
+                                </li>
+                                <li class="hnk-dropdown__option cy-studio-view mb-1">
+                                    <div class="hnk-dropdown__radio-container disabled">
+                                        <input type="checkbox" t-on-click="(e) => this.onClickBox(e)"
+                                               class="hnk-dropdown__radio CheckView"
+                                               id="search"
+                                               disabled="1"
+                                               target="search"
+                                               t-att-checked="state.activatedViews.includes('search')"
+                                               name="type"/>
+                                        <label class="hnk-dropdown__radio-label" for="search"/>
+                                    </div>
+                                    <div class="hnk-dropdown__label disabled">
+                                        <i class="ri-search-eye-line"/>
+                                        <span class="hnk-dropdown__label-text">Search</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

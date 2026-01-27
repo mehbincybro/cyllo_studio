@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import base64
 import json
 import logging
@@ -34,97 +54,6 @@ class OneDriveConnector(models.Model):
     workspace_id = fields.Many2one('document.workspace', string='Workspace',
                                    help="Select a workspace with one drive id to upload into it",
                                    domain="[('onedrive_folder_id', '!=', False)]")
-
-    def generate_one_drive_refresh_token(self):
-        """Generate a OneDrive access token from a refresh token if it has expired. This function makes a request to
-        the Microsoft Azure OAuth2 token endpoint to refresh the OneDrive access token using a provided refresh token.
-        Raises:
-            requests.HTTPError: If there is an issue with the HTTP request or response."""
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        headers = {"Content-type": "application/x-www-form-urlencoded"}
-        data = {
-            'client_id': self.one_drive_client_key,
-            'client_secret': self.one_drive_secret,
-            'scope': ONEDRIVE_SCOPE,
-            'grant_type': "refresh_token",
-            'redirect_uri': base_url + '/one_drive/auth',
-            'refresh_token': self.one_drive_refresh_token
-        }
-        try:
-            res = requests.post("https://login.microsoftonline.com/common/oauth2/v2.0/token",
-                                data=data, headers=headers)
-            res.raise_for_status()
-            response = res.content and res.json() or {}
-            if response:
-                expires_in = response.get('expires_in')
-                self.write({
-                    'one_drive_access_token': response.get('access_token'),
-                    'one_drive_refresh_token': response.get('refresh_token'),
-                    'one_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
-                })
-        except requests.HTTPError as error:
-            _logger.exception("Bad microsoft onedrive request : %s !", error.response.content)
-            raise error
-
-    def action_get_access(self):
-        """Method to initiate the process of getting access to OneDrive. This function constructs an authorization
-        URL and returns it as an action URL for the user to initiate the authentication process with Microsoft
-        OneDrive.
-        Returns:
-            dict: A dictionary containing the action URL information."""
-        authority = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
-        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
-        action_id = self.env.ref('cyllo_documents.action_view_one_drive_connector').id
-        redirect_url = base_url + f"/web#id={self.id}&action={action_id}&view_type=form&model=one.drive.connector"
-        state = {
-            'one_drive_connector_id': self.id,
-            'url_return': redirect_url
-        }
-        encoded_params = urls.url_encode({
-            'response_type': 'code',
-            'client_id': self.one_drive_client_key,
-            'scope': ONEDRIVE_SCOPE,
-            'redirect_uri': base_url + '/one_drive/auth',
-            'state': json.dumps(state),
-            'prompt': 'consent',
-            'access_type': 'offline'
-        })
-        return {
-            'type': 'ir.actions.act_url',
-            'target': 'self',
-            'url': f"{authority}?{encoded_params}",
-        }
-
-    def get_onedrive_tokens(self, authorize_code):
-        """Method to get one drive access token.
-        Args:
-            authorize_code:Authorization code from onedrive to generate access token"""
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-        base_url = request.env['ir.config_parameter'].get_param('web.base.url')
-        data = {
-            'code': authorize_code,
-            'client_id': self.one_drive_client_key,
-            'client_secret': self.one_drive_secret,
-            'grant_type': 'authorization_code',
-            'scope': ONEDRIVE_SCOPE,
-            'redirect_uri': base_url + '/one_drive/auth'
-        }
-        try:
-            res = requests.post(
-                "https://login.microsoftonline.com/common/oauth2/v2.0/token", data=data, headers=headers)
-            res.raise_for_status()
-            response = res.content and res.json() or {}
-            if response:
-                expires_in = response.get('expires_in')
-                self.write({
-                    'one_drive_access_token': response.get('access_token'),
-                    'one_drive_refresh_token': response.get('refresh_token'),
-                    'one_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
-                    'state': 'connected'
-                })
-        except requests.HTTPError as error:
-            _logger.exception("Bad microsoft onedrive request : %s !", error.response.content)
-            raise error
 
     def action_export_files(self):
         """Method to export selected files to OneDrive. This function checks the validity of the OneDrive access token,
@@ -177,6 +106,97 @@ class OneDriveConnector(models.Model):
                     'sticky': False,
                 }
             }
+
+    def action_get_access(self):
+        """Method to initiate the process of getting access to OneDrive. This function constructs an authorization
+        URL and returns it as an action URL for the user to initiate the authentication process with Microsoft
+        OneDrive.
+        Returns:
+            dict: A dictionary containing the action URL information."""
+        authority = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize'
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        action_id = self.env.ref('cyllo_documents.action_view_one_drive_connector').id
+        redirect_url = base_url + f"/web#id={self.id}&action={action_id}&view_type=form&model=one.drive.connector"
+        state = {
+            'one_drive_connector_id': self.id,
+            'url_return': redirect_url
+        }
+        encoded_params = urls.url_encode({
+            'response_type': 'code',
+            'client_id': self.one_drive_client_key,
+            'scope': ONEDRIVE_SCOPE,
+            'redirect_uri': base_url + '/one_drive/auth',
+            'state': json.dumps(state),
+            'prompt': 'consent',
+            'access_type': 'offline'
+        })
+        return {
+            'type': 'ir.actions.act_url',
+            'target': 'self',
+            'url': f"{authority}?{encoded_params}",
+        }
+
+    def generate_one_drive_refresh_token(self):
+        """Generate a OneDrive access token from a refresh token if it has expired. This function makes a request to
+        the Microsoft Azure OAuth2 token endpoint to refresh the OneDrive access token using a provided refresh token.
+        Raises:
+            requests.HTTPError: If there is an issue with the HTTP request or response."""
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        headers = {"Content-type": "application/x-www-form-urlencoded"}
+        data = {
+            'client_id': self.one_drive_client_key,
+            'client_secret': self.one_drive_secret,
+            'scope': ONEDRIVE_SCOPE,
+            'grant_type': "refresh_token",
+            'redirect_uri': base_url + '/one_drive/auth',
+            'refresh_token': self.one_drive_refresh_token
+        }
+        try:
+            res = requests.post("https://login.microsoftonline.com/common/oauth2/v2.0/token",
+                                data=data, headers=headers)
+            res.raise_for_status()
+            response = res.content and res.json() or {}
+            if response:
+                expires_in = response.get('expires_in')
+                self.write({
+                    'one_drive_access_token': response.get('access_token'),
+                    'one_drive_refresh_token': response.get('refresh_token'),
+                    'one_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
+                })
+        except requests.HTTPError as error:
+            _logger.exception("Bad microsoft onedrive request : %s !", error.response.content)
+            raise error
+
+    def get_onedrive_tokens(self, authorize_code):
+        """Method to get one drive access token.
+        Args:
+            authorize_code:Authorization code from onedrive to generate access token"""
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        base_url = request.env['ir.config_parameter'].get_param('web.base.url')
+        data = {
+            'code': authorize_code,
+            'client_id': self.one_drive_client_key,
+            'client_secret': self.one_drive_secret,
+            'grant_type': 'authorization_code',
+            'scope': ONEDRIVE_SCOPE,
+            'redirect_uri': base_url + '/one_drive/auth'
+        }
+        try:
+            res = requests.post(
+                "https://login.microsoftonline.com/common/oauth2/v2.0/token", data=data, headers=headers)
+            res.raise_for_status()
+            response = res.content and res.json() or {}
+            if response:
+                expires_in = response.get('expires_in')
+                self.write({
+                    'one_drive_access_token': response.get('access_token'),
+                    'one_drive_refresh_token': response.get('refresh_token'),
+                    'one_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
+                    'state': 'connected'
+                })
+        except requests.HTTPError as error:
+            _logger.exception("Bad microsoft onedrive request : %s !", error.response.content)
+            raise error
 
     def auto_sync_one_drive(self):
         """Method that is triggered during an auto-sync to export and import files from OneDrive. This method is

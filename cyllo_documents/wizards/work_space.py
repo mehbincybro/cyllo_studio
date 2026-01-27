@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 from odoo.http import request
 
@@ -24,19 +44,32 @@ class WorkSpace(models.TransientModel):
         """function to copy documents """
         for workspace in self.workspace_ids.ids:
             for rec in self.doc_ids:
-                self.env['document.file'].create({
-                    'name': rec.name,
-                    'attachment': rec.attachment,
-                    'brochure_url': rec.brochure_url,
-                    'attachment_id': rec.attachment_id.id,
-                    'mimetype': rec.mimetype,
-                    'content_url':
-                        f"""{request.httprequest.host_url[:-1]}/web/content/{rec.attachment_id.id}/{rec.name}""",
-                    'date': fields.Datetime.today().now(),
-                    'workspace_id': workspace,
-                    'user_id': rec.user_id.id,
-                    'extension': rec.name.split(".")[len(rec.name.split(".")) - 1]
-                })
+                if rec.content_type == 'url':
+                    self.env['document.file'].create({
+                        'name': rec.name,
+                        'date': fields.Datetime.today().now(),
+                        'workspace_id': workspace,
+                        'user_id': rec.user_id.id,
+                        'extension': 'url',
+                        'content_url': rec.content_url,
+                        'content_type': 'url',
+                        'preview': rec.preview,
+                        'brochure_url': rec.brochure_url
+                    })
+                else:
+                    self.env['document.file'].create({
+                        'name': rec.name,
+                        'attachment': rec.attachment,
+                        'brochure_url': rec.brochure_url,
+                        'attachment_id': rec.attachment_id.id,
+                        'mimetype': rec.mimetype,
+                        'content_url':
+                            f"""{request.httprequest.host_url[:-1]}/web/content/{rec.attachment_id.id}/{rec.name}""",
+                        'date': fields.Datetime.today().now(),
+                        'workspace_id': workspace,
+                        'user_id': rec.user_id.id,
+                        'extension': rec.name.split(".")[len(rec.name.split(".")) - 1]
+                    })
         return {
             'type': 'ir.actions.client',
             'tag': 'reload',

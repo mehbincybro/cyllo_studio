@@ -1,8 +1,29 @@
 # -*- coding: utf-8 -*-
-from odoo import _, fields, models
-from odoo.exceptions import ValidationError
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import json
 import requests
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
+
 
 
 class SocialMediaPost(models.Model):
@@ -21,8 +42,8 @@ class SocialMediaPost(models.Model):
         Computes the attachment ID for Instagram posts.
         """
         for post in self:
-            jpeg_images = post.ir_attachment_ids.filtered(lambda image: image.mimetype == 'image/jpeg')
-            post.instagram_attachment_id = jpeg_images[0] if jpeg_images else False
+            jpeg_image = next((img for img in post.ir_attachment_ids if img.mimetype == 'image/jpeg'), False)
+            post.instagram_attachment_id = jpeg_image
             post.instagram_attachment_id.public = True
 
     def action_post(self):
@@ -105,11 +126,13 @@ class SocialMediaPost(models.Model):
                                 'post_id': self.id,
                                 'ig_account_id': account.id
                             })
+                        elif (self.mode == 'url'):
+                            raise ValidationError(_('Only link with file type  can be posted on Instagram.'))
                 elif (self.mode == 'attachment' and self.company_id and self.ir_attachment_ids and
                       not self.instagram_attachment_id):
                     raise ValidationError(_('Only .jpg/.jpeg images can be posted on Instagram.'))
             return super().action_post()
-        except Exception:
+        except Exception :
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',

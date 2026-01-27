@@ -1,15 +1,13 @@
 /** @odoo-module **/
 import {registry} from "@web/core/registry";
 import {useService} from "@web/core/utils/hooks";
+import { session } from "@web/session";
 import {ModelViewer} from "./model_viewer";
 import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
 import {DragItem, DropZone} from "./drag_n_drop"
 import {GraphTile} from "@cyllo_analytics/js/presentation/components/graph_tile";
 import {SQLEditor} from "./editor/SQLEditor";
-import {FilterDialog} from "./sheet_filter/filter_dialog";
 import {browser} from "@web/core/browser/browser";
-
-const {Component, useState, onWillStart, useEffect, onWillDestroy, useRef} = owl
 import {useSaveContext} from "@cyllo_analytics/js/useSaveContext";
 import {SQLQueryParser} from "./query/query_manager"
 import {FieldAutoComplete} from "@cyllo_analytics/js/sheet_filter/field_auto_complete"
@@ -19,6 +17,9 @@ import {Table} from "@cyllo_analytics/js/table/table";
 import {Number} from "@cyllo_analytics/js/fields/number";
 import {DeleteDialog} from "./delete_dialog_box";
 import {standardActionServiceProps} from "@web/webclient/actions/action_service";
+import {_t} from "@web/core/l10n/translation";
+import {SheetFilterDomain} from "./sheet_filter/sheetFilterDomain";
+const {Component, useState, onWillStart, useEffect, onWillDestroy, useRef} = owl
 
 
 export class SheetDeleteDialog extends DeleteDialog {
@@ -46,15 +47,16 @@ class FieldList extends Component {
 
         this.state = useState({
             data: this.props.data,
-            search: ''
+            search: '',
         })
         useEffect(() => {
             this.state.data = this.props.data
+            this.state.search = ""
         }, () => [this.props.data])
         useEffect(() => {
             if (this.state.search) {
                 this.state.data = this.props.data.filter(item => {
-                    var search = this.state.search.toLowerCase()
+                    const search = this.state.search.toLowerCase()
                     return item.label.toLowerCase().includes(search) || item.name.toLowerCase().includes(search)
                 })
             } else {
@@ -72,6 +74,7 @@ export class CylloSheet extends Component {
     setup() {
         const {id, saveManually, removeManually} = useSaveContext()
         this.id = id
+        this.hasMonetary = false //multi
         this.isNewSheet = false;
         onWillDestroy(removeManually)
         this.sheet = useRef('sheet')
@@ -79,6 +82,7 @@ export class CylloSheet extends Component {
         this.removeManually = removeManually
         this.model = 'dashboard.sheet'
         this.orm = useService("orm")
+        this.company = useService("company")
         this.dialog = useService("dialog")
         this.notification = useService("notification")
         this.avoid_fields = []
@@ -104,6 +108,7 @@ export class CylloSheet extends Component {
             limit: 0,
             query: '',
             need_save: false,
+            false_linking: false,
             sheetTypes: [],
             chart: [],
             selectedType: [1, 'line'],
@@ -111,8 +116,12 @@ export class CylloSheet extends Component {
             globalFilters: [],
             image: "",
             option: {},
-            kpiValue: {}
+            kpiValue: {},
+            saveClicked: false,
+            id: id,
+            currency: false,
         })
+
         this.query_data = useState({
             dimension: [],
             measure: [],
@@ -128,29 +137,32 @@ export class CylloSheet extends Component {
             recordValue: 1
         })
         onWillStart(async () => {
-            this.state.sheetTypes = await this.orm.searchRead('dashboard.sheet.type', [])
             this.navState.allRecords = await this.orm.search('dashboard.sheet', [])
             if (this.id) {
-                var value = this.navState.allRecords.findIndex(item => item == this.id)
+                const value = this.navState.allRecords.findIndex(item => item == this.id)
                 this.navState.recordValue = value + 1
             }
             if (this.props.action.context?.dashboard_id) {
-                var context = this.props.action.context
+                const context = this.props.action.context
                 this.state.configs.push({id: context.dashboard_id, display_name: context.display_name})
             }
-            await this.orm.call(this.model, 'get_config_data', []).then((res) => {
-                this.state.sheetTypes = res.sheet_types
-                this.previewLimit = {
-                    is_enable: res.is_enable,
-                    limit: res.limit
-                }
-            })
+            const res = await this.orm.call(this.model, 'get_config_data', [])
+            this.state.sheetTypes = res.sheet_types
+            this.previewLimit = {
+                is_enable: res.is_enable,
+                limit: res.limit
+            }
+            //fetch current company currency
+            const companyData = await this.orm.read("res.company", [this.company.currentCompany?.id || 1], ["currency_id"])
+            const currency = await this.orm.read("res.currency", [companyData[0].currency_id[0]], ["id", "display_name"])
+            this.state.currency = currency[0]
         })
         this.env.bus.addEventListener("CY:UPDATE_UNLINKS", (ev) => {
             var {type, id} = ev.detail
             this.unlinkList[type].push(id)
         })
         this.env.bus.addEventListener("CY:UPDATE_QUERY", (ev) => {
+            this.state.false_linking = false
             var {type, data} = ev.detail
             this.query_data[type] = data
             if (["measure", "dimension"].includes(type)) {
@@ -160,8 +172,9 @@ export class CylloSheet extends Component {
             this.genQuery()
         })
         useEffect(() => {
-            this.updateSheet()
+            (async () => await this.updateSheet())()
         }, () => [this.id])
+
         useEffect(() => {
                 this.calculateLimit()
                 this.genQuery()
@@ -201,7 +214,9 @@ export class CylloSheet extends Component {
 
     async updateSheet() {
         await this.updateData();
-        this.globalFilters()
+        this.genQuery()
+        await this.generateChart()
+        await this.globalFilters()
     }
 
     /**
@@ -217,17 +232,38 @@ export class CylloSheet extends Component {
 
     genQuery() {
         var query_data = this.query_data
+        this.hasMonetary = false
         if (!query_data.measure.length) {
             this.state.query = ''
             this.ChartData.generate = false
             return
         }
+        query_data.measure.forEach(measure => {
+            if (measure.monetaryInBase) {
+                this.hasMonetary = true
+                // modify the query here for changing currency
+                const substring = measure.query.substring(measure.query.indexOf('ROUND'), measure.query.lastIndexOf('2)') + 2)
+                const replaceString = measure.monetaryInBase.replaceAll('{selectedCurrency}', `${this.state.currency?.id}`)
+                measure.query = measure.query.replaceAll(substring, replaceString)
+            }
+        });
         var columns = [...query_data.dimension, ...query_data.measure]
+        var tableNames = columns.map(col => col.column.split('.')[0]);
+        var uniqueTableNames = new Set(tableNames);
+        if (this.state.models.length > uniqueTableNames.size) {
+            this.state.false_linking = true
+        } else {
+            this.state.false_linking = false
+        }
         var columnStr = columns.length ? columns.map(item => item.query).join(', ') : ''
         var join = query_data.join.join(' \n')
-        var groupColumn = columns.filter(item => !item.query.includes('(')).map(item => item.alias)
+        var groupColumn = columns
+            .filter(item => !/(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
+            .map(item => item.alias);
         var groupByQuery = query_data.groupBy.length ? query_data.groupBy.map(item => item.column) : []
-        var totalGroupBy = groupByQuery.length || columns.filter(item => item.query.includes('(')).length ? [...groupByQuery, ...groupColumn] : []
+        var totalGroupBy = groupByQuery.length || columns
+            .filter(item => /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
+            .length ? [...groupByQuery, ...groupColumn] : []
         totalGroupBy = [...new Set(totalGroupBy)]
         var groupBy = totalGroupBy.length ? '\n GROUP BY ' + totalGroupBy.join(', ') : ''
         var orderBy = query_data.orderBy.length ? '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ') : ''
@@ -266,19 +302,18 @@ export class CylloSheet extends Component {
     generateChart() {
         try {
             if (this.isGoodQuery) {
-                this.orm.call("dashboard.config", "sql_execute", [this.state.previewQuery]).then((data) => {
-                    if (data.length) {
-                        let props = {
-                            data,
-                            name: this.state.name || '',
-                            measures: this.query_data.measure.map(item => item.alias),
-                            dimension: this.query_data.dimension.map(item => item.alias),
-                            dimension_axis: this.query_data.dimension_axis,
-                            type: this.state.selectedType[1],
-                        }
-                        this.ChartData.data = props
-                        this.ChartData.generate = true
+                this.orm.call("dashboard.config", "sql_execute", [
+                    this.state.previewQuery
+                ]).then((data) => {
+                    this.ChartData.data = {
+                        data,
+                        name: this.state.name || '',
+                        measures: this.query_data.measure.map(item => item.alias),
+                        dimension: this.query_data.dimension.map(item => item.alias),
+                        dimension_axis: this.query_data.dimension_axis,
+                        type: this.state.selectedType[1],
                     }
+                    this.ChartData.generate = true
                 })
             }
         } catch (error) {
@@ -295,6 +330,15 @@ export class CylloSheet extends Component {
         this.state.models = models
         this.setFields()
         this.setTableSave()
+    }
+
+    /**
+     * Set the currency for monetary measures in sheet.
+     * @param {Array} currency - id and display_name of currency.
+     */
+    setCurrency(currency){
+        this.state.currency = currency
+        this.genQuery()
     }
 
     checkHasLink(model) {
@@ -362,12 +406,15 @@ export class CylloSheet extends Component {
      */
     get getAxisData() {
         const getLimit = (yAxisType) => {
-            var xLimit, yLimit
+            let xLimit, yLimit;
             switch (this.state.selectedType[1].toLowerCase()) {
                 case "gauge":
+                    xLimit = 0;
+                    yLimit = 1;
+                    break;
                 case "kpi":
-                    xLimit = 1;
-                    yLimit = 0;
+                    xLimit = 0;
+                    yLimit = 1;
                     break;
                 case "heatmap":
                     xLimit = 1;
@@ -390,36 +437,69 @@ export class CylloSheet extends Component {
                     yLimit = 5;
             }
             if (yAxisType === "measure") {
-                return {xLimit, yLimit}
+                return { xLimit, yLimit };
             } else {
-                return {"xLimit": yLimit, "yLimit": xLimit}
+                return { xLimit: yLimit, yLimit: xLimit };
             }
         };
 
-        let type = 'both';
-        let yType = 'both';
-
-        if (this.query_data.dimension_axis === 'x') {
-            if (this.query_data.dimension.length || this.query_data.measure.length) {
-                type = 'dimension';
-                yType = 'measure';
+        if (this.state.selectedType[1].toLowerCase() === "kpi") {
+            // Force clear the X axis if anything is there
+            if (this.query_data.dimension?.length) {
+                this.query_data.dimension = [];
             }
-            const {xLimit, yLimit} = getLimit(yType);
+
+            // This object is the return value
+            return {
+                x: [],
+                xType: "dimension",
+                y: this.query_data.measure,
+                yType: "measure",
+                xLimit: 0,
+                yLimit: 1,
+            };
+        }
+        if (this.state.selectedType[1].toLowerCase() === "gauge") {
+            // Force clear dimensions
+            if (this.query_data.dimension?.length) {
+                this.query_data.dimension = [];
+            }
+
+            return {
+                x: [],
+                xType: "dimension",
+                y: this.query_data.measure,
+                yType: "measure",
+                xLimit: 0,
+                yLimit: 1,
+            };
+        }
+
+        // Normal flow for other chart types
+        let type = "both";
+        let yType = "both";
+
+        if (this.query_data.dimension_axis === "x") {
+            if (this.query_data.dimension.length || this.query_data.measure.length) {
+                type = "dimension";
+                yType = "measure";
+            }
+            const { xLimit, yLimit } = getLimit(yType);
             return {
                 x: this.query_data.dimension,
                 xType: type,
                 y: this.query_data.measure,
                 yType,
-                xLimit, //1
-                yLimit, //5
+                xLimit,
+                yLimit,
             };
         }
 
         if (this.query_data.measure.length) {
-            type = 'measure';
-            yType = 'dimension';
+            type = "measure";
+            yType = "dimension";
         }
-        const {xLimit, yLimit} = getLimit(yType);
+        const { xLimit, yLimit } = getLimit(yType);
         return {
             x: this.query_data.measure,
             xType: type,
@@ -442,19 +522,27 @@ export class CylloSheet extends Component {
      * Save the sheet configuration.
      */
     async onSave() {
+        if (this.state.saveClicked) return
+        this.state.saveClicked = true
         var joinData = [...this.query_data.joinData]
         joinData.forEach((item) => {
             delete item.model?.fields
         })
         if (this.state.selectedType[1] == 'kpi') {
-            var kpiEl = this.sheet.el.querySelector(".kpi_sheet")
-            const canvas = await html2canvas(kpiEl)
-            this.state.image = canvas.toDataURL('image/png');
+            var kpiEl = this.sheet.el.querySelector(".kpi-sheet-parent")
+            const canvas = kpiEl ? await html2canvas(kpiEl) : false
+            if (canvas) {
+                this.state.image = canvas.toDataURL('image/png');
+            }
         } else if (this.state.selectedType[1] == 'table') {
             var el = this.sheet.el.querySelector(".cy_table_sheet")
-            const canvas = await html2canvas(el)
-            this.state.image = canvas.toDataURL('image/png');
+            const canvas = el ? await html2canvas(el) : false
+            if (canvas) {
+                this.state.image = canvas.toDataURL('image/png');
+            }
         }
+        const isInteger = value => typeof value === 'number' && isFinite(value, "") && Math.floor(value) === value;
+
         let vals = {
             image: this.Image,
             id: this.id || false,
@@ -464,39 +552,52 @@ export class CylloSheet extends Component {
             order_by: this.query_data.orderBy,
             dimension: this.query_data.dimension[0],
             measure: this.query_data.measure,
-            where: this.query_data.where,
+            where: this.query_data.where.map(filter => {
+                return {
+                    ...filter,
+                    id: isInteger(filter.id) ? filter.id : false
+                }
+            }),
             type: this.state.selectedType,
             dimension_axis: this.query_data.dimension_axis,
             query: this.state.query,
             configs: this.state.configs,
             unlink_list: this.unlinkList,
             options: this.filterOptions,
-            kpi: this.state.kpiValue
+            kpi: this.state.kpiValue,
+            currency: this.state.currency.id,
         }
         if (!this.state.name) {
             this.showMessage('Please provide a name first', 'danger')
         } else {
-            vals['name'] = this.state.name.substring(0, 32)
-            this.orm.call(this.model, 'update_data', [vals]).then(async (data) => {
+            try {
+                vals['name'] = this.state.name.substring(0, 32)
+                const data = await this.orm.call(this.model, 'update_data', [vals])
                 this.id = data.rec_id
+                this.state.id = data.rec_id
                 this.saveManually(this.id)
                 this.showMessage("Saved", "success")
                 this.state.need_save = false
                 const {show_position_warning} = data
-                if (show_position_warning){
+                if (show_position_warning) {
                     this.showMessage(`As the chart shifted from being a KPI to ${this.state.selectedType[1]}, it required removing the previous positions.`, "warning")
                 }
                 this.isNewSheet = data.is_new_sheet;
                 data.sheet_filter.forEach(item => {
-                    this.query_data.where.find(where => where.name == item.name).id = item.id
+                    this.query_data.where.find(where => where.name === item.name).id = item.id
                 })
                 this.navState.allRecords = await this.orm.search('dashboard.sheet', [])
-            })
+            }
+            catch {
+                this.showMessage(`There was an error while saving the record`, "warning")
+                this.state.saveClicked = false
+            }
         }
+        this.state.saveClicked = false
     }
 
     async globalFilters() {
-        const ids = await this.state.configs.map((config) => config.id);
+        const ids = this.state.configs.map((config) => config.id);
         const globalFilters = await this.orm.searchRead('dashboard.global.filter', [['dashboard_config_id', 'in', ids]], [])
         const filteredDict = {};
         globalFilters.forEach((filter) => {
@@ -522,28 +623,32 @@ export class CylloSheet extends Component {
 
     async updateData() {
         if (!this.id) return
-        await this.orm.call(this.model, 'get_sheet_data', [this.id]).then(data => {
-            this.state.name = data.name
-            this.state.limit = data.limit
-            this.state.selectedType = data.type
-            this.state.configs = data.configs
-            data.models.forEach(model => {
-                for (var i in model.fields) {
-                    model.fields[i].model = model
-                }
-            })
-            this.setModel(data.models)
-            this.query_data.join = data.join
-            this.query_data.joinData = data.joinData
-            this.query_data.dimension = data.dimension
-            this.query_data.measure = data.measure
-            this.query_data.groupBy = data.groupBy
-            this.query_data.orderBy = data.orderBy
-            this.query_data.dimension_axis = data.dimension_axis
-            this.query_data.where = data.where
-            this.filterOptions = data.options
-            this.state.kpiValue = data.kpi
+        const data = await this.orm.call(this.model, 'get_sheet_data', [this.state.id])
+        if (data.has_error.error) {
+            const model = data.has_error.value.length > 1 ? "models" : "model"
+            this.notification.add(_t(`The sheet cannot display the graph because it is missing some information. It cannot access the ${model}: ${data.has_error.value.join(", ")}.`), {type: "warning"});
+        }
+        this.state.name = data.name
+        this.state.currency = data.currency[0]
+        this.state.limit = data.limit
+        this.state.selectedType = data.type
+        this.state.configs = data.configs
+        data.models.forEach(model => {
+            for (var i in model.fields) {
+                model.fields[i].model = model
+            }
         })
+        this.setModel(data.models)
+        this.query_data.join = data.join
+        this.query_data.joinData = data.joinData
+        this.query_data.dimension = data.dimension
+        this.query_data.measure = data.measure
+        this.query_data.groupBy = data.groupBy
+        this.query_data.orderBy = data.orderBy
+        this.query_data.dimension_axis = data.dimension_axis
+        this.query_data.where = data.where
+        this.filterOptions = data.options
+        this.state.kpiValue = data.kpi
     }
 
     showMessage(message, type) {
@@ -551,15 +656,26 @@ export class CylloSheet extends Component {
     }
 
     onFilterClick() {
-        this.dialog.add(FilterDialog, {fields: this.state.fields, confirm: this.addWhere.bind(this)})
+        const where = {
+            name: "",
+            domain: "",
+            domain_py_expression: [],
+            active: true,
+        }
+        this.dialog.add(SheetFilterDomain, {
+            confirm: this.addWhere.bind(this),
+            models: this.state.models,
+            where,
+            isEdit: false
+        })
     }
 
     addWhere(domain) {
-        if (domain.edit) {
-            var item = this.query_data.where.find(item => item.id == domain.id)
-            for (const key of Object.keys(domain)) {
-                item[key] = domain[key]
-            }
+        if (domain.isEdit) {
+            this.query_data.where = [
+                ...this.query_data.where.filter(item => item.id !== domain.id),
+                domain
+            ]
         } else {
             this.query_data.where.push(domain)
         }
@@ -572,8 +688,38 @@ export class CylloSheet extends Component {
     }
 
     onClickSheetType(type) {
-        this.state.selectedType = type
-        this.generateChart()
+        // set the new type
+        this.state.selectedType = type;
+
+        // if KPI is selected -> backup and clear X-axis related fields (temporary removal)
+        if (type && type[1] && String(type[1]).toLowerCase() === 'kpi') {
+            // create backup object so we can restore when leaving KPI
+            this._backup_query_data = {
+                dimension: Array.isArray(this.query_data.dimension) ? [...this.query_data.dimension] : [],
+                groupBy: Array.isArray(this.query_data.groupBy) ? [...this.query_data.groupBy] : [],
+                orderBy: Array.isArray(this.query_data.orderBy) ? [...this.query_data.orderBy] : [],
+                dimension_axis: this.query_data.dimension_axis
+            };
+            // clear X axis related arrays so KPI has no X-axis
+            this.query_data.dimension = [];
+            this.query_data.groupBy = [];
+            this.query_data.orderBy = [];
+            // ensure the axis is set so UI expects measure on Y (helps acceptance)
+            this.query_data.dimension_axis = 'y';
+        } else {
+            // if we have a backup and we are switching away from KPI, restore it
+            if (this._backup_query_data) {
+                this.query_data.dimension = Array.isArray(this._backup_query_data.dimension) ? [...this._backup_query_data.dimension] : [];
+                this.query_data.groupBy = Array.isArray(this._backup_query_data.groupBy) ? [...this._backup_query_data.groupBy] : [];
+                this.query_data.orderBy = Array.isArray(this._backup_query_data.orderBy) ? [...this._backup_query_data.orderBy] : [];
+                this.query_data.dimension_axis = this._backup_query_data.dimension_axis || 'x';
+                // clear backup
+                this._backup_query_data = null;
+            }
+        }
+
+        // regenerate chart preview
+        this.generateChart();
     }
 
     async onDashboardSelect(config) {
@@ -765,10 +911,7 @@ export class CylloSheet extends Component {
                     var val_new = ` ${alias[1]}.`
                     where.domain = where.domain.replaceAll(val_to_change, val_new)
                 })
-                //            var has_where = this.query_data.where.filter(item => item.query == where.query)
-                //            if(!has_where.length){
                 this.query_data.where.push(where)
-                //            }
             })
             // Group by
             parsedData.groupBy.forEach(groupBy => {
@@ -901,28 +1044,18 @@ export class CylloSheet extends Component {
     onClickDeleteFilter(index, filterId) {
         this.query_data.where = this.query_data.where.filter((item, idx) => idx !== index);
         this.updateWhere(this.query_data.where)
-        if (filterId) {
+        const isInteger = typeof filterId === 'number' && isFinite(filterId) && Math.floor(filterId) === filterId;
+        if (filterId && isInteger) {
             this.orm.unlink("dashboard.sheet.filter", [filterId]);
         }
     }
 
-    onClickEditFilter(filter) {
-        let filterDomain = [];
-        let idCounter = 0;
-        filter.domain.split(' OR ').forEach(element => {
-            let splitBySpace = element.trim().split(' ');
-            let field = splitBySpace[0].split('.')[1];
-            let table = splitBySpace[0].split('.')[0];
-            let operator = splitBySpace[1];
-            let rhs = splitBySpace.slice(2).join(' ');
-            filterDomain.push({id: idCounter++, field, table, operator, rhs});
-        });
-        this.dialog.add(FilterDialog, {
-            filterData: filter,
-            filterDomain,
-            edit: true,
-            fields: this.state.fields,
-            confirm: this.addWhere.bind(this)
+    onClickEditFilter(where) {
+        this.dialog.add(SheetFilterDomain, {
+            where,
+            isEdit: true,
+            confirm: this.addWhere.bind(this),
+            models: this.state.models
         })
     }
 
@@ -933,11 +1066,11 @@ export class CylloSheet extends Component {
         }
     }
 
-    changeRecord(event) {
+    async changeRecord(event) {
         if (!this.id) {
             return
         }
-        var index = this.navState.allRecords.findIndex(item => item == this.id)
+        var index = this.navState.allRecords.findIndex(item => item === this.id)
         index = event === "fwd" ? index + 1 : index - 1
         if (index > this.navState.allRecords.length - 1) {
             index = 0
@@ -945,18 +1078,19 @@ export class CylloSheet extends Component {
             index = this.navState.allRecords.length - 1
         }
         this.id = this.navState.allRecords[index]
+        this.state.id = this.navState.allRecords[index]
         this.saveManually(this.id)
         this.navState.recordValue = index + 1
-        this.updateSheet()
     }
 
     get axis() {
-        var x, y, group;
+        let x, y, group;
         switch (this.state.selectedType[1].toLowerCase()) {
             case "gauge":
             case "kpi":
-                x = false;
-                y = true;
+                const dimensionAxis = this.query_data.dimension_axis
+                x = dimensionAxis === 'y';
+                y = !x;
                 group = false;
                 break;
             case "map":

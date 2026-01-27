@@ -1,0 +1,4 @@
+id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
+access_cyllo_llm,access_cyllo_llm,model_cyllo_llm,base.group_user,1,1,1,1
+access_chatbot_agent,access_chatbot_agent,model_chatbot_agent,base.group_user,1,1,1,1
+access_chatbot_history,access_chatbot_history,model_chatbot_history,base.group_user,1,1,1,1

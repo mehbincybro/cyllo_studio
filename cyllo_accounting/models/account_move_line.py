@@ -1,10 +1,33 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 
 
 class AccountMoveLine(models.Model):
-    """Inheriting account.move.line for adding new functionalities"""
-    _inherit = 'account.move.line'
+    """Extends the 'account.move.line' model by adding new functionalities and
+    includes the 'annotation.mixin' for additional features."""
+    _name = 'account.move.line'
+    _description = 'Account Move Line'
+    _inherit = ['account.move.line', 'annotation.mixin']
 
     multi_invoice_payment = fields.Boolean(default=False)
     # Enable boolean field to create deferred revenue or expense based on move lines
@@ -27,6 +50,16 @@ class AccountMoveLine(models.Model):
                 rec.move_asset_type = 'revenue'
             elif rec.move_type == 'in_invoice':
                 rec.move_asset_type = 'expense'
+
+    @api.model
+    def get_js_list_view(self):
+        view = self.env.ref("cyllo_accounting.view_account_move_line_tree")
+        return view.id if view else False
+
+    def reconcile(self):
+        result = super().reconcile()
+        self.move_id._compute_payment_state()
+        return result
 
     @api.model
     def _prepare_reconciliation_amls(self, values_list, shadowed_aml_values=None):
@@ -112,3 +145,4 @@ class AccountMoveLine(models.Model):
         else:
             res = super(AccountMoveLine, self)._prepare_reconciliation_amls(values_list, shadowed_aml_values=None)
             return res
+

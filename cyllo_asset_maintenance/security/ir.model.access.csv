@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_asset_maintenance_manager,access.asset.maintenance.manager,model_asset_maintenance,account.group_account_manager,1,1,1,1
+access_account_asset_maintenance_user,access.account.asset.maintenance.user,model_account_asset_maintenance,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,1,1,1
+access_asset_asset_user,access.asset.maintenance.user,cyllo_asset_management.model_asset_asset,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,1,0,0
+access_asset_item_user,access.asset.item.manager,cyllo_asset_management.model_asset_item,cyllo_asset_maintenance.group_cyllo_asset_maintenance,1,0,0,0

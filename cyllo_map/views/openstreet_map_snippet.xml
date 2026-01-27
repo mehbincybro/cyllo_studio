@@ -48,7 +48,7 @@
                             Latitude:
                         </label>
                         <div class="col-sm-2">
-                            <input type="text" id="latitude" name="latitude" class="latitude_input" placeholder="Longitude"/>
+                            <input type="text" id="latitude" name="latitude" class="latitude_input" placeholder="Latitude"/>
                         </div>
                     </div>
                     <div class="form-group row">

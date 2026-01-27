@@ -1,15 +1,15 @@
 /** @odoo-module **/
-
 import { registry } from "@web/core/registry";
-import { Component, useState, onWillStart, useRef, onMounted } from '@odoo/owl';
+import { Component, useState, onWillStart, useRef } from '@odoo/owl';
 import { useService } from "@web/core/utils/hooks";
 import { GraphTile } from "@cyllo_analytics/js/presentation/components/graph_tile";
-import { browser } from "@web/core/browser/browser";
 import { _t } from "@web/core/l10n/translation";
 import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
 import { BlockUI, unblockUI } from "@web/core/ui/block_ui";
 import { download } from "@web/core/network/download";
 import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown"
+import {Dropdown} from "@web/core/dropdown/dropdown";
+import {DropdownItem} from "@web/core/dropdown/dropdown_item";
 
 const PERIODS = {
     quarter: 'Quarter',
@@ -48,6 +48,7 @@ export class ChurnPredictionDashboard extends Component {
             min: 0,
             searchText: false,
             predictData: true,
+            selectedCustomerId: null,
         });
         onWillStart(async () => {
             var period, periodType, numberOfPeriods
@@ -87,9 +88,9 @@ export class ChurnPredictionDashboard extends Component {
             this.state.min = this.state.churnData.cust_wise_details.length > 6 ? 6 : this.state.churnData.cust_wise_details.length;
             this.state.count = this.state.churnData.cust_wise_details.length
             let props = {
-                data: [{ value: this.state.churnData.churn_perc, name: 'Churn', itemStyle: { color: '#FF5733' } },
-                       { value: this.state.churnData.not_churn_perc, name: 'Not Churn', itemStyle: { color: '#FF5763' } }],
-                measures: ['value'],
+                data: [{ value: this.state.churnData.churn_perc, name: 'At-Risk', itemStyle: { color: '#ff3333' } },
+                       { value: this.state.churnData.not_churn_perc, name: 'Loyal', itemStyle: { color: '#9ea700' } }],
+                measures: ['value', 'itemStyle'],
                 dimension: 'name',
                 dimension_axis: 'y',
                 type: 'pie',
@@ -103,9 +104,9 @@ export class ChurnPredictionDashboard extends Component {
 
     onClickCustomer(cust){
         let props = {
-            data: [{ value: cust.prob_yes, name: 'Churn' },
-                   { value: cust.prob_no, name: 'Not Churn' }],
-            measures: ['value'],
+            data: [{ value: cust.prob_yes, name: 'At-Risk', itemStyle: { color: '#ff3333' }},
+                   { value: cust.prob_no, name: 'Loyal', itemStyle: { color: '#9ea700' } }],
+            measures: ['value', 'itemStyle'],
             dimension: 'name',
             dimension_axis: 'y',
             type: 'pie',
@@ -113,6 +114,7 @@ export class ChurnPredictionDashboard extends Component {
         this.state.cust = props
         this.state.generate = true
         this.state.customer = cust.custName
+        this.state.selectedCustomerId = cust.custId
     }
 
     async exportPDF(){
@@ -151,13 +153,14 @@ export class ChurnPredictionDashboard extends Component {
 
     onInputCustomer(ev) {
         this.state.searchText = ev.toLowerCase();
+        this.state.offset = 0;
         this.setArr()
     }
 
     get chartStyle() {
         return {
             height:`320px;`,
-            width:`320px;`,
+            width:`380px;`,
         }
     }
     onClickCustomerDetails(cust){
@@ -173,39 +176,41 @@ export class ChurnPredictionDashboard extends Component {
         })
     }
     get hasNext(){
-        return !(this.state.offset + this.state.min >= this.state.count)
+        return this.state.offset + this.state.min < this.state.count;
     }
     get hasPrev(){
-        return this.state.offset !== 0
+        return this.state.offset > 0;
     }
     onClick(num){
         this.state.offset += this.state.min * num
         this.setArr()
     }
-    setArr(){
-        var min = this.state.min - 1
-        var next_min = this.state.count - (this.state.offset + 1)
-        next_min = next_min > min ? min : next_min
-        var start = this.state.offset
-        var end = this.state.offset + next_min
-        this.state.arr = this.createArray(start, end)
-    }
+    setArr() {
+    const pageSize = 6;  // You can set this to any number
+    const start = this.state.offset;
+    const end = start + pageSize;
+
+    this.state.min = pageSize;  // Update the state's page size
+    this.state.arr = this.createArray(start, end);
+}
+
     createArray(start, end) {
         const result = [];
         if(this.state.searchText){
             const filteredData = this.state.churnData.cust_wise_details.filter(item => {
-                const custName = item.custName.toLowerCase();
-                return custName.includes(this.state.searchText);
-            })
+    return item.custName && item.custName.toLowerCase().includes(this.state.searchText);
+           });
             if (filteredData){
                 this.state.count = filteredData.length
-                for (let i = start; i <= end; i++) {
+                for (let i = start;i < end && i < filteredData.length; i++) {
                     result.push(filteredData[i]);
                 }
             }
         }
         else{
-            for (let i = start; i <= end; i++) {
+            const allData = this.state.churnData.cust_wise_details;
+            this.state.count = allData.length;
+            for (let i = start;i < end && i < allData.length; i++) {
                 result.push(this.state.churnData.cust_wise_details[i]);
             }
         }
@@ -214,7 +219,6 @@ export class ChurnPredictionDashboard extends Component {
     onClickFrequency(cust){
         const lastPeriodDate = this.state.churnData.date_range[this.state.churnData.date_range.length-1]
         const domain = [['date_order', '>=', this.state.churnData.date_range[0][0]], ['date_order', '<=', this.state.churnData.date_range[this.state.churnData.date_range.length-1][1]], ['partner_id', '=', cust.custId]];
-        if(cust.total_sales != 0){
             this.actionService.doAction({
                 name: "Sale orders of " +  cust.custName + " from " +  this.state.churnData.date_range[0][0] + " to "
                     + this.state.churnData.date_range[this.state.churnData.date_range.length-1][1],
@@ -225,10 +229,27 @@ export class ChurnPredictionDashboard extends Component {
                 domain: domain,
                 target: "current",
             });
+    }
+    formatNumber(value) {
+        if (!value) return ''
+        if (value >= 1e18) {
+            return (value / 1e18).toFixed(2) + 'Qi';
+        } else if (value >= 1e15) {
+            return (value / 1e15).toFixed(2) + 'Q';
+        } else if (value >= 1e12) {
+            return (value / 1e12).toFixed(2) + 'T';
+        } else if (value >= 1e9) {
+            return (value / 1e9).toFixed(2) + 'B';
+        } else if (value >= 1e6) {
+            return (value / 1e6).toFixed(2) + 'M';
+        } else if (value >= 1e3) {
+            return (value / 1e3).toFixed(2) + 'K';
+        } else {
+            return value.toString();
         }
     }
 }
 
 ChurnPredictionDashboard.template = "ChurnPredictionDashboard";
-ChurnPredictionDashboard.components = { GraphTile, FilterDropdown }
+ChurnPredictionDashboard.components = { GraphTile, FilterDropdown, Dropdown, DropdownItem }
 registry.category("actions").add("churn_prediction", ChurnPredictionDashboard);

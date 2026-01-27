@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Form for the asset maintenance-->
+    <record id="asset_maintenance_view_form" model="ir.ui.view">
+        <field name="name">asset.maintenance.view.form</field>
+        <field name="model">asset.maintenance</field>
+        <field name="arch" type="xml">
+            <form string="Maintenance">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="employee_id"/>
+                            <field name="issue"/>
+                        </group>
+                        <group>
+                            <field name="scheduled_date"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_send_maintenance" type="object" string="Send Maintenance Request"
+                            class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!--Action for asset maintenance-->
+    <record id="action_view_asset_maintenance" model="ir.actions.act_window">
+        <field name="name">Maintenance</field>
+        <field name="res_model">asset.maintenance</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

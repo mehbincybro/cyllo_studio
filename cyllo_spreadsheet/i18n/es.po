@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-01 09:17+0000\n"
-"PO-Revision-Date: 2023-12-01 09:17+0000\n"
+"POT-Creation-Date: 2025-12-24 11:28+0000\n"
+"PO-Revision-Date: 2025-12-24 11:28+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,548 +16,298 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: cyllo_spreadsheet
-#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet_import
-msgid "Add Item to Spreadsheet"
-msgstr "Agregar elemento a la hoja de cálculo"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "<i class=\"ri-delete-bin-line me-1\"/>Delete"
+msgstr "<i class=\"ri-delete-bin-line me-1\"/>Eliminar"
 
 #. module: cyllo_spreadsheet
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_sheet_to_spreadsheet
-msgid "Add sheet to spreadsheet"
-msgstr "Agregar hoja a la hoja de cálculo"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "<i class=\"ri-share-line me-1\"/>Share"
+msgstr "<i class=\"ri-share-line me-1\"/>Compartir"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_to_spreadsheet
-#, python-format
-msgid "Add to spreadsheet"
-msgstr "Agregar a la hoja de cálculo"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Action"
+msgstr "Acción"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
-msgid "Adding access rights"
-msgstr "Agregar derechos de acceso"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
-msgid "Adding name of spreadsheet"
-msgstr "Agregar nombre de la hoja de cálculo"
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_admin
+msgid "Admin"
+msgstr "Administrador"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "After next"
-msgstr "Después del siguiente"
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__binary_content
+msgid "Binary Content"
+msgstr "Contenido Binario"
+
+#. module: cyllo_spreadsheet
+#: model:ir.module.category,description:cyllo_spreadsheet.ir_module_category_cyllo_spreadsheet_access
+msgid "Category for Cyllo Spreadsheet module"
+msgstr "Categoría para el módulo Cyllo Spreadsheet"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Before Previous"
-msgstr "Antes de"
+msgid "Close"
+msgstr "Cerrar"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
-#, python-format
-msgid "Cancel"
-msgstr "Cancelar"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__company_id
+msgid "Company"
+msgstr "Compañía"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Change name"
-msgstr "Cambiar nombre"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__converted_binary_content
+msgid "Converted Binary Content"
+msgstr "Contenido Binario Convertido"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
-msgid "Client id"
-msgstr "Identificación del cliente"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Created By"
+msgstr "Creado Por"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
-msgid "Code"
-msgstr "Código"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Created Date"
+msgstr "Fecha de Creación"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
-msgid "Commands"
-msgstr "Comandos"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Confirm"
-msgstr "Confirmar"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
-msgid "Contains the spreadsheet information"
-msgstr "Contiene la información de la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
-msgid "Contributors"
-msgstr "Colaboradores"
-
-#. module: cyllo_spreadsheet
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_create_spreadsheet
-msgid "Create spreadsheet"
-msgstr "Crear hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__create_uid
 msgid "Created by"
 msgstr "Creado por"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__create_date
 msgid "Created on"
-msgstr "Creado en"
+msgstr "Creado el"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
-msgid "Current id"
-msgstr "ID actual"
+#: model:ir.module.category,name:cyllo_spreadsheet.ir_module_category_cyllo_spreadsheet_access
+msgid "Cyllo Spreadsheet Access"
+msgstr "Acceso a Cyllo Spreadsheet"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
-msgid "Current model name"
-msgstr "Nombre del modelo actual"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
-msgid "Data"
-msgstr "Datos"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__display_name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__display_name
 msgid "Display Name"
-msgstr "Nombre para mostrar"
+msgstr "Nombre Visible"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_download_menus.js:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
 #, python-format
 msgid "Download"
 msgstr "Descargar"
 
 #. module: cyllo_spreadsheet
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_tree
-msgid "Edit"
-msgstr "Editar"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
-msgid "Excel file name"
-msgstr "Nombre del archivo de Excel"
-
-#. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "File"
-msgstr "Archivo"
+msgid "Editor"
+msgstr "Editor"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
-msgid "File Name"
-msgstr "Nombre del archivo"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Filters"
-msgstr "Filtros"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
-msgid "For adding spreadsheet data as a data file "
-msgstr "Para agregar datos de hoja de cálculo como un archivo de datos"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
-msgid "For getting file name"
-msgstr "Para obtener el nombre del archivo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
-msgid "For getting import mode code"
-msgstr "Para obtener el código de modo de importación"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__name
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
-msgid "For getting the name"
-msgstr "Para obtener el nombre"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
-msgid "For identifying the import mode"
-msgstr "Para identificar el modo de importación"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
-msgid "For uploading your excel file and edit it inside spreadsheet "
-msgstr ""
-"Para cargar su archivo de Excel y edítelo dentro de la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
-msgid "Getting spreadsheet"
-msgstr "Obtener una hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
-msgid "Groups"
-msgstr "Grupos"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__id
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__id
 msgid "ID"
-msgstr "IDENTIFICACIÓN"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
-msgid "Import Data"
-msgstr "Datos de importacion"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import_mode
-msgid "Import Mode"
-msgstr "Modo de importación"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import
-msgid "Import data to spreadsheet"
-msgstr "Importar datos a la hoja de cálculo"
+msgstr "ID"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/list/listRenderer.xml:0
 #, python-format
-msgid ""
-"Insert list in\n"
-"            spreadsheet"
-msgstr ""
-"Insertar lista en\n"
-"            hoja de cálculo"
+msgid "Image Description"
+msgstr "Descripción de Imagen"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_uid
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Last Updated By"
+msgstr "Última Actualización Por"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Last Updated Date"
+msgstr "Fecha de Última Actualización"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__write_uid
 msgid "Last Updated by"
-msgstr "Última actualización por"
+msgstr "Actualizado por"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__write_date
 msgid "Last Updated on"
-msgstr "Ultima actualización en"
+msgstr "Actualizado el"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/NameComponent/NameComponent.xml:0
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__name
 #, python-format
-msgid "Link menu in spreadsheet"
-msgstr "Menú de enlaces en la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Link to Odoo menu"
-msgstr "Enlace al menú Odoo"
-
-#. module: cyllo_spreadsheet
-#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_manager
-msgid "Manager"
-msgstr "Gerente"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
-msgid "Mode"
-msgstr "Modo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
-msgid "Mode of import"
-msgstr "Modo de importación"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
-msgid "Model"
-msgstr "Modelo"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Month"
-msgstr "Mes"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
 msgid "Name"
 msgstr "Nombre"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
-msgid "Name of the import mode"
-msgstr "Nombre del modo de importación"
-
-#. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/hooks/control_panel_upload.xml:0
 #, python-format
-msgid "Next"
-msgstr "Próximo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
-msgid "Next revision id"
-msgstr "Siguiente identificación de revisión"
-
-#. module: cyllo_spreadsheet
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
-msgid "OK"
-msgstr "DE ACUERDO"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
-msgid "Owner"
-msgstr "Dueño"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
-msgid "Owner who created the spreadsheet"
-msgstr "Propietario que creó la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
-msgid "Person who can edit the spreadsheet"
-msgstr "Persona que puede editar la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
-msgid "Person who can only read the spreadsheet"
-msgstr "Persona que solo puede leer la hoja de cálculo"
+msgid "New"
+msgstr "Nuevo"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Previous"
-msgstr "Anterior"
+msgid "Read Access"
+msgstr "Acceso de Lectura"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__user_read_ids
+msgid "Record Read access for users"
+msgstr "Acceso de lectura al registro para usuarios"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__user_write_ids
+msgid "Record Write access for users"
+msgstr "Acceso de escritura al registro para usuarios"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Quarter"
-msgstr "Cuarto"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
-msgid "Readers"
-msgstr "Lectores"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Relative Period"
-msgstr "Período relativo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
-msgid "Res Id"
-msgstr "RES ID"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
-msgid "Revision id"
-msgstr "ID de revisión"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
 #, python-format
 msgid "Save"
-msgstr "Ahorrar"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
-msgid "Saving spreadsheet informationfrom the js file"
-msgstr "Guardar información de la hoja de cálculo del archivo JS"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__sequence
-msgid "Sequence"
-msgstr "Secuencia"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
-msgid "Server revision id"
-msgstr "ID de revisión del servidor"
+msgstr "Guardar"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
-#: model:ir.module.category,name:cyllo_spreadsheet.ir_module_category_spreadsheet
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/list/listController.js:0
+#, python-format
+msgid "Share"
+msgstr "Compartir"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__sheet_json
+msgid "Sheet Json"
+msgstr "JSON de Hoja"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_sheet
 #: model:ir.ui.menu,name:cyllo_spreadsheet.menu_spreadsheet
-#, python-format
+#: model:ir.ui.menu,name:cyllo_spreadsheet.menu_spreadsheet_root
 msgid "Spreadsheet"
-msgstr "Hoja de cálculo"
+msgstr "Hoja de Cálculo"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_cy_revision
-msgid "Spreadsheet Cyllo Revision"
-msgstr "Revisión de Cyllo de hoja de cálculo"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__image_1920
+msgid "Spreadsheet Thumbnail"
+msgstr "Miniatura de Hoja de Cálculo"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_data
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
-msgid "Spreadsheet Data"
-msgstr "Datos de hoja de cálculo"
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_write_user
+msgid "Spreadsheet Write/Read User"
+msgstr "Usuario con Permisos de Escritura/Lectura en Hoja de Cálculo"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
-msgid "Spreadsheet Raw"
-msgstr "Hoja de cálculo crudo"
+#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid "Spreadsheet sheet"
+msgstr "Hoja de Hoja de Cálculo"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
-msgid "Spreadsheet Revision"
-msgstr "Revisión de la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_abstract
-msgid "Spreadsheet abstract for inheritance"
-msgstr "Resumen de la hoja de cálculo para la herencia"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
-msgid "Spreadsheet data"
-msgstr "Datos de hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_binary_data
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_binary_data
-msgid "Spreadsheet file"
-msgstr "Archivo de hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet
-msgid "Spreadsheets"
-msgstr "Hojas de cálculo"
+#: model_terms:ir.actions.act_window,help:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid ""
+"To get started, either upload an existing spreadsheet or create\n"
+"                a new one using the tools provided\n"
+"                above. You can format the data, add new sheets, and easily\n"
+"                manipulate the content in your spreadsheet\n"
+"                for efficient processing."
+msgstr ""
+"Za početak, ili prenesite postojeću proračunsku tablicu ili kreirajte\n"
+"                novu koristeći dostupne alate\n"
+"                iznad. Možete formatirati podatke, dodavati nove listove i lako\n"
+"                manipulirati sadržajem u svojoj proračunskoj tablici\n"
+"                za učinkovitu obradu."
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/hooks/control_panel_upload.xml:0
 #, python-format
-msgid "Stacked"
-msgstr "Apilados"
+msgid "Upload"
+msgstr "Cargar"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
-msgid "Storing id of parent model"
-msgstr "Almacenamiento de ID del modelo principal"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
-msgid "Storing spreadsheet data and row details"
-msgstr "Almacenar datos de hoja de cálculo y detalles de fila"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
-msgid "Storing uploaded file name"
-msgstr "Almacenamiento de nombre de archivo cargado"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__thumbnail
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__thumbnail
-msgid "Thumbnail"
-msgstr "Miniatura"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
-msgid "Type"
-msgstr "Tipo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
-msgid "Type of revision for each record"
-msgstr "Tipo de revisión para cada registro"
+#: model_terms:ir.actions.act_window,help:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid "Upload or Create new spreadsheet"
+msgstr "Cargar o Crear nueva hoja de cálculo"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#. odoo-python
-#: code:addons/cyllo_spreadsheet/models/spreadsheet_spreadsheet.py:0
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Unnamed"
-msgstr "Sin nombre"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
-msgid "Used to store the changes on the spreadsheet"
-msgstr "Se usa para almacenar los cambios en la hoja de cálculo"
-
-#. module: cyllo_spreadsheet
-#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_user
 msgid "User"
 msgstr "Usuario"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Year"
-msgstr "Año"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__user_read_ids
+msgid "Users Read"
+msgstr "Lectura de Usuarios"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__user_write_ids
+msgid "Users Write"
+msgstr "Escritura de Usuarios"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "name is required"
-msgstr "Se requiere el nombre"
+msgid "Users:"
+msgstr "Usuarios:"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_ir_websocket
-msgid "websocket message handling"
-msgstr "gestión de mensajes de WebSocket"
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#, python-format
+msgid "Viewer"
+msgstr "Visualizador"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.js:0
+#, python-format
+msgid "Warning"
+msgstr "Advertencia"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#, python-format
+msgid "Write Access"
+msgstr "Acceso de Escritura"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__binary_content
+msgid "stores the original Binary files"
+msgstr "almacena los archivos binarios originales"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__converted_binary_content
+msgid "stores the updated Binary files"
+msgstr "almacena los archivos binarios actualizados"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "xlsx"
+msgstr "xlsx"

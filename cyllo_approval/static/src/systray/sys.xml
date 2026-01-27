@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <t t-name="cyllo_approval.ApprovalIcon" owl="1">
+        <div class="o_systray_icon">
+            <i class="fa fa-check-circle"/>
+            <span class="badge" t-esc="approvals.length"/>
+        </div>
+        <div class="dropdown-menu">
+            <t t-if="approvals.length > 0">
+                <t t-foreach="approvals" t-as="approval"
+                   t-key="approval.approval_id">
+                    <div class="dropdown-item">
+                        <a href="#"
+                           t-on-click.prevent="() => openApproval(approval.approval_id)">
+                            <t t-esc="approval.message"/>
+                        </a>
+                    </div>
+                </t>
+            </t>
+            <t t-else="">
+                <div class="dropdown-item text-muted">No approvals</div>
+            </t>
+        </div>
+    </t>
+</templates>

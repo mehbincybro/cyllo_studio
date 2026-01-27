@@ -1,0 +1,1193 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_approval
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-28 09:50+0000\n"
+"PO-Revision-Date: 2025-10-28 09:50+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_approval_request
+msgid ""
+"<p>Dear Sir\n"
+"                </p>\n"
+"                <p>An approval request has been assigned to you. Below are the\n"
+"                    details:\n"
+"                </p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Requested By:</strong>\n"
+"                        <t t-out=\"object.requested_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Date:</strong>\n"
+"                        <t t-out=\"object.requested_date\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Kindly review the request.</p>\n"
+"            "
+msgstr ""
+"<p>Geachte heer\n"
+"                </p>\n"
+"                <p>Er is een goedkeuringsverzoek aan u toegewezen. Hieronder staan de\n"
+"                    details:\n"
+"                </p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Verzoek ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Aangevraagd door:</strong>\n"
+"                        <t t-out=\"object.requested_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Datum:</strong>\n"
+"                        <t t-out=\"object.requested_date\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Record bekijken\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Gelieve het verzoek te beoordelen.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_request_approved
+msgid ""
+"<p>Dear<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Your approval request has been approved.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Approved By:</strong>\n"
+"                        <t t-out=\"object.approved_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Approved Date:</strong>\n"
+"                        <t t-out=\"object.approved_date\"></t>\n"
+"                    </li>\n"
+"                    <t t-if=\"object.comment\">\n"
+"                        <li>\n"
+"                            <strong>Comment:</strong>\n"
+"                            <t t-out=\"object.comment\"></t>\n"
+"                        </li>\n"
+"                    </t>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Thank you.</p>\n"
+"            "
+msgstr ""
+"<p>Geachte <t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Uw goedkeuringsverzoek is goedgekeurd.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Verzoek ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Goedgekeurd door:</strong>\n"
+"                        <t t-out=\"object.approved_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Goedgekeurd op:</strong>\n"
+"                        <t t-out=\"object.approved_date\"></t>\n"
+"                    </li>\n"
+"                    <t t-if=\"object.comment\">\n"
+"                        <li>\n"
+"                            <strong>Commentaar:</strong>\n"
+"                            <t t-out=\"object.comment\"></t>\n"
+"                        </li>\n"
+"                    </t>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Record bekijken\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Dank u.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_request_rejected
+msgid ""
+"<p>Dear<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Your approval request has been rejected.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Rejected By:</strong>\n"
+"                        <t t-out=\"object.rejected_by_id.name\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Thank you.</p>\n"
+"            "
+msgstr ""
+"<p>Geachte <t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Uw goedkeuringsverzoek is afgewezen.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Verzoek ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Afgewezen door:</strong>\n"
+"                        <t t-out=\"object.rejected_by_id.name\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Record bekijken\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Dank u.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_rule_kanban
+msgid "<span class=\"text-bg-danger\">Archived</span>"
+msgstr "<span class=\"text-bg-danger\">Gearchiveerd</span>"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Accept"
+msgstr "Accepteren"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_needaction
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_needaction
+msgid "Action Needed"
+msgstr "Actie vereist"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Activate Rule"
+msgstr "Regel activeren"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__active
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__active
+msgid "Active"
+msgstr "Actief"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_ids
+msgid "Activities"
+msgstr "Activiteiten"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_exception_decoration
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoratie activiteitsuitzondering"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_state
+msgid "Activity State"
+msgstr "Activiteitsstatus"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_type_icon
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Pictogram activiteitstype"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__admin_users
+msgid "Admin Users"
+msgstr "Beheerdersgebruikers"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "All"
+msgstr "Alle"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__allow_comment
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__allow_comment
+msgid "Allow Comment"
+msgstr "Commentaar toestaan"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__comment
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_comment
+msgid "Approval Comment"
+msgstr "Goedkeuringscommentaar"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_count
+msgid "Approval Count"
+msgstr "Aantal goedkeuringen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+msgid "Approval Logs"
+msgstr "Goedkeuringslogboeken"
+
+#. module: cyllo_approval
+#: model:res.groups,name:cyllo_approval.group_approval_manager
+msgid "Approval Managers"
+msgstr "Goedkeuringsmanagers"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_ir_model__approval_need
+msgid "Approval Needed"
+msgstr "Goedkeuring vereist"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__approval_request_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_request_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_request_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approval Request"
+msgstr "Goedkeuringsverzoek"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_request_approved
+msgid "Approval Request Approved"
+msgstr "Goedkeuringsverzoek goedgekeurd"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_approval_request
+msgid "Approval Request Notification"
+msgstr "Melding goedkeuringsverzoek"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_request_rejected
+msgid "Approval Request Rejected"
+msgstr "Goedkeuringsverzoek afgewezen"
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_approval_request
+msgid "Approval Request for {{ object.name }}"
+msgstr "Goedkeuringsverzoek voor {{ object.name }}"
+
+#. module: cyllo_approval
+#: model:ir.ui.menu,name:cyllo_approval.menu_approval_request
+#: model_terms:ir.actions.act_window,help:cyllo_approval.action_approval_request_view
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_home_request
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approval Requests"
+msgstr "Goedkeuringsverzoeken"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approval_rule_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_rule_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_rule_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approval Rule"
+msgstr "Goedkeuringsregel"
+
+#. module: cyllo_approval
+#: model:ir.actions.act_window,name:cyllo_approval.action_approval_rule_view
+#: model:ir.ui.menu,name:cyllo_approval.menu_approval_rule
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_activity
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_pivot
+msgid "Approval Rules"
+msgstr "Goedkeuringsregels"
+
+#. module: cyllo_approval
+#: model:ir.actions.act_window,name:cyllo_approval.action_approval_request_view
+#: model:ir.model,name:cyllo_approval.model_approval_request
+msgid "Approval requests"
+msgstr "Goedkeuringsverzoeken"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_approval_rule
+msgid "Approval rules"
+msgstr "Goedkeuringsregels"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#: model:ir.ui.menu,name:cyllo_approval.menu_cyllo_approval_root
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approvals
+#, python-format
+msgid "Approvals"
+msgstr "Goedkeuringen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__is_sequenced
+msgid "Approve in Sequence order"
+msgstr "Goedkeuren in sequentievolgorde"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__approved
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approved"
+msgstr "Goedgekeurd"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approved_by_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approved By"
+msgstr "Goedgekeurd door"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approved_date
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approved Date"
+msgstr "Datum goedkeuring"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__approver_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approver"
+msgstr "Goedkeurder"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approver_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__approver_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approver_ids
+msgid "Approvers"
+msgstr "Goedkeurders"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Archived"
+msgstr "Gearchiveerd"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_attachment_count
+msgid "Attachment Count"
+msgstr "Aantal bijlagen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__group
+msgid "Based on Group"
+msgstr "Gebaseerd op groep"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__related
+msgid "Based on Related Users"
+msgstr "Gebaseerd op gerelateerde gebruikers"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__user
+msgid "Based on User"
+msgstr "Gebaseerd op gebruiker"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approval_transferred
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__transferred
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_transferred
+msgid "Can be Transferred"
+msgstr "Kan worden overgedragen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Cancel"
+msgstr "Annuleren"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__company_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__company_id
+msgid "Company"
+msgstr "Bedrijf"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Confirm"
+msgstr "Bevestigen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Count"
+msgstr "Aantal"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Create Approval"
+msgstr "Goedkeuring aanmaken"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__create_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__create_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__create_uid
+msgid "Created by"
+msgstr "Aangemaakt door"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__create_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__create_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__create_date
+msgid "Created on"
+msgstr "Aangemaakt op"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__company_id
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__company_id
+msgid "Current company"
+msgstr "Huidig bedrijf"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__state
+msgid "Current status of the approval request"
+msgstr "Huidige status van het goedkeuringsverzoek"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approved_date
+msgid "Date when the request was approved"
+msgstr "Datum waarop het verzoek is goedgekeurd"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__requested_date
+msgid "Date when the request was made"
+msgstr "Datum waarop het verzoek is gedaan"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__definition_type
+msgid "Define whether this rule is based on a domain or a server action."
+msgstr "Bepaal of deze regel gebaseerd is op een domein of een serveractie."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__definition_type
+msgid "Definition Type"
+msgstr "Definitietype"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_rule_kanban
+msgid "Delete"
+msgstr "Verwijderen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__state__disable
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Disable"
+msgstr "Uitschakelen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__display_name
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__display_name
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__display_name
+msgid "Display Name"
+msgstr "Weergavenaam"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__domain
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__definition_type__domain
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Domain"
+msgstr "Domein"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__domain
+msgid "Domain condition that set for this rule."
+msgstr "Domeinconditie die voor deze regel is ingesteld."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__email_notification
+msgid "Email Notification"
+msgstr "E-mailmelding"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Email Notification Settings"
+msgstr "Instellingen voor e-mailmeldingen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__state__enable
+msgid "Enable"
+msgstr "Inschakelen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_ir_model__approval_need
+msgid "Enable to add this model to approval module"
+msgstr "Inschakelen om dit model toe te voegen aan de goedkeuringsmodule"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__related_user_id
+msgid ""
+"Field in the selected model that determines the related users for approval."
+msgstr ""
+"Veld in het geselecteerde model dat de gerelateerde gebruikers voor goedkeuring bepaalt."
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_home_request
+msgid "Follow, download or pay your invoices"
+msgstr "Volg, download of betaal uw facturen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_follower_ids
+msgid "Followers"
+msgstr "Volgers"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Volgers (Partners)"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_type_icon
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Font awesome pictogram bijv. fa-tasks"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/approval_request.py:0
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase_order_approval_data
+#, python-format
+msgid "Forward"
+msgstr "Doorsturen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Forward Approval"
+msgstr "Goedkeuring doorsturen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__from_user_ids
+msgid "From"
+msgstr "Van"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__group_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__group_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Group"
+msgstr "Groep"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Group By"
+msgstr "Groeperen op"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__has_message
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__has_message
+msgid "Has Message"
+msgstr "Heeft bericht"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__id
+msgid "ID"
+msgstr "ID"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_exception_icon
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_exception_icon
+msgid "Icon"
+msgstr "Pictogram"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_exception_icon
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Pictogram om een uitzonderingsactiviteit aan te duiden."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_needaction
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Indien aangevinkt, vereisen nieuwe berichten uw aandacht."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Indien aangevinkt, hebben sommige berichten een afleverfout."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_is_follower
+msgid "Is Follower"
+msgstr "Is volger"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__write_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__write_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__write_uid
+msgid "Last Updated by"
+msgstr "Laatst bijgewerkt door"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__write_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__write_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__write_date
+msgid "Last Updated on"
+msgstr "Laatst bijgewerkt op"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "Mark As Read"
+msgstr "Markeren als gelezen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_error
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_error
+msgid "Message Delivery error"
+msgstr "Fout bij berichtaflevering"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_ids
+msgid "Messages"
+msgstr "Berichten"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__model_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Model"
+msgstr "Model"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__model_name
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+msgid "Model Name"
+msgstr "Modelnaam"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__model_select
+msgid "Model Selected"
+msgstr "Geselecteerd model"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_ir_model
+msgid "Models"
+msgstr "Modellen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__my_activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Deadline mijn activiteit"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "My Approvals"
+msgstr "Mijn goedkeuringen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "My Requests"
+msgstr "Mijn verzoeken"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__name
+msgid "Name"
+msgstr "Naam"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_calendar_event_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Volgende activiteitskalendergebeurtenis"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Deadline volgende activiteit"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_summary
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_summary
+msgid "Next Activity Summary"
+msgstr "Samenvatting volgende activiteit"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_type_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_type_id
+msgid "Next Activity Type"
+msgstr "Volgende activiteitstype"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/sys.xml:0
+#, python-format
+msgid "No approvals"
+msgstr "Geen goedkeuringen"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "No new notification yet..."
+msgstr "Nog geen nieuwe melding..."
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "Notification Item Image"
+msgstr "Afbeelding meldingsitem"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_approve
+msgid "Notify on Approval"
+msgstr "Melden bij goedkeuring"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_reject
+msgid "Notify on Rejection"
+msgstr "Melden bij afwijzing"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_request
+msgid "Notify on Request"
+msgstr "Melden bij verzoek"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Aantal acties"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_error_counter
+msgid "Number of errors"
+msgstr "Aantal fouten"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Aantal berichten die actie vereisen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Aantal berichten met afleverfout"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__pending
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Pending"
+msgstr "In afwachting"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__read_by_ids
+msgid "Read By Users"
+msgstr "Gelezen door gebruikers"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Reject"
+msgstr "Afwijzen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__rejected
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Rejected"
+msgstr "Afgewezen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__rejected_by_id
+msgid "Rejected By"
+msgstr "Afgewezen door"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__res_id
+msgid "Related Record Id"
+msgstr "Gerelateerd record-ID"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__related_user_id
+msgid "Related User"
+msgstr "Gerelateerde gebruiker"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Reload"
+msgstr "Herladen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data_button
+msgid "Request Approval"
+msgstr "Goedkeuring aanvragen"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+msgid "Request Name"
+msgstr "Naam verzoek"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "Request Transferred Successfully"
+msgstr "Verzoek succesvol overgedragen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__name
+msgid "Request name"
+msgstr "Naam verzoek"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__requested_by_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Requested By"
+msgstr "Aangevraagd door"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__requested_date
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Requested Date"
+msgstr "Aangevraagde datum"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__requested_by_id
+msgid "Requested User"
+msgstr "Aangevraagde gebruiker"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_user_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_user_id
+msgid "Responsible User"
+msgstr "Verantwoordelijke gebruiker"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approval_rule_id
+msgid "Rule Related to this approval"
+msgstr "Regel gerelateerd aan deze goedkeuring"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "SMS-afleverfout"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Search Bank"
+msgstr "Bank zoeken"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__model_id
+msgid "Select the model for which this approval rule applies."
+msgstr "Selecteer het model waarop deze goedkeuringsregel van toepassing is."
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "Select the user to whom the request will be transferred"
+msgstr "Selecteer de gebruiker aan wie het verzoek zal worden overgedragen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__sequence_order
+msgid "Sequence"
+msgstr "Volgorde"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_ir_actions_server
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__server_action_id
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__definition_type__server_action
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Server Action"
+msgstr "Serveractie"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__server_trigger
+msgid "Server Trigger"
+msgstr "Servertrigger"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__server_action_id
+msgid "Server action to execute when the rule is triggered."
+msgstr "Serveractie die wordt uitgevoerd wanneer de regel wordt geactiveerd."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__show_request_button
+msgid "Show Request Button"
+msgstr "Toon verzoekknop"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__group_id
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__group_id
+msgid "Specific group whose members can approve the request."
+msgstr "Specifieke groep waarvan de leden het verzoek kunnen goedkeuren."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__user_id
+msgid "Specific user who can approve the request."
+msgstr "Specifieke gebruiker die het verzoek kan goedkeuren."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__user_type
+msgid "Specify how approvers are determined for this rule."
+msgstr "Geef aan hoe goedkeurders voor deze regel worden bepaald."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_value
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "State"
+msgstr "Status"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_from_id
+msgid "State From"
+msgstr "Status van"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_to_id
+msgid "State To"
+msgstr "Status naar"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_values_ids
+msgid "State Values"
+msgstr "Statuswaarden"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_state
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status gebaseerd op activiteiten\n"
+"Vertraagd: Vervaldatum is al voorbij\n"
+"Vandaag: Activiteitsdatum is vandaag\n"
+"Gepland: Toekomstige activiteiten."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_value
+msgid "Technical name of the state field in the selected model."
+msgstr "Technische naam van het statusveld in het geselecteerde model."
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid ""
+"The 'From' user and 'To' user cannot be the same. Please choose different "
+"users."
+msgstr ""
+"De gebruiker 'Van' en 'Naar' kunnen niet hetzelfde zijn. Kies verschillende "
+"gebruikers."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approved_by_id
+msgid "The person who approved the request"
+msgstr "De persoon die het verzoek heeft goedgekeurd"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approver_ids
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__approver_ids
+#: model:ir.model.fields,help:cyllo_approval.field_check_approval__approver_ids
+msgid "The person who approves the request"
+msgstr "De persoon die het verzoek goedkeurt"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__rejected_by_id
+msgid "The person who rejected the request"
+msgstr "De persoon die het verzoek heeft afgewezen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__res_id
+msgid "The record ID for the Related Model"
+msgstr "Het record-ID voor het gerelateerde model"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_from_id
+msgid "The state from which the transition begins."
+msgstr "De status van waaruit de overgang begint."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_to_id
+msgid "The state to which the transition occurs."
+msgstr "De status naar waar de overgang plaatsvindt."
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "This Record Needs to be approved"
+msgstr "Dit record moet worden goedgekeurd"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__to_user_ids
+msgid "To"
+msgstr "Naar"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__transferred
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Transferred"
+msgstr "Overgedragen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_exception_decoration
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Type van de uitzonderingsactiviteit op record."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__user_id
+msgid "User"
+msgstr "Gebruiker"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__user_type
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "User Type"
+msgstr "Gebruikerstype"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__read_by_ids
+msgid "Users who have marked this approval request as read"
+msgstr "Gebruikers die dit goedkeuringsverzoek als gelezen hebben gemarkeerd"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+msgid "View"
+msgstr "Weergave"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__website_message_ids
+msgid "Website Messages"
+msgstr "Websiteberichten"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__website_message_ids
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__website_message_ids
+msgid "Website communication history"
+msgstr "Communicatiegeschiedenis website"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Write your comment here..."
+msgstr "Schrijf uw commentaar hier..."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__x_stage_id
+msgid "X Stage"
+msgstr "X Fase"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "You are not allowed to transfer the request"
+msgstr "U mag het verzoek niet overdragen"
+
+#. module: cyllo_approval
+#: model_terms:ir.actions.act_window,help:cyllo_approval.action_approval_request_view
+msgid "You can view approval requests from here."
+msgstr "U kunt hier goedkeuringsverzoeken bekijken."
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_request_approved
+msgid "Your Approval Request {{ object.name }} has been Approved"
+msgstr "Uw goedkeuringsverzoek {{ object.name }} is goedgekeurd"
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_request_rejected
+msgid "Your Approval Request {{ object.name }} has been Rejected"
+msgstr "Uw goedkeuringsverzoek {{ object.name }} is afgewezen"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Your not allowed to approve this record"
+msgstr "U mag dit record niet goedkeuren"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Your not allowed to reject this record"
+msgstr "U mag dit record niet afwijzen"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_approval_forward
+msgid "approval.forward"
+msgstr "approval.forward"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_check_approval
+msgid "check.approval"
+msgstr "check.approval"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "e.g. Rule for RFQ"
+msgstr "bijv. Regel voor RFQ"

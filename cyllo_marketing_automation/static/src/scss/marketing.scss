@@ -66,14 +66,6 @@
 .cy-marketing-tile-list {
     padding-right: 0px;
 }
-.card-header{
-    color: #0D3554;
-}
-.card-text{
-    text-align: right;
-    font-size: 30px;
-    padding: 3% 5% 0% 0%;
-}
 .cy-market-activity-btn {
     text-shadow: none;
     font-weight: 500;
@@ -373,7 +365,6 @@
     font-size: 14px;
     font-weight: 400;
     width: 100%;
-    width: 100px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -402,7 +393,7 @@
     border-right: 1px solid #dfdfdf;
     border-bottom: 2px solid #dfdfdf;
     border-left: 1px solid #dfdfdf;
-    background-color: #fff;
+    background-color: transparent;
     color: #505050;
     font-weight: 600;
     font-size: 13px;
@@ -420,7 +411,7 @@
 }
 .cy-marketing-auto_add-parent-container {
     position: absolute;
-    border-radius: 2px;
+    border-radius: 5px;
     border: 1px solid #dfdfdf;
     background: #fff;
     -webkit-box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.09);
@@ -557,6 +548,11 @@
     border-radius: 2px;
     margin: 0 8px;
 }
+
+.cy-status-tag {
+    margin-bottom: 4px;
+}
+
 .cy-status-tag .cancel{
     background-color: #FFBFCA;
 }
@@ -650,6 +646,7 @@
     color: #222222;
     font-weight: 500;
 }
+
 .cy-marketing-tile_row .cy-card_desc {
     margin-top: 0.6rem;
     padding: 0.8rem 0 0.2rem 0;
@@ -658,19 +655,50 @@
     font-weight: 500;
     border-top: 1px solid #efecec;
 }
+
 .cy-marketing-tile_row .cy-card_detail {
     width: 100%;
 }
+
 .cy-marketing-tile_row{
     gap: 10px;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
 }
+
 @media (max-width: 768px){
     .cy-marketing-tile-list {
         padding: 0px;
     }
+
     .cy-marketing-tile_row {
     gap: 0.8rem;
     }
+}
+
+[data-darkreader-scheme="dark"] {
+    .activity-main_page,
+    .cy-marketing-auto_tab-view,
+    .cy-breadcrumbs-marketing-titlebar {
+        background-color: #0f110a;
+    }
+
+    .cy-marketing-auto_list-box,
+    .cy-activity_state-box,
+    .cy-marketing-auto_list-box-test,
+    .cy-test-participation_list-btn,
+    .cy-marketing_status .cy-card_box {
+        background-color: #13160d;
+    }
+
+    .cy-marketing_status .cy-cardbox-icon img {
+        filter: invert(100%);
+    }
+
+    .child-activities-content button,
+    .cy-marketing-auto_list-box-test button,
+    .cy-marketing-auto_list-box .edit-delete-buttons button {
+        background-color: transparent;
+    }
+
 }

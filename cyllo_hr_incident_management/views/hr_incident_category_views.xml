@@ -11,6 +11,23 @@
         </field>
     </record>
 
+    <record id="view_hr_incident_category_form" model="ir.ui.view">
+        <field name="name">view.hr.incident.category.form</field>
+        <field name="model">hr.incident.category</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="description"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
     <record id="action_view_incident_categories" model="ir.actions.act_window">
         <field name="name">Incident Categories</field>
         <field name="type">ir.actions.act_window</field>

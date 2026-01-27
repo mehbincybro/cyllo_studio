@@ -1,11 +1,34 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, http, _
-from odoo.http import request, Controller
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import _, fields, http
+from odoo.http import request
+
 from odoo.addons.portal.controllers.portal import CustomerPortal
+
 
 
 class SubscriptionPortal(CustomerPortal):
     """ Class to define the portal views """
+
     def _prepare_home_portal_values(self, counters):
         """ Function to get the count of total number of orders """
         vals = super()._prepare_home_portal_values(counters)
@@ -16,49 +39,58 @@ class SubscriptionPortal(CustomerPortal):
         return vals
 
 
-class PortalControl(Controller):
+class PortalControl(CustomerPortal):
     """Class created to render datas to portal"""
+
     @http.route(['/your_sub_orders'], type='http', auth="public", website=True)
     def _portal_sub_order_tree(self):
-        """Method used to return datas to create a tree view with orders of the
-         current user in the portal"""
+        """Method used to return datas to create a tree view with orders of the current user in the portal"""
+        subscription_ids = request.env['subscription.order'].sudo().search(
+            [('partner_id', '=', request.env.user.partner_id.id),
+             ('state', 'in', ['posted', 'sale', 'requested'])])
         values = {
-            'orders': request.env['subscription.order'].sudo().search(
-                [('partner_id', '=', request.env.user.partner_id.id),
-                 ('state', 'in', ('posted', 'sale'))]),
-            'active_records': request.env['subscription.order'].sudo().search(
-                [('partner_id', '=', request.env.user.partner_id.id),
-                 ('state', 'in', ('posted', 'sale')),
-                 ('state_subscription', '=', 'active')]),
-            'to_renew': request.env['subscription.order'].sudo().search(
-                [('partner_id', '=', request.env.user.partner_id.id),
-                 ('state', 'in', ('posted', 'sale')),
-                 ('state_subscription', '=', 'renew')]),
-            'churned': request.env['subscription.order'].sudo().search(
-                [('partner_id', '=', request.env.user.partner_id.id),
-                 ('state', 'in', ('posted', 'sale')),
-                 ('state_subscription', '=', 'churned')]),
-            'trial': request.env['subscription.order'].sudo().search(
-                [('partner_id', '=', request.env.user.partner_id.id),
-                 ('state', 'in', ('posted', 'sale')),
-                 ('state_subscription', '=', 'trial')]),
-            'page_name': 'Subscription_Orders'
+            'orders': subscription_ids,
+            'active_records': subscription_ids.filtered(
+                lambda sub: sub.state_subscription == 'active'),
+            'to_renew': subscription_ids.filtered(
+                lambda sub: sub.state_subscription == 'renew'),
+            'churned': subscription_ids.filtered(
+                lambda sub: sub.state_subscription == 'churned'),
+            'trial': subscription_ids.filtered(
+                lambda sub: sub.state_subscription == 'trial'),
+            'requested_orders': subscription_ids.filtered(lambda sub: sub.state== 'requested'),
+            'page_name': 'Subscription Orders',
+
         }
         return request.render("cyllo_subscription.subscription_orders", values)
 
     @http.route(['/details/<int:order_id>'], type='http', auth='public',
                 website=True)
-    def _portal_sub_order_form(self, order_id):
+    def _portal_sub_order_form(self, order_id, report_type=None,
+                               access_token=None, download=True):
         """Method to render data to the details page of the portal"""
+        current_record = request.env['subscription.order'].sudo().browse(
+            order_id)
+        existing_order = request.env['subscription.order'].sudo().search([
+            ('parent_id', '=', current_record.id),
+            ('state_subscription', '=', 'active')], limit=1)
+
         values = {
-            'each_order': request.env['subscription.order'].sudo().browse(
-                order_id),
-            'reasons': request.env['subscription.order.close.reason'].search([
-                ('available_in_portal', '=', True)]),
+            'each_order': current_record,
+            'reasons': request.env[
+                'subscription.order.close.reason'].sudo().search(
+                [('available_in_portal', '=', True)]),
+            'existing_order': bool(existing_order),
             'page_name': 'Details'
         }
-        return request.render(
-            'cyllo_subscription.subscription_details', values)
+        if report_type in ('html', 'pdf', 'text'):
+            return self._show_report(
+                model=current_record,
+                report_type=report_type,
+                report_ref='cyllo_subscription.subscription_report',
+                download=download,
+            )
+        return request.render('cyllo_subscription.subscription_details', values)
 
     @http.route(['/your_sub_orders/close/<int:order_id>'], type='http',
                 auth='public', website=True)
@@ -67,26 +99,46 @@ class PortalControl(Controller):
         record = request.env['subscription.order'].sudo().browse(order_id)
         records = {
             'page_name': 'Close order',
-            'order': order_id,
+            'order': record,
             'orders': record
         }
         record.state_subscription = 'churned'
-        record.message_post(
-            body=_('Reason to close the subscription: %s', kwargs.get('reasons')), message_type='comment',
-            subtype_xmlid='mail.mt_comment')
+        if kwargs.get('custom_reason'):
+            record.message_post(body=_('Reason to close the subscription: %s',
+                                       kwargs.get('custom_reason')),
+                                message_type='comment',
+                                subtype_xmlid='mail.mt_comment')
+        else:
+            record.message_post(body=_('Reason to close the subscription: %s',
+                                       kwargs.get('reasons')),
+                                message_type='comment',
+                                subtype_xmlid='mail.mt_comment')
         return request.render('cyllo_subscription.subscription_closed', records)
 
     @http.route(['/renew_sub'], type='http', auth='public', website=True)
     def renew_order(self, **kwargs):
         """Method used to render values to renew subscription from portal"""
-        request.env['subscription.order'].sudo().create({
+
+        new_order = request.env['subscription.order'].sudo().create({
             'partner_id': kwargs.get('partner'),
             'time_based_price_id': kwargs.get('plan'),
-            'state': 'draft',
-            'state_subscription': 'quotation',
-            'subscription_order_line_ids': [
-                        (fields.Command.create({
-                            'product_id': kwargs.get('product'),
-                            'subtotal': request.env['time.based.price'].sudo().browse(int(kwargs.get('plan'))).cost,
-                        }))]})
-        return request.redirect('/my/home')
+            'state': 'requested',
+            'state_subscription': 'active',
+            'parent_id' :kwargs.get('order_id'),
+            'sale_order_id': request.env['subscription.order'].sudo().browse(
+                    int(kwargs.get('order_id'))).sale_order_id.id,
+            'renewal_date': fields.Datetime.now(),
+            'sale_order_template_id': kwargs.get('sale_order_template_id'),
+            'subscription_order_line_ids': [(fields.Command.create({
+                'product_id': kwargs.get('product'),
+                'time_based_price_id': kwargs.get('plan'),
+                'subtotal': request.env['subscription.order'].sudo().browse(
+                    int(kwargs.get('order_id'))).subscription_order_line_ids.subtotal,
+                'quantity' : int(kwargs.get('quantity', 1)),
+                'tax_ids' : request.env['subscription.order'].sudo().browse(
+                    int(kwargs.get('order_id'))).subscription_order_line_ids.tax_ids.ids,
+                'total_price' : request.env['subscription.order'].sudo().browse(
+                    int(kwargs.get('order_id'))).subscription_order_line_ids.total_price
+
+        }))]})
+        return request.redirect(f"/details/{new_order.id}")

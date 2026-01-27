@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="group_approval_manager" model="res.groups">
+        <field name="name">Approval Managers</field>
+        <field name="category_id" ref="base.module_category_hidden"/>
+        <field name="users" eval="[Command.link(ref('base.user_admin'))]"/>
+    </record>
+    <record id="approval_request_rule" model="ir.rule">
+        <field name="name">Approval Request Rule</field>
+        <field name="model_id" ref="model_approval_request"/>
+        <field name="domain_force">['|',('requested_by_id', '=',
+            user.id),('approver_ids','in',user.id)]
+        </field>
+    </record>
+    <!-- Multi-company record filtration and security group-->
+    <record id="rule_approval_rule_company" model="ir.rule">
+        <field name="name">Approval Rule Multi-Company</field>
+        <field name="model_id" ref="model_approval_rule"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+    <record id="rule_approval_request_company" model="ir.rule">
+        <field name="name">Approval Request Multi-Company</field>
+        <field name="model_id" ref="model_approval_request"/>
+        <field name="domain_force">
+            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
+        </field>
+    </record>
+</odoo>

@@ -25,8 +25,9 @@ export class SupportServiceOverview extends Component {
       }
     /* Function to get ticket details */
     getTicketDetails(value, failed) {
-        let domain = [['user_id','=',session.uid]]
-        failed ? domain.push(['is_failed','=',true]): ''
+        let domain = [['user_id','=',session.uid],['stage_id.is_closed', '=', false],
+        ['stage_id.is_canceled', '=', false]]
+        failed ? domain.push(['stage_id.is_closed', '=', false,],[ 'deadline', '<', new Date()]): ''
         let priorityId = value ? value === 'urgent_tickets' ?  3 : 2 : null
         priorityId ? domain.push(['priority','=',priorityId]) : '';
         this.doAction(domain)
@@ -58,13 +59,13 @@ export class SupportServiceOverview extends Component {
     /* doAction for all the domains defined above */
     async doAction(domain){
         await this.action.doAction({
-        type: 'ir.actions.act_window',
-        name: 'Tickets',
-        res_model: 'support.service.ticket',
-        domain:domain,
-        views: [[false, 'tree'], [false, 'form']],
-        view_mode: 'tree',
-        target: 'self',
+            type: 'ir.actions.act_window',
+            name: 'Tickets',
+            res_model: 'support.service.ticket',
+            domain:domain,
+            views: [[false, 'tree'], [false, 'form']],
+            view_mode: 'tree',
+            target: 'self',
         })
     }
 }

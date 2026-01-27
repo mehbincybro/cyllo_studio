@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import http
 from odoo.http import request
 
@@ -13,7 +33,8 @@ class DocumentTemplatesRequest(http.Controller):
         :return: HTTP response containing the 'my_document_request' template with relevant data for the user's
         document requests. """
         if request.env.user.has_group('cyllo_documents.group_cyllo_documents_manager'):
-            values = {'document_requests': request.env['document.template.request'].sudo().search(
+            values = {'document_requests': request.env[
+                'document.template.request'].sudo().search(
                 [('employee_id', '=', request.env.user.employee_id.id)]),
                 'document_req_count': request.env['document.template.request'].sudo().
                 search_count([('employee_id', '=', request.env.user.employee_id.id)])}

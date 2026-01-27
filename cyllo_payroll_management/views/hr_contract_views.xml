@@ -14,8 +14,21 @@
                 <attribute name="state"/>
             </xpath>
             <xpath expr="//field[@name='employee_id']" position="after">
-                <field name="training_date_from" force_save="1" invisible="(state not in ('draft','training'))"/>
-                <field name="training_date_to" force_save="1" invisible="(state not in ('draft','training'))"/>
+                <field name="employee_training_period_id" invisible="1"/>
+                <field name="trainee" force_save="1"
+                       readonly="employee_training_period_id"
+                       invisible="(state not in ('draft','training')) or employee_training_period_id"/>
+                <field name="training_date_from" force_save="1"
+                       invisible="(state not in ('draft','training')) or not trainee"
+                       readonly="employee_training_period_id"
+                       required="trainee"/>
+                <field name="training_date_to" force_save="1"
+                       invisible="(state not in ('draft','training')) or not trainee"
+                       readonly="employee_training_period_id"
+                       required="trainee"/>
+            </xpath>
+            <xpath expr="//field[@name='employee_id']" position="attributes">
+                <attribute name="required">trainee</attribute>
             </xpath>
             <xpath expr="//field[@name='job_id']" position="after">
                 <field name="employee_salary_structure_id" force_save="1"/>
@@ -45,7 +58,7 @@
             <xpath expr="//notebook/page[@name='information']" position="inside">
                 <group>
                     <group>
-                        <field name="yearly_wage" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline"/>
+                        <field name="yearly_wage" widget="monetary" options="{'currency_field': 'currency_id'}" class="oe_inline" invisible="wage_type == 'hourly'"/>
                     </group>
                 </group>
             </xpath>
@@ -70,8 +83,8 @@
                 <page string="Training Details">
                     <separator string="Employee Training Period Details"/>
                     <group>
-                        <field name="training_date_start"/>
-                        <field name="training_date_end"/>
+                        <field name="training_date_from" readonly="1"/>
+                        <field name="training_date_to" readonly="1"/>
                     </group>
                 </page>
             </xpath>

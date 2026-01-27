@@ -14,7 +14,7 @@
                     <t t-name="kanban-box">
                         <div>
                             <div class="oe_kanban_details" style="height:auto;">
-                                <div class="container">
+                                <div class="container p-1">
                                     <div class="column">
                                         <field name="profile_image"/>
                                     </div>
@@ -32,14 +32,21 @@
                                         <field name="posted_image"/>
                                     </t>
                                 </div>
-                                <br/>
                                 <t t-if="record.posted_image">
-                                    <div class="line" style="border-bottom: 1px solid black;"/>
-                                    <button type="object" name="action_social_media_comments" class="fa fa-comments" style='font-size:36px' title="Comments">
-                                        <field name="comments_count" style="padding:3px;"/>
-                                    </button>
-                                    <i class="fa fa-heart" title="Likes"/>
-                                    <field name="likes_count" style="padding:3px;"/>
+                                    <div class="d-flex gap-2 p-2">
+                                        <button type="object"
+                                                name="action_social_media_likes"
+                                                class="ri-heart-line btn-secondary cy-kanban-feed-buttons"
+                                                title="Likes">
+                                            <field name="likes_count" style="padding:3px;"/>
+                                        </button>
+                                        <button type="object"
+                                                name="action_social_media_comments"
+                                                class="ri-chat-3-line btn-secondary cy-kanban-feed-buttons"
+                                                title="Comments">
+                                            <field name="comments_count" style="padding:3px;"/>
+                                        </button>
+                                    </div>
                                 </t>
                             </div>
                         </div>

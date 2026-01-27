@@ -1,0 +1,35 @@
+.kanban_overall{
+    .cy-studio-custom-dropdown .custom-dropdown ul{
+        max-height: 16rem !important;
+        overflow-y: auto !important;
+        }
+    }
+.oe_kanban_global_click {
+    pointer-events: auto; /* keep normal clicks */
+}
+
+/* BUT: give priority to ribbon */
+.oe_kanban_global_click .ribbon {
+    pointer-events: auto !important; /* allow clicking */
+    cursor: pointer !important; /* show hand cursor */
+    overflow: unset;
+    top:20px;
+}
+
+
+/* Remove overflow from the outer modal-body */
+.modal-body.p-0{
+    overflow: hidden !important;
+}
+
+/* Ensure only the kanban renderer scrolls */
+.o_kanban_view .o_content {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 150px); /* Adjust based on your modal header height */
+}
+
+/* OR target the renderer directly */
+.o_kanban_renderer {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 150px);
+}

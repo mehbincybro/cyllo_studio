@@ -1,0 +1,970 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_sale_analytics
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-11-19 05:47+0000\n"
+"PO-Revision-Date: 2025-11-19 05:47+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "&amp; Predicted Sales For"
+msgstr "en Voorspelde Verkopen Voor"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid ""
+"<b>Sales Data for this Frequency is\n"
+"                                    Insufficient.\n"
+"                                </b>"
+msgstr ""
+"<b>Verkoopgegevens Voor Deze Frequentie Zijn\n"
+"                                    Onvoldoende.\n"
+"                                </b>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "<span>Days</span>"
+msgstr "<span>Dagen</span>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "<span>Months</span>"
+msgstr "<span>Maanden</span>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "<span>Quarters</span>"
+msgstr "<span>Kwartalen</span>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "<span>Six Months</span>"
+msgstr "<span>Zes Maanden</span>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "<span>Years</span>"
+msgstr "<span>Jaren</span>"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid ""
+"ACTUAL\n"
+"                                                SALES"
+msgstr ""
+"WERKELIJKE\n"
+"                                                VERKOPEN"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+msgid ""
+"ACTUAL\n"
+"                                            SALES"
+msgstr ""
+"WERKELIJKE\n"
+"                                            VERKOPEN"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Active Customers"
+msgstr "Actieve Klanten"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Actual"
+msgstr "Werkelijk"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+#, python-format
+msgid "Actual Sales from"
+msgstr "Werkelijke Verkopen Van"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Actual Sales is from"
+msgstr "Werkelijke Verkopen Zijn Van"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "Amount"
+msgstr "Bedrag"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "At-Risk Customers"
+msgstr "Klanten Met Risico"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+msgid ""
+"Average\n"
+"                                            Sales\n"
+"                                            Price"
+msgstr ""
+"Gemiddelde\n"
+"                                            Verkoop\n"
+"                                            Prijs"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Average Sales Price"
+msgstr "Gemiddelde Verkoopprijs"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Bar Graph"
+msgstr "Staafdiagram"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Based on Last"
+msgstr "Gebaseerd Op Laatst"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Card image cap"
+msgstr "Kaartafbeelding"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Churn"
+msgstr "Klantenverlies"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Churn %"
+msgstr "Klantenverlies %"
+
+#. module: cyllo_sale_analytics
+#: model:ir.actions.report,name:cyllo_sale_analytics.report_churn_prediction_pdf
+#: model:ir.ui.menu,name:cyllo_sale_analytics.menu_churn_prediction
+msgid "Churn Prediction"
+msgstr "Klantenverlies Voorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model:ir.actions.client,name:cyllo_sale_analytics.action_view_churn_prediction_dashboard
+#, python-format
+msgid "Churn Prediction Dashboard"
+msgstr "Dashboard Voor Klantenverlies Voorspelling"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Churn Prediction Report"
+msgstr "Rapport Klantenverlies Voorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Churn Table"
+msgstr "Tabel Klantenverlies"
+
+#. module: cyllo_sale_analytics
+#: model:ir.model,name:cyllo_sale_analytics.model_res_partner
+msgid "Contact"
+msgstr "Contact"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Current Date"
+msgstr "Huidige Datum"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Customer"
+msgstr "Klant"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Date"
+msgstr "Datum"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Day"
+msgstr "Dag"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Days"
+msgstr "Dagen"
+
+#. module: cyllo_sale_analytics
+#: model:ir.ui.menu,name:cyllo_sale_analytics.menu_demand_forecasting
+msgid "Demand Forecasting"
+msgstr "Vraagprognose"
+
+#. module: cyllo_sale_analytics
+#: model:ir.actions.report,name:cyllo_sale_analytics.report_demand_prediction_pdf
+msgid "Demand Prediction"
+msgstr "Vraagvoorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: model:ir.actions.client,name:cyllo_sale_analytics.action_view_demand_prediction_dashboard
+#, python-format
+msgid "Demand Prediction Dashboard"
+msgstr "Dashboard Voor Vraagvoorspelling"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+msgid "Demand Prediction Report"
+msgstr "Rapport Vraagvoorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "End Date:"
+msgstr "Einddatum:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "End date"
+msgstr "Einddatum"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Enter a value greater than or equal to 4"
+msgstr "Voer een waarde in groter dan of gelijk aan 4"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid ""
+"Estimated percentage of total customers that is predicted or expected to "
+"continue using your services or products without discontinuing based on the "
+"data within selected period."
+msgstr ""
+"Geschat percentage van totale klanten waarvan wordt voorspeld of verwacht dat zij uw diensten of producten zonder onderbreking blijven gebruiken op basis van de gegevens binnen de geselecteerde periode."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid ""
+"Estimated percentage of total customers that is predicted to discontinue or "
+"stop using your services or products based on the data within selected "
+"period."
+msgstr ""
+"Geschat percentage van totale klanten waarvan wordt voorspeld dat zij uw diensten of producten zullen stopzetten of niet meer zullen gebruiken op basis van de gegevens binnen de geselecteerde periode."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Export"
+msgstr "Exporteren"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Financial Year"
+msgstr "Boekjaar"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Forecast"
+msgstr "Prognose"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Frequency for Forcasting"
+msgstr "Frequentie Voor Prognose"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Frequency:"
+msgstr "Frequentie:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Future Period"
+msgstr "Toekomstige Periode"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Future Periods:"
+msgstr "Toekomstige Perioden:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Go Back"
+msgstr "Ga Terug"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Half Year"
+msgstr "Half Jaar"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Half Years"
+msgstr "Halve Jaren"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Last Purchase Date"
+msgstr "Datum Laatste Aankoop"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Likely to be Churn:"
+msgstr "Waarschijnlijk Klantenverlies:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Line Graph"
+msgstr "Lijndiagram"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Loading your data..."
+msgstr "Uw Gegevens Laden..."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Loyal Customers"
+msgstr "Loyale Klanten"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Measures"
+msgstr "Maatregelen"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Month"
+msgstr "Maand"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Months"
+msgstr "Maanden"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid ""
+"No Data for\n"
+"                                    Prediction.There should be enough\n"
+"                                    customers and sale orders for prediction.The\n"
+"                                    dataset is too small to perform a meaningful\n"
+"                                    prediction.\n"
+"                                    The model may have limited accuracy due to\n"
+"                                    the small dataset size."
+msgstr ""
+"Geen Gegevens Voor Voorspelling. Er Zouden Voldoende Klanten en Verkooporders Voor Voorspelling Moeten Zijn. De Dataset Is Te Klein Voor Een Zinvolle Voorspelling. Het Model Kan Beperkte Nauwkeurigheid Hebben Door De Kleine Dataset."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "No Data for Prediction"
+msgstr "Geen Gegevens Voor Voorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "No Data has been Recorded."
+msgstr "Er Zijn Geen Gegevens Opgenomen."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "No Sale Orders"
+msgstr "Geen Verkooporders"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Not Churn"
+msgstr "Geen Klantenverlies"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Not Churn %"
+msgstr "Geen Klantenverlies %"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Not enough data for"
+msgstr "Onvoldoende Gegevens Voor"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Number of Periods"
+msgstr "Aantal Perioden"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/js/churn_prediction.js:0
+#, python-format
+msgid "Number of periods must be at least 4"
+msgstr "Aantal Perioden Moet Minstens 4 Zijn"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Order Number"
+msgstr "Ordernummer"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Overall Churn v/s Not Churn"
+msgstr "Totaal Klantenverlies vs Geen Klantenverlies"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "PDF"
+msgstr "PDF"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "PNG"
+msgstr "PNG"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "PREDICTED SALES"
+msgstr "VOORSPELDE VERKOPEN"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Period"
+msgstr "Periode"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Period Type"
+msgstr "Periodetype"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Period for Forcasting"
+msgstr "Periode Voor Prognose"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+#, python-format
+msgid "Periods"
+msgstr "Perioden"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#, python-format
+msgid "Predicted Demand For"
+msgstr "Voorspelde Vraag Voor"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Predicted Sales For"
+msgstr "Voorspelde Verkopen Voor"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Prediction Based on Last"
+msgstr "Voorspelling Gebaseerd Op Laatst"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Prediction based on the data from"
+msgstr "Voorspelling Gebaseerd Op Gegevens Van"
+
+#. module: cyllo_sale_analytics
+#: model:ir.ui.menu,name:cyllo_sale_analytics.menu_predictive_analytics_categ
+msgid "Predictive Analytics"
+msgstr "Predictieve Analytiek"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+msgid "Probability of Churn"
+msgstr "Waarschijnlijkheid Van Klantenverlies"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Probability of Churn:"
+msgstr "Waarschijnlijkheid Van Klantenverlies:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Probability of Not Churn:"
+msgstr "Waarschijnlijkheid Van Geen Klantenverlies:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Product"
+msgstr "Product"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+msgid "Product :"
+msgstr "Product :"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Product:"
+msgstr "Product:"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+msgid ""
+"Quantity\n"
+"                                            Sold"
+msgstr ""
+"Hoeveelheid\n"
+"                                            Verkocht"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Quantity Sold"
+msgstr "Hoeveelheid Verkocht"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Quarter"
+msgstr "Kwartaal"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Quarters"
+msgstr "Kwartalen"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#, python-format
+msgid "Revenue"
+msgstr "Opbrengst"
+
+#. module: cyllo_sale_analytics
+#: model:ir.actions.report,name:cyllo_sale_analytics.report_sales_prediction_pdf
+msgid "Sale Prediction"
+msgstr "Verkoopvoorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Sales Data for this Frequency is Insufficient."
+msgstr "Verkoopgegevens Voor Deze Frequentie Zijn Onvoldoende."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid ""
+"Sales Data is Insufficient for this Frequency.\n"
+"                                            Increase the Sales Data by adjusting the Start Date and End Date."
+msgstr ""
+"Verkoopgegevens Zijn Onvoldoende Voor Deze Frequentie.\n"
+"                                            Verhoog De Verkoopgegevens Door De Startdatum En Einddatum Aan Te Passen."
+
+#. module: cyllo_sale_analytics
+#: model:ir.ui.menu,name:cyllo_sale_analytics.menu_sales_forecasting
+msgid "Sales Forecasting"
+msgstr "Verkoopprognose"
+
+#. module: cyllo_sale_analytics
+#: model:ir.model,name:cyllo_sale_analytics.model_sale_order
+msgid "Sales Order"
+msgstr "Verkooporder"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#: model:ir.actions.client,name:cyllo_sale_analytics.action_view_sales_prediction_dashboard
+#, python-format
+msgid "Sales Prediction Dashboard"
+msgstr "Dashboard Voor Verkoopvoorspelling"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid "Sales Prediction Report"
+msgstr "Rapport Verkoopvoorspelling"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Salesperson"
+msgstr "Verkoper"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "Search"
+msgstr "Zoeken"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Search customers..."
+msgstr "Klanten Zoeken..."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid ""
+"Select the period type for data retrieval: If 'Current Date' is selected, "
+"data will be taken up to today's date. If 'Financial Year' is selected, data"
+" will be taken based on your company's financial year. Data will be taken up"
+" to previous year's end date"
+msgstr ""
+"Selecteer Het Periodetype Voor Gegevensobfuscatie: Als 'Huidige Datum' Is Geselecteerd, Worden Gegevens Tot Vandaag Opgehaald. Als 'Boekjaar' Is Geselecteerd, Worden Gegevens Op Basis Van Het Boekjaar Van Uw Bedrijf Opgehaald. Gegevens Worden Tot De Einddatum Van Het Voorgaande Jaar Opgehaald"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Sl.No"
+msgstr "Seriënummer"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Start Date:"
+msgstr "Startdatum:"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Start date"
+msgstr "Startdatum"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Status"
+msgstr "Status"
+
+#. module: cyllo_sale_analytics
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+msgid ""
+"The dataset is too small\n"
+"                                to perform a meaningful prediction.\n"
+"                                Increase the Actual Data by adjusting the Start\n"
+"                                Date and End Date."
+msgstr ""
+"De Dataset Is Te Klein\n"
+"                                Voor Een Zinvolle Voorspelling.\n"
+"                                Verhoog De Werkelijke Gegevens Door De Startdatum\n"
+"                                En Einddatum Aan Te Passen."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid ""
+"The dataset is too small to perform a meaningful prediction.\n"
+"                                            Increase the Sales Data by adjusting the Start Date and End Date."
+msgstr ""
+"De Dataset Is Te Klein Voor Een Zinvolle Voorspelling.\n"
+"                                            Verhoog De Verkoopgegevens Door De Startdatum En Einddatum Aan Te Passen."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid ""
+"The model may have limited accuracy due to the\n"
+"                                small\n"
+"                                dataset size."
+msgstr ""
+"Het Model Kan Beperkte Nauwkeurigheid Hebben Door\n"
+"                                De Kleine\n"
+"                                Datasetgrootte."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "There is no sale orders for"
+msgstr "Er Zijn Geen Verkooporders Voor"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid ""
+"There should be enough customers and sale orders for prediction.The dataset "
+"is too small to perform a meaningful prediction. The model may have limited "
+"accuracy due to the small dataset size. Please check with more data."
+msgstr ""
+"Er Zouden Voldoende Klanten En Verkooporders Voor Voorspelling Moeten Zijn. De Dataset Is Te Klein Voor Een Zinvolle Voorspelling. Het Model Kan Beperkte Nauwkeurigheid Hebben Door De Kleine Dataset. Controleer Alstublieft Met Meer Gegevens."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid ""
+"There should be sale orders for demand prediction. The dataset is\n"
+"                                too small to perform a meaningful prediction."
+msgstr ""
+"Er Zouden Verkooporders Voor Vraagvoorspelling Moeten Zijn. De Dataset Is\n"
+"                                Te Klein Voor Een Zinvolle Voorspelling."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Total"
+msgstr "Totaal"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Total Amount"
+msgstr "Totaal Bedrag"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Total Customers"
+msgstr "Totaal Klanten"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#, python-format
+msgid "Total Sale Orders"
+msgstr "Totaal Verkooporders"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid "Total number of customers in the company."
+msgstr "Totaal Aantal Klanten In Het Bedrijf."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#, python-format
+msgid ""
+"Total number of customers who have engaged with your business by making at "
+"least one sale order."
+msgstr ""
+"Totaal Aantal Klanten Die Met Uw Bedrijf Hebben Uitgewisseld Door Minstens Één Verkooporder Te Plaatsen."
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "Untaxed Amount"
+msgstr "Bedrag Zonder Belasting"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#, python-format
+msgid "XLSX"
+msgstr "XLSX"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Year"
+msgstr "Jaar"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#, python-format
+msgid "Years"
+msgstr "Jaren"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#, python-format
+msgid "from"
+msgstr "van"
+
+#. module: cyllo_sale_analytics
+#. odoo-javascript
+#: code:addons/cyllo_sale_analytics/static/src/xml/churn_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/customer_details.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/demand_prediction.xml:0
+#: code:addons/cyllo_sale_analytics/static/src/xml/sales_prediction.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_churn_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_demand_prediction
+#: model_terms:ir.ui.view,arch_db:cyllo_sale_analytics.report_sales_prediction
+#, python-format
+msgid "to"
+msgstr "naar"

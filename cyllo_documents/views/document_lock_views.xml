@@ -5,17 +5,15 @@
         <field name="name">view.document.lock.form</field>
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
-            <form js_class="document_lock_view_form">
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_lock_doc">Lock</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+            <form>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="password" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_lock_doc">Lock</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -25,16 +23,14 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_unlock_doc">Unlock</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_unlock_doc">Unlock</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -44,16 +40,14 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_share">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_share">OK</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -63,16 +57,31 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_download">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_download">OK</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- form view for copying from locked documents.-->
+    <record id="view_document_lock_copy_form" model="ir.ui.view">
+        <field name="name">view.document.lock.copy.form</field>
+        <field name="model">document.lock</field>
+        <field name="arch" type="xml">
+            <form>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_copy">Ok</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -82,16 +91,15 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_create_lead">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_create_lead">OK
+                        </button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -101,16 +109,15 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_create_task">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_create_task">OK
+                        </button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -120,16 +127,14 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_lock_mail">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_lock_mail">OK</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -139,16 +144,14 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_copy_mail">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_copy_mail">OK</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -158,16 +161,15 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_lock_archive">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_lock_archive">OK
+                        </button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -177,16 +179,14 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_delete_permanent">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_delete_permanent">OK</button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>
@@ -196,16 +196,15 @@
         <field name="model">document.lock</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <group>
-                        <field name="document_file_id" readonly="1" invisible="1"/>
-                        <field name="password" class="document_wizard_input" password="True"/>
-                    </group>
-                </group>
-                <footer>
-                    <button class="document_lock_wizard" type="object" name="action_document_move_to_trash">OK</button>
-                    <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
-                </footer>
+                <div class="document_security_view">
+                    <field name="document_file_id" readonly="1" invisible="1"/>
+                    <field name="validate_password_doc" class="document_wizard_input" password="True" widget="password"/>
+                    <footer>
+                        <button class="document_lock_wizard" type="object" name="action_document_move_to_trash">OK
+                        </button>
+                        <button class="document_cancel_wizard" special="cancel" string="Cancel"/>
+                    </footer>
+                </div>
             </form>
         </field>
     </record>

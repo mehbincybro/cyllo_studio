@@ -1,8 +1,7 @@
 /** @odoo-module **/
-import { Component, onWillStart,useRef } from "@odoo/owl";
+import { Component, onWillStart, useRef, useState, onMounted} from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
-
 
 export class FacebookComments extends Component {
     static template = "cyllo_facebook.FacebookComments";
@@ -10,36 +9,81 @@ export class FacebookComments extends Component {
     setup() {
         onWillStart(this.onWillStart);
         this.actionService = useService("action");
-        this.rpc = useService("rpc");
         this.orm = useService("orm");
         this.comment_reply = useRef("fb_comment_reply_area");
+        this.nextElementSibling = null
+        this.state = useState({
+            loadingFb: false,
+            fb_comments: []
+        })
+        onMounted(() => {
+
+            document.querySelectorAll("textarea").forEach((textarea) => {
+                textarea.addEventListener("input", () => {
+                    textarea.style.height = "auto";
+                    textarea.style.height = textarea.scrollHeight + "px";
+                });
+            });
+        })
     }
     // Fetch Facebook comments before the component is mounted
     async onWillStart() {
-        var feed_id = this.props.action.context.active_id
-        var self = this;
-        self.fb_comments = await this.orm.call("social.media.feed", "get_facebook_comments", [feed_id], {})
+        const feedId = this.props.action.context.active_id;
+        if (feedId) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "fb_media_number"]
+            );
+            await this.orm.call("social.media.feed", "action_compute_fb_likes_count", [], {feed: record[0].fb_media_number})
+            this.state.fb_comments = await this.orm.call(
+                "social.media.feed", "get_facebook_comments", [], {feed: record[0].fb_media_number}
+            )
+        }
     }
+
     // Method to get the fetched Facebook comments
     get FacebookCommentDetails() {
-        return this.fb_comments
+        return this.state.fb_comments
     }
+
     // Method to handle the 'Post' button click for posting a new comment
     async onClickPost(){
-        var feed_id = this.props.action.context.active_id
-        var comment_div =  document.getElementById("fb_comment_area");
-        var extra_comment_div =  document.getElementById("extra_comment_div");
-        await this.orm.call("social.media.feed", "post_facebook_comments", [feed_id,comment_div.value], {})
-        .then(function(data) {
-            comment_div.value = ''
-        })
-        window.location.reload();
+        if (this.state.loadingFb === true) {
+            return;
+        }
+        this.state.loadingFb = true;
+        const feedId = this.props.action.context.active_id
+        if (feedId) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "fb_media_number"]
+            );
+            const comment_div = document.getElementById("fb_comment_area");
+            const self = this
+            await this.orm.call(
+                "social.media.feed", "post_facebook_comments", [], {
+                    feed: record[0].fb_media_number,
+                    comment: comment_div.value
+                }
+            ).then(async function (data) {
+                self.state.fb_comments = await self.orm.call(
+                    "social.media.feed", "get_facebook_comments",
+                    [], {feed: record[0].fb_media_number}
+                )
+                comment_div.value = ''
+                self.state.loadingFb = false;
+            })
+            await this.orm.call("social.media.feed", "action_compute_fb_likes_count", [], {feed: record[0].fb_media_number})
+        }
     }
+
     async convertToLead(){
         var feed_id = this.props.action.context.active_id
         self=this
         var parentElementId=event.target.parentElement.id
-        const matchingComment = this.fb_comments.find(comment => comment.id === parentElementId);
+        const matchingComment = this.state.fb_comments.find(comment => comment.id === parentElementId);
         await this.orm.call("social.media.feed", "create_lead", [feed_id, matchingComment], {})
         .then(function(data) {
             if (data['lead']){
@@ -69,27 +113,65 @@ export class FacebookComments extends Component {
             }
         })
     }
-    // Method to handle the 'View Replies' button click for displaying replies
-    onClickViewReplies(){
-        event.target.nextElementSibling.style = 'block'
-    }
-    // Method to post a reply to a specific comment
-    async postReply(){
-        var comment_id = event.target.parentElement.id
-        var feed_id = this.props.action.context.active_id
-        var reply =event.target.parentElement.firstChild
-        await this.orm.call("social.media.feed", "post_facebook_reply", [feed_id,comment_id,reply.value], {})
-        .then(function(data) {
-            reply.value=''
-        })
-    }
+
     // Method to handle the 'Reply' button click for displaying the reply input area
-    onClickReply(){
-        event.target.nextElementSibling.style = 'block'
+    onClickReply(event) {
+        const replyDiv = event.currentTarget.closest(".cy-social_marketComment-box").querySelector(".reply_div");
+        if (replyDiv.classList.contains("d-none")){
+            replyDiv.classList.remove("d-none")
+        }
+        else{
+            replyDiv.classList.add("d-none")
+        }
+        this.nextElementSibling = replyDiv
     }
+
+    // Method to handle the 'View Replies' button click for displaying replies
+    onClickViewReplies(event) {
+        const replies = event.currentTarget.closest(".cy-social_marketComment-box").querySelector(".view_replies");
+        if (replies.classList.contains("d-none")){
+            replies.classList.remove("d-none")
+        }
+        else{
+            replies.classList.add("d-none")
+        }
+    }
+
+    // Method to post a reply to a specific comment
+    async postReply(comment){
+        if (this.state.loadingFb === true) {
+            return;
+        }
+        this.state.loadingFb = true;
+        const feedId = this.props.action.context.active_id
+        if (feedId) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "fb_media_number"]
+            );
+            const self = this
+            const comment_reply_div = document.getElementById(("comment_" + comment.id));
+            await this.orm.call("social.media.feed", "post_facebook_reply", [], {
+                feed: record[0].fb_media_number,
+                comment: comment.id,
+                reply: comment_reply_div.value,
+            }).then(async function (data) {
+                self.state.fb_comments = await self.orm.call(
+                    "social.media.feed", "get_facebook_comments",
+                    [], {feed: record[0].fb_media_number}
+                )
+                comment_reply_div.value = ''
+                self.state.loadingFb = false;
+                })
+            await this.orm.call("social.media.feed", "action_compute_fb_likes_count", [], {feed: record[0].fb_media_number})
+        }
+    }
+
     // Method to handle the deletion of comments
     onClickDelete(){
         var fb_comment_id = event.target.parentElement.id
     }
 }
+
 registry.category("actions").add("fb_comments", FacebookComments);

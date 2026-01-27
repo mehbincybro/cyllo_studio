@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 import { useService } from "@web/core/utils/hooks";
 import { Layout } from "@web/search/layout";
 import { usePager } from "@web/search/pager_hook";
@@ -8,7 +7,7 @@ import { DynamicRecordList } from "@web/model/relational_model/dynamic_record_li
 import { extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
 import { standardViewProps } from "@web/views/standard_view_props";
 import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
-import { CyCogMenu, CogMenuList } from "@cyllo_form/js/cog_menu_form"; // TODO: Might need to change the path after merging
+import { CyCogMenu, CogMenuList } from "@cyllo_base/js/cog_menu_form"; // TODO: Might need to change the path after merging
 import { TileSearchBar } from "./tile_searchbar/tile_searchbar";
 import { ImportDialog } from "@cyllo_analytics/js/import_dialog";
 import { ConfigurationDialog } from "@cyllo_analytics/js/configuration_dialog";

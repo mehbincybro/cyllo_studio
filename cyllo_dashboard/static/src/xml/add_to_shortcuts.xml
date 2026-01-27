@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_dashboard.AddToShortcuts" owl="1">
-        <li class="nav-item" t-on-click="addToShortcuts" t-if="state.isAddedToShortcut == false and this.env.config.actionId">
-             <a class="nav-link cy-navitem-list" href="#">Add to Shortcuts</a>
+        <li class="nav-item" t-on-click="addToShortcuts"
+            t-if="!state.isAddedToShortcut and this.env.config.actionId"
+            accesskey="Y">
+             <a class="nav-link cy-navitem-list"
+                href="#"><i class="ri-folder-add-line"/>Add to Shortcuts</a>
+        </li>
+        <li class="nav-item" t-on-click="removeFromShortcuts"
+            t-if="state.isAddedToShortcut and this.env.config.actionId"
+            accesskey="S">
+             <a class="nav-link cy-navitem-list"
+                href="#"><i class="ri-folder-reduce-line"/>Remove From Shortcuts</a>
         </li>
     </t>
 </templates>

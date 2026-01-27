@@ -1,6 +1,27 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import logging
 from odoo import api, fields, models
+
 
 _logger = logging.getLogger(__name__)
 
@@ -62,11 +83,13 @@ class Users(models.Model):
         :param user_id: ID of the user to perform cleanup for.
         """
         try:
-            users = self.env['res.users'].search([])
+            users = self.env['res.users'].sudo().search([])
             for user in users:
                 user.write({'first_time': True})
             app_mass_install_menu = self.env.ref("cyllo_app_mass_install.menu_action_first_time")
             if app_mass_install_menu:
-                app_mass_install_menu.active = False
+                app_mass_install_menu.sudo().write({'active': False})
+            return {'status': 'success'}
         except Exception as e:
-            _logger.info("An error occurred while cleaning up menus: %s" % str(e))
+            _logger.info("An error occurred while cleaning up menus: %s", str(e))
+            return {'status': 'error', 'message': str(e)}

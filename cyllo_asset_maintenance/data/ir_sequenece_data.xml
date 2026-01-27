@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <!--    sequence for asset maintenance-->
+    <record id="ir_sequence_asset_maintenance" model="ir.sequence">
+        <field name="name">Asset Maintenance</field>
+        <field name="code">account.asset.maintenance</field>
+        <field name="prefix">AM</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+    </record>
+</odoo>

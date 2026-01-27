@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from dateutil.relativedelta import relativedelta
 from math import ceil
 
@@ -22,7 +42,7 @@ class EmployeeSalaryAttachment(models.Model):
         child_support_id = self.env.ref('cyllo_payroll_management.employee_payslip_other_input_child_support')
         return [('id', 'in', [attached_salary_id.id, assigned_salary_id.id, child_support_id.id])]
 
-    employee_id = fields.Many2one('hr.employee', required=True, help='Enter the name of employee')
+    employee_id = fields.Many2one('hr.employee', required=True, help='Enter the name of employee or select one')
     description = fields.Char(required=True, help='Enter the comments to be added to payslip')
     employee_payslip_other_input_id = fields.Many2one('employee.payslip.other.input', string='Type',
                                                       tracking=True, domain=_get_attachment_domain,
@@ -32,7 +52,7 @@ class EmployeeSalaryAttachment(models.Model):
     currency_id = fields.Many2one(related='company_id.currency_id', help='Currency of company')
     start_date = fields.Date(help='Enter the starting date',
                              default=lambda self: start_of(fields.Date.today(), 'month'))
-    end_date = fields.Date(string='Estimated End date', help='Approximated end date', ompute='_compute_end_date')
+    end_date = fields.Date(string='Estimated End date', help='Approximated end date', compute='_compute_end_date')
     attachment = fields.Binary(string='Document', help='Please add supporting document')
     attachment_name = fields.Char(help='This name is shown as attachment name')
     month_amount = fields.Monetary(string='Monthly Amount', required=True, tracking=True,
@@ -102,17 +122,6 @@ class EmployeeSalaryAttachment(models.Model):
             raise UserError(_('You cannot delete a running salary attachment!'))
         return super(EmployeeSalaryAttachment, self).unlink()
 
-    def record_paid_amount(self, paid_amount):
-        """ This method record the payment of salary attachment """
-        if self.balance <= paid_amount:
-            remaining_amount = self.balance
-            self.paid_amount = self.paid_amount + self.balance
-            self.action_done()
-            carried_to_next = paid_amount - remaining_amount
-            return carried_to_next
-        else:
-            self.paid_amount = self.paid_amount + paid_amount
-
     def action_done(self):
         """To move the record in completed state"""
         self.write({'state': 'completed'})
@@ -124,3 +133,14 @@ class EmployeeSalaryAttachment(models.Model):
     def action_open(self):
         """To move the record in running state"""
         self.write({'state': 'running'})
+
+    def record_paid_amount(self, paid_amount):
+        """ This method record the payment of salary attachment """
+        if self.balance <= paid_amount:
+            remaining_amount = self.balance
+            self.paid_amount = self.paid_amount + self.balance
+            self.action_done()
+            carried_to_next = paid_amount - remaining_amount
+            return carried_to_next
+        else:
+            self.paid_amount = self.paid_amount + paid_amount

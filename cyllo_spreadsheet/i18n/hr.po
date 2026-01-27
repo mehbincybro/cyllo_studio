@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-01 09:13+0000\n"
-"PO-Revision-Date: 2023-12-01 09:13+0000\n"
+"POT-Creation-Date: 2025-12-24 11:01+0000\n"
+"PO-Revision-Date: 2025-12-24 11:01+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -16,547 +16,297 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: cyllo_spreadsheet
-#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet_import
-msgid "Add Item to Spreadsheet"
-msgstr "Dodajte predmet u proračunsku tablicu"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "<i class=\"ri-delete-bin-line me-1\"/>Delete"
+msgstr "<i class=\"ri-delete-bin-line me-1\"/>Izbriši"
 
 #. module: cyllo_spreadsheet
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_sheet_to_spreadsheet
-msgid "Add sheet to spreadsheet"
-msgstr "Dodajte list u proračunsku tablicu"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "<i class=\"ri-share-line me-1\"/>Share"
+msgstr "<i class=\"ri-share-line me-1\"/>Podijeli"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_to_spreadsheet
-#, python-format
-msgid "Add to spreadsheet"
-msgstr "Dodaj u proračunsku tablicu"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Action"
+msgstr "Radnja"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
-msgid "Adding access rights"
-msgstr "Dodavanje prava na pristup"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
-msgid "Adding name of spreadsheet"
-msgstr "Dodavanje imena proračunske tablice"
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_admin
+msgid "Admin"
+msgstr "Administrator"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "After next"
-msgstr "Nakon sljedećeg"
+msgid "Apply"
+msgstr "Primijeni"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__binary_content
+msgid "Binary Content"
+msgstr "Binarni sadržaj"
+
+#. module: cyllo_spreadsheet
+#: model:ir.module.category,description:cyllo_spreadsheet.ir_module_category_cyllo_spreadsheet_access
+msgid "Category for Cyllo Spreadsheet module"
+msgstr "Kategorija za modul Cyllo Spreadsheet"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Before Previous"
-msgstr "Prije prethodnog"
+msgid "Close"
+msgstr "Zatvori"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
-#, python-format
-msgid "Cancel"
-msgstr "Otkazati"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__company_id
+msgid "Company"
+msgstr "Tvrtka"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Change name"
-msgstr "Promijenite ime"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__converted_binary_content
+msgid "Converted Binary Content"
+msgstr "Pretvoreni binarni sadržaj"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
-msgid "Client id"
-msgstr "ID klijenta"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Created By"
+msgstr "Kreirao"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
-msgid "Code"
-msgstr "Kodirati"
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Created Date"
+msgstr "Datum kreiranja"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
-msgid "Commands"
-msgstr "Naredbe"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Confirm"
-msgstr "Potvrditi"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
-msgid "Contains the spreadsheet information"
-msgstr "Sadrži podatke o proračunskoj tablici"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
-msgid "Contributors"
-msgstr "Suradnici"
-
-#. module: cyllo_spreadsheet
-#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_create_spreadsheet
-msgid "Create spreadsheet"
-msgstr "Stvorite proračunsku tablicu"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__create_uid
 msgid "Created by"
-msgstr "Napravio"
+msgstr "Kreirao"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__create_date
 msgid "Created on"
-msgstr "Stvoren na"
+msgstr "Kreirano"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
-msgid "Current id"
-msgstr "Trenutni ID"
+#: model:ir.module.category,name:cyllo_spreadsheet.ir_module_category_cyllo_spreadsheet_access
+msgid "Cyllo Spreadsheet Access"
+msgstr "Pristup Cyllo Spreadsheetu"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
-msgid "Current model name"
-msgstr "Naziv trenutnog modela"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
-msgid "Data"
-msgstr "Podaci"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__display_name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__display_name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__display_name
 msgid "Display Name"
-msgstr "Zaslon"
+msgstr "Prikazano ime"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_download_menus.js:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
 #, python-format
 msgid "Download"
-msgstr "preuzimanje datoteka"
-
-#. module: cyllo_spreadsheet
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_tree
-msgid "Edit"
-msgstr "Uredi"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
-msgid "Excel file name"
-msgstr "Naziv datoteke Excel"
+msgstr "Preuzmi"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "File"
-msgstr "Datoteka"
+msgid "Editor"
+msgstr "Urednik"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
-msgid "File Name"
-msgstr "Naziv datoteke"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Filters"
-msgstr "Filtri"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
-msgid "For adding spreadsheet data as a data file "
-msgstr "Za dodavanje podataka o proračunskom tablicu kao datoteku podataka"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
-msgid "For getting file name"
-msgstr "Za dobivanje imena datoteke"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
-msgid "For getting import mode code"
-msgstr "Za dobivanje koda načina uvoza"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__name
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
-msgid "For getting the name"
-msgstr "Za dobivanje imena"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
-msgid "For identifying the import mode"
-msgstr "Za identificiranje načina uvoza"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
-msgid "For uploading your excel file and edit it inside spreadsheet "
-msgstr "Za prijenos excel datoteke i uredite je unutar proračunske tablice"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
-msgid "Getting spreadsheet"
-msgstr "Dobivanje proračunske tablice"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
-msgid "Groups"
-msgstr "Grupa"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__id
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__id
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__id
 msgid "ID"
-msgstr "iskaznica"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
-msgid "Import Data"
-msgstr "Uvoz podataka"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import_mode
-msgid "Import Mode"
-msgstr "Način uvoza"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import
-msgid "Import data to spreadsheet"
-msgstr "Uvoz podataka u proračunsku tablicu"
+msgstr "ID"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/list/listRenderer.xml:0
 #, python-format
-msgid ""
-"Insert list in\n"
-"            spreadsheet"
-msgstr ""
-"Umetni popis u\n"
-"            proračunska tablica"
+msgid "Image Description"
+msgstr "Opis slike"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_uid
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_uid
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Last Updated By"
+msgstr "Zadnji ažurirao"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_tree
+msgid "Last Updated Date"
+msgstr "Datum zadnjeg ažuriranja"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__write_uid
 msgid "Last Updated by"
-msgstr "Zadnji put ažurirao"
+msgstr "Zadnji ažurirao"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_date
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__write_date
 msgid "Last Updated on"
-msgstr "Zadnji put ažurirano na"
+msgstr "Ažurirano"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/NameComponent/NameComponent.xml:0
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__name
 #, python-format
-msgid "Link menu in spreadsheet"
-msgstr "Izbornik veze u proračunskoj tablici"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
-#, python-format
-msgid "Link to Odoo menu"
-msgstr "Link do izbornika Odoo"
-
-#. module: cyllo_spreadsheet
-#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_manager
-msgid "Manager"
-msgstr "Menadžer"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
-msgid "Mode"
-msgstr "Način"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
-msgid "Mode of import"
-msgstr "Način uvoza"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
-msgid "Model"
-msgstr "Model"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Month"
-msgstr "Mjesec"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
 msgid "Name"
 msgstr "Ime"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
-msgid "Name of the import mode"
-msgstr "Ime načina uvoza"
-
-#. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/hooks/control_panel_upload.xml:0
 #, python-format
-msgid "Next"
-msgstr "Sljedeći"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
-msgid "Next revision id"
-msgstr "Sljedeći ID revizije"
-
-#. module: cyllo_spreadsheet
-#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
-msgid "OK"
-msgstr "u redu"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
-msgid "Owner"
-msgstr "Vlasnik"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
-msgid "Owner who created the spreadsheet"
-msgstr "Vlasnik koji je stvorio proračunsku tablicu"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
-msgid "Person who can edit the spreadsheet"
-msgstr "Osoba koja može urediti proračunsku tablicu"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
-msgid "Person who can only read the spreadsheet"
-msgstr "Osoba koja može pročitati samo proračunsku tablicu"
+msgid "New"
+msgstr "Novo"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Previous"
-msgstr "Prethodni"
+msgid "Read Access"
+msgstr "Pristup za čitanje"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__user_read_ids
+msgid "Record Read access for users"
+msgstr "Pristup čitanju zapisa za korisnike"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__user_write_ids
+msgid "Record Write access for users"
+msgstr "Pristup pisanju zapisa za korisnike"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Quarter"
-msgstr "Četvrtina"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
-msgid "Readers"
-msgstr "Čitatelji"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Relative Period"
-msgstr "Relativno razdoblje"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
-msgid "Res Id"
-msgstr "RES ID"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
-msgid "Revision id"
-msgstr "ID revizije"
-
-#. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
 #, python-format
 msgid "Save"
-msgstr "Uštedjeti"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
-msgid "Saving spreadsheet informationfrom the js file"
-msgstr "Spremanje podataka o proračunskoj tablici iz JS datoteke"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__sequence
-msgid "Sequence"
-msgstr "Slijed"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
-msgid "Server revision id"
-msgstr "ID revizije poslužitelja"
+msgstr "Spremi"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
-#: model:ir.module.category,name:cyllo_spreadsheet.ir_module_category_spreadsheet
+#: code:addons/cyllo_spreadsheet/static/src/topMenuRegistry/topMenuRegistry.js:0
+#: code:addons/cyllo_spreadsheet/static/src/views/list/listController.js:0
+#, python-format
+msgid "Share"
+msgstr "Dijeli"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__sheet_json
+msgid "Sheet Json"
+msgstr "Sheet Json"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_sheet
 #: model:ir.ui.menu,name:cyllo_spreadsheet.menu_spreadsheet
-#, python-format
+#: model:ir.ui.menu,name:cyllo_spreadsheet.menu_spreadsheet_root
 msgid "Spreadsheet"
-msgstr "Proračunska tablica"
+msgstr "Tablica"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_cy_revision
-msgid "Spreadsheet Cyllo Revision"
-msgstr "Proračunska tablica Cyllo Revision"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__image_1920
+msgid "Spreadsheet Thumbnail"
+msgstr "Sličica tablice"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_data
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
-msgid "Spreadsheet Data"
-msgstr "Podaci o proračunskim tablicama"
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_write_user
+msgid "Spreadsheet Write/Read User"
+msgstr "Korisnik za pisanje/čitanje tablice"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
-msgid "Spreadsheet Raw"
-msgstr "Proračunska tablica sirova"
+#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid "Spreadsheet sheet"
+msgstr "Tablica"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
-msgid "Spreadsheet Revision"
-msgstr "Revizija proračunske tablice"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_abstract
-msgid "Spreadsheet abstract for inheritance"
-msgstr "Sažetak proračunske tablice za nasljedstvo"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
-msgid "Spreadsheet data"
-msgstr "Podaci o proračunskim tablicama"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_binary_data
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_binary_data
-msgid "Spreadsheet file"
-msgstr "Datoteka proračunske tablice"
-
-#. module: cyllo_spreadsheet
-#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet
-msgid "Spreadsheets"
-msgstr "Proračunske tablice"
+#: model_terms:ir.actions.act_window,help:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid ""
+"To get started, either upload an existing spreadsheet or create\n"
+"                a new one using the tools provided\n"
+"                above. You can format the data, add new sheets, and easily\n"
+"                manipulate the content in your spreadsheet\n"
+"                for efficient processing."
+msgstr "Za početak, prenesite postojeću tablicu ili kreirajte\n"
+"                novu koristeći dostupne alate\n"
+"                iznad. Možete formatirati podatke, dodavati nove listove i lako\n"
+"                upravljati sadržajem u svojoj tablici\n"
+"                za učinkovitije procesiranje."
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/hooks/control_panel_upload.xml:0
 #, python-format
-msgid "Stacked"
-msgstr "Složen"
+msgid "Upload"
+msgstr "Prenesi"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
-msgid "Storing id of parent model"
-msgstr "Spremanje ID -a matičnog modela"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
-msgid "Storing spreadsheet data and row details"
-msgstr "Spremanje podataka o proračunskoj tablici i detalji retka"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
-msgid "Storing uploaded file name"
-msgstr "Pohranjivanje prenesenog naziva datoteke"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__thumbnail
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__thumbnail
-msgid "Thumbnail"
-msgstr "Minijatura"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
-msgid "Type"
-msgstr "Tip"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
-msgid "Type of revision for each record"
-msgstr "Vrsta revizije za svaki zapis"
+#: model_terms:ir.actions.act_window,help:cyllo_spreadsheet.action_view_spreadsheet_sheet
+msgid "Upload or Create new spreadsheet"
+msgstr "Prenesite ili kreirajte novu tablicu"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#. odoo-python
-#: code:addons/cyllo_spreadsheet/models/spreadsheet_spreadsheet.py:0
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "Unnamed"
-msgstr "Neimenovan"
-
-#. module: cyllo_spreadsheet
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
-#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
-msgid "Used to store the changes on the spreadsheet"
-msgstr "Koristi se za pohranu promjena na proračunskoj tablici"
-
-#. module: cyllo_spreadsheet
-#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_user
 msgid "User"
 msgstr "Korisnik"
 
 #. module: cyllo_spreadsheet
-#. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
-#, python-format
-msgid "Year"
-msgstr "Godina"
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__user_read_ids
+msgid "Users Read"
+msgstr "Korisnici za čitanje"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_sheet__user_write_ids
+msgid "Users Write"
+msgstr "Korisnici za pisanje"
 
 #. module: cyllo_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
 #, python-format
-msgid "name is required"
-msgstr "Ime je potrebno"
+msgid "Users:"
+msgstr "Korisnici:"
 
 #. module: cyllo_spreadsheet
-#: model:ir.model,name:cyllo_spreadsheet.model_ir_websocket
-msgid "websocket message handling"
-msgstr "upravljanje porukama websocketa"
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#, python-format
+msgid "Viewer"
+msgstr "Pregledatelj"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.js:0
+#, python-format
+msgid "Warning"
+msgstr "Upozorenje"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/views/userShare/userShare.xml:0
+#, python-format
+msgid "Write Access"
+msgstr "Pristup pisanju"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__binary_content
+msgid "stores the original Binary files"
+msgstr "pohranjuje izvorne binarne datoteke"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_sheet__converted_binary_content
+msgid "stores the updated Binary files"
+msgstr "pohranjuje ažurirane binarne datoteke"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_sheet_kanban
+msgid "xlsx"
+msgstr "xlsx"

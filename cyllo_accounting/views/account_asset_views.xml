@@ -116,7 +116,8 @@
             <tree string="Deferred Revenues">
                 <field name="name" string="Deferred revenue"/>
                 <field name="date"/>
-                <field name="residual_value" invisible="1"/>
+                <field name="company_id"/>
+                <field name="residual_value" column_invisible="1"/>
                 <field name="book_value"/>
             </tree>
         </field>
@@ -270,7 +271,8 @@
             <tree string="Deferred Expenses">
                 <field name="name" string="Deferred expense"/>
                 <field name="date"/>
-                <field name="residual_value" invisible="1"/>
+                <field name="company_id"/>
+                <field name="residual_value" column_invisible="1"/>
                 <field name="book_value"/>
             </tree>
         </field>

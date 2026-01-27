@@ -23,6 +23,7 @@ class ConsolidatedBalance extends owl.Component {
             comparison: [],
             selected_group_name: [],
             filter: null,
+            hideZero: true
         });
         this.filter = useState({
             selected_journal: [],
@@ -97,12 +98,12 @@ class ConsolidatedBalance extends owl.Component {
          * @param {Event} ev - The event object triggered by the action.
          */
         if (!ev.target.classList.contains("selected-filter")) {
-            for (var length = 0; length < this.tbody.el.children.length; length++) {
+            for (var length = 0; length < this.tbody.el?.children.length; length++) {
                 $(this.tbody.el.children[length])[0].classList.add('show')
             }
             ev.target.classList.add("selected-filter");
         } else {
-            for (var length = 0; length < this.tbody.el.children.length; length++) {
+            for (var length = 0; length < this.tbody.el?.children.length; length++) {
                 $(this.tbody.el.children[length])[0].classList.remove('show')
             }
             ev.target.classList.remove("selected-filter");
@@ -114,12 +115,9 @@ class ConsolidatedBalance extends owl.Component {
      * Elements with the 'hide-at-zero' class will have the 'd-none' class toggled.
      * @returns {Promise<void>} A Promise that resolves when the operation is complete.
      */
-    ev.target.classList.toggle("selected-filter");
-    var hideAtZeroElements = this.tbody.el.querySelectorAll('.border-gainsboro')
-        hideAtZeroElements.forEach(function (element) {
-            var length = element.children.length - 1
-            element.classList.toggle('d-none');
-        });
+     this.state.hideZero = !this.state.hideZero
+     ev.target.classList.toggle("selected-filter");
+
     }
     async print_pdf(ev) {
         /**

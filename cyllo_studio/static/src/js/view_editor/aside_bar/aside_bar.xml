@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.AsideBar">
+        <div class="rounded cy-side-menu col-2 view_overall_light shadow"
+             t-att-class="props?.isAnimatingSidebar ? 'animate-out' : ''">
+            <div class="d-flex" style="border-bottom:1px solid #8b8989 !important;">
+                <div class="rounded cy-window-view w-100 d-flex justify-content-center align-items-center"
+                     t-on-click="(ev)=> this.props.handleView(ev)">
+                    <button class="w-100 cy-nav__link" t-att-class="state.type === 'View' ? 'active' : ''">View</button>
+                </div>
+                <div t-if="propsType" class=" w-100 d-flex justify-content-center align-items-center">
+                    <button class="w-100 cy-nav__link" t-att-class="propsType ? 'active' : ''">Properties</button>
+                </div>
+                <button class="cy-close-arrow" t-on-click="() => this.closeSidebar()">
+                    <i class="ri-arrow-left-fill"/>
+                </button>
+            </div>
+            <div t-if="propsType and showTypeDropdown" class="dropdown-checkbox-container mb-2"
+                 style="margin: 9px 12px 0px 17px;">
+                <label class="cy-navbar_label customCheckbox-label"
+                       for="onStyle">Type
+                </label>
+                <div class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                            onChange="(value) => this.FieldTypeChange(value)"
+                            options="fieldType"
+                            defaultValue="defaultFieldType"
+                    />
+                </div>
+            </div>
+            <t t-if="state.type === 'Properties'">
+                <FieldProperties t-props="fieldPropertiesProps"/>
+            </t>
+            <t t-if="state.type === 'View'">
+                <OverallView t-props="OverallProps"/>
+            </t>
+            <t t-if="state.type === 'ButtonProperties'">
+                <ButtonProperties t-props="ButtonPropertiesProps"/>
+            </t>
+            <t t-if="state.type === 'KanbanFieldProperties'">
+                <KanbanFieldProperties t-props="KanbanFieldPropertiesProps"/>
+            </t>
+            <t t-if="state.type === 'ribbon'">
+                <RibbonProperties t-props="KanbanComponentProps"/>
+            </t>
+            <t t-if="state.type === 'button'">
+                <ButtonProperties t-props="KanbanComponentProps"/>
+            </t>
+            <t t-if="state.type === 'text' and props.viewDetails.viewType === 'form'">
+                <TextProperties t-props="SiblingTextProps"/>
+            </t>
+            <t t-elif="state.type === 'text'">
+                <TextProperties t-props="KanbanSpanProps"/>
+            </t>
+            <t t-if="state.type === 'notebook_details'">
+                <PageProperties t-props="noteBookPropertiesProps"/>
+            </t>
+            <t t-if="state.type === 'SmartButtonProperties'">
+                <SmartButtonProperties t-props="SmartButtonPropertiesProps"/>
+            </t>
+            <t t-if="props.type === 'ExistingFieldProperties'">
+                <ExistingFieldProperties t-props="ExistingFieldPropertiesProps"/>
+            </t>
+            <t t-if="props.type === 'KanbanDivProperties'">
+                <DivProperties t-props="KanbanDivPropertiesProps"/>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -20,6 +20,7 @@ else:
     <record id="employee_salary_rule_gross" model="employee.salary.rule">
         <field name="name">Gross</field>
         <field name="code">GROSS</field>
+        <field name="sequence">100</field>
         <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_gross"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
@@ -33,7 +34,7 @@ else:
         <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_net"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.GRA</field>
     </record>
     <!-- House Rent Allowance salary rule -->
     <record id="employee_salary_rule_house_rent_allowance" model="employee.salary.rule">
@@ -118,5 +119,15 @@ else:
         <field name="condition_python">result = inputs.ASSIG_SALARY</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = -inputs.ASSIG_SALARY</field>
+    </record>
+    <record id="employee_salary_rule_gratuity_settlement" model="employee.salary.rule">
+        <field name="name">Gratuity Settlement</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">GRATUITY</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_gratuity_config"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = payslip.gratuity_settlement_id</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = payslip.gratuity_settlement_id.gratuity_amount</field>
     </record>
 </odoo>

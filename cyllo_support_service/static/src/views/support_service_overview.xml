@@ -18,20 +18,28 @@
                                             <tr>
                                                 <td>Open Tickets</td>
                                                 <td t-on-click="() => this.getTicketDetails()">
-                                                    <div class="cy-support_service_btn" style="cursor:pointer">
-                                                        <p><t t-out="ticketData['all_tickets']"/></p>
+                                                    <div class="cy-support_service_btn cursor-pointer">
+                                                        <p>
+                                                            <t t-out="ticketData['all_tickets']"/>
+                                                        </p>
                                                         Ticket
                                                     </div>
                                                 </td>
                                                 <td t-on-click="() => this.getTicketDetails('high_priority')">
-                                                    <div class="cy-support_service_btn cy-support_service_high_priority" style="cursor:pointer">
-                                                        <p><t t-out="ticketData['high_priority']"/></p>
+                                                    <div class="cy-support_service_btn cy-support_service_high_priority"
+                                                         style="cursor:pointer">
+                                                        <p>
+                                                            <t t-out="ticketData['high_priority']"/>
+                                                        </p>
                                                         High Priority
                                                     </div>
                                                 </td>
                                                 <td t-on-click="() => this.getTicketDetails('urgent_tickets')">
-                                                    <div class="cy-support_service_btn cy-support_service_urgent" style="cursor:pointer">
-                                                        <p><t t-out="ticketData['urgent']"/></p>
+                                                    <div class="cy-support_service_btn cy-support_service_urgent"
+                                                         style="cursor:pointer">
+                                                        <p>
+                                                            <t t-out="ticketData['urgent']"/>
+                                                        </p>
                                                         Urgent
                                                     </div>
                                                 </td>
@@ -39,9 +47,18 @@
                                             <!-- Table row to show the failed ticket details -->
                                             <tr>
                                                 <td>Failed Tickets</td>
-                                                <td t-on-click="() => this.getTicketDetails('',true)" style="cursor:pointer"><t t-out="ticketData['failed_ticket_count']"/></td>
-                                                <td t-on-click="() => this.getTicketDetails('high_priority',true)" style="cursor:pointer"><t t-out="ticketData['failed_high_priority_ticket_count']"/></td>
-                                                <td t-on-click="() => this.getTicketDetails('urgent_tickets',true)" style="cursor:pointer"><t t-out="ticketData['failed_urgent_ticket_count']"/></td>
+                                                <td t-on-click="() => this.getTicketDetails('',true)"
+                                                    style="cursor:pointer">
+                                                    <t t-out="ticketData['failed_ticket_count']"/>
+                                                </td>
+                                                <td t-on-click="() => this.getTicketDetails('high_priority',true)"
+                                                    style="cursor:pointer">
+                                                    <t t-out="ticketData['failed_high_priority_ticket_count']"/>
+                                                </td>
+                                                <td t-on-click="() => this.getTicketDetails('urgent_tickets',true)"
+                                                    style="cursor:pointer">
+                                                    <t t-out="ticketData['failed_urgent_ticket_count']"/>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
@@ -57,22 +74,34 @@
                                             <tr>
                                                 <td>Closed Tickets</td>
                                                 <td t-on-click="() => this.getTodayClosedTicket()">
-                                                    <div class="cy-support_service_btn" style="cursor:pointer">
-                                                        <p><t t-out="ticketData['my_today_closed_ticket_count']"/></p>
+                                                    <div class="cy-support_service_btn"
+                                                         style="cursor:pointer">
+                                                        <p>
+                                                            <t t-out="ticketData['my_today_closed_ticket_count']"/>
+                                                        </p>
                                                         Today
                                                     </div>
                                                 </td>
                                                 <td t-on-click="() => this.getLastWeekClosedTicket()">
-                                                    <div class="cy-support_service_btn" style="cursor:pointer">
-                                                        <p><t t-out="ticketData['my_last_seven_days_closed_ticket_count']"/></p>
+                                                    <div class="cy-support_service_btn"
+                                                         style="cursor:pointer">
+                                                        <p>
+                                                            <t t-out="ticketData['my_last_seven_days_closed_ticket_count']"/>
+                                                        </p>
                                                         Last Week
                                                     </div>
                                                 </td>
                                             </tr>
                                             <tr>
                                                 <td>Success Rate</td>
-                                                <td t-on-click="() => this.getTodaySuccessRate()" style="cursor:pointer"><t t-out="ticketData['my_today_success_rate']"/></td>
-                                                <td t-on-click="() => this.getLastWeekSuccessRate()" style="cursor:pointer"><t t-out="ticketData['my_last_seven_days_success_rate']"/></td>
+                                                <td t-on-click="() => this.getTodaySuccessRate()"
+                                                    style="cursor:pointer">
+                                                    <t t-out="ticketData['my_today_success_rate']"/>
+                                                </td>
+                                                <td t-on-click="() => this.getLastWeekSuccessRate()"
+                                                    style="cursor:pointer">
+                                                    <t t-out="ticketData['my_last_seven_days_success_rate']"/>
+                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>

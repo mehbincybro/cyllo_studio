@@ -3,9 +3,7 @@
 }
 
 .cy_product_kanban{
-    justify-content: center;
     align-items: center;
-    height:90% !important;
 }
 
 .cy_product_kanban .o_kanban_record_top{
@@ -31,10 +29,12 @@
     height:unset !important;
 }
 
-.cy_o_kanban_record{
-    width:15% !important;
+
+.cy_product_kanban .oe_kanban_details {
+    margin-bottom: unset;
+    min-height: 30%;
 }
 
-.cy_o_kanban_record .oe_kanban_details {
-    margin-bottom: unset;
+.o_kanban_renderer.o_kanban_ungrouped:has(.cy_o_kanban_record) .o_kanban_record.o_kanban_ghost {
+    width: 15% !important;
 }

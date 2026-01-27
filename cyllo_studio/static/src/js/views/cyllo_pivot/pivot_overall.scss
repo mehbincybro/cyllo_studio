@@ -1,0 +1,229 @@
+.dropdown-item{
+    color: #ccc;
+}
+.cy-studio-dropdown{
+     color: #ccc;
+}
+.ri-delete-bin-2-fill:before{
+    color: #ff5c5c;
+}
+#rowGrouping .cy-studio-dropdown{
+    padding:unset;
+}
+
+
+.pivot_properties {
+  padding: 10px;
+  border-radius: 4px;
+  overflow: unset;
+  margin-left: 2% !important;
+  .cy-input{
+    width: 104% !important;
+
+    .dropdown .d-block{
+        border: 1px solid #2e2e2e;
+        background-color: #2e2e2e !important;
+//         color:#BCBBA7 !important;
+         span{
+             color:#BCBBA7;
+        }
+  }
+  }
+  .plus_input{
+    position: relative !important;
+    left:106.5%;
+  }
+  .list-checkbox-group {
+    margin-bottom: 6px;
+  }
+  .dropdown-item:hover, .dropdown-item:focus{
+    background-color:#00000038 !important;
+  }
+  .o-dropdown button.dropdown-toggle:hover{
+    color:#c8c8c8 !important;
+  }
+  .o-dropdown.dropdown > .o-dropdown--menu{
+    left: auto;
+    right: auto;
+    margin-left: -1.5%;
+    margin-right: 0;
+    width: 80%;
+    margin-top: 3%;
+  }
+  #columnGrouping .o-dropdown--menu{
+    background-color: #2e2e2e !important;
+    color: #d6d6d6 !important;
+    width: 81.5%;
+//     left: 8.2% !important;
+    height: fit-content;
+//     top: 37.5% !important;
+    max-height: 400px;
+.dropdown-item{
+    width: 100% !important;
+    &:focus{
+        background-color:#00000038 !important;
+    }
+   &:hover{
+        background-color:#00000038 !important;
+    }
+  }
+  }
+
+  #rowGrouping .o-dropdown--menu{
+    background-color: #2e2e2e !important;
+    color: #d6d6d6 !important;
+    width: 81%;
+//     left: 8.2% !important;
+    height: fit-content;
+//     top: 46.5% !important;
+    max-height: 400px;
+  }
+
+  .checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      color: #ccc;
+
+      .checkbox-indicator {
+        margin-right: 8px;
+        svg {
+          fill: none;
+          stroke: #fff;
+          stroke-width: 2;
+        }
+      }
+
+      .label-text {
+        font-size: 14px;
+      }
+    }
+  }
+
+  .d-flex {
+    display: flex;
+    align-items: center;
+    margin-left: -2px;
+  }
+
+  .select-option-drop {
+    margin: 10px 0;
+    .dropdown_pivot_overall {
+      background:#transparent;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 4px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      color: #ccc;
+
+      .cy-studio-dropdown {
+        background: transparent;
+        border: none;
+        color: #ccc;
+        padding:unset;
+      }
+
+      .ri-delete-bin-2-fill {
+        color: #ff5c5c;
+        cursor: pointer;
+      }
+    }
+  }
+  @media(max-height: 880px){
+        #columnGrouping .o-dropdown--menu, #rowGrouping .o-dropdown--menu{
+            border: 1px solid #2e2e2e!important;
+            height: 40% !important;
+          }
+      }
+  @media (max-width: 768px) {
+    padding: 8px;
+
+    .checkbox-item {
+      flex-direction: column;
+      align-items: flex-start;
+
+      .checkbox-label {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+    }
+
+    .select-option-drop {
+      flex-direction: column;
+
+      .dropdown_pivot_overall {
+        width: 100%;
+        margin-bottom: 6px;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 12px;
+
+    .checkbox-indicator {
+      width: 16px;
+      height: 16px;
+    }
+
+    .label-text {
+      font-size: 12px;
+    }
+  }
+}
+
+.cy-studio-container {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px;
+  gap: 10px;
+  height: 100vh;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 200px 1fr 250px;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 60px 1fr 250px;
+
+    .sidebar {
+      position: fixed;
+      left: -200px;
+      transition: left 0.3s ease;
+
+      &.open {
+        left: 0;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+
+    .sidebar, .pivot_properties {
+      display: none;
+    }
+
+    &.show-sidebar .sidebar,
+    &.show-properties .pivot_properties {
+      display: block;
+      position: fixed;
+      width: 250px;
+      height: 100%;
+      z-index: 1000;
+    }
+  }
+}
+
+@media (max-width: 1470px) {
+    .pivot_properties .plus_input {
+        left: 109.5% !important;
+    }
+}
+

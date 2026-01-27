@@ -8,7 +8,8 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='sales_purchases']" position="after">
                 <page string="Office 365" name="office_365">
-                    <field name="office_connectors_ids" nolabel="1" readonly="1">
+                    <field name="office_connectors_ids" nolabel="1"
+                           readonly="1">
                         <tree>
                             <field name="partner_id"/>
                             <field name="connector_id"/>

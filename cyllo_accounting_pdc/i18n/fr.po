@@ -977,7 +977,7 @@ msgstr "PDC Bounce Raison"
 
 #. module: cyllo_accounting_pdc
 #: model:ir.model.fields,field_description:cyllo_accounting_pdc.field_account_pdc_bounce_reason__pdc_payment_id
-#: model_terms:ir.ui.view,arch_db:cyllo_accounting_pdc.view_account_move_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_pdc.view_account_move_form_inherit_pdc
 msgid "PDC Payment"
 msgstr "Paiement PDC"
 

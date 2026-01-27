@@ -3,11 +3,32 @@
     <t t-name="GraphTile">
         <div t-attf-id="elem_{{ state.rec_id }}"
              t-att-class="props.toggleClass"
-             class="card cp mr-1 mt-1 align-items-stretch cy_tile"
-             t-on-click.prevent.stop="onClickChart" t-att-style="state.cardStyle">
-            <t t-if="props.footer" t-slot="footer"/>
+             class="card cp mr-1 mt-1 align-items-stretch cy_tile cy_dashboard_chart"
+             t-att-style="props.width.length ? 'width: ' + props.width : '' + (state.cardStyle ? ' ' + state.cardStyle : '')"
+             t-on-click.prevent.stop="onClickChart">
+            <div class="position-relative">
+                <t t-if="props.footer" t-slot="footer"/>
+            </div>
             <div t-ref="root" t-att-style="state.style"/>
             <t t-if="state.hasData" t-slot="ai-footer"/>
+            <t t-if="state.hasData and showZoom" t-slot="zoom-footer">
+                <div class="position-absolute zoom-btn-container-graph-tile"
+                     t-att-class="{ 'dark' : props.isDarkMode}">
+                    <div t-if="state.showZoom" class="d-flex mb-4 me-2">
+                        <div t-out="state.zoom"/>
+                        %
+                    </div>
+                    <svg class="zoom-container" viewBox="0 0 8 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path t-on-click.stop="() => this.zoom('in')"
+                              class="zoom-btn-chart"
+                              d="M7.02,3.58c0-1.92-1.56-3.48-3.48-3.48c-1.92,0-3.48,1.56-3.48,3.48c0,0.03,0,0.06,0,0.09h0v5.56h6.96V3.67h0  C7.01,3.64,7.02,3.61,7.02,3.58z M5.84,5.54H3.88v1.95H3.19V5.54H1.24V4.85h1.95V2.9h0.69v1.95h1.95V5.54z"/>
+                        <path t-on-click.stop="() => this.zoom('out')"
+                              class="zoom-btn-chart"
+                              d="M7.01,15.31L7.01,15.31l0-5.56H0.06v5.56h0c0,0.03,0,0.06,0,0.09c0,1.92,1.56,3.48,3.48,3.48  c1.92,0,3.48-1.56,3.48-3.48C7.02,15.37,7.01,15.34,7.01,15.31z M5.57,14.13H1.5v-0.69h4.07V14.13z"/>
+                    </svg>
+                </div>
+            </t>
         </div>
     </t>
 </templates>

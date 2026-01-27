@@ -67,5 +67,3 @@ export class ImportDialog extends Component {
 
 ImportDialog.template = "cyllo_analytics.ImportDialog"
 ImportDialog.components = { Dialog }
-
-

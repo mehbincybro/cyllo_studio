@@ -6,13 +6,16 @@
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position="after">
-                <page name="Whatsapp Number">
-                    <group style="display: inline-block;">
-                        <label for="phone_number"/>
-                        <div style="display: inline-flex;">
-                            <field name="phone_country_code_id" class="o_address_zip" style="min-width: 200px;" placeholder="Country code"/>
-                            <field name="phone_number" placeholder="Phone Number"/>
-                        </div>
+                <page name="WhatsApp">
+                    <group class="container_row_2">
+                        <group string="WhatsApp Number">
+                            <field name="whatsapp_number" placeholder="(555) 111-2222"/>
+                            <label for="phone_number"/>
+                            <div style="display: inline-flex;">
+                                <field name="phone_country_code_id" style="width: 150px;" placeholder="+1" options="{'no_quick_create': True}"/>
+                                <field name="phone_number" style="width: 200px;" placeholder="(555) 111-2222"/>
+                            </div>
+                        </group>
                     </group>
                 </page>
             </xpath>

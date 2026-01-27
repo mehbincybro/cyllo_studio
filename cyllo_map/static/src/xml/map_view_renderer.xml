@@ -117,11 +117,11 @@
 													<span class="cy-directing-icon">
 														<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+														<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">At the end of the road turn <t t-esc="step.maneuver.modifier"/>
 														<span> to </span><t t-esc="step.name"/>
@@ -146,10 +146,10 @@
 														<span class="cy-directing-icon">
 															<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
 															<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
-															<img src="/cyllo_map/static/src/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
-															<img src="/cyllo_map/static/src/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
-															<img src="/cyllo_map/static/src/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
-															<img src="/cyllo_map/static/src/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+															<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+															<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+															<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+															<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
 														</span>
 														<span class="cy-direction__path">
 															<t t-esc="step.maneuver.modifier"/>
@@ -174,10 +174,10 @@
 														<i class="ri-arrow-up-line" t-if="step.maneuver.modifier === 'straight'"/>
 														<i class="ri-corner-up-right-line" t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line" t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
+														<img src="/cyllo_map/static/img/right.png" t-if="step.maneuver.modifier === 'slight right'"/>
+														<img src="/cyllo_map/static/img/left.png" t-if="step.maneuver.modifier === 'slight left'"/>
+														<img src="/cyllo_map/static/img/sharp_right.png" t-if="step.maneuver.modifier === 'sharp right'"/>
+														<img src="/cyllo_map/static/img/sharp_left.png" t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">
 														At the fork turn <t t-esc="step.maneuver.modifier"/>
@@ -204,13 +204,13 @@
 														   t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line"
 														   t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png"
+														<img src="/cyllo_map/static/img/right.png"
 															 t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png"
+														<img src="/cyllo_map/static/img/left.png"
 															 t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png"
+														<img src="/cyllo_map/static/img/sharp_right.png"
 															 t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png"
+														<img src="/cyllo_map/static/img/sharp_left.png"
 															 t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">
@@ -239,13 +239,13 @@
 														   t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line"
 														   t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png"
+														<img src="/cyllo_map/static/img/right.png"
 															 t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png"
+														<img src="/cyllo_map/static/img/left.png"
 															 t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png"
+														<img src="/cyllo_map/static/img/sharp_right.png"
 															 t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png"
+														<img src="/cyllo_map/static/img/sharp_left.png"
 															 t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">
@@ -274,13 +274,13 @@
 														   t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line"
 														   t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png"
+														<img src="/cyllo_map/static/img/right.png"
 															 t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png"
+														<img src="/cyllo_map/static/img/left.png"
 															 t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png"
+														<img src="/cyllo_map/static/img/sharp_right.png"
 															 t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png"
+														<img src="/cyllo_map/static/img/sharp_left.png"
 															 t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">
@@ -323,13 +323,13 @@
 														   t-if="step.maneuver.modifier === 'right'"/>
 														<i class="ri-corner-up-left-line"
 														   t-if="step.maneuver.modifier === 'left'"/>
-														<img src="/cyllo_map/static/src/img/right.png"
+														<img src="/cyllo_map/static/img/right.png"
 															 t-if="step.maneuver.modifier === 'slight right'"/>
-														<img src="/cyllo_map/static/src/img/left.png"
+														<img src="/cyllo_map/static/img/left.png"
 															 t-if="step.maneuver.modifier === 'slight left'"/>
-														<img src="/cyllo_map/static/src/img/sharp_right.png"
+														<img src="/cyllo_map/static/img/sharp_right.png"
 															 t-if="step.maneuver.modifier === 'sharp right'"/>
-														<img src="/cyllo_map/static/src/img/sharp_left.png"
+														<img src="/cyllo_map/static/img/sharp_left.png"
 															 t-if="step.maneuver.modifier === 'sharp left'"/>
 													</span>
 													<span class="cy-direction__path">

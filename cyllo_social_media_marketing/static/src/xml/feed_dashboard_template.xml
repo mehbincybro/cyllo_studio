@@ -3,7 +3,7 @@
     <t t-name="cyllo_social_media_marketing.SocialMediaFeed">
         <div class="cyllo_container_social">
             <div class="row">
-                <div class="col-12 cy-breadcrumbs-titlebar cyllo_title_social">
+                <div class="col-12 cy-breadcrumbs-titlebar cyllo_title_social border-bottom">
                     <div class="row d-flex align-items-center py-2">
                         <div class="col cy-main-section-head d-flex align-items-center">
                             <ul class="navbar-nav flex-row flex-wrap gap-4 left_align">
@@ -31,16 +31,16 @@
                 <main class="cy-main">
                     <div class="cy-dashboard-container mb-2">
                         <div class="d-flex cy-soical-marketing_dashboard">
-                            <div class="col-md-2  cy-border-right social_glance">
+                            <div class="col-lg-3 border-top-0 cy-border-right social_glance">
                                 <div class="d-flex flex-column p-0 cy-social_glance-container">
-                                    <div class="col p-3 cy-soical_marketing-glance">
-                                        <h5 class="cy-soical_marketing-glance_heading m-0">
+                                    <div class="col cy-soical_marketing-glance">
+                                        <h5 class="cy-soical_marketing-glance_heading m-0 border-bottom">
                                             At a glance
                                         </h5>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-10 cy-social_postingSection">
+                            <div class="cy-social_postingSection">
                                 <div class="d-flex p-0 cy-social_maketing-topSection"/>
                             </div>
                         </div>

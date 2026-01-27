@@ -15,6 +15,13 @@
         <field name="perm_read" eval="True"/>
         <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_employee'))]"/>
     </record>
+    <record id="rule_salary_attachment_employee" model="ir.rule">
+        <field name="name">Current Employee Attachment</field>
+        <field name="model_id" ref="model_employee_salary_attachment"/>
+        <field name="domain_force">[('employee_id.id', '=', user.employee_id.id)]</field>
+        <field name="perm_read" eval="True"/>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_employee'))]"/>
+    </record>
 
     <!--Admin access to all records-->
     <record id="rule_employee_resignation_manager" model="ir.rule">
@@ -89,15 +96,15 @@
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_manager'))]"/>
     </record>
-    <record id="rule_salary_structure_type_manager" model="ir.rule">
-        <field name="name">Admin Access to user - Salary Structure Type</field>
-        <field name="model_id" ref="model_salary_structure_type"/>
-        <field name="domain_force">[(1, '=', 1)]</field>
-        <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_manager'))]"/>
-    </record>
     <record id="rule_employee_payslip_batch_list_manager" model="ir.rule">
         <field name="name">Admin Access to user - Payslip Batch List</field>
         <field name="model_id" ref="model_employee_payslip_batch_list"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_manager'))]"/>
+    </record>
+    <record id="rule_salary_attachment_manager" model="ir.rule">
+        <field name="name">Admin Access to user - Attachment</field>
+        <field name="model_id" ref="model_employee_salary_attachment"/>
         <field name="domain_force">[(1, '=', 1)]</field>
         <field name="groups" eval="[Command.link(ref('group_cyllo_payroll_management_manager'))]"/>
     </record>
@@ -140,7 +147,7 @@
     <record id="rule_employee_salary_structure_company" model="ir.rule">
         <field name="name">Payroll Management Multy Company Rule - Salary Structure</field>
         <field name="model_id" ref="model_employee_salary_structure"/>
-        <field name="domain_force">[('company_id','in', company_ids)]</field>
+        <field name="domain_force">['|',('company_id','in', company_ids),('company_id','=',False)]</field>
     </record>
     <record id="rule_employee_training_period_company" model="ir.rule">
         <field name="name">Payroll Management Multy Company Rule - Training Period</field>
@@ -160,11 +167,6 @@
     <record id="rule_resigned_reasons_company" model="ir.rule">
         <field name="name">Payroll Management Multy Company Rule - Resigned Reason</field>
         <field name="model_id" ref="model_resigned_reasons"/>
-        <field name="domain_force">[('company_id','in', company_ids)]</field>
-    </record>
-    <record id="rule_salary_structure_type_company" model="ir.rule">
-        <field name="name">Payroll Management Multy Company Rule - Structure Type</field>
-        <field name="model_id" ref="model_salary_structure_type"/>
         <field name="domain_force">[('company_id','in', company_ids)]</field>
     </record>
     <record id="rule_employee_payslip_batch_list_company" model="ir.rule">

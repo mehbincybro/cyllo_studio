@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <menuitem id="menu_cyllo_office_365_connector_root" name="Office 365 Connector"/>
+    <menuitem id="menu_cyllo_office_365_connector_root"
+              web_icon="cyllo_office_365_connector,static/description/cyllo_microsoft-365.svg"
+              name="Office 365 Connector"/>
     <menuitem id="menu_operations_categ" name="Operations"
               parent="menu_cyllo_office_365_connector_root"/>
     <menuitem id="menu_master_data_categ" name="Master Data"

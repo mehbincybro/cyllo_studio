@@ -1,19 +1,20 @@
 /** @odoo-module */
 
-import { registry } from '@web/core/registry';
+import {registry} from '@web/core/registry';
 
 const actionRegistry = registry.category("actions");
-import { useState, Component, onWillStart, onMounted, useRef, useSubEnv, onWillDestroy, useEffect } from "@odoo/owl";
-import { useFileViewer } from "@web/core/file_viewer/file_viewer_hook";
-import { session } from "@web/session";
-import { useBus, useService } from '@web/core/utils/hooks';
-import { WhatsappSidebar } from './whatsapp_sidebar'
-import { WhatsappChatTop } from './whatsapp_chat_top'
-import { WhatsappChatInput } from './whatsapp_chat_input'
-import { WhatsappWelcome } from './whatsapp_welcome'
-import { WhatsappChatHistory } from './whatsapp_chat_history'
-import { WhatsappImagePreview } from './whatsapp_image_preview'
-import { useSaveContext } from './useSaveContext'
+import {useState, Component, onWillStart, onMounted, useRef, useSubEnv, onWillDestroy, useEffect} from "@odoo/owl";
+import {useFileViewer} from "@web/core/file_viewer/file_viewer_hook";
+import {session} from "@web/session";
+import {useBus, useService} from '@web/core/utils/hooks';
+import {_t} from "@web/core/l10n/translation";
+import {WhatsappSidebar} from './whatsapp_sidebar'
+import {WhatsappChatTop} from './whatsapp_chat_top'
+import {WhatsappChatInput} from './whatsapp_chat_input'
+import {WhatsappWelcome} from './whatsapp_welcome'
+import {WhatsappChatHistory} from './whatsapp_chat_history'
+import {WhatsappImagePreview} from './whatsapp_image_preview'
+import {useSaveContext} from './useSaveContext'
 
 
 let rotationDegrees = 0;
@@ -24,11 +25,13 @@ export class Whatsapp extends Component {
     setup() {
         this.store = useService("mail.store");
         this.fileViewerInstance = new useFileViewer();
+        this.notification = useService("notification");
         this.state = useState({
             channel: [],
             imagePreview: false,
             chatHistory: [],
             imageLoaded: 0,
+            offset: 14,
             imageStyle: ' ',
             inputFile: 0,
             attachment: 0,
@@ -62,31 +65,54 @@ export class Whatsapp extends Component {
         })
 
         useBus(this.env.bus, 'CLICK_PARTNER', async (channel) => {
-            const { partner } = channel.detail
+            const {partner} = channel.detail
             await this.getMessagingPartner(partner)
             await this.fetchChannel();
             await this.renderChatHistory()
         });
         useBus(this.env.bus, 'SEND_MESSAGE', (data) => this.currentMessageUpdate(data.detail.message));
+        useBus(this.env.bus, 'All_MESSAGE', () => this.loadMore());
         useBus(this.env.bus, 'PREVIEW_IMAGE', (data) => this.viewPreviewImage(data));
         useBus(this.env.bus, 'PREVIEW_DOCUMENT', (data) => this.viewPreviewDocument(data));
         useBus(this.env.bus, 'SEARCH_PARTNER', (data) => this.addChattingPartner(data.detail.partner));
         this.busService = this.env.services.bus_service
         this.channel = "WHATSAPP-CHANNEL"
         this.busService.addChannel(this.channel)
-        this.busService.addEventListener("notification", this.onMessage.bind(this))
+        this.busService.subscribe("notification", this.onMessage.bind(this))
+        this.busService.subscribe("STATE-UPDATE", this.onStateUpdate.bind(this))
     }
 
-    onMessage(message) {
-        if (message.detail[0].type === 'notification') {
-            this.state.channel.forEach((channel) => {
-                if (channel.id === message.detail[0].payload.message[0].channel_id[0]) {
-                    channel.message_count += 1
-                }
-            });
-            if (message.detail[0].payload.message){ //Fixed the error while upgrading it from browser terminal
-                this.currentMessageUpdate(message.detail[0].payload.message)
+    async onMessage(response) {
+        try {
+            const msg = response?.message?.[0];
+            if (!msg) return;
+
+            if (session?.uid) {
+                this.state.channel = await this.orm.searchRead(
+                    "whatsapp.channel",
+                    [["user_id", "=", session.uid]],
+                    []
+                );
             }
+
+            if (this.state.id === msg.channel_id?.[0]) {
+                await this.renderChatHistory();
+            }
+
+            this.notification.add(
+                _t(msg.message || "Media file"),
+                {
+                    title: `${msg.channel_id?.[1]} ${_t('messaged you')}`,
+                    type: "whatsapp",
+                }
+            );
+        } catch (e) {}
+    }
+
+
+    async onStateUpdate(response) {
+        if (this.state.id) {
+            await this.renderChatHistory()
         }
     }
 
@@ -103,6 +129,8 @@ export class Whatsapp extends Component {
         await this.fetchChannel();
         const channelIds = this.state.channel.map(item => item.partner_id[0])
         if (channelIds.includes(data.id)) {
+            var live_channel = this.state.channel.filter(r => r.partner_id[0] == data.id)
+            await this.getMessagingPartner(live_channel[0])
             return
         }
         ChannelValues = {
@@ -120,24 +148,38 @@ export class Whatsapp extends Component {
 
     /* Chat history */
     async renderChatHistory() {
-        await this.orm.call("whatsapp.message", "get_chat_history", [this.state.id]).then(result => {
-            if (result) {
-                result.forEach((chat) => {
-                    this.dateSplit = chat['create_date'].split(' ')
-                    chat['date'] = this.dateSplit[0]
-                    chat['time'] = this.dateSplit[1].split(':').slice(0, 2).join(':');
-                });
-                this.state.chatHistory = result;
-            }
-        });
-        let channel = await this.orm.read("whatsapp.channel", [this.state.id], []);
-        this.state.activeChannel = channel[0];
+        try {
+            let channel = await this.orm.read("whatsapp.channel", [this.state.id], []);
+            await this.orm.call("whatsapp.message", "get_chat_history", [this.state.id, 25]).then(result => {
+                if (result) {
+                    result.forEach((chat) => {
+                        this.dateSplit = chat['create_date'].split(' ')
+                        chat['date'] = this.dateSplit[0]
+                        chat['time'] = this.dateSplit[1].split(':').slice(0, 2).join(':');
+                    });
+                    this.state.chatHistory = result;
+                }
+            });
+            this.state.activeChannel = channel[0];
+        } catch (error) {}
+    }
+
+    async loadMore() {
+        let result = await this.orm.call("whatsapp.message", "get_chat_history", [this.state.id, false]);
+        if (result) {
+            result.forEach((chat) => {
+                this.dateSplit = chat['create_date'].split(' ');
+                chat['date'] = this.dateSplit[0];
+                chat['time'] = this.dateSplit[1].split(':').slice(0, 2).join(':');
+            });
+            this.state.chatHistory = result;
+        }
     }
 
     /* Click function of chatting partner at the whatsapp side bar */
-    getMessagingPartner(channel) {
+    async getMessagingPartner(channel) {
         this.state.id = channel.id
-        this.renderChatHistory();
+        await this.renderChatHistory();
     }
 
     get sideBarProps() {
@@ -176,7 +218,8 @@ export class Whatsapp extends Component {
 
         return {
             history: this.state.chatHistory,
-            today: formattedDate
+            today: formattedDate,
+            partner: this.state.activeChannel
         }
     }
 

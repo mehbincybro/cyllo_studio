@@ -1,7 +1,6 @@
 /** @odoo-module **/
-
-import { useService } from "@web/core/utils/hooks";
-import { Component, useState } from "@odoo/owl";
+import {useService} from "@web/core/utils/hooks";
+import {Component, useState} from "@odoo/owl";
 
 /**
  * SelectedAppDetails component to display details of a selected app.
@@ -21,6 +20,7 @@ export class SelectedAppDetails extends Component {
         });
         this.ormService = useService("orm");
     }
+
     /**
      * Displays details of the selected app.
      * @param {Object} appDetails - Details of the selected app.
@@ -29,9 +29,10 @@ export class SelectedAppDetails extends Component {
         this.state.selectedApp = appDetails;
     }
 
-    unlinkApps(app){
+    unlinkApps(app) {
         this.env.delete_app(app);
     }
+
     /**
      * Installs the selected apps.
      * @param {Array} apps_to_install - Array of app IDs to be installed.
@@ -39,8 +40,9 @@ export class SelectedAppDetails extends Component {
     async installApps(apps_to_install) {
         try {
             this.env.skip(apps_to_install);
-        } catch (error) {}
+        } catch (error) {
         }
+    }
 }
 SelectedAppDetails.props = {
     ...Component.props,

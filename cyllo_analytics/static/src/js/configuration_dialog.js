@@ -91,7 +91,16 @@ export class ConfigurationDialog extends Component {
                 fields: related,
              },
          }
-         var fields = { theme_id, name, group_ids, user_ids, ir_menu_ids, banner_id }
+         var company_id = {
+            type: "many2one",
+            relation: "res.company",
+            string: "Company",
+            related: {
+                activeFields: related,
+                fields: related,
+            },
+        }
+         var fields = { theme_id, name, group_ids, user_ids, ir_menu_ids, banner_id, company_id }
          var self = this
          return {
              mode: "edit",

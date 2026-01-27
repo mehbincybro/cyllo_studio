@@ -1,0 +1,202 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_asset_maintenance
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-23 09:15+0000\n"
+"PO-Revision-Date: 2025-01-23 09:15+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__active
+msgid "Active"
+msgstr "نشيط"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Archived"
+msgstr "أرشفة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__asset_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.view_account_asset_maintenance_form
+msgid "Asset"
+msgstr "أصل"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Asset Item"
+msgstr "عنصر الأصول"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.actions.act_window,name:cyllo_asset_maintenance.action_view_asset_maintenance
+#: model:ir.model,name:cyllo_asset_maintenance.model_account_asset_maintenance
+#: model:ir.model,name:cyllo_asset_maintenance.model_asset_maintenance
+#: model:ir.ui.menu,name:cyllo_asset_maintenance.menu_assets
+#: model:ir.ui.menu,name:cyllo_asset_maintenance.menu_cyllo_asset_maintenance_root
+msgid "Asset Maintenance"
+msgstr "صيانة الأصول"
+
+#. module: cyllo_asset_maintenance
+#: model:res.groups,name:cyllo_asset_maintenance.group_cyllo_asset_maintenance
+msgid "Asset Maintenance User"
+msgstr "مستخدم صيانة الأصول"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__asset_type_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Asset Type"
+msgstr "نوع الأصول"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Assets"
+msgstr "أصول"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.view_account_asset_maintenance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Confirm"
+msgstr "يتأكد"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__create_uid
+msgid "Created by"
+msgstr "تم إنشاؤها بواسطة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__create_date
+msgid "Created on"
+msgstr "تم إنشاؤها على"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__currency_id
+msgid "Currency"
+msgstr "عملة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,help:cyllo_asset_maintenance.field_account_asset_maintenance__currency_id
+msgid "Currency of company"
+msgstr "عملة الشركة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__date
+msgid "Date"
+msgstr "تاريخ"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__department_id
+msgid "Department"
+msgstr "قسم"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.view_account_asset_maintenance_form
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Done"
+msgstr "منتهي"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__employee_id
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__employee_id
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Employee"
+msgstr "موظف"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Group By..."
+msgstr "مجموعة من ..."
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__id
+msgid "ID"
+msgstr "بطاقة تعريف"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__is_scrap
+msgid "Is Scrap"
+msgstr "هو الخردة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__issue
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__issue
+msgid "Issue"
+msgstr "مشكلة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث على"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.actions.act_window,name:cyllo_asset_maintenance.action_view_asset_maintenance
+#: model:ir.actions.server,name:cyllo_asset_maintenance.model_asset_asset_maintenance
+#: model:ir.ui.menu,name:cyllo_asset_maintenance.menu_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.asset_maintenance_view_form
+msgid "Maintenance"
+msgstr "صيانة"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "New"
+msgstr "جديد"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Ongoing"
+msgstr "مستمر"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__reference
+msgid "Reference"
+msgstr "مرجع"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__user_id
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__user_id
+msgid "Responsible User"
+msgstr "المستخدم المسؤول"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.account_asset_maintenance_view_search
+msgid "Scarp"
+msgstr "نزطة"
+
+#. module: cyllo_asset_maintenance
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_account_asset_maintenance__scheduled_date
+#: model:ir.model.fields,field_description:cyllo_asset_maintenance.field_asset_maintenance__scheduled_date
+msgid "Scheduled Date"
+msgstr "التاريخ المقرر"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.view_account_asset_maintenance_form
+msgid "Scrap"
+msgstr "خردة"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.asset_maintenance_view_form
+msgid "Send Maintenance Request"
+msgstr "إرسال طلب الصيانة"
+
+#. module: cyllo_asset_maintenance
+#: model_terms:ir.ui.view,arch_db:cyllo_asset_maintenance.view_account_asset_maintenance_form
+msgid "Start Maintenance"
+msgstr "ابدأ الصيانة"

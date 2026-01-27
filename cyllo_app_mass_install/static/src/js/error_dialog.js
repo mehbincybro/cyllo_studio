@@ -1,6 +1,14 @@
 /** @odoo-module **/
-import { ClientErrorDialog, Error504Dialog, RPCErrorDialog, ErrorDialog, RedirectWarningDialog, SessionExpiredDialog, WarningDialog } from "@web/core/errors/error_dialogs";
-import { patch } from "@web/core/utils/patch";
+import {
+    ClientErrorDialog,
+    Error504Dialog,
+    RPCErrorDialog,
+    ErrorDialog,
+    RedirectWarningDialog,
+    SessionExpiredDialog,
+    WarningDialog
+} from "@web/core/errors/error_dialogs";
+import {patch} from "@web/core/utils/patch";
 
 patch(WarningDialog.prototype, {
     setup() {

@@ -33,7 +33,7 @@
 						<div align="center" style="height:250px;">
 							<img alt="Avatar"
                                  class="o_dial_phonecall_avatar"
-                                 t-att-src="'data:image/png;base64,' + this.state.selectedPartner.image_1920"
+                                 t-att-src="this.state.selectedPartner.image_1920 ? 'data:image/png;base64,' + this.state.selectedPartner.image_1920 : '/cyllo_twilio_voice_call/static/src/img/images.png'"
                                  style="height:200px;width:200px;margin-top:30px"/>
                             <t t-if="this.state.selectedPartner.partner_name">
 								<br/>

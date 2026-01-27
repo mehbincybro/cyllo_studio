@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 
 try:
@@ -14,32 +34,45 @@ class IncomingCallList(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'reference'
 
-    reference = fields.Char(readonly=True, copy=False, default='New', help="Reference to the model")
+    reference = fields.Char(readonly=True, copy=False, default='New',
+                            help="Reference to the model")
     from_number = fields.Char('From', help='From number to call any number')
     to_number = fields.Char('To', help='Receiving number for testing')
-    user_id = fields.Many2one('res.users', default=lambda self: self.env.user.id, string="Receiver", readonly=True)
-    company_id = fields.Many2one('res.company', default=lambda self: self.env.user.company_id, readonly=True)
-    start_time = fields.Datetime(help="To get the time and date when the call is started")
-    end_time = fields.Datetime(help="To get the time and date when the call is ended")
+    user_id = fields.Many2one('res.users',
+                              default=lambda self: self.env.user.id,
+                              string="Receiver", readonly=True)
+    company_id = fields.Many2one('res.company',
+                                 default=lambda self: self.env.user.company_id,
+                                 readonly=True)
+    start_time = fields.Datetime(
+        help="To get the time and date when the call is started")
+    end_time = fields.Datetime(
+        help="To get the time and date when the call is ended")
     duration = fields.Char(help="Duration of the call")
     status = fields.Char(help="Status of the call")
-    record_sid = fields.Char(string="Record Details", help="Record Sid of the call")
+    record_sid = fields.Char(string="Record Details",
+                             help="Record Sid of the call")
     call_sid = fields.Char(help="To get the call sid")
     image_1920 = fields.Image(string="Image", help="To get the image")
     partner_id = fields.Many2one('res.partner', string="Name")
 
-    @api.model
+    @api.model_create_multi
     def create(self, vals):
         """Supering create function to add reference"""
-        if vals.get('reference', 'New') == 'New':
-            vals['reference'] = self.env['ir.sequence'].next_by_code('incoming.call.list') or 'New'
+        for val in vals:
+            if val.get('reference', 'New') == 'New':
+                val['reference'] = self.env['ir.sequence'].next_by_code(
+                    'incoming.call.list') or 'New'
         return super(IncomingCallList, self).create(vals)
 
     def action_incoming_call(self, num, Sid):
         """To create an incoming call list when we're making a call """
-        account_sid = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.account_sid")
-        auth_token = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.auth_token")
-        from_number = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.from_number")
+        account_sid = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.account_sid")
+        auth_token = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.auth_token")
+        from_number = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.from_number")
         client = Client(account_sid, auth_token)
         call = client.calls(Sid).fetch()
         if call:
@@ -54,12 +87,16 @@ class IncomingCallList(models.Model):
 
     def action_incoming_from_partner(self, num, Sid, id):
         """To create an incoming call list when we're making a call """
-        account_sid = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.account_sid")
-        auth_token = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.auth_token")
-        from_number = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.from_number")
+        account_sid = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.account_sid")
+        auth_token = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.auth_token")
+        from_number = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.from_number")
         client = Client(account_sid, auth_token)
         call = client.calls(Sid).fetch()
         image_1920 = False
+
         if id:
             partner_id = id
             partner = self.env['res.partner'].browse(partner_id)
@@ -81,25 +118,25 @@ class IncomingCallList(models.Model):
 
     def action_hanging_call(self, num, Sid):
         """To Update an Incoming call list when we're hanging up the call """
-        account_sid = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.account_sid")
-        auth_token = self.env["ir.config_parameter"].sudo().get_param("cyllo_twilio_voice_call.auth_token")
+        account_sid = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.account_sid")
+        auth_token = self.env["ir.config_parameter"].sudo().get_param(
+            "cyllo_twilio_voice_call.auth_token")
         client = Client(account_sid, auth_token)
         call = client.calls(Sid).fetch()
         if call:
-            active_record = self.env['incoming.call.list'].search([('call_sid', '=', Sid)])
+            active_record = self.env['incoming.call.list'].search(
+                [('call_sid', '=', Sid)])
             total_seconds = int(call.duration)
             # Calculate minutes and seconds
             minutes, seconds = divmod(total_seconds, 60)
             # Store duration as a string in the "MM:SS" format
             duration_str = f"{minutes:02d}:{seconds:02d}"
-            recording_url = f"""https://api.twilio.com/2010-04-01/Accounts/{client.recordings.list()[0].account_sid}
-            /Recordings/{client.recordings.list()[0].sid}.mp3"""
             if active_record:
                 active_record.sudo().write({
                     'status': call.status,
                     'duration': duration_str,
                     'end_time': fields.datetime.now(),
-                    'record_sid': recording_url
                 })
 
     def action_play_recording(self):

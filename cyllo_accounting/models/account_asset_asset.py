@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import calendar
 from dateutil.relativedelta import relativedelta
 
@@ -19,14 +39,14 @@ class AccountAssetAsset(models.Model):
     _inherit = ['mail.thread.main.attachment', 'mail.activity.mixin']
     _description = "Account Asset"
 
-    name = fields.Char(string='Asset name', required=True, tracking=True)
-    active = fields.Boolean(default=True)
+    name = fields.Char(string='Asset name', required=True, tracking=True, help="Name of the asset")
+    active = fields.Boolean(default=True, help="Whether this asset is active")
     # asset_type_id is deferred revenue type or deferred expense type, this can be created from the configuration.
     asset_type_id = fields.Many2one('account.asset.type', help='Select Asset Type')
     company_id = fields.Many2one('res.company', readonly=True, default=lambda self: self.env.company)
     # asset_type decides it is deferred revenue or deferred expense
     asset_type = fields.Selection([('revenue', 'Deferred Revenue'), ('expense', 'Deferred Expense')],
-                                  compute='_compute_asset_type', store=True, index=True, copy=True)
+                                  compute='_compute_asset_type', store=True, index=True, copy=True, string='Asset Category')
     journal_id = fields.Many2one('account.journal', required=True, help="Journal for this type",
                                  domain="[('type', '=', 'general'), ('company_id', '=', company_id)]")
     # account_id is account for deferred revenue or expense. domain will be takes from the corresponding view
@@ -47,7 +67,7 @@ class AccountAssetAsset(models.Model):
     total_value = fields.Float(string='Total depreciable Value', copy=False)
     not_depreciable_value = fields.Float(copy=False)
     # It is the residual value for depreciation
-    residual_value = fields.Float(compute='_compute_residual_value', store=True, copy=False)
+    residual_value = fields.Float(compute='_compute_residual_value', store=True, copy=False, index=True)
     total_modify_value = fields.Float(compute='_compute_total_modify_value', store=True,
                                       help="Original Value-Not Depreciable Value+Gross Increase Value")
     # gross_value will be updated in case of modify revenue or expense
@@ -59,7 +79,8 @@ class AccountAssetAsset(models.Model):
         selection=[('draft', 'Draft'), ('running', 'Running'), ('done', 'Done'), ('close', 'Closed'),
                    ('cancel', 'Cancelled')], string='Status', copy=False, default='draft',
         help="When it is created, the status is 'Draft'.\n"
-             "If the it is confirmed, the status in 'Running' and the lines can be posted.\n You can close it\n")
+             "If the it is confirmed, the status in 'Running' and the lines can be posted.\n You can close it\n",
+        index=True)
     # After calculating depreciations will get depreciable lines.
     depreciation_move_ids = fields.One2many('account.move', 'asset_id',
                                             string='Depreciation Lines')
@@ -106,7 +127,7 @@ class AccountAssetAsset(models.Model):
                 rec.original_value = rec.original_value or False
                 continue
             if rec.invoice_line_ids.filtered(lambda x: x.move_id.state == 'draft'):
-                raise UserError(_("All the lines must be posted"))
+                raise UserError(_("All the lines must be posted."))
             rec.original_value = rec.purchase_value
 
     @api.depends('invoice_line_ids')
@@ -166,6 +187,81 @@ class AccountAssetAsset(models.Model):
             self.number_of_entries = self.asset_type_id.number_of_entries
             self.period = self.asset_type_id.period
             self.computation_method = self.asset_type_id.computation_method
+
+    def unlink(self):
+        """When deleting a deferred revenue/expense"""
+        for rec in self:
+            if rec.state in ['running', 'done']:
+                raise UserError(_('The document is in the state %s , So you cannot delete it.',
+                                  dict(self._fields['state']._description_selection(self.env)).get(rec.state)))
+            posted_moves = len(rec.depreciation_move_ids.filtered(lambda x: x.state == 'posted'))
+            if posted_moves > 0:
+                raise UserError(_('You cannot delete a record linked to posted entries.'
+                                  '\nYou can cancel the linked journal entries.'))
+        return super(AccountAssetAsset, self).unlink()
+
+    def action_compute(self):
+        """When clicks the compute button create revenue/expense board  and also creates draft entries"""
+        start_date = self.prorata_date if self.prorata_date else self.first_recognition_date
+        self.compute_depreciation(self.residual_value, self.number_of_entries, start_date)
+
+    def action_confirm(self):
+        """When confirming the asset revenue/expense, post the journal entries of each move"""
+        if not self.depreciation_move_ids:
+            start_date = self.prorata_date if self.prorata_date else self.first_recognition_date
+            move_list = self.compute_depreciation(self.residual_value, self.number_of_entries, start_date)
+            for move in move_list:
+                move._post()
+        else:
+            for move in self.depreciation_move_ids:
+                move._post()
+        self.write({'state': 'running'})
+
+    def action_running(self):
+        """Button: Set to Running"""
+        self.write({'state': 'running'})
+
+    def action_close(self):
+        """Button: Close"""
+        self.ensure_one()
+        self.write({'state': 'close'})
+
+    def action_save_template(self):
+        """Button: Save Template"""
+        if self.asset_type == 'revenue':
+            form_view = self.env.ref('cyllo_accounting.view_account_asset_type_deferred_revenue_form')
+        else:
+            form_view = self.env.ref('cyllo_accounting.view_account_asset_type_deferred_expense_form')
+        return {
+            'name': _('Save Template'),
+            'views': [[form_view.id, "form"]],
+            'res_model': 'account.asset.type',
+            'type': 'ir.actions.act_window',
+            'context': {
+                'default_type': self.asset_type,
+                'default_account_id': self.account_id.id,
+                'default_expense_account_id': self.expense_account_id.id,
+                'default_journal_id': self.journal_id.id,
+                'default_number_of_entries': self.number_of_entries,
+                'default_period': self.period,
+                'default_computation_method': self.computation_method,
+                'default_company_id': self.company_id.id,
+                'default_currency_id': self.currency_id.id,
+            }
+        }
+
+    def action_get_entries(self):
+        """The smart button shows the corresponding journal entries"""
+        self.ensure_one()
+        return {
+            'name': _("Journal Entries"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'context': {'create': False},
+            'view_mode': 'tree,form',
+            'target': 'current',
+            'domain': [('asset_id', '=', self.id)],
+        }
 
     def compute_depreciation_amount(self, depreciation, total_days, number_of_entries):
         """Calculate the amount based the days, total_days and depreciation_date
@@ -279,78 +375,3 @@ class AccountAssetAsset(models.Model):
         self.depreciation_move_ids.filtered(lambda mv: mv.state == 'draft').unlink()
         depreciation_moves = self._depreciation_board(residual_value, number_of_entries, start_date)
         return depreciation_moves
-
-    def action_compute(self):
-        """When clicks the compute button create revenue/expense board  and also creates draft entries"""
-        start_date = self.prorata_date if self.prorata_date else self.first_recognition_date
-        self.compute_depreciation(self.residual_value, self.number_of_entries, start_date)
-
-    def action_confirm(self):
-        """When confirming the asset revenue/expense, post the journal entries of each move"""
-        if not self.depreciation_move_ids:
-            start_date = self.prorata_date if self.prorata_date else self.first_recognition_date
-            move_list = self.compute_depreciation(self.residual_value, self.number_of_entries, start_date)
-            for move in move_list:
-                move._post()
-        else:
-            for move in self.depreciation_move_ids:
-                move._post()
-        self.write({'state': 'running'})
-
-    def action_running(self):
-        """Button: Set to Running"""
-        self.write({'state': 'running'})
-
-    def action_close(self):
-        """Button: Close"""
-        self.ensure_one()
-        self.write({'state': 'close'})
-
-    def unlink(self):
-        """When deleting a deferred revenue/expense"""
-        for rec in self:
-            if rec.state in ['running', 'done']:
-                raise UserError(_('The document is in the state %s , So you cannot delete it.',
-                                  dict(self._fields['state']._description_selection(self.env)).get(rec.state)))
-            posted_moves = len(rec.depreciation_move_ids.filtered(lambda x: x.state == 'posted'))
-            if posted_moves > 0:
-                raise UserError(_('You cannot delete a record linked to posted entries.'
-                                  '\nYou can cancel the linked journal entries.'))
-        return super(AccountAssetAsset, self).unlink()
-
-    def action_save_template(self):
-        """Button: Save Template"""
-        if self.asset_type == 'revenue':
-            form_view = self.env.ref('cyllo_accounting.view_account_asset_type_deferred_revenue_form')
-        else:
-            form_view = self.env.ref('cyllo_accounting.view_account_asset_type_deferred_expense_form')
-        return {
-            'name': _('Save Template'),
-            'views': [[form_view.id, "form"]],
-            'res_model': 'account.asset.type',
-            'type': 'ir.actions.act_window',
-            'context': {
-                'default_type': self.asset_type,
-                'default_account_id': self.account_id.id,
-                'default_expense_account_id': self.expense_account_id.id,
-                'default_journal_id': self.journal_id.id,
-                'default_number_of_entries': self.number_of_entries,
-                'default_period': self.period,
-                'default_computation_method': self.computation_method,
-                'default_company_id': self.company_id.id,
-                'default_currency_id': self.currency_id.id,
-            }
-        }
-
-    def action_get_entries(self):
-        """The smart button shows the corresponding journal entries"""
-        self.ensure_one()
-        return {
-            'name': _("Journal Entries"),
-            'type': 'ir.actions.act_window',
-            'res_model': 'account.move',
-            'context': {'create': False},
-            'view_mode': 'tree,form',
-            'target': 'current',
-            'domain': [('asset_id', '=', self.id)],
-        }

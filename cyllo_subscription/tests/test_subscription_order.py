@@ -1,86 +1,69 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import logging
-from odoo.tests import common
 from odoo import fields
+from odoo.exceptions import ValidationError
+from odoo.addons.cyllo_subscription.tests.common import TestCylloSubscription
 
 _logger = logging.getLogger(__name__)
 
 
-class TestSubscriptionOrder(common.TransactionCase):
+class TestSubscriptionOrder(TestCylloSubscription):
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.partner = cls.env['res.partner'].create({'name': 'John'})
-        cls.product = cls.env['product.product'].create({
-            'name': 'SP1',
-            'is_subscription': True
-        })
-        cls.product2 = cls.env['product.product'].create({
-            'name': 'SP1',
-            'is_subscription': False
-        })
-        cls.time_based = cls.env['time.based.price'].create({
-            'name': 'Mon',
-            'subscription_unit': 'months',
-            'currency_id': 1
-        })
-        cls.sale_order_template = cls.env['sale.order.template'].create({
-            'name': 'Template1',
-            'is_subscription': True,
-            'invoice_creation': 'confirmed',
-            'sale_order_template_line_ids': [
-                (fields.Command.create({'product_id': cls.product.id}))]
-        })
-        cls.sale_order = cls.env['sale.order'].create({
-            'name': 'S00001',
-            'partner_id': cls.partner.id,
-            'order_line': [
-                (fields.Command.create({'product_id': cls.product.id}))
-            ]
-        })
-        cls.subscription_order = cls.env['subscription.order'].create({
-            'name': 'SO001',
-            'partner_id': cls.partner.id,
-            'time_based_price_id': cls.time_based.id,
-            'sale_order_template_id': cls.sale_order_template.id,
-            'renewal_date': '2023-11-16',
-            'sale_order_id': cls.sale_order.id,
-            'subscription_order_line_ids': [
-                (fields.Command.create({'product_id': cls.product.id}))]
-        })
-        cls.account_move = cls.env['account.move'].create({
-            'partner_id': cls.partner.id,
-            'move_type': 'out_invoice',
-            'payment_reference': cls.subscription_order.name,
-            'invoice_origin': cls.subscription_order.name,
-            'invoice_date_due': '2023-12-15',
-            'date': '2023-12-15',
-            'is_subscription': True,
-            'state': 'draft',
-            'subscription_order_ids': cls.subscription_order.ids,
-            'invoice_line_ids': [
-                (fields.Command.create({
-                    'product_id': cls.product.id,
-                }))]})
-        cls.sale_order2 = cls.env['sale.order'].create({
-            'name': 'S00002',
-            'partner_id': cls.partner.id,
-            'order_line': [
-                (fields.Command.create({'product_id': cls.product2.id}))
-            ]
-        })
-        cls.subscription_order_alert = cls.env['subscription.order.alert'].create({
-            'name': 'Sub alert',
-            'action': 'set_to_renew'
-        })
+    def test_compute_partner_street(self):
+        _logger.info("Starts test_compute_partner_street")
+        self.subscription_order1._compute_partner_street()
+        self.assertEqual(self.subscription_order1.partner_street, f'{self.partner.street} {self.partner.street2}',
+                         msg="test_compute_partner_street Failed")
+        self.partner.street = ''
+        self.subscription_order1._compute_partner_street()
+        self.assertEqual(self.subscription_order1.partner_street, f' {self.partner.street2}',
+                         msg="test_compute_partner_street Failed")
+        self.partner.street = 'street1'
+        self.partner.street2 = ''
+        self.subscription_order1._compute_partner_street()
+        self.assertEqual(self.subscription_order1.partner_street, f'{self.partner.street} ',
+                         msg="test_compute_partner_street Failed")
+        _logger.info("Ends test_compute_partner_street")
 
-    # Test subscription.order
+    def test_unlink(self):
+        _logger.info("Starts test_unlink")
+        with self.assertRaises(ValidationError):
+            self.subscription_order2.unlink()
+        with self.assertRaises(ValidationError):
+            self.subscription_order3.unlink()
+        _logger.info("Ends test_unlink")
+
     def test_compute_invoice_count(self):
-        _logger.info("Starts tests for so")
-        self.subscription_order._compute_invoice_count()
-        self.assertEqual(self.subscription_order.invoice_count, 1)
-        _logger.info("Ends tests for 'so'")
+        _logger.info("Starts test_compute_invoice_count")
+        self.subscription_order1._compute_invoice_count()
+        self.assertEqual(self.subscription_order1.invoice_count, 1)
+        _logger.info("Ends test_compute_invoice_count")
+
+    def test_action_post(self):
+        _logger.info("Starts test_action_post")
+        with self.assertRaises(ValidationError):
+            self.subscription_order4.action_post()
+        _logger.info("Ends test_action_post")
 
     def test_compute_recurring_revenue(self):
         _logger.info("Start tests compute_recurring_revenue")
@@ -107,7 +90,7 @@ class TestSubscriptionOrder(common.TransactionCase):
         _logger.info("End tests compute_recurring_revenue")
 
     def test_action_renew_order(self):
-        _logger.info("Start tests action_renew_order")
+        _logger.info("Start test_action_renew_order")
         partner = self.env['res.partner'].create({'name': 'John'})
         product = self.env['product.product'].create({
             'name': 'SP1',
@@ -127,14 +110,20 @@ class TestSubscriptionOrder(common.TransactionCase):
                 (fields.Command.create({'product_id': product.id}))]
         })
         subscription_order.action_renew_order()
-        self.assertFalse(self.subscription_order.check_upsell_renewal)
-        _logger.info("End tests action_renew_order")
+        self.assertFalse(self.subscription_order1.check_upsell_renewal)
+        _logger.info("End test_action_renew_order")
 
     def test_check_subscription_renewal(self):
         _logger.info("Start tests test_check_subscription_renewal")
-        self.subscription_order.check_subscription_renewal()
-        self.assertEqual(self.subscription_order.state_subscription, 'renew')
+        self.subscription_order1.check_subscription_renewal()
+        self.assertEqual(self.subscription_order1.state_subscription, 'renew')
         _logger.info("End tests test_check_subscription_renewal")
+
+    def test_action_upsell(self):
+        _logger.info("Start tests test_action_upsell")
+        self.subscription_order2.action_renew_order()
+        self.assertTrue(self.subscription_order2.check_upsell_renewal)
+        _logger.info("End tests test_action_upsell")
 
     # Test in account.move
     def test_ir_cron_action_post(self):
@@ -169,5 +158,17 @@ class TestSubscriptionOrder(common.TransactionCase):
     def test_action_trigger(self):
         _logger.info("Starts tests test_action_trigger")
         self.subscription_order_alert.action_trigger()
-        self.assertEqual(self.subscription_order.state_subscription, 'renew')
+        self.assertEqual(self.subscription_order1.state_subscription, 'renew')
         _logger.info("Ends tests test_action_trigger")
+
+    def test_action_close_subscription(self):
+        _logger.info("Starts tests test_action_close_subscription")
+        self.assertEqual(self.subscription_order2.action_close_subscription(), {
+            'name': 'Close Reason',
+            'type': 'ir.actions.act_window',
+            'res_model': 'subscription.close',
+            'view_mode': 'form',
+            'context': {'default_subscription_order_id': self.subscription_order2.id},
+            'target': 'new',
+        })
+        _logger.info("Ends tests test_action_close_subscription")

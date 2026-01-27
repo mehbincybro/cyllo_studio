@@ -11,11 +11,15 @@
         </field>
     </record>
     <record id="action_view_sheets" model="ir.actions.act_window">
-        <field name="name">Dashboard sheet</field>
+        <field name="name">Dashboard Sheet</field>
         <field name="res_model">dashboard.sheet</field>
         <field name="view_mode">tile,form</field>
     </record>
-    <menuitem id="menu_sheets" name="Sheets"
-              parent="menu_cyllo_analytics_root" action="action_view_sheets"
+
+    <!-- Menu: Sheets under Cyllo Analytics -->
+    <menuitem id="menu_sheets"
+              name="Sheets"
+              parent="menu_cyllo_analytics_root"
+              action="action_view_sheets"
               groups="cyllo_analytics.group_cyllo_analytics_admin"/>
 </odoo>

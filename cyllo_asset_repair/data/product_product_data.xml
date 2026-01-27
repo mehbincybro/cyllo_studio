@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--    Repair service as a product-->
+    <record id="product_product_repair_service" model="product.product">
+        <field name="name">Repair Service</field>
+        <field name="type">service</field>
+        <field name="lst_price">100</field>
+    </record>
+</odoo>

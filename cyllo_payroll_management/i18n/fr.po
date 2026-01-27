@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-01 03:57+0000\n"
-"PO-Revision-Date: 2024-04-01 03:57+0000\n"
+"POT-Creation-Date: 2025-02-03 04:36+0000\n"
+"PO-Revision-Date: 2025-02-03 04:36+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -23,14 +23,12 @@ msgstr "Pour sélectionner l'employé"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_salary_structure.py:0
-#: code:addons/cyllo_payroll_management/models/employee_salary_structure.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr ""
+msgstr "% s (copie)"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_configuration.py:0
 #: code:addons/cyllo_payroll_management/models/gratuity_configuration.py:0
 #, python-format
 msgid "'From Year' should be less than 'To Year'."
@@ -39,50 +37,105 @@ msgstr "« De l'année » doit être inférieur à « Jusqu'à l'année »."
 #. module: cyllo_payroll_management
 #: model:ir.actions.report,print_report_name:cyllo_payroll_management.report_employee_payslip_report
 msgid "'Payslip - %s' % (object.employee_id.name)"
-msgstr "'Payslip - %s' % (object.employee_id.name)"
+msgstr "'Payslip -% s'% (object.employee_id.name)"
 
 #. module: cyllo_payroll_management
 #: model:ir.actions.report,print_report_name:cyllo_payroll_management.report_resignation_request
 msgid "'Resignation Request - %s' % (object.employee_id.name)"
-msgstr "'Resignation Request - %s' % (object.employee_id.name)"
+msgstr "'Demande de démission -% s'% (object.employee_id.name)"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_contract_form
 msgid "/ hour"
-msgstr "/ hour"
+msgstr "/ heure"
 
 #. module: cyllo_payroll_management
 #: model:mail.template,body_html:cyllo_payroll_management.mail_template_resignation_request
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                    <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
-"                        HiTeam,\n"
-"                        <br>\n"
-"                        I hereby submit my resignation from the position of\n"
-"                        <span t-out=\"object.employee_id.job_id.name or ''\">\n"
-"                        </span>\n"
-"                        <br>\n"
-"                        Please find more details from the attached Resignation\n"
-"                        Request of\n"
-"                        <t t-if=\"object.employee_id\">\n"
-"                            \"<span t-out=\"object.employee_id.name or ''\">\n"
-"                        </span>\"\n"
-"                        </t>\n"
-"                        <br>\n"
-"                        <br>\n"
-"                    </p>\n"
-"                </div>\n"
-"            "
+"                <p style=\"margin: 0px; padding: 0px; font-size: 13px;\">\n"
+"                    HiTeam,\n"
+"                    <br>\n"
+"                    I hereby submit my resignation from the position of\n"
+"                    <span t-out=\"object.employee_id.job_id.name or ''\">\n"
+"                    </span>\n"
+"                    <br>\n"
+"                    Please find more details from the attached Resignation\n"
+"                    Request of\n"
+"                    <t t-if=\"object.employee_id\">\n"
+"                        \"<span t-out=\"object.employee_id.name or ''\">\n"
+"                    </span>\"\n"
+"                    </t>\n"
+"                    <br>\n"
+"                    <br>\n"
+"                </p>\n"
+"            </div>\n"
+"        "
 msgstr ""
+"<div style = \"margin: 0px; padding: 0px;\">\n"
+"<p style = \"margin: 0px; padding: 0px; font-taille: 13px;\">\n"
+"Hi Team,\n"
+"<br>\n"
+"Je soumets par la présente ma démission de la position de\n"
+"<span t-out = \"object.employee_id.job_id.name ou ''\">\n"
+"</span>\n"
+"<br>\n"
+"Veuillez trouver plus de détails à partir de la démission ci-jointe\n"
+"Demander\n"
+"<t t-if = \"object.employee_id\">\n"
+"\"<span t-out =\" object.employee_id.name ou '' \">\n"
+"</pan> \"\n"
+"</t>\n"
+"<br>\n"
+"<br>\n"
+"</p>\n"
+"</div>"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
+msgid "<i class=\"fa fa-book\" title=\"Journal Entry\"/>"
+msgstr "<i class = \"fa fa-book\" title = \"Journal Entry\" />"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+msgid "<i class=\"fa fa-calendar\" title=\"Work Entries\"/>"
+msgstr "<i class = \"fa fa-calendar\" title = \"work entrées\" />"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+msgid "<i class=\"fa fa-clock-o\" title=\"Attendance\"/>"
+msgstr "<i class = \"fa fa-hlock-o\" title = \"présence\" />"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_employee_form
+msgid "<i class=\"fa-credit-card\" title=\"Payslip\"/>"
+msgstr "<i class = \"fa-credit-card\" title = \"payslip\" />"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
+msgid "<span invisible=\"not notice_period\"> Days</span>"
+msgstr "<span invisible = \"ne pas prévoir la période\"> jours </span>"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_list_form
 msgid ""
-"<span nolabel=\"1\">The dates and credit note listed on\n"
-"                        Payslips Batch will be used by this wizard to create\n"
+"<span nolabel=\"1\">\n"
+"                        The dates and credit note listed on Payslips Batch will be used by this wizard to create\n"
 "                        payslips for the selected employee or employees.\n"
 "                    </span>"
 msgstr ""
+"<span nolabel = \"1\">\n"
+"Les dates et la note de crédit répertoriées sur le lot PaySlips seront utilisées par cet assistant pour créer\n"
+"Pays de paie pour l'employé ou les employés sélectionnés.\n"
+"</span>"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_batch_payslip_mark_paid_form
+msgid ""
+"<span>Are you sure you want to mark all the payslips paid? <br/></span>"
+msgstr ""
+"<Span> Êtes-vous sûr de vouloir marquer toutes les plateaux de paie "
+"payés?<br/> </span>"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.resignation_request
@@ -115,20 +168,20 @@ msgid "Access for Payroll Management Module"
 msgstr "Accès au module de gestion de la paie"
 
 #. module: cyllo_payroll_management
+#: model:ir.model,name:cyllo_payroll_management.model_account_move_line
+msgid "Account Move Line"
+msgstr "Écriture comptable"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_form
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_res_config_settings_form
 msgid "Accounting"
 msgstr "Comptabilité"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
-msgid "Accounting Configuration"
-msgstr "Configuration comptable"
-
-#. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_form
-msgid "Accounting Details"
-msgstr "Détails comptables"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__account_move_id
+msgid "Accounting Entry"
+msgstr "Entrée de comptabilité"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__message_needaction
@@ -150,7 +203,7 @@ msgstr "Action nécessaire"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__active
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__active
 msgid "Active"
-msgstr "Active"
+msgstr ""
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__active_amount
@@ -245,6 +298,11 @@ msgid "Always True"
 msgstr "Toujours vrai"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
+msgid "Always true"
+msgstr "Toujours vrai"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_input__amount
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__amount
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
@@ -263,6 +321,11 @@ msgid "Amount Type"
 msgstr "Type de montant"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__gratuity_amount
+msgid "Amount of appreciation payed to employee"
+msgstr "Montant d'appréciation versée à l'employé"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_attachment__month_amount
 msgid "Amount to pay each month"
 msgstr "Montant à payer chaque mois"
@@ -270,8 +333,13 @@ msgstr "Montant à payer chaque mois"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__appears_on_payslip
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__appears_on_payslip
-msgid "Appears on Payslip"
+msgid "Appears On Payslip"
 msgstr "Apparaît sur la fiche de paie"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
+msgid "Appears on payslip"
+msgstr "Apparaît sur Payslip"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__condition_python
@@ -280,19 +348,17 @@ msgid ""
 "Applied this rule for calculation if condition is true. You can specify "
 "condition like basic > 1000."
 msgstr ""
-"Appliqué cette règle pour le calcul si la condition est vraie. Vous pouvez spécifier "
-"état de base > 1000."
+"Appliqué cette règle pour le calcul si la condition est vraie. Vous pouvez "
+"spécifier état de base > 1000."
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_contract_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_contract_form
 msgid "Approve"
 msgstr "Approuver"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_resignation__state__approved
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__state__approve
 msgid "Approved"
 msgstr "Approuvée"
 
@@ -303,12 +369,12 @@ msgstr "Date confirmée"
 
 #. module: cyllo_payroll_management
 #: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_approved_resignations
-#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_approved_resignations
 msgid "Approved Resignation"
 msgstr "Démission approuvée"
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_approved_resignations
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_approved_resignations
 msgid "Approved Resignations"
 msgstr "Démissions approuvées"
 
@@ -373,13 +439,6 @@ msgid "Attendance"
 msgstr "Présence"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
-msgid ""
-"Attendance\n"
-"                                    ("
-msgstr "Présence\n"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__attendance_count
 msgid "Attendance Count"
 msgstr "Nombre de présences"
@@ -388,6 +447,11 @@ msgstr "Nombre de présences"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_work_entry_type__is_attendance
 msgid "Attendance Entry"
 msgstr "Entrée de présence"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+msgid "Attendance("
+msgstr "Présence("
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_other_input__structure_ids
@@ -407,7 +471,6 @@ msgstr "Montant du solde à payer"
 #. module: cyllo_payroll_management
 #: model:employee.salary.rule,name:cyllo_payroll_management.employee_salary_rule_basic_salary
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__basic_salary
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__basic_salary
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.resignation_request
 msgid "Basic Salary"
 msgstr "Salaire de base"
@@ -416,6 +479,32 @@ msgstr "Salaire de base"
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
 msgid "Basic Salary:"
 msgstr "Salaire de base:"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__batch
+msgid "Batch"
+msgstr "Lot"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_res_config_settings__batch_move_line
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_res_config_settings_form
+msgid "Batch Account Move Lines"
+msgstr "Lignes de déplacement du compte par lots"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_res_company__batch_move_line
+msgid "Batch Move"
+msgstr "Se déplacer par lots"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_account_move_line__batch_id
+msgid "Batch Name"
+msgstr "Nom de lot"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__batch_move_line
+msgid "Batch Payroll Move Line"
+msgstr "Ligne de déménagement de la paie par lots"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__is_batch_payslip
@@ -428,11 +517,17 @@ msgid "Batch Payslip Enabled"
 msgstr "Fiche de paie par lots activée"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__batch_payslip_name
+msgid "Batch Payslip Name"
+msgstr "Nom de la rémunération par lots"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_attachment_form
 msgid "CANCEL"
 msgstr "ANNULER"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_batch_payslip_mark_paid_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_list_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
@@ -449,6 +544,7 @@ msgstr "Annulé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__category_id
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 msgid "Category"
 msgstr "Catégorie"
@@ -490,16 +586,6 @@ msgid "Choose the Contract"
 msgstr "Choisissez le contrat"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
-msgid "Close"
-msgstr "Fermer"
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_batch__state__close
-msgid "Closed"
-msgstr "Fermée"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__hr_work_entry_type__round_type__closest
 msgid "Closest"
 msgstr "Le plus proche"
@@ -510,7 +596,6 @@ msgstr "Le plus proche"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_other_input__code
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__code
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule_category__code
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__code
 msgid "Code"
 msgstr "Code"
 
@@ -521,9 +606,10 @@ msgid "Code:"
 msgstr "Code:"
 
 #. module: cyllo_payroll_management
+#: model:ir.model,name:cyllo_payroll_management.model_res_company
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_attachment_search
 msgid "Companies"
-msgstr "Entreprises"
+msgstr "Sociétés"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__company_id
@@ -544,6 +630,8 @@ msgstr "Entreprises"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__company_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_resigned_reasons__company_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_salary_structure_type__company_id
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__company_id
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__company_id
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__company_id
 msgid "Company"
 msgstr "Entreprise"
@@ -554,13 +642,8 @@ msgid "Company Contribution"
 msgstr "Contribution de l'entreprise"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__company_id
-#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__company_id
-msgid "Company id"
-msgstr "Identifiant de l'entreprise"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_salary_attachment__state__completed
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_training_period__state__done
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_attachment_search
 msgid "Completed"
 msgstr "Complété"
@@ -578,18 +661,23 @@ msgstr "Calcul"
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 msgid "Compute Sheet"
-msgstr "Compute Sheet"
+msgstr "Feuille de calcul"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__condition_select
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__condition_select
 msgid "Condition Based on"
-msgstr "Condition Based on"
+msgstr "Condition basée sur"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_form
 msgid "Conditions"
 msgstr "Terms"
+
+#. module: cyllo_payroll_management
+#: model:ir.model,name:cyllo_payroll_management.model_res_config_settings
+msgid "Config Settings"
+msgstr "Paramètres de configuration"
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_configuration_categ
@@ -599,39 +687,43 @@ msgstr "Configuration"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__gratuity_duration_line_id
 msgid "Configuration Line"
-msgstr "Configuration Line"
+msgstr "Ligne de configuration"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_batch_payslip_mark_paid_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_resignation_request_confirm_form
 msgid "Confirm"
-msgstr "Confirm"
+msgstr "Confirmer"
 
 #. module: cyllo_payroll_management
 #: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_resignation_request
 msgid "Confirm Resignation Request"
-msgstr "Confirm Resignation Request"
+msgstr "Confirmer la demande de démission"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_batch__state__confirm
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_resignation__state__confirm
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__state__confirm
 msgid "Confirmed"
-msgstr "Confirmed"
+msgstr "Confirmé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__confirmed_date
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.resignation_request
 msgid "Confirmed Date"
-msgstr "Confirmed Date"
+msgstr "Date confirmée"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__contract_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__contract_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__contract_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__contract_id
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__contract_id
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
 msgid "Contract"
-msgstr "Contract"
+msgstr "Contracter"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
@@ -651,10 +743,35 @@ msgid "Contract Type"
 msgstr "Type de contrat"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__end_date
+msgid "Contract end date"
+msgstr "Date de fin du contrat (s'il s'agit d'un contrat à durée déterminée)."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__contract_id
+msgid "Contract for the selected employee"
+msgstr "Contrat pour l'employé sélectionné"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__contract_id
+msgid "Contract related to employee"
+msgstr "Contrat actuel du salarié"
+
+#. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_contracts
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_contracts_categ
 msgid "Contracts"
 msgstr "Contrats"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__journal_entry_count
+msgid "Count of journal entries of payslip"
+msgstr "Compte des entrées de journal de Payslip"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__entry_count
+msgid "Count of work entries for payslip employee"
+msgstr "Count d'entrées de travail pour les employés de paiement"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_structure__country_id
@@ -664,11 +781,22 @@ msgstr "Pays"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
+msgid "Create Batch Entry"
+msgstr "Créer une entrée par lots"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
+msgid "Create Date"
+msgstr "Créer une date"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 msgid "Create Draft Entry"
 msgstr "Créer une entrée brouillon"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_all_payslip
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_to_pay
 msgid "Create New Employee Payslip Here"
 msgstr "Créez une nouvelle fiche de paie d'employé ici"
@@ -676,7 +804,8 @@ msgstr "Créez une nouvelle fiche de paie d'employé ici"
 #. module: cyllo_payroll_management
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_salary_rule_category
 msgid "Create New Employee Salary Rule Category Here"
-msgstr "Créez une nouvelle catégorie de règles salariales pour les employés ici"
+msgstr ""
+"Créez une nouvelle catégorie de règles salariales pour les employés ici"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_training_period
@@ -694,9 +823,9 @@ msgid "Create New Gratuity Settlements"
 msgstr "Créer de nouveaux règlements de gratifications"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_refused_reason
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_resigned_reason
 msgid "Create New Resigned Reasons Here"
-msgstr "Créez de nouveaux motifs de démission ici"
+msgstr "Créer de nouvelles raisons résignées ici"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_structure_type
@@ -704,6 +833,7 @@ msgid "Create New Salary Structure Type Here"
 msgstr "Créez un nouveau type de structure salariale ici"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__create_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__create_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__create_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__create_uid
@@ -727,6 +857,7 @@ msgid "Created by"
 msgstr "Créé par"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__create_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__create_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__create_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__create_date
@@ -752,9 +883,6 @@ msgstr "Créé sur"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__account_credit_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__account_credit_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__credit_account_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__credit_account_id
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
 msgid "Credit Account"
 msgstr "Compte créditeur"
 
@@ -762,11 +890,6 @@ msgstr "Compte créditeur"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__credit_note
 msgid "Credit Note"
 msgstr "Note de crédit"
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__credit_account_id
-msgid "Credit account for the gratuity"
-msgstr "Compte créditeur pour le pourboire"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_input__currency_id
@@ -783,9 +906,14 @@ msgid "Currency of company"
 msgstr "Devise de l'entreprise"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__contract_id
-msgid "Current contract of the employee"
-msgstr "Contrat actuel du salarié"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__contract_id
+msgid "Current Contract"
+msgstr "Contract"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__date_from__current
+msgid "Current contract"
+msgstr "Contrat actuel"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_training_period__job_position_id
@@ -798,13 +926,9 @@ msgid "Daily"
 msgstr "Tous les jours"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__daily_wage
-msgid "Daily Wage"
-msgstr "Salaire journalier"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__start_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__start_date
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__date_from
 msgid "Date From"
 msgstr "Dater de"
 
@@ -813,6 +937,11 @@ msgstr "Dater de"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__end_date
 msgid "Date To"
 msgstr "Date de"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__joining_date
+msgid "Date of joining"
+msgstr "Date d'adhésion"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_form
@@ -833,16 +962,8 @@ msgstr "Allocation de cherté"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__account_debit_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__account_debit_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__debit_account_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__debit_account_id
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
 msgid "Debit Account"
 msgstr "Compte de débit"
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__debit_account_id
-msgid "Debit account for the gratuity"
-msgstr "Compte débiteur du pourboire"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_attachment__employee_payslip_other_input_id
@@ -881,11 +1002,11 @@ msgstr "Département"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid ""
 "Depending on the type of structure, the payslip's duration is not accurate."
-msgstr "Selon le type de structure, la durée du bulletin de paie n'est pas précise."
+msgstr ""
+"Selon le type de structure, la durée du bulletin de paie n'est pas précise."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__name
@@ -910,6 +1031,7 @@ msgid "Designation"
 msgstr "Désignation"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__display_name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__display_name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__display_name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__display_name
@@ -938,6 +1060,12 @@ msgid "Display in Payslip"
 msgstr "Afficher dans la fiche de paie"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__divide_days
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__divide_days
+msgid "Divide days"
+msgstr "Diviser les jours"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__attachment
 msgid "Document"
 msgstr "Document"
@@ -945,14 +1073,8 @@ msgstr "Document"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip__state__done
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_batch__state__done
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
 msgid "Done"
 msgstr "Fait"
-
-#. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
-msgid "Done Payslip Batches"
-msgstr "Lots de fiches de paie terminés"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__hr_work_entry_type__round_type__down
@@ -967,11 +1089,6 @@ msgstr "Vers le bas"
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
 msgid "Draft"
 msgstr "Brouillon"
-
-#. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
-msgid "Draft Payslip Batches"
-msgstr "Projets de lots de fiches de paie"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
@@ -994,6 +1111,7 @@ msgstr "E-mail"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_resignation_request_confirm__employee_id
 #: model:res.groups,name:cyllo_payroll_management.group_cyllo_payroll_management_employee
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
 msgid "Employee"
 msgstr "Employé"
 
@@ -1029,11 +1147,12 @@ msgid "Employee Name"
 msgstr "Nom de l'employé"
 
 #. module: cyllo_payroll_management
+#: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_all_payslip
 #: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_to_pay
 #: model:ir.actions.report,name:cyllo_payroll_management.report_employee_payslip_report
 #: model:ir.model,name:cyllo_payroll_management.model_employee_payslip
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__employee_payslip_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__employee_payslip_id
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_all_payslip
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_refunded_payslip
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_to_pay
 msgid "Employee Payslip"
@@ -1069,10 +1188,8 @@ msgstr "Demande de démission d'un employé"
 
 #. module: cyllo_payroll_management
 #: model:mail.template,subject:cyllo_payroll_management.mail_template_resignation_request
-msgid ""
-"Employee Resignation Request - \"{{ object.employee_id.name }}\"\n"
-"            "
-msgstr ""
+msgid "Employee Resignation Request - \"{{ object.employee_id.name }}\""
+msgstr "Demande de démission de l'employé - \"{{object.employee_id.name}}\""
 
 #. module: cyllo_payroll_management
 #: model:ir.model,name:cyllo_payroll_management.model_employee_salary_attachment
@@ -1116,15 +1233,30 @@ msgid "Employee Working Details"
 msgstr "Détails de travail des employés"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__employee_id
+msgid "Employee for gratuity settlement"
+msgstr "Employé pour le règlement de gratification"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__gratuity_years
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_years
 msgid "Employee gratuity years"
 msgstr "Années de gratification des employés"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__joining_date
-msgid "Employee joining date"
-msgstr "Date d'arrivée du salarié"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__employee_training_period_id
+msgid "Employee training period data"
+msgstr "Données de période de formation des employés"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__training_date_to
+msgid "Employee training period end date"
+msgstr "Période de formation des employés Date de fin"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__training_date_from
+msgid "Employee training period start date"
+msgstr "Période de formation des employés date de début"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__leave_taken
@@ -1161,31 +1293,46 @@ msgid "Employees in Notice Period"
 msgstr "Employés en période de préavis"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_other_inputs
+msgid "Employees payslip other inputs"
+msgstr "Les employés payent d'autres intrants"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_salary_attachment
+msgid "Employees salary attachment"
+msgstr "Attachement salarial des employés"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_salary_rule
+msgid "Employees salary rule"
+msgstr "Règle de salaire des employés"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_salary_structure
+msgid "Employees salary structures"
+msgstr "Structures salariales des employés"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_employees_in_notice_period
-msgid ""
-"Employees who are in notice\n"
-"                period"
-msgstr ""
-"Employés prévenus\n"
-"                période"
+msgid "Employees who are in notice period"
+msgstr "Les employés qui sont en période de préavis"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__end_date
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__end_date
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__training_date_end
-msgid "End Date"
-msgstr "Date de fin"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_training_period__end_date
-msgid "End date"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__end_date
+msgid "End Date"
 msgstr "Date de fin"
 
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_training_period.py:0
-#: code:addons/cyllo_payroll_management/models/employee_training_period.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_configuration.py:0
+#, python-format
+msgid "End date must be grater than the start date"
+msgstr "La date de fin doit être supérieure à la date de début"
+
+#. module: cyllo_payroll_management
+#. odoo-python
 #: code:addons/cyllo_payroll_management/models/gratuity_configuration.py:0
 #, python-format
 msgid "End date must be grater than the start date "
@@ -1197,18 +1344,22 @@ msgid "End date of batch payslip period"
 msgstr "Date de fin de période de paie groupée"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__end_date
+msgid "End date of gratuity"
+msgstr "Date de fin de la gratification"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__to_date
 msgid "End date of payslip"
 msgstr "Date de fin du bulletin de salaire"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__end_date
-msgid "End date of the contract (if it's a fixed-term contract)."
-msgstr "Date de fin du contrat (s'il s'agit d'un contrat à durée déterminée)."
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_training_period__end_date
+msgid "End date of training"
+msgstr "Date de fin de la formation"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #, python-format
 msgid "End date should be after the start date"
@@ -1226,10 +1377,18 @@ msgid "Enter a fixed amount for this payroll element."
 msgstr "Saisissez un montant fixe pour cet élément de paie."
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__amount_python_compute
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__amount_python_compute
+msgid "Enter a valid python code for computation"
+msgstr "Entrez un code Python valide pour le calcul"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__note
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__note
 msgid "Enter any additional notes or descriptions related to this record."
-msgstr "Saisissez toutes les notes ou descriptions supplémentaires liées à cet enregistrement."
+msgstr ""
+"Saisissez toutes les notes ou descriptions supplémentaires liées à cet "
+"enregistrement."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_attachment__description
@@ -1238,7 +1397,7 @@ msgstr "Saisissez les commentaires à ajouter au bulletin de paie"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_attachment__employee_id
-msgid "Enter the name of employee"
+msgid "Enter the name of employee or select one"
 msgstr "Entrez le nom de l'employé"
 
 #. module: cyllo_payroll_management
@@ -1249,10 +1408,17 @@ msgstr "Entrez la date de début"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Error! You cannot create recursive hierarchy of Salary Rules."
-msgstr "Erreur! Vous ne pouvez pas créer une hiérarchie récursive de règles salariales."
+msgstr ""
+"Erreur! Vous ne pouvez pas créer une hiérarchie récursive de règles "
+"salariales."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__structure_id
+msgid "Establish the rules for this payslip based on the selected contract"
+msgstr ""
+"Établir les règles de cette rémunération en fonction du contrat sélectionné"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__end_date
@@ -1266,9 +1432,30 @@ msgid "Eventual third party involved in the salary payment of the employees."
 msgstr "Tiers éventuel impliqué dans le paiement des salaires des salariés."
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_training_period__state__extended
-msgid "Extended"
-msgstr "Étendue"
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__date_from__exact
+msgid "Exact contract period"
+msgstr "Période de contrat exacte"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__extra_days
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__extra_days
+msgid "Extra days"
+msgstr "Jours supplémentaires"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__extra_days
+msgid "Extra no. of days allowed for employee"
+msgstr "Extra no.des jours autorisés pour l'employé"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__date_from__first
+msgid "First contract"
+msgstr "Premier contrat"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
+msgid "Fixed"
+msgstr ""
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__amount_fix
@@ -1345,13 +1532,14 @@ msgstr "Générer"
 
 #. module: cyllo_payroll_management
 #: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_employee_payslip_batch_list
+#: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_employee_payslip_batch_mark_paid
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
 msgid "Generate Payslips"
 msgstr "Générer des fiches de paie"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__name
-msgid "Give the name of the salary rule"
+msgid "Give a name for the salary rule"
 msgstr "Donnez le nom de la règle salariale"
 
 #. module: cyllo_payroll_management
@@ -1374,6 +1562,7 @@ msgstr "Années de calcul de la gratification"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__gratuity_configuration_ids
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__gratuity_configuration_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__gratuity_configuration_id
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__gratuity_configuration_ids
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_gratuity_configuration
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_gratuity_configuration
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
@@ -1391,12 +1580,20 @@ msgid "Gratuity Details"
 msgstr "Détails du pourboire"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__gratuity_duration_line_ids
+msgid "Gratuity Duration Line"
+msgstr "Ligne de durée de gratification"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__gratuity_amount
 msgid "Gratuity Payment"
 msgstr "Paiement du pourboire"
 
 #. module: cyllo_payroll_management
+#: model:employee.salary.rule,name:cyllo_payroll_management.employee_salary_rule_gratuity_settlement
 #: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_gratuity_settlement
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__gratuity_settlement_id
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__gratuity_settlement_ids
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__gratuity_settlement_id
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_gratuity_settlement
 msgid "Gratuity Settlement"
@@ -1408,32 +1605,33 @@ msgid "Gratuity Settlement Details"
 msgstr "Détails du règlement des gratifications"
 
 #. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid "Gratuity Settlement is not available to Selected Employees."
-msgstr "Le règlement des gratifications n’est pas disponible pour les employés sélectionnés."
-
-#. module: cyllo_payroll_management
 #: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_gratuity_settlement
 msgid "Gratuity Settlements"
 msgstr "Règlements de gratifications"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__credit_account_id
-msgid "Gratuity credit account"
-msgstr "Compte de crédit de pourboire"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_configuration_id
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_configuration_ids
+msgid ""
+"Gratuity configuration available for selected employee and contract type"
+msgstr ""
+"Configuration de gratification disponible pour les employés et le type de "
+"contrat sélectionnés"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__debit_account_id
-msgid "Gratuity debit account"
-msgstr "Compte de débit de pourboire"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__gratuity_configuration_ids
+msgid "Gratuity configuration lines"
+msgstr "Lignes de configuration de gratification"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__journal_id
-msgid "Gratuity journal"
-msgstr "Journal des gratifications"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_duration_line_id
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_duration_line_ids
+msgid ""
+"Gratuity configuration lines applicable for selected employee and contract "
+"type"
+msgstr ""
+"Lignes de configuration de gratification applicables pour les employés et le"
+" type de contrat sélectionnés"
 
 #. module: cyllo_payroll_management
 #: model:employee.salary.rule,name:cyllo_payroll_management.employee_salary_rule_gross
@@ -1442,6 +1640,7 @@ msgstr ""
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_attachment_search
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_structure_search
@@ -1456,7 +1655,7 @@ msgstr "Type de prestations RH"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__house_rent
 msgid "HRA"
-msgstr "HRA"
+msgstr "Hra"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__hr_work_entry_type__round_days__half
@@ -1515,6 +1714,7 @@ msgid "House rent allowance of the employee"
 msgstr "Allocation de logement du salarié"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__id
@@ -1578,7 +1778,8 @@ msgstr "Icône pour indiquer une activité d'exception."
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__message_needaction
 #: model:ir.model.fields,help:cyllo_payroll_management.field_salary_structure_type__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "Si cette case est cochée, les nouveaux messages nécessitent votre attention."
+msgstr ""
+"Si cette case est cochée, les nouveaux messages nécessitent votre attention."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__message_has_error
@@ -1607,6 +1808,15 @@ msgid "If checked, some messages have a delivery error."
 msgstr "Si coché, certains messages ont une erreur de livraison"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__include_training
+msgid ""
+"If enabled, the training period of employee also included in gratuity "
+"computation"
+msgstr ""
+"S'il est activé, la période de formation de l'employé a également inclus "
+"dans le calcul de la gratification"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__is_batch_payslip
 msgid "If its checked, indicates that it generated batch payslip"
 msgstr "Si c'est coché, cela indique qu'il a généré une fiche de paie groupée"
@@ -1618,39 +1828,35 @@ msgid ""
 "If the active field is set to false, it will allow you to hide the salary "
 "rule without removing it."
 msgstr ""
-"Si le champ actif est mis à faux, cela vous permettra de masquer le salaire"
-"règle sans l'enlever."
+"Si le champ actif est mis à faux, cela vous permettra de masquer le "
+"salairerègle sans l'enlever."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__contract_type
 msgid ""
-"If the contract have the end date then the contract type is limited,if the "
+"If the contract have the end date then the contract type is limited, if the "
 "contract have not the end date the contract type will be unlimited"
 msgstr ""
-"Si le contrat a une date de fin, le type de contrat est limité, si le "
-"le contrat n'a pas de date de fin, le type de contrat sera illimité"
+"Si le contrat a une date de fin, le type de contrat est limité, si le le "
+"contrat n'a pas de date de fin, le type de contrat sera illimité"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_list_form
 msgid ""
-"If you want to choose every\n"
-"                            employee from this structure, then set a customised\n"
-"                            compensation structure."
+"If you want to choose every employee from this structure, then set a "
+"customised compensation structure."
 msgstr ""
-"Si vous voulez choisir tous\n"
-" employé de cette structure, puis définissez un personnalisé\n"
-"structure de rémunération."
+"Si vous souhaitez choisir chaque employé de cette structure, définissez une "
+"structure de rémunération personnalisée."
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_list_form
 msgid ""
-"If you want to choose every\n"
-"                            employee in this department (as well as any\n"
-"                            subdepartments) at once, set a specific department."
+"If you want to choose every employee in this department (as well as any "
+"subdepartments) at once, set a specific department."
 msgstr ""
-"Si vous voulez choisir tous\n"
-" employé de ce service (ainsi que tout\n"
-" sous-départements) à la fois, définissez un département spécifique. »
+"Si vous souhaitez choisir chaque employé de ce département (ainsi que tous "
+"les sous-dispositifs) à la fois, définissez un département spécifique."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__image_1920
@@ -1659,16 +1865,9 @@ msgid "Image"
 msgstr "Image"
 
 #. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid ""
-"In Gratuity's configuration, there is a date conflict.Kindly resolve the "
-"disagreement and give it another go."
-msgstr ""
-"Dans la configuration de Gratuity, il y a un conflit de dates. Veuillez résoudre le "
-"Désaccord et réessayez."
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__include_training
+msgid "Include training"
+msgstr "Inclure la formation"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__credit_note
@@ -1679,6 +1878,11 @@ msgstr "Indique que cette fiche de paie a un remboursement d'une autre"
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 msgid "Input Data"
 msgstr "Des données d'entrée"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__is_approved
+msgid "Is Approved"
+msgstr "Est approuvé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__message_is_follower
@@ -1696,37 +1900,32 @@ msgid "Is Follower"
 msgstr "Est un suiveur"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__is_approved
-msgid "Is approved"
-msgstr "Est approuvé"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__gratuity_amount
 msgid ""
-"It is calculated,If the wage type is hourly then gratuity payment is "
-"calculated as employee basic salary * Employee Daily Wage Days * gratuity "
-"configration rule percentage * gratuity calculation years.If the wage type "
-"is monthly then gratuity payment is calculated as employee basic salary * "
-"(Working Days/Employee Daily Wage Days) * gratuity configration rule "
-"percentage * gratuity calculation years."
+"It is calculated from (Employee basic salary * Extra allowed days *  "
+"Experience in years * Percentage) / (Divide in days * 100), where the values"
+" will be taken from gratuity configuration"
 msgstr ""
-"Il est calculé. Si le type de salaire est horaire, le paiement de la gratification est "
-"calculé comme salaire de base de l'employé * Jours de salaire journalier de l'employé * gratification"
-"Pourcentage de la règle de configuration * Années de calcul de la gratification. Si la rubrique "
-"est mensuel, le paiement de la gratification est alors calculé comme le salaire de base de l'employé * "
-"(Jours ouvrés/Jours de salaire journalier de l'employé) * règle de configuration des gratifications"
-"pourcentage * années de calcul de la gratification."
+"Il est calculé. Si le type de salaire est horaire, le paiement de la "
+"gratification est calculé comme salaire de base de l'employé * Jours de "
+"salaire journalier de l'employé * gratificationPourcentage de la règle de "
+"configuration * Années de calcul de la gratification. Si la rubrique est "
+"mensuel, le paiement de la gratification est alors calculé comme le salaire "
+"de base de l'employé * (Jours ouvrés/Jours de salaire journalier de "
+"l'employé) * règle de configuration des gratificationspourcentage * années "
+"de calcul de la gratification."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__quantity
 msgid ""
 "It is used in computation for percentage and fixed amount. For e.g. A rule "
-"for Meal Voucherhaving fixed amount of 1€ per worked day can have its "
+"for Meal Voucher having fixed amount of 1€ per worked day can have its "
 "quantity defined in expression like worked_days.WORK100.number_of_days."
 msgstr ""
-"Il est utilisé dans le calcul du pourcentage et du montant fixe. Par exemple, une règle"
-"pour les Chèques Repas ayant un montant forfaitaire de 1€ par jour travaillé peuvent avoir son "
-"quantité définie dans une expression telle que working_days.WORK100.number_of_days."
+"Il est utilisé dans le calcul du pourcentage et du montant fixe. Par "
+"exemple, une règlepour les Chèques Repas ayant un montant forfaitaire de 1€ "
+"par jour travaillé peuvent avoir son quantité définie dans une expression "
+"telle que working_days.WORK100.number_of_days."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__amount
@@ -1740,24 +1939,27 @@ msgid "Job Position"
 msgstr "Poste"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__joining_date
-msgid "Joining Date"
-msgstr "Date d'inscription"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__joining_date
+msgid "Joining date"
+msgstr "Date d'adhésion"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__journal_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__journal_id
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__journal_id
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
-msgid "Journal"
-msgstr "Journal"
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
+msgid "Journal Entry"
+msgstr "Journal Entrée"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
-msgid "Journal Configuration"
-msgstr "Configuration des journaux"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__journal_entry_count
+msgid "Journal Entry Count"
+msgstr "Compte d'entrée au journal"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__journal_id
+msgid "Journal related to the structure"
+msgstr "Journal lié à la structure"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__write_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__write_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__write_uid
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__write_uid
@@ -1781,6 +1983,7 @@ msgid "Last Updated by"
 msgstr "Dernière mise à jour par"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_batch_payslip_mark_paid__write_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__write_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__write_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch_list__write_date
@@ -1804,6 +2007,11 @@ msgid "Last Updated on"
 msgstr "Dernière mise à jour le"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__contract_id
+msgid "Latest employee contract"
+msgstr "Dernier contrat des employés"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__leaving_date
 msgid "Leaving Date"
 msgstr "Date de départ"
@@ -1813,11 +2021,6 @@ msgstr "Date de départ"
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__contract_type__limited
 msgid "Limited"
 msgstr "Limitée"
-
-#. module: cyllo_payroll_management
-#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_refunded_payslip
-msgid "Listed the refunded payslip here"
-msgstr "J'ai listé la fiche de salaire remboursée ici"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_other_input_form
@@ -1833,6 +2036,28 @@ msgstr "MARQUER COMME COMPLÉTÉ"
 #: model:res.groups,name:cyllo_payroll_management.group_cyllo_payroll_management_manager
 msgid "Manager"
 msgstr "Directrice"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__date_from__manual
+msgid "Manual"
+msgstr "Manuel"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
+msgid "Mark as fully paid"
+msgstr "Marquez comme entièrement payé"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_tree_register_payment
+msgid "Mark as paid"
+msgstr "Marquez comme payé"
+
+#. module: cyllo_payroll_management
+#: model:ir.model,name:cyllo_payroll_management.model_batch_payslip_mark_paid
+msgid "Mark batch payslip paid"
+msgstr "Mark Batch Payslip Payé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__condition_range_max
@@ -1855,7 +2080,7 @@ msgstr "Indemnité médicale"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__parent_rule_id
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__parent_rule_id
-msgid "Mention the Salary rule category"
+msgid "Mention the parent Salary rule"
 msgstr "Mentionner la catégorie de règle salariale"
 
 #. module: cyllo_payroll_management
@@ -1897,7 +2122,6 @@ msgstr "Portée minimale"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "Missing salary structure"
 msgstr "Structure salariale manquante"
@@ -1922,7 +2146,6 @@ msgstr "Salaire mensuel fixe"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
-#: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #, python-format
 msgid "Monthly amount should be positive"
 msgstr "Le montant mensuel doit être positif"
@@ -1946,11 +2169,13 @@ msgstr "Date limite de mon activité"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_other_input__name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule_category__name
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_structure__name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__type
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__name
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__name
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_form
 msgid "Name"
 msgstr "Nom"
 
@@ -1958,6 +2183,11 @@ msgstr "Nom"
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__name
 msgid "Name for the batch payslip"
 msgstr "Nom du bulletin de paie groupé"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__payslip_name
+msgid "Name of payslip"
+msgstr "Nom de Payslip"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_salary_structure_type__name
@@ -1971,7 +2201,6 @@ msgstr "Salaire net"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
 #: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_training_period__state__new
 #, python-format
@@ -2042,26 +2271,17 @@ msgstr "Pas d'arrondi"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
 #, python-format
-msgid "No configuration for an acceptable gratuity was found!"
-msgstr "Aucune configuration pour un pourboire acceptable n'a été trouvée !"
+msgid "No running contract found for selected employee"
+msgstr "Aucun contrat de course trouvé pour l'employé sélectionné"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid "No gratuity configuration found, please check the dates."
-msgstr "Aucune configuration de pourboire trouvée, veuillez vérifier les dates."
-
-#. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "No work entries might be produced during the time frame for %s - %s."
-msgstr "Aucune entrée de travail ne peut être produite pendant la période %s - %s."
+msgstr ""
+"Aucune entrée de travail ne peut être produite pendant la période %s - %s."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__notice_period
@@ -2114,6 +2334,11 @@ msgid "Number of errors"
 msgstr "Nombre d'erreurs"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__extra_days
+msgid "Number of extra working days allowed per year"
+msgstr "Nombre de jours ouvrables supplémentaires autorisés par an"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__message_needaction_counter
@@ -2144,9 +2369,10 @@ msgid "Number of messages with delivery error"
 msgstr "Nombre de messages avec erreur de livraison"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__working_days
-msgid "Number of working days per month"
-msgstr "Nombre de jours ouvrables par mois"
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__contract_type__open
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__contract_type__open
+msgid "Open"
+msgstr "Ouvrir"
 
 #. module: cyllo_payroll_management
 #: model:employee.salary.rule,name:cyllo_payroll_management.employee_salary_rule_other_allowance
@@ -2175,6 +2401,8 @@ msgstr "Autres entrées"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip__state__paid
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_batch__state__paid
+#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__state__paid
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
 msgid "Paid"
 msgstr "Payé"
 
@@ -2186,7 +2414,12 @@ msgstr "Montant payé"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__is_paid
 msgid "Paid Option"
-msgstr ""
+msgstr "Option payante"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
+msgid "Paid Payslip Batches"
+msgstr "Lots de paiement payant"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_structure__parent_id
@@ -2194,6 +2427,8 @@ msgid "Parent"
 msgstr "Option payante"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__parent_category_id
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__parent_category_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule_category__parent_id
 msgid "Parent Category"
 msgstr "Catégorie Parentale"
@@ -2203,6 +2438,12 @@ msgstr "Catégorie Parentale"
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__parent_rule_id
 msgid "Parent Salary Rule"
 msgstr "Règle salariale des parents"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__parent_category_id
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_rule__parent_category_id
+msgid "Parent category of selected rule category"
+msgstr "Catégorie parent de catégorie de règles sélectionnée"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__partner_id
@@ -2223,15 +2464,25 @@ msgstr "Fiche de paie"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "Pay Slip of %s for %s"
 msgstr "Fiche de paie de %s pour %s"
 
 #. module: cyllo_payroll_management
+#: model:ir.model,name:cyllo_payroll_management.model_account_payment
+msgid "Payments"
+msgstr "Paiements"
+
+#. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_cyllo_payroll_management_root
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_res_config_settings_form
 msgid "Payroll"
 msgstr "Paie"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__code
+msgid "Payroll Code"
+msgstr "Code"
 
 #. module: cyllo_payroll_management
 #: model:ir.module.category,name:cyllo_payroll_management.ir_module_category_payroll_management
@@ -2244,23 +2495,23 @@ msgid "Payroll Structures"
 msgstr "Structures de paie"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__employee_payslip_id
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_employee_form
 msgid "Payslip"
-msgstr "Fiche de paie"
-
-#. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_employee_form
-msgid ""
-"Payslip\n"
-"                            ("
-msgstr ""
+msgstr "Fiche de paie de l'employé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__employee_payslip_batch_id
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_payslip_batches
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_payslip_batches
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
 msgid "Payslip Batches"
 msgstr "Lots de fiches de paie"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
+msgid "Payslip Batches on Draft"
+msgstr "Lots de paiement des lots sur le projet"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_employee__payslip_count
@@ -2295,9 +2546,19 @@ msgid "Payslip Reference"
 msgstr "Référence de la fiche de paie"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__employee_payslip_ids
+msgid "Payslip related to this batch"
+msgstr "Payslip lié à ce lot"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__payslip_id
 msgid "Payslip the input"
 msgstr "Fiche de paie la saisie"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_employee_form
+msgid "Payslip("
+msgstr "Payslip ("
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_payslips_categ
@@ -2319,6 +2580,8 @@ msgstr "Fiches de paie des employés"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__percentage
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__percentage
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 msgid "Percentage"
 msgstr "Pourcentage"
 
@@ -2343,13 +2606,6 @@ msgstr "Veuillez ajouter une pièce justificative"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#, python-format
-msgid "Please add the Credit and Debit account in the rules."
-msgstr "Veuillez ajouter le compte de crédit et de débit dans les règles."
-
-#. module: cyllo_payroll_management
-#. odoo-python
 #: code:addons/cyllo_payroll_management/models/hr_contract.py:0
 #, python-format
 msgid "Please add the Training Start Date and End Date"
@@ -2363,17 +2619,16 @@ msgid "Please add the notice period for the employee(in days)"
 msgstr "Veuillez ajouter le délai de préavis du salarié (en jours)"
 
 #. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/hr_contract.py:0
-#, python-format
-msgid "Please choose an employee for the contract"
-msgstr "Veuillez choisir un employé pour le contrat"
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
+msgid "Python"
+msgstr "Python"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__amount_python_compute
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_rule__amount_python_compute
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_line__amount_select__code
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_salary_rule__amount_select__code
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 msgid "Python Code"
 msgstr "Code Python"
 
@@ -2408,6 +2663,7 @@ msgstr "EN COURS D'EXÉCUTION"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip_line__condition_select__range
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_salary_rule__condition_select__range
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 msgid "Range"
 msgstr "Gamme"
 
@@ -2440,6 +2696,16 @@ msgid "Reference"
 msgstr "Référence"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__reference
+msgid "Reference for payslip"
+msgstr "Référence pour le gilet"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__reference
+msgid "Reference for resignation"
+msgstr "Référence pour la démission"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__reference
 msgid "Reference of the record"
 msgstr "Référence"
@@ -2452,14 +2718,12 @@ msgstr "Remboursement"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "Refund Payslip"
 msgstr "Remboursement de la fiche de paie"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "Refund: "
@@ -2472,13 +2736,9 @@ msgid "Refunded Payslip"
 msgstr "Fiche de paie remboursée"
 
 #. module: cyllo_payroll_management
-#: model:ir.ui.menu,name:cyllo_payroll_management.menu_refused_reason
-msgid "Refused Reason"
-msgstr "Raison du refus"
-
-#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_tree_register_payment
 msgid "Register Payment"
 msgstr "S'inscrire Paiement"
 
@@ -2496,7 +2756,7 @@ msgstr "Rejetée"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__employee_payslip_batch_id
 msgid "Relation to the batch"
-msgstr "Relation to the batch"
+msgstr "Relation avec le lot"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__gratuity_settlement_id
@@ -2510,8 +2770,14 @@ msgstr "Détails de la démission"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_resigned_reasons__name
+#: model:ir.ui.menu,name:cyllo_payroll_management.menu_resigned_reason
 msgid "Resignation Reason"
 msgstr "Raison de la démission"
+
+#. module: cyllo_payroll_management
+#: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_resigned_reason
+msgid "Resignation Reasons"
+msgstr "Raisons de démission"
 
 #. module: cyllo_payroll_management
 #: model:ir.actions.report,name:cyllo_payroll_management.report_resignation_request
@@ -2541,9 +2807,8 @@ msgid "Resigned"
 msgstr "Résignée"
 
 #. module: cyllo_payroll_management
-#: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_refused_reason
 #: model:ir.model,name:cyllo_payroll_management.model_resigned_reasons
-#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_refused_reason
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_resigned_reason
 msgid "Resigned Reasons"
 msgstr "Raisons de démission"
 
@@ -2641,9 +2906,10 @@ msgid "Salary Computation"
 msgstr "Calcul du salaire"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__journal_id
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_structure__journal_id
 msgid "Salary Journal"
-msgstr "Journal des salaires"
+msgstr "Journal"
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_salary_rule
@@ -2700,6 +2966,11 @@ msgid "Scheduled Pay"
 msgstr "Paie programmée"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_structure__schedule_pay
+msgid "Scheduled payment type"
+msgstr "Pour ajouter l'horaire de paie"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_search
 msgid "Search Payslip Batches"
 msgstr "Rechercher des lots de fiches de paie"
@@ -2713,6 +2984,18 @@ msgstr "Rechercher une pièce jointe au salaire"
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_search
 msgid "Search Salary Rule"
 msgstr "Règle de recherche de salaire"
+
+#. module: cyllo_payroll_management
+#. odoo-python
+#: code:addons/cyllo_payroll_management/models/employee_payslip_batch.py:0
+#, python-format
+msgid "Select Payslips"
+msgstr "Sélectionner les plafonds"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__department_id
+msgid "Select department for this employee"
+msgstr "Sélectionnez le département pour cet employé"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__company_id
@@ -2733,8 +3016,10 @@ msgstr "Sélectionnez les salariés associés à cette fiche de paie."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch_list__batch_payslip_id
-msgid "Select the payslip run to which this record is associated."
-msgstr "Sélectionnez le traitement de fiche de paie auquel cet enregistrement est associé."
+msgid "Select the payslip run to which this  is associated."
+msgstr ""
+"Sélectionnez le traitement de fiche de paie auquel cet enregistrement est "
+"associé."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__resignation_type_id
@@ -2753,11 +3038,8 @@ msgstr "Envoyer une demande"
 
 #. module: cyllo_payroll_management
 #: model:mail.template,description:cyllo_payroll_management.mail_template_resignation_request
-msgid ""
-"Sent Resignation Request To The Manager\n"
-"            "
-msgstr ""
-"Envoyé une demande de démission au responsable\n"
+msgid "Sent Resignation Request To The Manager"
+msgstr "Envoyé une demande de démission au responsable\n"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__reference
@@ -2785,8 +3067,8 @@ msgid ""
 "Set a specific department if you wish to select all the employees from this "
 "department (and sub departments) at once."
 msgstr ""
-"Définissez un service spécifique si vous souhaitez sélectionner tous les employés de celui-ci "
-"département (et sous-départements) à la fois."
+"Définissez un service spécifique si vous souhaitez sélectionner tous les "
+"employés de celui-ci département (et sous-départements) à la fois."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch_list__structure_id
@@ -2796,10 +3078,10 @@ msgid ""
 "generated for all the selected employees, based on their contracts "
 "configuration."
 msgstr ""
-"Définissez une structure spécifique si vous souhaitez réaliser une fiche de paie supplémentaire (ex : Fin de "
-"la prime annuelle). Si vous laissez ce champ vide, une fiche de paie régulière sera "
-"généré pour tous les salariés sélectionnés, sur la base de leurs contrats"
-"configuration."
+"Définissez une structure spécifique si vous souhaitez réaliser une fiche de "
+"paie supplémentaire (ex : Fin de la prime annuelle). Si vous laissez ce "
+"champ vide, une fiche de paie régulière sera généré pour tous les salariés "
+"sélectionnés, sur la base de leurs contratsconfiguration."
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_batch_form
@@ -2809,16 +3091,22 @@ msgid "Set to Draft"
 msgstr "Définir sur Brouillon"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__joining_date
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__start_date
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__start_date
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__training_date_start
-msgid "Start Date"
-msgstr "Date de début"
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_form
+msgid "Set to draft"
+msgstr "Réglé à la rédaction"
 
 #. module: cyllo_payroll_management
+#: model:ir.actions.act_window,name:cyllo_payroll_management.action_view_settings
+#: model:ir.ui.menu,name:cyllo_payroll_management.menu_settings
+msgid "Settings"
+msgstr "Paramètres"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_resignation__joining_date
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__start_date
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_training_period__start_date
-msgid "Start date"
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration__start_date
+msgid "Start Date"
 msgstr "Date de début"
 
 #. module: cyllo_payroll_management
@@ -2827,9 +3115,19 @@ msgid "Start date of batch payslip period"
 msgstr "Date de début de période de paie groupée"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__start_date
+msgid "Start date of gratuity"
+msgstr "Date de début de la gratification"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__start_date
 msgid "Start date of payslip"
 msgstr "Date de début du bulletin de paie"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_training_period__start_date
+msgid "Start date of training"
+msgstr "Date de début de la formation"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__state
@@ -2886,6 +3184,11 @@ msgid "Status of the contract"
 msgstr "Statut du contrat"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
+msgid "Structure"
+msgstr "Structure"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_salary_structure_type__name
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_structure_type
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_structure_search
@@ -2893,19 +3196,16 @@ msgid "Structure Type"
 msgstr "Type de structure"
 
 #. module: cyllo_payroll_management
-#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_form
-msgid "Submit"
-msgstr "Soumettre"
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__state__submit
-msgid "Submitted"
-msgstr "Soumise"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__type_id
 msgid "The Type of other input in payslip"
 msgstr "Le type d'autre saisie dans la fiche de paie"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__account_move_id
+msgid "The account move of payslip where the journal entry posted"
+msgstr ""
+"Le déménagement du compte de la remise des paiements où l'entrée du journal "
+"a publié"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__allowed_type_ids
@@ -2914,8 +3214,10 @@ msgstr "Les types de saisie autorisés pour la fiche de paie en cours"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__salary_attachment_ids
-msgid "The attachments related to the salaryinformation for this record."
-msgstr "Les pièces jointes liées aux informations sur le salaire pour cet enregistrement."
+msgid "The attachments related to the salary information for this record."
+msgstr ""
+"Les pièces jointes liées aux informations sur le salaire pour cet "
+"enregistrement."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_structure__children_ids
@@ -2928,8 +3230,8 @@ msgid ""
 "The code of salary rules can be used as reference in computation of other "
 "rules. In that case, it is case sensitive."
 msgstr ""
-"Le code des règles salariales peut servir de référence dans le calcul des autres "
-"règles. Dans ce cas, c'est sensible à la casse."
+"Le code des règles salariales peut servir de référence dans le calcul des "
+"autres règles. Dans ce cas, c'est sensible à la casse."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__code
@@ -2969,14 +3271,16 @@ msgstr "La date de départ du salarié après le délai de préavis"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__approved_date
 msgid "The date when the resignation request, is approved by the manager"
-msgstr "La date à laquelle la demande de démission est approuvée par le gérant"
+msgstr ""
+"La date à laquelle la demande de démission est approuvée par le gérant"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__confirmed_date
 msgid ""
 "The date when the resignation request, is confirmed by the employee itself"
 msgstr ""
-"La date à laquelle la demande de démission, est confirmée par le salarié lui-même"
+"La date à laquelle la demande de démission, est confirmée par le salarié "
+"lui-même"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__dearness_allowance
@@ -2992,31 +3296,41 @@ msgstr "Le compte de débit pour l'écriture de journal validée"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid ""
 "The duration chosen does not correspond with the duration of the contract's "
 "validity."
-msgstr ""
-"La durée choisie ne correspond pas à la durée du contrat"
-"validité."
+msgstr "La durée choisie ne correspond pas à la durée du contratvalidité."
 
 #. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__divide_days
 msgid ""
-"The employee has multiple running contracts. Please ensure there is only one"
-" active contract for gratuity calculation."
+"The employee basic salary will be divided by this no. of days for gratuity computation\n"
+"e.g. if the given number is 30, then the value will be basic salary/30"
 msgstr ""
-"L'employé a plusieurs contrats en cours. Veuillez vous assurer qu'il n'y en a qu'un seul"
-"contrat actif pour le calcul de la gratification."
+"Le salaire de base des employés sera divisé par ce non.des jours pour le calcul de la gratification\n"
+"par exempleSi le nombre donné est de 30, la valeur sera le salaire de base / 30"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__date_from
+msgid ""
+"The employee experience will be calculated from \n"
+"First contract: The start date of the first contract of employee\n"
+"Current contract: The start date of the current contract of the employee\n"
+"Exact contract period: The exact period of time the employee is in any contract\n"
+"Manual: You can choose the date manually"
+msgstr ""
+"L'expérience des employés sera calculée à partir de\n"
+"Premier contrat: la date de début du premier contrat d'employé\n"
+"Contrat actuel: la date de début du contrat actuel de l'employé\n"
+"Période de contrat exacte: la période exacte de l'employé est dans n'importe quel contrat\n"
+"Manuel: vous pouvez choisir la date manuellement"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_structure__journal_id
 msgid "The journal of payslip where the journal entry posted"
-msgstr "Le journal de fiche de paie où l'écriture de journal a été enregistrée"
+msgstr ""
+"Le journal de fiche de paie où l'écriture de journal a été enregistrée"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__child_ids
@@ -3078,14 +3392,29 @@ msgid "The payslip inputs associated with this payslip."
 msgstr "Les saisies de fiche de paie associées à cette fiche de paie."
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__employee_payslip_line_ids
+msgid "The payslip rules associated with this payslip"
+msgstr "Les règles de paiement associées à cette rémunération"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_batch__employee_payslip_ids
 msgid "The payslips that in the batch"
 msgstr "Les fiches de paie qui sont dans le lot"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.actions.act_window,help:cyllo_payroll_management.action_view_refunded_payslip
+msgid "The refunded payslip will be listed here"
+msgstr "Le plafonds remboursé sera répertorié ici"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_structure__employee_salary_rule_ids
 msgid "The salary rules associated with this payroll structure."
 msgstr "Les règles salariales associées à cette structure de paie."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__percentage
+msgid "The total amount will be calculated with the percentage given here"
+msgstr "Pour ajouter le pourcentage"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__total_worked_hours
@@ -3112,7 +3441,8 @@ msgstr "Les types d'entrée de travail non rémunéré sont ajoutés ici"
 msgid ""
 "The warning messages for the payslip date violates the salary schedule pay"
 msgstr ""
-"Les messages d'avertissement pour la date du bulletin de paie ne respectent pas la grille salariale"
+"Les messages d'avertissement pour la date du bulletin de paie ne respectent "
+"pas la grille salariale"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_hr_work_entry_type__unpaid_structure_ids
@@ -3120,26 +3450,11 @@ msgid ""
 "The work entry on the payslip does not result in any monetary compensation "
 "for the employee."
 msgstr ""
-"L'inscription du travail sur le bulletin de paie n'entraîne aucune compensation monétaire"
-"pour l'employé."
+"L'inscription du travail sur le bulletin de paie n'entraîne aucune "
+"compensation monétairepour l'employé."
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid ""
-"There are no running contracts available for the chosen employee.The "
-"employee needs to be under an running contract in order to calculate their "
-"gratuity settlement."
-msgstr ""
-"Aucun contrat en cours n'est disponible pour le salarié choisi. Le "
-"un employé doit être sous contrat en cours pour pouvoir calculer son"
-"règlement des pourboires."
-
-#. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
 #: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
 #, python-format
 msgid ""
@@ -3148,12 +3463,22 @@ msgstr ""
 "Il existe déjà une demande de démission active ou approuvée pour cet employé"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__joining_date
+msgid "This date will be used for the gratuity of the employee"
+msgstr "Cette date sera utilisée pour la gratification de l'employé"
+
+#. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_training_period.py:0
 #: code:addons/cyllo_payroll_management/models/employee_training_period.py:0
 #, python-format
 msgid "This employee already has a training period."
 msgstr "Ce salarié bénéficie déjà d'un stage."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__trainee
+msgid "This employee can have a training period if this field is checked"
+msgstr ""
+"Cet employé peut avoir une période de formation si ce champ est vérifié"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_input__is_attachment
@@ -3161,23 +3486,13 @@ msgid "This enables the attachment"
 msgstr "Cela permet la fixation"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__training_date_end
-msgid "This field to show the end date of the employees training period"
-msgstr "Ce champ permet d'afficher la date de fin de stage des salariés."
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__training_date_start
-msgid "This field to show the starting date of the employees training period"
-msgstr "Ce champ pour afficher la date de début de la période de formation des salariés"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_other_input__structure_ids
 msgid ""
-"This input will be only available inthose structure.If empty, it will "
+"This input will be only available in those structure.If empty, it will "
 "beavailable in all payslip."
 msgstr ""
-"Cette entrée ne sera disponible que dans ces structures. Si elle est vide, elle"
-"être disponible dans toutes les fiches de paie."
+"Cette entrée ne sera disponible que dans ces structures. Si elle est vide, "
+"elleêtre disponible dans toutes les fiches de paie."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_attachment__attachment_name
@@ -3185,12 +3500,34 @@ msgid "This name is shown as attachment name"
 msgstr "Ce nom est affiché comme nom de pièce jointe"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__divide_days
+msgid "This number of days will be divided with employee basic salary"
+msgstr "Ce nombre de jours sera divisé avec le salaire de base des employés"
+
+#. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "This payslip might not be accurate:"
 msgstr "Cette fiche de paie pourrait ne pas être exacte :"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__to_year
+msgid ""
+"This rule will be applicable when an employee's experience is less than this number of years.\n"
+"If set to 0, then only the start year will be considered."
+msgstr ""
+"Cette règle sera applicable lorsque l'expérience d'un employé est inférieure à ce nombre d'années.\n"
+"S'il est réglé sur 0, seule l'année de début sera prise en compte."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__from_year
+msgid ""
+"This rule will be applicable when employee's experience id more than this number of years.\n"
+"If set to 0 then only the end year will be considered."
+msgstr ""
+"Cette règle sera applicable lorsque l'expérience des employés est supérieure à ce nombre d'années.\n"
+"Si vous êtes défini sur 0, seule l'année de fin sera envisagée."
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__condition_range
@@ -3200,24 +3537,31 @@ msgid ""
 "basic,but you can also use categories code fields in lowercase as a variable"
 " names(hra, ma, lta, etc.) and the variable basic."
 msgstr ""
-"Ceci sera utilisé pour calculer les valeurs des champs % ; en général, c'est sur "
-"de base, mais vous pouvez également utiliser les champs de code des catégories en minuscules comme variable"
-" les noms (hra, ma, lta, etc.) et la variable basic."
+"Ceci sera utilisé pour calculer les valeurs des champs % ; en général, c'est"
+" sur de base, mais vous pouvez également utiliser les champs de code des "
+"catégories en minuscules comme variable les noms (hra, ma, lta, etc.) et la "
+"variable basic."
 
 #. module: cyllo_payroll_management
 #: model:ir.model,name:cyllo_payroll_management.model_hr_leave
-msgid "Time Off"
-msgstr "Congés"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_training_period__time_off_ids
-msgid "Time off"
+msgid "Time Off"
 msgstr "Congés"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_training_period_form
 msgid "Time off Details"
 msgstr "Détails des congés"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_training_period__time_off_ids
+msgid "Time off allocated"
+msgstr "Temps libre alloué"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__half_time_off_ids
+msgid "Time off related to this employee"
+msgstr "Temps libre lié à cet employé"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.report_employee_payslip
@@ -3237,6 +3581,7 @@ msgstr "Pour ajouter le nom"
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_to_pay
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_search
 msgid "To Pay"
 msgstr "Payer"
 
@@ -3278,12 +3623,7 @@ msgstr "Pour ajouter le nom de la configuration"
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__name
 msgid "To add the name of the rule"
-msgstr ""
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__percentage
-msgid "To add the percentage"
-msgstr "Pour ajouter le pourcentage"
+msgstr "Pour ajouter le nom de la règle"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_resigned_reasons__name
@@ -3292,11 +3632,10 @@ msgstr "Pour ajouter le motif de la démission"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_resignation__reason
-msgid "To add the reason of the resignation"
+msgid "To add the reason of the resignation in detail"
 msgstr "Pour ajouter le motif de la démission"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_salary_structure__schedule_pay
 #: model:ir.model.fields,help:cyllo_payroll_management.field_salary_structure_type__default_schedule_pay
 msgid "To add the schedule pay"
 msgstr "Pour ajouter l'horaire de paie"
@@ -3317,6 +3656,17 @@ msgid "To add the working time of the employee"
 msgstr "Pour ajouter le temps de travail du salarié"
 
 #. module: cyllo_payroll_management
+#. odoo-python
+#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
+#, python-format
+msgid ""
+"To calculate exact experience of employee, all the contracts should have the"
+" start date and end date"
+msgstr ""
+"Pour calculer l'expérience exacte de l'employé, tous les contrats devraient "
+"avoir la date de début et la date de fin"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_hr_employee__is_resigned
 msgid "To check if the employee has resigned or not"
 msgstr "Pour vérifier si le salarié a démissionné ou non"
@@ -3328,7 +3678,7 @@ msgstr "Pour vérifier que le contrat est approuvé ou non"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__is_batch_payslip
-msgid "To check whether the payslip is genrated form the batch or not "
+msgid "To check whether the payslip is generated form the batch or not "
 msgstr "Pour vérifier si la fiche de paie est générée à partir du lot ou non"
 
 #. module: cyllo_payroll_management
@@ -3360,6 +3710,24 @@ msgid "To choose the salary structure type"
 msgstr "Pour choisir la catégorie parent"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_res_config_settings__batch_move_line
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_res_config_settings_form
+msgid ""
+"To combine all of the accounting entries for a given time into a single "
+"account move line, enable this option. In addition to disabling single "
+"payment generations, this will anonymize the accounting entries."
+msgstr ""
+"Pour combiner toutes les entrées comptables pour un temps donné dans une "
+"seule ligne de déplacement de compte, activez cette option.En plus de "
+"désactiver les générations de paiement unique, cela anonymisera les entrées "
+"comptables."
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_account_move_line__batch_id
+msgid "To get batch id from the batch payslip"
+msgstr "Pour obtenir un identifiant de lot de la rémunération par lots"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__employee_payslip_id
 msgid "To get te payslip values"
 msgstr "Pour obtenir les valeurs des fiches de paie"
@@ -3368,6 +3736,16 @@ msgstr "Pour obtenir les valeurs des fiches de paie"
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__currency_id
 msgid "To get the Currency"
 msgstr "Pour obtenir la monnaie"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__batch_payslip_name
+msgid "To get the batch payslip name"
+msgstr "Pour obtenir le nom de paiement du lot"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__batch
+msgid "To get the id of the batch"
+msgstr "Pour obtenir l'ID du lot"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__rate
@@ -3385,16 +3763,29 @@ msgid "To get the salary rule"
 msgstr "Pour obtenir la règle salariale"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__batch_move_line
+#: model:ir.model.fields,help:cyllo_payroll_management.field_res_company__batch_move_line
+msgid "To get the value from the settings"
+msgstr "Pour obtenir la valeur des paramètres"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__yearly_wage
 msgid "To get the yearly cost"
 msgstr "Pour obtenir le coût annuel"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__total
-msgid "Total"
-msgstr "Total"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_hr_contract__employee_salary_structure_id
+msgid "To select salary structure applicable for this employee"
+msgstr "Pour sélectionner la structure de salaire applicable pour cet employé"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip_line__total
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_settlement_tree
+msgid "Total"
+msgstr ""
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__total_amount
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_attachment__total_amount
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__amount
 msgid "Total Amount"
@@ -3418,13 +3809,7 @@ msgid "Total Years Worked"
 msgstr "Nombre total d'années travaillées"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__total_amount
-msgid "Total amount"
-msgstr "Montant total"
-
-#. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #, python-format
 msgid ""
@@ -3441,9 +3826,9 @@ msgid "Total amount to be paid"
 msgstr "Montant total à payer"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration_line__daily_wage
-msgid "Total number of employee wage days"
-msgstr "Nombre total de jours de salaire des employés"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__attendance_count
+msgid "Total attendance count for the payslip employee"
+msgstr "Compte de fréquentation totale pour l'employé Payslip"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_hr_employee__payslip_count
@@ -3470,6 +3855,11 @@ msgstr "Le paiement total est activé"
 #: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__total_working_years
 msgid "Total working years"
 msgstr "Années de travail totales"
+
+#. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__trainee
+msgid "Trainee"
+msgstr "Stagiaire"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_hr_contract_form
@@ -3519,6 +3909,17 @@ msgid "Type"
 msgstr "Taper"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_configuration__contract_type
+msgid ""
+"Type of employee contract\n"
+"Limited: applied when there is an end date for employee contract\n"
+"Unlimited: applied when there is no end date for employee contract"
+msgstr ""
+"Type de contrat des employés\n"
+"Limite: appliqué lorsqu'il y a une date de fin pour le contrat des employés\n"
+"Illimité: appliqué lorsqu'il n'y a pas de date de fin pour le contrat des employés"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__activity_exception_decoration
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_batch__activity_exception_decoration
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__activity_exception_decoration
@@ -3541,12 +3942,6 @@ msgstr "NON PAYÉ"
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__hr_work_entry_type__round_type__up
 msgid "UP"
 msgstr "EN HAUT"
-
-#. module: cyllo_payroll_management
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_configuration__contract_type__unlimited
-#: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__gratuity_settlement__contract_type__unlimited
-msgid "Unlimited"
-msgstr "Illimité"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_structure_form
@@ -3581,24 +3976,26 @@ msgid "Validity Details"
 msgstr "Détails de validité"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__basic_salary
+msgid "Wage"
+msgstr "Salaire de base"
+
+#. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_settlement__wage_type
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_hr_contract__wage_type
 msgid "Wage Type"
 msgstr "Type de salaire"
 
 #. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid "Wage days of employee is not configured in the gratuity configuration!"
-msgstr "Les jours de salaire du salarié ne sont pas configurés dans la configuration des gratifications !"
-
-#. module: cyllo_payroll_management
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_payslip__state__waiting
 #: model:ir.model.fields.selection,name:cyllo_payroll_management.selection__employee_resignation__state__waiting
 msgid "Waiting"
 msgstr "En attendant"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_resignation_search
+msgid "Waiting or Confirm"
+msgstr "Attendre ou confirmer"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_payslip__date_warning_message
@@ -3651,8 +4048,8 @@ msgid ""
 "When the work entry is displayed in the payslip, the value is rounded "
 "accordingly."
 msgstr ""
-"Lorsque l'inscription du travail est affichée dans la fiche de paie, la valeur est arrondie"
-"par conséquent."
+"Lorsque l'inscription du travail est affichée dans la fiche de paie, la "
+"valeur est arrondiepar conséquent."
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_work_entries_categ
@@ -3662,11 +4059,8 @@ msgstr "Entrées de travail"
 
 #. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
-msgid ""
-"Work Entries\n"
-"                                    ("
-msgstr ""
-"Entrées de travail\n"
+msgid "Work Entries("
+msgstr "Entrées de travail ("
 
 #. module: cyllo_payroll_management
 #: model:ir.ui.menu,name:cyllo_payroll_management.menu_work_entry
@@ -3684,13 +4078,17 @@ msgid "Work Entry Type"
 msgstr "Type d'entrée au travail"
 
 #. module: cyllo_payroll_management
+#: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip__employee_worked_days_ids
+msgid "Work days of payslip employee"
+msgstr "Journées de travail de l'employé de paiement"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 msgid "Worked Days"
 msgstr "Jours travaillés"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_worked_days__days
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_gratuity_configuration_line__working_days
 msgid "Working Days"
 msgstr "Jours de travail"
 
@@ -3706,27 +4104,15 @@ msgstr "Plan de travail"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#: code:addons/cyllo_payroll_management/models/gratuity_settlement.py:0
-#, python-format
-msgid ""
-"Working days of the employee is not configured in the gratuity "
-"configuration!"
-msgstr ""
-"Les jours de travail du salarié ne sont pas configurés dans la gratification"
-"configuration!"
-
-#. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Wrong percentage base or quantity defined for salary rule %s (%s)."
-msgstr "Base de pourcentage ou quantité incorrecte définie pour la règle de salaire %s (%s)."
+msgstr ""
+"Base de pourcentage ou quantité incorrecte définie pour la règle de salaire "
+"%s (%s)."
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Wrong python code defined for salary rule %s (%s)."
@@ -3735,7 +4121,6 @@ msgstr "Mauvais code Python défini pour la règle de salaire %s (%s)."
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Wrong python condition defined for salary rule %s (%s)."
 msgstr "Mauvaise condition Python définie pour la règle de salaire %s (%s)."
@@ -3743,14 +4128,12 @@ msgstr "Mauvaise condition Python définie pour la règle de salaire %s (%s)."
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Wrong quantity defined for salary rule %s (%s)."
 msgstr "Quantité incorrecte définie pour la règle de salaire %s (%s)."
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_rule.py:0
 #, python-format
 msgid "Wrong range condition defined for salary rule %s (%s)."
@@ -3764,26 +4147,16 @@ msgstr "Coût annuel"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
-#: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
 #, python-format
 msgid ""
 "You can't send the mail because either the department manager or employee "
 "manager is missing."
 msgstr ""
-"Vous ne pouvez pas envoyer le courrier car soit le chef de service, soit l'employé"
-"le manager a disparu."
+"Vous ne pouvez pas envoyer le courrier car soit le chef de service, soit "
+"l'employéle manager a disparu."
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/hr_contract.py:0
-#: code:addons/cyllo_payroll_management/models/hr_contract.py:0
-#, python-format
-msgid "You cannot change the status of non-approved Contracts"
-msgstr "Vous ne pouvez pas modifier le statut des contrats non approuvés"
-
-#. module: cyllo_payroll_management
-#. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_structure.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_structure.py:0
 #, python-format
 msgid "You cannot create a recursive salary structure."
@@ -3792,7 +4165,6 @@ msgstr "Vous ne pouvez pas créer une structure salariale récursive."
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
-#: code:addons/cyllo_payroll_management/models/employee_resignation.py:0
 #, python-format
 msgid "You cannot create a request for other employees"
 msgstr "Vous ne pouvez pas créer de demande pour d'autres employés"
@@ -3800,14 +4172,14 @@ msgstr "Vous ne pouvez pas créer de demande pour d'autres employés"
 #. module: cyllo_payroll_management
 #. odoo-python
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "You cannot delete a payslip which is not draft or cancelled state!"
-msgstr "Vous ne pouvez pas supprimer une fiche de paie qui n'est pas à l'état de brouillon ou annulé !"
+msgstr ""
+"Vous ne pouvez pas supprimer une fiche de paie qui n'est pas à l'état de "
+"brouillon ou annulé !"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #: code:addons/cyllo_payroll_management/models/employee_salary_attachment.py:0
 #, python-format
 msgid "You cannot delete a running salary attachment!"
@@ -3815,7 +4187,6 @@ msgstr "Vous ne pouvez pas supprimer une saisie-arrêt sur salaire en cours !"
 
 #. module: cyllo_payroll_management
 #. odoo-python
-#: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #: code:addons/cyllo_payroll_management/models/employee_payslip.py:0
 #, python-format
 msgid "You need to set the contract for the salary line "
@@ -3832,14 +4203,41 @@ msgid "days"
 msgstr "jours"
 
 #. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_gratuity_configuration_form
+msgid "e.g Tenure Bonus"
+msgstr "par exemple le bonus d'occupation"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_category_form
+msgid "e.g. Basic"
+msgstr "par exempleBasique"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_rule_tree
+msgid "e.g. Basic Salary"
+msgstr "par exempleSalaire de base"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_salary_structure_form
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_salary_structure_type_form
+msgid "e.g. Employee"
+msgstr "par exempleEmployé"
+
+#. module: cyllo_payroll_management
+#: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_resigned_reasons_tree
+msgid "e.g. Relocation"
+msgstr "par exempleDéménagement"
+
+#. module: cyllo_payroll_management
 #: model_terms:ir.ui.view,arch_db:cyllo_payroll_management.view_employee_payslip_form
 msgid "hour"
 msgstr "heure"
 
 #. module: cyllo_payroll_management
-#: model:ir.model.fields,field_description:cyllo_payroll_management.field_employee_salary_structure__name
-msgid "name"
-msgstr "nom"
+#: model:ir.model.fields,help:cyllo_payroll_management.field_gratuity_settlement__percentage
+msgid "percentage of gratuity"
+msgstr "pourcentage de gratification"
 
 #. module: cyllo_payroll_management
 #: model:ir.model.fields,help:cyllo_payroll_management.field_employee_payslip_line__amount_percentage_base

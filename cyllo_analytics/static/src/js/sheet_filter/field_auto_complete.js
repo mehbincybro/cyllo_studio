@@ -22,9 +22,15 @@ export class FieldAutoComplete extends Component {
             open: false,
             id: 0
         })
+        const extractFieldName = (expression) => {
+            const regex = /(.+?)\s*->>\s*'.*'/;
+            const match = expression.match(regex);
+            return match ? match[1].trim() : expression.trim();
+        }
+
         if (this.props.filterDomain){
             this.props.filterDomain.forEach(filter => {
-                var mainDomainVal = this.props.options.find(field => field.name == filter.field && field.model.table == filter.table)
+                var mainDomainVal = this.props.options.find(field => field.name === extractFieldName(filter.field) && field.model.table === filter.table)
                 var domainVal = {...mainDomainVal}
                 var value = filter.rhs
                 if (['datetime','date'].includes(domainVal.field_type)) {

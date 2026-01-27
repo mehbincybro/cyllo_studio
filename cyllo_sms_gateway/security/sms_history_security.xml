@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Multi-Company rule for SMS History -->
-    <record id="rule_sms_history_company" model="ir.rule">
+    <record id="rule_sms_history_multi_company" model="ir.rule">
         <field name="name">SMS History: Multi-company</field>
         <field name="model_id" ref="model_sms_history"/>
         <field name="domain_force">['|', ('company_id', '=', False),
@@ -9,7 +9,7 @@
         </field>
     </record>
     <!-- Multi-Company rule for SMS History -->
-    <record id="rule_sms_history_company" model="ir.rule">
+    <record id="rule_sms_history_multi_company" model="ir.rule">
         <field name="name">SMS Gateway Configuration: Multi-Company Rule</field>
         <field name="model_id" ref="model_sms_history"/>
         <field name="domain_force">[('company_id', '=', user.company_id.id)]

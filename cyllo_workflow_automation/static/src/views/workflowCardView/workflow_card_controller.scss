@@ -1,0 +1,141 @@
+.auto-card {
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0px 0px 6px 1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.auto-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: #DFDFDF;
+}
+
+.auto-card-inner {
+    position: relative;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.auto-card-image {
+    padding-top: 19px;
+    height: 198px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.auto-card-image img {
+    width: 178px;
+    height: 165px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.auto-card-image:hover img {
+     transform: scale(1.1);
+}
+
+.auto-card-content {
+    padding: 15px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center
+}
+
+.auto-card-title {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 400;
+    color: #333;
+}
+
+.auto-card-delete {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background-color: transparent;
+    border: none;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.auto-card-delete i {
+    color: #ff4d4d;
+    font-size: 16px;
+}
+
+.auto-card-delete i:hover {
+    color: #c10d0d;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.auto_card_container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 16px;
+}
+
+.o_autocard_renderer {
+    box-shadow: none !important;
+}
+
+.cy-auto-group-card {
+    width: 209px;
+}
+
+.auto-card-column-title {
+    transform-origin: left bottom 0;
+    transform: rotate(90deg);
+    overflow: visible;
+}
+
+.cy-auto-group-card-container {
+    display: -webkit-box !important;
+    display: -webkit-flex !important;
+    display: flex !important;
+    height: 100vh;
+}
+
+.cy-w-empty-record {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
+
+    &.p{
+        color:#6F7500 !important
+    }
+}
+
+.cy-w-create-record{
+    cursor: pointer;
+}

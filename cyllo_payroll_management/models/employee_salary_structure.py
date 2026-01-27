@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -12,14 +32,17 @@ class EmployeeSalaryStructure(models.Model):
     @api.model
     def _get_parent(self):
         """ This method is used to retrieve the parent record representing the base payroll structure. """
-        return self.env.ref('cyllo_payroll_management.employee_salary_structure_base_for_new_structures', False)
+        default_structure = self.env.ref(
+            'cyllo_payroll_management.employee_salary_structure_base_for_new_structures',
+            False)
+        return default_structure if default_structure and default_structure.sudo().company_id.id in self.env.company.ids else False
 
     name = fields.Char(required=True, help='The name of the record.')
     code = fields.Char(string='Reference', required=True, help='A unique reference code for the record.')
-    type_id = fields.Many2one('salary.structure.type', required=True, ondelte='restrict',
+    type_id = fields.Many2one('hr.payroll.structure.type', required=True, ondelete='restrict',
                               help='The type of this salary structure')
-    schedule_pay = fields.Selection(related='type_id.default_schedule_pay')
-    company_id = fields.Many2one('res.company', required=True, copy=False,
+    schedule_pay = fields.Selection(related='type_id.default_schedule_pay', help='Scheduled payment type')
+    company_id = fields.Many2one('res.company', copy=False,
                                  default=lambda self: self.env.company.id,
                                  help='The company associated with this record')
     country_id = fields.Many2one('res.country', help='To choose the country',
@@ -57,7 +80,7 @@ class EmployeeSalaryStructure(models.Model):
         return super(EmployeeSalaryStructure, self).copy(default)
 
     def _get_all_rules(self):
-        """ To gte the all rules """
+        """ To get all the rules """
         all_rules = [rule for struct in self for rule in struct.employee_salary_rule_ids._recursive_search_of_rules()]
         return all_rules
 

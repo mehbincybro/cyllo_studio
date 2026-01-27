@@ -1,24 +1,45 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
-    'name': 'Cyllo Payroll Management',
+    'name': 'Payroll Management',
     'version': '1.0',
-    'category': 'Human Resources ',
+    'category': 'Human Resources',
     'summary': """Used to manage the payroll module""",
     'description': """The module helps you to manage the employee contract, and payroll management in cyllo.""",
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['hr_contract', 'mail', 'account', 'hr_work_entry', 'hr_attendance', 'hr_work_entry_contract',
+    'depends': ['hr_contract', 'mail', 'account', 'hr_work_entry',
+                'hr_attendance', 'hr_work_entry_contract',
                 'hr_work_entry_holidays', 'contacts', 'hr_holidays'],
+    'icon': '/cyllo_payroll_management/static/description/payroll.svg',
     'data': [
         'security/cyllo_payroll_management_groups.xml',
         'security/cyllo_payroll_management_rules.xml',
         'security/ir.model.access.csv',
-        'reports/employee_resignation_request_report_templates.xml',
+        'reports/report_resignation_request.xml',
         'data/employee_salary_rule_category_data.xml',
         'data/account_journal_data.xml',
-        'data/salary_structure_type_data.xml',
         'data/employee_salary_rule_data.xml',
         'data/employee_salary_structure_data.xml',
         'data/ir_sequence_data.xml',
@@ -28,7 +49,7 @@
         'data/mail_template_data.xml',
         'views/hr_contract_views.xml',
         'views/employee_salary_structure_views.xml',
-        'views/salary_structure_type_views.xml',
+        'views/hr_payroll_structure_type_views.xml',
         'views/employee_salary_rule_category_views.xml',
         'views/employee_salary_rule_views.xml',
         'views/employee_payslip_views.xml',
@@ -43,9 +64,10 @@
         'views/employee_payslip_other_input_views.xml',
         'views/employee_salary_attachment_views.xml',
         'views/account_move_views.xml',
-        'wizards/resignation_request_confirm_views.xml',
-        'wizards/employee_payslip_batch_list_views.xml',
-        'reports/employee_payslip_report_templates.xml',
+        'wizards/batch_payslip_mark_paid.xml',
+        'wizards/resignation_request_confirm.xml',
+        'wizards/employee_payslip_batch_list.xml',
+        'reports/report_employee_payslip.xml',
         'views/cyllo_payroll_management_menu_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_company_views.xml',

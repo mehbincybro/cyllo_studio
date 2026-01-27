@@ -14,12 +14,23 @@
             </tile>
         </field>
     </record>
+
+    <!-- Action for dashboard templates -->
     <record id="action_view_templates" model="ir.actions.act_window">
-        <field name="name">Cyllo Analytic Dashboard</field>
+        <field name="name">Analytic Dashboard</field>
         <field name="res_model">dashboard.config</field>
         <field name="view_mode">tile,form</field>
     </record>
-    <menuitem id="menu_cyllo_analytics_root" name="Cyllo Analytics"/>
-    <menuitem id="menu_templates" name="Templates"
-              parent="menu_cyllo_analytics_root" action="action_view_templates"/>
+
+    <!-- Root menu -->
+    <menuitem groups="group_cyllo_analytics_user"
+              id="menu_cyllo_analytics_root"
+              web_icon="cyllo_analytics,static/description/cyllo_analytics.svg"
+              name="Cyllo Analytics"/>
+
+    <!-- Templates submenu -->
+    <menuitem id="menu_templates"
+              name="Templates"
+              parent="menu_cyllo_analytics_root"
+              action="action_view_templates"/>
 </odoo>

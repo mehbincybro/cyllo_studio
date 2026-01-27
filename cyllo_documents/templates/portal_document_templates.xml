@@ -17,7 +17,7 @@
         <xpath expr="//div[@id='o_portal_navbar_content']" position="after">
             <t t-if="page_name == 'document'">
                 <div id="document_upload_button">
-                    <button class="btn btn-outline-secondary fa fa-upload btn-block return-btn"
+                    <button class="btn btn-secondary fa fa-upload btn-block return-btn"
                             id="web_docs_upload" title="Upload">
                     </button>
                 </div>

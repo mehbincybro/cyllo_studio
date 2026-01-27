@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields
 from odoo.tests.common import TransactionCase
 
@@ -163,3 +183,39 @@ class TestCylloAccounting(TransactionCase):
             'default_tax_sale': company.account_sale_tax_id,
             'default_tax_purchase': company.account_purchase_tax_id,
         }
+
+class TestCylloAccountingFiscalYear(TransactionCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.partner = cls.env['res.partner'].create({
+            'name': 'Test partner'
+        })
+        cls.fiscal_year = cls.env['account.fiscal.year'].create({
+            'name': 'Year1',
+            'start_date': '2021-01-01',
+            'end_date': '2021-12-31',
+            'company_id': cls.env.company.id,
+            'state': 'draft'
+        })
+        cls.fiscal_year2 = cls.env['account.fiscal.year'].create({
+            'name': 'Year2',
+            'start_date': '2026-01-01',
+            'end_date': '2026-12-31',
+            'company_id': cls.env.company.id,
+            'state': 'draft',
+        })
+        cls.fiscal_year3 = cls.env['account.fiscal.year'].create({
+            'name': 'Year2',
+            'start_date': '2022-01-01',
+            'end_date': '2022-12-31',
+            'company_id': cls.env.company.id,
+            'state': 'draft',
+        })
+        cls.account_move = cls.env['account.move'].create({
+            'partner_id': cls.partner.id,
+            'move_type': 'out_invoice',
+            'state': 'draft',
+            'invoice_date': '2021-10-05',
+            'fiscal_year_id': cls.fiscal_year2.id,
+        })

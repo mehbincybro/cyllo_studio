@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates xml:space="preserve">
+    <!--  Replace the import records in base import  -->
+    <t t-inherit="base_import.ImportRecords" t-inherit-mode="extension" owl="1">
+        <xpath expr="//DropdownItem" position="replace">
+            <li class="nav-item" t-on-click="importRecords" accesskey="I">
+                <a class="nav-link cy-navitem-list" href="#"><i
+                        class="ri-download-2-line"/>Import records
+                </a>
+            </li>
+        </xpath>
+    </t>
+</templates>

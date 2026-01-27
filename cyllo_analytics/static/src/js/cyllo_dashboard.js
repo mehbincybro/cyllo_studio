@@ -1,8 +1,6 @@
 /** @odoo-module **/
-
 import {registry} from "@web/core/registry";
-import {useService} from "@web/core/utils/hooks";
-
+import {useService, useBus} from "@web/core/utils/hooks";
 const {Component, useRef, useState, onMounted, onWillStart, useEffect, status, useExternalListener} = owl;
 import {Dropdown} from "@web/core/dropdown/dropdown";
 import {DropdownItem} from "@web/core/dropdown/dropdown_item";
@@ -41,6 +39,23 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             refresh: false,
             currentLen: 0
         }
+        useBus(this.env.bus, "SIDEBAR_MENU_TOGGLE", ({detail:{isSidebarOn}}) => {
+            /*
+            * To Resize the charts when the menu is toggled
+            * */
+            if (!this.state.originalWidth) {
+                this.state.originalWidth = this.state.width
+            }
+            const ref = this.__owl__.bdom.parentEl
+            const {width} = ref.getBoundingClientRect()
+            const adjWidth = (width * 0.95) / 12
+            this.state.width = isSidebarOn ? this.state.originalWidth : adjWidth
+            setTimeout(() => {
+                if (status(this) !== "destroyed") {
+                    this.env.bus.trigger("REFRESH_GRAPH") //Force Render
+                }
+            }, 100)
+        })
         useEffect(() => {
             this.env.bus.trigger("REFRESH_GRAPH")
         }, () => [this.state.width, this.ui.size]);
@@ -52,7 +67,7 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                     image_1920
                 } = this.bannerState.banner[0];
                 if (!image_1920) {
-                    return root.style.setProperty('--banner-image-url', `url('')`);
+                    return root?.style.setProperty('--banner-image-url', `url('')`);
                 }
                 const imageUri = `data:image/svg+xml;base64,${image_1920}`;
                 fetch(imageUri)
@@ -76,24 +91,16 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                         }
                         const serializedSvg = new XMLSerializer().serializeToString(svgDoc);
                         const modifiedImageUri = `data:image/svg+xml;base64,${btoa(serializedSvg)}`;
-                        root.style.setProperty('--banner-image-url', `url(${modifiedImageUri})`);
+                        root?.style.setProperty('--banner-image-url', `url(${modifiedImageUri})`);
                     })
                     .catch(error => {
                         console.error('Error fetching SVG data:', error);
                     });
             } else {
-                root.style.setProperty('--banner-image-url', `url('')`);
-
+                root?.style.setProperty('--banner-image-url', `url('')`);
             }
         }, () => [this.bannerState.banner, this.themeState.theme?.theme_color_ids]);
 
-        useEffect(() => {
-            if (this.refreshObject.currentLen >= this.state.sortedItems.length) {
-                if (this.refreshObject.refresh && !this.isSearchMode) {
-                    window.location.reload();
-                }
-            }
-        }, () => [this.refreshObject.currentLen])
         this.is_subAction = this.props.action.context.is_subAction || false;
         onMounted(async () => {
             this.state.globalFilters = await this.orm.searchRead('dashboard.global.filter', [
@@ -112,7 +119,9 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             w: 0,
             h: 0,
             ft: true,
-            maxH: []
+            maxH: [],
+            maxHVal: {0: [0]},
+            cache: {}
         }
         this.firstLine = true
         useEffect(() => {
@@ -147,7 +156,8 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
 
     async onSetTemplate() {
         if (!this.graph.el) return
-        const canvas = await html2canvas(this.graph.el)
+        const element = this.graph.el.querySelector(".cy_dash-card_container")
+        const canvas = await html2canvas(element)
         let imgData = canvas.toDataURL('image/png');
         if (status(this) !== "destroyed") {
             this.orm.write("dashboard.config", [this.id], {
@@ -222,76 +232,97 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             options,
             theme: this.themeState.theme,
             currentTheme: this.themeState.currentTheme,
+            isDarkMode: this.state.darkMode
         })
     }
 
     computeStyle(item) {
         const isSearch = Boolean(this.state.search.length)
-        var unit = this.state.width
-        var toggleClass = 'chart-container-absolute'
-        var sheetPosition = item.dashboard_sheet_option_ids
-        var graph_height, graph_width, x, y
-        var height = item.type == 'kpi' ? 1 : 3
-        var width = item.type == 'kpi' ? 3 : 4
-        if (sheetPosition?.length && !isSearch) {
-            var {
+        const unit = this.state.width
+        const toggleClass = 'chart-container-absolute'
+        const sheetPosition = item.dashboard_sheet_option_ids
+        let graph_height, graph_width, x, y
+        const {height, width} = this.getChartSizes(item.type)
+        if (item.id in this.positions.cache && !isSearch) {
+            ({
                 graph_height,
                 graph_width,
                 x,
                 y
-            } = sheetPosition[0].attributes
-            if (x >= 9) {
-                this.firstLine = false;
-            }
+            } = this.positions.cache[item.id])
         } else {
-            this.refreshObject.refresh = !this.isSearchMode
-            if (this.firstLine) {
-                x = (this.positions.x > 0 || this.positions.w > 0) ? this.positions.x + this.positions.w : this.positions.x
-                this.firstLine = false;
-            } else {
-                x = this.positions.x + (this.positions.w ? this.positions.w : width);
-            }
-            y = this.positions.y
-            if (x > 9) {
-                x = 0;
-                y = this.positions.y + Math.max(...this.positions.maxH);
-                this.positions.h = 0
-                this.positions.maxH = [0]
-            }
-            [graph_height, graph_width, x, y] = [height, width, x, y];
-            if (this.isSearchMode) {
+
+            if (sheetPosition?.length && !isSearch) {
                 ({
                     graph_height,
-                    graph_width
+                    graph_width,
+                    x,
+                    y
                 } = sheetPosition[0].attributes)
+                if (this.positions.w && !x) {
+                    this.positions.w = 0
+                }
+            } else {
+                if (isSearch) {
+                    if (sheetPosition.length) {
+                        ({
+                            graph_height,
+                            graph_width,
+                        } = sheetPosition[0].attributes)
+                    } else {
+                        graph_height = height
+                        graph_width = width
+                    }
+
+                } else {
+                    graph_height = height
+                    graph_width = width
+                }
+                x = this.positions.w + graph_width > 12 ? 0 : this.positions.w
+                if (this.positions.w && !x) {
+                    this.positions.w = 0
+                    const newY = this.positions.maxHVal[this.positions.y]
+                    y = Math.max(...newY) + this.positions.y
+                } else {
+                    y = this.positions.y
+                    const allY = Object.entries(this.positions.maxHVal)
+                        .filter(([key]) => parseInt(key, 10) !== y)
+                        .flatMap(([key, items]) =>
+                            items.map(item => item + parseInt(key, 10))
+                        );
+                    const isAnyGreaterThanY = allY.some(value => value > y);
+                    if (isAnyGreaterThanY) {
+                        y = Math.max(...allY)
+                        x = 0
+                        this.positions.w = 0
+                    }
+                }
+            }
+            this.positions.x = x
+            this.positions.y = y
+            this.positions.w += graph_width
+            this.positions.h = graph_height
+            if (this.positions.maxHVal[y]) {
+                this.positions.maxHVal[y].push(graph_height)
+            } else this.positions.maxHVal[y] = [graph_height]
+            if (!sheetPosition?.length && !(item.id in this.positions.cache)) {
+                this.orm.call("dashboard.sheet", "set_sheet_position", [item.id, this.id], {
+                    x,
+                    y,
+                    graph_width,
+                    graph_height
+                })
             }
         }
-        if (y === this.positions.y) {
-            this.positions.maxH.push(graph_height)
-        } else {
-            this.positions.maxH = [0]
-            this.positions.maxH.push(graph_height)
-        }
 
-        this.positions.x = x
-        this.positions.y = this.positions.y < y ? y : this.positions.y
-        this.positions.h = Math.max(...this.positions.maxH)
-        this.positions.w = graph_width
-        if (!sheetPosition?.length) {
-            this.orm.call("dashboard.sheet", "set_sheet_position", [item.id, this.id], {
-                x,
-                y,
-                graph_width,
-                graph_height
-            })
-        }
-        var attributes = {
+        const attributes = {
             graph_height,
             graph_width,
             x,
             y
         }
-        var style = {
+        this.positions.cache[item.id] = attributes
+        const style = {
             height: `${(graph_height * unit) - 10}px;`,
             width: `${(graph_width * unit) - 10}px;`,
             top: `${y * unit}px;`,
@@ -359,7 +390,6 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                 return [lhs, opr, rhs];
             })
             domain.push(...subD);
-
         }
         return this.actionService.doAction({
             name: _t("My Dashboard"),
@@ -427,7 +457,7 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             logging: false,
             scrollY: -window.scrollY, // Capture the entire scrollable area
             windowHeight: element.scrollHeight + 1000,
-            ignoreElements: (node) => node.classList.contains('btn-ai-insights')
+            ignoreElements: (node) => node.classList.contains('ai-btn-class')
         }).then((canvas) => {
             let imgData = canvas.toDataURL('image/png');
             let pageWidth = pdf.internal.pageSize.getWidth();
@@ -439,8 +469,8 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             var pdfPages = Math.ceil(imageHeight / pageHeight);
             var value = 2850
             if (type === 'l') {
-                imageWidth = pageWidth - 70
-                offsetX = 35;
+                imageWidth = pageWidth - 100
+                offsetX = 50;
                 pdfPages = Math.ceil(imageHeight / 250);
                 value = 2000
             }
@@ -474,13 +504,13 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
      */
     async onJsonExport() {
         try {
-            var data = await this.orm.call("dashboard.config", "get_dashboard_data", [this.id]);
-            var json = JSON.stringify(data);
-            var blob = new Blob([json], {
+            const data = await this.orm.call("dashboard.config", "get_dashboard_data", [this.id]);
+            const json = JSON.stringify(data);
+            const blob = new Blob([json], {
                 type: "application/json"
             });
-            var url = URL.createObjectURL(blob);
-            var file = document.createElement("a"); // Correct the element type to "a"
+            const url = URL.createObjectURL(blob);
+            const file = document.createElement("a"); // Correct the element type to "a"
             file.download = this.name + " dashboard.json";
             file.href = url;
             file.click();
@@ -695,10 +725,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             }
         }
     }
+
     closeFilter() {
         this.filter_dropdown.el.classList.add("cy_filter_toggler")
         this.dashboard.el.querySelector(".cy-churn-filter-btn").classList.remove("show")
     }
+
     onClickFilter() {
         this.filter_dropdown.el.classList.toggle("cy_filter_toggler")
         this.dashboard.el.querySelector(".cy-churn-filter-btn").classList.toggle("show")

@@ -13,12 +13,13 @@
 export function loadingChart(props) {
     return {
         title: {
-          text: props.title ? props.title : '',
-            padding: [2, 0, 0, 15],
-                    textStyle: {
-                        fontSize: 17,
-                        fontWeight: 'normal',
-                    }
+            text: props.title ? props.title : '',
+            padding: [15, 0, 0, 15],
+            textStyle: {
+                fontSize: 17,
+                fontWeight: 600,
+                textBorderColor: 'white', // Add border color
+            }
         },
         graphic: {
             elements: [{
@@ -38,13 +39,13 @@ export function loadingChart(props) {
                     duration: props?.duration ? props.duration : 1,
                     loop: props?.loop,
                     keyframes: [{
-                            percent: 0.7,
-                            style: {
-                                fill: 'transparent',
-                                lineDashOffset: 200,
-                                lineDash: [200, 0]
-                            }
-                        },
+                        percent: 0.7,
+                        style: {
+                            fill: 'transparent',
+                            lineDashOffset: 200,
+                            lineDash: [200, 0]
+                        }
+                    },
                         {
                             // Stop for a while.
                             percent: 0.8,

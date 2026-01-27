@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-<!-- Schedule action for generating automatic database backup-->
+    <!-- Schedule action for generating automatic database backup-->
     <record id="ir_cron_backup_automatic_database_backup" model="ir.cron">
         <field name="name">Backup : Automatic Database Backup</field>
         <field name="model_id" ref="model_db_backup_configure"/>

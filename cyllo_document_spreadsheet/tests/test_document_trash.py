@@ -1,27 +1,44 @@
 # -*- coding: utf-8 -*-
-import logging
-from odoo.tests import common
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import fields, _
+from odoo.tests.common import TransactionCase
 
-_LOGGER = logging.getLogger(__name__)
 
-
-class TestDocumentTrash(common.TransactionCase):
+class TestDocumentTrash(TransactionCase):
 
     def test_action_restore_document(self):
-        """Test for the fields in 'document.trash''"""
-        _LOGGER.info("Starts 'action_restore_document' functiontest")
-        workspace_id = self.env.ref(
-            "cyllo_document_spreadsheet.document_workspace_spreadsheet").id
-        self.trash = self.env['document.trash'].create({
-            'name': "Event Management Report.xlsx",
-            'workspace_id': workspace_id,
-            'brochure_url': "http://test:8017/web/image/1352?unique=82"
-                            "5387c05d27cd359e3dd76247fbf0dc08a0ae9f",
+        trash_doc = self.env['document.trash'].create({
+            'name': 'Test Document',
+            'date': fields.Datetime.now(),
+                    'workspace_id': self.env['document.workspace'].create({
+                    'name': 'Test Workspace',
+                }).id,
+            'user_id': self.env.user.id,
         })
-        result = self.trash.action_restore_document()
-        self.assertEqual(result['name'], 'Trash')
-        self.assertEqual(result['target'], 'main')
-        self.assertEqual(result['view_mode'], 'tree,form')
-        self.assertEqual(result['res_model'], 'document.trash')
-        self.assertEqual(result['type'], 'ir.actions.act_window')
-        _LOGGER.info("End 'action_restore_document' function test")
+        self.assertEqual(trash_doc.action_restore_document(), {
+            'name': _('Trash'),
+            'target': 'main',
+            'view_mode': 'tree,form',
+            'res_model': 'document.trash',
+            'type': 'ir.actions.act_window',
+        })
+        

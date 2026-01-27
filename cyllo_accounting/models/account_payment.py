@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -8,12 +28,23 @@ class AccountPayment(models.Model):
     _inherit = 'account.payment'
 
     move_ids = fields.Many2many('account.move', help='Select Invoices')
-    total_invoice_amount = fields.Monetary(currency_field='currency_id', compute='_compute_total_invoice_amount',
+    total_invoice_amount = fields.Monetary(currency_field='currency_id',
+                                           compute='_compute_total_invoice_amount',
                                            store=True)
-    payment_line_ids = fields.Many2many(comodel_name='account.payment.line', string='Invoices', help='Payment lines',
-                                        compute='_compute_payment_line_ids', store=True, auto_join=True)
+    payment_line_ids = fields.Many2many(comodel_name='account.payment.line', string='Invoices',
+                                        help='Payment lines',
+                                        compute='_compute_payment_line_ids', store=True,
+                                        auto_join=True)
+    total_payment_amount = fields.Monetary(
+        "Total payment amount",
+        compute='_compute_total_payment_amount',
+        currency_field='company_currency_id'
+    )
     multi_invoice_payment = fields.Boolean(default=False,
                                            help='If it is true then can choose multiple invoices for payment')
+
+    batch_payment_id = fields.Many2one('batch.payment', string='Batch Payment',
+                                       readonly=True)
 
     @api.depends('payment_line_ids', 'move_ids', 'move_ids.amount_residual', 'state')
     def _compute_total_invoice_amount(self):
@@ -26,24 +57,36 @@ class AccountPayment(models.Model):
                 rec.total_invoice_amount = sum(rec.payment_line_ids.mapped(
                     'paid_amount')) if rec.payment_line_ids else 0
 
-    def action_draft(self):
-        """Move to draft state"""
-        res = super().action_draft()
-        if self.move_ids:
-            self.amount = 0
-        for line in self.payment_line_ids:
-            line.paid_amount = 0
-        return res
+    def _compute_total_payment_amount(self):
+        """Calculate the total payment amount"""
+        for rec in self:
+            rec.total_payment_amount = rec.total_invoice_amount if rec.multi_invoice_payment else rec.amount_company_currency_signed
 
-    @api.depends('move_ids', 'state')
+    @api.depends('amount', 'payment_type', 'total_payment_amount')
+    def _compute_amount_signed(self):
+        """Compute amount signed"""
+        for payment in self:
+            if payment.payment_type == 'outbound':
+                payment.amount_signed = -payment.total_payment_amount if payment.multi_invoice_payment else -payment.amount
+            else:
+                payment.amount_signed = payment.total_payment_amount if payment.multi_invoice_payment else payment.amount
+
+    @api.depends('move_ids', 'state', 'reconciled_invoice_ids')
     def _compute_payment_line_ids(self):
         """compute payment lines"""
         for rec in self:
             lines = []
             rec.payment_line_ids = False
-            for move in rec.move_ids:
+            if rec.reconciled_invoice_ids:
+                move_ids = rec.reconciled_invoice_ids
+            elif rec.reconciled_bill_ids:
+                move_ids = rec.reconciled_bill_ids
+            else:
+                move_ids = []
+            for move in move_ids:
                 payment_line = self.env['account.payment.line'].search([('move_id', '=', move.id),
-                                                                        ('payment_id', '=', rec.id)], limit=1)
+                                                                        ('payment_id', '=',
+                                                                         rec.id)], limit=1)
                 if not payment_line:
                     payment_line = self.env['account.payment.line'].create({'move_id': move.id,
                                                                             'payment_id': rec.id})
@@ -60,6 +103,24 @@ class AccountPayment(models.Model):
                 raise UserError(_(
                     "\nThere are already some invoice lines."
                     "First remove the lines"))
+
+    def action_draft(self):
+        """Move to draft state"""
+        res = super().action_draft()
+        if self.move_ids:
+            self.amount = 0
+        for line in self.payment_line_ids:
+            line.paid_amount = 0
+        return res
+
+    def action_confirm_invoice_payment(self):
+        """If there is move_ids then only the confirm button calls this
+         function"""
+        if self.move_ids:
+            payment = self._create_invoice_payment()
+            if payment:
+                for move in self.move_ids:
+                    move.residual_amount = 0
 
     def payment_init(self, register_payment_id, to_process, edit_mode=False):
         """ Create the payments"""
@@ -81,13 +142,15 @@ class AccountPayment(models.Model):
                     liquidity_lines, counterpart_lines, writeoff_lines = payment._seek_for_lines()
                     source_balance = abs(sum(lines.mapped('amount_residual')))
                     if liquidity_lines[0].balance:
-                        payment_rate = liquidity_lines[0].amount_currency / liquidity_lines[0].balance
+                        payment_rate = liquidity_lines[0].amount_currency / liquidity_lines[
+                            0].balance
                     else:
                         payment_rate = 0.0
                     source_balance_converted = abs(source_balance) * payment_rate
                     payment_balance = abs(sum(counterpart_lines.mapped('balance')))
                     payment_amount_currency = abs(sum(counterpart_lines.mapped('amount_currency')))
-                    if not payment.currency_id.is_zero(source_balance_converted - payment_amount_currency):
+                    if not payment.currency_id.is_zero(
+                            source_balance_converted - payment_amount_currency):
                         continue
                     delta_balance = source_balance - payment_balance
                     # Balance are already the same.
@@ -102,7 +165,8 @@ class AccountPayment(models.Model):
                             fields.Command.update(debit_lines[0].id,
                                                   {'debit': debit_lines[0].debit + delta_balance}),
                             fields.Command.update(credit_lines[0].id,
-                                                  {'credit': credit_lines[0].credit + delta_balance}),
+                                                  {'credit': credit_lines[
+                                                                 0].credit + delta_balance}),
                         ]})
         return payments
 
@@ -116,7 +180,8 @@ class AccountPayment(models.Model):
 
     def payment_reconcile(self, to_process, edit_mode=False):
         """ Reconcile the payments """
-        domain = [('parent_state', '=', 'posted'), ('account_type', 'in', ('asset_receivable', 'liability_payable')),
+        domain = [('parent_state', '=', 'posted'),
+                  ('account_type', 'in', ('asset_receivable', 'liability_payable')),
                   ('reconciled', '=', False)]
         for vals in to_process:
             payment_lines = vals['payment'].line_ids.filtered_domain(domain)
@@ -155,22 +220,41 @@ class AccountPayment(models.Model):
         to_process = []
         if edit_mode:
             payment_vals = register_payment_id._create_payment_vals_from_wizard(first_batch_result)
-            to_process.append({'create_vals': payment_vals, 'to_reconcile': first_batch_result['lines'],
-                               'batch': first_batch_result})
+            to_process.append(
+                {'create_vals': payment_vals, 'to_reconcile': first_batch_result['lines'],
+                 'batch': first_batch_result})
         else:
             for batch_result in batches:
-                to_process.append({'create_vals': register_payment_id._create_payment_vals_from_batch(batch_result),
-                                   'to_reconcile': batch_result['lines'], 'batch': batch_result})
+                to_process.append({
+                                      'create_vals': register_payment_id._create_payment_vals_from_batch(
+                                          batch_result),
+                                      'to_reconcile': batch_result['lines'], 'batch': batch_result})
         payments = self.payment_init(register_payment_id, to_process, edit_mode=edit_mode)
         self.payment_post(to_process, edit_mode=edit_mode)
         self.payment_reconcile(to_process, edit_mode=edit_mode)
         return payments
 
-    def action_confirm_invoice_payment(self):
-        """If there is move_ids then only the confirm button calls this
-         function"""
-        if self.move_ids:
-            payment = self._create_invoice_payment()
-            if payment:
-                for move in self.move_ids:
-                    move.residual_amount = 0
+    def button_open_statement_lines(self):
+        """Redirect the user to the reconciled statement line(s) using the custom 'reconcile' view
+        defined in the Cyllo module, instead of the default form or list view.
+
+        :return: An action targeting the account.move model with the custom 'reconcile' view.
+        """
+        self.ensure_one()
+
+        action = {
+            'name': _("Matched Transactions"),
+            'type': 'ir.actions.act_window',
+            'res_model': 'account.bank.statement.line',
+            'context': {'create': False},
+            'view_mode': 'reconcile',
+        }
+        if len(self.reconciled_statement_line_ids) == 1:
+            action.update({
+                'domain': [('id', '=', self.reconciled_statement_line_ids.id)],
+            })
+        else:
+            action.update({
+                'domain': [('id', 'in', self.reconciled_statement_line_ids.ids)],
+            })
+        return action

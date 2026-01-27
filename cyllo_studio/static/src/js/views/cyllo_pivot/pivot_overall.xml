@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.PivotOverall">
+        <div class="m-2 pivot_properties">
+            <div class="list-checkbox-group">
+                <div class="checkbox-item">
+                    <input class="checkbox-input ViewCheck" id="disableLink" type="checkbox" name="create"
+                           style="display: none;" t-model="props.mode.disableLinking"
+                           t-on-click="(ev)=> this.props.handleView('disable_linking',!props.mode.disableLinking)"/>
+                    <label class="checkbox-label" for="disableLink">
+                        <span class="checkbox-indicator">
+                            <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                <polyline points="1 5 4 8 11 1"></polyline>
+                            </svg>
+                        </span>
+                        <span class="label-text">Disable Link To Record</span>
+                    </label>
+                </div>
+            </div>
+            <div class="list-checkbox-group">
+                <div class="checkbox-item">
+                    <input class="checkbox-input ViewCheck" id="stickyPivot" type="checkbox" name="create"
+                           style="display: none;" t-model="props.mode.sticky"
+                           t-on-click="(ev)=> this.props.handleView('sticky',!props.mode.sticky)"/>
+                    <label class="checkbox-label" for="stickyPivot">
+                        <span class="checkbox-indicator">
+                            <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                <polyline points="1 5 4 8 11 1"></polyline>
+                            </svg>
+                        </span>
+                        <span class="label-text">Sticky Pivot</span>
+                    </label>
+                </div>
+            </div>
+            <div class="list-checkbox-group">
+                <div class="checkbox-item">
+                    <input class="checkbox-input ViewCheck" type="checkbox" t-model="props.mode.displayQuantity"
+                           id="displayQuantity" name="displayQuantity"
+                           t-on-click="({target})=>this.updatePivot('display_quantity', target.checked)"/>
+                    <label class="checkbox-label" for="displayQuantity">
+                        <span class="checkbox-indicator">
+                            <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                <polyline points="1 5 4 8 11 1"/>
+                            </svg>
+                        </span>
+                        <span class="label-text">Display Quantity</span>
+                    </label>
+                </div>
+            </div>
+            <div class="d-flex mt-2">
+                <button t-if="state.addNew" class="plus_input"
+                        t-on-click="()=>this.handleInputGrouping('colGroupBys')">
+                    <i class="fa fa-plus" style="margin-left: -107px;"/>
+                </button>
+                <label class="label-text" for="positionSelect">
+                    <span>Column Grouping:</span>
+                </label>
+            </div>
+            <div class="select-option-drop m-3" id="columnGrouping" style="margin-left: 7px !important;">
+                <t t-foreach="state.colGroupBys" t-as="colGroupBys" t-key="colGroupBys_index">
+                    <div class="dropdown_pivot_overall cy-input d-flex justify-content-between">
+                        <span t-if="colGroupBys" class="text-capitalize">
+                            <t t-set="value"
+                               t-value="colGroupBys.includes(':') ? colGroupBys.split(':')[0] : colGroupBys"/>
+                            <t t-set="interval"
+                               t-value="colGroupBys.includes(':') ? colGroupBys.split(':')[1] : false"/>
+                            <t t-esc="props.activeFields[value].string"/>
+                            <t t-if="interval">-
+
+
+                                <t t-esc="interval"/>
+                            </t>
+                        </span>
+                        <Dropdown t-else="" togglerClass="'btn cy-studio-dropdown'" showCaret="true"
+                                  menuClass="'cy-selection-values'">
+                            <t t-set-slot="toggler">
+                                <span>Select an option</span>
+                            </t>
+                            <t t-foreach="Object.keys(fields)" t-as="field" t-key="field">
+                                <AccordionItem t-if="['date', 'datetime'].includes(fields[field]?.type)"
+                                               description="fields[field].string">
+                                    <div t-on-click="()=>this.updatePivot(fields[field].name, 'col', 'year')">
+                                        <a class="dropdown-item" href="#">Year</a>
+                                    </div>
+                                    <div t-on-click="()=>this.updatePivot(fields[field].name, 'col', 'quarter')">
+                                        <a class="dropdown-item" href="#">Quarter</a>
+                                    </div>
+                                    <div t-on-click="()=>this.updatePivot(fields[field].name, 'col', 'month')">
+                                        <a class="dropdown-item" href="#">Month</a>
+                                    </div>
+                                    <div t-on-click="()=>this.updatePivot(fields[field].name, 'col', 'week')">
+                                        <a class="dropdown-item" href="#">Week</a>
+                                    </div>
+                                    <div t-on-click="()=>this.updatePivot(fields[field].name, 'col', 'day')">
+                                        <a class="dropdown-item" href="#">Day</a>
+                                    </div>
+                                </AccordionItem>
+                                <DropdownItem t-else=""
+                                              onSelected="()=>this.updatePivot(fields[field].name, 'col')">
+                                    <span t-esc="fields[field].string"/>
+                                </DropdownItem>
+                            </t>
+                        </Dropdown>
+                        <i t-on-click="() => this.handleRemoveGroup('colPath', colGroupBys_index, 'colGroupBys' )"
+                           t-att-class="colGroupBys ? '': 'my-1'"
+                           class="mx-2 cursor-pointer ri-delete-bin-2-fill"/>
+                    </div>
+                </t>
+            </div>
+            <div class="d-flex mt-2">
+                <button t-if="state.addNew" class="plus_input"
+                        t-on-click="()=>this.handleInputGrouping('rowGroupBys')">
+                    <i class="fa fa-plus" style="margin-left: -107px;"/>
+                </button>
+                <label class="label-text" for="positionSelect">
+                    <span>Row Grouping:</span>
+                </label>
+            </div>
+            <div class="select-option-drop m-3" id="rowGrouping" style="margin-left: 7px !important;">
+                <t t-if="state.rowGroupBys">
+                    <t t-foreach="state.rowGroupBys" t-as="rowGroupBys" t-key="rowGroupBys_index">
+                        <div class="check_box_color cy-input d-flex justify-content-between" style="padding: 6px 8px;">
+                            <span t-if="rowGroupBys" class="text-capitalize">
+                                <t t-set="value"
+                                   t-value="rowGroupBys.includes(':') ? rowGroupBys.split(':')[0] : rowGroupBys"/>
+                                <t t-set="interval"
+                                   t-value="rowGroupBys.includes(':') ? rowGroupBys.split(':')[1] : false"/>
+                                <t t-esc="props.activeFields[value].string"/>
+                                <t t-if="interval">-
+
+
+                                    <t t-esc="interval"/>
+                                </t>
+                            </span>
+                            <Dropdown t-else="" togglerClass="'btn cy-studio-dropdown'" showCaret="true"
+                                      menuClass="'cy-selection-values'">
+                                <t t-set-slot="toggler">
+                                    <span>Select an option</span>
+                                </t>
+                                <t t-foreach="Object.keys(fields)" t-as="field" t-key="field">
+                                    <AccordionItem t-if="['date', 'datetime'].includes(fields[field].type)"
+                                                   description="fields[field].string">
+                                        <div t-on-click="()=>this.updatePivot(fields[field].name, 'row', 'year')">
+                                            <a class="dropdown-item" href="#">Year</a>
+                                        </div>
+                                        <div t-on-click="()=>this.updatePivot(fields[field].name, 'row', 'quarter')">
+                                            <a class="dropdown-item" href="#">Quarter</a>
+                                        </div>
+                                        <div t-on-click="()=>this.updatePivot(fields[field].name, 'row', 'month')">
+                                            <a class="dropdown-item" href="#">Month</a>
+                                        </div>
+                                        <div t-on-click="()=>this.updatePivot(fields[field].name, 'row', 'week')">
+                                            <a class="dropdown-item" href="#">Week</a>
+                                        </div>
+                                        <div t-on-click="()=>this.updatePivot(fields[field].name, 'row', 'day')">
+                                            <a class="dropdown-item" href="#">Day</a>
+                                        </div>
+                                    </AccordionItem>
+                                    <DropdownItem t-else=""
+                                                  onSelected="()=>this.updatePivot(fields[field].name, 'row')">
+                                        <span t-esc="fields[field].string"/>
+                                    </DropdownItem>
+                                </t>
+                            </Dropdown>
+                            <i t-on-click="() => this.handleRemoveGroup('rowPath', rowGroupBys_index, 'rowGroupBys')"
+                               t-att-class="rowGroupBys ? '': 'my-1'"
+                               class="mx-2 cursor-pointer ri-delete-bin-2-fill"/>
+                        </div>
+                    </t>
+                </t>
+            </div>
+            <div class="d-flex mt-2">
+                <button t-if="state.addNew" class="plus_input"
+                        t-on-click="()=>this.handleInputGrouping('activeMeasures')">
+                    <i class="fa fa-plus" style="margin-left: -107px;"/>
+                </button>
+                <label class="label-text" for="positionSelect">
+                    <span>Measure:</span>
+                </label>
+            </div>
+            <div class="select-option-drop m-3" id="measure" style="margin-left: 7px !important;">
+                <t t-if="state.loadedActiveMeasures">
+                    <t t-foreach="state.loadedActiveMeasures?.filter(m => m !== '__count')"
+                       t-as="loadedActiveMeasure"
+                       t-key="loadedActiveMeasure_index">
+                        <div class="dropdown_pivot_overall cy-input d-flex justify-content-between">
+
+                            <span t-if="loadedActiveMeasure" class="text-capitalize"
+                                  t-esc="props.activeFields[loadedActiveMeasure].string"/>
+                            <!--							<span t-if="loadedActiveMeasure" class="text-capitalize" t-esc="props.active_fields[loadedActiveMeasure].string"/>-->
+                        </div>
+                    </t>
+                </t>
+                <t t-if="state?.activeMeasures">
+                    <t t-foreach="state.activeMeasures.filter(m => m !== '__count')" t-as="activeMeasure"
+                       t-key="activeMeasure_index">
+                        <div class="check_box_color cy-input d-flex justify-content-between"
+                            style="padding: 6px 8px">
+                            <span t-if="activeMeasure" class="text-capitalize" style="left: 2px !important;"
+                                  t-esc="props.activeFields[activeMeasure].string"/>
+                            <Dropdown t-else="" togglerClass="'btn cy-studio-dropdown'" showCaret="true"
+                                      menuClass="'cy-selection-values'">
+                                <t t-set-slot="toggler">
+                                    <span style="margin-left:-19%">Select an option</span>
+                                </t>
+                                <t t-foreach="Object.keys(props.mode?.measures).filter(field => field !== '__count' and !state.activeMeasures.includes(field))"
+                                   t-as="field" t-key="field">
+                                    <DropdownItem onSelected="()=>this.updatePivot(field, 'measure')" class="'w-100'">
+                                        <span t-esc="props.mode.measures[field].string"/>
+                                    </DropdownItem>
+                                </t>
+                            </Dropdown>
+                            <i t-on-click="(ev) => this.handleRemoveGroup('measurePath',activeMeasure_index, 'activeMeasures')"
+                               t-att-class="activeMeasure ? '': 'my-1'"
+                               class="mx-2 cursor-pointer ri-delete-bin-2-fill"/>
+                        </div>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-<!--    Action for the Wizard for adding project in budget -->
-    <record id="action_view_budget_project_wizard" model="ir.actions.act_window">
+    <!--    Action for the Wizard for adding project in budget -->
+    <record id="action_view_budget_project_wizard"
+            model="ir.actions.act_window">
         <field name="name">Budget Project Wizard</field>
         <field name="res_model">budget.project.wizard</field>
         <field name="view_mode">form</field>
@@ -16,15 +17,19 @@
                 <group>
                     <field name="add_create" widget="radio"/>
                     <field name="project_id" invisible="add_create != 'add'"/>
-                    <field name="project_name" invisible="add_create != 'create'"/>
+                    <field name="project_name"
+                           invisible="add_create != 'create'"/>
                     <field name="budget_id" invisible="1"/>
                 </group>
                 <footer>
                     <button class="btn btn-primary" string="ADD"
-                            name="action_add_project" type="object" invisible="add_create != 'add'"/>
+                            name="action_add_project" type="object"
+                            invisible="add_create != 'add'"/>
                     <button class="btn btn-primary" string="CREATE"
-                            name="action_create_project" type="object" invisible="add_create != 'create'"/>
-                    <button class="btn btn-secondary" string="DISCARD" special="cancel"/>
+                            name="action_create_project" type="object"
+                            invisible="add_create != 'create'"/>
+                    <button class="btn btn-secondary" string="DISCARD"
+                            special="cancel"/>
                 </footer>
             </form>
         </field>

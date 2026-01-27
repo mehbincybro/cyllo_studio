@@ -2,9 +2,7 @@
 import { useService } from "@web/core/utils/hooks";
 import { SheetDeleteDialog } from "@cyllo_analytics/js/cyllo_sheet";
 import { Component } from "@odoo/owl";
-import {
-    getImageSrcFromRecordInfo,
-} from "@web/views/kanban/kanban_record";
+import { getImageSrcFromRecordInfo,} from "@web/views/kanban/kanban_record";
 
 export class TileCard extends Component {
     setup(){
@@ -15,9 +13,10 @@ export class TileCard extends Component {
     get Image() {
         const {
             value: record,
-            model
+            model,
+            imageField
         } = this.props
-        return getImageSrcFromRecordInfo(record, model, "image_1920", this.id) //Todo: Make image_1920 dynamic field
+        return getImageSrcFromRecordInfo(record, model, imageField || "image_1920", this.id) //Todo: Make image_1920 dynamic field
     }
     get tileData() {
         return this.props.value.data;

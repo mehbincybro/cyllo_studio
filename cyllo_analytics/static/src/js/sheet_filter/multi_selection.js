@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 import { Component, useState, useRef } from "@odoo/owl";
 import { usePosition } from "@web/core/position_hook";
 

@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState, useRef, useSubEnv } from "@odoo/owl";
+import { Component, useState, useRef, useSubEnv, onMounted, onWillUnmount } from "@odoo/owl";
 import { ContactTab } from '@cyllo_twilio_voice_call/js/contact_tab'
 import { _t } from "@web/core/l10n/translation";
 var device;
@@ -13,20 +13,20 @@ export class RecentTab extends Component {
         this.action = useService("action");
         this.notification = useService("notification");
         this.sid = null, // Initialize callSid as null
-            this.number = null,
-            this.state = useState({
-                recent: [], // Store fetched partners
-                showPartner: false,
-                recent_out: [],
-                mergedRecent: [],
-                mergedData: [],
-                contact: false,
-                selectedPartner: null,
-                call: false,
-                wasRejected: false,
-                duration: 0,
-                number: null,
-            });
+        this.number = null,
+        this.state = useState({
+            recent: [], // Store fetched partners
+            showPartner: false,
+            recent_out: [],
+            mergedRecent: [],
+            mergedData: [],
+            contact: false,
+            selectedPartner: null,
+            call: false,
+            wasRejected: false,
+            duration: 0,
+            number: null,
+        });
         this.isTimerPaused = false;
         this._fetchRecentCall();
         this._fetchRecentCallOut();
@@ -39,36 +39,38 @@ export class RecentTab extends Component {
     */
     async _fetchRecentCall() {
         try {
-            const recent = await this.orm.searchRead("incoming.call.list", [], ["from_number", "start_time", "duration", "image_1920", "partner_id"]); // Fetch partners with specific fields
+            const recent = await this.orm.searchRead("incoming.call.list",[],["from_number", "start_time", "duration", "image_1920", "partner_id"],
+            { order: 'start_time DESC' }); // Fetch incoming calls with specific fields sorted by start_time in descending order
             this.state.recent = recent;
         } catch (error) {
-            // Handle error fetching partners
-            console.error("Error fetching partners:", error);
+            console.error("Error fetching incoming calls:", error);
         }
         this.mergeAndSortData();
-
     }
+
     /*
     Fetch outgoing call list
     */
     async _fetchRecentCallOut() {
         try {
-            const recent_out = await this.orm.searchRead("out.going.call.list", [], ["to_number", "start_time", "duration", "image_1920", "partner_id"]); // Fetch partners with specific fields
+            const recent_out = await this.orm.searchRead("out.going.call.list",[],["to_number", "start_time", "duration", "image_1920", "partner_id"],
+                { order: 'start_time DESC' });// Fetch partners with specific fields sorted by start_time in descending order
             this.state.recent_out = recent_out;
         } catch (error) {
-            // Handle error fetching partners
             console.error("Error fetching partners:", error);
         }
         this.mergeAndSortData();
     }
+
     /*
       To merge incoming and outgoing calls
     */
     mergeAndSortData() {
         try {
-            this.state.recent = this.state.recent.concat(this.state.recent_out);
+            var combined_data = this.state.recent.concat(this.state.recent_out);
+            var sorted_data = combined_data.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
             // Add current user's time to the start_date field in merged data
-            const mergedDataWithUserTime = this.state.recent.map(item => {
+            const mergedDataWithUserTime = sorted_data.map((item,index) => {
                 // Get start_date from the item in this.state.recent
                 var startDate = new Date(item.start_time);
                 // Get the current user's time based on the start_date's timezone
@@ -81,26 +83,25 @@ export class RecentTab extends Component {
                 return {
                     ...item,
                     start_time: userDateTimeFormatted, // Update start_time to current user's time for each item
+                    serial: index + 1 // Add a serial number based on the index of the item in the merged array
                 };
             });
-            // Sort mergedData by start_time in ascending order
-            const sortedData = mergedDataWithUserTime.sort((a, b) => new Date(b.start_time) - new Date(a.start_time));
-            // Set the sorted merged data in component state
-            this.state.mergedRecent = sortedData;
+            this.state.mergedRecent = mergedDataWithUserTime;
         } catch (error) {
             console.error("Error merging and sorting data:", error);
         }
     }
+
     /*
     To search contacts
     */
     searchRecent(ev) {
         this.state.searchTerms = (ev.target.value || "").trim().toLowerCase();
     }
+
     /*To get partners based on the search results*/
     get filteredPartners() {
         const searchTerm = this.state.searchTerms;
-
         if (!searchTerm || !this.state.mergedRecent.length) {
             return this.state.mergedRecent; // Return all partners if search term is empty or partners list is empty
         }
@@ -110,11 +111,13 @@ export class RecentTab extends Component {
             (recent.to_number && recent.to_number.includes(searchTerm)) // Check to_number
         );
     }
+
     /*To move to the dial pad*/
     _OnClickNumPad() {
         this.props.dial_pad.state.recent = false
         this.props.dial_pad.state.value = false
     }
+
     /*To move to the previous page*/
     _OnBack() {
         this.state.showPartner = false
@@ -133,7 +136,7 @@ export class RecentTab extends Component {
         if (RecentDiv.style.display === 'none') {
             RecentDiv.style.display = 'block';
             closeBtn.style.display = 'flex';
-            RecentTab.style.minWidth = '347px';
+            RecentTab.style.minWidth = '342px';
             RecentTab.style.borderRadius = '0px';
             RecentTab.style.removeProperty('height');
             RecentTab.style.backgroundColor = 'white';
@@ -151,7 +154,7 @@ export class RecentTab extends Component {
             RecentDiv.style.display = 'none';
             closeBtn.style.display = 'none';
             RecentTab.style.minWidth = '50px';
-            RecentTab.style.width = '71px';
+            RecentTab.style.width = '73px';
             RecentTab.style.height = '72px';
             RecentTab.style.borderRadius = '50%';
             RecentTab.style.backgroundColor = '';
@@ -168,11 +171,13 @@ export class RecentTab extends Component {
             }
         }
     }
+
     /*To move to the contacts*/
     _OnContacts() {
         this.props.dial_pad.state.recent = false
         this.props.dial_pad.state.contacts = true
     }
+
     /*To get the contacts*/
     async getRecent(contact) {
         this.state.showPartner = true;
@@ -186,7 +191,6 @@ export class RecentTab extends Component {
                 // If a partner with this number exists, update the selectedPartner details
                 this.state.selectedPartner.image_1920 = partner[0].image_1920;
                 this.state.selectedPartner.partner_name = partner[0].name;
-                // You may need to update the UI elements to display the fetched partner details
             }
         } else if (contact.from_number) {
             const partner = await this.orm.searchRead("res.partner", [
@@ -196,12 +200,9 @@ export class RecentTab extends Component {
                 // If a partner with this number exists, update the selectedPartner details
                 this.state.selectedPartner.image_1920 = partner[0].image_1920;
                 this.state.selectedPartner.partner_name = partner[0].name;
-                // You may need to update the UI elements to display the fetched partner details
             }
         }
     }
-
-
     /*
        This functions are used to get the time counter or the duration of the calls,
        when accepting the call even if it is outgoing or incoming.
@@ -226,6 +227,7 @@ export class RecentTab extends Component {
         const seconds = this.state.duration % 60;
         return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     }
+
     /*To make call to the selected partner*/
     async _OnClickCall() {
         device = this.props.dial_pad.device
@@ -243,7 +245,6 @@ export class RecentTab extends Component {
         if (PartnerId && PartnerId.length > 0) {
             this.state.selectedPartner.image_1920 = PartnerId[0].image_1920;
             this.state.selectedPartner.partner_name = PartnerId[0].name;
-            // You may need to update the UI elements to display the fetched partner details
         }
 
         if (PartnerId && PartnerId.length > 0) {
@@ -271,7 +272,7 @@ export class RecentTab extends Component {
                      */
                     call.on('accept', (event) => {
                         const callSid = call.parameters.CallSid;
-                        this.sid = callSid; // Store the CallSid for later use
+                        this.sid = callSid;
                         this.isTimerPaused = false;
                         this._runTimer();
                         this.orm.call('out.going.call.list', 'action_call', [, this.number, callSid, id]);
@@ -281,8 +282,8 @@ export class RecentTab extends Component {
                         this.state.call = false;
                         this._OnBack()
                         const callSid = call.parameters.CallSid;
-                       await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]);
-                             this.action.doAction('soft_reload')
+                        await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]);
+                        this.action.doAction('soft_reload')
                         this.resetTimer();
                     });
 
@@ -293,7 +294,7 @@ export class RecentTab extends Component {
                         this.state.wasRejected = false
                         const callSid = call.parameters.CallSid;
                         if (!this.state.wasRejected) {
-                        await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]).then(() => {
+                            await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]).then(() => {
                                 this.action.doAction('soft_reload')
                             }).catch((error) => {
                                 console.error("Failed to perform soft_reload:", error);
@@ -305,13 +306,12 @@ export class RecentTab extends Component {
                         this.state.call = false;
                         this._OnBack()
                         const callSid = call.parameters.CallSid;
-                              await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]);
-                              this.action.doAction('soft_reload')
+                        await this.orm.call('out.going.call.list', 'action_cancel', [, this.number, callSid]);
+                        this.action.doAction('soft_reload')
                         this.resetTimer();
                     });
 
                 } catch (error) {
-                    // Handle any errors if the promise is rejected
                     console.error("Call rejected:", error);
                 }
             }
@@ -326,8 +326,9 @@ export class RecentTab extends Component {
             type: "warning"
         });
     }
+
     /*To reject the call*/
-  async _onClickCancel() {
+    async _onClickCancel() {
         var self = this;
         this.state.call = false;
         this._OnBack()

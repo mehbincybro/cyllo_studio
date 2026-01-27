@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import requests
 from odoo import _, api, fields, models
 from odoo.tools.safe_eval import datetime
@@ -12,10 +32,14 @@ class SocialMediaPost(models.Model):
     _inherit = 'social.media.post'
 
     post_on_youtube = fields.Boolean(string="Post in Youtube")
-    youtube_channel_id = fields.Many2one('youtube.channel', string="Youtube Channels",
+    youtube_channel_id = fields.Many2one('youtube.channel',
+                                         string="Youtube Channels",
                                          help="Youtube connected accounts")
-    mode = fields.Selection(selection_add=[('upload', 'Upload video(Choose this mode for youtube)')], default='url')
-    youtube_video_number = fields.Char(string="Youtube Id", help="Unique id of video in youtube")
+    mode = fields.Selection(selection_add=[
+        ('upload', 'Upload video(Choose this mode for youtube)')],
+        default='url')
+    youtube_video_number = fields.Char(string="Youtube Id",
+                                       help="Unique id of video in youtube")
 
     @api.onchange('post_on_youtube')
     def _onchange_post_on_youtube(self):
@@ -83,7 +107,7 @@ class SocialMediaPost(models.Model):
                     }
                     update_url = "https://www.googleapis.com/youtube/v3/videos?part=status,snippet"
                     response = requests.put(update_url, headers=headers, json=updated_metadata)
-                    pf_link = f"""/web/image/youtube.channel/#{channel.id}/channel_image"""
+                    pf_link = f"""/web/image/youtube.channel/{channel.id}/channel_image"""
                     if response.status_code == 400:
                         return {
                             'type': 'ir.actions.client',
@@ -122,7 +146,8 @@ class SocialMediaPost(models.Model):
                             'state': 'post'
                         })
             return super().action_post()
-        except Exception:
+        except Exception as e:
+            print(e)
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',

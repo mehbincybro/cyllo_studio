@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, onWillStart, useRef } from "@odoo/owl";
+import { Component, onWillStart, useRef, useState, onMounted} from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 
@@ -11,34 +11,77 @@ export class InstagramComment extends Component {
         this.orm = useService("orm");
         this.actionService = useService("action");
         this.comment_reply = useRef("ig_comment_reply_area");
+        this.nextElementSibling = null
+        this.state = useState({
+            loadingInsta: false,
+            insta_comment: []
+        })
+        onMounted(() => {
+            document.querySelectorAll("textarea").forEach((textarea) => {
+                textarea.addEventListener("input", () => {
+                    textarea.style.height = "auto";
+                    textarea.style.height = textarea.scrollHeight + "px";
+                });
+            });
+        })
     }
     // Fetch Instagram comments before the component is mounted
     async onWillStart() {
-        const feed_id = this.props.action.context.active_id;
-        const self = this;
-        self.insta_comment = await this.orm.call(
-            "social.media.feed", "get_instagram_comments", ["", feed_id], {})
+        const feedId = this.props.action.context.active_id;
+        if (feedId) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "ig_media_number"]
+            );
+            await this.orm.call("social.media.feed", "action_compute_likes_count", [feedId], {})
+            this.state.insta_comment = await this.orm.call(
+                "social.media.feed", "get_instagram_comments", [], {feed: record[0].ig_media_number}
+            )
+        }
     }
+
     // Method to get the fetched Instagram comments
     get InstagramCommentDetails() {
-        return this.insta_comment
+        return this.state.insta_comment
     }
+
     // Method to handle the 'Post' button click for posting a new comment
     async onClickPost() {
-        const feed_id = this.props.action.context.active_id;
+        if (this.state.loadingInsta === true) {
+            return;
+        }
+        this.state.loadingInsta = true;
+        const feedId = this.props.action.context.active_id;
         const comment_div = document.getElementById("ig_comment_area");
-        await this.orm.call(
-            "social.media.feed", "post_instagram_comments", ["", feed_id, comment_div.value], {}
-        ).then(function(data) {
-            comment_div.value = ''
-        })
-        window.location.reload();
+        if (feedId && comment_div.value) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "ig_media_number"]
+            );
+            const self = this
+            await this.orm.call(
+                "social.media.feed", "post_instagram_comments", [], {
+                    feed: record[0].ig_media_number,
+                    comment: comment_div.value
+                }
+            ).then(async function (data) {
+                self.state.insta_comment = await self.orm.call(
+                    "social.media.feed", "get_instagram_comments",
+                    [], {feed: record[0].ig_media_number}
+                )
+                comment_div.value = ''
+                self.state.loadingInsta = false;
+            })
+        }
     }
+
     async convertToLead() {
         var feed_id = this.props.action.context.active_id
         self = this
         var parentElementId = event.target.parentElement.id
-        const matchingComment = this.insta_comment.find(comment => comment.id === parentElementId);
+        const matchingComment = this.state.insta_comment.find(comment => comment.id === parentElementId);
         await this.orm.call(
                 "social.media.feed", "create_lead_ig", [feed_id, matchingComment], {})
             .then(function(data) {
@@ -72,31 +115,60 @@ export class InstagramComment extends Component {
                 }
             })
     }
+
+    // Method to handle the 'Reply' button click for displaying the reply input area
+    onClickReply(event) {
+        const replyDiv = event.currentTarget.closest(".cy-social_marketComment-box").querySelector(".reply_div");
+        if (replyDiv.classList.contains("d-none")){
+            replyDiv.classList.remove("d-none")
+        }
+        else{
+            replyDiv.classList.add("d-none")
+        }
+        this.nextElementSibling = replyDiv
+    }
+
     // Method to handle the 'View Replies' button click for displaying replies
-    onClickViewReplies(ev) {
-        var style = ev.target.nextElementSibling.style
-        if (style.display == 'none') {
-            ev.target.nextElementSibling.style = 'block'
-        } else {
-            ev.target.nextElementSibling.style = 'none'
+    onClickViewReplies(event) {
+        const replies = event.currentTarget.closest(".cy-social_marketComment-box").querySelector(".view_replies");
+        if (replies.classList.contains("d-none")){
+            replies.classList.remove("d-none")
+        }
+        else{
+            replies.classList.add("d-none")
         }
     }
+
     // Method to post a reply to a specific comment
-    async postReply() {
-        const comment_id = event.target.parentElement.id;
-        const feed_id = this.props.action.context.active_id;
-        const comment_reply_div = event.target.parentElement.firstChild;
-        await this.orm.call(
-            "social.media.feed", "post_instagram_reply",
-            ["", feed_id, comment_id, comment_reply_div.value], {}
-        ).then(function(_) {
-            comment_reply_div.value = ''
-        })
+    async postReply(comment) {
+        if (this.state.loadingInsta === true) {
+            return;
+        }
+        this.state.loadingInsta = true;
+        const feedId = this.props.action.context.active_id;
+        if (feedId) {
+            const record = await this.orm.read(
+                "social.media.feed",
+                [feedId],
+                ["id", "ig_media_number"]
+            );
+            const self = this
+            const comment_reply_div = document.getElementById(("comment_" + comment.id));
+            await this.orm.call("social.media.feed", "post_instagram_reply", [], {
+                feed: record[0].ig_media_number,
+                comment: comment.id,
+                reply: comment_reply_div.value,
+            }).then(async function (data) {
+                self.state.insta_comment = await self.orm.call(
+                    "social.media.feed", "get_instagram_comments",
+                    [], {feed: record[0].ig_media_number}
+                )
+                self.nextElementSibling.classList.add("d-none")
+                comment_reply_div.value = ''
+                self.state.loadingInsta = false;
+            })
+        }
     }
-    // Method to handle the 'Reply' button click for displaying the reply input area
-    onClickReply() {
-        event.target.nextElementSibling.style = 'block'
-    }
-    // Method to handle the deletion of comments
 }
+
 registry.category("actions").add("insta_comments", InstagramComment);

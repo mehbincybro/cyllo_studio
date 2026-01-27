@@ -1,9 +1,30 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 import logging
+from dateutil.relativedelta import relativedelta
+
 from odoo.addons.cyllo_payroll_management.tests.common import \
     TestPayrollManagementBase
-from dateutil.relativedelta import relativedelta
 
 _logger = logging.getLogger(__name__)
 
@@ -61,7 +82,7 @@ class TestEmployeePayslipFlow(TestPayrollManagementBase):
         _logger.info("Testes for Entry count")
         work_entries = self.employee_payslip.contract_id.generate_work_entries(
             self.employee_payslip.start_date, self.employee_payslip.to_date)
-        self.employee_payslip._compute_entry_count()
+        self.employee_payslip._compute_work_entry_ids()
         self.assertIsNotNone(work_entries)
         _logger.info("Entry Count Success")
 
@@ -154,5 +175,3 @@ class TestEmployeePayslipFlow(TestPayrollManagementBase):
         self.employee_payslip.action_create_entry()
         self.assertEqual(self.employee_payslip.state, 'done')
         _logger.info('Test action entry success')
-
-

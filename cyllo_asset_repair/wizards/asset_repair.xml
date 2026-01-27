@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Form view for the asset repair-->
+    <record id="view_asset_repair_form" model="ir.ui.view">
+        <field name="name">view.asset.repair.form</field>
+        <field name="model">asset.repair</field>
+        <field name="arch" type="xml">
+            <form string="Maintenance">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="asset_id" invisible="1"/>
+                            <field name="employee_id"/>
+                            <field name="issue"/>
+                        </group>
+                        <group>
+                            <field name="scheduled_date"/>
+                            <field name="user_id"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_send_repair" type="object" string="Send Repair Request"
+                                class="btn-primary"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--Action for the asset repair-->
+    <record id="action_view_asset_repair" model="ir.actions.act_window">
+        <field name="name">Repair</field>
+        <field name="res_model">asset.repair</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

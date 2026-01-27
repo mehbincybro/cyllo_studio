@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import requests
 
 from odoo import api, fields, models
@@ -35,31 +55,6 @@ class DocumentWorkspace(models.Model):
         for record in self:
             record.document_count = self.env['document.file'].search_count(
                 [('workspace_id', '=', self.id)])
-
-    def action_button_view_document(self):
-        """ Open the Kanban view of associated documents. This function opens the Kanban view displaying documents
-        associated with the current workspace.
-        :return: Action to open the Kanban view """
-        return {
-            'type': 'ir.actions.act_window',
-            'res_model': 'document.file',
-            'name': self.name,
-            'view_mode': 'kanban,form',
-            'view_type': 'form',
-            'target': 'current',
-            'domain': [('workspace_id', '=', self.id)]
-        }
-
-    @api.model
-    def work_spaces(self):
-        """ Retrieve and send workspace data to the front-end. This function searches for all existing document
-        workspaces and prepares a list of dictionaries containing their IDs and names. This list is intended to be
-        sent to the front-end for user display.
-        :return: A list of dictionaries, each containing 'id' and 'name' keys
-                 representing workspace IDs and names."""
-        workspace_ids = self.env['document.workspace'].search([])
-        workspace_list = [{'id': i.id, 'name': i.name} for i in workspace_ids]
-        return workspace_list
 
     def write(self, vals):
         """Update the WorkSpace's name and rename corresponding folders in Google Drive and OneDrive if valid
@@ -178,3 +173,28 @@ class DocumentWorkspace(models.Model):
                     except Exception as e:
                         raise UserError(e)
         return super().unlink()
+
+    def action_button_view_document(self):
+        """ Open the Kanban view of associated documents. This function opens the Kanban view displaying documents
+        associated with the current workspace.
+        :return: Action to open the Kanban view """
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'document.file',
+            'name': self.name,
+            'view_mode': 'kanban,form',
+            'view_type': 'form',
+            'target': 'current',
+            'domain': [('workspace_id', '=', self.id)]
+        }
+
+    @api.model
+    def work_spaces(self):
+        """ Retrieve and send workspace data to the front-end. This function searches for all existing document
+        workspaces and prepares a list of dictionaries containing their IDs and names. This list is intended to be
+        sent to the front-end for user display.
+        :return: A list of dictionaries, each containing 'id' and 'name' keys
+                 representing workspace IDs and names."""
+        workspace_ids = self.env['document.workspace'].search([])
+        workspace_list = [{'id': i.id, 'name': i.name} for i in workspace_ids]
+        return workspace_list

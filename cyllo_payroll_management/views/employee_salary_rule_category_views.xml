@@ -9,7 +9,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="name"/>
+                            <field name="name" placeholder="e.g. Basic"/>
                             <field name="code"/>
                             <field name="parent_id"/>
                         </group>
@@ -33,6 +33,17 @@
                 <field name="code"/>
                 <field name="parent_id"/>
             </tree>
+        </field>
+    </record>
+    <record id="view_employee_salary_rule_category_search" model="ir.ui.view">
+        <field name="name">view.employee.salary.rule.category.search</field>
+        <field name="model">employee.salary.rule.category</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="parent_id"/>
+            </search>
         </field>
     </record>
     <!-- Action-->

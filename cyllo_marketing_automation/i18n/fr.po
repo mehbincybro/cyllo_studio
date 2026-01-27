@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-03 11:00+0000\n"
-"PO-Revision-Date: 2024-01-03 11:00+0000\n"
+"POT-Creation-Date: 2025-11-18 08:52+0000\n"
+"PO-Revision-Date: 2025-11-18 08:52+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,33 +17,61 @@ msgstr ""
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
-msgid "<span>Activity</span><br/>"
-msgstr "<pan> Activité </span> <br/>"
+msgid ""
+"<span class=\"cy-state_heading state_heading-marketing-campaign\">\n"
+"                                        Activity\n"
+"                                    </span>\n"
+"                                    <br/>"
+msgstr ""
+"<span class=\"cy-state_heading state_heading-marketing-campaign\">\n"
+"                                        Activité\n"
+"                                    </span>\n"
+"                                    <br/>"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
+msgid ""
+"<span class=\"cy-state_heading state_heading-marketing-campaign\">\n"
+"                                        Participants\n"
+"                                    </span>\n"
+"                                    <br/>"
+msgstr ""
+"<span class=\"cy-state_heading state_heading-marketing-campaign\">\n"
+"                                        Participants\n"
+"                                    </span>\n"
+"                                    <br/>"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
+msgid ""
+"<span class=\"state_heading-marketing-campaign\">\n"
+"                                        Test\n"
+"                                    </span>\n"
+"                                    <br/>"
+msgstr ""
+"<span class=\"state_heading-marketing-campaign\">\n"
+"                                        Test\n"
+"                                    </span>\n"
+"                                    <br/>"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
-msgid "<span>After</span>"
-msgstr "<span> après </span>"
-
-#. module: cyllo_marketing_automation
-#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
-msgid "<span>Participants</span><br/>"
-msgstr "<pan> Participants </span> <br/>"
-
-#. module: cyllo_marketing_automation
-#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
-msgid "<span>Test</span><br/>"
-msgstr "<pan> Tester </span> <br/>"
+msgid "<span class=\"w-25\">After</span>"
+msgstr "<span class=\"w-25\">Après</span>"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_needaction
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_needaction
 msgid "Action Needed"
-msgstr "Action nécessaire"
+msgstr "Action requise"
 
 #. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__activity_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__activity_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+#, python-format
 msgid "Activities"
 msgstr "Activités"
 
@@ -58,14 +86,11 @@ msgid "Activities of the current campaign"
 msgstr "Activités de la campagne actuelle"
 
 #. module: cyllo_marketing_automation
-#. odoo-javascript
-#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_activity_actions
-#: model:ir.actions.client,name:cyllo_marketing_automation.marketing_activity_action
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.action_view_marketing_activity_actions
+#: model:ir.actions.client,name:cyllo_marketing_automation.action_marketing_activity
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__name
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__activity_id
-#, python-format
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
 msgid "Activity"
 msgstr "Activité"
 
@@ -81,6 +106,7 @@ msgid "Activity Domain"
 msgstr "Domaine d'activité"
 
 #. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_activity_line
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__test_activity_ids
 msgid "Activity Lines"
 msgstr "Lignes d'activité"
@@ -106,17 +132,16 @@ msgid "Activity in the activity line"
 msgstr "Activité dans la ligne d'activité"
 
 #. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Add Activity"
+msgstr "Ajouter une activité"
+
+#. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
 msgid "Add New Activity"
 msgstr "Ajouter une nouvelle activité"
-
-#. module: cyllo_marketing_automation
-#. odoo-javascript
-#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#, python-format
-msgid "Add Parent Activity"
-msgstr "Ajouter l'activité des parents"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
@@ -126,15 +151,20 @@ msgstr "Ajouter aux modèles"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__activity_ids
 msgid "All Activity lists"
-msgstr "Liste de toutes les activités"
+msgstr "Toutes les listes d'activités"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Another Activity"
 msgstr "Une autre activité"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__domain
+msgid "Applied domain for records"
+msgstr "Domaine appliqué pour les enregistrements"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
@@ -155,10 +185,9 @@ msgstr "Modèle d'automatisation"
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Bounce"
-msgstr "Rebond"
+msgstr "Rebondir"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__cancel
@@ -184,15 +213,14 @@ msgid "Campaign related to participant"
 msgstr "Campagne liée au participant"
 
 #. module: cyllo_marketing_automation
-#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_campaign_action
-#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_campaign_menu
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.action_view_campaigns
+#: model:ir.ui.menu,name:cyllo_marketing_automation.menu_campaigns
 msgid "Campaigns"
 msgstr "Campagnes"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #, python-format
 msgid "Cancel"
 msgstr "Annuler"
@@ -200,28 +228,27 @@ msgstr "Annuler"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__is_test_participant
 msgid "Check the record is test participant or not"
-msgstr "Vérifiez que l'enregistrement est le participant au test ou non"
+msgstr "Vérifiez si l'enregistrement est un participant test ou non"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__model_id
 msgid "Choose a target model to generate campaign"
-msgstr "Choisissez un modèle cible pour générer une campagne"
+msgstr "Choisissez un modèle cible pour générer la campagne"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_id
 msgid "Choose any predefined templateto apply the filter for the domain"
-msgstr ""
-"Choisissez tout templateto prédéfini appliquez le filtre pour le domaine"
+msgstr "Choisissez un modèle prédéfini pour appliquer le filtre au domaine"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__model_id
 msgid "Choose target model to filter records"
-msgstr "Choisissez le modèle cible pour filtrer les enregistrements"
+msgstr "Choisissez un modèle cible pour filtrer les enregistrements"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__activity_trigger_type
 msgid "Choose the activity trigger type"
-msgstr "Choisissez le type de déclenchement d'activité"
+msgstr "Choisissez le type de déclencheur de l'activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__user_id
@@ -231,7 +258,7 @@ msgstr "Choisissez l'utilisateur responsable de cette campagne"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__activity_trigger
 msgid "Choose the time need to trigger your activity"
-msgstr "Choisissez le temps nécessaire pour déclencher votre activité"
+msgstr "Choisissez le délai nécessaire pour déclencher votre activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__trigger_schedule_type
@@ -241,39 +268,54 @@ msgstr "Choisissez le type de déclenchement de l'activité"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__type
 msgid "Choose your activity type"
-msgstr "Choisissez votre type d'activité"
+msgstr "Choisissez le type d'activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__mailing_mailing_id
 msgid ""
 "Choose your mail template \n"
-"Note: Choose different template for each activity. Otherwise may cause to duplicate mailing"
+" Note: Choose different template for each activity. Otherwise may cause to duplicate mailing"
 msgstr ""
-"Choisissez votre modèle de messagerie\n"
-"Remarque: choisissez un modèle différent pour chaque activité.Sinon, peut entraîner du reportage"
+"Choisissez votre modèle d'e-mail\n"
+"Remarque : Choisissez un modèle différent pour chaque activité, sinon cela peut provoquer des doublons."
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Click"
-msgstr "Cliquez sur"
+msgstr "Cliquez"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__company_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__company_id
+msgid "Company"
+msgstr "Entreprise"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_participant__state__completed
 msgid "Completed"
-msgstr "Complété"
+msgstr "Terminé"
 
 #. module: cyllo_marketing_automation
-#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_filter_menu
+#: model:ir.ui.menu,name:cyllo_marketing_automation.menu_configuration_categ
 msgid "Configuration"
 msgstr "Configuration"
 
 #. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_res_partner
+msgid "Contact"
+msgstr "Contact"
+
+#. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__record_count
 msgid "Count of the activities"
-msgstr "Compte des activités"
+msgstr "Nombre d'activités"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.actions.act_window,help:cyllo_marketing_automation.action_view_campaigns
+msgid "Create Marketing Campaign Records."
+msgstr "Créer des enregistrements de campagnes marketing."
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__user_id
@@ -292,7 +334,7 @@ msgstr "Créé par"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__test_date_started
 msgid "Created date and time"
-msgstr "Créé la date et l'heure"
+msgstr "Date et heure de création"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__create_date
@@ -301,7 +343,7 @@ msgstr "Créé la date et l'heure"
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__create_date
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__create_date
 msgid "Created on"
-msgstr "Créé sur"
+msgstr "Créé le"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__state
@@ -322,7 +364,7 @@ msgstr "Date"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__test_date_started
 msgid "Date and time of the record created"
-msgstr "La date et l'heure de l'enregistrement créées"
+msgstr "Date et heure de création de l'enregistrement"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__day
@@ -336,7 +378,7 @@ msgstr "Jour"
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__display_name
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__display_name
 msgid "Display Name"
-msgstr "Afficher un nom"
+msgstr "Nom affiché"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__domain
@@ -350,10 +392,9 @@ msgid "Domain"
 msgstr "Domaine"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_domain
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__domain
 msgid "Domain to filter the records"
-msgstr "Domaine pour filtrer les enregistrements"
+msgstr "Domaine permettant de filtrer les enregistrements"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__error
@@ -363,27 +404,32 @@ msgstr "ERREUR"
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
 msgid "Email Content"
-msgstr "Contenu par e-mail"
+msgstr "Contenu de l'e-mail"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model,name:cyllo_marketing_automation.model_mail_compose_message
 msgid "Email composition wizard"
-msgstr "Assistant de composition d'emails"
+msgstr "Assistant de composition des e-mails"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__name
 msgid "Enter a name for the campaign"
-msgstr "Entrez un nom pour la campagne"
+msgstr "Saisissez un nom pour la campagne"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__name
 msgid "Enter a name for the filter"
-msgstr "Entrez un nom pour le filtre"
+msgstr "Saisissez un nom pour le filtre"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__name
 msgid "Enter a name for you activity"
-msgstr "Entrez un nom pour votre activité"
+msgstr "Saisissez un nom pour votre activité"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_filter_form
+msgid "Enter filter name"
+msgstr "Saisissez le nom du filtre"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_failure_message
@@ -393,44 +439,44 @@ msgstr "Message d'échec"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_domain
 msgid "Favorite filter domain"
-msgstr "Domaine filtrant préféré"
+msgstr "Domaine de filtre favori"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_id
 msgid "Favourite"
-msgstr "Préféré"
+msgstr "Favori"
 
 #. module: cyllo_marketing_automation
-#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_filter_menu_favourite
+#: model:ir.ui.menu,name:cyllo_marketing_automation.menu_favourites
 msgid "Favourites"
 msgstr "Favoris"
 
 #. module: cyllo_marketing_automation
-#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_filter_action
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.action_view_favourites
 msgid "Filter"
-msgstr "Filtre"
+msgstr "Filtrer"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__name
 msgid "Filter Name"
-msgstr "Nom de filtre"
+msgstr "Nom du filtre"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_follower_ids
 msgid "Followers"
-msgstr "Suiveurs"
+msgstr "Abonnés"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_partner_ids
 msgid "Followers (Partners)"
-msgstr "Suiveurs (partenaires)"
+msgstr "Abonnés (Partenaires)"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
 msgid "Group By"
-msgstr "Par groupe"
+msgstr "Regrouper par"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__has_message
@@ -446,7 +492,7 @@ msgstr "Style hiérarchique"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__h_level_css
 msgid "Hierarchy Style"
-msgstr "Style de hiérarchie"
+msgstr "Style hiérarchique"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__hour
@@ -460,7 +506,7 @@ msgstr "Heure"
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__id
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__id
 msgid "ID"
-msgstr "IDENTIFIANT"
+msgstr "ID"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__record_id
@@ -472,7 +518,7 @@ msgstr "ID de l'enregistrement sélectionné"
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_needaction
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_needaction
 msgid "If checked, new messages require your attention."
-msgstr "S'il est vérifié, les nouveaux messages nécessitent votre attention."
+msgstr "Si coché, les nouveaux messages nécessitent votre attention."
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_has_error
@@ -480,7 +526,7 @@ msgstr "S'il est vérifié, les nouveaux messages nécessitent votre attention."
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_has_error
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
-msgstr "S'il est vérifié, certains messages ont une erreur de livraison."
+msgstr "Si coché, certains messages présentent une erreur de livraison."
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__is_inactive
@@ -491,32 +537,32 @@ msgstr "Inactif"
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_is_follower
 msgid "Is Follower"
-msgstr "Est suiveur"
-
-#. module: cyllo_marketing_automation
-#: model:ir.model.fields,help:cyllo_marketing_automation.field_mailing_mailing__cy_automation_template
-msgid "Is marketing automation template"
-msgstr "Est le modèle d'automatisation marketing"
+msgstr "Est abonné"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_bounced
 msgid "Is mail bounced"
-msgstr "Le courrier est-il rebondi"
+msgstr "Le message a-t-il été rejeté ?"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_clicked
 msgid "Is mail clicked"
-msgstr "Le courrier est-il cliqué"
+msgstr "Le message a-t-il été cliqué ?"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_opened
 msgid "Is mail opened"
-msgstr "Le courrier est-il ouvert"
+msgstr "Le message a-t-il été ouvert ?"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_replied
 msgid "Is mail replied"
-msgstr "Le courrier est-il répondu"
+msgstr "Le message a-t-il reçu une réponse ?"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_mailing_mailing__cy_automation_template
+msgid "Is marketing automation template"
+msgstr "Est-ce un modèle d'automatisation marketing ?"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__write_uid
@@ -539,111 +585,108 @@ msgstr "Dernière mise à jour le"
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #, python-format
 msgid "Launch"
-msgstr "Lancement"
+msgstr "Lancer"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #, python-format
 msgid "Launch Test"
-msgstr "Test de lancement"
+msgstr "Lancer le test"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__type__mail
 msgid "Mail"
-msgstr "Mail"
+msgstr "E-mail"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
 msgid "Mail Body"
-msgstr "Corps de courrier"
+msgstr "Corps du message"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_bounced
 msgid "Mail Bounced"
-msgstr "Courrier rebondi"
+msgstr "E-mail rejeté"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_clicked
 msgid "Mail Clicked"
-msgstr "Mail cliqué"
+msgstr "E-mail cliqué"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_failure_message
 msgid "Mail Failure Reason"
-msgstr "Raison de défaillance du courrier"
+msgstr "Raison de l'échec de l'e-mail"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_opened
 msgid "Mail Opened"
-msgstr "Le courrier a ouvert ses portes"
+msgstr "E-mail ouvert"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_replied
 msgid "Mail Replied"
-msgstr "Courrier a répondu"
+msgstr "E-mail répondu"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_trace_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__activity_executed_ids
 msgid "Mail Trace"
-msgstr "Trace de courrier"
+msgstr "Suivi des e-mails"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_bounce
 msgid "Mail: bounced"
-msgstr "Mail: rebondi"
+msgstr "E-mail : rejeté"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_click
 msgid "Mail: clicked"
-msgstr "Mail: cliqué"
+msgstr "E-mail : cliqué"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_click
 msgid "Mail: not clicked"
-msgstr "Mail: non cliqué"
+msgstr "E-mail : non cliqué"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_open
 msgid "Mail: not opened"
-msgstr "Mail: non ouvert"
+msgstr "E-mail : non ouvert"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_reply
 msgid "Mail: not replied"
-msgstr "Mail: non répondu"
+msgstr "E-mail : sans réponse"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_open
 msgid "Mail: opened"
-msgstr "Mail: ouvert"
+msgstr "E-mail : ouvert"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_reply
 msgid "Mail: replied"
-msgstr "Mail: répondu"
+msgstr "E-mail : répondu"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model,name:cyllo_marketing_automation.model_mailing_trace
 msgid "Mailing Statistics"
-msgstr "Statistiques des emails"
+msgstr "Statistiques des e-mails"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_trace_ids
 msgid "Mails delivered form the activity lines"
-msgstr "Mails livrés à partir des lignes d'activité"
+msgstr "E-mails envoyés à partir des lignes d'activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__activity_executed_ids
 msgid "Mails delivered from each lines"
-msgstr "Mails livrés à partir de chaque ligne"
+msgstr "E-mails envoyés depuis chaque ligne"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__parent_activity_id
@@ -662,19 +705,19 @@ msgid "Marketing Activity Line"
 msgstr "Ligne d'activité marketing"
 
 #. module: cyllo_marketing_automation
-#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_automation_menu
+#: model:ir.ui.menu,name:cyllo_marketing_automation.menu_cyllo_marketing_automation_root
 msgid "Marketing Automation"
 msgstr "Automatisation marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.actions.server,name:cyllo_marketing_automation.ir_cron_marketing_automation_run_activity_ir_actions_server
 msgid "Marketing Automation: Run Activity"
-msgstr "Automatisation du marketing: activité exécutée"
+msgstr "Automatisation marketing : Exécuter l'activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model,name:cyllo_marketing_automation.model_marketing_campaign
 msgid "Marketing Campaign"
-msgstr "Campagne de marketing"
+msgstr "Campagne marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model,name:cyllo_marketing_automation.model_marketing_filter
@@ -682,34 +725,46 @@ msgid "Marketing Filter"
 msgstr "Filtre marketing"
 
 #. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_participant
+msgid "Marketing Participants"
+msgstr "Participants marketing"
+
+#. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__mailing_mailing_id
 msgid "Marketing Template"
-msgstr "Modèle de marketing"
+msgstr "Modèle marketing"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_mail_compose_message__marketing_activity_id
+msgid "Marketing activity"
+msgstr "Activité marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__marketing_activity_count
 msgid "Marketing activity count"
-msgstr "Compte d'activités marketing"
+msgstr "Nombre d'activités marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model,name:cyllo_marketing_automation.model_mailing_mailing
 msgid "Mass Mailing"
-msgstr "Email Marketing"
+msgstr "E-mail marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_error
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_has_error
 msgid "Message Delivery error"
-msgstr "Erreur de livraison de messages"
+msgstr "Erreur de livraison du message"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_ids
 msgid "Messages"
-msgstr "messages"
+msgstr "Messages"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__model_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__model_name
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__model_name
 msgid "Model"
 msgstr "Modèle"
@@ -720,9 +775,6 @@ msgid "Model Description"
 msgstr "Description du modèle"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_name
-#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__model_name
-#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__model_name
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__model_name
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__model_name
 msgid "Model Name"
@@ -736,7 +788,7 @@ msgstr "Nom du modèle"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__model_name
 msgid "Model name of the model"
-msgstr "Nom du modèle du modèle"
+msgstr "Nom du modèle"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__month
@@ -755,40 +807,42 @@ msgid "New"
 msgstr "Nouveau"
 
 #. module: cyllo_marketing_automation
+#: model_terms:ir.actions.act_window,help:cyllo_marketing_automation.action_view_campaigns
+msgid "No data yet!"
+msgstr "Aucune donnée pour le moment !"
+
+#. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Not Clicked"
-msgstr "Pas cliqué"
+msgstr "Non cliqué"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Not Open"
-msgstr "Pas ouverte"
+msgstr "Non ouvert"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Not Replied"
-msgstr "Non répondu"
+msgstr "Sans réponse"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_needaction_counter
 msgid "Number of Actions"
-msgstr "Nombre d'actions"
+msgstr "Nombre d’actions"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_has_error_counter
 msgid "Number of errors"
-msgstr "Nombre d'erreurs"
+msgstr "Nombre d’erreurs"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_needaction_counter
@@ -805,10 +859,9 @@ msgstr "Nombre de messages avec erreur de livraison"
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Open"
-msgstr "Ouvrir"
+msgstr "Ouvert"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__processed
@@ -819,52 +872,54 @@ msgstr "TRAITÉ"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__parent_activity_id
 msgid "Parent Activity"
-msgstr "Activité des parents"
+msgstr "Activité parent"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__sub_parent_activity_id
 msgid "Parent activity of the corresponding activity"
-msgstr "Activité parentale de l'activité correspondante"
+msgstr "Activité parent de l’activité correspondante"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__participant_id
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__participant_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__participant_id
 msgid "Participant"
 msgstr "Participant"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__participant_count
 msgid "Participant Count"
-msgstr "Comptage des participants"
+msgstr "Nombre de participants"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__participant_id
 msgid "Participant in the activity line"
-msgstr "Participant à la ligne d'activité"
+msgstr "Participant dans la ligne d’activité"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__participant_id
 msgid "Participant related to activity"
-msgstr "Participant lié à l'activité"
+msgstr "Participant lié à l’activité"
 
 #. module: cyllo_marketing_automation
-#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_participant_action
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_card.xml:0
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.action_view_marketing_participant_action
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+#, python-format
 msgid "Participants"
 msgstr "Participants"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__participant_count
 msgid "Participants Count"
-msgstr "Count les participants"
+msgstr "Nombre total de participants"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #, python-format
 msgid "Pick or create a/an"
-msgstr "Choisir ou créer un a / an"
+msgstr "Sélectionnez ou créez un(e)"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__reject
@@ -876,17 +931,17 @@ msgstr "REJETÉ"
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record_id
 msgid "Record"
-msgstr "Enregistrer"
+msgstr "Enregistrement"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record_count
 msgid "Record Count"
-msgstr "Nombre d'enregistrements"
+msgstr "Nombre d’enregistrements"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_mailing_trace__marketing_activity_line_id
 msgid "Record corresponding to marketing line"
-msgstr "Enregistrer correspondant à la ligne marketing"
+msgstr "Enregistrement correspondant à la ligne marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__record
@@ -901,10 +956,9 @@ msgstr "Retirer des modèles"
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
 #, python-format
 msgid "Replied"
-msgstr "A répondu"
+msgstr "Répondu"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__user_id
@@ -914,20 +968,20 @@ msgstr "Utilisateur responsable"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__user_id
 msgid "Responsible user "
-msgstr "Utilisateur responsable"
+msgstr "Utilisateur responsable "
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_campaign__state__running
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_participant__state__running
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
 msgid "Running"
-msgstr "En cours d'exécution"
+msgstr "En cours"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__schedule
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__schedule
 msgid "SCHEDULED"
-msgstr "PROGRAMMÉ"
+msgstr "PLANIFIÉ"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_sms_error
@@ -938,24 +992,24 @@ msgstr "Erreur de livraison SMS"
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
 msgid "Select a favourite filter"
-msgstr "Sélectionnez un filtre préféré"
+msgstr "Sélectionnez un filtre favori"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__server_action_id
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__type__server
 msgid "Server Action"
-msgstr "Action du serveur"
+msgstr "Action serveur"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__domain_activity
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__filter
 msgid "Set domain to filter the records"
-msgstr "Définir le domaine pour filtrer les enregistrements"
+msgstr "Définissez un domaine pour filtrer les enregistrements"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__server_action_id
 msgid "Set your server action"
-msgstr "Définissez l'action de votre serveur"
+msgstr "Définissez votre action serveur"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
@@ -965,7 +1019,7 @@ msgstr "Paramètres"
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
 msgid "Start"
-msgstr "Commencer"
+msgstr "Démarrer"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__state
@@ -987,7 +1041,7 @@ msgstr "Statut"
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
 msgid "Stop"
-msgstr "Arrêt"
+msgstr "Arrêter"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_campaign__state__stopped
@@ -1006,6 +1060,7 @@ msgid "Subject"
 msgstr "Sujet"
 
 #. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_id
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__model_id
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
 msgid "Target"
@@ -1024,12 +1079,12 @@ msgstr "Modèle"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__template_count
 msgid "Template Count"
-msgstr "Comptage de modèles"
+msgstr "Nombre de modèles"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__template_count
 msgid "Template count"
-msgstr "Comptage de modèles"
+msgstr "Nombre de modèles"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
@@ -1044,13 +1099,12 @@ msgstr "Test"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__is_test_participant
 msgid "Test Participant"
-msgstr "Tester le participant"
+msgstr "Participant test"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__test_count
-#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__test_count
 msgid "Test Records Count"
-msgstr "Nombre d'enregistrements de test"
+msgstr "Nombre d’enregistrements de test"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
@@ -1060,25 +1114,32 @@ msgstr "Tests"
 #. module: cyllo_marketing_automation
 #. odoo-python
 #: code:addons/cyllo_marketing_automation/models/marketing_filter.py:0
-#: code:addons/custom/cyllo_marketing_automation/models/marketing_filter.py:0
 #, python-format
-msgid "The filter domain is not valid for this target model."
-msgstr "Le domaine du filtre n'est pas valable pour ce modèle cible."
+msgid ""
+"The domain rule cannot be empty or invalid for the selected target model."
+msgstr ""
+"La règle de domaine ne peut pas être vide ou invalide pour le modèle cible "
+"sélectionné."
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
-msgid "This mailing has no selected design (yet!)."
-msgstr "Ce courrier n'a pas encore de conception sélectionnée (encore!)."
+msgid ""
+"This mailing has no selected design\n"
+"                                        (yet!)."
+msgstr ""
+"Ce publipostage n’a pas encore de mise en page sélectionnée\n"
+"                                        (pour le moment)."
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__is_inactive
 msgid "To check whether the participant is executed or not"
-msgstr "Pour vérifier si le participant est exécuté ou non"
+msgstr "Permet de vérifier si le participant a été exécuté ou non"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__activity_trigger
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
 msgid "Trigger"
-msgstr "Déclenchement"
+msgstr "Déclencheur"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__activity_another_trigger
@@ -1088,34 +1149,52 @@ msgstr "Déclencher ensuite"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__trigger_schedule_type
 msgid "Trigger Type"
-msgstr "Type de déclenchement"
+msgstr "Type de déclencheur"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__activity_another_trigger
 msgid "Trigger the activity next"
-msgstr "Déclencher l'activité ensuite"
+msgstr "Déclencher l’activité suivante"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__activity_trigger_type
 msgid "Type"
-msgstr "Taper"
+msgstr "Type"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__website_message_ids
 msgid "Website Messages"
-msgstr "Messages du site Web"
+msgstr "Messages du site web"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__website_message_ids
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__website_message_ids
 msgid "Website communication history"
-msgstr "Historique de communication du site Web"
+msgstr "Historique de communication du site web"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__week
 msgid "Week"
 msgstr "Semaine"
+
+#. module: cyllo_marketing_automation
+#. odoo-python
+#: code:addons/cyllo_marketing_automation/models/marketing_campaign.py:0
+#, python-format
+msgid "You can not delete a campaign which is not in draft stage."
+msgstr "Vous ne pouvez pas supprimer une campagne qui n’est pas à l’état brouillon."
+
+#. module: cyllo_marketing_automation
+#. odoo-python
+#: code:addons/cyllo_marketing_automation/models/res_partner.py:0
+#, python-format
+msgid ""
+"You can not delete a partner which is a participant \n"
+" in a Marketing Campaign"
+msgstr ""
+"Vous ne pouvez pas supprimer un partenaire qui est un participant\n"
+" dans une campagne marketing"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__activity_another
@@ -1125,32 +1204,39 @@ msgstr "une autre activité"
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__begin
 msgid "beginning of workflow"
-msgstr "début du workflow"
+msgstr "début du flux de travail"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_domain
+msgid "domain for the participants"
+msgstr "domaine pour les participants"
 
 #. module: cyllo_marketing_automation
 #: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
 msgid "e.g. New Sale on all T-shirts"
-msgstr "par exemple.Nouvelle vente sur tous les t-shirts"
+msgstr "ex. Nouvelle promotion sur tous les T-shirts"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model,name:cyllo_marketing_automation.model_marketing_activity_line
-msgid "marketing.activity.line"
-msgstr ""
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "eg: Generate Lead/Opportunity"
+msgstr "ex. : Générer une piste/opportunité"
 
 #. module: cyllo_marketing_automation
-#: model:ir.model,name:cyllo_marketing_automation.model_marketing_participant
-msgid "marketing.participant"
-msgstr ""
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "img"
+msgstr "img"
 
 #. module: cyllo_marketing_automation
 #: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__state
 msgid "status of the activity"
-msgstr "statut de l'activité"
+msgstr "statut de l’activité"
 
 #. module: cyllo_marketing_automation
 #. odoo-javascript
 #: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
-#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
 #, python-format
 msgid "to generate a Test Participant"
-msgstr "pour générer un participant à un test"
+msgstr "pour générer un participant test"

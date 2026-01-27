@@ -24,7 +24,8 @@
                        t-props="searchBarToggler.props"/>
                 </t>
                 <!-- Render the main content using the Renderer component -->
-                <t t-component="props.Renderer" t-props="renderProps" list="model.root"/>
+                <t t-component="props.Renderer" t-props="renderProps"
+                   list="model.root"/>
             </Layout>
         </div>
     </t>

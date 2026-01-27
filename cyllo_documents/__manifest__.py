@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     'name': 'Document Management',
     'version': '1.0.0',
@@ -12,15 +32,16 @@
     'depends': ['base', 'mail', 'hr', 'cyllo_base', 'cyllo_portal'],
     'website': "https://www.cyllo.com",
     'external_dependencies': {'python': ['linkpreview']},
+    'icon': '/cyllo_documents/static/description/documents.svg',
     'data': [
         'data/ir_cron_data.xml',
         'data/ir_sequence_data.xml',
         'data/document_workspace_data.xml',
+
         'security/user_groups.xml',
         'security/ir.model.access.csv',
         'security/record_rules.xml',
-        'wizards/document_request_accept_views.xml',
-        'wizards/document_request_reject_views.xml',
+
         'views/document_tag_views.xml',
         'views/document_template_request_views.xml',
         'views/document_request_template_views.xml',
@@ -31,8 +52,12 @@
         'views/document_workspace_views.xml',
         'views/document_file_views.xml',
         'views/res_config_settings_views.xml',
+        'wizards/document_request_accept_views.xml',
+        'wizards/document_request_reject_views.xml',
         'views/request_document_views.xml',
         'views/document_trash_views.xml',
+        'views/cyllo_documents_menu.xml',
+
         'templates/document_request_portal_templates.xml',
         'templates/document_request_portal_form.xml',
         'templates/document_share_preview.xml',
@@ -41,24 +66,22 @@
         'templates/portal_document_templates.xml',
         'reports/report_document_download.xml',
         'reports/reports.xml',
+
         'wizards/document_share_views.xml',
         'wizards/document_url_views.xml',
         'wizards/work_space_views.xml',
-        'views/cyllo_documents_menu.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.min.js',
             'cyllo_documents/static/src/css/kanban.css',
             'cyllo_documents/static/src/css/style.css',
-            'cyllo_documents/static/src/js/search_document.js',
-            'cyllo_documents/static/src/js/form_controller.js',
-            'cyllo_documents/static/src/js/kanban_record.js',
-            'cyllo_documents/static/src/js/kanban_renderer.js',
-            'cyllo_documents/static/src/js/kanbancontroller.js',
             'cyllo_documents/static/src/js/document_preview_action.js',
-            'cyllo_documents/static/src/xml/KanbanController.xml',
             'cyllo_documents/static/src/xml/document_preview_template.xml',
+            'cyllo_documents/static/src/js/widget/*',
+            'cyllo_documents/static/src/view/doc_view/*',
+            'cyllo_documents/static/src/view/calender_view/*',
+            'cyllo_documents/static/src/view/list_view/*',
         ],
         'web.assets_frontend': [
             'https://cdn.jsdelivr.net/npm/pdfjs-dist/build/pdf.min.js',

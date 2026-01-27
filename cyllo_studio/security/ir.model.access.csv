@@ -1,0 +1,2 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_default_widgets,access default_widgets,cyllo_studio.model_default_widgets,base.group_user,1,1,1,1

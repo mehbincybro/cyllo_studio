@@ -19,6 +19,25 @@
     height: 3rem;
     border-radius: 25px;
 }
+.cyllo_register_support_ticket_form{
+    height: 100%;
+}
+.property_container_style{
+    border: 1px solid #e2e5b3;
+    border-radius: 88px 24px;
+    margin-bottom: 21px;
+}
+.incident_service_description{
+    transform: translateY(-84%);
+    margin-left: 25%;
+}
+.incident_management-request_container{
+    height: 10vh;
+    padding: 1rem 1.6rem;
+    background: #f5f6e6;
+    font-family:var(--fira-family);
+    margin-bottom: 84px !important;
+}
 .cy-support_service_ticket_table{
     width: 65%;
 }
@@ -103,6 +122,15 @@ width: 64%;
 }
 .cy-incident_requests_form {
     margin: 1.2rem 0 1rem 0;
+    width: 90%;
+}
+.field_request-label {
+    margin: 1rem 0;
+    font-weight: 600;
+}
+.heading_align-style{
+    margin-left:25%;
+    transform: translateY(-56px);
 }
 .cy-incident_requests_input {
     width: 100%;
@@ -136,19 +164,19 @@ width: 64%;
     box-shadow: rgba(0,0,0,0.1) 0px 1px 2px 0px;
 }
 .cy-button-primary-stroke {
-  border-radius: 2px;
-  border-top: 1px solid #4B9212;
-  border-right: 1px solid #4B9212;
-  border-bottom: 1px solid #4B9212;
-  border-left: 1px solid #4B9212;
-  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);
-  background: #5EB717;
-  color: #fff;
-  font-weight: 600;
-  font-size: 13px;
-  padding: 0.5rem 1rem;
-  text-shadow: 1px 1px #4B9212;
-  position: relative;
+    border-radius: 2px;
+    border-top: 1px solid #4B9212;
+    border-right: 1px solid #4B9212;
+    border-bottom: 1px solid #4B9212;
+    border-left: 1px solid #4B9212;
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);
+    background: #5EB717;
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 0.5rem 1rem;
+    text-shadow: 1px 1px #4B9212;
+    position: relative;
 
   &::before {
     content: '';

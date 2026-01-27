@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="approval_rule_form" model="ir.ui.view">
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <form string="Create Approval">
+                <sheet>
+                    <header>
+                        <button string="Activate Rule" type="object" name="action_enable" class="btn btn-primary" invisible="state=='enable'"/>
+                        <button string="Disable" type="object" name="action_disable" class="btn btn-secondary" invisible="state=='disable'"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Rule for RFQ"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="model_id" required="1" widget="selection"/>
+                            <field name="model_select" invisible="1"/>
+                            <field name="definition_type"/>
+                            <field name="domain" invisible="definition_type!='domain'" widget="domain" options="{'model': 'model_select'}"/>
+                            <field name="server_action_id" invisible="definition_type!='server_action'" domain="[('model_id','=',model_id),('usage','=','ir_actions_server')]" options="{'no_create': True}"/>
+                            <field name="state_value" invisible="definition_type!='domain'"/>
+                            <field name="state_values_ids" invisible="1" required="definition_type=='domain'"/>
+                            <field name="state_from_id" domain="[('id', 'in', state_values_ids)]" invisible="definition_type!='domain'" required="definition_type=='domain'" options="{'no_create': True}"/>
+                            <field name="state_to_id" domain="[('id', 'in', state_values_ids)]" invisible="definition_type!='domain'" required="definition_type=='domain'" options="{'no_create': True}"/>
+                        </group>
+                        <group>
+                            <field name="user_type" required="1"/>
+                            <field name="admin_users" invisible="1"/>
+                            <field name="user_id" invisible="user_type!='user'" required="user_type == 'user'" domain="[('id', 'in', admin_users)]"/>
+                            <field name="group_id" invisible="user_type!='group'" required="user_type == 'group'" domain="[('id', 'in', admin_users)]"/>
+                            <field name="related_user_id" invisible="user_type!='related'" domain="[('model_id','=',model_id),('relation','=','res.users'), ('name', '!=', 'approver_ids')]" required="user_type == 'related'" options="{'no_create': True}"/>
+                            <field name="is_sequenced"/>
+                            <field name="sequence_order" invisible="is_sequenced!=True"/>
+                            <field name="allow_comment"/>
+                            <field name="transferred"/>
+                            <field name="active" invisible="1"/>
+                            <field name="email_notification"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Email Notification Settings" invisible="email_notification!=True">
+                            <group>
+                                <group>
+                                    <field name="notify_on_request"/>
+                                    <field name="notify_on_approve"/>
+                                    <field name="notify_on_reject"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" groups="base.group_user"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="approval_rule_tree" model="ir.ui.view">
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="model_id"/>
+                <field name="state_from_id"/>
+                <field name="state_to_id"/>
+                <field name="definition_type"/>
+            </tree>
+        </field>
+    </record>
+    <record id="approve_rule_search" model="ir.ui.view">
+        <field name="name">approve.rule</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <search string="Search Bank">
+                <field name="name"/>
+                <separator/>
+                <filter string="Archived" name="active" domain="[('active', '=', False)]"/>
+                <filter string="Domain" name="definition_type" domain="[('definition_type','=','domain')]"/>
+                <filter string="Server Action" name="definition_type" domain="[('definition_type','=','server_action')]"/>
+                <separator/>
+                <filter string="Model" name="model_id" domain="[]" context="{'group_by':'model_id'}"/>
+                <filter string="User Type" name="user_type" domain="[]" context="{'group_by':'user_type'}"/>
+            </search>
+        </field>
+    </record>
+    <!-- kanban view for the approval.rule model -->
+    <record id="view_approval_rule_kanban" model="ir.ui.view">
+        <field name="name">view.approval.rule.kanban</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="active" invisible="1"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <t t-if="widget.deletable">
+                            <a role="menuitem" type="delete"
+                               class="dropdown-item">Delete
+                            </a>
+                        </t>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
+                            <div class="ribbon ribbon-top-right"
+                                 invisible="active">
+                                <span class="text-bg-danger">Archived</span>
+                            </div>
+                            <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                                <div>
+                                    <strong class="o_kanban_record_title oe_partner_heading">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
+                                    <ul>
+                                        <li t-if="record.model_id.raw_value">
+                                            <t t-if="record.model_id.raw_value">
+                                                <field name="model_id"/>
+                                            </t>
+                                        </li>
+                                        <li t-if="record.definition_type.raw_value">
+                                            <t t-if="record.definition_type.raw_value">
+                                                <field name="definition_type"/>
+                                            </t>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <t t-if="record.state.raw_value">
+                                            <field name="state"
+                                                   widget="label_selection"
+                                                   options="{'classes': {'enable': 'success', 'disable': 'danger'}}"/>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Pivot View -->
+    <record id="approval_rule_pivot" model="ir.ui.view">
+        <field name="name">approval.rule.pivot</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <pivot string="Approval Rules">
+                <field name="id" string="Count" type="count"/>
+                <field name="name" type="row"/>
+                <field name="model_id" type="row"/>
+                <field name="state" type="col"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- Graph View -->
+    <record id="approval_rule_graph" model="ir.ui.view">
+        <field name="name">approval.rule.graph</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <graph string="Approval Rules" type="bar">
+                <field name="name" type="row"/>
+                <field name="state" type="col"/>
+            </graph>
+        </field>
+    </record>
+    <!-- Activity View -->
+    <record id="approval_rule_activity" model="ir.ui.view">
+        <field name="name">approval.rule.activity</field>
+        <field name="model">approval.rule</field>
+        <field name="arch" type="xml">
+            <activity string="Approval Rules">
+                <templates>
+                    <div t-name="activity-box">
+                        <div class="ms-2">
+                            <field name="name" display="full" class="o_text_block"/>
+                        </div>
+                    </div>
+                </templates>
+            </activity>
+        </field>
+    </record>
+
+
+    <record id="action_approval_rule_view" model="ir.actions.act_window">
+        <field name="name">Approval Rules</field>
+        <field name="res_model">approval.rule</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,activity</field>
+    </record>
+    <menuitem id="menu_cyllo_approval_root" name="Approvals"/>
+    <menuitem id="menu_approval_rule" name="Approval Rules" groups="cyllo_approval.group_approval_manager"
+              action="action_approval_rule_view" parent="menu_cyllo_approval_root"/>
+</odoo>

@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
-    'name': 'Cyllo Barcode',
+    'name': 'Barcode',
     'version': "1.0",
     'summary': 'Cyllo Inventory Barcode',
     'description': 'Barcode for the Inventory Adjustments and Transfers',
@@ -10,9 +30,11 @@
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
     'depends': ['stock_picking_batch', 'mrp_subcontracting'],
-    'icon': '/cyllo_barcode/static/description/barcode.svg',
     'assets': {
         'web.assets_backend': [
+            'cyllo_barcode/static/src/view/**/*',
+            'cyllo_barcode/static/src/js/choosePicking.js',
+            'cyllo_barcode/static/src/js/choosePicking.xml',
             'cyllo_barcode/static/src/js/cyllo_barcode.js',
             'cyllo_barcode/static/src/js/barcode_adjustment.js',
             'cyllo_barcode/static/src/js/barcode_adjustment_lines.js',
@@ -29,13 +51,14 @@
             'cyllo_barcode/static/src/xml/barcode_templates.xml',
             'cyllo_barcode/static/src/xml/barcode_dialog.xml',
             'cyllo_barcode/static/src/js/barcode_sound_service.js',
+            'cyllo_barcode/static/src/scss/style.css',
             'cyllo_barcode/static/src/scss/cyllo_barcode.scss',
-            'cyllo_barcode/static/src/tests/tour/cyllo_barcode_tour.js'
         ],
         'web.qunit_suite_tests': [
             'cyllo_barcode/static/src/tests/*'
         ]
     },
+    'icon': '/cyllo_barcode/static/description/barcode.svg',
     'data': [
         'reports/cyllo_barcode_report.xml',
         'reports/cyllo_barcode_templates.xml',
@@ -43,6 +66,8 @@
         'views/stock_picking_type_views.xml',
         'views/res_config_settings_views.xml',
         'views/ir_actions_client_views.xml',
+        'views/stock_picking_views.xml',
+        'views/stock_picking_batch_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

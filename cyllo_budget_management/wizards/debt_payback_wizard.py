@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -9,45 +29,59 @@ class DebtPaybackWizard(models.TransientModel):
     _name = 'debt.payback.wizard'
     _description = "Wizard for the payback Details in Debt"
 
-    available_journal_ids = fields.Many2many('account.journal', compute='_compute_available_journal_ids')
-    journal_id = fields.Many2one('account.journal', domain="[('id', 'in', available_journal_ids)]",
-                                 required=True, help='Choose the journal')
-    payment_method_line_id = fields.Many2one('account.payment.method.line', string='Payment Method',
-                                             domain="[('id', 'in', payment_method_line_ids)]", required=True,
-                                             help='Choose the Payment Method')
-    payment_method_line_ids = fields.Many2many('account.payment.method.line',
-                                               compute='_compute_payment_method_line_ids')
+    available_journal_ids = fields.Many2many(
+        'account.journal', compute='_compute_available_journal_ids')
+    journal_id = fields.Many2one(
+        'account.journal', domain="[('id', 'in', available_journal_ids)]",
+        required=True, help='Choose the journal')
+    payment_method_line_id = fields.Many2one(
+        'account.payment.method.line', string='Payment Method',
+        domain="[('id', 'in', payment_method_line_ids)]", required=True,
+        help='Choose the Payment Method')
+    payment_method_line_ids = fields.Many2many(
+        'account.payment.method.line',
+        compute='_compute_payment_method_line_ids')
     partner_id = fields.Many2one('res.partner')
     payback_partner_id = fields.Many2one('res.partner')
-    recipient_bank_id = fields.Many2one('res.partner.bank', domain="[('partner_id','=',partner_id)]",
-                                        help='Choose the bank')
-    payback_recipient_bank_id = fields.Many2one('res.partner.bank', string='Recipient Bank',
-                                                domain="[('partner_id','=',payback_partner_id)]",
-                                                help='Choose the bank')
+    recipient_bank_id = fields.Many2one(
+        'res.partner.bank', domain="[('partner_id','=',partner_id)]",
+        help='Choose the bank')
+    payback_recipient_bank_id = fields.Many2one(
+        'res.partner.bank', string='Recipient Bank',
+        domain="[('partner_id','=',payback_partner_id)]",
+        help='Choose the bank')
     debt_id = fields.Many2one('debt.management')
-    return_type = fields.Selection(selection=[('partial', 'Partially'), ('full', 'Completely')], default='full',
-                                   help='Choose the Type')
+    return_type = fields.Selection(
+        selection=[('partial', 'Partially'), ('full', 'Completely')],
+        default='full', help='Choose the Type')
     amount = fields.Monetary(help='Amount', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id.id)
-    balance_amount = fields.Monetary(string='Balance', help='Balance to payback', currency_field='currency_id')
-    company_id = fields.Many2one('res.company', default=lambda self: self.env.company.id)
+    currency_id = fields.Many2one(
+        'res.currency',
+        default=lambda self: self.env.user.company_id.currency_id.id)
+    balance_amount = fields.Monetary(
+        string='Balance', help='Balance to payback',
+        currency_field='currency_id')
+    company_id = fields.Many2one('res.company',
+                                 default=lambda self: self.env.company.id)
 
     @api.depends('company_id')
     def _compute_available_journal_ids(self):
         """Compute the available journals for the current company """
         for record in self:
             record.available_journal_ids = self.env['account.journal'].search([
-                *self.env['account.journal']._check_company_domain(record.company_id),
-                ('type', 'in', ('bank', 'cash')),
-            ]).ids
+                *self.env['account.journal']._check_company_domain(
+                    record.company_id),
+                ('type', 'in', ('bank', 'cash'))]).ids
 
     @api.depends('journal_id')
     def _compute_payment_method_line_ids(self):
         """    Compute the available payment method lines based on the journal_id """
         for record in self:
-            record.debt_id = record.debt_id.browse(self.env.context.get('active_id'))
+            record.debt_id = record.debt_id.browse(
+                self.env.context.get('active_id'))
             payment_type = 'inbound' if self.debt_id.debt_type == 'take' else 'outbound'
-            record.payment_method_line_ids = record.journal_id._get_available_payment_method_lines(payment_type)
+            record.payment_method_line_ids = record.journal_id._get_available_payment_method_lines(
+                payment_type)
             record.partner_id = record.debt_id.person_id.id if payment_type == 'outbound' \
                 else self.env.company.partner_id.id
             record.payback_partner_id = record.debt_id.person_id.id if payment_type == 'inbound' \
@@ -59,7 +93,6 @@ class DebtPaybackWizard(models.TransientModel):
         payment = self.env['account.payment'].create({
             'partner_id': self.debt_id.person_id.id,
             'company_id': self.env.user.company_id.id,
-            'date': self.debt_id.date,
             'amount': self.debt_id.amount,
             'payment_type': 'inbound' if self.debt_id.debt_type == 'borrow' else 'outbound',
             'partner_type': 'customer',
@@ -88,7 +121,6 @@ class DebtPaybackWizard(models.TransientModel):
         payment = self.env['account.payment'].create({
             'partner_id': self.debt_id.person_id.id,
             'company_id': self.env.user.company_id.id,
-            'date': self.debt_id.date,
             'amount': self.amount,
             'payment_type': 'inbound' if self.debt_id.debt_type == 'lend' else 'outbound',
             'partner_type': 'customer',

@@ -2,7 +2,7 @@
 <odoo>
     <!-- Inherited the Hr Employee for adding new fields -->
     <record id="view_hr_employee_form" model="ir.ui.view">
-        <field name="name">view.hr.employee.</field>
+        <field name="name">view.hr.employee.form</field>
         <field name="model">hr.employee</field>
         <field name="inherit_id" ref="hr.view_employee_form"/>
         <field name="arch" type="xml">
@@ -10,7 +10,8 @@
                 <field name="is_resigned" invisible="1"/>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
-                <button name="action_view_payslip" type="object" class="oe_stat_button" invisible=" payslip_count == 0" string="Payslip">
+                <button name="action_view_payslip" type="object" class="oe_stat_button" invisible=" payslip_count == 0" string="Payslip"
+                groups="cyllo_payroll_management.group_cyllo_payroll_management_manager">
                     <i class="fa-credit-card" title="Payslip"/>
                     <div class="o_stat_info" style="margin-left:2px;">
                         <span class="o_stat_text">
@@ -28,7 +29,7 @@
         <field name="view_mode">kanban,tree,form</field>
         <field name="domain">[('is_resigned', '=', True)]</field>
         <field name="help" type="html">
-            <p class="oe_view_nocontent_create">Employees who are in notice period</p>
+            <p class="o_view_nocontent_smiling_face">Employees who are in notice period</p>
         </field>
     </record>
 </odoo>

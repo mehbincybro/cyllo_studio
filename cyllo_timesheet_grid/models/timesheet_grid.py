@@ -1,7 +1,27 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from datetime import datetime
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -16,7 +36,8 @@ class TimesheetGrid(models.Model):
     @api.model
     def fetch_remaining_hours(self,filtered_ids):
         """
-            Fetches information about remaining hours, allocated hours, and effective hours for the given task IDs.
+            Fetches information about remaining hours, allocated hours, and
+             effective hours for the given task IDs.
             :param filtered_ids: A list of task IDs to filter the results.
             :type filtered_ids: list
             :return: A list of tuples containing the retrieved data.
@@ -63,8 +84,9 @@ class TimesheetGrid(models.Model):
             task_current = self.env['project.task'].browse(task_id)
         else:
             task_current = self.env['project.project'].browse(project_id)
-        data = (task_current.timesheet_ids.filtered(lambda rec: rec.date == formatted_date and
-                                                                rec.employee_id.id == employee_id))
+        data = (task_current.timesheet_ids.filtered(
+            lambda rec: rec.date == formatted_date and
+                        rec.employee_id.id == employee_id))
         if len(data) == 0:
             task_current.update({
                 'timesheet_ids': [fields.Command.create({
@@ -140,8 +162,10 @@ class TimesheetGrid(models.Model):
             settings.
         """
         settings = self.env['ir.config_parameter']
-        return {'minimum_duration': settings.sudo().get_param('cyllo_timesheet_grid.minimal_duration'),
-                'round_up': settings.sudo().get_param('cyllo_timesheet_grid.round_up')}
+        return {'minimum_duration': settings.sudo().get_param(
+            'cyllo_timesheet_grid.minimal_duration'),
+                'round_up': settings.sudo().get_param(
+                    'cyllo_timesheet_grid.round_up')}
 
     @api.model
     def day_hour_check(self):
@@ -150,5 +174,6 @@ class TimesheetGrid(models.Model):
             days or hours.
             :return: Boolean indicating whether time is encoded in days.
         """
-        is_day = self.env['res.config.settings'].sudo().search([], limit=1, order='id desc')
+        is_day = self.env['res.config.settings'].sudo().search([], limit=1,
+                                                               order='id desc')
         return is_day.is_encode_uom_days

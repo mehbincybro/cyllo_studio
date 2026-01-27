@@ -17,6 +17,7 @@
 }
 .create_user_image{
     height: 3rem;
+    width: 3rem;
     border-radius: 25px;
 }
 .cy-support_service_ticket_table{
@@ -103,6 +104,17 @@ width: 64%;
 }
 .cy-support_service-ticket_form {
     margin: 1.2rem 0 1rem 0;
+    width:90%;
+}
+.cyllo_register_support_ticket_form{
+    height:100%;
+}
+.support_service_description{
+    transform: translateX(25%) translateY(-84%);
+}
+.support_service_description {
+    transform: translateY(-84%);
+    margin-left: 25%;
 }
 .cy-support_service-ticket_input {
     width: 100%;
@@ -178,7 +190,22 @@ width: 64%;
   align-self: center;
   margin-left: 15px;
 }
-
+.heading_align-style{
+    margin-left:25%;
+    transform: translateY(-56px);
+}
+.property_container_style{
+    border: 1px solid #e2e5b3;
+    border-radius: 88px 24px;
+    margin-bottom: 21px;
+}
+.service_request-request_container{
+    height: 10vh;
+    padding: 1rem 1.6rem;
+    background: #f5f6e6;
+    font-family:var(--fira-family);
+    margin-bottom: 84px !important;
+}
 .cy_support_priority_div .stars-box .star {
   color: #ccc;
   cursor: pointer;
@@ -200,4 +227,28 @@ width: 64%;
     gap: 1em;
     justify-content: end;
     padding-top: 2rem;
+}
+.o_support_ticket_layout_list div.td_support_ticket{
+    display: block !important;
+    width: 100%;
+}
+.td_support_ticket{
+
+}
+.o_support_ticket_layout_list col {
+    width: 100%;
+}
+.o_support_ticket_layout_list table td div.support_ticket_row {
+    padding: 1rem !important;
+}
+.td_support_ticket div.card{
+     height: 100%;
+    }
+.o_support_ticket_layout_list div.card{
+    height:auto !important;
+}
+.request_top {
+    background-image: url("/cyllo_support_service/static/src/img/");
+    background-repeat: no-repeat;
+    background-size: contain;
 }

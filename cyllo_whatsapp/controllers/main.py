@@ -1,8 +1,30 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import base64
 import logging
-import requests
 
+from http import HTTPStatus
+
+import requests
 from odoo import http
 from odoo.http import request
 
@@ -15,10 +37,12 @@ class Webhook(http.Controller):
     @http.route('/check_model/whatsapp', type="json", auth="public")
     def check_model_exist(self):
         """Check whether model exist."""
-        model = bool(request.env['ir.model'].sudo().search_count([('model', '=', 'whatsapp.channel')]))
+        model = bool(request.env['ir.model'].sudo().search_count(
+            [('model', '=', 'whatsapp.channel')]))
         return model
 
-    @http.route('/whatsapp/message/', methods=['POST'], type="json", auth="public")
+    @http.route('/whatsapp/message/', methods=['POST'], type="json",
+                auth="public")
     def webhook_receive_message(self):
         """
         Handle incoming messages in a WhatsApp webhook.
@@ -43,63 +67,110 @@ class Webhook(http.Controller):
         """
         data = request.get_json_data()
         for entry in data['entry']:
-            user = request.env['res.users'].sudo().search([('account_uid', '=', entry['id'])], limit=1)
+            user = request.env['res.users'].sudo().search(
+                [('account_uid', '=', entry['id'])], limit=1)
             if not user:
-                _logger.warning("This account is not configured for any user: %s ", data)
+                _logger.warning(
+                    "This account is not configured for any user: %s ", data)
             else:
                 for changes in entry.get('changes', []):
                     value = changes['value']
                     if changes['field'] == 'messages':
                         if value.get('messages'):
-                            message = data['entry'][0]['changes'][0]['value']['messages'][0]
-                            message_values = {'flag': False, 'message_uid': message['id']}
+                            message = \
+                                data['entry'][0]['changes'][0]['value']['messages'][
+                                    0]
+                            message_values = {'flag': False,
+                                              'state': 'received',
+                                              'message_uid': message['id']}
                             if message['type'] == 'text':
-                                message_values['message'] = message['text']['body']
+                                message_values['message'] = message['text'][
+                                    'body']
                                 message_values['message_type'] = message['type']
-                            elif message['type'] in ['image', 'audio', 'document']:
+                            elif message['type'] in ['image', 'audio',
+                                                     'document', 'video',
+                                                     'sticker']:
                                 message_type = message['type']
                                 media_id = message[message_type]['id']
-                                response = self._extract_binary_data(media_id, user)
-                                attachment_values = {'mimetype': message[message_type]['mime_type'],
-                                                     'datas': base64.b64encode(response.content)}
+                                response = self._extract_binary_data(media_id,
+                                                                     user)
+                                attachment_values = {
+                                    'mimetype': message[message_type][
+                                        'mime_type'],
+                                    'datas': base64.b64encode(response.content)}
                                 if message_type == 'image':
-                                    caption = message[message_type].get('caption', None)
+                                    caption = message[message_type].get(
+                                        'caption', None)
                                     message_values['message'] = caption
-                                    message_values['image'] = base64.b64encode(response.content)
-                                    file_name = 'IMG-WA-' + message['timestamp'] + '.png'
+                                    message_values['image'] = base64.b64encode(
+                                        response.content)
+                                    file_name = 'IMG-WA-' + message[
+                                        'timestamp'] + '.png'
+                                    attachment_values['name'] = file_name
+                                elif message_type == 'sticker':
+                                    message_values[
+                                        'sticker'] = base64.b64encode(
+                                        response.content).decode()
+                                    file_name = 'IMG-ST-' + message[
+                                        'timestamp'] + '.webp'
                                     attachment_values['name'] = file_name
                                 elif message_type == 'audio':
-                                    file_name = 'AUD-WA-' + message['timestamp'] + '.opus'
+                                    file_name = 'AUD-WA-' + message[
+                                        'timestamp'] + '.opus'
+                                    attachment_values['name'] = file_name
+                                elif message_type == 'video':
+                                    file_name = 'VID-WA-' + message[
+                                        'timestamp'] + '.mp4'
                                     attachment_values['name'] = file_name
                                 else:
-                                    caption = message[message_type].get('caption', None)
+                                    caption = message[message_type].get(
+                                        'caption', None)
                                     message_values['message'] = caption
-                                    attachment_values['name'] = message[message_type]['filename']
-                                attachment = request.env['ir.attachment'].sudo().create(attachment_values)
+                                    attachment_values['name'] = \
+                                        message[message_type]['filename']
+                                attachment = request.env[
+                                    'ir.attachment'].sudo().create(
+                                    attachment_values)
                                 message_values['attachment_id'] = attachment.id
                                 message_values['message_type'] = message['type']
+                                if message.get('audio', {}).get('voice'):
+                                    message_values['is_voice'] = True
+                                else:
+                                    message_values['is_voice'] = False
                             else:
-                                _logger.warning("Unsupported whatsapp message type: %s", message['type'])
+                                _logger.warning(
+                                    "Unsupported whatsapp message type: %s",
+                                    message['type'])
                                 continue
                             if value.get('contacts'):
-                                profile = data['entry'][0]['changes'][0]['value']['contacts'][0]
+                                profile = \
+                                    data['entry'][0]['changes'][0]['value'][
+                                        'contacts'][0]
                                 number = profile['wa_id']
-                                partner = request.env['res.partner'].sudo().search([('whatsapp_number', '=', number)])
+                                partner = request.env[
+                                    'res.partner'].sudo().search(
+                                    [('whatsapp_number', '=', number)])
                                 if not partner:
-                                    partner = request.env['res.partner'].sudo().create(
+                                    partner = request.env[
+                                        'res.partner'].sudo().create(
                                         {'name': profile['profile']['name'],
                                          'user_id': user.id,
                                          'whatsapp_number': profile['wa_id']})
-                                channel = request.env['whatsapp.channel'].sudo().search(
-                                    [('partner_id', '=', partner.id), ('user_id', '=', user.id)])
+                                channel = request.env[
+                                    'whatsapp.channel'].sudo().search(
+                                    [('partner_id', '=', partner.id),
+                                     ('user_id', '=', user.id)])
                                 if not channel:
-                                    channel = request.env['whatsapp.channel'].sudo().create(
+                                    channel = request.env[
+                                        'whatsapp.channel'].sudo().create(
                                         {'sender_id': user.partner_id.id,
                                          'partner_id': partner.id,
                                          'user_id': user.id,
                                          'name': partner.name})
                                 message_values['channel_id'] = channel.id
-                            received_message = request.env['whatsapp.message'].sudo().create(message_values)
+                            received_message = request.env[
+                                'whatsapp.message'].sudo().create(
+                                message_values)
                             channel.write({
                                 'last_message': received_message.message,
                                 'last_messenger': channel.name,
@@ -109,25 +180,46 @@ class Webhook(http.Controller):
                                 "channel": channel,
                                 "message": received_message.read(),
                             }
-                            request.env["bus.bus"]._sendone(channel, "notification", message)
+                            request.env["bus.bus"]._sendone(channel,
+                                                            "notification",
+                                                            message)
                     if value.get('statuses'):
                         for record in value.get('statuses'):
-                            message = request.env['whatsapp.message'].sudo().search(
+                            message = request.env[
+                                'whatsapp.message'].sudo().search(
                                 [('message_uid', 'ilike', record.get('id'))])
                             message.state = record.get('status')
+                            if record.get('status') == 'read':
+                                message.is_read = True
+                            request.env["bus.bus"]._sendone("WHATSAPP-CHANNEL",
+                                                            "STATE-UPDATE",
+                                                            message)
                 if value.get('message_template_id'):
-                    wa_template = self._get_wa_template(value['message_template_id'])
-                    self._update_template_from_respons(wa_template, changes['field'], value)
+                    wa_template = self._get_wa_template(
+                        value['message_template_id'])
+                    self._update_template_from_respons(wa_template,
+                                                       changes['field'], value)
 
-    @http.route('/whatsapp/message/', methods=['GET'], type="http", auth="public", csrf=False)
+    @http.route(['/whatsapp/message', '/whatsapp/message/'], methods=['GET'],
+                type="http", auth="public", csrf=False)
     def receive_message(self, **kwargs):
         """
         Handle incoming messages from WhatsApp webhook.
         :param kwargs: Keyword arguments containing information from the request.
         :return: Response based on the validation and subscription status.
         """
-        if kwargs:
-            return (kwargs['hub.challenge'])
+        mode = kwargs.get("hub.mode")
+        challenge = kwargs.get("hub.challenge")
+        token = kwargs.get("hub.verify_token")
+        verify_token = request.env['ir.config_parameter'].sudo().get_param(
+            'res_users.whatsapp_return_token'
+        )
+        if mode == "subscribe" and token == verify_token:
+            response = request.make_response(challenge)
+            response.status_code = HTTPStatus.OK
+            return response
+        return http.Response("Invalid Verify Token",
+                             status=HTTPStatus.FORBIDDEN)
 
     def _extract_binary_data(self, media_id, user):
         """ Retrieve binary data associated with a media ID from the Facebook
@@ -156,7 +248,8 @@ class Webhook(http.Controller):
 
     def _get_wa_template(self, message_template_id):
         """ Search the template corresponds to response template_uid """
-        return request.env['whatsapp.template'].sudo().search([('template_uid', '=', message_template_id)])
+        return request.env['whatsapp.template'].sudo().search(
+            [('template_uid', '=', message_template_id)])
 
     def _update_template_from_respons(self, wa_template, field, value):
         """

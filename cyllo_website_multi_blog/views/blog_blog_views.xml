@@ -8,13 +8,16 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="replace">
                 <sheet>
-                    <widget name="web_ribbon" title="Archived"
-                            bg_color="text-bg-danger" invisible="active"/>
+                    <widget name="web_ribbon"
+                            title="Archived"
+                            bg_color="text-bg-danger"
+                            invisible="active"/>
                     <group>
                         <field name="active" invisible="1"/>
                         <field name="name"/>
                         <field name="subtitle"/>
-                        <field name="website_ids" widget="many2many_tags"
+                        <field name="website_ids"
+                               widget="many2many_tags"
                                options="{'no_create': True}"
                                groups="website.group_multi_website"/>
                     </group>
@@ -22,13 +25,16 @@
             </xpath>
         </field>
     </record>
+
     <record id="view_blog_blog_list" model="ir.ui.view">
         <field name="name">view.blog.blog.tree</field>
         <field name="model">blog.blog</field>
         <field name="inherit_id" ref="website_blog.view_blog_blog_list"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='website_id']" position="replace">
-                        <field name="website_ids" widget="many2many_tags" groups="website.group_multi_website"/>
+                <field name="website_ids"
+                       widget="many2many_tags"
+                       groups="website.group_multi_website"/>
             </xpath>
         </field>
     </record>

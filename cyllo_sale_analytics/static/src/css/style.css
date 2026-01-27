@@ -1,0 +1,562 @@
+.cy_prediction_container {
+    .cy_prediction-child {
+        margin: 0 16px;
+    }
+
+    .prediction-heading {
+        padding: 10px 0 2px 0;
+        padding-left: 0px !important;
+        font-size: 1.728rem;
+        font-weight: 700;
+        font-family: "Plus Jakarta Sans", sans-serif !important;
+    }
+
+    .cy-sales-main-head-container {
+        display: flex;
+        gap: 8px;
+    }
+
+    .cy_sale_redirect {
+       right: 40px;
+    }
+
+    .cy-churn-main_head {
+        font-size: 16px !important;
+        font-weight: 500;
+    }
+
+    #sale_forecast_chart {
+        width: 82vw;
+        height: 75vh;
+        background: white;
+        border-radius: 8px;
+        box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+    }
+
+    @media (max-width: 1480px) {
+        #sale_forecast_chart {
+            width: 80vw;
+        }
+        .prediction-heading {
+            font-size: 26px;
+        }
+    }
+}
+
+.cyllo-background {
+    background:  #f8fafc !important;
+}
+
+.cy-export-dropdown {
+    font-weight: 600 !important;
+    padding: 0.55rem 1rem;
+}
+
+.dropdown-fit-content .o-dropdown--menu {
+    max-width: fit-content;
+    min-width: fit-content;
+    border: 1px solid #dfdfdf;
+}
+
+.customer-go-back {
+    cursor: pointer;
+}
+
+.cy-sale_cust--img-container {
+    background: white;
+}
+
+.cy-sale_cust--img-container.card_3.card-border-shadow.w-100 {
+    max-height: 300px !important;
+    height: 300px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+.toggle-chart-button {
+    padding: 0.235rem 0.625rem;
+}
+
+.toggle-chart-button:hover {
+    background: white !important;
+    color: #9ea700 !important;
+}
+
+.dropdown-filters-sale .cy-marketing-auto_add-parent-container {
+    inset: 0 0 auto auto !important
+}
+
+.ps-2px {
+    padding-left: 2px;
+}
+
+.cy_kpi-sale-card-container .cy_churn_info {
+    border: unset;
+}
+
+.demand-graph-container-card {
+    height: 81vh;
+}
+
+.demand-graph-container-card.w-82 {
+    width: 82%;
+}
+.demand-graph-container-card.w-93 {
+    width: 93%;
+}
+.cy-sale-analysis_nav.w-84 {
+    width: 84%
+}
+.cy-sale-analysis_nav.w-95 {
+    width: 95%
+}
+
+.height-fit {
+    height: -webkit-fill-available;
+}
+.card.cy-demand_prediction-container {
+    margin-top: 12px !important;
+}
+
+.cy-demand_predict-list.height-fit {
+    overflow: scroll;
+    max-height: 94%;
+}
+
+.cy_kpi-sale-card-container .cy_churn_info,
+.cy_churn_info:hover + .churn_explain {
+    z-index: 2;
+}
+
+.cy-churn_tile--perc {
+    font-weight: 600;
+}
+
+.churn-app-icon {
+    width: 32px;
+}
+
+.churn-total-customer {
+    width: 200px;
+}
+
+.background-white {
+    background: white;
+}
+
+.card-border-shadow {
+    border: 1px solid #dfdfdf;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05) !important;
+}
+
+.churn-total-customer-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+}
+
+.churn-active-customer-container {
+    right: 0;
+    top: 14px;
+}
+
+.churn-at-risk-customer {
+    width: 164px;
+}
+
+@media (max-width: 1480px) {
+    .churn-total-customer-container {
+        position: absolute;
+        right: 0;
+    }
+
+    .churn-total-customer {
+        width: 164px;
+    }
+
+    .churn-card-inner-container {
+        margin-bottom: 24px;
+    }
+
+    .churn-at-risk-customer {
+        width: 134px;
+    }
+
+    .make-z-index {
+        z-index: 1;
+        position: relative;
+    }
+    .demand-graph-container-card.w-82, .cy-sale-analysis_nav.w-82 {
+        width: 81%;
+    }
+}
+
+.responsive-18px-font {
+    font-size: clamp(14px, 1vw + 1rem, 18px) !important;
+}
+
+.w-100px {
+    width: 100px;
+}
+
+@media (max-width: 980px) {
+    .gap-sm-12px {
+        gap: 12px;
+    }
+
+    .churn-chart-partner {
+        margin-top: 16px;
+    }
+}
+
+/*.partner-search-container:has(input.cy-churn_cust-search-bar:focus){*/
+/*    background: #DFDFDF;*/
+/*}*/
+/*.input-group.search-demand-products:has(input.cy-dem-prod-search:focus){*/
+/*    span.cy-search, .cy-dem-prod-search {*/
+/*        background: #DFDFDF;*/
+/*    }*/
+/*}*/
+.cy-dem-prod-search {
+    height: 38px;
+}
+.demand.cy-sale-analysis_nav {
+    padding: 4px 0 8px 0;
+}
+
+.form-control.cy-churn_cust-search-bar {
+    height: 32px;
+}
+
+@media (max-width: 1250px) {
+    .churn-at-risk-customer {
+        width: 112px;
+    }
+
+    .churn-total-customer {
+        width: 132px;
+    }
+
+}
+
+.churn-customer-bread {
+    font-weight: 600;
+    font-size: 16px;
+    color: black;
+}
+
+.customer-data-churn-main {
+    height: 94vh;
+    overflow: scroll;
+    overflow-x: hidden;
+}
+
+.border-solid {
+    border: 1px solid #dfdfdf;
+}
+
+.customer-sale-data-churn {
+    .accordion-button, .accordion-item {
+        background-color: #f8fafc;
+    }
+}
+
+.churn-success {
+    color: green;
+}
+
+.churn-danger {
+    color: red;
+}
+
+.demand-product-list-container {
+    border-right: 1px solid #dfdfdf;
+    padding: 16px 16px 16px 4px;
+    overflow: hidden;
+    height: -webkit-fill-available;
+    height: 100%;
+}
+.h-95 {
+    height: 95%;
+}
+.demand-loader.loader {
+    width: 290px;
+    height: 290px;
+}
+.demand-prediction-products {
+    padding: 4px;
+    margin: 0 0 16px 0;
+    overflow: auto;
+    max-height: 70vh;
+}
+.demand-loading-text {
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.product-name-font {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.demand-common-graph {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}
+
+.width-84vw {
+    width: 84vw;
+}
+
+/* Main tile container */
+.tile-fix {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 100%;
+    overflow-wrap: break-word;
+    white-space: normal;
+    padding: 1rem; /* Optional, for spacing inside tiles */
+    box-sizing: border-box;
+}
+
+/* Tile heading text (example: "Likely to be Churn") */
+.cy-sales-cust_head {
+    white-space: normal !important;
+    overflow-wrap: break-word;
+    word-break: break-word;
+
+    /* Responsive font size across all screen widths */
+    font-size: clamp(0.9rem, 1vw, 1.1rem);
+    line-height: 1.4;
+    font-weight: 600; /* Optional: Make headings bold */
+}
+
+/* Keep 3 tiles per row up to 1366px */
+@media (max-width: 1000px) {
+    .tile-fix {
+        flex: 0 0 32%;
+        max-width: 32%;
+    }
+}
+
+/* (Optional) Additional support for very small screens like mobile */
+@media (max-width: 576px) {
+    .tile-fix {
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+}
+
+.table100-head{
+    background-color: #f8fafc;
+}
+
+/* Remove accordion button styling and make it like a flat card */
+.accordion-item {
+    border: none;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    background-color: #fff;
+}
+
+.accordion-header {
+    padding: 0; /* Remove padding to let button handle spacing */
+}
+
+.accordion-button {
+    background: none;
+    border: none;
+    box-shadow: none;
+    padding: 16px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-radius: 8px;
+}
+
+/* Remove the arrow icon and collapsed styling */
+.accordion-button::after {
+    display: none;
+}
+
+.accordion-button.collapsed {
+    background: none;
+}
+
+/* Optional: Style the h4 inside button to be inline */
+.accordion-button h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Optional hover effect */
+.accordion-button:hover {
+    background-color: #f9f9f9;
+    cursor: pointer;
+}
+
+/* Hide collapse content unless expanded (Bootstrap handles this) */
+.customer-sale-data-churn .accordion-collapse {
+    border-top: 1px solid #eee;
+    padding: 0 24px 16px 24px;
+}
+
+/* Table styling if you want to reduce spacing inside accordion body */
+.accordion-body table {
+    margin-top: 12px;
+}
+
+/* White background and padding for the quarter heading row */
+.accordion-item > .accordion-header > .accordion-button {
+    background-color: #ffffff !important;
+    border: 1px solid #e6e6e6;
+    border-radius: 6px;
+    padding: 12px 20px;
+    font-weight: 500;
+    font-size: 15px;
+    color: #333;
+}
+
+/* Optional: subtle shadow to match card-like appearance */
+.accordion-item > .accordion-header > .accordion-button.collapsed {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+
+.cy-listView-table th,
+.cy-listView-table td {
+    text-align: left !important;         /* Align all text to the left */
+    padding: 8px 12px !important;        /* Optional: add some spacing for better readability */
+}
+
+.cy-listView-table th{
+    background-color: #EDEDED;
+}
+
+
+@media (max-width: 4000px) {
+    .card_3 {
+        width: 100% !important;
+        height: 100% !important;
+        max-height:100% !important;
+        max-width: 100% !important;
+        flex: 1 1 100% !important;
+        box-sizing: border-box;
+        overflow-x: auto !important;
+        overflow-y:auto !important;
+        line-height: 2.5;
+    }
+
+
+    .card_3 .cy-dashboard_cell {
+        white-space: nowrap !important;
+        padding: 0.4rem;
+        text-align: center !important;
+        flex: 1 1 33.33%; /* Equal width */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card_3 .cy-dashboard_header{
+        margin-top: 0px !important
+    }
+}
+
+
+@media (max-width: 1250px) {
+    .d-flex.flex-wrap.pb-2 {
+        align-items: stretch;
+    }
+
+    .cy-sale_cust--img-container {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .card_3 {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        line-height: 2.5;
+    }
+
+    .cy-responsive-content-wrapper {
+        flex: 1;
+    }
+}
+
+.cy-sales-analysis_custom-headline {
+    font-size: clamp(0.75rem, 2vw, 0.857rem);
+}
+
+.cy-dashboard_cell p {
+    font-size: clamp(0.7rem, 1.8vw, 0.8rem);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    margin: 0;
+}
+
+@media (max-width: 1400px) {
+    .cy-dashboard_header { padding: 2px 2px; }
+    .cy-dashboard_cell { padding: 1px 1px; }
+    .cy-dashboard_cell p { font-size: 0.65rem; }
+}
+
+.cy-sale_cust--img-container {
+    height: 300px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+/* For WebKit browsers like Chrome and Safari */
+.cy-sale_cust--img-container::-webkit-scrollbar {
+    width: 10px;
+}
+
+.cy-sale_cust--img-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.cy-sale_cust--img-container::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 10px;
+    border: 2px solid #f1f1f1;
+}
+
+.cy-sale_cust--img-container::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+
+/* Default is down arrow. When expanded, change to up arrow */
+button[aria-expanded="true"] .accordion-arrow {
+  content: "";
+  display: inline-block;
+  transform: rotate(180deg);
+}
+
+[data-darkreader-scheme="dark"] {
+    .customer-sale-data-churn {
+
+        .accordion-item > .accordion-header > .accordion-button {
+            background-color: #323227 !important;
+        }
+
+        .accordion-button, .accordion-item {
+            background-color: transparent !important;
+        }
+    }
+}

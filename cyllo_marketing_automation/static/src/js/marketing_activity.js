@@ -139,7 +139,6 @@ class MarketingActivity extends Component{
             },{
                 onClose: (ev) => {
                     this.getActivities()
-//                    this.action.doAction('soft_reload')
                 }
             });
         }
@@ -159,7 +158,7 @@ class MarketingActivity extends Component{
         * @method onclickCancelTest
     */
     onclickCancelTest(){
-        this.testDiv.el.style.display = 'none'
+        this.testDiv.el.classList.remove('show');
     }
     /**
         * Gets the current date and time based on the provided date.
@@ -243,7 +242,7 @@ class MarketingActivity extends Component{
     */
     async onUpdateTarget(ev){
         if(ev){
-            let getRecord = await this.orm.read('res.partner',[ev[0].id])
+            let getRecord = await this.orm.read(this.state.recordName.model_name,[ev[0].id])
             this.model.modelTarget = {id : getRecord[0].id, display_name : getRecord[0].display_name }
         }
         else{

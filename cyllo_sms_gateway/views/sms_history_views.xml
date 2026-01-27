@@ -15,6 +15,7 @@
                         </group>
                         <group>
                             <field name="sms_mobile"/>
+                            <field name="sid" readonly="1"/>
                             <field name="sms_status"/>
                         </group>
                         <field name="sms_text"/>
@@ -34,6 +35,7 @@
                 <field name="sms_text"/>
                 <field name="sms_mobile"/>
                 <field name="sms_status"/>
+                <field name="sid" optional="hide"/>
             </tree>
         </field>
     </record>

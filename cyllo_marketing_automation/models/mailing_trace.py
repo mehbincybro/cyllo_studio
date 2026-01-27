@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields, models
 
 
@@ -9,7 +29,8 @@ class MailingTrace(models.Model):
     """
     _inherit = 'mailing.trace'
 
-    marketing_activity_line_id = fields.Many2one('marketing.activity.line', index=True, ondelete='cascade',
+    marketing_activity_line_id = fields.Many2one('marketing.activity.line',
+                                                 index=True, ondelete='cascade',
                                                  help='Record corresponding to marketing line')
 
     def get_display_value(self, value):
@@ -73,6 +94,17 @@ class MailingTrace(models.Model):
         return res
 
     def set_bounced(self, domain=None, bounce_message=False):
+        """
+            Override the set_bounced method of MailingTrace to trigger the next
+            marketing activity when an email bounces.
+
+            Args:
+                domain (list, optional): A domain to filter the mailing traces. Defaults to None.
+                bounce_message (str or bool, optional): The bounce message received, if any.
+
+            Returns:
+                MailingTrace: The result of the super() call, typically a recordset.
+        """
         res = super(MailingTrace, self).set_bounced(
             domain=domain, bounce_message=bounce_message)
         res.marketing_activity_line_id.trigger_next_activity('bounced')

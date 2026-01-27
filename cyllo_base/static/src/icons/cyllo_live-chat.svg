@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>.live_chat_cls-1{fill:#26261A;}.live_chat_cls-2{fill:#a9a896;}</style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="live_chat_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="live_chat_cls-2" style="fill:#a9a896 !important;"
+                  d="M299.26,308.83A171.27,171.27,0,0,0,395.94,594a179.54,179.54,0,0,0,29.19,2.4,170.8,170.8,0,0,0,71.53-15.58,19.1,19.1,0,0,1,11.95-1.59l47.16,10.88a27.87,27.87,0,0,0,33.13-34.53l-11.55-42.44A18.75,18.75,0,0,1,578.94,500,171.18,171.18,0,0,0,299.26,308.83Z"/>
+        </g>
+    </g>
+</svg>

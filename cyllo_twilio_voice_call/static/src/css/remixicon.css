@@ -20,8 +20,6 @@
     /* chrome, firefox, opera, Safari, Android, iOS 4.2+*/
       url("./assets/remix-icons/remixicon.svg?t=1702456851606#remixicon")
       format("svg"); /* iOS 4.1- */
-      url("./assets/remix-icons/phone-fill.svg?t=1702456851606#remixicon")
-      format("svg"); /* iOS 4.1- */
   font-display: swap;
 }
 
@@ -2753,4 +2751,3 @@
 .ri-signpost-line:before { content: "\f48e"; }
 .ri-time-zone-fill:before { content: "\f48f"; }
 .ri-time-zone-line:before { content: "\f490"; }
-

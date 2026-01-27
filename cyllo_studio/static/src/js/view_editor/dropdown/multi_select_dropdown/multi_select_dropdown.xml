@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.MultiSelectDropDown">
+        <div class="cy-drop-down o_field_tags d-inline-flex flex-wrap mw-100 o_tags_input o_input w-100 gap-1"
+             t-att-class="props.class" t-att-style="props.style">
+            <TagsList tags="tags"/>
+            <div class="d-inline-flex w-100">
+                <Dropdown showCaret="true">
+                    <t t-set-slot="toggler">
+                        <div class="cy-dropdown_space"/>
+                    </t>
+                    <t t-foreach="Object.keys(state.allValues)" t-as="key" t-key="key">
+                        <t t-if="!state.selectedValues.includes(key)">
+                            <DropdownItem onSelected="() => this.onSelected(key)">
+                                <span t-att-value="key">
+                                    <t t-esc="state.allValues[key]"/>
+                                </span>
+                                <br/>
+                            </DropdownItem>
+                        </t>
+                    </t>
+                </Dropdown>
+            </div>
+        </div>
+    </t>
+</templates>

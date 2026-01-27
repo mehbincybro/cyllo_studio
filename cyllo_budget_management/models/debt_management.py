@@ -1,42 +1,78 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import io
-import xlsxwriter
-from odoo import _, api, fields, models
+import json
 from datetime import timedelta
+
+import xlsxwriter
+
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import date_utils
-import json
 
 
 class DebtManagement(models.Model):
-    """ Model used to store Debt management details, perform debt related functions """
+    """ Model used to store Debt management details, perform debt related
+    functions """
     _name = 'debt.management'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Debt Management System'
     _rec_name = 'display_name'
 
-    display_name = fields.Char(help='display name of document request', default=_('New'))
-    debt_type = fields.Selection(selection=[('lend', 'Lend'), ('borrow', 'Borrow')], required=True,
-                                 help='choose the debt type')
-    person_id = fields.Many2one('res.partner', 'Person ', help='The person whom you would like to give/take',
-                                required=True)
-    amount = fields.Monetary(currency_field='currency_id', help='The amount of debt')
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id.id)
-    balance_amount = fields.Monetary(string='Balance', tracking=True, currency_field='currency_id',
-                                     help='Balance amount')
+    display_name = fields.Char(
+        help='display name of document request', default=_('New'), copy=False)
+    debt_type = fields.Selection(
+        selection=[('lend', 'Lend'), ('borrow', 'Borrow')], required=True,
+        help='choose the debt type')
+    person_id = fields.Many2one(
+        'res.partner', 'Person ',
+        help='The person whom you would like to give/take', required=True)
+    amount = fields.Monetary(currency_field='currency_id',
+                             help='The amount of debt')
+    currency_id = fields.Many2one(
+        'res.currency',
+        default=lambda self: self.env.user.company_id.currency_id.id)
+    balance_amount = fields.Monetary(
+        string='Balance', tracking=True, currency_field='currency_id',
+        help='Balance amount', copy=False,readonly=True,compute='_compute_balance_amount')
     date = fields.Date(default=fields.datetime.now(), help='Debt Date')
-    payback_period = fields.Selection(selection=[('week', 'Week'), ('month', 'Month')],
-                                      help='Choose the payback period')
+    payback_period = fields.Selection(
+        selection=[('week', 'Week'), ('month', 'Month')],
+        help='Choose the payback period')
     payback_date = fields.Date(help='Choose the payback date', required=True)
-    returned_or_not = fields.Boolean(string='Returned?', readonly=True, tracking=True,
-                                     help='True if completely returned')
-    partially_returned = fields.Boolean(help='True if Partially returned', readonly=True)
-    returned_date = fields.Date(tracking=True, help='Returned Date')
-    returned_amount = fields.Monetary()
+    returned_or_not = fields.Boolean(
+        string='Returned?', readonly=True, tracking=True,
+        help='True if completely returned', copy=False)
+    partially_returned = fields.Boolean(
+        help='True if Partially returned', readonly=True, copy=False)
+    returned_date = fields.Date(tracking=True, help='Returned Date', copy=False)
+    returned_amount = fields.Monetary(copy=False, readonly=True)
     state = fields.Selection(
-        selection=[('draft', 'Draft'), ('lend_borrow', 'Lent/Borrowed'), ('partial_return', 'Partially Returned'),
-                   ('return', 'Returned'), ('cancel', 'Cancelled')], default='draft', readonly=True, tracking=True)
-    company_id = fields.Many2one('res.company', 'Company', readonly=True, default=lambda self: self.env.user.company_id,
+        selection=[('draft', 'Draft'), ('lend_borrow', 'Lent/Borrowed'),
+                   ('partial_return', 'Partially Returned'),
+                   ('return', 'Returned'), ('cancel', 'Cancelled')],
+        default='draft', readonly=True, tracking=True)
+    company_id = fields.Many2one('res.company', 'Company', readonly=True,
+                                 default=lambda self: self.env.user.company_id,
                                  help='Name of the company of the user')
 
     @api.model_create_multi
@@ -44,7 +80,8 @@ class DebtManagement(models.Model):
         """Super the create function in debt.management to generate sequences"""
         for vals in vals_list:
             if not vals.get('display_name') or vals['display_name'] == _('New'):
-                vals['display_name'] = self.env['ir.sequence'].next_by_code('debt.management') or _('New')
+                vals['display_name'] = self.env['ir.sequence'].next_by_code(
+                    'debt.management') or _('New')
         return super().create(vals_list)
 
     def action_confirm_debt(self):
@@ -55,7 +92,9 @@ class DebtManagement(models.Model):
             'res_model': 'debt.payback.wizard',
             'name': 'Payment Confirmation',
             'context': self.env.context,
-            'views': [[self.env.ref('cyllo_budget_management.view_debt_payback_wizard_confirm_form').id, 'form']],
+            'views': [[self.env.ref(
+                'cyllo_budget_management.view_debt_payback_wizard_confirm_form').id,
+                       'form']],
             'target': 'new'
         }
 
@@ -85,19 +124,25 @@ class DebtManagement(models.Model):
     def _check_payback_date(self):
         """Constrains for the payback date"""
         if self.payback_date < fields.date.today():
-            raise ValidationError('Payback date should be greater than Lent/Borrowed date')
+            raise ValidationError(
+                'Payback date should be greater than Lent/Borrowed date')
 
     def payback_mail(self):
         """Scheduled action for sending mail reminding the payback date"""
         records_to_payback = self.search(
-            [('state', 'not in', ['draft', 'cancel', 'return']), ('payback_date', '!=', False)]).filtered(
-            lambda x: x.payback_date.date() == fields.date.today() + timedelta(1))
+            [('state', 'not in', ['draft', 'cancel', 'return']),
+             ('payback_date', '!=', False)]).filtered(
+            lambda x: x.payback_date == fields.date.today() + timedelta(
+                1))  # removed .date() from payback_date.date()
         for record in records_to_payback:
-            mail_template = self.env.ref('cyllo_budget_management.mail_template_payback_alert')
+            mail_template = self.env.ref(
+                'cyllo_budget_management.mail_template_payback_alert')
             email_values = {'email_to': record.person_id.email}
-            mail_template.send_mail(record.id, email_values=email_values, force_send=True)
+            mail_template.send_mail(record.id, email_values=email_values,
+                                    force_send=True)
             email_values_user = {'email_to': self.env.user.email}
-            mail_template.send_mail(record.id, email_values=email_values_user, force_send=True)
+            mail_template.send_mail(record.id, email_values=email_values_user,
+                                    force_send=True)
 
     def action_generate_xlsx(self):
         """Action created for generate xlsx report for debt management"""
@@ -118,7 +163,8 @@ class DebtManagement(models.Model):
         return {
             'type': 'ir.actions.report',
             'data': {'model': 'debt.management',
-                     'options': json.dumps(data, default=date_utils.json_default),
+                     'options': json.dumps(data,
+                                           default=date_utils.json_default),
                      'output_format': 'xlsx',
                      'report_name': 'Excel Report',
                      },
@@ -152,7 +198,9 @@ class DebtManagement(models.Model):
             sheet.write('F15', 'PayBack Date', thin_head)
             sheet.write('G15', 'Balance To Pay', thin_head)
             sheet.write('H15', 'Returned Date', thin_head)
-            sheet.write(11, 2, status[parsed_data.get('state')], sub_class)
+            sheet.write(11, 2,
+                        status[parsed_data.get('state')] if parsed_data.get(
+                            'state') else "", sub_class)
             sheet.write(16, 1, parsed_data.get('person_id'), txt)
             sheet.write(16, 2, parsed_data.get('amount'), txt)
             sheet.write(16, 3, parsed_data.get('date'), txt)
@@ -170,7 +218,9 @@ class DebtManagement(models.Model):
             sheet.write('E15', 'PayBack Period', thin_head)
             sheet.write('F15', 'PayBack Date', thin_head)
             sheet.write('G15', 'Returned Date', thin_head)
-            sheet.write(11, 2, status[parsed_data.get('state')], sub_class)
+            sheet.write(11, 2,
+                        status[parsed_data.get('state')] if parsed_data.get(
+                            'state') else "", sub_class)
             sheet.write(16, 1, parsed_data.get('person_id'), txt)
             sheet.write(16, 2, parsed_data.get('amount'), txt)
             sheet.write(16, 3, parsed_data.get('date'), txt)
@@ -185,3 +235,8 @@ class DebtManagement(models.Model):
         output.seek(0)
         response.stream.write(output.read())
         output.close()
+    @api.depends('amount')
+    def _compute_balance_amount(self):
+        for debt in self:
+            debt.balance_amount = debt.amount - debt.returned_amount
+

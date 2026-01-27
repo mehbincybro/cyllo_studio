@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>
+            .fleet_cls-1{fill:#26261A;}.fleet_cls-2{fill:#9C9C86;}.fleet_cls-3{fill:#A6A687;}.fleet_cls-4{fill:#8A8A73;}.fleet_cls-5{fill:#7E7E6B;}.fleet_cls-6{fill:#6C6C5B;}.fleet_cls-7{fill:#DAD7C3;}
+        </style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="fleet_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="fleet_cls-2" style="fill:#9C9C86 !important;"
+                  d="M588.09,338.53H490.34L464.2,430l26.14,117.61h156.8V482.27l-8.71-13.07,8.71-13.07V412.35Z"/>
+            <path class="fleet_cls-2" style="fill:#9C9C86 !important;" d="M607.94,456.13h39.2v26.14h-39.2Z"/>
+            <path class="fleet_cls-2" style="fill:#9C9C86 !important;" d="M202.86,260.13V430l111.07,8.71L425,430l8.71-84.94L425,260.13Z"/>
+            <path class="fleet_cls-3" style="fill:#A6A687 !important;" d="M425,260.13h65.34V430H425Z"/>
+            <path class="fleet_cls-4" style="fill:#8A8A73 !important;" d="M202.86,430V547.61H425l8.71-58.81L425,430Z"/>
+            <path class="fleet_cls-5" style="fill:#7E7E6B !important;" d="M425,430h65.34V547.61H425Z"/>
+            <circle class="fleet_cls-6" style="fill:#6C6C5B !important;" cx="307.39" cy="560.67" r="39.2"/>
+            <circle class="fleet_cls-6" style="fill:#6C6C5B !important;" cx="555.67" cy="560.67" r="39.2"/>
+            <path class="fleet_cls-7" style="fill:#DAD7C3 !important;" d="M529.54,364.66v52.27h87.92l-41.93-52.27Z"/>
+        </g>
+    </g>
+</svg>

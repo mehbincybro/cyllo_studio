@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     'name': "Database Backup Management",
     'version': "1.0",
@@ -12,21 +32,22 @@
     'maintainer': "Cyllo",
     'category': 'Extra Tools',
     'depends': ['base', 'mail'],
+    'icon': '/cyllo_database_backup/static/description/database-backup.svg',
     'data': [
         'security/ir.model.access.csv',
         'data/backup_destination_data.xml',
         'data/ir_cron_data.xml',
         'data/mail_template_data.xml',
         'data/discuss_channel_data.xml',
-        'wizards/dropbox_auth_code_views.xml',
+        'wizards/dropbox_auth_code.xml',
         'views/db_backup_configure_views.xml',
         'views/backup_destination_views.xml',
     ],
     'external_dependencies': {
         'python': ['dropbox', 'pyncclient', 'boto3', 'nextcloud-api-wrapper',
                    'paramiko']},
-    'installable': True,
     'license': 'LGPL-3',
+    'installable': True,
     'auto_install': False,
     'application': False,
 }

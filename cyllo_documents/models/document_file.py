@@ -1,8 +1,30 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import base64
 import requests
+import hashlib
 
-from odoo import api, fields, models, modules, tools
+from odoo import _, api, fields, models
+from odoo.exceptions import UserError
 
 
 class DocumentFile(models.Model):
@@ -10,15 +32,18 @@ class DocumentFile(models.Model):
     _name = 'document.file'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = 'Documents'
+    _order = "id desc"
 
-    name = fields.Char(help="Document name")
+    name = fields.Char(help="Document name", readonly=True)
     attachment = fields.Binary(string='File', help="Document data")
     date = fields.Datetime(help="Document create date")
-    workspace_id = fields.Many2one('document.workspace', required=True, help="workspace name")
-    user_id = fields.Many2one('res.users', string='Owner', default=lambda self: self.env.user,
+    workspace_id = fields.Many2one('document.workspace', required=True,
+                                   help="workspace name")
+    user_id = fields.Many2one('res.users', string='Owner',
+                              default=lambda self: self.env.user,
                               help="Document owner name, if the document  belongs to a specific partner")
     brochure_url = fields.Char(string="URL", help="Document sharable URL")
-    extension = fields.Char(help="Document extension, helps to determine the file type")
+    extension = fields.Char(help="Document extension, helps to determine the file type", readonly=True)
     priority = fields.Selection([('0', 'None'), ('1', 'Favorite')], help="Favorite button")
     activity_ids = fields.One2many('mail.activity', string='Activities', help="List of activity ids")
     attachment_id = fields.Many2one('ir.attachment', ondelete='restrict', help="Attached item")
@@ -34,21 +59,37 @@ class DocumentFile(models.Model):
     auto_delete = fields.Boolean(default=False, help="Document delete status")
     days = fields.Integer(help="auto delete in days")
     trash = fields.Boolean(help="To specify deleted items")
-    delete_date = fields.Date(string='Date Delete', readonly=True, )
+    delete_date = fields.Date(string='Date Delete', readonly=True)
     file_url = fields.Char(help="it store url while adding an url document")
-    size = fields.Char(compute='_compute_size', help='computed size of document')
-    is_locked = fields.Boolean(string="Lock document", help="To make document lock", default=False)
-    document_file_id = fields.Many2one('document.file', help="Add document here")
-    google_drive_file_key = fields.Char(string='Google Drive file id', help='id of file from google drive')
-    one_drive_file_key = fields.Char(string='One Drive file id', help='id of file from one drive')
+    size = fields.Char(compute='_compute_size',
+                       help='computed size of document')
+    is_locked = fields.Boolean(string="Lock document",
+                               help="To make document lock", default=False)
+    document_file_id = fields.Many2one('document.file',
+                                       help="Add document here")
+    google_drive_file_key = fields.Char(string='Google Drive file id',
+                                        help='id of file from google drive')
+    one_drive_file_key = fields.Char(string='One Drive file id',
+                                     help='id of file from one drive')
     is_crm_install = fields.Boolean(help="field to check crm installed or not")
-    is_project_install = fields.Boolean(help="field to check project installed or not")
-    document_tag_id = fields.Many2one('document.tag', string='Tags')
-    image_1920 = fields.Image(string='Preview Image', help='Preview image of PDF')
-    url_preview_image = fields.Image('URL Thumbnail Image', compute='_compute_url_preview_image',
-                                     help='Preview image of PDF')
+    is_project_install = fields.Boolean(
+        help="field to check project installed or not")
+    document_tag_ids = fields.Many2many('document.tag', string='Tags')
+    image_1920 = fields.Image(string='Preview Image',
+                              help='Preview image of PDF')
+    url_preview_image = fields.Image('URL Thumbnail Image',
+                                     compute='_compute_url_preview_image',
+                                     help='Preview image of URL')
     has_url_thumbnail = fields.Boolean()
-    excel_thumbnail = fields.Image(help='Preview image of PDF')
+    excel_thumbnail = fields.Image(help='Preview image of XLS')
+    company_id = fields.Many2one('res.company', help='choose company',
+                                 default=lambda self: self.env.company)
+
+    @api.depends('attachment_id')
+    def _compute_size(self):
+        """Function is used to fetch the file size of an attachment"""
+        for rec in self:
+            rec.size = str(rec.attachment_id.file_size / 1000) + ' Kb'
 
     @api.depends('preview')
     def _compute_url_preview_image(self):
@@ -59,7 +100,8 @@ class DocumentFile(models.Model):
                     response = requests.get(record.preview)
                     if response.status_code == 200:
                         image_data = response.content
-                        base64_image = base64.b64encode(image_data).decode('utf-8')
+                        base64_image = base64.b64encode(image_data).decode(
+                            'utf-8')
                         record.url_preview_image = base64_image
                         record.has_url_thumbnail = True
                     else:
@@ -71,11 +113,11 @@ class DocumentFile(models.Model):
             else:
                 record.url_preview_image = False
 
-    @api.depends('attachment_id')
-    def _compute_size(self):
-        """Function is used to fetch the file size of an attachment"""
-        for rec in self:
-            rec.size = str(rec.attachment_id.file_size / 1000) + ' Kb'
+    def unlink(self):
+        if len(self.ids) > 1 and self.filtered(lambda rec: rec.is_locked):
+            raise UserError(_("Can't group select locked items for deletion"))
+        else:
+            return super().unlink()
 
     @api.model
     def action_upload_document(self, *args):
@@ -113,6 +155,42 @@ class DocumentFile(models.Model):
                 [('name', '=', 'project')]).state == 'installed' else False,
             'image_1920': args[0].get('preview_image') if args[0].get('preview_image') else False
         })
+
+    @api.model
+    def action_btn_create_task(self, doc):
+        """ Create a task based on a document if the 'project' module is installed. This function checks if the
+        'project' module is installed and, if so, creates a task with the name of the document. It also associates
+        the document's attachment with the task.
+        :param doc: The document for which a task should be created.
+        :type doc: recordset
+        :return: True if the task is created, False if the 'project' module is not installed.
+        :rtype: bool"""
+        module_id = self.env['ir.module.module'].sudo().search([('name', '=', 'project')])
+        if module_id.state == 'installed':
+            for rec in self.browse(doc):
+                task_id = self.env['project.task'].create({'name': rec['name']})
+                rec.attachment_id.res_model = 'project.task'
+                rec.attachment_id.res_id = task_id
+            return True
+        return False
+
+    @api.model
+    def action_btn_create_lead(self, doc):
+        """Create a CRM lead based on a document if the 'crm' module is installed. This function checks if the
+        'crm' module is installed and, if so, creates a lead with the name of the document. It also associates the
+        document's attachment with the lead.
+        :param doc: The document for which a CRM lead should be created.
+        :type doc: recordset
+        :return: True if the lead is created, False if the 'crm' module is not installed.
+        :rtype: bool"""
+        module_id = self.env['ir.module.module'].sudo().search([('name', '=', 'crm')])
+        if module_id.state == 'installed':
+            for rec in self.browse(doc):
+                lead_id = self.env['crm.lead'].create({'name': rec['name']})
+                rec.attachment_id.res_model = 'crm.lead'
+                rec.attachment_id.res_id = lead_id
+            return True
+        return False
 
     @api.model
     def download_zip_function(self, document_selected):
@@ -154,6 +232,7 @@ class DocumentFile(models.Model):
                 'partner_id': docs.partner_id,
                 'days': docs.days,
                 'file_url': docs.file_url,
+                'doc_no': docs.id
             })
             docs.unlink()
 
@@ -199,42 +278,6 @@ class DocumentFile(models.Model):
         }
 
     @api.model
-    def action_btn_create_task(self, doc):
-        """ Create a task based on a document if the 'project' module is installed. This function checks if the
-        'project' module is installed and, if so, creates a task with the name of the document. It also associates
-        the document's attachment with the task.
-        :param doc: The document for which a task should be created.
-        :type doc: recordset
-        :return: True if the task is created, False if the 'project' module is not installed.
-        :rtype: bool"""
-        module_id = self.env['ir.module.module'].sudo().search([('name', '=', 'project')])
-        if module_id.state == 'installed':
-            for rec in self.browse(doc):
-                task_id = self.env['project.task'].create({'name': rec['name']})
-                rec.attachment_id.res_model = 'project.task'
-                rec.attachment_id.res_id = task_id
-            return True
-        return False
-
-    @api.model
-    def action_btn_create_lead(self, doc):
-        """Create a CRM lead based on a document if the 'crm' module is installed. This function checks if the
-        'crm' module is installed and, if so, creates a lead with the name of the document. It also associates the
-        document's attachment with the lead.
-        :param doc: The document for which a CRM lead should be created.
-        :type doc: recordset
-        :return: True if the lead is created, False if the 'crm' module is not installed.
-        :rtype: bool"""
-        module_id = self.env['ir.module.module'].sudo().search([('name', '=', 'crm')])
-        if module_id.state == 'installed':
-            for rec in self.browse(doc):
-                lead_id = self.env['crm.lead'].create({'name': rec['name']})
-                rec.attachment_id.res_model = 'crm.lead'
-                rec.attachment_id.res_id = lead_id
-            return True
-        return False
-
-    @api.model
     def delete_doc(self):
         """Delete documents from the trash based on the configured retention period.This function deletes documents
          from the 'document.trash' table based on the configured retention period specified in the
@@ -247,6 +290,18 @@ class DocumentFile(models.Model):
             if delta.days == limit:
                 rec.unlink()
 
+    @staticmethod
+    def show_warning(message, info_type="info", sticky=False):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': message,
+                'type': info_type,
+                'sticky': sticky,
+            }
+        }
+
     def click_share(self):
         """Share a single document by generating a shareable URL or requesting a password for locked documents.
         This function allows users to share a single document. If the document is not locked,it generates a shareable
@@ -257,15 +312,7 @@ class DocumentFile(models.Model):
         if not self.browse(document_id).is_locked:
             return self.env['document.share'].create_url([document_id])
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_share_form').id,
-                'target': 'new',
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Please Enter Password', 'view_document_lock_share_form')
 
     def click_create_lead(self):
         """Create a CRM lead from the document's dropdown menu. This method allows users to create a CRM lead from
@@ -276,21 +323,9 @@ class DocumentFile(models.Model):
         if not self.browse(document_id).is_locked:
             result = self.action_btn_create_lead(document_id)
             if not result:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {'message': "Install CRM Module to use this function", 'type': 'info', 'sticky': False}
-                }
+                return self.show_warning("Install CRM Module to use this function")
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'target': 'new',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_lead_form').id,
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Please Enter Password', 'view_document_lock_lead_form')
 
     def click_create_task(self):
         """ Create a task from the document's dropdown menu. This method allows users to create a task from a
@@ -301,22 +336,9 @@ class DocumentFile(models.Model):
         if not self.browse(document_id).is_locked:
             result = self.action_btn_create_task(document_id)
             if not result:
-                return {
-                    'type': 'ir.actions.client',
-                    'tag': 'display_notification',
-                    'params': {'message': "Install Project Module to use this function",
-                               'type': 'info', 'sticky': False}
-                }
+                return self.show_warning("Install Project Module to use this function")
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'target': 'new',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_task_form').id,
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Please Enter Password', 'view_document_lock_task_form')
 
     def click_create_mail(self):
         """Create an email from the document's dropdown menu. This method allows users to create an email from a
@@ -326,15 +348,7 @@ class DocumentFile(models.Model):
         if not self.browse(document_id).is_locked:
             return self.on_mail_document([document_id])
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'target': 'new',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_mail_form').id,
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Please Enter Password', 'view_document_lock_mail_form')
 
     def click_copy_move(self):
         """Copy or move a document from one workspace to another using the document's dropdown.His method allows
@@ -348,35 +362,12 @@ class DocumentFile(models.Model):
         user_group = self.env.user.has_group('cyllo_documents.group_cyllo_documents_manager')
         if user_group:
             if not self.browse(document_id).is_locked:
-                return {
-                    'type': 'ir.actions.act_window',
-                    'name': 'copy',
-                    'res_model': 'work.space',
-                    'view_mode': 'form',
-                    'target': 'new',
-                    'views': [[False, 'form']],
-                    'context': {'default_doc_ids': [document_id]}
-                }
+                return self.make_response('Copy', False, 'work.space',
+                                          {'default_doc_ids': [document_id]})
             else:
-                return {
-                    'type': 'ir.actions.act_window',
-                    'name': 'Please Enter Password',
-                    'res_model': 'document.lock',
-                    'view_mode': 'form',
-                    'target': 'new',
-                    'view_id': self.env.ref('cyllo_documents.view_document_lock_copy_form').id,
-                    'context': {'default_document_file_id': document_id}
-                }
+                return self.make_response('Please Enter Password', 'view_document_lock_copy_form')
         else:
-            return {
-                'type': 'ir.actions.client',
-                'tag': 'display_notification',
-                'params': {
-                    'message': "You don't have permission to perform this action",
-                    'type': 'danger',
-                    'sticky': False,
-                }
-            }
+            return self.show_warning("You don't have permission to perform this action", "danger")
 
     def click_document_archive(self):
         """Archive a document from the document's dropdown menu. This method allows users to archive a document if
@@ -386,64 +377,63 @@ class DocumentFile(models.Model):
         if not self.browse(document_id).is_locked:
             self.document_file_archive(document_id)
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'target': 'new',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_archive_form').id,
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Please Enter Password', 'view_document_lock_archive_form')
 
     def click_document_delete(self):
         """Delete a document from the document's dropdown menu. This method allows users to delete a document if
         they have the 'cyllo_documents.group_cyllo_documents_manager' group. It opens a window for users to choose between
         moving the document to the trash or permanently deleting it.
             :return: Action to choose between moving to trash or permanent deletion. """
-        document_id = self.env.context.get('document_id', False)
         user_group = self.env.user.has_group('cyllo_documents.group_cyllo_documents_manager')
         if user_group:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Choose One',
-                'res_model': 'document.delete.trash',
-                'view_mode': 'form',
-                'target': 'new',
-                'view_id': self.env.ref('cyllo_documents.view_document_delete_trash_form').id,
-                'context': {'default_document_file_id': document_id}
-            }
+            return self.make_response('Choose One', 'view_document_delete_trash_form', 'document.delete.trash')
 
     def click_document_lock(self):
         """Lock a document from the document's dropdown menu. This method allows users to lock a document by opening
         a window where they can set a password for the document. Once locked, the document can only be accessed with
         the provided password.
         :return: Action to set a password and lock the document."""
+        return self.make_response('Lock', 'view_document_lock_form')
+
+    def get_doc_lock_record(self):
         document_id = self.env.context.get('document_id', False)
-        return {
+        doc_lock_id = self.env['document.lock'].search([('document_file_id', '=', document_id),
+                                                        ('is_lock', '=', True)], order="id desc", limit=1)
+        return doc_lock_id
+
+    def make_response(self, name, view_name, res_model='document.lock', context=None):
+        if context is None:
+            context = {}
+        document_id = self.env.context.get('document_id', False)
+        doc_lock_id = self.get_doc_lock_record()
+        response = {
             'type': 'ir.actions.act_window',
-            'name': 'Lock',
-            'res_model': 'document.lock',
+            'name': name,
+            'res_model': res_model,
             'view_mode': 'form',
-            'view_id': self.env.ref('cyllo_documents.view_document_lock_form').id,
+            'view_id': self.env.ref(f'cyllo_documents.{view_name}').id if view_name else False,
             'target': 'new',
-            'context': {'default_document_file_id': document_id}
         }
+        if doc_lock_id:
+            response["res_id"] = doc_lock_id.id
+        else:
+            response["context"] = context or {'default_document_file_id': document_id}
+        return response
 
     def click_document_unlock(self):
         """ Unlock a document from the document's dropdown menu. This method allows users to unlock a locked
         document by opening a window where they can enter the document's password for access.
         :return: Action to enter the document's password and unlock it."""
-        document_id = self.env.context.get('document_id', False)
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Unlock',
-            'res_model': 'document.lock',
-            'view_mode': 'form',
-            'target': 'new',
-            'view_id': self.env.ref('cyllo_documents.view_document_lock_unlock_form').id,
-            'context': {'default_document_file_id': document_id}
-        }
+        return self.make_response('Unlock', 'view_document_lock_unlock_form')
+
+    def download_xlsx_record(self):
+        module_name = 'cyllo_spreadsheet'
+        module = self.env['ir.module.module'].sudo().search(
+            [('name', '=', module_name), ('state', '=', 'installed')],
+            limit=1
+        )
+        if not module:
+            return self.show_warning("Install Spreadsheet Module to use this function")
 
     def click_download(self):
         """Download a document from the document's dropdown menu. This method allows users to download a document
@@ -452,71 +442,15 @@ class DocumentFile(models.Model):
         document_url = self.env.context.get('document_url', False)
         document_id = self.env.context.get('document_id', False)
         if not self.browse(document_id).is_locked:
-            return {
-                'type': 'ir.actions.act_url',
-                'url': document_url + '?download=true',
-            }
+            if self.extension == 'xlsx':
+                return self.download_xlsx_record()
+            else:
+                return {
+                    'type': 'ir.actions.act_url',
+                    'url': document_url + '?download=true',
+                }
         else:
-            return {
-                'type': 'ir.actions.act_window',
-                'name': 'Please Enter Password',
-                'res_model': 'document.lock',
-                'view_mode': 'form',
-                'view_id': self.env.ref('cyllo_documents.view_document_lock_download_form').id,
-                'target': 'new',
-                'context': {'default_document_file_id': document_id}
-            }
-
-    @api.model
-    def get_documents_list(self, *args):
-        """Get a list of documents to open the document viewer. This method retrieves information about a specific
-        document and a list of other documents that can be viewed in the document viewer. It provides details such
-        as the document's name, download URL, extension, and more. It also checks if a document is viewable based on
-        its extension and whether it's locked.
-        :param args: A list of arguments, with the first argument being the document ID to retrieve.
-        :type args: list
-        :return: Information about the specified document and a list of other viewable documents.
-        :rtype: tuple"""
-        document = self.browse(int(args[0]))
-        attachment = ({
-            'defaultSource': document.brochure_url,
-            'displayName': document.name,
-            'downloadUrl': document.brochure_url,
-            'extension': document.extension,
-            'filename': document.name,
-            'id': document.id,
-            'originThreadLocalId': 'document.file,' + str(document.id),
-            'uid': str(document.create_uid.id),
-            'isPdf': True if document.extension == 'pdf' else False,
-            'isImage': True
-            if document.mimetype == 'image/jpeg' or document.extension == 'png' or document.extension == 'jpg'
-            else False,
-            'isViewable': True if not document.is_locked and (
-                    document.mimetype == 'image/jpeg' or document.extension == 'pdf' or document.extension == 'png')
-            else False,
-            'mimetype': document.mimetype,
-            'urlRoute': "/web/image/" + str(document.attachment_id.id),
-        })
-        attachment_list = [{
-            'defaultSource': record.brochure_url,
-            'displayName': str(record.name),
-            'downloadUrl': record.brochure_url,
-            'extension': record.extension,
-            'filename': record.name,
-            'id': record.id,
-            'originThreadLocalId': 'document.file,' + str(record.id),
-            'uid': str(record.create_uid.id),
-            'isPdf': True if record.extension == 'pdf' else False,
-            'isImage': True if record.mimetype == 'image/jpeg' or record.extension == 'png' else False,
-            'isViewable': True if not record.is_locked and (
-                    record.mimetype == 'image/jpeg' or record.extension == 'pdf' or record.extension == 'png')
-            else False,
-            'mimetype': record.mimetype,
-            'urlRoute': "/web/image/" + str(record.attachment_id.id),
-        } for record in self.search([]) if record.extension == 'pdf' or
-                                           record.extension == 'png' or
-                                           record.mimetype == 'image/jpeg']
-        return attachment, attachment_list
+            return self.make_response('Please Enter Password', 'view_document_lock_download_form')
 
     @api.model
     def get_document_count(self, *args):
@@ -529,3 +463,44 @@ class DocumentFile(models.Model):
         document_count_in_workspace = self.search_count([('workspace_id', '=', args[0])])
         all_document_count = self.sudo().search_count([])
         return document_count_in_workspace, all_document_count
+
+    def validate_password(self, pwd):
+        pwd = hashlib.sha256(pwd.encode()).hexdigest()
+        ir_config = self.env['ir.config_parameter'].sudo()
+        master_password = ir_config.get_param(
+            'cyllo_documents.document_master_password', False)
+        is_master_admin_only = ir_config.get_param(
+            'cyllo_documents.document_master_password_admin_only')
+        is_admin_user_group = self.env.user.has_group(
+            'cyllo_documents.group_cyllo_documents_manager')
+        if master_password:
+            master_password = hashlib.sha256(
+                master_password.encode()).hexdigest()
+        if pwd == self.env['document.lock'].search([
+            ('document_file_id', '=', self.id), ('is_lock', '=', True)],
+                order="id desc", limit=1).password:
+            return True
+        if master_password and pwd == master_password:
+            if not is_master_admin_only or is_admin_user_group:
+                return True
+        return False
+
+    @api.returns('self')
+    def copy_multi(self, default=None):
+        if len(self.ids) > 1 and self.filtered(lambda rec: rec.is_locked):
+            raise UserError(_("Can't group select locked items for duplication"))
+        elif len(self.ids) == 1 and self.is_locked:
+            action = self.make_response('Please Enter Password', 'view_document_lock_copy_form')
+            action["views"] = [[False, "form"]]
+            channel = "bus_do_action"
+            message = {
+                "channel": channel,
+                "auth": {
+                    "user": self.env.user.id
+                },
+                "action": action
+            }
+            self.env['bus.bus']._sendone(channel, "notification", message)
+            return self
+        else:
+            return super().copy_multi(default)

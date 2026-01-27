@@ -3,9 +3,10 @@ import { registry } from "@web/core/registry"
 import { onWillStart, onMounted, useState, Component, useRef, useEffect} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { download } from "@web/core/network/download";
-import { _t } from "@web/core/l10n/translation";
 import {useResize} from "@cyllo_base/js/hooks"
 import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown";
+import {Dropdown} from "@web/core/dropdown/dropdown";
+import {DropdownItem} from "@web/core/dropdown/dropdown_item";
 
 
 export class DemandPredictionDashboard extends Component {
@@ -34,10 +35,18 @@ export class DemandPredictionDashboard extends Component {
         this.root = useRef('root')
         this.chartContainer = useRef('chart-container')
         this.actionService = useService('action')
-        useResize("root", (width) => this.state.width = width / 12);
+        useResize("root", (width) => {
+            this.state.width = width / 12
+        });
         this.analyticsTable = useState({
             analysisTableActual : [],
             analysisTableForecast : [],
+        })
+        this.responsiveness = useState({
+            sideBarOn: false,
+        })
+        this.env.bus.addEventListener("SIDEBAR_MENU_TOGGLE", ({detail}) => {
+            this.responsiveness.sideBarOn = !this.responsiveness.sideBarOn
         })
 
         this.state = useState({
@@ -88,6 +97,26 @@ export class DemandPredictionDashboard extends Component {
             this.demandState.periodDemand = this.demandState.periodDemand < 0 ? 0 : this.demandState.periodDemand > maxLimit ? maxLimit : this.demandState.periodDemand
         }, () => [this.demandState.periodDemand, this.demandState.frequencyDemand])
     }
+    get getBodyClass() {
+        const {noData, status} = this.demandState
+        if (noData && status !== 'none') {
+            if (this.responsiveness.sideBarOn) {
+                return "w-93"
+            }
+            return "w-82"
+        }
+        return ""
+    }
+    get getHeaderClass() {
+        const {noData, status} = this.demandState
+        if (noData && status !== 'none') {
+            if (this.responsiveness.sideBarOn) {
+                return "w-95"
+            }
+            return "w-84"
+        }
+        return ""
+    }
     renderGraph() {
         const element = this.chartContainer.el?.querySelector("#demand_prediction_chart")
         if (this.demandState.chartData.length && element) {
@@ -123,16 +152,16 @@ export class DemandPredictionDashboard extends Component {
                     dimension: 0,
                     pieces: [{
                         lte: 0,
-                        color: 'blue'
+                        color: '#9ea700'
                     },
                     {
                         gt:0,
                         lte: (this.analyticsTable.analysisTableActual.length) - 1,
-                        color: 'blue'
+                        color: '#9ea700'
                     },
                     {
                         gt: (this.analyticsTable.analysisTableActual.length) - 1,
-                        color: 'red'
+                        color: '#ff3333'
                     }
                     ]
                 },
@@ -226,7 +255,7 @@ export class DemandPredictionDashboard extends Component {
         var chart = chart;
         }
         else{
-            var chart = this.root.el?.querySelector('.cy_demand_no_data')
+            var chart = this.root.el?.querySelector('.cy-no_data')
         }
         var canvas = await html2canvas(chart)
         var chartImg = canvas.toDataURL('image/png');
@@ -302,6 +331,6 @@ export class DemandPredictionDashboard extends Component {
     }
 
 }
-DemandPredictionDashboard.components = { FilterDropdown }
+DemandPredictionDashboard.components = { FilterDropdown, DropdownItem, Dropdown }
 DemandPredictionDashboard.template = "DemandPredictionDashboard";
 registry.category("actions").add("demand_prediction", DemandPredictionDashboard);

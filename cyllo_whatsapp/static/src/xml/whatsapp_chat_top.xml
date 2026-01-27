@@ -2,32 +2,21 @@
 <templates id="template">
     <!-- WhatsappChatTop Template -->
     <t t-name="WhatsappChatTop" owl="1">
-        <div class="p-3 px-lg-4 border-bottom">
-            <div class="d-flex align-items-center w-100 justify-space-between">
+        <div class="p-3 px-lg-4 border-bottom cy-whatsapp-top-container">
+            <a class="d-flex align-items-center w-100 justify-space-between">
                 <div class="flex-shrink-0">
-                    <img class="img-fluid border avatar-img me-3" t-attf-src="/web/image/res.partner/{{props.channel.partner_id[0]}}/image_1920" alt="loading..."/>
+                    <img class="img-fluid border avatar-img me-3"
+                         t-attf-src="/web/image/res.partner/{{props.channel.partner_id[0]}}/image_1920"
+                         alt="loading..."/>
                 </div>
-                <div class="flex-grow-1">
-                    <h5 class="chat-content mb-1 text-truncate">
-                        <t t-out="props.channel.partner_id[1]"/>
+                <div class="flex-grow-1 d-flex flex-column justify-content-center">
+                    <h5 class="chat-content m-0 text-truncate">
+                        <a class="h5" t-attf-href="/web#id=#{props.channel.partner_id[0]}&amp;view_type=form&amp;model=res.partner">
+                            <t t-out="props.channel.partner_id[1]"/>
+                        </a>
                     </h5>
-                    <p class="chat-online mb-0">Online</p>
                 </div>
-                <div class="profile-option d-flex">
-                    <Dropdown position="'bottom-end'">
-                        <t t-set-slot="toggler">
-                            <a>
-                                <i class="fa fa-ellipsis-v fa-fw "/>
-                            </a>
-                        </t>
-                        <DropdownItem>
-                            <a class="dropdown-item" t-attf-href="/web#id=#{props.channel.partner_id[0]}&amp;view_type=form&amp;model=res.partner">
-                                Profile
-                            </a>
-                        </DropdownItem>
-                    </Dropdown>
-                </div>
-            </div>
+            </a>
         </div>
     </t>
 </templates>

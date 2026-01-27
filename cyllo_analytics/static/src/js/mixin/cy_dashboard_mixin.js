@@ -1,43 +1,47 @@
 /** @odoo-module **/
-const { useState, onWillStart, onMounted, useEffect, useRef } = owl;
-import { useService } from "@web/core/utils/hooks";
-import { ThemeMaker } from "@cyllo_analytics/js/theme_maker";
-import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
-import { registry } from "@web/core/registry";
-import { session } from "@web/session";
-import { ControlPanel } from "@web/search/control_panel/control_panel";
-import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+const {useState, onWillStart, useEffect, useRef} = owl;
+import {useService} from "@web/core/utils/hooks";
+import {ThemeMaker} from "@cyllo_analytics/js/theme_maker";
+import {useSaveContext} from "@cyllo_analytics/js/useSaveContext";
+import {session} from "@web/session";
+import {standardActionServiceProps} from "@web/webclient/actions/action_service";
+
 const TIMEFRAMES = {
-  'This Week': 'week',
-  'This Quarter': 'quarter',
-  'Last Quarter': 'quarter_l',
-  'This Month': 'month',
-  'Last Month': 'month_l',
-  'This Year': 'year',
-  'Last Year': 'year_l',
-  'Custom': 'custom'
+    'This Week': 'week',
+    'This Quarter': 'quarter',
+    'Last Quarter': 'quarter_l',
+    'This Month': 'month',
+    'Last Month': 'month_l',
+    'This Year': 'year',
+    'Last Year': 'year_l',
+    'Custom': 'custom'
+}
+export const SUB_KPI_SIZES = {
+    "kpi": {height: 1, width: 3},
+    "financial_kpi": {height: 2, width: 3}
 }
 
 export function CyAnalyticMixin(CyComponent) {
     return class extends CyComponent {
         setup() {
             super.setup();
-            this.env.bus.addEventListener("PN:RLD", () => setTimeout(() => { window.location.reload() }, 50))
+            this.env.bus.addEventListener("PN:RLD", () => setTimeout(() => {
+                window.location.reload()
+            }, 50))
             this.edit = false;
             this.dateFormats = {
                 display: 'YYYY/MM/DD',
                 actual: 'YYYY-MM-DD',
             }
-           useEffect(() => {
-               const navBar = document.body.querySelector('.o_navbar');
-               navBar.style.display = "none";
-               return () => {
-                   navBar.style.display = "flex";
-               }
+            useEffect(() => {
+                this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", {show: false})
+                return () => {
+                    this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", {show: true})
+                }
             })
             this.filters = useState({})
-            const { id, removeManually, getKeyValue, saveToSession } = useSaveContext()
-            this.saveContext = { removeManually, getKeyValue, saveToSession }
+            const {id, removeManually, getKeyValue, saveToSession} = useSaveContext()
+            this.saveContext = {removeManually, getKeyValue, saveToSession}
             this.removeManually = removeManually
             this.hasAccess = session.is_admin;
             this.id = id
@@ -70,14 +74,15 @@ export function CyAnalyticMixin(CyComponent) {
             })
             this.timFrameState = useState({
                 selected: this.defaultFilterTag,
-                date_0 : "",
-                date_1 : "",
-                company : [],
-                user : []
+                date_0: "",
+                date_1: "",
+                company: [],
+                user: []
             })
             this.dashboard = useRef('dashboard')
             this.state = useState({
                 width: 0,
+                originalWidth: 0,
                 globalFilters: [],
                 sources: [],
                 optionClass: 'collapse-filter',
@@ -85,8 +90,9 @@ export function CyAnalyticMixin(CyComponent) {
                 currentItem: false,
                 sortedItems: [],
                 search: "",
-                previousSearch: "",
+                previousSearch: " ", // default is ' '
                 showInfo: false,
+                darkMode: false,
             })
             onWillStart(this.onWillStart)
             useEffect(() => {
@@ -96,40 +102,56 @@ export function CyAnalyticMixin(CyComponent) {
                 this.dateOrder(flag, filter[0], true)
                 this.applyAllFilters()
             }, () => [this.ChartData.items])
+            let toggleDarkMode = false
             useEffect(() => {
-                if (!this.edit && (this.state.search.length || this.state.previousSearch.length)){
+                toggleDarkMode && this.toggleDarkMode()
+                toggleDarkMode = true
+            }, () => [this.state.darkMode]);
+            let firstTime = true
+            useEffect(() => {
+                if (!this.edit && (this.state.search.length || this.state.previousSearch.length)) {
                     const data = this.state.search.length > this.state.previousSearch.length ? this.state.sortedItems : this.items
                     const searchWord = this.state.search.toLowerCase().split(' ')
                     var filtered = data.filter(item => {
                         const names = item.name.toLowerCase().split(" ")
-                        var nameLength = names.length -1
+                        var nameLength = names.length - 1
                         var subNameMatch = true;
-                        for (let i = 0; i <= searchWord.length -1; i++){
+                        for (let i = 0; i <= searchWord.length - 1; i++) {
                             if (i > nameLength) return false;
                             if (searchWord.length === 1) {
                                 subNameMatch = names.some(item => item.includes(searchWord[i]))
                                 continue;
                             }
-                            if (i === searchWord.length -1 && subNameMatch) {
+                            if (i === searchWord.length - 1 && subNameMatch) {
                                 subNameMatch = names[i].includes(searchWord[i])
-                            }
-                            else {
+                            } else {
                                 subNameMatch = names[i] === searchWord[i]
                             }
                         }
                         return subNameMatch;
                     })
-                    this.state.search.length && this.resetPosition()
-                    this.state.sortedItems = this.state.search.length ? filtered : this.sortedItems
-                    this.state.previousSearch = this.state.search
+                    if (!firstTime) {
+                        this.resetPosition()
+                        this.state.sortedItems = this.state.search.length ? filtered : this.sortedItems
+                        this.state.previousSearch = this.state.search
+                    }
+                    firstTime = false
                 }
 
             }, () => [this.state.search])
         }
-         get TimeFrame(){
+
+        get TimeFrame() {
             return TIMEFRAMES
         }
+
+        async toggleDarkMode() {
+            this.env.bus.trigger("TOGGLE_DARK_MODE")
+            this.env.bus.trigger("REFRESH_GRAPH")
+        }
+
         async onWillStart() {
+            this.state.darkMode = await this.orm.call('res.users', 'get_active', [])
             var data = await this.orm.call("dashboard.config", "get_sheets", [this.id])
             this.items = data[0]
             this.state.showInfo = !Boolean(this.items.length);
@@ -141,74 +163,83 @@ export function CyAnalyticMixin(CyComponent) {
             this.bannerState.banner = data[4]
             if (this.themeState.theme) {
                 this.themeState.theme_id = data[2].id
-                var theme_maker = new ThemeMaker(this.themeState.theme)
-                this.themeState.currentTheme = theme_maker.getTheme()
+                this.themeMaker = new ThemeMaker(this.themeState.theme)
+                this.themeState.currentTheme = this.themeMaker.getTheme()
             }
             this.fetchThemes()
-
         }
+
         onClickSearch() {
             const searchRef = this.dashboard.el.querySelector(".dash_searchbar");
             [".icon", "input[type='text']"].forEach(item => $(searchRef).find(item).toggleClass("active"))
             if (!this.state.search.length) {
                 $(searchRef).find(".search_input_main").focus();
-            }else {
+            } else {
                 this.resetPosition()
                 this.state.sortedItems = this.sortedItems
             }
             this.state.search = ""
             this.state.previousSearch = ""
         }
-        onMessage({ detail: notifications }) {
+
+        onMessage({detail: notifications}) {
             notifications = notifications.filter(item => item.payload.channel === "CY:ANALYTICS")
             notifications.forEach(item => {
-                var res = this.ChartData.itemData.find(data => data.id === item.payload.id )
+                var res = this.ChartData.itemData.find(data => data.id === item.payload.id)
                 if (res) {
                     res.data = item.payload.result
                     this.ChartData.data.push(res)
                 }
             })
         }
-        dateOrder(flag, value, defaultVal){
-            var momentValue = flag ? moment() : moment().subtract(1,value);
+
+        dateOrder(flag, value, defaultVal) {
+            var momentValue = flag ? moment() : moment().subtract(1, value);
             var startDate = momentValue.startOf(value).toDate();
             var endDate = momentValue.endOf(value).toDate();
             this.timFrameState.date_0 = moment(startDate).format(this.dateFormats.actual)
             this.timFrameState.date_1 = moment(endDate).format(this.dateFormats.actual)
             this.filters['start-date'] = moment(startDate).format(this.dateFormats.actual)
             this.filters['end-date'] = moment(endDate).format(this.dateFormats.actual)
-            if (defaultVal){
+            if (defaultVal) {
                 this.filterData.date_0 = moment(startDate).format(this.dateFormats.display)
                 this.filterData.date_1 = moment(endDate).format(this.dateFormats.display)
             }
         }
-        resetPosition(){
+
+        resetPosition() {
             this.positions = {
                 x: 0,
                 y: 0,
                 w: 0,
                 h: 0,
                 ft: true,
-                maxH: []
+                maxH: [],
+                maxHVal: {0: [0]},
+                cache: {}
             }
             this.firstLine = true
         }
+
         storeDefaultFilter() {
             var defaultFilterObject = {
                 ...this.timFrameState
             }
             this.saveContext.saveToSession("defaultFilter", defaultFilterObject, true)
         }
+
         get defaultFilterOpts() {
             return this.saveContext.getKeyValue("defaultFilter")
         }
+
         get defaultFilterTag() {
             var selectedTag = 'month_l'
-            if (this.defaultFilterOpts?.selected){
+            if (this.defaultFilterOpts?.selected) {
                 selectedTag = this.defaultFilterOpts.selected == "custom" ? selectedTag : this.defaultFilterOpts.selected
             }
             return selectedTag
         }
+
         /**
          * Fetch available themes.
          */
@@ -217,6 +248,7 @@ export function CyAnalyticMixin(CyComponent) {
                 fields: ["name"]
             })
         }
+
         /**
          * Fetch data for charts.
          */
@@ -236,11 +268,12 @@ export function CyAnalyticMixin(CyComponent) {
                         id: item.id
                     }
                     this.ChartData.data.push(props)
-                    itemLength --;
+                    itemLength--;
                     this.ChartData.loading = !(itemLength == 0)
                 })
             })
         }
+
         getKpi(item) {
             return {
                 description: item.kpi_description,
@@ -251,6 +284,7 @@ export function CyAnalyticMixin(CyComponent) {
                 model: item.table_ids[0].model
             }
         }
+
         get sortedItems() {
             const copiedItems = this.items.slice();
             const value = copiedItems.sort((a, b) => {
@@ -279,7 +313,8 @@ export function CyAnalyticMixin(CyComponent) {
             });
             return value
         }
-        applyAllFilters(){
+
+        applyAllFilters() {
             this.state.sortedItems.forEach(item => {
                 this.applyItemFilter(item)
             })
@@ -287,17 +322,18 @@ export function CyAnalyticMixin(CyComponent) {
                 this.fetchData()
             }
         }
-        applyItemFilter(item){
+
+        applyItemFilter(item) {
             var domains = item.filter_ids
                 .filter(item => item.is_active)
                 .map(item => item.domain)
             var where = domains.join(' AND ')
             item.sheet_filter_ids.forEach(filter => {
-                var { operator, code } = filter.global_filter_id
+                var {operator, code} = filter.global_filter_id
                 var value = this.filters[code]
-                if(value?.length){
-                    value = typeof value == 'string' ? `'${value}'`:
-                            typeof value == 'object' ? `(${value.join(', ')})` : value
+                if (value?.length) {
+                    value = typeof value == 'string' ? `'${value}'` :
+                        typeof value == 'object' ? `(${value.join(', ')})` : value
                     var domain = `${filter.field} ${operator} ${value}`
                     domain = where ? ` AND ${domain}` : domain
                     where += domain
@@ -306,11 +342,16 @@ export function CyAnalyticMixin(CyComponent) {
             var new_query = this.applyFilters(item.query, where)
             item.query = new_query
         }
+
         applyFilters(query, newCondition) {
-            var currentWhere = query.match(/WHERE\s+([^]+?)(?:GROUP BY|ORDER BY|LIMIT|$)/i)
+            const beforeFrom = query.slice(0, query.toUpperCase().lastIndexOf("FROM"));
+            const afterFrom = query.slice(query.toUpperCase().lastIndexOf("FROM"));
+            const currentWhere = afterFrom.match(
+                /WHERE\s+(.+?)(?=GROUP\s+BY|ORDER\s+BY|LIMIT|$)/is
+            );
             if (currentWhere) {
                 let conditions = currentWhere[1].trim()
-                if(newCondition){
+                if (newCondition) {
                     query = query.replace(conditions, newCondition)
                 } else {
                     query = query.replace(conditions, '')
@@ -321,18 +362,33 @@ export function CyAnalyticMixin(CyComponent) {
                 const orderByRegex = /\bORDER\s+BY\b/i;
                 const limitRegex = /\bLIMIT\b/i;
                 const insertPosition =
-                    groupByRegex.test(query) ? groupByRegex.exec(query).index :
-                    orderByRegex.test(query) ? orderByRegex.exec(query).index :
-                    limitRegex.test(query) ? limitRegex.exec(query).index :
-                    query.length;
-                const beforeInsert = query.substring(0, insertPosition);
-                const afterInsert = query.substring(insertPosition);
-                if(newCondition){
-                    query = `${beforeInsert} WHERE ${newCondition} ${afterInsert}`
+                    groupByRegex.test(afterFrom) ? groupByRegex.exec(afterFrom).index :
+                        orderByRegex.test(afterFrom) ? orderByRegex.exec(afterFrom).index :
+                            limitRegex.test(afterFrom) ? limitRegex.exec(afterFrom).index :
+                                afterFrom.length;
+                const beforeInsert = afterFrom.substring(0, insertPosition);
+                const afterInsert = afterFrom.substring(insertPosition);
+                if (newCondition) {
+                    query = `${beforeFrom} ${beforeInsert} WHERE ${newCondition} ${afterInsert}`
                 }
             }
             return query;
         }
-        static props = { ...standardActionServiceProps }
+
+        getChartSizes(type, rearrangeId = 1, subKpi = false) {
+            if (type === "kpi") {
+                if (subKpi) {
+                    return SUB_KPI_SIZES[subKpi]
+                } else return {height: 1, width: 3}
+            } else {
+                const modVal = rearrangeId % 2;
+                if (modVal === 0) {
+                    return {height: 4, width: 6}; // Even
+                } else {
+                    return {height: 3, width: 4}; // Odd
+                }
+            }
+        }
+        static props = {...standardActionServiceProps}
     }
 }

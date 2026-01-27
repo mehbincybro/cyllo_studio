@@ -11,7 +11,6 @@ const { Component, onMounted, useRef, onWillUpdateProps } = owl
 export class SQLEditor extends Component {
     setup(){
         this.ref = useRef('editor')
-        this.query = this.props.value
         onMounted(() => {
             this.code = CodeMirror(this.ref.el, {
               lineNumbers: this.props.lineNumbers || true,
@@ -29,9 +28,8 @@ export class SQLEditor extends Component {
         })
     }
     onBlur(){
-        var query = this.code.doc.getValue()
-        if(query == this.query) return
-        this.query = query
+        const query = this.code.doc.getValue()
+        if(query === this.props.value) return
         this.props.onBlur(query)
     }
 }

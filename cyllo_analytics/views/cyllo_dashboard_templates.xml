@@ -6,7 +6,11 @@
         <field name="tag">cy_analytic_dashboard</field>
         <field name="target">current</field>
     </record>
+
     <!-- Menu item for the main dashboard-->
-    <menuitem id="menu_dashboard" name="Dashboard" sequence="0"
-              parent="menu_cyllo_analytics_root" action="cyllo_dashboard_action"/>
+    <menuitem id="menu_dashboard"
+              name="Dashboard"
+              sequence="0"
+              parent="menu_cyllo_analytics_root"
+              action="cyllo_dashboard_action"/>
 </odoo>

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_analytics.KpiSheet" owl="1">
+        <div class="d-flex p-5">
+            <div class="kpi-sheet-parent col-12 col-sm-6 col-md-6 col-lg-6 col-xl-6 kpi-card-main-container">
+                <div class="card card-with-ratio">
+                    <div class="card-content">
+                        <div class="card-body kpi-card-body">
+                            <t t-if="state.measureView === 'View 1'"
+                               t-call="kpi.sheet.view.type.1"/>
+                            <t t-if="state.measureView === 'View 2'"
+                               t-call="kpi.sheet.view.type.2"/>
+                            <t t-if="state.measureView === 'no_view'"
+                               t-call="kpi.sheet.view.type.3"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row py-2 p-5 Kpi_config" t-ref="KpiConfig">
+            <div class="col-sm-6">
+                <div class="col-12 mb-2 position-relative kpi_icon_container">
+                    <label for="inputAddress"
+                           class="form-label  cy-modal-form_label">KPI Icon
+                    </label>
+                    <div class="kpi_icon-selection-button-container position-relative">
+                        <button class="cy-sheet_icon-selection"
+                                t-on-click="onClickKpiIcon">
+                            <i class="cy-icons"
+                               t-att-class="this.state.iconDefault"/>
+                        </button>
+                        <div class="cy-sheet_icon-selection-box position-absolute">
+                            <div class="modal-content cy-sheet_icon-selectBox">
+                                <div class="modal-header cy-sheet_selection-box-head  d-flex align-items-center">
+                                    <h5 class=" cy-sheet_selection-heading-txt">
+                                        Select Icon
+                                    </h5>
+                                    <span id="closeBtn"
+                                          class="cy-icons cy-social_cmnt-closebtn"
+                                          t-on-click="onCloseKpiIcon">
+                                        <i class="ri-close-line"/>
+                                    </span>
+                                </div>
+                                <div class="modal-body pt-0">
+                                    <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2"
+                                        style="width: 245px;">
+                                        <li t-foreach="IconClass" t-as="icons"
+                                            t-key="icons_index">
+                                            <div class="cy-icon_box-item cursor-pointer"
+                                                 t-on-click="()=> this.selectIcon(icons)">
+                                                <i class="cy-icons"
+                                                   t-att-class="icons"/>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cy-selected_icon">
+                    </div>
+                </div>
+                <div class="col-12 target-value-container d-flex align-items-center mb-2">
+                    <label for="inputAddress"
+                           class="text-nowrap form-label cy-modal-form_label">
+                        KPI Target
+                    </label>
+                    <input t-on-focus="onFocusInputKPI"
+                           t-on-change="onChangeKPITarget" type="number"
+                           class="form-control kpi-target-value" min="0"
+                           placeholder="Target Value" t-model="state.target"/>
+                </div>
+                <div class="col-12 mb-2 pt-5px">
+                    <label for="inputAddress"
+                           class="form-label cy-modal-form_label">Measuring view
+                    </label>
+                    <div class="view-type-container-sheet d-flex gap-4">
+                        <div class="form-check">
+                            <div class="d-flex align-items-center view_type-button cursor-pointer"
+                                 t-attf-class="view_type-button_{{ state.measureView === 'View 1' ? 'selected' : 'normal' }}"
+                                 t-on-click="() => this.setKpiView('View 1')">
+                                <input class="form-check-input d-none cy-sheet_checkbox"
+                                       type="radio"
+                                       name="measuringView"
+                                       id="view1" value="View 1"
+                                       t-model="state.measureView"/>
+                                <div class="cy-sheet_checkbox-view-holder">
+                                    <div t-attf-class="ri-circle-{{state.measureView === 'View 1' ? 'fill' : 'line' }}"/>
+                                    <div class="form-check-label cy-sheet-graph-name"
+                                         for="view1">
+                                        View 1
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-check">
+                            <div class="d-flex align-items-center view_type-button cursor-pointer"
+                                 t-on-click="() => this.setKpiView('View 2')"
+                                 t-attf-class="view_type-button_{{ state.measureView === 'View 2' ? 'selected' : 'normal' }}">
+                                <input class="form-check-input d-none cy-sheet_checkbox"
+                                       type="radio"
+                                       name="measuringView"
+                                       id="view2"
+                                       value="View 2"
+                                       t-model="state.measureView"/>
+                                <div class="cy-sheet_checkbox-view-holder">
+                                    <div t-attf-class="ri-circle-{{state.measureView === 'View 2' ? 'fill' : 'line' }}"/>
+                                    <div class="form-check-label cy-sheet-graph-name"
+                                         for="view2">
+                                        View 2
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="col-12  mb-2 d-flex align-items-center redirect-to-record">
+                    <div class="d-flex align-items-center">
+                        <label class="form-check-label cy-modal-form_label"
+                               for="flexCheckDefault">
+                            Redirect to Record
+                        </label>
+                        <span class="ms-2 slider-container">
+                            <label class="switch">
+                                <input type="checkbox"
+                                       t-model="state.redirect"/>
+                                <span class="slider round"/>
+                            </label>
+                        </span>
+                    </div>
+                </div>
+                <div class="col-12 mb-2">
+                    <label for="inputAddress"
+                           class="form-label  cy-modal-form_label">Description
+                    </label>
+                    <textarea class="form-control cy-button-stroke"
+                              id="exampleFormControlTextarea1"
+                              rows="8"
+                              t-model="state.description"/>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="kpi.sheet.view.type.1">
+        <div class="media kpi-view_1 d-flex align-items-center card-inner-body">
+            <div class="w-100">
+                <div class="kpi-heading-container">
+                    <div class="kpi-heading-name"
+                         t-out="capitalizeFirstLetter(state.name)"/>
+                    <div class="position-relative kpi-tools-container">
+                        <div class="description-kpi">
+                            <div t-if="state.description"
+                                 class="kpi-info-container ri-information-line">
+                                <div class="kpi-info-content"
+                                     t-out="state.description"/>
+                            </div>
+                            <t t-slot="footer"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex view_1-container">
+                    <div class="d-flex flex-column align-item-center">
+                        <div class="kpi-content-view">
+                            <div class="kpi-left-aligned-container">
+                                <div class="kpi-left-container">
+                                    <div class="align-self-center kpi-icon-size">
+                                        <i t-att-class="state.iconDefault"
+                                           class=""/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="kpi-middle-container">
+                        <div class="media-body text-right">
+                            <div class="kpi-structure">
+                                <div class="me-1"
+                                     t-out="formatNumber(kpiData)"/>
+                                <t t-if="state.target">
+                                    <div>/</div>
+                                    <div class="ms-1"
+                                         t-esc="formatNumber(state.target)"/>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="progress-container">
+                            <div t-att-class="getKPIClass('main')"
+                                 class="small-screen-kpi-view-1">
+                                <div class="progress cy-kpi-progress-bar_2"
+                                     t-attf-style="width: {{stylePercentageWidth}}%;">
+                                    <span t-att-class="getKPIClass('sub1')"><t
+                                            t-out="kpiTarget"/>%
+                                    </span>
+                                </div>
+                                <span class="is-for-small-screen"
+                                      t-if="stylePercentageWidth lte 40"
+                                      t-att-class="getKPIClass('sub2')">
+                                    <t t-out="kpiTarget"/>%
+                                </span>
+                            </div>
+                            <div class="progress cy-kpi-progress-bar"
+                                 t-attf-style="width: {{stylePercentageWidth}}%;"/>
+                            <div class="percentage-sheet cy-kpi-progress-bar-value"
+                                 t-attf-style="left: {{stylePercentageWidth}}%;">
+                                <span><t t-out="kpiTarget"/>%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="kpi.sheet.view.type.2">
+        <div class="media d-flex kpi-view-2 justify-content-between align-items-center card-inner-body">
+            <div class="kpi-content-view">
+                <div class="kpi-heading-container">
+                    <div class="kpi-heading-name"
+                         t-out="capitalizeFirstLetter(state.name)"/>
+                </div>
+                <div class="kpi-left-aligned-container">
+                    <div class="kpi-left-container">
+                        <div class="align-self-center kpi-icon-size">
+                            <i t-att-class="state.iconDefault" class=""/>
+                        </div>
+                    </div>
+                    <div class="kpi-middle-container">
+                        <div class="media-body text-right">
+                            <div class="kpi-structure">
+                                <div class="me-1"
+                                     t-out="formatNumber(kpiData)"/>
+                                <t t-if="state.target">
+                                    <div>/</div>
+                                    <div class="ms-1"
+                                         t-out="formatNumber(state.target)"/>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="kpi-right-container">
+                <div class="kpi-view-icon-status"
+                     t-att-class="state.className"/>
+                <div class="kpi-target-percentage">
+                    <span class="me-1" t-out="kpiTarget || '0.00'"/>
+                    <span>%</span>
+                </div>
+            </div>
+            <div class="position-relative">
+                <div class="description-kpi">
+                    <div t-if="state.description"
+                         class="kpi-info-container ri-information-line">
+                        <div class="kpi-info-content"
+                             t-out="state.description"/>
+                    </div>
+                    <t t-slot="footer"/>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="kpi.sheet.view.type.3">
+        <div class="media d-flex kpi-view-2 justify-content-between align-items-center card-inner-body">
+            <div class="kpi-content-view">
+                <div class="kpi-heading-container">
+                    <div class="kpi-heading-name"
+                         t-out="capitalizeFirstLetter(state.name)"/>
+                </div>
+                <div class="kpi-left-aligned-container">
+                    <div class="kpi-left-container">
+                        <div class="align-self-center kpi-icon-size">
+                            <i t-att-class="state.iconDefault" class=""/>
+                        </div>
+                    </div>
+                    <div class="kpi-middle-container w-100">
+                        <div class="media-body text-right">
+                            <div class="kpi-structure">
+                                <div class="me-1"
+                                     t-out="formatNumber(kpiData)"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="position-relative">
+                <div class="description-kpi">
+                    <div t-if="state.description"
+                         class="kpi-info-container ri-information-line">
+                        <div class="kpi-info-content"
+                             t-out="state.description"/>
+                    </div>
+                    <t t-slot="footer"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

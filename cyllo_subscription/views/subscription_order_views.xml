@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-<!--    Subscription order tree view-->
+    <record id="view_subscription_order_search" model="ir.ui.view">
+        <field name="name">view.subscription.order.search</field>
+        <field name="model">subscription.order</field>
+        <field name="arch" type="xml">
+            <search string="Subscriptions">
+                <field name="name" string="Order" filter_domain="['|', ('name', 'ilike', self)]"/>
+                <field name="partner_id" operator="child_of"/>
+                <field name="sale_order_id"/>
+                <field name="subscription_order_line_ids" string="Product" filter_domain="[('subscription_order_line_ids.product_id', 'ilike', self)]"/>
+                <filter name="active_subscriptions" string="Active" domain="[('state_subscription','=','active')]"/>
+                <filter name="renew_subscriptions" string="To Renew" domain="[('state_subscription','=','renew')]"/>
+                <filter name="churned_subscriptions" string="Churned" domain="[('state_subscription','=','churned')]"/>
+                <separator/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="customer" context="{'group_by':'partner_id'}"/>
+                    <filter string="Sale order" name="sale_order_id" context="{'group_by':'sale_order_id'}"/>
+                    <filter string="Template" name="template" context="{'group_by':'sale_order_template_id'}"/>
+                    <filter string="State" name="state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Subscription order tree view -->
     <record id="view_subscription_order_tree" model="ir.ui.view">
         <field name="name">view.subscription.order.tree</field>
         <field name="model">subscription.order</field>
@@ -19,7 +43,7 @@
             </tree>
         </field>
     </record>
-<!--    Subscription order form view-->
+    <!-- Subscription order form view -->
     <record id="view_subscription_order_form" model="ir.ui.view">
         <field name="name">view.subscription.order.form</field>
         <field name="model">subscription.order</field>
@@ -27,7 +51,7 @@
             <form create="0">
                 <header>
                     <button name="action_post" type="object" string="Create Invoice" invisible="state_subscription == 'churned'"/>
-                    <button name="action_renew_order" type="object" string="Renew"/>
+                    <button name="action_renew_order" type="object" string="Renew" invisible="state_subscription not in ('churned')"/>
                     <button name="action_upsell" type="object" string="Upsell"/>
                     <button name="action_close_subscription" type="object" string="Close" invisible="state_subscription not in ('active', 'renew')"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
@@ -35,23 +59,23 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button type="object"  name="action_show_invoices" invisible="invoice_count == 0"
-                            class="oe_stat_button"
-                            icon="fa-pencil-square-o">
+                                class="oe_stat_button"
+                                icon="fa-pencil-square-o">
                             <field name="invoice_count" string="Invoice" widget="statinfo" invisible="invoice_count == 0"/>
                         </button>
                         <button type="object"  name="action_view_report"
-                            class="oe_stat_button"
-                            icon="fa-line-chart">
+                                class="oe_stat_button"
+                                icon="fa-line-chart">
                             <field name="recurring_revenue" string="MRR" widget="statinfo"/>
                         </button>
                     </div>
                     <field name="state_subscription" class="float-end fs-6"
-                       widget="badge"
-                       decoration-success="state_subscription == 'active'"
-                       decoration-warning="state_subscription == 'renew'"
-                       decoration-info="state_subscription == 'quotation'"
-                       decoration-danger="state_subscription == 'churned'"
-                       decoration-muted="state_subscription == 'trial'"/>
+                           widget="badge"
+                           decoration-success="state_subscription == 'active'"
+                           decoration-warning="state_subscription == 'renew'"
+                           decoration-info="state_subscription == 'quotation'"
+                           decoration-danger="state_subscription == 'churned'"
+                           decoration-muted="state_subscription == 'trial'"/>
                     <h2><field name="name"/></h2>
                     <group>
                         <group>
@@ -79,8 +103,40 @@
                                     <field name="currency_id" column_invisible="1"/>
                                     <field name="tax_ids" widget="many2many_tags"/>
                                     <field name="subtotal"/>
+                                    <field name="total_price" optional="hide"/>
+                                    <field name="state" column_invisible="1"/>
                                 </tree>
                             </field>
+                            <div class="oe_button_box" name="button_box"/>
+                            <div class="oe_avatar" style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                                <field name="currency_id" invisible="1"/>
+                                <table class="table table-sm" style="width: 300px;">
+                                    <tr>
+                                        <td><strong>Untaxed Amount:</strong></td>
+                                        <td class="text-end">
+                                            <span>
+                                                <field name="amount_untaxed" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Tax:</strong></td>
+                                        <td class="text-end">
+                                            <span>
+                                                <field name="amount_tax" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Total:</strong></td>
+                                        <td class="text-end">
+                                            <span>
+                                                <field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}" readonly="1"/>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
                         </page>
                     </notebook>
                 </sheet>
@@ -92,37 +148,20 @@
             </form>
         </field>
     </record>
-<!--    Field in action button to create consolidated invoice-->
-    <record id="model_consolidate_invoice" model="ir.actions.server">
-        <field name="name">Create Invoice</field>
-        <field name="model_id" ref="cyllo_subscription.model_subscription_order"/>
-        <field name="binding_model_id" ref="cyllo_subscription.model_subscription_order"/>
-        <field name="state">code</field>
-        <field name="code">
-            action = records.consolidated_invoice()
-        </field>
-    </record>
-<!--    Subscription order sequence number-->
-    <record id="ir_sequence_name" model="ir.sequence">
-        <field name="name">Name</field>
-        <field name="code">subscription.order</field>
-        <field name="prefix">SUB/</field>
-        <field name="padding">4</field>
-        <field name="company_id" eval="False"/>
-    </record>
-<!--    Action to show only the record to renew-->
-    <record id="action_view_sale_order_to_renew" model="ir.actions.act_window">
+
+    <!-- Action to show only the record to renew -->
+    <record id="action_view_to_renew" model="ir.actions.act_window">
         <field name="name">To Renew</field>
         <field name="res_model">subscription.order</field>
         <field name="domain">[('state_subscription', '=', 'renew')]</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-            No Order is found. Let's create one!
+                No Order is found. Let's create one!
             </p>
         </field>
     </record>
-<!--    Subscription order action-->
+    <!-- Subscription order action -->
     <record id="action_view_subscription_order" model="ir.actions.act_window">
         <field name="name">Subscription Order</field>
         <field name="res_model">subscription.order</field>

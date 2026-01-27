@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 import logging
 from odoo.addons.cyllo_payroll_management.tests.common import \
@@ -17,8 +37,8 @@ class TestEmployeePayslipBatch(TestPayrollManagementBase):
 
     def test_action_close(self):
         _logger.info('Test for action close')
-        self.employee_batch.action_close()
-        self.assertEqual(self.employee_batch.state, 'close')
+        self.employee_batch.action_paid()
+        self.assertEqual(self.employee_batch.state, 'paid')
         _logger.info('Test success for action close')
 
     def test_action_generate_batch(self):

@@ -51,12 +51,14 @@
                 </header>
                 <sheet>
                     <h1>
-                        <field name="name" readonly="state == 'sync'" placeholder="Name for the connector"/>
+                        <field name="name" readonly="state == 'sync'"
+                               placeholder="Name for the connector"/>
                     </h1>
                     <group>
                         <field name="contact_synced" invisible="1"/>
                         <field name="to_do_synced" invisible="1"/>
                         <field name="type" widget="radio"/>
+                        <field name="company_id" groups="base.group_multi_company"/>
                     </group>
                     <notebook>
                         <page name="information" string="Configuration">

@@ -1,0 +1,164 @@
+.graph_properties{
+
+    .plus_input{
+        /*
+               top: 27.6%;
+         */
+        left: 87%;
+    }
+    .dropdown-item.focus{
+        background-color: #00000038;
+    }
+    .o-dropdown--menu{
+
+        position: fixed;
+        top: 105% !important;
+        left: -2% !important;
+        background: #2e2e2e;
+        border: 1px solid #2e2e2e;
+        border-radius: 3px !important;
+        width: 121%;
+        max-height: 10px !important;
+    }
+    .btn:hover {
+        color: unset;
+    }
+    .cy-input{
+        margin-top:5%;
+        .dropdown .dropdown-menu {
+            margin-left:0 !important;
+            max-height: 16rem !important;
+            overflow: scroll !important;
+        }
+    }
+}
+.light-studio-mode .cy-studio-graph-icon{
+    background-color:#d3d3d3;
+    color: #494840;
+}
+.cy-studio-graph-icon{
+    color:#828176;
+    background-color: #32352a;
+    width: 17%;
+    text-align: center;
+    border-radius: 6px;
+}
+
+.checkbox-item{
+    margin-left:0px !important;
+}
+.checkbox-can-create{
+    margin-left: 0px;
+}
+.cy-studio-graph-icon .active-icon{
+    color: #a4ad02 ;
+}
+.custom-round-checkbox {
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    border: 2px solid var(--custom-dropdown-color);
+    border-radius: 50%; /* Makes it round */
+    background-color: #dee0da;
+    cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
+}
+
+.custom-round-checkbox:checked {
+    background-color: #a4ad02;
+    border-color: #a4ad02;
+}
+.custom-round-checkbox:checked::after {
+    content: '✔';
+    display: block;
+    color: white;
+    font-size: 15px;
+    text-align: center;
+    line-height: 14px;
+}
+.cy-graph-default-type {
+    background: var(--custom-dropdown-bg);
+    border: 1px solid var(--custom-dropdown-border);
+    border-radius: 8px;
+    position: absolute;
+    width: 100%;
+    z-index: 99999;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: dropdownFadeSlide 0.5s ease;
+}
+
+.o-autocomplete--dropdown-menu {
+    scrollbar-width: thin;
+}
+
+.cy-graph-default-type li:hover {
+    background-color: rgba(0, 0, 0, 0.08); /* Light black / gray background */
+    border-radius: 4px;
+    cursor: pointer;
+}
+/* Hide pin by default */
+.cy-dropdown-item .cy-pushpin-fill {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.view_overall_light {
+    .scroll-container {
+        padding-top: 4px !important;
+    }
+
+    .dropdown-item:hover, .dropdown-item:focus {
+        color: #ccc;
+    }
+}
+
+/* Show on hover */
+.cy-dropdown-item:hover .cy-pushpin-fill {
+    opacity: 1;
+}
+
+/* Always show if pinned (default selected) */
+.cy-dropdown-item.pinned .cy-pushpin-fill {
+    opacity: 1;
+    color:#a4ad02 !important;
+}
+.default_type_icon {
+    font-size: 8px;
+    color:#a4ad02 !important;
+    position: absolute;
+}
+.default-graph-icon {
+    color:#a4ad02 !important;
+}
+.arrow-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem; /* Consistent padding with cy-studio-graph-icon */
+    cursor: pointer;
+}
+.graph_properties {
+    overflow: visible !important;
+}
+.measure-scrollable {
+    overflow-y: auto;
+    max-height: 650px;
+}
+.cy-studio-custom-dropdown .dropdown-menu {
+    position: absolute !important;
+    top: 100%;
+    left: 0;
+    z-index: 1001;
+    max-height: none !important;
+    overflow: visible !important;
+}
+.rotated {
+    transform: rotate(180deg);
+}
+.o_graph_canvas_container canvas {
+    height: 844px !important;
+}
+
+.o_graph_canvas_container {
+    overflow: hidden !important;
+}

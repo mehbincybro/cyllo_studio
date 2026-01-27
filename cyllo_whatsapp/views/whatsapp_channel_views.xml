@@ -5,24 +5,24 @@
         <field name="name">view.whatsapp.channel.form</field>
         <field name="model">whatsapp.channel</field>
         <field name="arch" type="xml">
-            <form string="Whatsapp Channel">
+            <form string="Whatsapp Channel" create="0">
                 <sheet>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
                         <label for="name"/>
-                        <h1><field name="name"/></h1>
+                        <h1><field name="name" readonly="1"/></h1>
                     </div>
                     <group>
                         <group>
                             <field name="active" invisible="1"/>
-                            <field name="user_id"/>
-                            <field name="partner_id"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="user_id" readonly="1"/>
+                            <field name="partner_id" readonly="1"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="1"/>
                         </group>
                     </group>
                     <notebook>
                         <page id="message" name="Messages">
-                            <field name="wa_message_ids">
+                            <field name="wa_message_ids" readonly="1">
                                 <tree string="Message" editable="false" create="false">
                                     <field name="id"/>
                                     <field name="message"/>

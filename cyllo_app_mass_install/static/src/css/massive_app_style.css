@@ -1,4 +1,6 @@
 :root {
+    /* background */
+    --background-color: #F9FAFB;
     /* Colors */
     --bg-white-100: hsl(0, 0%, 100%);
     --bg-light-100: hsl(0, 0%, 99.5%);
@@ -61,9 +63,7 @@
     grid-template-columns: 100% 0;
     transition: all 0.3s linear;
     border: 1px solid var(--bg-steel-400);
-    max-width: 80%;
-    margin: 1rem auto;
-    height: 97vh;
+    height: 100vh;
 }
 
 @media screen and (max-width: 992px) {
@@ -75,7 +75,7 @@
 
 .cy-app-install-demo-card--sidebar {
     display: grid;
-    grid-template-columns: 70% 30%;
+    grid-template-columns: 75% 25%;
     transition: all 0.3s linear;
 }
 
@@ -86,10 +86,12 @@
 .cy-app-install-demo-card--sidebar .cy-app-install-appbar {
     display: block;
     position: sticky;
-    height: 88vh;
-    padding-top: 0;
+    height: calc(99vh + 8px);
+    padding-top: 10px;
     padding-right: 0;
     top: 0;
+    overscroll-behavior: contain;
+    background: #e9ebb5;
 }
 
 
@@ -98,11 +100,12 @@
     font-family: var(--inter-sans);
     cursor: pointer;
     transition: all 0.3s linear;
-    font-weight: 400;
-    color: #6F7500;
-    background-color: #F5F6E6;
+    font-weight: 500;
+    color: white;
+    background-color: #9EA700;
     font-size: var(--bg-font-size-base);
     padding: 0.7rem 1rem;
+    border-radius: 10px;
 }
 
 @media screen and (max-width: 991.98px) {
@@ -125,7 +128,7 @@
         top: unset;
         height: unset;
         bottom: -15px;
-        background-color: var(--bg-white-100);
+        background-color: #e9ebb5;
     }
 
     .cy-app-install-appbar__items {
@@ -135,8 +138,8 @@
 }
 
 .cy-app-install-demo-card {
-    background-color: var(--bg-white-100);
-    height: 96vh;
+    background-color: var(--background-color);
+    height: 100vh;
     padding: 2rem;
     overflow-y: hidden;
 }
@@ -154,10 +157,10 @@
 }
 
 .cy-app-install-demo-card__title {
-    font-family: var(--inter-sans);
-    font-size: var(--bg-font-size-lg) !important;
+    font-family: "Plus Jakarta Sans", sans-serif !important;
+    font-size: 35px !important;
     font-weight: bold;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
     color: var(--bg-dark-900);
     white-space: nowrap;
 }
@@ -176,9 +179,7 @@
 }
 
 .cy-app-install-demo-apps__cat-header {
-    border-bottom: 1px solid #DFDFDF;
-    padding-bottom: 1rem;
-    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
 }
 
 .cy-app-install-demo-apps {
@@ -212,27 +213,27 @@
 .cy-app-install-demo-apps__label {
     display: inline-flex;
     align-items: center;
-    font-weight: 500;
+    font-weight: 600;
     padding: 1rem;
     min-height: 80px;
     width: 100%;
     background-color: var(--bg-light-100);
     border: 1px solid var(--bg-steel-200);
-    border-radius: 0.2rem;
+    border-radius: 0.7rem;
     cursor: pointer;
     color: var(--bg-dark-800);
     box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0,
     rgba(255, 255, 255, 0.25) 0 1px 0 inset;
     transition: all 0.3s linear;
-    font-size: 15px;
+    font-size: 16px;
+    line-height: 20px;
 }
 
 .cy-app-install-demo-apps__label:hover {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
-    background-color: var(--bg-light-200);
-    border-color: var(--bg-steel-400);
-    transform: translate3d(0, -1px, 0);
+    border-color: #ecedcc;
     transition: all 0.3s linear;
+    box-shadow: inset 0 0 0 2px #9EA700;
+    transform: translate3d(0, -1px, 0);
 }
 
 .cy-app-install-demo-apps__checkbox:checked + .cy-app-install-demo-apps__label {
@@ -241,11 +242,11 @@
     box-shadow: rgba(87, 107, 219, 0.2) 0px 1px 5px 0px;
     color: var(--bg-dark-900);
     transition: all 0.3s linear;
-    display: None;
+    display: none;
 }
 
 .cy-app-install-demo-apps__cat-title {
-    font-weight: bold;
+    font-weight: 500;
     font-family: var(--inter-sans);
     font-size: var(--bg-font-size-base);
 }
@@ -258,14 +259,12 @@
     align-items: center;
     justify-content: center;
     margin-right: 10px;
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
     pointer-events: none;
 }
 
 /* App Sidebar */
-
 .cy-app-install-appbar {
-    padding: 3rem 2rem;
+    padding: 3rem 20px;
 }
 
 .cy-app-install-appbar__count {
@@ -281,12 +280,14 @@
 
 .cy-app-install-appbar__header {
     margin-bottom: 2rem;
-    min-width: 400px;
+    margin-top: 1rem;
+    /*min-width: 400px;*/
 }
 
 .cy-app-install-appbar__body {
     height: calc(97vh - (52px + 7rem + 3rem));
     overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .cy-app-install-appbar__footer {
@@ -304,7 +305,12 @@
 .cy-app-install-appbar__item {
     display: flex;
     align-items: center;
-    margin-top: 1.25rem;
+    background: #FFFFFF !important;
+    margin-right: 20px;
+    padding-right: 12px;
+    border-radius: 1rem;
+    padding-left: 8px;
+    box-shadow: 0 2px 2px rgba(0, 0, 0, 0.1);
 }
 
 .cy-app-install-appbar__item:first-child {
@@ -323,9 +329,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
     animation: scale 0.4s linear forwards;
-    border: 1px solid #dfdfdf;
     border-radius: 5px;
 
 }
@@ -338,7 +342,7 @@
 
 /* Buttons */
 .cy-app-install-btn {
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
     font-family: var(--inter-sans);
     cursor: pointer;
     transition: all 0.3s linear;
@@ -359,17 +363,15 @@
 }
 
 .cy-app-install-btn--primary {
-    min-height: 50px;
-    width: 170px;
+    height: 50px;
     background: #9ea700;
     color: #fff !important;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1rem;
-    border-radius: 25px;
+    border-radius: 12px;
     border: none !important;
-    font-weight: bold;
     font-family: var(--inter-sans);
     transition: all 0.3s linear;
 }
@@ -387,30 +389,90 @@
     text-shadow: 1px 1px var(--bg-secondary-600);
 }
 
+.cy-app-install-btn--link {
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+}
+
+.cy-app-install-btn--link:hover {
+    background-color: #dfe1b7 !important;
+}
+
 /* Steps */
 
 .cy-app-install-steps {
     display: flex;
+    font-family: "Manrope", sans-serif;
     align-items: center;
     margin-top: 2rem;
-    margin-bottom: 2rem;
-    padding-left: 0;
+    margin-bottom: 8px;
+    padding: 0 24px !important;
     list-style: none;
     gap: 10px;
 }
 
-.cy-app-install-step {
-    position: relative;
-    width: 33.33%;
+.cy-app-install-steps-text {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 !important;
+    list-style: none;
+    gap: 10px;
 }
 
-.cy-app-install-step::after {
+.cy-app-install-steps-text li {
+    width: 130px;
+}
+
+.cy-app-install-step {
+    position: relative;
+}
+
+.cy-app-install-step--checkbox {
+    background-color: #dfe1b7;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.cy-app-install-step--checkbox span {
+    padding-bottom: 1px;
+    font-weight: bold;
+}
+
+.cy-app-install-step--checkbox.completed {
+    background-color: var(--primary);
+    color: var(--white);
+}
+
+.cy-app-install-step--checkbox.active {
+    background-color: var(--primary);
+    color: var(--white);
+    box-shadow: inset 0 0 0 2px var(--primary), inset 0 0 0 8px var(--background-color);
+}
+
+.cy-app-install-step--checkbox i {
+    font-size: 20px;
+    color: #fff;
+}
+
+.cy-app-install-step--bar {
     content: "";
     width: 100%;
     height: 5px;
     display: inline-block;
     border-radius: 25px;
     background-color: #F0F1F3;
+}
+
+.cy-app-install-step--bar.completed {
+    background-color: var(--primary);
 }
 
 .cy-app-install-first_step::after {
@@ -429,7 +491,7 @@
 .cy-app-install-step__label {
     visibility: visible;
     font-size: var(--bg-font-size-base);
-    font-weight: bold;
+    font-weight: 500;
     color: black;
 }
 
@@ -452,7 +514,7 @@
 .cy-app-install-step.cy-app-install-step--active .cy-app-install-step__label {
     visibility: visible;
     font-size: var(--bg-font-size-base);
-    font-weight: bold;
+    font-weight: 500;
     color: black;
 }
 
@@ -527,6 +589,18 @@
     }
 }
 
+.cy-app-install-apps_footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--background-color);
+    padding: 8px 6px 0;
+    height: 95px;
+}
+
+.cy-app-install-apps_footer .cy-app-install-btn {
+    margin-bottom: 36px;
+}
+
 .cy-app-install_user_table {
     position: relative;
     bottom: 7px;
@@ -534,7 +608,6 @@
 
 .cy_app-install-get_started {
     padding: 36px;
-    background-color: white;
     height: unset;
 }
 
@@ -561,14 +634,8 @@
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: rgba(255, 255, 255, 1);
     z-index: 3000;
-}
-
-.cy-app-install-spinner-container {
-    position: absolute;
-    margin-bottom: 53px;
-    transform: translateY(-50%);
 }
 
 .cy-app-install-welcome-message {
@@ -591,12 +658,16 @@
 
 #cy-app-install-loading-text {
     font-size: 18px;
+    font-weight:500;
+    font-family: var(--inter-sans);
 }
 
 #cy-app-install-cyllo-info {
-    margin-top: 10px;
-    color: #666;
-    max-width: 700px;
+    color: #222;
+    max-width: 800px;
+    font-weight: 500;
+    font-size: 15px;
+    font-family: var(--inter-sans);
 }
 
 .cy-app-install-spinner {
@@ -619,11 +690,9 @@
 }
 
 .cy_app_install_selected {
-    border-color: var(--bg-secondary-500);
-    background-color: #f8f8f8;
-    box-shadow: rgba(87, 107, 219, 0.2) 0px 1px 5px 0px;
-    color: var(--bg-dark-900);
+    border-color: #ecedcc;
     transition: all 0.3s linear;
+    box-shadow: inset 0 0 0 2px #9EA700;;
 }
 
 .cy-app-install-demo-card__skipbtn {
@@ -643,12 +712,11 @@
 
 /* .....................................User Information............................*/
 
-
 .cy-app-install-onboarding-card__input {
     width: 100%;
     padding: 0.35rem;
     border-radius: 5px !important;
-    border: 1px solid #DFDFDF;
+    border: 2px solid #9EA700;
     font-family: var(--inter-sans);
     transition: all 0.3s linear;
 }
@@ -661,23 +729,19 @@
 }
 
 .cy-app-install-onboarding-card__form {
-    margin-top: 1.5rem;
 }
 
 .cy-app-install-onboarding-card__form-row {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-top: 0.75rem;
+    gap: 25px;
     margin-bottom: 0.75rem;
 }
 
 .cy-app-install-onboarding-card__form-row-two {
-
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-
+    gap: 25px;
 }
 
 .cy-app-install-userinform-form__label {
@@ -690,7 +754,6 @@
 
 .cy-app-install-form_submit {
     padding: 0 36px 36px 36px;
-    background-color: white;
     height: unset;
 }
 
@@ -922,6 +985,7 @@
 .cy-app-install-main__placeholder {
     border: none;
     width: fit-content;
+    background-color: var(--background-color);
 }
 
 .cy-app-install-main__placeholder:focus {
@@ -944,11 +1008,11 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 2rem 0 1rem 0;
+    padding: 1rem 0 1rem 0;
 }
 
 .cy-app-install-user_addbtn {
-    padding: 0.5rem 2rem;
+    padding: 0.5rem 1rem;
 }
 
 .cy-app-install-demo_usertable-container {
@@ -973,8 +1037,6 @@
     padding: 0.85rem 1rem;
     font-size: var(--bg-font-size-base);
     font-weight: 400;
-
-
 }
 
 .cy-app-install-userlist_avatar {
@@ -986,7 +1048,7 @@
 .cy-app-install-user-avatar {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 50px;
 }
 
@@ -997,11 +1059,13 @@
 
 .cy-app-install-usertable__head,
 .cy-app-install-usertable__row:not(:last-child) {
-    border-bottom: 1px solid var(--bg-steel-200)
+    border-bottom: 3px solid var(--bg-steel-200);
+    border-left:3px solid var(--bg-steel-200);
+    border-right: 3px solid var(--bg-steel-200);
 }
 
 .cy-app-install-usertable__head {
-    background-color: var(--bg-steel-100);
+    background-color: #c5ca66;
 }
 
 .cy-app-install-demo_usertable {
@@ -1021,7 +1085,6 @@
 }
 
 .cy-app-install-demo-card-modal__title {
-
     font-size: var(--bg-font-size-md);
     font-weight: bold;
     margin-bottom: 0px;
@@ -1039,6 +1102,12 @@
     background-color: var(--bg-light-200);
 }
 
+.cy-app-install-usertable__row{
+    border-bottom: 3px solid var(--bg-steel-200);
+    border-left: 3px solid var(--bg-steel-200);
+    border-right: 3px solid var(--bg-steel-200);
+}
+
 .cy-app-install-userdetail_delete {
     color: var(--bg-red-500);
 }
@@ -1047,8 +1116,9 @@
     width: 80px;
     height: 80px;
     margin-right: 1rem;
-    border-radius: 4px;
-    overflow: hidden;
+    border-radius: 10%;
+    display: flex;
+    position: relative;
 }
 
 .cy-app-install-demo_step2-hero {
@@ -1056,12 +1126,63 @@
     align-items: center;
     flex-direction: row;
     justify-content: flex-start;
+    background: var(--background-color);
+    border-radius: 10px 10px 0px 0px;
 }
 
 .cy-app-install-demo_hero-profile {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: 10%;
+}
+
+.trash_icon {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 9999;
+    background-color: white;
+    width: 25px;
+    height: 25px;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.trash_icon:hover {
+    background-color: #f0f0f0;
+    color: red;
+    width :30px;
+    height :30px;
+}
+
+.pencil-icon {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    z-index: 9999;
+    background-color: white;
+    width: 25px;
+    height: 25px;
+    color: black;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.pencil-icon:hover {
+    background-color: #f0f0f0;
+    color : blue;
+    width :30px;
+    height :30px;
 }
 
 .cy_app_mass_install_main {
@@ -1087,35 +1208,35 @@
 .cy-app-install-view {
     display: flex;
     flex-direction: column;
-    padding-top: 17px;
-    background-color: white;
-    padding-left: 0px;
+    background-color: #ecedcc;
 }
 
 .cy-app-install-company-card {
     overflow: auto;
-    padding: 1rem 1rem 0 1rem;
-    height: 100%;
+    padding: 1rem 0 0 0;
     padding-top: 0;
+    scrollbar-width: none;
 }
 
 .cy-app-install-container {
     display: flex;
     flex-direction: column;
-    padding: 16px;
-    padding-top: 0;
+    padding: 0 30px;
+    background-color: var(--background-color);;
 }
 
 .cy-app-install-company-form {
     height: 100% !important;
     overflow: auto;
+    background: var(--background-color);
+    border-radius: 0px 0px 10px 10px;
 }
 
 .cy-app-install-sticky {
     z-index: 1000;
     position: sticky;
     top: 0px;
-    background-color: white;
+    background-color: var(--background-color);
     padding-top: 15px;
     padding-bottom: 15px;
 }
@@ -1145,25 +1266,34 @@
     display: flex;
     align-items: center;
     position: relative;
-    min-width: 44%;
+    min-width: 30%;
     border: 1px solid #dfdfdf;
-    padding: 0.3rem;
-    border-radius: 6px !important;
+    border-radius: 0.5rem !important;
     box-shadow: rgba(27, 31, 35, 0.04) 0 1px 0, rgba(255, 255, 255, 0.25) 0 1px 0 inset;
+    background: white;
 }
 
 .cy-app-install-demo-card__search-container:focus-within {
     border-color: var(--primary);
 }
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px white inset !important;
+}
+
 .cy-app-install-demo-search_input {
+    background: transparent !important;
     border: 1px solid var(--bg-steel-200);
     border-radius: 0rem;
     color: var(--bg-dark-800);
     box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px,
     rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
     transition: all 0.3s linear;
-    padding: 0.65rem !important;
     padding-right: 1.2rem !important;
+    padding-left: 0.25rem !important;
     width: 100%;
     font-size: 0.84rem;
     outline: none;
@@ -1176,32 +1306,30 @@
     border-left: 0px;
     color: var(--bg-dark-800);
     transition: all 0.3s linear;
-    padding: 0.5rem;
-    background-color: white;
+    background-color: transparent;
     font-size: 1rem;
     position: relative;
     right: 0px;
     cursor: pointer;
     bottom: 0px;
     padding-left: 0.7rem;
+    padding-right: 1rem;
+    font-size: 1.3rem;
 }
+
 .cy-app-install-demo_selection-container:focus {
     box-shadow: rgba(87, 107, 219, 0.2) 0px 1px 5px 0px;
     outline: none;
 }
 
 .cy-app-install-demo_selection-container {
-    padding: 0.5rem 1.1rem 0.6rem 0.5rem;
+    padding: 0.5rem 1rem 0.6rem 1rem;
     font-size: var(--bg-font-size-base);
-    border-radius: 0px;
     font-size: 0.85rem;
-    font-weight: bold;
-    border: 1px solid var(--bg-steel-200);
-    border-radius: 8px;
-    box-shadow: rgba(27, 31, 35, 0.04) 0px 1px 0px,
-    rgba(255, 255, 255, 0.25) 0px 1px 0px inset;
+    font-weight: 500;
+    --border-rad: calc(0.5rem - 1px);
+    border-radius: var(--border-rad) 0 0 var(--border-rad);
     transition: all 0.3s linear;
-    width: auto;
     color: white;
     background-color: #9ea700;
 }
@@ -1215,6 +1343,10 @@
     flex-grow: 1;
 }
 
+.cy-app-install-demo-card__search-container input::placeholder {
+    color: #444;
+}
+
 .cy-app-install-nothing_to_display {
     font-size: 23px;
     font-family: var(--inter-sans);
@@ -1225,23 +1357,28 @@
 
 .cy-app-install-highlighted-term {
     justify-content: space-between;
-    gap: 10px;
-    display: inline-block !important;
-    padding: 6.5px 8px;
-    border-radius: 0px 8px 8px 0px;
+    padding: 0 8px;
+    border-radius: 0 5px 5px 0;
     background-color: #f5f6e6 !important;
     line-break: anywhere;
     width: -webkit-fill-available;
-    font-weight: bold;
-    MARGIN-RIGHT: 0PX;
-    MIN-WIDTH: 80%;
-    height: 40px;
+    margin-right: 0;
+    height: 28px;
     overflow-x: hidden;
+}
+
+.cy-app-install-highlighted-term span {
+    padding-bottom: 4px;
+}
+
+.cy-app-install-highlighted-category span {
+    padding-bottom: 2px;
 }
 
 .cy-app-install-close-button {
     border-color: transparent !important;
     background-color: transparent !important;
+    margin-left: 8px;
 }
 
 .cy-app-install-select-input-button {
@@ -1274,8 +1411,10 @@
     gap: 3px;
 }
 
-.cy-app-install-select-wrap {
-    border-radius: 8px 8px 8px 8px;
+.cy-app-install-select-highlighted > div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media screen and (max-width: 1105px) {
@@ -1299,6 +1438,7 @@
         min-width: 68px !important;
 
     }
+
     .cy-app-install-demo-card__search-container input {
         width: 100%;
         min-width: unset;
@@ -1312,6 +1452,7 @@
         bottom: 0px;
         position: absolute;
     }
+
     .cy-app-install-highlighted-phone {
         width: 100%;
     }
@@ -1359,6 +1500,11 @@ select::-ms-expand {
     width: 4rem;
 }
 
+.cy-app-install-select-input-button .select-cy {
+    height: 40px;
+    width: 5rem;
+}
+
 .select-cy::after {
     content: '\ea4e';
     position: absolute;
@@ -1375,7 +1521,12 @@ select::-ms-expand {
     font-style: normal;
     color: white;
 }
-#cy-app-install-autocomplete{
+
+.select-cy +div {
+    padding-left: 8px;
+}
+
+#cy-app-install-autocomplete {
     position: absolute;
     top: calc(100% + 3px);
     left: auto;
@@ -1385,19 +1536,120 @@ select::-ms-expand {
     padding: 0.5rem !important;
     padding-right: 1.2rem !important;
 }
-.cy-app-install-suggestions{
-    cursor:pointer;
+
+.cy-app-install-suggestions {
+    cursor: pointer;
     height: 30px;
     padding: 6px;
 
 }
+
 .cy-app-install-highlighted-suggestion {
     background-color: #F5F6E6; /* Change background color of highlighted suggestion */
 }
-.cy-app-install-highlighted-category{
+
+.cy-app-install-highlighted-category {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background-color: #a8b01a;
-    border-radius: 8px 0px 0px 8px;
+    border-radius: 5px 0 0 5px;
     color: white;
-    padding: 9.5px 8px;
+    padding: 0 8px;
     font-weight: 500;
+    height: 28px;
+}
+
+.cyllo_app_install_company,
+.cyllo_app_install_user {
+    background: var(--background-color);
+}
+
+.cyllo_app_install_company .cy-app-install-sticky,
+.cyllo_app_install_company .cy-app-install-demo-card,
+.cyllo_app_install_user .cy-app-install-sticky,
+.cyllo_app_install_user .cy-app-install-demo-card {
+    background: var(--background-color);
+}
+
+.cy-appbar__count-label {
+    color: #222
+}
+.cy-hidden {
+    display: none !important;
+}
+
+.company-logo-upload {
+    height: 75px;
+    border: 2px dashed #aaaaaa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    flex-direction: column;
+    background-color: #fafafa;
+    margin: auto;
+    border-radius: 15px;
+    width: 75px;
+}
+
+.avatar-upload {
+    position: relative !important;
+    max-width: 205px !important;
+    margin: 50px auto !important;
+    .avatar-edit {
+        position: absolute !important;
+        right: 12px !important;
+        z-index: 1 !important;
+        top: 10px !important;
+        input {
+            display: none !important;
+            + label {
+                display: inline-block !important;
+                width: 34px !important;
+                height: 34px !important;
+                margin-bottom: 0 !important;
+                border-radius: 100% !important;
+                background: #FFFFFF !important;
+                border: 1px solid transparent !important;
+                box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.12) !important;
+                cursor: pointer !important;
+                font-weight: normal !important;
+                transition: all .2s ease-in-out !important;
+                &:hover {
+                    background: #f1f1f1 !important;
+                    border-color: #d6d6d6 !important;
+                }
+                &:after {
+                    content: "\f040" !important;
+                    font-family: 'FontAwesome' !important;
+                    color: #757575 !important;
+                    position: absolute !important;
+                    top: 10px !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    text-align: center !important;
+                    margin: auto !important;
+                }
+            }
+        }
+    }
+    .avatar-preview {
+        width: 192px !important;
+        height: 192px !important;
+        position: relative !important;
+        border-radius: 100% !important;
+        border: 6px solid #F8F8F8 !important;
+        box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.1) !important;
+        > img {
+            width: 100% !important;
+            height: 100% !important;
+            border-radius: 100% !important;
+            background-size: cover !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
+        }
+    }
 }

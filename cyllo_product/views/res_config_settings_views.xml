@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!--Adding field in res.config.settings-->
-    <record id="view_res_config_settings_form" model="ir.ui.view">
-        <field name="name">view.res.config.settings.form</field>
+    <record id="view_res_config_settings_form_inherit_product_approval" model="ir.ui.view">
+        <field name="name">view.res.config.settings.form.inherit.product.approval</field>
         <field name="model">res.config.settings</field>
         <field name="priority">110</field>
         <field name="inherit_id" ref="base.res_config_settings_view_form"/>
@@ -40,7 +40,7 @@
                             <div invisible="not minimum_cost_limit">
                                 <div>
                                     <label for="cost_limit" class="col-lg-4 o_light_label"/>
-                                    <field name="cost_limit"
+                                    <field name="cost_limit" widget="monetary" options="{'currency_field': 'currency_id'}"
                                            required="minimum_cost_limit"/>
                                 </div>
                             </div>
@@ -51,7 +51,7 @@
                             <div invisible="not minimum_price_limit">
                                 <div>
                                     <label for="price_limit" class="col-lg-4 o_light_label"/>
-                                    <field name="price_limit"
+                                    <field name="price_limit" widget="monetary" options="{'currency_field': 'currency_id'}"
                                            required="minimum_price_limit"/>
                                 </div>
                             </div>
@@ -61,7 +61,7 @@
             </xpath>
         </field>
     </record>
-<!--    Acton for res config settings-->
+    <!--Acton for res config settings-->
      <record id="action_view_settings" model="ir.actions.act_window">
         <field name="name">Settings</field>
         <field name="res_model">res.config.settings</field>

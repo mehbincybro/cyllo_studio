@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record id="report_action_report_churn_prediction" model="ir.actions.report">
+    <record id="report_churn_prediction_pdf"
+            model="ir.actions.report">
         <field name="name">Churn Prediction</field>
         <field name="model">res.partner</field>
         <field name="report_type">qweb-pdf</field>
@@ -47,8 +48,14 @@
                                 <div>
                                     <center>
                                         <div>
-                                            <div class="col" style="border-radius: 2px;border: 1px solid #dfdfdf;background: #dfdfdf;
-                                            padding: 1rem; width: 20%;display: inline-block !important;height: 100px;">
+                                            <div class="col"
+                                                 style="border-radius: 2px;
+                                                 border: 1px solid #dfdfdf;
+                                                 background: #dfdfdf;
+                                                 padding: 1rem;
+                                                 width: 20%;
+                                                 display: inline-block !important;
+                                                 height: 100px;">
                                                 <div>
                                                     <h6 class="cy-dashboard_state">
                                                         Total Customers
@@ -103,7 +110,8 @@
                                             </div>
                                         </div>
                                     </center>
-                                    <div class="col-lg-4 col-md-4" style="display:flex;justify-content:center;">
+                                    <div class="col-lg-4 col-md-4"
+                                         style="display:flex;justify-content:center;">
                                         <center>
                                             <img t-att-src="head"/>
                                         </center>
@@ -159,10 +167,12 @@
                                                             <t t-esc="cust['Churn']"/>
                                                         </td>
                                                         <td style="border: 1px solid black;border-collapse: collapse;">
-                                                            <t t-esc="cust['prob_yes']"/>%
+                                                            <t t-esc="cust['prob_yes']"/>
+                                                            %
                                                         </td>
                                                         <td style="border: 1px solid black;border-collapse: collapse;">
-                                                            <t t-esc="cust['prob_no']"/>%
+                                                            <t t-esc="cust['prob_no']"/>
+                                                            %
                                                         </td>
                                                     </tr>
                                                 </t>
@@ -184,12 +194,13 @@
                                     The model may have limited accuracy due to
                                     the small dataset size.
                                 </h5>
-                                <br/><br/>
+                                <br/>
+                                <br/>
                             </div>
                         </div>
                     </t>
                 </div>
-        </t>
+            </t>
         </t>
     </template>
 </odoo>

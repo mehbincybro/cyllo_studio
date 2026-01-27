@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ChatUser">
+        <div class="chat-message user-message">
+            <img t-att-src="props.userImage" class="cyllo-ai-avatar cyllo-ai-user"/>
+            <div class="chat-bubble user">
+                <t t-if="props.html" t-out="props.html"/>
+                <t t-elif="props.text" t-out="props.text"/>
+            </div>
+        </div>
+    </t>
+</templates>

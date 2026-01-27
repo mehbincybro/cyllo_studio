@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import base64
 from datetime import timedelta
 import requests
@@ -16,15 +36,35 @@ class YoutubeAccount(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _description = "Social Media YouTube Account"
 
-    client_number = fields.Char(string='Client Id', required=True, help="Client id")
-    client_secret = fields.Char(string='Client secret ', required=True, help="Client secret")
-    name = fields.Char(string="Account Name", required=True, help="Any preferable name of the account")
+    client_number = fields.Char(string='Client Id', required=True,
+                                help="Client id")
+    client_secret = fields.Char(string='Client secret ', required=True,
+                                help="Client secret")
+    name = fields.Char(string="Account Name", required=True,
+                       help="Any preferable name of the account")
     access_token = fields.Char(help="Access token for this account ")
-    refresh_token = fields.Char(string='Refresh Token of Account', help="Refresh token for this account ")
-    channel_count = fields.Integer(string="Number of channel", help="Number of channels related to this account")
-    state = fields.Selection([('new', 'Not Connected'), ('sync', 'Connected'), ('expired', 'Expired')],
-                             'Status', readonly=True, index=True, default='new', help='State of youtube account')
-    token_expiry_date = fields.Datetime(string='Validity of Token', help="Validity of access token")
+    refresh_token = fields.Char(string='Refresh Token of Account',
+                                help="Refresh token for this account ")
+    channel_count = fields.Integer(string="Number of channel",
+                                   help="Number of channels related to this account")
+    state = fields.Selection([('new', 'Not Connected'), ('sync', 'Connected'),
+                              ('expired', 'Expired')],
+                             'Status', readonly=True, index=True, default='new',
+                             help='State of youtube account')
+    token_expiry_date = fields.Datetime(string='Validity of Token',
+                                        help="Validity of access token")
+    company_id = fields.Many2one(string="Related Company",
+                                 comodel_name='res.company',
+                                 default=lambda self: self.env.company.id,
+                                 required=True, index=True,
+                                 help="The company associated with the social media account.")
+    channel_ids = fields.One2many(
+        'youtube.channel',
+        'youtube_account_id',
+        string="Channels"
+    )
+    is_default = fields.Boolean(string="Default Account",
+                                help="The default YouTube account")
 
     def action_get_authorization_url(self):
         """
@@ -144,11 +184,12 @@ class YoutubeAccount(models.Model):
             'Accept': 'application/json',
         }
         params = {
-            'part': 'snippet',
+            'part': 'snippet,brandingSettings',
             'mine': 'true'
         }
         channel_url = "https://www.googleapis.com/youtube/v3/channels"
         response = requests.get(channel_url, headers=headers, params=params)
+        print("Channel API Response:", response.json())
         if response.status_code == 200:
             channels_data = response.json().get('items', [])
             self.channel_count = len(channels_data)
@@ -185,3 +226,5 @@ class YoutubeAccount(models.Model):
             'domain': [('youtube_account_id', '=', self.id)],
             'context': "{'create': False}"
         }
+
+

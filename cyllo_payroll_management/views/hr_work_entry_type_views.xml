@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Inherited the Hr contract for adding new fields -->
-    <record id="view_hr_work_entry_type_" model="ir.ui.view">
-        <field name="name">view.hr.work.entry.type.</field>
+    <record id="view_hr_work_entry_type_form" model="ir.ui.view">
+        <field name="name">view.hr.work.entry.type.form</field>
         <field name="model">hr.work.entry.type</field>
         <field name="inherit_id" ref="hr_work_entry.hr_work_entry_type_view_form"/>
         <field name="arch" type="xml">

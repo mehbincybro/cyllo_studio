@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="MailNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form">
+                <!-- Label and Type Selector -->
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <label for="from-subject" class="form-label cy-modal-form_label">Label</label>
+                        <TypeToggler
+                                options="getTogglerOptions"
+                                value="fieldState.mail_isTemplate || false"
+                                updateValue.bind="updateType"
+                                width="15"
+                        />
+                    </div>
+                    <input type="text"
+                           class="o_input"
+                           autocomplete="off"
+                           placeholder="Label"
+                           t-on-focusout="(ev) => this.setLabel(ev.target.value)"
+                           t-att-value="getLabel"
+                    />
+                </div>
+                <!-- Template Mode -->
+                <div class="row mb-3 align-items-end" t-if="getType">
+                    <div class="col-md-6 cy-variable-toggle">
+                        <label for="record" class="form-label cy-modal-form_label">Choose Record</label>
+                        <CustomDropdown
+                                options="getRecords"
+                                defaultValue="getModel"
+                                onChange="(value) => this.updateObject(value)"
+                                placeholder="'Select a record...'"
+                                searchable="true"
+                                width="''"
+                                maxHeight="'70px'"
+                        />
+                    </div>
+                    <div class="col-md-6">
+                        <label for="variable" class="form-label cy-modal-form_label">Choose your mail template</label>
+                        <Many2XAutocomplete
+                                resModel="'mail.template'"
+                                getDomain.bind="getDomain"
+                                fieldString="'Mail templates'"
+                                activeActions="{}"
+                                update.bind="onSelectMail"
+                                value="getTemplate"
+                        />
+                    </div>
+                </div>
+                <!-- Custom Mode -->
+                <div t-if="!getType">
+                    <div class="mb-3 align-items-end">
+                        <div class="col-md-12">
+                            <label for="from-mail" class="form-label cy-modal-form_label">To</label>
+                            <div class="mb-3">
+                                <t t-set="multipleDataLength"
+                                   t-value="this.getRecipient().length"/>
+                                <t t-foreach="this.getRecipient()" t-as="recipient"
+                                   t-key="recipient_index">
+                                    <div class="d-inline-flex justify-content-between gap-3 col-md-12">
+                                        <MultiDataSelector
+                                                index="recipient_index"
+                                                getValueEditorInfo.bind="(recipient) => this.getValueEditorInfo(recipient,'recipient')"
+                                                setData.bind="(value,index)=>this.setData(value,index,'recipient')"
+                                                getDataValue="recipient"
+                                                toggleIncludeVariable.bind="(type,index) =>this.toggleIncludeVariable(type,'recipient',index,)"
+                                                removeData.bind="(index)=>this.removeData(index,'recipient')"
+                                                length="multipleDataLength"
+                                                isAdd="true"
+                                                add.bind="(index)=>this.insertData(index,'recipient')"
+                                        />
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <label for="from-subject" class="form-label cy-modal-form_label">Subject</label>
+                            <t t-set="info" t-value="this.getValueEditorInfo(getSubject,'subject')"/>
+                            <div class="d-flex mb-3">
+                                <div class="flex-grow-1 me-2">
+                                    <t t-component="info.component"
+                                       t-props="getComponentProps(info)"/>
+                                </div>
+                                <FieldTypeDropdown
+                                        currentLabel="getDropdownLabel(getSubject.selectionType)"
+                                        onSelected="(type) => this.toggleIncludeVariable(type,'subject')"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label cy-modal-form_label">Message</label>
+                        <textarea class="form-control"
+                                  rows="4"
+                                  t-on-focusout="(ev) => this.setMessageValue(ev.target.value)"
+                                  t-att-value="getMessage"
+                        />
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

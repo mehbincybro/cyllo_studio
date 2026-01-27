@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 const {Component, useState, useEffect, xml} = owl
 
 export class Number extends Component {

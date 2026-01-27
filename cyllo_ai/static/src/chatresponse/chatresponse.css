@@ -1,0 +1,258 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+p {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.chat-message {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.response-message {
+    justify-content: flex-start;
+    flex-direction: row;
+}
+
+.chat-bubble.bot {
+    background: #edf0e5;
+    color: #333;
+    border-radius: 16px 16px 16px 4px;
+    max-width: 100%;
+    padding: 14px 18px;
+    position: relative;
+    /* ← ADD THIS */
+    margin-left: 8px;
+    overflow-x: auto;
+}
+
+.chart-config {
+    display: flex;
+}
+
+.chart-type-popup {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    /* prevent clicks when hidden */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 99;
+    position: absolute;
+    top: 45px;
+    right: 10px;
+    display: grid;
+    background-color: white;
+    padding: 10px;
+    grid-template-columns: repeat(5, 40px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border-radius: 10px;
+}
+
+.chart-type-popup.visible {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+/* Optional: add subtle rounded corners */
+.chat-bubble.bot table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 6px auto 0;
+    /* center horizontally */
+    font-size: 14px;
+    color: #333;
+    /* center horizontally */
+    table-layout: fixed;
+    /* force cells to respect width */
+    word-wrap: break-word;
+    /* break long text */
+}
+
+.chat-bubble.bot td {
+    word-wrap: break-word;
+    text-align: left;
+    padding: 8px;
+    box-sizing: border-box;
+    white-space: normal;
+}
+
+.chat-bubble.bot tr:nth-child(even) {
+    background-color: white
+}
+
+.chatbot-input-wrapper textarea {
+    padding-left: 13px !important;
+}
+
+[data-darkreader-scheme="dark"] {
+
+    .chat-bubble.bot th {
+        background-color: #c0ceec1f;
+    }
+
+    .chat-bubble.bot td {
+        border: 1px solid #2f2f2f;
+    }
+
+    .chat-bubble.bot table {
+        color: #b1b59eeb;
+    }
+
+    ;
+
+    .chat-bubble.bot a {
+        color: #b6c697;
+    }
+
+    .user-message .chat-bubble.user {
+        background-color: #c0ceec1f;
+    }
+
+}
+
+.chat-bubble.bot th {
+    background-color: #9EA700;
+    white-space: normal;
+    /* allows wrapping */
+    color: white;
+    text-align: left;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.chat-bubble.bot h1 {
+    font-size: 1.3rem !important;
+}
+
+.chat-bubble.bot h2 {
+    font-size: 1.2rem !important;
+}
+
+.chat-bubble.bot h3 {
+    font-size: 1.1rem !important;
+}
+
+.chat-bubble.bot h4 {
+    font-size: 1rem !important;
+}
+
+.chat-bubble.bot h5 {
+    font-size: 0.9rem !important;
+}
+
+/* Optional: better readability on small screens */
+@media (max-width: 600px) {
+    .chat-bubble.bot table {
+        font-size: 12px;
+        border: none;
+    }
+}
+
+/* Ensure the chart container has a proper height and is not shrunk */
+.cyllo-chatbot-chart-container {
+    min-height: 300px !important;
+    height: 400px !important;
+    width: 100% !important;
+    box-sizing: border-box;
+    display: block;
+}
+
+.chart-close-btn {
+    background-color: #373627;
+    border: none;
+    color: white;
+}
+
+.graph-icon {
+    cursor: pointer;
+    font-size: 18px;
+    color: #555;
+    padding-top: 8px;
+    padding-right: 8px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: end;
+}
+
+.graph-icon:hover {
+    color: #333;
+}
+
+.action-icons {
+    display: flex;
+    gap: 4px;
+    font-size: 1.1rem;
+    margin-top: 2px;
+    align-self: flex-start;
+    /* Push icons to right */
+    margin-left: 9px;
+}
+
+.action-icons i {
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    padding: 4px;
+    /* reduced padding for smaller hover area */
+    border-radius: 50%;
+    /* smaller rounded box */
+    height: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* ✅ Check icon */
+.proceed-icon {
+    color: green;
+}
+
+.proceed-icon:hover {
+    background-color: green;
+    color: white;
+}
+
+/* ❌ Cancel icon */
+.cancel-icon {
+    color: #d9534f;
+}
+
+.cancel-icon:hover {
+    background-color: #d9534f;
+    color: white;
+}
+
+.gov-popup {
+    position: fixed;
+    top: 50%;
+    left: 58%;
+    transform: translate(-50%, -50%);
+    background: white;
+    z-index: 9999;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    width: 75%;
+    height: 90%;
+}
+
+.gov-popup-header {
+    background: #373627;
+    color: white;
+    padding: 8px 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.gov-popup-body {
+    padding: 12px;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}

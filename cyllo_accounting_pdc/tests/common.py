@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields
 from odoo.tests import common
 
@@ -9,6 +29,14 @@ class TestCylloAccountingPdc(common.TransactionCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.company_data = cls.setup_company_data('company_1_data')
+        cls.fiscal_year = cls.env['account.fiscal.year'].create({
+            'name': 'Fiscal Year 2021',
+            'start_date': '2021-01-01',
+            'end_date': '2021-12-31',
+            'company_id': cls.env.company.id,
+            'state': 'draft',
+        })
+        cls.fiscal_year.action_open()
         cls.account_journal = cls.env['account.journal'].create({
             'name': 'Test Bank',
             'type': 'bank',
@@ -20,26 +48,18 @@ class TestCylloAccountingPdc(common.TransactionCase):
         cls.partner = cls.env['res.partner'].create({
             'name': 'Partner A'
         })
-        cls.product = cls.env['product.product'].create({
-            'name': 'Product A'
-        })
         cls.account_move = cls.env['account.move'].create({
             'partner_id': cls.partner.id,
             'move_type': 'out_invoice',
             'state': 'draft',
             'invoice_line_ids': [
                 (fields.Command.create({
-                    'product_id': cls.product.id,
+                    'name': 'Test Line',
+                    'price_unit': 100,
                     'account_id': cls.company_data[
                         'default_account_deferred_expense'].id
                 }))
-            ],
-            'line_ids': [
-                (fields.Command.create({
-                    'product_id': cls.product.id,
-                    'account_id': cls.company_data[
-                        'default_account_deferred_expense'].id,
-                }))]
+            ]
         })
         cls.pdc_payment = cls.env['account.pdc.payment'].create({
             'move_id': cls.account_move.id,
@@ -108,15 +128,20 @@ class TestCylloAccountingPdc(common.TransactionCase):
                 'partner_type': 'customer',
                 'currency_id': cls.env.company.currency_id.id,
                 'payment_type': 'inbound'}}
+        payment_method_line = cls.account_journal._get_available_payment_method_lines(
+            'inbound').filtered(lambda x: x.code == 'pdc_payment')
         cls.to_process = [{
             'create_vals': {'date': fields.Date.today(),
                             'due_date': fields.Date.today(),
                             'bank_name': 'Bank', 'cheque_reference': 'Chk Ref',
                             'amount': 2068.85, 'payment_type': 'inbound',
                             'partner_type': 'customer',
-                            'ref': 'INV/2024/00008', 'journal_id': 6,
-                            'company_id': 1, 'currency_id': 1,
-                            'partner_id': 10, 'payment_method_line_id': 8},}]
+                            'ref': 'INV/2024/00008',
+                            'journal_id': cls.account_journal.id,
+                            'company_id': cls.env.company.id,
+                            'currency_id': cls.env.company.currency_id.id,
+                            'partner_id': cls.partner.id,
+                            'payment_method_line_id': payment_method_line.id}, }]
 
     @classmethod
     def create_invoice(cls):

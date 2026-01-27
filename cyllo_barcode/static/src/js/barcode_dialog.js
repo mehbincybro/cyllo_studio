@@ -68,7 +68,7 @@ export class BarcodeDialog extends Component {
             } catch (err) {
                 this.sound.Danger.play()
                 this.videoPreviewRef.el.remove()
-                this.state.alert = "Failed to detect webcam.Please ensure that your browser has the required permissions to access your webcam."
+                this.state.alert = "Failed to detect webcam. Please ensure that your browser has the required permissions to access your webcam."
             }
         })
     }

@@ -1,0 +1,392 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_social_media_marketing.SocialMediaDashboard">
+        <div class="o_social_media_dashboard">
+            <div class="o_left_section">
+                <div class="o_social_media_cards">
+                    <div class="o_social_media_card">
+                        <i class="fa fa-facebook"/>
+                        <h3>Facebook</h3>
+                        <p>Manage your Facebook pages and schedule posts</p>
+                        <button class="btn btn-primary"
+                                t-on-click="() => this.OpenView('social.fb.account')">
+                            Link account
+                        </button>
+                    </div>
+                    <div class="o_social_media_card">
+                        <i class="fa fa-instagram"/>
+                        <h3>Instagram</h3>
+                        <p>Manage your Instagram Business account and schedule
+                            posts
+                        </p>
+                        <button class="btn btn-primary"
+                                t-on-click="() => this.OpenView('social.insta.account')">
+                            Link account
+                        </button>
+                    </div>
+                    <div class="o_social_media_card">
+                        <i class="fa fa-youtube-play"/>
+                        <h3>Youtube</h3>
+                        <p>Manage your YouTube Business account and schedule
+                            posts
+                        </p>
+                        <button class="btn btn-primary"
+                                t-on-click="() => this.OpenView('youtube.account')">
+                            Link account
+                        </button>
+                    </div>
+                </div>
+                <div class="o_connected_accounts">
+                    <h3>Connected Accounts</h3>
+                    <div class="o_account_cards">
+                        <div class="o_account_card" t-foreach="state.accounts"
+                             t-as="account" t-key="account_index"
+                             t-if="state.accounts and account_index lt 7"
+                             t-on-click="() => this.ViewAccounts(account)">
+                            <div class="social-icon">
+                                <i class="fa fa-facebook"
+                                   t-if="account.platform =='social.fb.account'"/>
+                                <i class="fa fa-instagram"
+                                   t-if="account.platform =='social.insta.account'"/>
+                                <i class="fa fa-youtube-play"
+                                   t-if="account.platform =='youtube.account'"/>
+                            </div>
+                            <div class="o_account_details">
+                                <h4>
+                                    <t t-esc="account.account_name"/>
+                                </h4>
+                                <div class="d-flex align-items-center" style="font-size: 18px; gap: 16px;">
+                                    <div class="border-right">
+                                        <i class="ri-layout-5-line me-1"/>
+                                        <span t-esc="account.total_posts"/>
+                                    </div>
+                                    <div class="vr"/>
+                                    <div>
+                                        <i class="ri-heart-line me-1"/>
+                                        <span t-esc="account.total_likes"/>
+                                    </div>
+                                    <div class="vr"/>
+                                    <div>
+                                        <i class="ri-chat-3-line me-1"/>
+                                        <span t-esc="account.total_comments"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a class="justify-content-end d-flex"
+                       t-if="state.accounts.length > 6" t-on-click="OpenModal">
+                        See More >>
+                    </a>
+                </div>
+            </div>
+            <div class="o_social_media_posts">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h3>Previous Posts</h3>
+                    <button class="btn mb-2 p-1" t-on-click="CreatePost"><i class="ri-add-line" style="font-size:20px"/></button>
+                </div>
+                <div class="tabs">
+                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'all'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'all')">
+                        <span style="font-size: 16px">All</span>
+                    </button>
+                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'facebook'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'facebook')">
+                        <i class="ri-facebook-circle-line"/>
+                    </button>
+                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'instagram'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'instagram')">
+                        <i class="ri-instagram-line"/>
+                    </button>
+                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'youtube'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'youtube')">
+                        <i class="ri-youtube-line"/>
+                    </button>
+                </div>
+                <div class="o_posts_list"
+                     t-if="state.activePosts.length &gt; 0">
+                    <div class="o_post_item" t-foreach="state.activePosts"
+                         t-as="post"
+                         t-key="post.id"
+                         t-if="state.activePosts"
+                         t-on-click="() => this.OpenFeed(post.id)">
+                        <div class="d-flex align-items-center gap-2">
+                            <img t-attf-src="{{post.profile_image_url}}"
+                                 class="post-profile-image"/>
+                            <div class="post-info">
+                                <div class="post-title">
+                                    Post:
+                                    <t t-esc="post.post_id[1]"/>
+                                </div>
+                                <div t-attf-id="Details_{{post.id}}"
+                                     class="d-flex align-items-center gap-3">
+                                    <a class="d-flex align-items-center gap-1">
+                                        <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                        <p class="cy-social-market-txt">
+                                            <t t-esc="post.likes_count"/>
+                                        </p>
+                                    </a>
+                                    <a class="d-flex align-items-center gap-1 cy-social-market-comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-social-market-txt">
+                                            <t t-esc="post.comments_count"/>
+                                        </p>
+                                    </a>
+                                </div>
+                            </div>
+                            <i class="fa fa-facebook notification-icon"
+                               t-if="post.posted_on_facebook"/>
+                            <i class="fa fa-instagram notification-icon"
+                               t-if="post.posted_on_ig"/>
+                            <i class="fa fa-youtube notification-icon"
+                               t-if="post.posted_on_youtube"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="o_posts_list"
+                     t-if="state.activePosts.length &lt; 1">
+                    <div class="cy-social-marketing-nostream">
+                        <img src="images/undraw_no_data_re_kwbl 1 (1).svg"
+                             alt=""/>
+                        <p class="cy-nostream_add-msg">No Post added yet!</p>
+                        <span class="cy-nostream_add-subtext">Add a
+                            post
+                            to keep an eye on your own posts and
+                            monitor all social activities
+                        </span>
+
+                    </div>
+
+                </div>
+            </div>
+            <div t-if="state.showModal" class="modal fade show" tabindex="-1"
+                 role="dialog" style="display: block;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">All Connected Accounts</h5>
+                            <a type="button" class="close" style="cursor: pointer; font-size: 22px;"
+                               aria-label="Close" t-on-click="CloseModal"><i class="ri-close-line"/>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <div class="o_account_cards">
+                                <div class="o_account_card"
+                                     t-foreach="state.accounts" t-as="account"
+                                     t-on-click="() => this.ViewAccounts(account)"
+                                     t-key="account_index">
+                                    <i class="fa fa-facebook"
+                                       t-if="account.platform == 'social.fb.account'"/>
+                                    <i class="fa fa-instagram"
+                                       t-if="account.platform == 'social.insta.account'"/>
+                                    <i class="fa fa-youtube"
+                                       t-if="account.platform == 'youtube.account'"/>
+                                    <div class="o_account_details">
+                                        <h4>
+                                            <t t-esc="account.account_name"/>
+                                        </h4>
+                                        <p>Total Posts:
+                                            <t t-esc="account.total_posts"/>
+                                        </p>
+                                        <p>Total Likes:
+                                            <t t-esc="account.total_likes"/>
+                                        </p>
+                                        <p>Total Comments:
+                                            <t t-esc="account.total_comments"/>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary"
+                                    t-on-click="CloseModal">Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div t-if="state.showConnectModal" class="modal fade show"
+                 tabindex="-1" role="dialog" style="display: block;">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                Connect
+                                <t t-esc="{
+                        'social.fb.account': 'Facebook Account',
+                        'social.insta.account': 'Instagram Account',
+                        'youtube.account': 'YouTube Account',
+                    }[state.selectedPlatform]"/>
+                            </h5>
+                            <a class="close" aria-label="Close"
+                               t-on-click="CloseConnectModal"
+                               style="cursor: pointer; font-size: 22px">
+                                <span aria-hidden="true"><i class="ri-close-line"/></span>
+                            </a>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Facebook Fields -->
+
+                            <div t-if="state.selectedPlatform == 'social.fb.account'">
+                                <div class="form-group">
+                                    <label for="facebook_page_name"
+                                           class="custom-modal-label">Page Name
+                                    </label>
+                                    <input autocomplete="off" id="facebook_page_name" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.facebookPageName"
+                                           placeholder="Enter Facebook Page Name"
+                                           required=""/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="facebook_access_token"
+                                           class="custom-modal-label">Page
+                                        Access Token
+                                    </label>
+                                    <input autocomplete="off" id="facebook_access_token"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.facebookAccessToken"
+                                           placeholder="Enter Page Access Token"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="facebook_user_access_token"
+                                           class="custom-modal-label">User
+                                        Access Token
+                                    </label>
+                                    <input autocomplete="off" id="facebook_user_access_token"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.facebookUserAccessToken"
+                                           placeholder="Enter User Access Token"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meta_app_number"
+                                           class="custom-modal-label">Meta App
+                                        Number
+                                    </label>
+                                    <input autocomplete="off" id="meta_app_number" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.metaAppNumber"
+                                           placeholder="Enter Meta App Number"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="meta_app_secret"
+                                           class="custom-modal-label">Meta App
+                                        Secret
+                                    </label>
+                                    <input autocomplete="off" id="meta_app_secret" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.metaAppSecret"
+                                           placeholder="Enter Meta App Secret"/>
+                                </div>
+                            </div>
+
+                            <!-- Instagram Fields -->
+                            <div t-if="state.selectedPlatform == 'social.insta.account'">
+                                <div class="form-group">
+                                    <label for="facebook_insta_page_name"
+                                           class="custom-modal-label">Page Name
+                                    </label>
+                                    <input autocomplete="off" id="facebook_insta_page_name"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.facebookInstaPageName"
+                                           placeholder="Enter Instagram Page Name"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="instagram_access_token"
+                                           class="custom-modal-label">User
+                                        Access Token
+                                    </label>
+                                    <input autocomplete="off" id="instagram_access_token"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.instagramAccessToken"
+                                           placeholder="Enter User Access Token"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="instagram_page_access_token"
+                                           class="custom-modal-label">Page
+                                        Access Token
+                                    </label>
+                                    <input autocomplete="off" id="instagram_page_access_token"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.instagramPageAccessToken"
+                                           placeholder="Enter Page Access Token"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="insta_meta_app_number"
+                                           class="custom-modal-label">Meta App
+                                        Number
+                                    </label>
+                                    <input autocomplete="off" id="insta_meta_app_number"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.InstaMetaAppNumber"
+                                           placeholder="Enter Meta App Number"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="insta_meta_app_secret"
+                                           class="custom-modal-label">Meta App
+                                        Secret
+                                    </label>
+                                    <input autocomplete="off" id="insta_meta_app_secret"
+                                           type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.InstaMetaAppSecret"
+                                           placeholder="Enter Meta App Secret"/>
+                                </div>
+                            </div>
+
+                            <!-- YouTube Fields -->
+                            <div t-if="state.selectedPlatform == 'youtube.account'">
+                                <div class="form-group">
+                                    <label for="name"
+                                           class="custom-modal-label">Channel
+                                        Name
+                                    </label>
+                                    <input autocomplete="off" id="name" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.youtubeChannelName"
+                                           placeholder="Enter YouTube Channel Name"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="client_number"
+                                           class="custom-modal-label">Client Id
+                                    </label>
+                                    <input autocomplete="off" id="client_number" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.clientNumber"
+                                           placeholder="Enter Client ID"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="client_secret"
+                                           class="custom-modal-label">Client
+                                        Secret
+                                    </label>
+                                    <input autocomplete="off" id="client_secret" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.clientSecret"
+                                           placeholder="Enter Client Secret"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-secondary rounded me-1"
+                                    t-on-click="CloseConnectModal">Close
+                            </button>
+                            <button type="submit"
+                                    class="btn btn-primary rounded"
+                                    t-on-click="ConnectAccount">Connect
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

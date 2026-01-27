@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-<!--        Database backup configuration views-->
+    <!--        Database backup configuration views-->
     <record id="view_db_backup_configure_tree" model="ir.ui.view">
         <field name="name">view.db.backup.configure.tree</field>
         <field name="model">db.backup.configure</field>
@@ -18,10 +18,34 @@
         <field name="model">db.backup.configure</field>
         <field name="arch" type="xml">
             <form>
+                <header>
+                    <button name="action_sftp_connection" type="object"
+                            class="btn-primary"
+                            string="Test Connection"
+                            icon="fa-television"
+                            invisible="(backup_destination not in ('ftp', 'sftp'))"/>
+                    <button name="action_nextcloud" type="object"
+                            class="btn-primary"
+                            string="Test Connection"
+                            icon="fa-television"
+                            invisible="(backup_destination != 'next_cloud')"/>
+                    <button name="action_s3cloud" type="object"
+                            class="btn-primary"
+                            string="Test Connection"
+                            icon="fa-television"
+                            invisible="(backup_destination != 'amazon_s3')"/>
+                    <button name="action_dropbox" type="object"
+                            class="btn-primary"
+                            string="Test Connection"
+                            icon="fa-television"
+                            invisible="(backup_destination != 'dropbox')"/>
+                </header>
+
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Name"/>
+                            <field name="name"
+                                   placeholder="Enter configuration name"/>
                         </h1>
                     </div>
                     <group>
@@ -34,34 +58,47 @@
                         <group>
                             <field name="backup_destination" required="1"/>
                             <field name="backup_path"
-                                   invisible="( backup_destination != 'local')" required="(backup_destination == 'local')"/>
+                                   invisible="( backup_destination != 'local')"
+                                   required="(backup_destination == 'local')"/>
                             <field name="ftp_host"
-                                   invisible="(backup_destination != 'ftp')" required="(backup_destination == 'ftp')"/>
+                                   invisible="(backup_destination != 'ftp')"
+                                   required="(backup_destination == 'ftp')"/>
                             <field name="ftp_port"
-                                   invisible="(backup_destination != 'ftp')" required="(backup_destination == 'ftp')"/>
+                                   invisible="(backup_destination != 'ftp')"
+                                   required="(backup_destination == 'ftp')"/>
                             <field name="ftp_user"
-                                   invisible="(backup_destination != 'ftp')" required="(backup_destination == 'ftp')"/>
+                                   invisible="(backup_destination != 'ftp')"
+                                   required="(backup_destination == 'ftp')"/>
                             <field name="ftp_password"
-                                   invisible="(backup_destination != 'ftp')" required="(backup_destination == 'ftp')"
+                                   invisible="(backup_destination != 'ftp')"
+                                   required="(backup_destination == 'ftp')"
                                    password="True"/>
                             <field name="ftp_path"
-                                   invisible="(backup_destination != 'ftp')" required="(backup_destination == 'ftp')"/>
+                                   invisible="(backup_destination != 'ftp')"
+                                   required="(backup_destination == 'ftp')"/>
                             <field name="sftp_host"
-                                   invisible="(backup_destination != 'sftp')" required="(backup_destination == 'sftp')"/>
+                                   invisible="(backup_destination != 'sftp')"
+                                   required="(backup_destination == 'sftp')"/>
                             <field name="sftp_port"
-                                   invisible="(backup_destination != 'sftp')" required="(backup_destination == 'sftp')"/>
+                                   invisible="(backup_destination != 'sftp')"
+                                   required="(backup_destination == 'sftp')"/>
                             <field name="sftp_user"
-                                   invisible="(backup_destination != 'sftp')" required="(backup_destination == 'sftp')"/>
+                                   invisible="(backup_destination != 'sftp')"
+                                   required="(backup_destination == 'sftp')"/>
                             <field name="sftp_password"
-                                   invisible="(backup_destination != 'sftp')" required="(backup_destination == 'sftp')"
+                                   invisible="(backup_destination != 'sftp')"
+                                   required="(backup_destination == 'sftp')"
                                    password="True"/>
                             <field name="sftp_path"
-                                   invisible="(backup_destination != 'sftp')" required="(backup_destination == 'sftp')"/>
+                                   invisible="(backup_destination != 'sftp')"
+                                   required="(backup_destination == 'sftp')"/>
                             <field name="gdrive_client_key" string="Client ID"
-                                   invisible="(backup_destination != 'google_drive')" required="(backup_destination == 'google_drive')"/>
+                                   invisible="(backup_destination != 'google_drive')"
+                                   required="(backup_destination == 'google_drive')"/>
                             <field name="gdrive_client_secret"
                                    string="Client Secret"
-                                   invisible="(backup_destination != 'google_drive')" required="(backup_destination == 'google_drive')"
+                                   invisible="(backup_destination != 'google_drive')"
+                                   required="(backup_destination == 'google_drive')"
                                    password="True"/>
                             <field name="gdrive_redirect_uri"
                                    string="Redirect URI"
@@ -72,25 +109,32 @@
                                    invisible="1"/>
                             <field name="gdrive_token_validity" invisible="1"/>
                             <field name="google_drive_folder_key"
-                                   invisible="(backup_destination != 'google_drive')" required="(backup_destination == 'google_drive')"/>
+                                   invisible="(backup_destination != 'google_drive')"
+                                   required="(backup_destination == 'google_drive')"/>
                             <field name="dropbox_client_key" string="App Key"
-                                   invisible="(backup_destination != 'dropbox')" required="(backup_destination == 'dropbox')"
+                                   invisible="(backup_destination != 'dropbox')"
+                                   required="(backup_destination == 'dropbox')"
                                    password="True"/>
                             <field name="dropbox_client_secret"
                                    string="App Secret"
-                                   invisible="(backup_destination != 'dropbox')" required="(backup_destination == 'dropbox')"
+                                   invisible="(backup_destination != 'dropbox')"
+                                   required="(backup_destination == 'dropbox')"
                                    password="True"/>
                             <field name="onedrive_client_key" string="Client ID"
-                                   invisible="(backup_destination != 'onedrive')" required="(backup_destination == 'onedrive')"/>
+                                   invisible="(backup_destination != 'onedrive')"
+                                   required="(backup_destination == 'onedrive')"/>
                             <field name="onedrive_client_secret"
                                    string="Client Secret"
-                                   invisible="(backup_destination != 'onedrive')" required="(backup_destination == 'onedrive')"
+                                   invisible="(backup_destination != 'onedrive')"
+                                   required="(backup_destination == 'onedrive')"
                                    password="True"/>
                             <field name="onedrive_redirect_uri"
                                    string="Redirect URI"
                                    invisible="(backup_destination != 'onedrive')"/>
-                            <field name="onedrive_folder_key" string="Folder ID"
-                                   invisible="(backup_destination != 'onedrive')" required="(backup_destination == 'onedrive')"/>
+                            <field name="onedrive_folder_key"
+                                   string="Folder Name"
+                                   invisible="(backup_destination != 'onedrive')"
+                                   required="(backup_destination == 'onedrive')"/>
                             <field name="onedrive_access_token"
                                    string="Access Token"
                                    invisible="1" password="True"/>
@@ -108,13 +152,15 @@
                             <field name="next_cloud_user_name"
                                    string="User Name"
                                    invisible="(backup_destination != 'next_cloud')"/>
-                            <field name="next_cloud_password" string="Password" password="True"
+                            <field name="next_cloud_password" string="Password"
+                                   password="True"
                                    invisible="(backup_destination != 'next_cloud')"/>
-                            <field name="nextcloud_folder_key" string="Folder ID"
+                            <field name="nextcloud_folder_key"
+                                   string="Folder ID"
                                    invisible="(backup_destination != 'next_cloud')"/>
 
                             <field name="aws_access_key"
-                                   invisible ="(backup_destination != 'amazon_s3')"/>
+                                   invisible="(backup_destination != 'amazon_s3')"/>
                             <field name="aws_secret_access_key" password="True"
                                    invisible="(backup_destination != 'amazon_s3')"/>
                             <field name="bucket_file_name"
@@ -216,7 +262,8 @@
                             <field name="is_dropbox_token_generated"
                                    invisible="1"/>
                             <field name="dropbox_folder"
-                                   invisible="(backup_destination != 'dropbox')" required="(backup_destination == 'dropbox')"/>
+                                   invisible="(backup_destination != 'dropbox')"
+                                   required="(backup_destination == 'dropbox')"/>
                             <field name="auto_remove"/>
                             <label for="days_to_remove" class="oe_inline"
                                    invisible="(auto_remove == False)"/>
@@ -225,19 +272,6 @@
                                        required="(auto_remove == True)"/>
                                 Days
                             </div>
-                            <button name="action_sftp_connection" type="object"
-                                    string="Test Connection"
-                                    icon="fa-television"
-                                    invisible="(backup_destination not in ('ftp', 'sftp'))"/>
-
-                            <button name="action_nextcloud" type="object"
-                                    string="Test Connection"
-                                    icon="fa-television"
-                                    invisible="(backup_destination != 'next_cloud')"/>
-                            <button name="action_s3cloud" type="object"
-                                    string="Test Connection"
-                                    icon="fa-television"
-                                    invisible="(backup_destination != 'amazon_s3')"/>
                         </group>
                     </group>
                 </sheet>

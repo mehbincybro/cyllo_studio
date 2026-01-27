@@ -1,10 +1,30 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     'name': 'Cyllo Analytics',
     'version': '1.0',
     'category': 'Extra Tools',
     'summary': """This module helps businesses with the ability to transform raw data into actionable insights""",
-    'description': 'Cyllo Dashboard is a robust module amplifying data analytics and reporting in Blue grail ERP. It '
+    'description': 'Cyllo Dashboard is a robust module amplifying data analytics and reporting in cyllo ERP. It '
                    'converts raw data into actionable insights, empowering informed decisions and strategic planning.',
     'author': 'Cyllo',
     'company': 'Cyllo',
@@ -12,17 +32,18 @@
     'website': 'https://www.cyllo.com',
     'license': 'LGPL-3',
     'depends': ['cyllo_base', 'web'],
+    'icon': '/cyllo_analytics/static/description/analytics.svg',
     'data': [
         'security/dashboard_config_security.xml',
         'security/ir.model.access.csv',
         'data/banner/dashboard_banner.xml',
         'data/dashboard_sheet_type_data.xml',
         'data/dashboard_global_filter_data.xml',
+        'data/theme/dashboard_theme_cyllo.xml',
         'data/theme/dashboard_theme_walden.xml',
         'data/theme/dashboard_theme_infographic.xml',
         'data/theme/dashboard_theme_roma.xml',
         'data/theme/dashboard_theme_chalk.xml',
-        'data/theme/dashboard_theme_dark.xml',
         'data/theme/dashboard_theme_essos.xml',
         'data/theme/dashboard_theme_macarons.xml',
         'data/theme/dashboard_theme_vintage.xml',
@@ -39,7 +60,7 @@
     'uninstall_hook': 'cyllo_d_uninstall_hook',
     'post_init_hook': 'cyllo_d_post_init_hook',
     "external_dependencies": {
-        'python': ['openai']
+        'python': ['openai', 'tiktoken']
     },
     'assets': {
         'web.assets_backend': [
@@ -59,16 +80,13 @@
             'cyllo_analytics/static/src/xml/configuration_dialog.xml',
             'cyllo_analytics/static/src/xml/menu_dialog_templates.xml',
             'cyllo_analytics/static/src/xml/delete_dialog_templates.xml',
-            'cyllo_analytics/static/src/xml/editDashboard.xml',
-            'cyllo_analytics/static/src/xml/presentationPreview.xml',
-            'cyllo_analytics/static/src/xml/presentationMaker.xml',
-            'cyllo_analytics/static/src/xml/CylloSheet.xml',
-            'cyllo_analytics/static/src/xml/aiExplanation.xml',
+            'cyllo_analytics/static/src/xml/edit_dashboard.xml',
+            'cyllo_analytics/static/src/xml/presentation_maker.xml',
+            'cyllo_analytics/static/src/xml/cyllo_sheet.xml',
             'cyllo_analytics/static/src/xml/import_dialog.xml',
-            'cyllo_analytics/static/src/xml/DragNDrop.xml',
-            'cyllo_analytics/static/src/xml/kpiSheet.xml',
-            'cyllo_analytics/static/src/xml/filterDropdown.xml',
-            'cyllo_analytics/static/src/xml/dashboardFilter.xml',
+            'cyllo_analytics/static/src/xml/drag_n_drop.xml',
+            'cyllo_analytics/static/src/xml/kpi_sheet.xml',
+            'cyllo_analytics/static/src/xml/filter_dropdown.xml',
             'cyllo_analytics/static/src/js/cyllo_dashboard.js',
             'cyllo_analytics/static/src/js/query/query_manager.js',
             'cyllo_analytics/static/src/js/mixin/*',

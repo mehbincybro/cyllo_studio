@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-<!--    Subscription order alert tree view-->
+    <!-- Subscription order alert tree view -->
     <record id="view_subscription_order_alert_tree" model="ir.ui.view">
         <field name="name">view.subscription.order.alert.tree</field>
         <field name="model">subscription.order.alert</field>
@@ -10,7 +10,7 @@
             </tree>
         </field>
     </record>
-<!--    Subscription order alert form view-->
+    <!-- Subscription order alert form view -->
     <record id="view_subscription_order_alert_form" model="ir.ui.view">
         <field name="name">view.subscription.order.alert.form</field>
         <field name="model">subscription.order.alert</field>
@@ -23,8 +23,8 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button type="object"  name="action_show_subscription"
-                            class="oe_stat_button"
-                            icon="fa-book">
+                                class="oe_stat_button"
+                                icon="fa-book">
                             <field name="order_count" string="Subscription" widget="statinfo"/>
                         </button>
                     </div>
@@ -59,7 +59,7 @@
             </form>
         </field>
     </record>
-<!--    Subscription order alert Action-->
+    <!-- Subscription order alert Action -->
     <record id="action_view_alert" model="ir.actions.act_window">
         <field name="name">Alert</field>
         <field name="res_model">subscription.order.alert</field>

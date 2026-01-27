@@ -51,12 +51,12 @@
                                            invisible="name != 'TWILIO'"/>
                                 </group>
                                 <!-- Credentials for d7 -->
-                                <group string="d7 Credentials"
-                                       invisible="name != 'D7'">
-                                    <field name="d7_api" required="1"
-                                           password="True" force_save="1"
-                                           invisible="name != 'D7'"/>
-                                </group>
+<!--                                <group string="d7 Credentials"-->
+<!--                                       invisible="name != 'D7'">-->
+<!--                                    <field name="d7_api" required="1"-->
+<!--                                           password="True" force_save="1"-->
+<!--                                           invisible="name != 'D7'"/>-->
+<!--                                </group>-->
                                 <!-- Credentials for Click send-->
                                 <group string="Click Send Credentials"
                                        invisible="name != 'CLICK SEND'">

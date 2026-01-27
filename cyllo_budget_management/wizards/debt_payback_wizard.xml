@@ -16,10 +16,15 @@
                 <group>
                     <group>
                         <field name="return_type" required="1"/>
-                        <field name="amount" readonly="return_type != 'partial' " widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        <field name="balance_amount" invisible="return_type == 'full' "
+                        <field name="amount"
+                               readonly="return_type != 'partial' "
+                               widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
+                        <field name="balance_amount"
+                               invisible="return_type == 'full' "
                                readonly="return_type == 'partial'"
-                               force_save="1" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                               force_save="1" widget="monetary"
+                               options="{'currency_field': 'currency_id'}"/>
                         <field name="currency_id" invisible="1"/>
                     </group>
                     <field name="company_id" invisible="1"/>
@@ -29,13 +34,15 @@
                     <group>
                         <field name="journal_id"/>
                         <field name="payment_method_line_id"/>
-                        <field name="payback_recipient_bank_id" context="{'default_partner_id':payback_partner_id}"/>
+                        <field name="payback_recipient_bank_id"
+                               context="{'default_partner_id':payback_partner_id}"/>
                     </group>
                 </group>
                 <footer>
                     <button class="btn btn-primary" string="Pay"
                             name="action_confirm_payback" type="object"/>
-                    <button class="btn btn-secondary" string="DISCARD" special="cancel"/>
+                    <button class="btn btn-secondary" string="DISCARD"
+                            special="cancel"/>
                 </footer>
             </form>
 
@@ -52,7 +59,8 @@
                         <field name="journal_id"/>
                     </group>
                     <group>
-                        <field name="recipient_bank_id" context="{'default_partner_id':partner_id}"/>
+                        <field name="recipient_bank_id"
+                               context="{'default_partner_id':partner_id}"/>
                     </group>
                     <group>
                         <field name="payment_method_line_id"/>
@@ -65,7 +73,8 @@
                 <footer>
                     <button class="btn btn-primary" string="Pay"
                             name="action_confirm_payment" type="object"/>
-                    <button class="btn btn-secondary" string="DISCARD" special="cancel"/>
+                    <button class="btn btn-secondary" string="DISCARD"
+                            special="cancel"/>
                 </footer>
             </form>
         </field>

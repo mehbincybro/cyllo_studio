@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Template for rendering the stock move dashboard. -->
+<templates>
+    <t t-name="cyllo_crm.crm_lead_dashboard" owl="1">
+        <!-- Dashboard -->
+        <div class="o_stock_move_dashboard container-fluid py-4 border-bottom bg-white"
+             t-att-class="{'d-none': !state.isDashboardVisible}">
+            <div class="row justify-content-between gap-3 gap-lg-0">
+                <div>
+                    <div class="grid gap-4">
+                        <!-- Dashboard Cards (you can adjust them as needed) -->
+                        <div class="g-col-9 g-col-sm-10 grid gap-1">
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'total_leads')" filter_name="my">
+                                    <div class="fs-2" t-out="crmLeadData['my_leads']"/>My leads
+                                </a>
+                            </div>
+
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'idle')" filter_name="activities_idle">
+                                    <div class="fs-2" t-out="crmLeadData['idle']"/>Idle leads
+                                </a>
+                            </div>
+
+                            <!-- Repeat for other buttons -->
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'no_activity')" filter_name="no_activity">
+                                    <div class="fs-2" t-out="crmLeadData['no_activity']"/>No activity
+                                </a>
+                            </div>
+
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'overdue')" filter_name="activities_overdue">
+                                    <div class="fs-2" t-out="crmLeadData['overdue']"/>Overdue
+                                </a>
+                            </div>
+
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'due_today')" filter_name="activities_today">
+                                    <div class="fs-2" t-out="crmLeadData['due_today']"/>Due Today
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal"
+                                   t-on-click="(ev) => this.setSearchContext(ev, 'activity_today')" filter_name="assigned_to_me">
+                                    <div class="fs-2" t-out="crmLeadData['activity_today']"/>My activities
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

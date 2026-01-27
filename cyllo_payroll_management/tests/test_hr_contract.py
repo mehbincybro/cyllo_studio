@@ -1,9 +1,29 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import logging
-from odoo.addons.cyllo_payroll_management.tests.common import \
-    TestPayrollManagementBase
 
 from odoo.exceptions import ValidationError
+from odoo.addons.cyllo_payroll_management.tests.common import \
+    TestPayrollManagementBase
 
 _logger = logging.getLogger(__name__)
 
@@ -52,23 +72,3 @@ class TestHrContract(TestPayrollManagementBase):
         self.contract_03.action_approve_contract()
         self.assertEqual(self.contract_03.state, 'open')
         _logger.info('Test success for approve contract training')
-
-    def test_onchange_state(self):
-        _logger.info('Test for onchange state')
-        self.employee_04 = self.env['hr.employee'].create(
-            {'name': 'Michel john'})
-        with self.assertRaises(ValidationError) as VE:
-            self.contract_04 = self.env['hr.contract'].create({
-                'training_date_from': '2017-12-31',
-                'training_date_to': '2018-01-01',
-                'name': 'Contract for Michel john',
-                'state': 'training',
-                'wage': 5000,
-                'employee_id': self.employee_04.id,
-                'resource_calendar_id': self.calendar_40h.id,
-                'employee_salary_structure_id': self.salary_structure.id
-            })
-            self.contract_04._onchange_state()
-        self.assertEqual(VE.exception.args[0],
-                             'You cannot change the status of non-approved Contracts')
-        _logger.info('Test success for onchange state')

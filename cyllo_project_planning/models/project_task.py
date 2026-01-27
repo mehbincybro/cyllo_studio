@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 
 
@@ -6,8 +26,11 @@ class PlanAllocation(models.Model):
     """This model extends the 'project.task' model to add planned allocation functionality."""
     _inherit = 'project.task'
 
-    plan_allocation_ids = fields.One2many('plan.allocation', 'task_id',
-                                          string="Planned Allocation")
+    plan_allocation_ids = fields.One2many(
+        'plan.allocation',
+        'task_id',
+        string="Planned Allocation"
+    )
     is_allocated = fields.Boolean(default=False)
     allocation_count = fields.Integer(compute='_compute_allocation_count')
 
@@ -29,7 +52,8 @@ class PlanAllocation(models.Model):
 
     def action_plan_task_allocations(self):
         """Function to creating plan allocations for tasks"""
-        employee_ids = self.env['hr.employee'].search([('user_id', 'in', self.user_ids.ids)]).ids
+        employee_ids = self.env['hr.employee'].search(
+            [('user_id', 'in', self.user_ids.ids)]).ids
         return {
             'type': 'ir.actions.act_window',
             'name': _('Project Plan Allocation'),

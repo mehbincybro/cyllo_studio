@@ -51,7 +51,7 @@ export async function worldMapChart(env, values) {
         color = env.params.themeColor
     }
     values.visualMap = {
-        left: 'left',
+        right: 10,
         min,
         max,
         inRange: {

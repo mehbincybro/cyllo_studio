@@ -1,5 +1,25 @@
 # -*- coding: utf-8 -*-
-from odoo import api, models, _
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import _, api, models
 
 
 class AccountPaymentRegister(models.TransientModel):
@@ -33,7 +53,8 @@ class AccountPaymentRegister(models.TransientModel):
             "amount_currency": line.amount_currency * -1,
         }
 
-    def _prepare_counterpart_move_lines_vals(self, total_credit, total_amount_currency):
+    def _prepare_counterpart_move_lines_vals(self, total_credit,
+                                             total_amount_currency):
         """Counterpart move line values"""
         self.ensure_one()
         account_id = False
@@ -60,7 +81,8 @@ class AccountPaymentRegister(models.TransientModel):
                         [('reconciled', '=', False), ('credit', '>', 0),
                          ('parent_state', '=', 'posted'),
                          ('payment_id', '=', payment.id)])
-                    move = account_move_obj.create(rec._prepare_account_move_vals(payment))
+                    move = account_move_obj.create(
+                        rec._prepare_account_move_vals(payment))
                     total_credit = 0.0
                     total_amount_currency = 0.0
                     to_reconcile_lines = []
@@ -69,9 +91,11 @@ class AccountPaymentRegister(models.TransientModel):
                         total_amount_currency += line.amount_currency
                         line_vals = self._prepare_move_line_vals(line)
                         line_vals["move_id"] = move.id
-                        move_line = account_move_line_obj.with_context(check_move_validity=False).create(line_vals)
+                        move_line = account_move_line_obj.with_context(
+                            check_move_validity=False).create(line_vals)
                         to_reconcile_lines.append(line + move_line)
-                    counter_vals = rec._prepare_counterpart_move_lines_vals(total_credit, total_amount_currency)
+                    counter_vals = rec._prepare_counterpart_move_lines_vals(
+                        total_credit, total_amount_currency)
                     counter_vals["move_id"] = move.id
                     account_move_line_obj.create(counter_vals)
                     move.action_post()

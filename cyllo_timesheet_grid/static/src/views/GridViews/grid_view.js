@@ -2,15 +2,15 @@
 import { _lt } from "@web/core/l10n/translation";
 import { RelationalModel } from "@web/model/relational_model/relational_model";
 import { registry } from "@web/core/registry";
-import {GridRenderer} from "./grid_renderer";
-import {GridController} from "./grid_controller";
-import {GridArchParser} from "./grid_arch_parser";
-import {GridRelationalModel} from "./grid_relational_model";
+import { GridRenderer } from "./grid_renderer";
+import { GridController } from "./grid_controller";
+import { GridArchParser } from "./grid_arch_parser";
+import { GridRelationalModel } from "./grid_relational_model";
 export const gridView = {
     searchMenuTypes: ["filter", "comparison", "favorite"],
     type: "grid",
     display_name: _lt("Grid"),
-    icon: "fa fa-th",
+    icon: "ri-grid-line",
     multiRecord: true,
     Controller: GridController,
     Renderer: GridRenderer,

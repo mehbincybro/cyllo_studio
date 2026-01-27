@@ -6,7 +6,9 @@
         <field name="tag">whatsapp_tags</field>
     </record>
     <!--  Menu root for Whatsapp -->
-    <menuitem id="menu_cyllo_whatsapp_root" name="Whatsapp" sequence="6"/>
+    <menuitem id="menu_cyllo_whatsapp_root" name="Whatsapp"
+              web_icon="cyllo_whatsapp,static/description/cyllo_whatsapp.svg"
+              sequence="6"/>
     <!-- Submenu item for Whatsapp Template under the Whatsapp menu -->
     <menuitem id="menu_whatsapp_chat" name="Whatsapp Chat" sequence="1"
               action="whatsapp_action" parent="menu_cyllo_whatsapp_root"/>

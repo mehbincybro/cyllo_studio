@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+  <defs>
+    <style>
+      .user_dashboard_cls-1 {
+        fill: #bcbba7;
+      }
+
+      .user_dashboard_cls-2 {
+        fill: #26261a;
+      }
+
+      .user_dashboard_cls-3 {
+        fill: #d7d6ca;
+      }
+
+      .user_dashboard_cls-4 {
+        fill: #c9c9b9;
+      }
+
+      .user_dashboard_cls-5 {
+        fill: #969686;
+      }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1-2">
+    <rect class="user_dashboard_cls-2" style="fill:#26261A !important;" y="0" width="850" height="850" rx="72.61" ry="72.61"/>
+  </g>
+  <circle class="user_dashboard_cls-5" style="fill:#969686 !important;" cx="440.72" cy="436.75" r="202.5"/>
+  <path class="user_dashboard_cls-4" style="fill:#c9c9b9 !important;" d="m539.01,581.12v-62.32c0-26.14-10.6-49.82-27.69-66.94-17.12-17.14-40.75-27.76-66.89-27.76-52.25,0-51.33,73.54-51.5,98.44l-43.08,58.58h189.17,0Z"/>
+  <path class="user_dashboard_cls-1" style="fill:#BCBBA7 !important;" d="m478.57,430.44c-35.37,13.72-60.44,48.12-60.44,88.35v62.32h-68.29v-62.32c0-52.28,42.34-94.7,94.59-94.7,12.05,0,23.54,2.24,34.14,6.35h0Z"/>
+  <ellipse class="user_dashboard_cls-3" style="fill:#d7d6ca !important;" cx="444.43" cy="365.2" rx="63.58" ry="63.66"/>
+</svg>

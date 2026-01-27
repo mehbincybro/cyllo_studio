@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     'name': 'Multiple SMS Gateway Integration',
     'version': '1.0.0',
@@ -10,8 +30,6 @@
     'website': "https://www.cyllo.com",
     'company': "Cyllo",
     'maintainer': "Cyllo",
-    'external_dependencies': {
-        'python': ['twilio', 'clicksend_client', 'pycountry']},
     'depends': ['base', 'cyllo_base', 'sale_management', 'website'],
     'data': [
         'security/multi_sms_gateway_groups.xml',
@@ -21,18 +39,20 @@
         'views/sms_history_views.xml',
         'views/portal_share_views.xml',
         'views/sms_gateway_config_views.xml',
-        'wizards/send_sms_views.xml',
+        'wizards/send_sms.xml',
         'views/multi_sms_gateway_menus.xml',
         'views/website_views.xml',
-        'views/login_templates.xml',
-        'views/verify_otp_templates.xml',
-        'views/web_login_templates.xml',
+        'templates/login_templates.xml',
+        'templates/verify_otp_templates.xml',
+        'templates/web_login_templates.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'cyllo_sms_gateway/static/src/**/*',
         ]
     },
+    'external_dependencies': {
+        'python': ['twilio', 'clicksend_client', 'pycountry']},
     'license': "LGPL-3",
     'installable': True,
     'auto_install': False,

@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import json
+
 from odoo import http
 from odoo.http import content_disposition, request
 from odoo.tools import html_escape
@@ -8,10 +28,11 @@ from odoo.tools import html_escape
 
 class XLSXReportController(http.Controller):
     """ Controller for handling XLSX report generation and delivery over HTTP.
-
     This controller provides an endpoint for generating XLSX reports based on the provided data
     and returning them as HTTP responses."""
-    @http.route('/smartd_xlsx_reports', type='http', auth='user', methods=['POST'], csrf=False)
+
+    @http.route('/smartd_xlsx_reports', type='http', auth='user',
+                methods=['POST'], csrf=False)
     def get_report_xlsx(self, model, data, output_format, report_name):
         """Generate an XLSX report based on the provided data and return it as a response.
             Args:
@@ -30,11 +51,11 @@ class XLSXReportController(http.Controller):
         try:
             if output_format == 'xlsx':
                 response = request.make_response(None, headers=[
-                        ('Content-Type', 'application/vnd.ms-excel'),
-                        ('Content-Disposition',
-                         content_disposition(report_name + '.xlsx'))
-                    ]
-                )
+                    ('Content-Type', 'application/vnd.ms-excel'),
+                    ('Content-Disposition',
+                     content_disposition(report_name + '.xlsx'))
+                ]
+                                                 )
                 report_obj.get_xlsx_report(data, response)
             response.set_cookie('fileToken', token)
             return response

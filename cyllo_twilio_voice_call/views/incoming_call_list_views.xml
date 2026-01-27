@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--    Form View for Twilio Voica Call-->
+    <!--    Form View for Twilio Voice Call-->
     <record id="view_incoming_call_list_form" model="ir.ui.view">
         <field name="name">view.incoming.call.list.form</field>
         <field name="model">incoming.call.list</field>
@@ -9,35 +9,37 @@
                 <header>
                     <button string="Play Recording" type="object"
                             name="action_play_recording"
-                            class="btn btn-primary"/>
+                            class="btn btn-primary" invisible="not record_sid"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
                             <div class="d-flex">
-                                <field name="reference" class="text-break" />
+                                <field name="reference" class="text-break"/>
                             </div>
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="user_id"/>
-                            <field name="company_id"/>
-                            <field name="from_number"/>
+                            <field name="partner_id"/>
                             <field name="to_number"/>
+                            <field name="from_number"/>
                         </group>
+                        <group>
+                            <field name="status"/>
+                            <field name="image_1920" widget="image"
+                                   options="{'size': [200, 200]}"/>
+                            <field name="company_id"/>
+                        </group>
+
                         <group>
                             <field name="start_time"/>
-                            <field name="status"/>
-                            <field name="image_1920" widget="image"/>
-                        </group>
-                        <group>
-                            <field name="record_sid" widget="url"
-                                   readonly="True" invisible="1"/>
                             <field name="end_time"/>
                             <field name="duration" readonly="1"/>
+                            <field name="record_sid" widget="url"
+                                   readonly="True" invisible="1"/>
                             <field name="call_sid" invisible="1"/>
-                            <field name="partner_id"/>
                         </group>
                     </group>
                 </sheet>
@@ -85,10 +87,15 @@
                 <field name="to_number"
                        filter_domain="[('to_number','ilike',self)]"
                        string="to Number"/>
+                <filter string="Staus" name="status"
+                        domain="[('status', '!=','')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Caller" name="caller"
+                            context="{'group_by': 'user_id'}"/>
+                </group>
             </search>
         </field>
     </record>
-
     <!--    Action for Twilio  -->
     <record id="action_view_incoming_call_list" model="ir.actions.act_window">
         <field name="name">Incoming Call List</field>
@@ -104,12 +111,13 @@
             </p>
         </field>
     </record>
-    <!-- main menu -->
-    <menuitem id="menu_cyllo_twilio_voice_call_root" name="Twilio Voice Call" sequence="1"/>
-    <!--    sub menu -->
+    <menuitem id="menu_cyllo_twilio_voice_call_root" name="Twilio Voice Call"
+              web_icon="cyllo_twilio_voice_call,static/description/cyllo_twillio.svg"
+              sequence="1"/>
     <menuitem id="menu_incoming_call_list" name="Incoming Call List"
-              parent="menu_cyllo_twilio_voice_call_root" action="action_view_incoming_call_list"
+              parent="menu_cyllo_twilio_voice_call_root"
+              action="action_view_incoming_call_list"
               sequence="4"/>
-    <menuitem name="Configuration" id="menu_configuration_categ"
+    <menuitem id="menu_configuration_categ" name="Configuration"
               parent="menu_cyllo_twilio_voice_call_root" sequence="7"/>
 </odoo>

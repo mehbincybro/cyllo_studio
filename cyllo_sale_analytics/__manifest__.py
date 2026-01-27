@@ -1,5 +1,24 @@
 # -*- coding: utf-8 -*-
-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     'name': 'Sale Analytics',
     'version': '1.0.0',
@@ -21,6 +40,7 @@
     "external_dependencies": {
         'python': ['pandas', 'scikit-learn', 'prophet', 'statsmodels']
     },
+    'icon': '/cyllo_sale_analytics/static/description/sales-analytics.svg',
     'data': [
         'reports/churn_prediction_templates.xml',
         'reports/demand_prediction_template.xml',
@@ -30,6 +50,7 @@
     'assets': {
         'web.assets_backend': [
             'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap',
+            'cyllo_sale_analytics/static/src/css/style.css',
             'cyllo_sale_analytics/static/src/js/churn_prediction.js',
             'cyllo_sale_analytics/static/src/js/sales_prediction.js',
             'cyllo_sale_analytics/static/src/js/demand_prediction.js',

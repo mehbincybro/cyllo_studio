@@ -1,6 +1,18 @@
 /** @odoo-module **/
 import publicWidget from "@web/legacy/js/public/public_widget";
-/**  Extends  publicWidget to get value onClick selection in website **/
+
+/**
+ * ServicePortal Widget
+ * ---------------------
+ * Extends Odoo's publicWidget to handle user interactions when creating
+ * service requests from the website portal.
+ *
+ * Features:
+ *  - Auto-assign service handler based on user's related employee.
+ *  - Dynamically update department options when service handler changes.
+ *  - Show/hide maintenance type and service equipment fields based on category.
+ *  - Toggle input visibility and required fields based on request type (custody/service).
+ */
 publicWidget.registry.ServicePortal = publicWidget.Widget.extend({
     selector: '.cy_service_create',
     events: {
@@ -8,7 +20,17 @@ publicWidget.registry.ServicePortal = publicWidget.Widget.extend({
         'change .request_type': '_onChangeRequestType',
         'change .category_sel': '_onChangeCategory',
     },
-    /**  Assign service handler based on user's related employee**/
+
+    /**
+     * Initializes the widget when the page loads.
+     *
+     * - Binds the ORM service for RPC calls.
+     * - If only one handler option exists, auto-selects it
+     *   and updates related department and employee data.
+     *
+     * @override
+     * @returns {Promise} Resolves when widget is initialized.
+     */
     start() {
         this.orm = this.bindService("orm");
         var handler = this.$el.find(".cy_service_handler")
@@ -27,14 +49,32 @@ publicWidget.registry.ServicePortal = publicWidget.Widget.extend({
               + handler_name + "</option>")
         }
     },
-    /** Add department of employee on change service handler selection **/
+
+    /**
+     * Handles change of the service handler selection.
+     *
+     * - Updates the department dropdown to show the handler's department.
+     *
+     * @param {Event} ev - The change event from the dropdown.
+     */
     _onChangeHandler: function(ev) {
         var department = this.$el.find(".handlers_dept")
         department.empty()
         department.append("<option value=" + ev.target.options[ev.target.selectedIndex].getAttribute('data') +
           ">" + ev.target.options[ev.target.selectedIndex].getAttribute('title') + "</option>")
     },
-    /** Show/Hide maintenance type and service equipment based on category **/
+
+    /**
+     * Handles change of the service category.
+     *
+     * - Fetches the selected category details via ORM.
+     * - If the category requires a maintenance order:
+     *    - Shows the service equipment and maintenance type fields.
+     *    - Marks them as required.
+     * - Otherwise, hides and resets those fields.
+     *
+     * @param {Event} ev - The change event from the category dropdown.
+     */
     _onChangeCategory: async function(ev) {
         const ser_category = this.$el.find(".category_sel")
         const ser_equip_div = this.$el.find(".cy-ser_equip")
@@ -42,27 +82,6 @@ publicWidget.registry.ServicePortal = publicWidget.Widget.extend({
         const maintenance_type_sel = this.$el.find(".cy_maintenance_type")
         const maintenance_type = this.$el.find(".cy-maintenance_type")
         const category = ev.target.options[ev.target.selectedIndex].value
-//        if (category){
-//            const services = await this.orm.searchRead("hr.service.category",
-//                [["id", "=", Number(category)]])
-//            if (services[0].require_maintenance_order){
-//                ser_equip_div.removeClass('d-none');
-//                cy_service_equip[0].setAttribute('required', true);
-//                maintenance_type.removeClass('d-none');
-//                maintenance_type_sel[0].setAttribute('required', true);
-//            }else{
-//                ser_equip_div.addClass('d-none');
-//                cy_service_equip[0].removeAttribute('required');
-//                maintenance_type.addClass('d-none');
-//            }
-//        }else{
-//            ser_equip_div.addClass('d-none');
-//            cy_service_equip[0].removeAttribute('required');
-//            maintenance_type.addClass('d-none');
-//        }
-        const categoryy = ev.target.value;
-        console.log("category", categoryy)
-        console.log("category", ev.target.options[ev.target.selectedIndex].value)
         if (category) {
           this.orm.searchRead("hr.service.category", [["id", "=", Number(category)]])
             .then(services => {
@@ -78,9 +97,20 @@ publicWidget.registry.ServicePortal = publicWidget.Widget.extend({
           cy_service_equip[0].removeAttribute('required');
           maintenance_type.addClass('d-none');
         }
-
     },
-    /** Show service details and custody details inputs based on selecting the type **/
+
+    /**
+     * Handles change of the request type (custody/service).
+     *
+     * - If custody:
+     *    - Shows equipment and return date fields (required).
+     *    - Hides category field.
+     * - If service:
+     *    - Shows category field (required).
+     *    - Hides equipment and return date fields.
+     *
+     * @param {Event} ev - The change event from the request type dropdown.
+     */
     _onChangeRequestType: function(ev) {
         var equipment = this.$el.find(".equipment")
         var equipment_sel = this.$el.find("#equipment_sel")

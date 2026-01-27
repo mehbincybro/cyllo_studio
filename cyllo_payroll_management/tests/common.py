@@ -1,7 +1,26 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 import logging
-from datetime import time
 
 from odoo.tests import common
 
@@ -13,6 +32,9 @@ class TestPayrollManagementBase(common.TransactionCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
+        cls.env.user.write({
+            'groups_id': [(4, cls.env.ref('cyllo_payroll_management.group_cyllo_payroll_management_manager').id)]
+        })
 
         cls.employee_01 = cls.env['hr.employee'].create({'name': 'John'})
         cls.department = cls.env['hr.department'].create({
@@ -20,7 +42,7 @@ class TestPayrollManagementBase(common.TransactionCase):
         })
 
         cls.structure_type = cls.structure_type = cls.env[
-            'salary.structure.type'].create({
+            'hr.payroll.structure.type'].create({
             'name': 'Employee',
         })
 
@@ -90,6 +112,27 @@ class TestPayrollManagementBase(common.TransactionCase):
             'code': 'SUMALW',
             'category_id': cls.env.ref(
                 'cyllo_payroll_management.employee_salary_rule_category_allowance').id,
+        })
+
+        cls.account_net = cls.env['account.account'].create({
+            'name': 'Net Salary Account',
+            'code': 'NET100',
+            'account_type': 'liability_current',
+            'reconcile': True,
+        })
+
+        cls.net_rule = cls.env['employee.salary.rule'].create({
+            'name': 'Net Salary',
+            'sequence': 100,
+            'amount_select': 'fix',
+            'amount_fix': 5000.0,
+            'code': 'NET',
+            'category_id': cls.env.ref('cyllo_payroll_management.employee_salary_rule_category_net').id,
+            'account_credit_id': cls.account_net.id,
+        })
+
+        cls.salary_structure.write({
+            'employee_salary_rule_ids': [(4, cls.net_rule.id)]
         })
         cls.calendar_40h = cls.env['resource.calendar'].create(
             {'name': 'Default calendar'})

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-inherit="web.NavBar" t-inherit-mode="extension" owl="1">
+        <xpath expr="//nav" position="attributes">
+            <attribute name="class" add="navbar navbar-expand-lg cy-top-navbar"
+                       separator=" "/>
+        </xpath>
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="before">
+            <div class="container-fluid ps-0">
+                <t t-if="!env.isSmall">
+                    <a class="cy-menu_icon" t-if="!menuState.isSubMenuOn"
+                       t-on-click="() => this.onClickMenuBar()" data-hotkey="z">
+                        <i class="cy-icons ri-menu-line pe-3 ps-1"
+                           style="font-size:16px !important;"/>
+                    </a>
+                </t>
+                <ul class="navbar-nav">
+                    <li class="nav-item" t-foreach="NavBarItems" t-as="item"
+                        t-key="item.key">
+                        <ErrorHandler
+                                onError="error => this.handleItemError(error, item)">
+                            <t t-component="item.Component"
+                               t-props="item.props"/>
+                        </ErrorHandler>
+                    </li>
+                </ul>
+            </div>
+        </xpath>
+        <xpath expr="//DropdownItem[@t-if='currentApp']" position="replace"/>
+        <xpath expr="//t[@t-call='web.NavBar.AppsMenu']" position="replace">
+            <div class="d-none">
+                <t t-call="web.NavBar.AppsMenu">
+                    <t t-set="apps" t-value="menuService.getApps()"/>
+                </t>
+            </div>
+        </xpath>
+        <xpath expr="//t[@t-call='web.NavBar.SectionsMenu']"
+               position="replace"/>
+    </t>
+    <t t-inherit="mail.MessagingMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-set-slot='toggler']" position="replace">
+            <t t-set-slot="toggler">
+                <div class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-chat-3-line cy-icons cy-stray-icon-sp"
+                           role="img" aria-label="Messages"
+                           t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"/>
+                        <span t-if="counter"
+                              class="o-mail-MessagingMenu-counter badge badge-clock"><t t-esc="counter"/></span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Messages
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+    <t t-inherit="mail.ActivityMenu" t-inherit-mode="extension" owl="1">
+        <xpath expr="//t[@t-set-slot='toggler']" position="replace">
+            <t t-set-slot="toggler">
+                <div class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-time-line cy-icons cy-stray-icon-sp"
+                           role="img" aria-label="Activities"/>
+                        <span t-if="store.activityCounter"
+                              class="o-mail-MessagingMenu-counter badge badge-clock"><t t-esc="store.activityCounter"/></span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Activities
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

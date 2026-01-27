@@ -1,20 +1,40 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="PresentationSelectionMode">
-        <div class="oys cy_presentation w-100" t-ref="rootRef" t-att-style="isNoData ? 'overflow: hidden;': ''" style="position: relative;">
+        <div class="oys cy_presentation w-100"
+             t-ref="rootRef"
+             t-att-style="isNoData ? 'overflow: hidden;': ''"
+             style="position: relative;">
             <div class="container-fluid o_pj_dashboard  control-panel"
                  style="display: flex; justify-content: space-between; align-items: center;">
-                <div class="title_presentation d-flex gap-1 justify-content: space-between; align-items: center;" style="width: 25%;">
-                    <i class="ri-arrow-left-s-line" t-on-click="goBack"
-                       style="cursor: pointer;padding-left: 1%; margin-top: 1px;" title="Go Back"/>
+                <div class="title_presentation position-relative d-flex gap-1 justify-content: space-between; align-items: center;"
+                     style="width: 25%;">
+                    <div class="d-flex align-items-center">
+                        <a class="cy-menu_icon"
+                           t-on-click="() => this.env.bus.trigger('onclickMenuBar')">
+                            <i class="cy-icons ri-menu-line pe-3 ps-1"
+                               style="font-size:16px !important;"/>
+                        </a>
+                    </div>
+                    <i class="ri-arrow-left-s-line"
+                       t-on-click="goBack"
+                       style="cursor: pointer;padding-left: 1%; margin-top: 1px;"
+                       title="Go Back"/>
                     <h3 class="my-0 ps-0 mt-1 title_presentation">Presentation Preview
-                        <div class="presentation-tooltip" style="cursor: pointer;">
-                            <span style="font-size: 9px;" class="filter-info">?</span>
+                        <div class="presentation-tooltip"
+                             style="cursor: pointer; width: 16px;">
+                            <span style="font-size: 12px;"
+                                  class="filter-info">?</span>
                         </div>
-                        <div class="tooltip-content justify-content-around modal_background" style="width: 35%;">
-                            <span class="title_presentation" t-out="filterContent" style="text-align: center; padding: unset;"/>
-                            <div class="demo_video d-flex justify-content-center" style="margin-bottom: 10px;">
-                                  <img src="/cyllo_analytics/static/src/img/presentation_help.gif" class="presentation_helper"/>
+                        <div class="tooltip-content presentation-tooltip-info justify-content-around modal_background"
+                             style="">
+                            <span class="title_presentation"
+                                  t-out="filterContent"
+                                  style="text-align: center; padding: unset;"/>
+                            <div class="demo_video d-flex justify-content-center"
+                                 style="margin-bottom: 10px;">
+                                  <img src="/cyllo_analytics/static/src/img/presentation_help.gif"
+                                       class="presentation_helper"/>
                             </div>
                         </div>
                     </h3>
@@ -22,57 +42,101 @@
                 <div class="save d-flex justify-content-between align-items-center m-1 p-2"
                      style="margin-right: 1% !important">
                     <div class="d-flex">
-                        <div class="btn-group cy_present_btn_grp">
-                            <span t-if="state.autoSlide" t-on-click="() => this.handlePresentation('play')">
-                                <label data-hotkey="a" class="btn btn-primary_present o_documents_kanban_upload presentation-btn">Play</label>
+                        <div class="btn presentation-btn cy_present_btn_grp cursor-pointer">
+                            <span t-if="state.autoSlide"
+                                  t-on-click="() => this.handlePresentation('play')">
+                                <label data-hotkey="a"
+                                       class="present-btn-text cursor-pointer">Play</label>
                             </span>
-                            <span t-else="" t-on-click="() => this.handlePresentation('start')">
-                                <label data-hotkey="a" class="btn btn-primary_present o_documents_kanban_upload presentation-btn">Start</label>
+                            <span t-else=""
+                                  t-on-click="() => this.handlePresentation('start')">
+                                <label data-hotkey="a"
+                                       class="present-btn-text cursor-pointer">Start</label>
                             </span>
-                            <div class="d-flex align-items-center cy-present-gear-container gap-3 mx-1 justify-content-end flex-wrap">
-                                <FilterDropdown name="'Settings'" display_name="''" footer="false" class="'ri-settings-5-line'">
-                                    <t t-set-slot="contents">
-                                        <div class="col-12">
-                                            <div class="additional-options-content">
-                                                <div class="d-flex gap-2">
-                                                    <label class="form-check-label  cy-modal-form_label presentation-label"
-                                                           style="color: unset !important;">Auto Slide</label>
-                                                    <input type="checkbox" class="form-check-input" t-model="state.autoSlide"/>
-                                                </div>
-                                                <div t-if="state.autoSlide" id="slideDuration" class="mt-2 slideDuration">
-                                                    <label for="slideDuration">Slide Duration (In Seconds):</label>
-                                                    <input class="px-2 mt-1 input_border" type="number" min="3" name="slideDuration" t-model="state.autoSlideTime"/>
-                                                </div>
-                                                <br/>
-                                                <label class="form-check-label  cy-modal-form_label presentation-label"
-                                                       style="color: unset !important;">Title Page</label>
-                                                <div id="titlePageDetails" class="titlePageDetails mt-2">
-                                                    <label for="heading">Heading:</label>
-                                                    <input class="px-2 mt-1 input_border" type="text" name="heading" t-model="state.heading" t-on-blur="addHeading"/>
-                                                    <label for="subheading" class="mt-2">Subheading:</label>
-                                                    <input class="px-2 mt-1 input_border" type="text" name="subheading" t-model="state.subheading"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                            </FilterDropdown>
                         </div>
+                        <div class="btn-group">
+                            <button class="present-btn-text btn presentation-btn dropdown-toggle"
+                                    type="button"
+                                    id=""
+                                    data-bs-toggle="dropdown"
+                                    data-bs-auto-close="outside"
+                                    aria-expanded="false">
+                        </button>
+                            <div class="dropdown-menu slide-tools-extra">
+                                <form class="py-2 px-3">
+                                    <div class="cy-market-dialog-header cy-border-btm">
+                                      <h2 class="cy-marketing-auto-dialog-head present-tool-tip-header">Settings</h2>
+                                    </div>
+                                    <div class="form-group d-flex justify-content-between mt-2">
+                                        <label class="form-check-label cy-modal-form_label presentation-label"
+                                               style="color: unset !important;">Auto Slide</label>
+                                        <input type="checkbox"
+                                               class="cursor-pointer"
+                                               t-model="state.autoSlide"/>
+                                    </div>
+                                    <div t-if="state.autoSlide"
+                                         id="slideDuration"
+                                         class="mt-1 slideDuration">
+                                        <label for="slideDuration">Slide Duration (In Seconds):</label>
+                                        <input class="px-2 mt-1 input_border"
+                                               type="number"
+                                               min="3"
+                                               name="slideDuration"
+                                               t-model="state.autoSlideTime"/>
+                                    </div>
+                                    <br t-if="state.autoSlide"/>
+                                    <div class="form-group mt-1">
+                                        <label class="form-check-label  cy-modal-form_label presentation-label"
+                                               style="color: unset !important;">Title Page</label>
+                                        <div id="titlePageDetails"
+                                             class="titlePageDetails mt-2">
+                                            <label for="heading">Heading:</label>
+                                            <input class="px-2 mt-1 input_border"
+                                                   type="text"
+                                                   name="heading"
+                                                   t-model="state.heading"
+                                                   t-on-blur="addHeading"/>
+                                            <label for="subheading"
+                                                   class="mt-2">Subheading:</label>
+                                            <input class="px-2 mt-1 input_border"
+                                                   type="text"
+                                                   name="subheading"
+                                                   t-model="state.subheading"/>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div t-ref="containerRef" class="d-flex justify-content-center">
+            <t t-set="dataVal"
+               t-value="ChartData.data.filter(item => item.type !== 'kpi').length"/>
+            <div t-ref="containerRef"
+                 t-attf-class="{{dataVal lt 6 ? 'h-100' : ''}}"
+                 class="chart-container-div d-flex justify-content-center">
                 <div class="row mt-3 mb-3 d-flex container-fluid">
                     <div class="col-12">
                         <div class="card-collection" t-ref="collection">
-                            <t t-foreach="ChartData.data" t-as="data" t-key="data_index" t-if="data.data.length">
-                                <GraphTile t-if="data.type != 'kpi' and data.type != 'table'"
-                                           value="data" theme="themeState.currentTheme"
-                                           themeColor="themeState.theme.theme_color"
-                                           onClickChart.bind="onClickChart" style="style"
-                                           toggleClass="'cy_db_presentation_select'"/>
-                                <Table t-elif="data.type == 'table'" onClickTable.bind="onClickChart"
-                                       data="data" style="style" theme="themeState.currentTheme"
+                            <t t-foreach="ChartData.data"
+                               t-as="data"
+                               t-key="data_index"
+                               t-if="data.data.length">
+                                <GraphTile
+                                        t-if="data.type != 'kpi' and data.type != 'table'"
+                                        value="data"
+                                        theme="themeState.currentTheme"
+                                        themeColor="themeState.theme.theme_color_ids"
+                                        onClickChart.bind="onClickChart"
+                                        style="style"
+                                        isDarkMode="state.darkMode"
+                                        toggleClass="'cy_db_presentation_select'"
+                                        width="style.width"/>
+                                <Table t-elif="data.type == 'table'"
+                                       onClickTable.bind="onClickChart"
+                                       data="data"
+                                       style="style"
+                                       theme="themeState.currentTheme"
                                        toggleClass="'cy_db_presentation_select'"/>
                             </t>
                         </div>

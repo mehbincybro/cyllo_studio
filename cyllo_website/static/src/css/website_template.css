@@ -1,0 +1,9 @@
+.o_footer ul {
+    margin: 0;
+}
+
+@media (min-width: 992px) {
+    .o_website_sale_checkout .o_total_card {
+        top: 0 !important;
+    }
+}

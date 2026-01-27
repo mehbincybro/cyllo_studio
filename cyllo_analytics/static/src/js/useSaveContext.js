@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 const { useComponent } = owl
 import { session } from "@web/session";
 

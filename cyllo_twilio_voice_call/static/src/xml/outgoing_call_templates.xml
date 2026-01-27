@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
 	<t t-name="dial_pad" owl="1">
-		<div class="cy-dial__pad" t-ref="keypad">
+		<div class="cy-dial__pad cy_twilio_main" t-ref="keypad">
 			<div class="out-keypad cy-dial__pad-action">
 				<button class="cy-dial-actionbtn"
                         t-on-click="_onClickMinimise" style="margin-top:-8px;">
@@ -18,12 +18,22 @@
 					<t t-if="!this.state.recent">
 						<t t-if="!this.state.contacts">
 							<div class="cy-dial_input--container">
-								<input type="tel" class="cy-dial-input"
+								<select id="country-code" name="country-code"
+                                        t-on-change="updatePhoneNumber">
+									<option value="+1">🇺🇸 +1 (United States)</option>
+                                    <option value="+44">🇬🇧 +44 (United Kingdom)</option>
+                                    <option value="+91">🇮🇳 +91 (India)</option>
+                                    <option value="+61">🇦🇺 +61 (Australia)</option>
+                                    <option value="+81">🇯🇵 +81 (Japan)</option>
+                                    <option value="+49">🇩🇪 +49 (Germany)</option>
+                                    <option value="+33">🇫🇷 +33 (France)</option>
+                                    <option value="+86">🇨🇳 +86 (China)</option>
+                                    <option value="+39">🇮🇹 +39 (Italy)</option>
+                                    <option value="+7">🇷🇺 +7 (Russia)</option>
+							    </select>
+                                <input type="tel" class="cy-dial-input"
                                        placeholder="Enter the number"
                                        t-ref="keys"/>
-                                <button class="btn cy-dial_clearbtn"
-                                        t-ref="clear"
-                                        t-on-click="_OnClear">C</button>
 							</div>
 						</t>
 					</t>
@@ -59,9 +69,9 @@
 						<t t-if="!this.state.recent">
 							<t t-if="!this.state.contacts">
 								<div align="center" style="height:307px;">
-									<img alt="Avatar"
+                                    <img alt="Avatar"
                                          class="o_dial_phonecall_avatar"
-                                         t-att-src="'data:image/png;base64,' + this.state.selectedPartner.image_1920"
+                                         t-att-src="this.state.selectedPartner.image_1920 ? 'data:image/png;base64,' + this.state.selectedPartner.image_1920 : '/cyllo_twilio_voice_call/static/src/img/images.png'"
                                          style="height:200px;width:200px;margin-top:30px"/>
                                     <t t-if="this.state.selectedPartner.partner_name">
 										<br/>
@@ -88,8 +98,8 @@
 				</t>
                 <div class="dial-pad-buttons" t-on-click="_onClickScreen">
 					<t t-if="!this.state.value">
-						<div style="margin-left:6px;"
-                             class="cy-dial_additional-buttons">
+						<div
+                                class="cy-dial_additional-buttons">
 							<button class="btn cy-dial_additional-btn cy-button-primary-stroke cy-recent-bn"
                                     t-on-click="() => this._onClickRecent()">Recent
                         </button>
@@ -122,11 +132,19 @@
                     <t t-if="!this.state.recent">
 						<t t-if="!this.state.contacts">
 							<div class="cy-dial_pad-callprocess">
-								<button class="btn cy-dial-process-btn cy-call-btn"
+								<button t-if="!this.state.cancel"
+                                        class="btn cy-dial_clearbtn"
+                                        t-ref="clear-all"
+                                        t-on-click="_OnClearAll">C</button>
+                                <button class="btn cy-dial-process-btn cy-call-btn"
                                         id="call"
                                         t-on-click="_onClickCall">
 									<i class="ri-phone-fill call-icon"/>
 								</button>
+                                <button t-if="!this.state.cancel"
+                                        class="btn cy-dial_clearbtn"
+                                        t-ref="clear-delete"
+                                        t-on-click="_OnClear"><i class="ri-delete-back-2-line"/></button>
                                 <t t-if="this.state.cancel">
 									<button class="btn cy-dial-process-btn cy-callend-btn"
                                             t-on-click="_onClickCancel">
@@ -139,6 +157,8 @@
 				</div>
 			</div>
 		</div>
+        <div class="outgoing_minimise" t-ref="minPad">
+			</div>
         <RecentTab hidden="this.state.recent" dial_pad="this"/>
 	</t>
 </templates>

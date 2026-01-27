@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.OverallView">
+        <t t-if="props.viewType == 'form'">
+            <FormOverall t-props="overallFormProps"/>
+        </t>
+        <t t-if="props.viewType == 'pivot'">
+            <PivotOverall t-props="overallPivotProps"/>
+        </t>
+        <t t-if="props.viewType == 'tree'">
+            <ListOverall t-props="overallListProps"/>
+        </t>
+        <t t-if="props.viewType == 'kanban'">
+            <KanbanOverall t-props="overallKanbanProps"/>
+        </t>
+        <t t-if="props.viewType == 'calendar'">
+            <CalendarOverall t-props="overallCalendarProps"/>
+        </t>
+        <t t-if="props.viewType == 'graph'">
+            <GraphOverall t-props="overallGraphProps"/>
+        </t>
+    </t>
+</templates>

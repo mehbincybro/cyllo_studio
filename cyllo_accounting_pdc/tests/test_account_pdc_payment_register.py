@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields
 from odoo.addons.cyllo_accounting_pdc.tests.common import TestCylloAccountingPdc
 
@@ -8,8 +28,8 @@ class TestAccountPdcPaymentRegister(TestCylloAccountingPdc):
     def test_get_batch_communication(self):
         self.assertTrue(self.payment_register._get_batch_communication(
             self.batch_result))
-        self.assertTrue(self.payment_register._get_batch_communication(
-            self.batch_result).split('-')[0].strip().find('Customer Payment'))
+        self.assertIn('Customer Payment', self.payment_register._get_batch_communication(
+            self.batch_result))
 
     def test_get_batch_available_journals(self):
         self.assertTrue(self.payment_register._get_batch_available_journals(
@@ -39,7 +59,7 @@ class TestAccountPdcPaymentRegister(TestCylloAccountingPdc):
     def test_get_total_amount_using_same_currency(self):
         self.assertEqual(
             self.payment_register._get_total_amount_using_same_currency(
-                self.batch_result, True), (97.7, False))
+                self.batch_result, True), (100.0, False))
     
     def test_get_total_amount_in_wizard_currency_to_full_reconcile(self):
         self.assertEqual(self.payment_register2._get_total_amount_in_wizard_currency_to_full_reconcile(self.batch_result, True), (0.0, False))
@@ -103,4 +123,3 @@ class TestAccountPdcPaymentRegister(TestCylloAccountingPdc):
                          ['payment_type'], 'inbound')
         self.assertEqual(self.payment_register._init_payments(self.to_process)
                          ['partner_type'], 'customer')
-

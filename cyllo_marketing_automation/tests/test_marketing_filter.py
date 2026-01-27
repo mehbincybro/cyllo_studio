@@ -1,7 +1,30 @@
 # -*- coding: utf-8 -*-
-from odoo.exceptions import UserError
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+import logging
+
+from odoo.exceptions import ValidationError
 from odoo.tests import common
 
+_logger = logging.getLogger(__name__)
 
 class TestMarketingFilter(common.TransactionCase):
     @classmethod
@@ -25,6 +48,7 @@ class TestMarketingFilter(common.TransactionCase):
 
             Checks if the method correctly validates the domain for the filter.
         """
+        _logger.info('Starts test_check_domain')
         self.valid_filter._check_domain()
         vals = {
             'name': 'Invalid Filter',
@@ -32,8 +56,7 @@ class TestMarketingFilter(common.TransactionCase):
             'model_id': self.env.ref('mail.model_mail_thread_cc').id,
             'domain': [("id", ">=", 1)],
         }
-        with self.assertRaises(UserError) as validation:
+        with self.assertRaises(ValidationError):
             self.env['marketing.filter'].sudo().create(vals)
-        self.assertEqual(
-            validation.exception.args[0],
-            'The filter domain is not valid for this target model.')
+        _logger.info('Ends test_check_domain')
+

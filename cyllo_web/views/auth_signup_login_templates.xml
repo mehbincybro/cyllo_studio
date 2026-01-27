@@ -2,83 +2,134 @@
 <odoo>
     <template id="signup" inherit_id="auth_signup.signup" name="Signup">
         <xpath expr="//t[@t-call='web.login_layout']" position="replace">
-            <t t-call="cyllo_web.login_layout">
-                <t t-call="cyllo_web.signup_fields">
-                    <t t-set="only_passwords" t-value="bool(token and not invalid_token)"/>
-                </t>
-                <p class="alert alert-danger" t-if="error" role="alert">
-                    <t t-esc="error"/>
-                </p>
-                <input type="hidden" name="redirect" t-att-value="redirect"/>
-                <input type="hidden" name="token" t-att-value="token"/>
-                <div class="cy-auth__footer">
-                    <button type="submit" class="btn btn-primary cy-auth__btn">Sign up</button>
-                    <a t-attf-href="/web/login?{{ keep_query() }}" class="btn btn-link btn-sm mt-2" role="button">Already have an account?</a>
-                    <div class="o_login_auth"/>
-                    <div class="text-center small mt-0 pt-2" t-if="not disable_footer">
-                        <t t-if="not disable_database_manager">
-                            <a class="border-end pe-2 me-1" href="/web/database/manager">Manage Databases</a>
-                        </t>
-                        <a href="https://www.cyllo.com" target="_blank">Powered by<span>Cyllo</span></a>
-                    </div>
-                </div>
-            </t>
-        </xpath>
-    </template>
-
-    <template id="reset_password" inherit_id="auth_signup.reset_password" name="Reset Password">
-         <xpath expr="//t[@t-call='web.login_layout']" position="replace">
-             <t t-call="web.frontend_layout">
+            <t t-call="web.frontend_layout">
                 <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
                 <t t-set="body_classname" t-value="'bg-100'"/>
                 <t t-set="no_header" t-value="True"/>
                 <t t-set="no_footer" t-value="True"/>
-                <div class="cy-auth" style="max-width:900px;">
-                    <div class="cy-auth__left">
-                        <div class="cy-auth__left_content" style="width: 430px;">
-                            <h2 class="cy-auth__left_title">Reset Password</h2>
-                            <p class="cy-auth__left_text">
-                                Reset your password
-                            </p>
-                        </div>
-                        <div class="">
-                            <img src="/cyllo_web/static/src/img/logo.svg"/>
-                        </div>
-                    </div>
-                    <div t-if="message" class="oe_login_form clearfix">
-                        <p class="alert alert-success mt-5" t-if="message" role="status" style="width:90%">
-                            <t t-esc="message"/>
-                        </p>
-                        <a href="/web/login" class="cy-auth__btn_reset text-center" role="button">Back to Login</a>
-                    </div>
-                    <form class="oe_reset_password_form" role="form" method="post" t-if="not message">
-                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
-                        <t t-if="token and not invalid_token">
-                            <t t-call="cyllo_web.signup_fields">
-                            <t t-set="only_passwords" t-value="1"/>
-                            </t>
-                        </t>
-                        <t t-if="not token">
-                            <div class="cy-auth__form-group field-login">
-                                <label class="cy-auth__label" for="login">Your Email<sup class="cy-auth__required">*</sup></label>
-                                <input type="text" name="login" t-att-value="login" id="login" class="form-control cy-auth__input input-tex"
-                                       autofocus="autofocus" required="required" autocapitalize="off"/>
+                <section class="cy-instance cy-instance-signup">
+                    <div style="min-height: 500px; max-height: 610px; height: 100%;">
+                        <div class="cy-instance_content">
+                            <div class="cy-step4 cy-form">
+                                <form role="form" method="post" t-if="not message">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                    <h2 class="cy-instance-title"
+                                        style="font-size: 24px; text-align: center; font-weight: 700;">
+                                        Signup up with Cyllo Cloud
+                                    </h2>
+                                    <t t-call="cyllo_web.signup_fields"/>
+                                    <div class="navigation-buttons cy-instance_col">
+                                        <button type="submit" id="signup_button" class="btn cy-login-btn next-button"
+                                                style="width: 400px; border-radius: 0.375rem; font-weight: 700;">
+                                            Sign up
+                                        </button>
+                                    </div>
+                                    <div style="text-align: center; margin-top: 44px; position: relative; z-index: 2;">
+
+                                        <p t-if="signup_enabled" class="cy-login-text">Already have an account??
+                                            <a t-attf-href="/web/login?{{ keep_query() }}" class="cy-login-text"
+                                               style="color: #9EA700 !important;">Login
+                                            </a>
+                                        </p>
+                                        <div class="o_login_auth d-none"/>
+                                    </div>
+                                </form>
                             </div>
-                        </t>
-                        <p class="alert alert-danger" t-if="error" role="alert" style="width:88%;">
-                            <t t-esc="error"/>
-                        </p>
-                        <input type="hidden" name="redirect" t-att-value="redirect"/>
-                        <input type="hidden" name="token" t-att-value="token"/>
-                        <div class="clearfix oe_login_buttons cy-auth__footer">
-                            <button type="submit" class="cy-auth__btn">Reset Password</button>
-                            <a t-if="not token" class="cy-auth__btn_reset text-center" t-attf-href="/web/login?{{ keep_query() }}">Back to Login</a>
-                            <a t-if="invalid_token" class="cy-auth__btn_reset text-center" href="/web/login">Back to Login</a>
-                            <div class="o_login_auth"/>
+                            <div class="cy-instance_bg" style="z-index: 0;">
+                                <img src="/cyllo_web/static/src/img/bg-instance.svg" alt=""/>
+                            </div>
                         </div>
-                    </form>
-                </div>
+
+                    </div>
+                </section>
             </t>
-         </xpath>
+        </xpath>
+    </template>
+    <template id="reset_password" inherit_id="auth_signup.reset_password" name="Reset password">
+        <xpath expr="//t[@t-call='web.login_layout']" position="replace">
+            <t t-call="web.frontend_layout">
+                <t t-set="html_data" t-value="{'style': 'height: 100%;'}"/>
+                <t t-set="body_classname" t-value="'bg-100'"/>
+                <t t-set="no_header" t-value="True"/>
+                <t t-set="no_footer" t-value="True"/>
+                <section class="cy-instance cy-instance-reset-password">
+                    <div style="min-height: 500px; max-height: 610px; height: 100%;">
+
+                        <div class="cy-instance_content">
+                            <t t-if="message">
+                                <div class="d-flex justify-content-center success-box-section">
+                                    <div class="cy-success-box">
+                                        <img src="/cyllo_cloud/static/src/img/success-tick.svg" alt="Success"
+                                             style="margin-bottom: 10px;"/>
+                                        <h4 class="cyllo-semibold">Reset Link Sent!</h4>
+                                        <p>Password reset instructions have been sent to your email address.</p>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="cy-step4 cy-form">
+                                    <form role="form" method="post">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+
+                                        <h2 class="cy-instance-title"
+                                            style="font-size: 24px; text-align: center; font-weight: 700;">
+                                            Reset Password
+                                        </h2>
+
+                                        <t t-if="token and not invalid_token">
+                                            <t t-call="cyllo_web.fields">
+                                                <t t-set="only_passwords" t-value="1"/>
+                                            </t>
+                                        </t>
+
+                                        <t t-if="not token">
+                                            <div class="floating-label-group mt-4">
+                                                <input type="text" name="login" class="form-control cy-input"
+                                                       t-att-value="login"
+                                                       id="login" style="padding: 13px 12px;"
+                                                       required="required" autofocus="autofocus" autocapitalize="off"
+                                                       placeholder=" "/>
+                                                <label for="login">Email</label>
+                                            </div>
+                                            <p t-if="error" class="cy-input-error">
+                                                <t t-esc="error"/>
+                                            </p>
+                                        </t>
+                                        <input type="hidden" name="redirect" t-att-value="redirect"/>
+                                        <input type="hidden" name="token" t-att-value="token"/>
+
+
+                                        <div class="navigation-buttons cy-instance_col">
+                                            <button type="submit" id="reset_password_button"
+                                                    class="btn cy-login-btn next-button"
+                                                    style="width: 400px; border-radius: 0.375rem; font-weight: 700;">
+                                                Reset Password
+                                            </button>
+                                        </div>
+
+                                        <div style="text-align: center; margin-top: 60px; position: relative; z-index: 2;">
+
+                                            <a t-if="not token" class="cy-forgot"
+                                               t-attf-href="/web/login?{{ keep_query() }}">Back to Login
+                                            </a>
+                                            <a t-if="invalid_token" class="cy-forgot" href="/web/login">Back to Login
+                                            </a>
+                                            <div class="o_login_auth d-none"/>
+                                        </div>
+                                        <input type="hidden" name="redirect" t-att-value="redirect"/>
+
+                                    </form>
+
+                                </div>
+                            </t>
+                            <div class="cy-instance_bg" style="z-index: 0;">
+                                <img src="/cyllo_web/static/src/img/bg-instance.svg" alt=""/>
+                            </div>
+                        </div>
+                    </div>
+
+                </section>
+            </t>
+        </xpath>
     </template>
 </odoo>

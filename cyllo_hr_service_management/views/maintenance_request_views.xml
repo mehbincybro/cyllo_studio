@@ -3,10 +3,12 @@
     <record id="view_maintenance_request_form" model="ir.ui.view">
         <field name="name">view.maintenance.request.form</field>
         <field name="model">maintenance.request</field>
-        <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
+        <field name="inherit_id"
+               ref="maintenance.hr_equipment_request_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='maintenance_type']" position="after">
-                <field name="service_id" readonly="1" invisible="not service_id"/>
+                <field name="service_id" readonly="1"
+                       invisible="not service_id"/>
             </xpath>
         </field>
     </record>

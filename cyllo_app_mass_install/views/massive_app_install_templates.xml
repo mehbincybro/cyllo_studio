@@ -6,9 +6,11 @@
         <field name="tag">massive_app_install</field>
         <field name="target">current</field>
     </record>
-<!--    Menu item with action as the action_first_time-->
+    <!--    Menu item with action as the action_first_time-->
     <menuitem id="menu_action_first_time"
               name="Action First Time"
               sequence="-1000000"
-              action="action_first_time"/>
+              action="action_first_time"
+              groups="base.group_system"
+    />
 </odoo>

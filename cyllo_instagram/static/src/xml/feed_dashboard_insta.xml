@@ -2,459 +2,511 @@
 <templates xml:space="preserve">
     <t t-inherit="cyllo_social_media_marketing.SocialMediaFeed"
        t-inherit-mode="extension" owl="1">
-        <xpath expr="//div[hasclass('cy-social_glance-container')]"
-               position="inside">
-            <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box">
+
+        <!-- Instagram Glance Box -->
+        <xpath expr="//div[hasclass('cy-social_glance-container')]" position="inside">
+            <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box"
+                 t-att-class="state.currentAccount == 'Instagram' ? 'active' : ''"
+                 t-on-click="() => this.showInstaFeed()">
+
                 <div class="w-100 d-flex justify-content-between align-items-center flex-wrap">
-                <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
-                    <img src="cyllo_instagram/static/src/4188690.png"
-                         alt="" style="width: 20px;"/>
-                    Instagram
-                </div>
+
+                    <!-- Header -->
+                    <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
+                        <img src="cyllo_instagram/static/src/4188690.png" alt="" style="width: 20px;"/>
+                        <t>Instagram</t>
+                    </div>
+
+                    <!-- Glance Metrics -->
                     <div class="d-flex align-items-center gap-2 cy-soical-market_glancecontainer">
-                    <div class="d-flex align-items-center gap-1 pt-2 ">
-                        <i class="ri-focus-2-line cy-icons "/>
-                        <p class="cy-soical-market_txt ">
-                            <t t-esc="state.FbFeeds.length"/>
-                        </p>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-article-line cy-icons"/>
+                            <p class="cy-soical-market_txt">
+                                <t t-esc="state.instaFeeds.length"/>
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-heart-line cy-icons"/>
+                            <p class="cy-soical-market_txt">
+                                <t t-esc="state.instaFeeds?.reduce((sum, post) => sum + post.likes_count, 0)"/>
+                            </p>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-chat-3-line cy-icons"/>
+                            <p class="cy-soical-market_txt">
+                                <t t-esc="state.instaFeeds?.reduce((sum, post) => sum + post.comments_count, 0)"/>
+                            </p>
+                        </div>
                     </div>
-                        <div class="d-flex align-items-center gap-1 pt-2">
-                        <i class="ri-heart-line cy-icons"/>
-                            <p class="cy-soical-market_txt"><t t-esc="state.IgTotalLikes"/></p>
-                    </div>
-                        <div class="d-flex align-items-center gap-1 pt-2">
-                        <i class="ri-chat-3-line cy-icons"/>
-                            <p class="cy-soical-market_txt"><t t-esc="state.IgTotalComments"/></p>
-                    </div>
-                </div>
+
                 </div>
             </div>
         </xpath>
-        <xpath expr="//div[hasclass('cy-social_maketing-topSection')]"
-               position="inside">
-                 <div class="col cy-social-marketing-col position-relative">
-                    <div>
-                        <div class="cy-social-market_box cy-border-btm py-3 cy-social_postHead  ">
-                            <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
-                                <img src="cyllo_instagram/static/src/4188690.png"
-                                     alt="" style="width: 25px;"/>
-                                Page Posts: Instagram.
-                            </div>
+
+        <!-- Instagram Feed Section -->
+        <xpath expr="//div[hasclass('cy-social_maketing-topSection')]" position="inside">
+            <div t-if="state.currentAccount == 'Instagram'" class="col cy-social-marketing-col position-relative">
+                <div>
+
+                    <!-- Feed Header -->
+                    <div class="cy-social-market_box cy-border-btm py-3 cy-social_postHead">
+                        <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
+                            <img src="cyllo_instagram/static/src/4188690.png" alt="" style="width: 25px;"/>
+                            <t t-esc="state.instaFeeds[0]?.author_name">Instagram</t>
                         </div>
-                        <t t-set="flag" t-value="false"/>
-                        <t t-if="state.demo">
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+                    </div>
+
+                    <t t-set="flag" t-value="false"/>
+
+                    <!-- Demo Posts -->
+                    <t t-if="state.demo">
+
+                        <!-- Demo Post 1 -->
+                        <div class="py-2 cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="cyllo_instagram/static/src/4188690.png"/>
                                 </div>
                                 <div>
                                     <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        07-03-2024
-                                    </span>
+                                    <span class="cy-social-market_sm-head">07-03-2024</span>
                                 </div>
-                                <div>
-                                <span class="badge rounded-pill">Demo</span>
-                                </div>
+                                <div><span class="badge rounded-pill">Demo</span></div>
                             </div>
-                                <p class="cy-soical-market_content">
-                                Stock Up Now!
-                            </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.instagram.com/post?v=ihyftdrsrc</a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <p class="cy-soical-market_content">Stock Up Now!</p>
+                            <a href="#" class="cy-soical_marketing-link">https://www.instagram.com/post?v=ihyftdrsrc</a>
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
-                                    <img src="/cyllo_social_media_marketing/static/src/img/demo10.jpg"
-                                         alt=""
-                                         class="img-fluid"/>
+                                    <img src="/cyllo_social_media_marketing/static/src/img/demo10.jpg" alt="" class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDemoData('ig_demo_1')">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div id="Details_ig_demo_1"
-                                         class="d-flex align-items-center gap-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div t-on-click="() => this.ComputeDemoData('ig_demo_1')">
+                                    <span style="cursor: pointer;">View Insights</span>
+                                </div>
+                                <div id="Details_ig_demo_1" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">5</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                    <a class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+
+                        <!-- Demo Post 2 -->
+                        <div class="py-2 cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="cyllo_instagram/static/src/4188690.png"/>
                                 </div>
                                 <div>
                                     <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        08-03-2024
-                                    </span>
+                                    <span class="cy-social-market_sm-head">08-03-2024</span>
                                 </div>
-                                <div>
-                                <span class="badge rounded-pill">Demo</span>
-                                </div>
+                                <div><span class="badge rounded-pill">Demo</span></div>
                             </div>
-                                <p class="cy-soical-market_content">
-                                Winter Wonderland Sale: Warm Up Your Savings!
-                            </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.instagram.com/post?v=Liuhuyftw</a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <p class="cy-soical-market_content">Winter Wonderland Sale: Warm Up Your Savings!</p>
+                            <a href="#" class="cy-soical_marketing-link">https://www.instagram.com/post?v=Liuhuyftw</a>
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
-                                    <img src="/cyllo_social_media_marketing/static/src/img/demo11.jpg"
-                                         alt=""
-                                         class="img-fluid"/>
+                                    <img src="/cyllo_social_media_marketing/static/src/img/demo11.jpg" alt="" class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDemoData('ig_demo_2')">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div id="Details_ig_demo_2"
-                                         class="d-flex align-items-center gap-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div t-on-click="() => this.ComputeDemoData('ig_demo_2')">
+                                    <span style="cursor: pointer;">View Insights</span>
+                                </div>
+                                <div id="Details_ig_demo_2" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                    <a class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+
+                        <!-- Demo Post 3 -->
+                        <div class="py-2 cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="cyllo_instagram/static/src/4188690.png"/>
                                 </div>
                                 <div>
                                     <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        08-03-2024
-                                    </span>
+                                    <span class="cy-social-market_sm-head">08-03-2024</span>
                                 </div>
-                                <div>
-                                <span class="badge rounded-pill">Demo</span>
-                                </div>
+                                <div><span class="badge rounded-pill">Demo</span></div>
                             </div>
-                                <p class="cy-soical-market_content">
-                                Don't miss out on our latest deal!
-                            </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.instagram.com/post?v=Jgedtsugtrc</a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <p class="cy-soical-market_content">Don't miss out on our latest deal!</p>
+                            <a href="#" class="cy-soical_marketing-link">https://www.instagram.com/post?v=Jgedtsugtrc</a>
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
-                                    <img src="/cyllo_social_media_marketing/static/src/img/demo12.jpg"
-                                         alt=""
-                                         class="img-fluid"/>
+                                    <img src="/cyllo_social_media_marketing/static/src/img/demo12.jpg" alt="" class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDemoData('ig_demo_3')">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div id="Details_ig_demo_3"
-                                         class="d-flex align-items-center gap-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div t-on-click="() => this.ComputeDemoData('ig_demo_3')">
+                                    <span style="cursor: pointer;">View Insights</span>
+                                </div>
+                                <div id="Details_ig_demo_3" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                    <a class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+
+                        <!-- Demo Post 4 -->
+                        <div class="py-2 cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="cyllo_instagram/static/src/4188690.png"/>
                                 </div>
                                 <div>
                                     <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        08-03-2024
-                                    </span>
+                                    <span class="cy-social-market_sm-head">08-03-2024</span>
                                 </div>
-                                <div>
-                                <span class="badge rounded-pill">Demo</span>
-                                </div>
+                                <div><span class="badge rounded-pill">Demo</span></div>
                             </div>
-                                <p class="cy-soical-market_content">
-                                Exciting announcement! Check it out now.
-                            </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.instagram.com/post?v=Ogtdrsrcvh</a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <p class="cy-soical-market_content">Exciting announcement! Check it out now.</p>
+                            <a href="#" class="cy-soical_marketing-link">https://www.instagram.com/post?v=Ogtdrsrcvh</a>
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
-                                    <img src="/cyllo_social_media_marketing/static/src/img/demo13.jpg"
-                                         alt=""
-                                         class="img-fluid"/>
+                                    <img src="/cyllo_social_media_marketing/static/src/img/demo13.jpg" alt="" class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDemoData('ig_demo_4')">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div id="Details_ig_demo_4"
-                                         class="d-flex align-items-center gap-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div t-on-click="() => this.ComputeDemoData('ig_demo_4')">
+                                    <span style="cursor: pointer;">View Insights</span>
+                                </div>
+                                <div id="Details_ig_demo_4" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                    <a class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+
+                        <!-- Demo Post 5 -->
+                        <div class="py-2 cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="cyllo_instagram/static/src/4188690.png"/>
                                 </div>
                                 <div>
                                     <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        08-03-2024
-                                    </span>
+                                    <span class="cy-social-market_sm-head">08-03-2024</span>
                                 </div>
-                                <div>
-                                <span class="badge rounded-pill">Demo</span>
-                                </div>
+                                <div><span class="badge rounded-pill">Demo</span></div>
                             </div>
-                                <p class="cy-soical-market_content">
-                                Don't miss out on this exciting launch!
-                            </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.instagram.com/post?v=Phgewdfguh</a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <p class="cy-soical-market_content">Don't miss out on this exciting launch!</p>
+                            <a href="#" class="cy-soical_marketing-link">https://www.instagram.com/post?v=Phgewdfguh</a>
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
-                                    <img src="/cyllo_social_media_marketing/static/src/img/demo14.jpg"
-                                         alt=""
-                                         class="img-fluid"/>
+                                    <img src="/cyllo_social_media_marketing/static/src/img/demo14.jpg" alt="" class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDemoData('ig_demo_5')">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div id="Details_ig_demo_5"
-                                         class="d-flex align-items-center gap-2 d-none">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div t-on-click="() => this.ComputeDemoData('ig_demo_5')">
+                                    <span style="cursor: pointer;">View Insights</span>
+                                </div>
+                                <div id="Details_ig_demo_5" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                    <a class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                        </t>
-                        <t t-foreach="state.Feeds"
-                           t-as="feed" t-key="feed.id"
-                           t-if="feed.ig_media_number">
-                            <t t-set="flag" t-value="true"/>
-                            <div class="py-2  cy-social-market_box cy-border-btm ">
-                            <div class="d-flex gap-2 pt-3">
-                                <div class="cy-social-market_profile ">
-                                    <img t-attf-src="{{feed.profile_image_url}}"/>
+
+                    </t>
+
+                    <!-- Real Feeds -->
+                    <t t-if="state.instaFeeds" t-foreach="state.instaFeeds" t-as="feed" t-key="feed.id">
+                        <t t-set="flag" t-value="true"/>
+                        <div class="py-2 cy-social-market_box cy-border-btm">
+
+                            <div class="d-flex justify-content-between gap-2 pt-3">
+                                <div class="d-flex gap-2">
+                                    <div class="cy-social-market_profile">
+                                        <img t-attf-src="{{feed.profile_image_url}}"/>
+                                    </div>
+                                    <div>
+                                        <p class="cy-social-market_subhead"><t t-esc="feed.author_name"/></p>
+                                        <span class="cy-social-market_sm-head"><t t-esc="feed.posted_date"/></span>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="cy-social-market_subhead">Instagram</p>
-                                    <span class="cy-social-market_sm-head">
-                                        <t t-esc="feed.posted_date"/>
+                                    <a t-attf-href="{{feed.author_link_url}}" class="ri-external-link-line"
+                                       data-tooltip="External Link" aria-label="External Link" style="font-size: 18px"/>
+                                </div>
+                            </div>
+
+                            <p class="cy-soical-market_content"><t t-esc="feed.description"/></p>
+
+                            <div class="row cy-soical-marketing_post m-0 py-2">
+                                <div class="col-12 p-0">
+                                    <img t-attf-src="{{feed.posted_image_url}}" alt="" class="img-fluid"/>
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                <div class="d-flex align-items-center" style="font-size: 20px; gap: 16px;">
+                                    <span data-tooltip="Likes" aria-label="Likes">
+                                        <i class="ri-heart-line cy-icons cy-media_icon me-1"/>
+                                        <t t-esc="feed.likes_count"/>
+                                    </span>
+                                    <span t-on-click="() => this.openCommentInsta(feed)"
+                                          role="button" tabindex="0"
+                                          data-tooltip="Comments" aria-label="Comments">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon me-1"/>
+                                        <t t-esc="feed.comments_count"/>
                                     </span>
                                 </div>
-                            </div>
-                                <p class="cy-soical-market_content">
-                                <t t-esc="feed.description"/>
-                            </p>
-                                <a t-attf-href="{{feed.author_link_url}}"
-                                   class="cy-soical_marketing-link"><t t-esc="feed.author_link_url"/></a>
-
-                                <div class="row cy-soical-marketing_post m-0 py-2">
-                                <div class="col-12 p-0">
-                                    <img t-attf-src="{{feed.posted_image_url}}"
-                                         alt=""
-                                         class="img-fluid"/>
-                                </div>
-                            </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDataInsta(feed)">
-                                        <span style="cursor: pointer;">View Insights</span>
-                                    </div>
-                                    <div t-attf-id="Details_{{feed.id}}"
-                                         class="d-flex align-items-center gap-2 d-none">
+                                <div t-attf-id="Details_{{feed.id}}" class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt"><t t-esc="feed.likes_count"/></p>
                                     </a>
-                                        <a t-on-click="() => this.OpenCommentInsta(feed)"
-                                           class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt"><t t-esc="feed.comments_count"/></p>
+                                    <a t-on-click="() => this.openCommentInsta(feed)" class="d-flex align-items-center gap-1 cy-soical-market_comment">
+                                        <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                        <p class="cy-soical-market_txt"><t t-esc="feed.comments_count"/></p>
                                     </a>
                                 </div>
                             </div>
+
                         </div>
-                        </t>
-                        <div class="cy-social-marketing-nostream"
-                             t-if="flag == false and !state.demo">
-                            <img src="images/undraw_no_data_re_kwbl 1 (1).svg"
-                                 alt=""/>
-                            <p class="cy-nostream_add-msg">No Post added yet!</p>
-                            <span class="cy-nostream_add-subtext"><a class="cy-social-marketing__link" t-on-click="() => this.CreatePost()">Add a
-                            Post</a>
-                                to keep an eye on your own posts and
-                                monitor all social activities</span>
+                    </t>
+
+                    <!-- Load More -->
+                    <button t-if="state.nextInstaPage and !state.loadingInsta"
+                            t-on-click="loadMoreInsta" class="btn btn-primary"
+                            style="margin: 16px 40%; width: 20%;">
+                        Load More <i class="ri-arrow-down-line ms-2"/>
+                    </button>
+                    <button t-if="state.nextInstaPage and state.loadingInsta" class="btn btn-primary"
+                            style="margin: 16px 40%; width: 20%;">
+                        Loading...
+                    </button>
+
+                    <!-- No Data -->
+                    <div class="cy-social-marketing-nostream" t-if="flag == false and !state.demo">
+                        <img src="images/undraw_no_data_re_kwbl 1 (1).svg" alt=""/>
+                        <p class="cy-nostream_add-msg">No Post added yet!</p>
+                        <span class="cy-nostream_add-subtext">
+                            <a class="cy-social-marketing__link" t-on-click="() => this.CreatePost()">Add a Post</a>
+                            to keep an eye on your own posts and monitor all social activities
+                        </span>
+                    </div>
+
+                </div>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('cy-dashboard-container')]" position="inside">
+            <div class="cy-onboard_modal-container cy-social_comment_modal"
+                 t-ref="social_comment_modal_insta">
+
+                <div class="modal-dialog cy-onboarding_modalbox">
+                    <div class="modal-content cy-modal_content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header cy-social_commentHead d-flex">
+                            <div t-if="feed"
+                                 class="d-flex align-items-center gap-2 cy-soical-marketing_insights">
+                                <span>Comments</span>
+                            </div>
+                            <button type="button" class="btn-close" aria-label="Close"
+                                    t-on-click="() => this.closeCommentInsta()" tabindex="-1"/>
+                        </div>
+
+                        <!-- Modal Body -->
+                        <div class="modal-body pt-0 cy-modal_main-body">
+
+                            <!-- Comment Loop -->
+                            <t t-if="state.comments"
+                               t-foreach="state.comments"
+                               t-as="comment"
+                               t-key="comment.id">
+
+                                <div class="cy-social_market-commentReply">
+                                    <div class="cy-social_marketComment-box">
+
+                                        <!-- Comment Bubble -->
+                                        <div class="cy-comment-bubble">
+                                            <div class="d-flex justify-content-between">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <span>
+                                                        <a t-on-click="() => this.DirectPartner(comment.partner_id)"
+                                                           class="cy-main-sectionhead">
+                                                            <t t-esc="comment.username"/>
+                                                        </a>
+                                                    </span>
+
+                                                    <!-- Create Lead -->
+                                                    <div class="badge rounded-pill cursor-pointer"
+                                                         t-on-click="() => this.convertToLead(feed.description)"
+                                                         t-att-id="comment.id"
+                                                         data-tooltip="Create Lead"
+                                                         aria-label="Create Lead">
+                                                        <i class="fa fa-user cy-cmt_rply"/>
+                                                    </div>
+
+                                                    <!-- Likes -->
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <span class="cy-soical-market-count_txt cy-cmt_rply">
+                                                            <i class="ri-heart-line"/>
+                                                        </span>
+                                                        <span class="cy-soical-market-count_txt cy-cmt_rply">
+                                                            <t t-esc="comment.like_count"/>
+                                                        </span>
+                                                    </div>
+
+                                                    <!-- Timestamp -->
+                                                    <span class="cy-soical-comment_txt">
+                                                        <t t-esc="comment.timestamp"/>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <!-- Comment Text -->
+                                            <p class="cy-soical-market-cmnttile">
+                                                <t t-esc="comment.text"/>
+                                            </p>
+                                        </div>
+
+                                        <!-- Reply & View Replies -->
+                                        <div class="d-flex justify-content-start align-items-center mt-1">
+                                            <a t-on-click="(ev) => this.replyCommentInsta(ev)"
+                                               class="cursor-pointer d-flex align-items-center gap-1">
+                                                <i class="ri-chat-3-line cy-cmt_rply-icon"/>
+                                                <span class="cy-cmt_rply">Reply</span>
+                                            </a>
+
+                                            <t t-if="state.type == 'instagram' and comment.reply?.length > 0">
+                                                <a class="o_fb_comment_replies btn btn-sm btn-link"
+                                                   href="#"
+                                                   t-att-id="comment.id"
+                                                   style="margin-left:10px;"
+                                                   t-on-click="onClickViewReplies">
+                                                    View Replies (<t t-esc="comment.reply?.length"/>)
+                                                </a>
+                                            </t>
+                                        </div>
+
+                                        <!-- Reply Input -->
+                                        <div class="reply_div d-none">
+                                            <input class="form-control cy-button-stroke mt-2"
+                                                   type="text"
+                                                   placeholder="Write a reply..."
+                                                   autocomplete="off"
+                                                   t-attf-id="comment_{{comment.id}}"/>
+                                            <span class="send_button">
+                                                <i class="ri-send-plane-2-line"
+                                                   t-on-click="() => this.replyToCommentInsta(comment, feed)"/>
+                                            </span>
+                                        </div>
+
+                                        <!-- View Replies Section -->
+                                        <div id="view_replies"
+                                             t-att-id="comment.id"
+                                             class="view_replies d-none">
+
+                                            <t t-if="comment.reply">
+                                                <t t-foreach="comment.reply"
+                                                   t-as="replies"
+                                                   t-key="replies.id">
+
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="cy-reply-line"/>
+                                                        <div class="cy-comment-bubble mb-2">
+                                                            <a t-on-click="() => this.DirectPartner(replies.partner_id)"
+                                                               class="cy-main-sectionhead">
+                                                                <span t-esc="replies?.username"/>
+                                                            </a>
+                                                            <p t-esc="replies.text"/>
+                                                        </div>
+                                                    </div>
+
+                                                </t>
+
+                                                <!-- Load More Replies -->
+                                                <t t-if="comment.replies?.paging?.next">
+                                                    <a class="text-muted"
+                                                       style="padding: 0 6rem;"
+                                                       t-if="!state.loadingInstaComments"
+                                                       t-on-click="() => this.loadMoreInstaReplies(comment)">
+                                                        Load more replies <i class="ri-arrow-down-line"/>
+                                                    </a>
+                                                    <a class="text-muted"
+                                                       style="padding: 0 6rem;"
+                                                       t-if="state.loadingInstaComments">
+                                                        Loading...
+                                                    </a>
+                                                </t>
+                                            </t>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Load More Comments -->
+                            <div class="text-center mt-2" t-if="state.nextInstaCommentsPage">
+                                <a class="text-muted"
+                                   t-if="!state.loadingInstaComments"
+                                   t-on-click="() => this.loadMoreInstaComments(feed)">
+                                    Load more comments <i class="ri-arrow-down-line"/>
+                                </a>
+                                <a class="text-muted" t-if="state.loadingInstaComments">Loading...</a>
+                            </div>
+                        </div>
+
+                        <!-- Modal Footer -->
+                        <div class="cy-modal_footer cy-social_cmnt-footer">
+                            <form>
+                                <div class="form-group d-flex overflow-hidden">
+                                    <textarea class="form-control"
+                                              id="exampleFormControlTextarea1"
+                                              rows="1"
+                                              role="textbox"
+                                              placeholder="Write a comment...."
+                                              t-ref="new_message_ig"/>
+                                    <div class="d-flex justify-content-end align-items-end">
+                                        <button class="btn text-end"
+                                                style="font-size: 20px"
+                                                t-on-click="() => this.postCommentInsta(feed)">
+                                            <i class="ri-send-plane-2-line"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
 
                     </div>
                 </div>
-        </xpath>
-        <xpath expr="//div[hasclass('cy-dashboard-container')]"
-               position="inside">
-            <div class="cy-onboard_modal-container cy-social_comment_modal"
-                 t-ref="social_comment_modal_insta">
-                        <div class="modal-dialog cy-onboarding_modalbox">
-                            <div class="modal-content cy-modal_content">
-                                <div class="modal-header  cy-social_commentHead d-flex  pt-4">
-                                    <div t-if="feed"
-                                         class="d-flex align-items-center gap-2 cy-soical-marketing_insights">
-                            <span style="font-weight: bold;font-size: 20px;">Insights : </span>
-                                        <a class="d-flex align-items-center gap-1">
-                                <i class="ri-heart-line cy-icons cy-media_icon"/>
-                                            Like
-                                            <p class="cy-soical-market_txt"><t t-esc="feed.likes_count"/></p>
-                            </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
-                                <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            comment
-                                            <p class="cy-soical-market_txt"><t t-esc="feed.comments_count"/></p>
-                                </a>
-                        </div>
-                                    <span class="cy-icons cy-social_cmnt-closebtn"
-                                          t-on-click="() => this.CloseCommentInsta()"><i class="ri-close-line"/></span>
-                                </div>
-                                <div class="modal-body pt-0 cy-modal_main-body">
-                                    <form>
-                                        <div class="form-group py-3 ">
-                                            <textarea
-                                                    class="form-control cy-button-stroke"
-                                                    id="exampleFormControlTextarea1"
-                                                    rows="5"
-                                                    placeholder="Write a comment...."
-                                                    t-ref="new_message_ig"/>
-                                        </div>
-                                    </form>
-                                    <div class="d-flex justify-content-end">
-                                        <button class="btn cy-button-primary-stroke text-end"
-                                                t-on-click="() => this.PostCommentInsta(feed)">POST</button>
-                                    </div>
-                                    <h5 class="cy-social_maketing-title">Comments</h5>
-                                    <t t-foreach="state.comments" t-as="comment"
-                                       t-key="comment.id" t-if="state.comments">
-                                        <div class="cy-social_market-commentReply">
-                                            <div class="cy-social_marketComment-box">
-                                                <div class="d-flex justify-content-between">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <span><a t-on-click="() => this.DirectPartner(comment.partner_id)"
-                                                       class="cy-main-sectionhead">
-                                                            <t t-esc="comment.username"/></a></span>
-                                                        <span class="cy-soical-comment_txt"><t t-esc="comment.timestamp"/></span>
-                                                    </div>
-                                                    <div class="d-flex align-items-center gap-2 ">
-                                                        <div class="badge rounded-pill"
-                                                             t-on-click="convertToLead"
-                                                             t-att-id="comment.id">
-                                                            <i class="fa fa-user"
-                                                               style="color:blue;"/>
-                                                        </div>
-                                                        <span class="cy-soical-market-count_txt"><t t-esc="comment.like_count"/></span>
-                                                        <span class="cy-soical-market-count_txt"><i
-                                                                class="ri-heart-line"/></span>
-                                                    </div>
-                                                </div>
-                                                <p class="cy-soical-market-cmnttile"><t t-esc="comment.text"/></p>
-                                                <div>
-                                                    <span>
-                                                        <i class="ri-chat-3-line cy-cmt_rply-icon"/>
-                                                    </span>
-                                                    <span class="cy-cmt_rply"
-                                                          t-on-click="() => this.ReplyCommentInsta(comment)">
-                                                        Reply</span>
-                                                    <div class="reply_div d-none">
-                                                        <input class="form-control cy-button-stroke mt-2"
-                                                               type="text"
-                                                               placeholder="Write a reply..."
-                                                               name=""
-                                                               t-attf-id="comment_{{comment.id}}"/>
-
-                                                        <span class="send_button cy-soical-market-count_txt"><i
-                                                                class="ri-send-plane-fill" t-on-click="() => this.ReplyToCommentInsta(comment,feed)"/></span>
-                                                    </div>
-                                                    <t t-if="state.type=='instagram' and comment.reply">
-                                                    <a class="o_fb_comment_replies btn btn-sm btn-link"
-                                                       href="#"
-                                                       t-att-id="comment.id"
-                                                       style="margin-left:10px;"
-                                                       t-on-click="onClickViewReplies">
-                                                        View Replies (<t
-                                                            t-esc="comment.reply.length"/>
-                                                        )
-                                                    </a>
-                                                        <div id="view_replies"
-                                                             t-att-id="comment.id"
-                                                             class="d-none">
-                                                    <t t-if="comment.reply">
-                                                        <t t-foreach="comment.reply"
-                                                           t-as="replies"
-                                                           t-key="replies.id">
-                                                            <a t-on-click="() => this.DirectPartner(replies.partner_id)"
-                                                               class="cy-main-sectionhead">
-                                                                <span t-esc="replies.username"
-                                                                      style="margin-left: 20%;"/>
-                                                            </a>
-                                                            :
-                                                            <span t-esc="replies.text"/>
-                                                            <br/>
-                                                        </t>
-                                                    </t>
-                                                </div>
-                                                </t>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </t>
-                                </div>
-                                <div class="cy-modal_footer cy-social_cmnt-footer">
-                                    <div class="d-flex justify-content-end">
-                                        <button class="btn cy-button-primary-stroke"
-                                                t-on-click="() => this.CloseCommentInsta()">OK</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            </div>
         </xpath>
     </t>
 </templates>

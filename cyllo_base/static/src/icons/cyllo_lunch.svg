@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>.lunch_cls-1{fill:#26261A;}.lunch_cls-2{fill:#BCBBA7;}.lunch_cls-3{fill:#a9a896;}.lunch_cls-4{fill:#c9c9b9;}.lunch_cls-5{fill:#BEBBA0;}
+        </style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="lunch_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="lunch_cls-2" style="fill:#BCBBA7 !important;" d="M624.14,518.67v12.89H225.86V518.67a199.14,199.14,0,1,1,398.28,0Z"/>
+            <path class="lunch_cls-3" style="fill:#a9a896 !important;" d="M624.14,518.67v12.89H425v-212A199.12,199.12,0,0,1,624.14,518.67Z"/>
+            <path class="lunch_cls-4" style="fill:#c9c9b9 !important;" d="M463.17,307.12A38.17,38.17,0,1,1,425,269,38.21,38.21,0,0,1,463.17,307.12Z"/>
+            <rect class="lunch_cls-4" style="fill:#c9c9b9 !important;" x="205.14" y="505.79" width="439.71" height="59.26"/>
+            <path class="lunch_cls-5" style="fill:#BEBBA0 !important;" d="M425,345.3V269a38.17,38.17,0,1,1,0,76.34Z"/>
+            <rect class="lunch_cls-5" style="fill:#BEBBA0 !important;" x="425" y="505.79" width="219.86" height="59.26"/>
+        </g>
+    </g>
+</svg>

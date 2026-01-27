@@ -1,0 +1,211 @@
+
+.cy-right-header-menugroup {
+    gap: 5px;
+    border: 1px solid #9EA700;
+    border-radius: 50px;
+    padding: 4px 5px !important;
+}
+
+.cy-right-header-menugroup-item a {
+    text-decoration: none;
+}
+
+.cy-right-header-menugroup-item a i {
+    color: var(--text);
+}
+
+.o_main_navbar .o_menu_systray .nav-link.cy-nav-links {
+    color: var(--text);
+}
+
+.o_main_navbar .o_menu_systray .o_switch_company_menu .dropdown-toggle:hover,
+.o_main_navbar .o_menu_systray .nav-link.cy-nav-links:hover {
+    color: rgba(0, 0, 0, 0.5);
+}
+
+.o_main_navbar .o_menu_systray .o-dropdown.dropdown.o-dropdown--no-caret:has(button > .fa-circle.text-danger),
+.o_main_navbar .o_menu_systray .o_debug_manager {
+    width: 30px;
+    height: 30px;
+    margin-right: 4px;
+    border-radius: 50%;
+    justify-content: center;
+
+    button {
+        padding: 0;
+    }
+
+    .fa-bug {
+        font-size: 20px;
+    }
+}
+
+.o_main_navbar .o_menu_systray .o-dropdown.dropdown.o-dropdown--no-caret:has(button > .fa-circle.text-danger):hover,
+.o_main_navbar .o_menu_systray .o_debug_manager:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+
+}
+
+.cy-right-header-menugroup li {
+    list-style: none;
+}
+
+.cy-right-header-menugroup-item .dropdown-toggle {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+
+.cy-tray {
+    position: relative;
+    display: inline-block;
+    width: 36px !important;
+    height: 36px !important;
+    border: none;
+    border-radius: 50% !important;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s linear;
+}
+
+.cy-tray:hover {
+    background-color: #e5e5e5;
+    transition: background 0.2s linear;
+}
+
+.cy-tray__btn {
+    width: 36px !important;
+    height: 36px !important;
+    background-color: transparent;
+    border: none;
+    border-radius: 50% !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s linear;
+}
+
+.cy-tray--show .cy-tray__btn-icon {
+    transform: rotate(-180deg);
+}
+
+.cy-tray__menu {
+    display: block;
+    width: 210px;
+    background-color: #ffffff;
+    border: 1px solid #e9e9e9;
+    box-shadow: rgba(0, 0, 0, 0.04) 0px 3px 5px;
+    display: none;
+    border-radius: 6px;
+}
+
+.cy-tray--show .cy-tray__menu {
+    display: block;
+}
+
+.cy-tray__menu-items {
+    padding-left: 0;
+    list-style: none;
+}
+
+.cy-tray__menu-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0.5rem;
+    gap: 5px;
+    cursor: pointer;
+    border-bottom: 1px solid #e9e9e9;
+    transition: background 0.2s linear;
+}
+
+.cy-tray__menu-item-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.cy-tray__menu-item .cy-tray__menu-pin {
+    color: #6d6d6d;
+}
+
+.cy-tray__menu-icon {
+    font-size: 20px;
+    width: inherit;
+}
+
+.cy-tray__menu-icon .systray_dark_root {
+    justify-content: unset;
+}
+
+.cy-tray__menu-item:hover {
+    background-color: #f5f5f5;
+    transition: background 0.2s linear;
+}
+
+.cy-tray__menu-item:last-child {
+    border-bottom: none;
+}
+
+.cy-tray__menu {
+    top: 125%;
+    right: 0;
+    position: absolute;
+}
+
+.cy-systray-parent-class {
+    gap: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.cy-systray-label {
+    font-size: 14px;
+    text-wrap: nowrap;
+    color: var(--text);
+}
+
+.cy-tray__menu .dropdown-toggle {
+    padding-left: 0 !important;
+    width: 100% !important;
+}
+
+.cy-tray__menu .dropdown-toggle:hover {
+    color: inherit;
+}
+
+.cy-stray-icon-sp {
+    padding-left: 5px !important;
+}
+
+.cy-tray__menu-icon .o-mail-DiscussSystray-class:hover {
+    background-color: unset;
+}
+
+.cy-right-header-menugroup .cy-right-header-menugroup-item > div:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.cy-right-header-menugroup-item .o-dropdown {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+.cy-tray__menu-icon .cy-dial__pad {
+    left: 93%;
+}
+
+[data-darkreader-scheme="dark"] {
+    .o_main_navbar .o_menu_systray .o-dropdown.dropdown.o-dropdown--no-caret:has(button > .fa-circle.text-danger):hover,
+    .o_sticky_icon:hover,
+    .cy-right-header-menugroup .cy-right-header-menugroup-item > div:hover,
+    .o_main_navbar .o_menu_systray .o_debug_manager:hover {
+        background-color: #323227;
+
+    }
+
+}

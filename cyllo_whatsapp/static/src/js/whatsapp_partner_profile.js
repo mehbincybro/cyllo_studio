@@ -7,7 +7,7 @@ import { useState, useRef } from "@odoo/owl";
 export class WhatsappPartnerProfile extends Component {
     setup() {
         this.state = useState({countVisible: false,})
-        this.root = useRef('root')
+        this.root = useRef('profile')
     }
 
     /*  click of partner triggers a custom event named 'CLICK_PARTNER' using

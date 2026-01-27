@@ -21,13 +21,9 @@ export class CompanyDetailsDialog extends Component {
     async _cancel() {
         this.props.close();
     }
-
 }
-// Define the template for the DeleteDialog component
 CompanyDetailsDialog.template = "cyllo_dashboard.CompanyDetailsDialog"
-// Define the components used in the DeleteDialog
 CompanyDetailsDialog.components = { Dialog }
-// Define default properties for the DeleteDialog component
 CompanyDetailsDialog.defaultProps = {
     confirmLabel: _t("Confirm"),
     cancelLabel: _t("Cancel"),

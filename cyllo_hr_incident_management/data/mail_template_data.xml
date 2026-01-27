@@ -6,9 +6,8 @@
         <field name="name">Incident Receptor Notification Email</field>
         <field name="model_id"
                ref="cyllo_hr_incident_management.model_hr_incident"/>
-        <field name="email_to">{{ object.incident_receptor_email }}
-        </field>
-        <field name="subject">Submitted Incident: {{ object.incident_category_id.name or 'n/a'}} - {{object.name}}</field>
+        <field name="email_to">{{object.incident_receptor_email}}</field>
+        <field name="subject">Submitted Incident: {{object.incident_category_id.name or 'n/a'}} - {{object.name}}</field>
         <field name="body_html" type="html">
             <table border="0" cellpadding="0" cellspacing="0"
                    style="padding-top:16px;background-color: #F1F1F1; font-family:Verdana, Arial,sans-serif; color: #454748; width: 100%; border-collapse:separate;">
@@ -158,8 +157,7 @@
         <field name="name">Incident Handler Notification Email</field>
         <field name="model_id"
                ref="cyllo_hr_incident_management.model_hr_incident"/>
-        <field name="email_to">{{ object.incident_handler_email }}
-        </field>
+        <field name="email_to">{{ object.incident_handler_email }}</field>
         <field name="subject">Assigned Incident: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
         <field name="body_html" type="html">
             <table border="0" cellpadding="0" cellspacing="0"
@@ -308,8 +306,7 @@
         <field name="name">Incident Initiator Notification Email</field>
         <field name="model_id"
                ref="cyllo_hr_incident_management.model_hr_incident"/>
-        <field name="email_to">{{ object.incident_initiator_email }}
-        </field>
+        <field name="email_to">{{ object.incident_initiator_email }}</field>
         <field name="subject">Started the Incident Enquiry: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
         <field name="body_html" type="html">
             <table border="0" cellpadding="0" cellspacing="0"
@@ -455,8 +452,7 @@
         </field>
         <field name="model_id"
                ref="cyllo_hr_incident_management.model_hr_incident"/>
-        <field name="email_to">{{ object.incident_receptor_email }}
-        </field>
+        <field name="email_to">{{ object.incident_receptor_email }}</field>
         <field name="subject">Completed the Incident Enquiry: {{ object.incident_category_id.name or 'n/a' }} - {{object.name}}</field>
         <field name="body_html" type="html">
             <table border="0" cellpadding="0" cellspacing="0"

@@ -4,18 +4,18 @@
     <t t-name="cyllo_whatsapp.WhatsappIcon" owl="1">
         <!--Current user's language displayed in systray -->
         <Dropdown position="'bottom-end'">
-            <t t-set-slot="toggler" autoOpen="false"
-               beforeOpen.bind="beforeOpen"
-               onStateChanged="state => this.state.isOpen = state.open"
-               position="'bottom-end'"
-               menuClass="discussSystray.menuClass"
-               class="discussSystray.class">
-                <i class="ri-whatsapp-line cy-icons" role="img"
-                   aria-label="Messages"/>
-                <span t-if="this.state.counter"
-                      class="o-mail-MessagingMenu-counter badge rounded-pill">
-                    <t t-esc="this.state.counter"/>
-                </span>
+            <t t-set-slot="toggler">
+                <div class="cy-systray-parent-class">
+                    <div>
+                        <i class="ri-whatsapp-line cy-icons cy-stray-icon-sp" role="img" aria-label="Messages"/>
+                        <span t-if="this.state.counter" class="o-mail-MessagingMenu-counter badge badge-clock">
+                            <t t-esc="this.state.counter"/>
+                        </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Whatsapp
+                    </span>
+                </div>
             </t>
             <t t-set-slot="default">
                 <div t-att-class="`${discussSystray.contentClass} o-mail-MessagingMenu`">
@@ -58,12 +58,16 @@
                                     </div>
                                     <div class="d-flex">
                                         <div class="flex-grow-1 text-start">
-                                            <span t-if="channel.last_message">
+                                            <span t-if="channel.last_messenger">
                                                 <t t-esc="channel.last_messenger"/>
                                                 :
                                             </span>
                                             <span t-if="channel.last_message"
                                                   t-esc="channel.last_message"/>
+                                            <span t-else=""><i
+                                                    class="fa fa-paperclip btn border-0 rounded-pill"/>
+                                                Media
+                                            </span>
                                         </div>
                                         <div class="d-flex align-items-center">
                                             <span t-if="channel.message_count != 0"
@@ -85,7 +89,7 @@
         </Dropdown>
         <div t-ref="whatsapp_window"
              class="o-mail-ChatWindow border border-bottom-0 position-fixed bottom-0 overflow-hidden d-flex flex-column rounded-top-3 d-none"
-             style="position: absolute;bottom: 0px;max-width: 325px;top: 56vh;background: white;border: 1px solid black;min-height: 400px; right: 10px;">
+             t-attf-style="position: absolute; right: 10px; bottom: 0px;max-width: 360px;top: 49vh;background: white;border: 1px solid black;min-height: 400px;">
             <div class="o-mail-ChatWindow-header d-flex align-items-center flex-shrink-0 bg-100 cursor-pointer border-bottom">
                 <div class="text-truncate fw-bold border border-transparent me-1 my-0 ms-3"
                      title="New message">
@@ -157,5 +161,12 @@
                 <br/>
             </div>
         </DropdownItem>
+    </t>
+    <t t-inherit="mail.ChatWindowContainer" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='chatWindowService.visible']" position="replace">
+        <t t-foreach="chatWindowService.visible" t-as="chatWindow" t-key="chatWindow.thread?.localId">
+            <ChatWindow chatWindow="chatWindow" right="CHAT_WINDOW_END_GAP_WIDTH + (chatWindow_index+this.chatWindowService.whatsapp) * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_INBETWEEN_WIDTH * 2)"/>
+        </t>
+        </xpath>
     </t>
 </templates>

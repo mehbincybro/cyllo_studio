@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 
 
@@ -38,6 +58,9 @@ class DocumentTrash(models.Model):
     days = fields.Integer(help="auto delete in days")
     delete_date = fields.Date(string='Date Delete', help="Date when the document will be deleted")
     file_url = fields.Char(help="it store url while adding an url document")
+    doc_no = fields.Integer()
+    company_id = fields.Many2one('res.company', help='choose company',
+                                 default=lambda self: self.env.company)
 
     @api.onchange('days')
     def _onchange_days(self):
@@ -57,7 +80,7 @@ class DocumentTrash(models.Model):
             'name': self.name,
             'extension': self.extension,
             'attachment': self.attachment,
-            'date': fields.Date.today(),
+            'date': fields.Datetime.today().now(),
             'workspace_id': self.workspace_id.id,
             'user_id': self.user_id.id,
             'content_type': self.content_type,
@@ -69,13 +92,15 @@ class DocumentTrash(models.Model):
             'user_ids': self.user_ids.ids,
             'partner_id': self.partner_id,
             'days': self.days,
+            'attachment_id': self.attachment_id.id,
         })
         attachment_id = self.env['ir.attachment'].sudo().create({'name': self.name,
                                                                  'datas': self.attachment,
                                                                  'res_model': 'document.file',
                                                                  'res_id': self.id,
                                                                  })
-        doc_id.attachment_id = attachment_id.id
+
+
         self.unlink()
         return {
             'name': _('Trash'),

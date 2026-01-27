@@ -1,16 +1,37 @@
 # -*- coding: utf-8 -*-
-from odoo import http
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import psutil
 import subprocess
-from odoo.tools import config
 import platform
-from odoo.http import request
+
+from odoo.http import Controller, request, route
+from odoo.tools import config
 
 
-class PerformanceController(http.Controller):
+class PerformanceController(Controller):
     """Controller for managing system performance data."""
 
-    @http.route('/performance', methods=['POST'], type='json', auth='user', csrf=False)
+    @route('/performance', methods=['POST'], type='json', auth='user',
+                csrf=False)
     def get_performance(self):
         """System performances"""
         sorted_tuples = ()
@@ -28,10 +49,11 @@ class PerformanceController(http.Controller):
         get_load_avg = psutil.getloadavg()
         try:
             temperatures = psutil.sensors_temperatures(fahrenheit=False)
-            hardware_temperature = round(temperatures['k10temp'][0].current) if ('k10temp' in temperatures) else 0
+            hardware_temperature = round(
+                temperatures['k10temp'][0].current) if (
+                    'k10temp' in temperatures) else 0
         except AttributeError:
             hardware_temperature = 0
-
         """CPU core wise usages"""
         cpu_usage = psutil.cpu_percent(percpu=True)
         core_usage_list = []
@@ -42,7 +64,8 @@ class PerformanceController(http.Controller):
         try:
             processes = psutil.process_iter(['name', 'memory_info', 'pid'])
             program_memory_list = []
-            ram_processes = sorted(processes, key=lambda a: a.memory_info().rss if psutil.pid_exists(a.pid) else 0.0,
+            ram_processes = sorted(processes, key=lambda
+                a: a.memory_info().rss if psutil.pid_exists(a.pid) else 0.0,
                                    reverse=True)[:4]
             for process in ram_processes:
                 try:
@@ -50,13 +73,13 @@ class PerformanceController(http.Controller):
                     memory_info = process.memory_info().rss
                     if memory_info is not None:
                         program_memory = {
-                            process_name: round(((memory_info * 0.001) / total_virtual_memory_kb) * 100, 2)
+                            process_name: round(
+                                ((memory_info * 0.001) / total_virtual_memory_kb) * 100, 2)
                         }
                         program_memory_list.append(program_memory)
                 except psutil.AccessDenied:
                     # Access to process denied, skip it
                     pass
-
             result_dict = {}
             for dictionary in program_memory_list:
                 for key, value in dictionary.items():
@@ -65,7 +88,6 @@ class PerformanceController(http.Controller):
                             result_dict[key] = value
                     else:
                         result_dict[key] = value
-
             tuples = list(result_dict.items())
             sorted_tuples = sorted(tuples, key=lambda x: x[1], reverse=True)
         except psutil.AccessDenied:
@@ -77,15 +99,16 @@ class PerformanceController(http.Controller):
             'hardware_temperature_history': hardware_temperature,
             'cpu_usage_history': total_cpu_usage,
         })
-
         used_memory_history = []
         used_ram_history = []
         hardware_temperature_history = []
         cpu_usage_history = []
         for value in request.env['performance.history.time'].search([]):
-            used_memory_date = [value.create_date.date(), value.used_memory_history]
+            used_memory_date = [value.create_date.date(),
+                                value.used_memory_history]
             used_ram_date = [value.create_date.date(), value.used_ram_history]
-            hardware_temperature_date = [value.create_date.date(), value.hardware_temperature_history]
+            hardware_temperature_date = [value.create_date.date(),
+                                         value.hardware_temperature_history]
             cpu_usage_time = [value.create_date.date(), value.cpu_usage_history]
             used_memory_history.append(used_memory_date)
             used_ram_history.append(used_ram_date)
@@ -104,8 +127,10 @@ class PerformanceController(http.Controller):
             'db_user': config.get('db_user'),
             'osv_memory_count_limit': config.get('osv_memory_count_limit'),
             'transient_age_limit': config.get('transient_age_limit'),
-            'limit_memory_hard': round((config.get('limit_memory_hard') / 1000000000), 2),
-            'limit_memory_soft': round((config.get('limit_memory_soft') / 1000000000), 2),
+            'limit_memory_hard': round(
+                (config.get('limit_memory_hard') / 1000000000), 2),
+            'limit_memory_soft': round(
+                (config.get('limit_memory_soft') / 1000000000), 2),
             'limit_request': config.get('limit_request'),
             'limit_time_cpu': config.get('limit_time_cpu'),
             'limit_time_real': config.get('limit_time_real'),
@@ -136,10 +161,11 @@ class PerformanceController(http.Controller):
             'cpu_usage_history': cpu_usage_history[-10:],
         }
 
-    @http.route('/cpu', methods=['POST'], type='json', auth='user', csrf=False)
+    @route('/cpu', methods=['POST'], type='json', auth='user', csrf=False)
     def get_cpu_performance(self):
         """Most using CPU using programs"""
-        top_output = subprocess.run(["top", "-b", "-n", "1"], capture_output=True).stdout.decode()
+        top_output = subprocess.run(["top", "-b", "-n", "1"],
+                                    capture_output=True).stdout.decode()
         lines = top_output.split("\n")
         process_lines = lines[7:]
         cpu_usage = {}

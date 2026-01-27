@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<!--    This cron job is responsible for scheduling the dark mode enable task.-->
-<!--    It runs daily, and its purpose is to perform dark mode scheduling operations.-->
+<!--    This cron job is responsible for run each activity.-->
     <record id="ir_cron_marketing_automation_run_activity" model="ir.cron">
         <field name="name">Marketing Automation: Run Activity</field>
         <field name="interval_number">1</field>

@@ -83,7 +83,6 @@
 
 }
 
-
 .cy-sales-forecast_graphtype:hover,
 .cy-sales-forecast_graphtype:focus,
 .cy-sales-forecast_graphtype.active {
@@ -93,13 +92,11 @@
 
 .cy-chart-type {
     border-radius: 2px !important;
-
 }
 
 .cy-sale-forecast_graph-container {
     height: 460px;
     width: 100%;
-
 }
 
 .cy-sales-forecast-img {
@@ -146,7 +143,7 @@
 
 .cy-sales-cust_head {
     color: #222222;
-    font-size: 1rem;
+    font-size: 18px;
     font-weight: 500;
     white-space: nowrap;
     margin: 0.5rem 0;
@@ -169,12 +166,6 @@
     color: #0E3A5D;
     font-size: 1rem;
     font-weight: 500;
-}
-
-.cy-sale-custom_detail-table {
-    height: 150px;
-    overflow-y: auto;
-    display: block;
 }
 
 @media (max-width: 992px) {
@@ -213,10 +204,11 @@
     font-weight: 500;
     padding: 0.4rem 0.2rem;
     font-size: 12px;
+    transform: translateY(-16px);
 }
 
 .cy-sales-analysis_custom-headline {
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 600;
     padding: 0.4rem 0;
     color: black;
@@ -234,15 +226,9 @@
     background: #fff;
 }
 
-.cy-sales-analysis_custom-headline {
-    font-size: 12px;
-    font-weight: 600;
-    padding: 0.4rem 0;
-    color: black;
-}
 
 .cy-sale-custom_detail-table {
-    height: 150px;
+    height: 160px;
     overflow-y: auto;
     display: block;
 }
@@ -394,7 +380,6 @@
     color: grey;
     margin-top: -30px;
     width: 100%
-
 }
 
 @media (max-width: 768px) {
@@ -427,7 +412,6 @@
     left: 0px;
     font-weight: 500;
     border: 1px solid #DFDFDF;
-
 }
 
 .cy-demand_predict-list {
@@ -437,8 +421,6 @@
     background-color: #fff;
     margin: 1rem 0;
     max-height: 82vh;
-
-
 }
 
 .cy-demand_predict-list_item {
@@ -446,7 +428,7 @@
 }
 
 .cy-empty_text {
-    max-width: 64%;
+    width: 100%;
     color: #505050;
     text-align: center;
 }
@@ -601,7 +583,6 @@
 .cy-demand_predict-list {
     padding-left: 0px;
     list-style: none;
-
     overflow-y: auto;
 }
 
@@ -633,10 +614,9 @@
 }
 
 .cy-demand_predict-btn {
-
     cursor: pointer;
     position: relative;
-    padding: 1rem;
+    padding: 8px;
     color: #505050;
     font-size: 14px;
     font-family: "Inter", sans-serif;
@@ -645,6 +625,7 @@
     display: flex;
     align-items: center;
     border-radius: 6px;
+    margin-bottom: 8px;
 }
 
 .cy-demand_predict-btn:hover, .cy-demand_predict-btn.active {
@@ -653,10 +634,14 @@
     color: #94b300;
 }
 
+.cy-demand_predict-btn img {
+    border-radius: 5px;
+    margin-right: 8px;
+}
+
 .cy_demand_predict-nodata {
     background-color: #fff;
     padding-left: 0px;
-
 }
 
 .cy-demand_prediction-table {
@@ -789,7 +774,7 @@
 
 .cy-churn_tile-text {
     color: #222222;
-    font-size: 16px;
+    font-size: 20px;
     font-weight: 600;
     margin-bottom: 0px;
 }
@@ -799,7 +784,7 @@
 }
 
 .cy-churn_tile--perc {
-    font-size: 42px;
+    font-size: clamp(28px, 1vw + 1rem, 42px);
     color: #505050;
     font-weight: 300;
     margin-top: 0.8rem;
@@ -827,20 +812,20 @@
 
 .top-churn-tile {
     margin-right: 2%;
-    /*margin-right: 18px;*/
 }
 
 
 .cy-churn_tile--icon {
     font-size: 18px;
     padding: 3px 12px;
+    border-radius: 5px;
     background-color: #f9aa4f;
     width: -webkit-fit-content;
     width: -moz-fit-content;
     width: fit-content;
     color: #fff;
-    width: 42px;
-    height: 42px;
+    width: 50px;
+    height: 50px;
     display: -webkit-box;
     display: -ms-flexbox;
     display: flex;
@@ -854,7 +839,7 @@
 
 .cy-marketing-auto_add-parent-container {
     position: absolute;
-    border-radius: 4px;
+    border-radius: 5px;
     border: 1px solid #dfdfdf;
     background: #fff;
     -webkit-box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.09);
@@ -902,21 +887,6 @@
     border: none;
     margin-top: 0px !important;
 }
-
-/*.cy-button-primary-stroke {*/
-/*    border-radius: 6px;*/
-/*    border-top: 1px solid #4B9212;*/
-/*    border-right: 1px solid #4B9212;*/
-/*    border-bottom: 1px solid #4B9212;*/
-/*    border-left: 1px solid #4B9212;*/
-/*    -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);*/
-/*    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);*/
-/*    background: #5EB717;*/
-/*    color: #fff;*/
-/*    font-weight: 600;*/
-/*    font-size: 13px;*/
-/*    text-shadow: 0.200000003px 0.200000003px 0px rgba(0, 0, 0, 0.25);*/
-/*}*/
 
 .cy-button--box {
     background-color: transparent !important;
@@ -978,28 +948,15 @@
 
 .cy-empty_data {
     position: absolute;
+    transform: translate(-50%, -50%);
+    left: 45%;
     top: 50%;
-    transform: translate(-50%, -50%);
-    left: 60%;
-    width: 100%;
-    top: 60%;
-}
-
-.cy-empty_data {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    left: 50%;
-    width: 100%;
-    top: 60%;
 }
 
 .cy_sale-empty_data {
-    position: absolute;
-    transform: translate(-50%, -50%);
-    left: 55%;
     width: 100%;
-    height: 50%;
-    top: 40rem;
+    display: flex;
+    height: 70vh;
 }
 
 .cy_churn_info_content {
@@ -1081,9 +1038,7 @@
 
     display: none;
     width: max-content;
-
     overflow: hidden;
-
 }
 
 .cy-template-title-info-container-box {
@@ -1106,17 +1061,13 @@
     font-size: 12.8px;
     color: #505050 !important;
     background-color: #fff;
-
     transform: scale(1.1) translateX(24px);
     box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
     font-weight: 600;
-
-
 }
 
 .cy-template-title-info-container-box:hover .cy-sales-analysis--hover {
     display: block;
-
 }
 
 .cy-demand-prdt-info-date {
@@ -1128,8 +1079,8 @@
 }
 
 .demand_prediction_chart {
-    width: 76vw;
-    height: 50vh;
+    width: 100%;
+    height: 45vh;
 }
 
 .o_image_40_contain {
@@ -1146,7 +1097,7 @@
 
 .cyllo_demand_prdt_main-container .cy-search {
     border-radius: 6px 0 0 6px !important;
-    border: 1px solid #ced4da;
+    background-color: #f1f1f1;
 }
 
 .cy-dem-prod-search {
@@ -1162,7 +1113,8 @@
     border-radius: 0.5rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
-.cyllo_demand_prdt_main-container .form-control:focus{
-    border: 1px solid #CED4DA;
+
+.cyllo_demand_prdt_main-container .form-control:focus {
+    border: 1px solid #f1f1f1;
     box-shadow: unset !important;
 }

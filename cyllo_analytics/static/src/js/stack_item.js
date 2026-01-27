@@ -35,7 +35,7 @@ export class StackItem {
      */
     addElement(){
         this.el = document.createElement('div')
-        this.el.classList.add("edit-border")
+        this.el.classList.add("edit-border", "background-color-class")
         const { unit, graph_height, graph_width } = this.params
         var width = graph_width ? (unit -1) * graph_width : this.parent.clientWidth
         var height = ((unit - 1) * (graph_height || 3)) - 5
@@ -43,7 +43,8 @@ export class StackItem {
         this.el.style.width = width + 'px'
         this.el.style.height = height + 'px'
         this.el.style.border = `1.5px ridge #000000;`
-        this.eChart = echarts.init(this.el, this.theme)
+        const themeName = this.params.isDarkMode ? `${this.theme}_dark` : this.theme
+        this.eChart = echarts.init(this.el, themeName)
         this.eChart.setOption(this.options)
         this.parent.appendChild(this.el)
         this.addChartProps()

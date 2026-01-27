@@ -24,6 +24,7 @@ FilterDropdown.defaultProps = {
     footer: true,
     class: "cy-active-btn cy-market-activity-btn",
     onClick: () => {},
+    mainClass: ""
 };
 FilterDropdown.template = "cyllo_analytics.filterDropdown"
 FilterDropdown.props = {
@@ -33,4 +34,5 @@ FilterDropdown.props = {
     class: { type: String, optional: true },
     onClick: { type: Function, optional: true },
     slots: { type: Object, optional: true },
+    mainClass: { type: String, optional: true },
 }

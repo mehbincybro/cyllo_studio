@@ -15,7 +15,6 @@ import {Apps} from "./app";
 import {SelectedAppDetails} from "./selected_app_details";
 import {_t} from "@web/core/l10n/translation";
 
-
 const COLORPICKER = ['cy-app-install-color__label--transparent', 'cy-app-install-color__label--red', 'cy-app-install-color__label--orange', 'cy-app-install-color__label--yellow', 'cy-app-install-color__label--blue', 'cy-app-install-color__label--sakura', 'cy-app-install-color__label--beige', 'cy-app-install-color__label--turquoise', 'cy-app-install-color__label--purple', 'cy-app-install-color__label--pink', 'cy-app-install-color__label--green', 'cy-app-install-color__label--lavender']
 
 /**
@@ -40,14 +39,19 @@ export class AppDrawer extends Component {
             // Function to display loading messages
             const showLoading = () => {
                 const erpFacts = [
-                    "Did you know Cyllo is an open-source ERP software with enterprise-level features, designed to streamline and optimize various business processes?",
-                    "With Cyllo, businesses gain access to insightful analytics that accelerate decision-making and drive growth.",
-                    "Cyllo analytics offer powerful data visualization and analysis tools to empower businesses with actionable insights."
+                    "Cyllo is an open-source ERP designed to streamline business processes.",
+                    "Cyllo analytics boost decision-making and drive growth.",
+                    "AI-powered Cyllo offers advanced BI for smarter insights.",
+                    "Cyllo's modular design customizes ERP for Sales, HR, and more.",
+                    "User-friendly Cyllo helps teams adapt quickly, improving productivity."
                 ];
                 var factIndex = 0;
+                if (this.rootRef.el) {
+                    $(this.rootRef.el.querySelector('#cy-app-install-cyllo-info')).text(erpFacts[factIndex]).fadeIn(500);
+                }
+                factIndex++;
                 return setInterval(() => {
                     if (this.rootRef.el) {
-                        $(this.rootRef.el.querySelector('#cy-app-install-loading-text')).text('Your ERP is cooking...');
                         $(this.rootRef.el.querySelector('#cy-app-install-cyllo-info')).fadeOut(500, function () {
                             $(this).text(erpFacts[factIndex]).fadeIn(500);
                         });
@@ -68,6 +72,7 @@ export class AppDrawer extends Component {
         this.ormService = useService("orm");
         document.querySelector(".o_main_navbar").style.display = 'none';
         document.querySelector(".cy-left-sidebar").style.display = 'none';
+        document.querySelector(".cy-submenu-box").style.display = 'none';
         this.rpc = useService("rpc");
         this.rootRef = useRef('root')
         this.radioState = useState({
@@ -105,6 +110,7 @@ export class AppDrawer extends Component {
             updatedCategories: [],
             input_clear: false,
             highlightedId: null,
+            image: null,
             template: sessionStorage.getItem('template') || 'main_content',
         });
         this.orm = useService("orm");
@@ -123,11 +129,29 @@ export class AppDrawer extends Component {
             delete_app: this.delete_apps_from_list.bind(this)
         });
         onWillDestroy(() => setTimeout(() => {
-                if (this.getStartedClicked) {
-                    window.location.reload()
-                }
-            }, 1000)
+            if (this.getStartedClicked) {
+                window.location.reload()
+            }
+        }, 1000)
         )
+        if (localStorage.getItem("Reload") === "true") {
+            localStorage.setItem("Reload", false)
+            sessionStorage.removeItem('template');
+            sessionStorage.removeItem('apps');
+            sessionStorage.removeItem('apps_to_install');
+            sessionStorage.removeItem('app_details');
+            document.querySelector(".o_main_navbar").style.display = 'flex';
+            document.querySelector(".cy-left-sidebar").style.display = 'block';
+            document.querySelector(".cy-submenu-box").style.display = 'block';
+            await this.action.doAction({
+                type: 'ir.actions.client',
+                name: _t('Dashboard'),
+                tag: 'cyllo_user_dashboard',
+            });
+            this.env.bus.trigger("RESET_MENUS", {
+                mainMenu: true,
+            });
+        }
     }
 
     /**
@@ -223,12 +247,12 @@ export class AppDrawer extends Component {
             this.state.email = user_data.company_data[0].email
             this.state.website = user_data.company_data[0].website
             this.state.color = user_data.company_data[0].color
-            this.state.image = user_data.company_data[0].logo
             this.state.user_data = user_data;
             this.state.states = user_data.country_state_data;
             if (user_data.first_time) {
                 document.querySelector(".o_main_navbar").style.display = 'flex';
                 document.querySelector(".cy-left-sidebar").style.display = 'block';
+                document.querySelector(".cy-submenu-box").style.display = 'block';
                 await this.action.doAction({
                     type: 'ir.actions.act_window',
                     name: _t('User'),
@@ -252,9 +276,11 @@ export class AppDrawer extends Component {
         if (this.state.highlightedId === null) {
             this.state.highlightedId = 'module'
         }
-        if (ev.target) {
+        if (ev.target && ev.target.value != "") {
             this.state.autoCompleteItems = [];
             this.state.autoCompleteItems.push(ev.target.value)
+        } else if (ev.target && ev.target.value == "") {
+            this.state.autoCompleteItems = [];
         }
         if (this.state.autoCompleteItems.length > 0) {
             const matchingCategories = [];
@@ -271,6 +297,12 @@ export class AppDrawer extends Component {
                 this.state.category = [];
             } else {
                 this.state.category = matchingCategories;
+            }
+        } else {
+            if (!this.state.all_modules) {
+                this.state.category = this.category;
+            } else {
+                this.state.category = this.category_with_all_apps;
             }
         }
     }
@@ -821,7 +853,6 @@ export class AppDrawer extends Component {
                 } else if ((this.state.categorySearchTerm.length > 0) && (this.state.technicalSearchTerm.length > 0) && (this.state.moduleSearchTerm.length > 0)) {
                     this.state.categorySearchTerm = [];
                 }
-
             }
             const matchingCategories = [];
             if (!this.state.all_modules) {
@@ -859,14 +890,12 @@ export class AppDrawer extends Component {
             }
             this.onSearch(this.state.autoCompleteItems)
         }
-        if (ev && 'key' in ev && ev.target.value == "" && ev.key === 'Backspace'){
-            if (this.state.moduleSearchTerm.length == 0 && this.state.technicalSearchTerm.length == 0 && this.state.categorySearchTerm.length == 0) {
+        if (this.state.moduleSearchTerm.length == 0 && this.state.technicalSearchTerm.length == 0 && this.state.categorySearchTerm.length == 0) {
             if (!this.state.all_modules) {
                 this.state.category = this.category;
             } else {
                 this.state.category = this.category_with_all_apps;
             }
-        }
         }
     }
 
@@ -1232,11 +1261,11 @@ export class AppDrawer extends Component {
      * Handles the image upload event.
      * Updates the preview image and stores the base64 data in the component state.
      */
-    handleImageUpload(event) {
+    async handleImageUpload(event) {
         const fileInput = event.target;
         const previewImage = document.getElementById('previewImage');
-        const file = fileInput.files[0];
-        if (file) {
+        const file = await fileInput.files[0];
+        if (file && previewImage) {
             const reader = new FileReader();
             reader.onload = (e) => {
                 previewImage.src = e.target.result;
@@ -1244,6 +1273,21 @@ export class AppDrawer extends Component {
                 this.state.image = base64Data;
             };
             reader.readAsDataURL(file);
+        }
+        const profile_card = this.rootRef.el.querySelector('.cy-app-install-demo-card__hero-profile')
+        profile_card.style.border = '2px solid transparent';
+    }
+
+    clearImage() {
+        this.state.image = null;
+        const previewImage = document.getElementById('previewImage');
+        if (previewImage) {
+            previewImage.src = '';
+        }
+
+        const profile_card = this.rootRef.el.querySelector('.cy-app-install-demo-card__hero-profile');
+        if (profile_card) {
+            profile_card.style.border = 'none';  // Optional: reset border if needed
         }
     }
 
@@ -1253,7 +1297,6 @@ export class AppDrawer extends Component {
     skip_second() {
         this.setTemplate("user");
     }
-
     /**
      * Retrieves the language name based on the language code.
      *
@@ -1308,6 +1351,7 @@ export class AppDrawer extends Component {
      * Displays a welcome message, waits for 3 seconds, cleans up menus, and reloads the main components.
      */
     async getStarted() {
+        $('li:contains("Action First Time")').hide();
         this.getStartedClicked = true
         await this.Loading();
         await this.ormService.call("ir.module.module", "app_install", [this.state.apps]);
@@ -1320,14 +1364,8 @@ export class AppDrawer extends Component {
         sessionStorage.removeItem('apps');
         sessionStorage.removeItem('apps_to_install');
         sessionStorage.removeItem('app_details');
-        await this.action.doAction({
-            type: 'ir.actions.client',
-            name: _t('Dashboard'),
-            tag: 'cyllo_user_dashboard',
-        });
-        this.env.bus.trigger("RESET_MENUS", {
-            mainMenu: true,
-        });
+        localStorage.setItem("Reload", true)
+        window.location.reload()
     }
 
     /**
@@ -1379,5 +1417,4 @@ export class AppDrawer extends Component {
         }
     }
 }
-
 registry.category("actions").add("massive_app_install", AppDrawer);

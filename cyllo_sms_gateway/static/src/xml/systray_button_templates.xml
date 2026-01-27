@@ -2,13 +2,13 @@
 <templates xml:space="preserve">
      <!-- Define the SendSMS component using the Owl notation -->
     <t t-name="SendSMS" owl="1">
-        <div class="o-dropdown dropdown o_user_menu d-none d-md-block pe-0 o-dropdown--no-caret" style="padding-right:0px !important;padding-left:10px !important;">
-            <button t-on-click="onClickAction"
-                    class="dropdown-toggle py-1 py-lg-0" style="padding-right:0px !important;"
-                    tabindex="0" aria-expanded="false">
-                    <img class="" style="height:19px !important;"
-                         src="cyllo_sms_gateway/static/img/message-solid.svg"/>
-            </button>
+        <div class="cy-systray-parent-class" t-on-click="onClickAction">
+            <div>
+                <i class="ri-chat-4-line cy-icons cy-stray-icon-sp" role="img"/>
+            </div>
+            <span t-if="props.nameShow" class="cy-systray-label">
+                Sms Gateway
+            </span>
         </div>
     </t>
 </templates>

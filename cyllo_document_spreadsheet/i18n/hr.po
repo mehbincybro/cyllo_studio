@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-04 03:14+0000\n"
-"PO-Revision-Date: 2023-12-04 03:14+0000\n"
+"POT-Creation-Date: 2025-02-10 09:02+0000\n"
+"PO-Revision-Date: 2025-02-10 09:02+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr "Stvoriti"
 
 #. module: cyllo_document_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_document_spreadsheet/static/src/xml/kanbanController.xml:0
+#: code:addons/cyllo_document_spreadsheet/static/src/js/views/docView/docController.xml:0
 #: model:ir.actions.act_window,name:cyllo_document_spreadsheet.action_view_create_spreadsheet
 #, python-format
 msgid "Create Spreadsheet"
@@ -36,7 +36,7 @@ msgstr "Stvorite proračunsku tablicu"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__create_uid
 msgid "Created by"
-msgstr "Napravio"
+msgstr "Stvorio"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__create_date
@@ -46,7 +46,12 @@ msgstr "Stvoren na"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__display_name
 msgid "Display Name"
-msgstr "Zaslon"
+msgstr "Prikaz ime"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_sheet__document_file_id
+msgid "Document File"
+msgstr "Datoteka dokumenata"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model,name:cyllo_document_spreadsheet.model_document_trash
@@ -54,17 +59,12 @@ msgid "Document Trash"
 msgstr "Smeće s dokumentom"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model,name:cyllo_document_spreadsheet.model_document_workspace
-msgid "Document Workspace"
-msgstr "Dokument radnog prostora"
-
-#. module: cyllo_document_spreadsheet
 #: model:ir.model,name:cyllo_document_spreadsheet.model_document_file
 msgid "Documents"
 msgstr "Dokumenti"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__document_file_id
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_sheet__document_file_id
 msgid "For getting record from document"
 msgstr "Za dobivanje zapisa iz dokumenta"
 
@@ -76,15 +76,15 @@ msgstr "Za identificiranje Excel zapisa"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__id
 msgid "ID"
-msgstr "iskaznica"
+msgstr "Iskaznica"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__is_document
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_sheet__is_document
 msgid "Identifying document element"
 msgstr "Identificiranje elementa dokumenta"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__is_document
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_sheet__is_document
 msgid "Is Document"
 msgstr "Je li dokument"
 
@@ -101,7 +101,7 @@ msgstr "Zadnji put ažurirao"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__write_date
 msgid "Last Updated on"
-msgstr "Zadnji put ažurirano na"
+msgstr "Zadnji put ažurirano o"
 
 #. module: cyllo_document_spreadsheet
 #. odoo-python
@@ -125,14 +125,25 @@ msgid "Name of the spreadsheet"
 msgstr "Ime proračunske tablice"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model,name:cyllo_document_spreadsheet.model_spreadsheet_spreadsheet
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_document_file__excel_thumbnail
+msgid "Preview image of XLS"
+msgstr "Pregled slike XLS -a"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model,name:cyllo_document_spreadsheet.model_spreadsheet_sheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_file__spreadsheet_id
 msgid "Spreadsheet"
 msgstr "Proračunska tablica"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_trash__spreadsheet_data
-msgid "Spreadsheet data"
-msgstr "Podaci o proračunskim tablicama"
+msgid "Spreadsheet Data"
+msgstr "Podaci o proračunskoj tablici"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_file__excel_thumbnail
+msgid "Spreadsheet Thumbnail"
+msgstr "Sličica proračunske tablice"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,help:cyllo_document_spreadsheet.field_document_trash__spreadsheet_data
@@ -140,23 +151,13 @@ msgid "Stores spreadsheet data into trash"
 msgstr "Pohranjuje podatke proračunske tablice u smeće"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.constraint,message:cyllo_document_spreadsheet.constraint_document_workspace_name_uniq
-msgid "This name already exists!"
-msgstr "Ovo ime već postoji!"
-
-#. module: cyllo_document_spreadsheet
 #. odoo-python
 #: code:addons/cyllo_document_spreadsheet/models/document_trash.py:0
 #, python-format
 msgid "Trash"
-msgstr "Otpad"
+msgstr "Smeće"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model,name:cyllo_document_spreadsheet.model_create_excel
 msgid "Wizard for Creating Excel Sheet"
 msgstr "Čarobnjak za stvaranje excel lista"
-
-#. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__document_file_id
-msgid "document"
-msgstr "dokument"

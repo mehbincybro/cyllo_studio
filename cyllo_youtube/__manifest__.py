@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
-    'name': 'Cyllo Youtube',
+    'name': 'Youtube',
     'category': 'Extra tool',
     'version': "1.0",
     'author': "Cyllo",
@@ -10,7 +30,9 @@
     'summary': "Integrate YouTube functionality into the Cyllo Social Media Marketing module.",
     'description': """This module extends the functionality of the Cyllo Social Media Marketing module by integrating YouTube features. It allows users to manage YouTube accounts, channels, and posts """,
     'depends': ['base','mail','cyllo_social_media_marketing'],
+    'icon': '/cyllo_youtube/static/description/youtube.svg',
     'data': [
+        'security/youtube_account_security.xml',
         'security/ir.model.access.csv',
         'views/youtube_account_views.xml',
         'views/youtube_channel_views.xml',

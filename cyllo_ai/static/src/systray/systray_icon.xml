@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-inherit="cyllo_web.Systray" t-inherit-mode="extension">
+        <xpath expr="//ul[hasclass('cy-right-header-menugroup')]" position="after">
+            <ChatBot t-if="this.state.isChatOpen" isChatOpen="state.isChatOpen"/>
+        </xpath>
+    </t>
+</templates>

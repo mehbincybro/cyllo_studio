@@ -17,6 +17,7 @@ publicWidget.registry.documentUploadButton = publicWidget.Widget.extend({
          args: [],
          kwargs: {},
          }).then(function (result) {
+            $('#workspace').empty();
             result.forEach(element => {
                 $('#workspace').append(`
                     <option value="${element['id']}">${element['name']}</option>`

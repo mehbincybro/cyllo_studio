@@ -1,8 +1,28 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import requests
 from dateutil.relativedelta import relativedelta
 
-from odoo import _, fields, models
+from odoo import _, fields, models, api
 
 
 class SocialFbAccount(models.Model):
@@ -32,6 +52,19 @@ class SocialFbAccount(models.Model):
                               help='Date at which access token must be refreshed')
     state = fields.Selection([('not connected', 'Not Connected'), ('connected', 'Connected')],
                              required=True, default='not connected', tracking=True)
+    company_id = fields.Many2one(string="Related Company",
+                                 comodel_name='res.company',
+                                 default=lambda self: self.env.company.id,
+                                 required=True, index=True,
+                                 help="The company associated with the social media account.")
+    is_default = fields.Boolean(string="Is Default", compute="_compute_is_default", store=False)
+
+    def _compute_is_default(self):
+        default_id = self.env['ir.config_parameter'].sudo().get_param(
+            'social_fb_account.default_fb_account_id'
+        )
+        for rec in self:
+            rec.is_default = str(rec.id) == str(default_id)
 
     def action_connect(self):
         """ Function to connect Facebook account and authenticate the connection. """
@@ -51,19 +84,21 @@ class SocialFbAccount(models.Model):
                     if data['name'] == self.facebook_page_name:
                         self.write({
                             'facebook_page_number': data['id'],
-                            'facebook_connection_authenticated': True
-                        })
-                        self.message_post(body="Page ID fetched Successfully.", )
-                        self.write({
-                            'state': 'connected',
                             'facebook_connection_authenticated': True,
+                            'state': 'connected',
+
                         })
+                        self.env['ir.config_parameter'].sudo().set_param(
+                            'social_fb_account.default_fb_account_id', self.id
+                        )
+                        self.message_post(body="Page ID fetched Successfully.", )
                 if self.facebook_page_name not in name_list:
                     return {
                         'type': 'ir.actions.client',
                         'tag': 'display_notification',
                         'params': {'message': _("Page not found with given name"), 'type': 'warning'},
                     }
+                self.refresh_access_token()
                 if not self.expiry_date or self.expiry_date < fields.date.today():
                     self.refresh_access_token()
             else:
@@ -89,6 +124,15 @@ class SocialFbAccount(models.Model):
             'state': 'not connected',
             'facebook_connection_authenticated': False,
         })
+        self.env['ir.config_parameter'].sudo().set_param(
+            'social_fb_account.default_fb_account_id', None
+        )
+
+    def action_default_fb(self):
+        """Set this Facebook account as default."""
+        self.env['ir.config_parameter'].sudo().set_param(
+            'social_fb_account.default_fb_account_id', self.id
+        )
 
     def refresh_access_token(self):
         """ Function to refresh the Facebook access token. """

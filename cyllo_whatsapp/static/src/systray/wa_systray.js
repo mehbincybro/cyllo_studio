@@ -6,6 +6,11 @@ import { NotificationItem } from "@mail/core/web/notification_item";
 import { useService, useBus } from '@web/core/utils/hooks';
 import { registry } from '@web/core/registry';
 import { renderToElement } from "@web/core/utils/render";
+import {
+    CHAT_WINDOW_END_GAP_WIDTH,
+    CHAT_WINDOW_INBETWEEN_WIDTH,
+    CHAT_WINDOW_WIDTH,
+} from "@mail/core/common/chat_window_service";
 import { Component, onWillStart, useState, useRef } from '@odoo/owl';
 import { session } from '@web/session';
 
@@ -15,6 +20,7 @@ export class WhatsappIcon extends MessagingMenu {
         super.setup(...arguments);
         this.searchBox = useRef('searchBox')
         this.whatsapp_window = useRef('whatsapp_window')
+        this.chatWindowService.whatsapp=0
         this.actionService = useService("action")
         this.rpc = useService("rpc");
         this.state = useState({channel: {},
@@ -22,7 +28,8 @@ export class WhatsappIcon extends MessagingMenu {
             partnerHistory: {},
             countVisible: false,
             id: false,
-            counter: 0
+            counter: 0,
+            right: 0
         })
         this.orm = useService('orm')
         onWillStart(async () => {
@@ -131,10 +138,13 @@ export class WhatsappIcon extends MessagingMenu {
     }
 
     configureChats() {
+        this.state.right = CHAT_WINDOW_END_GAP_WIDTH + (this.chatWindowService.visible.length * (CHAT_WINDOW_WIDTH + CHAT_WINDOW_END_GAP_WIDTH))
         if (this.whatsapp_window.el.classList.contains("d-none")) {
+                this.chatWindowService.whatsapp=this.chatWindowService.whatsapp+1
             this.whatsapp_window.el.classList.remove("d-none")
         } else {
             this.whatsapp_window.el.classList.add("d-none")
+                    this.chatWindowService.whatsapp=this.chatWindowService.whatsapp-1
         }
     }
 

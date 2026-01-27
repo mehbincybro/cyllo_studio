@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates>
+    <t t-name="trial_balanceHeaderButtons">
+        <t t-call="dateRange">
+            <t t-set="dateFilterTemplate" t-value="'toAndFromDateFilter'"/>
+            <t t-set="separateAt" t-value="3"/>
+        </t>
+        <t t-call="reportComparison"/>
+        <div class="drop journals_filter dropdown">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-book"/>
+                    Journals:
+                    <span class="code"/>
+                </t>
+                <DropdownItem parentClosingMode="'none'" t-foreach="state.journals" t-as="journal" t-key="journal_index"
+                              onSelected="() => this.addFilters(journal.id, 'journal_ids')">
+                    <i t-if="filterState.journal_ids.includes(journal.id)" class="ri-check-line"/>
+                    <span class="mx-2" t-out="journal.name"/>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+        <div class="drop analytic_filter">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-folder-open"/>
+                    Analytic Accounts
+                    <span class="analytic"/>
+                </t>
+                <DropdownItem parentClosingMode="'none'" t-foreach="state.analytics" t-as="analytic" t-key="analytic_index"
+                              onSelected="() => this.addFilters(analytic.id, 'analytic_ids')">
+                    <i t-if="filterState.analytic_ids.includes(analytic.id)" class="ri-check-line"/>
+                    <span class="mx-2" t-out="analytic.display_name"/>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+        <div class="drop search_Target_move" style="">
+            <Dropdown togglerClass="'btn dropdown-toggle'">
+                <t t-set-slot="toggler">
+                    <span class="fa fa-filter"/>
+                    Options
+                    <span class="target"/>
+                </t>
+                <DropdownItem class="'btn d-flex align-items-center px-2 py-2 m-0'" onSelected="() => this.onSelectDraftEntries(!state.draft)">
+                    <i t-if="state.draft" class="ri-check-line"/>
+                    <span class="mx-2"> Include Draft Entries </span>
+                </DropdownItem>
+            </Dropdown>
+        </div>
+    </t>
+</templates>

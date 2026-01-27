@@ -1,0 +1,7 @@
+<templates id="template" xml:space="preserve">
+    <t t-name="cyllo_studio_ai.StudioWrapperMain">
+        <CylloNavBar t-if="!this.state.isAI" t-props="viewProps"/>
+        <ActionContainer t-props="viewProps"/>
+        <MainComponentsContainer/>
+    </t>
+</templates>

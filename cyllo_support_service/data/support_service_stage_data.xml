@@ -27,13 +27,13 @@
     </record>
     <record id="support_service_stage_canceled" model="support.service.stage">
         <field name="name">Canceled</field>
-        <field name="is_fold" eval="False"/>
+        <field name="fold" eval="False"/>
         <field name="sequence">6</field>
     </record>
     <!-- Record for stage 'Closed' -->
     <record id="support_service_stage_closed" model="support.service.stage">
         <field name="name">Closed</field>
-        <field name="is_fold" eval="False"/>
+        <field name="fold" eval="False"/>
         <field name="is_closed" eval="True"/>
         <field name="sequence">7</field>
     </record>

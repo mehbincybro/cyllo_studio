@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 import { Component, useState, useEffect, onMounted } from "@odoo/owl";
 import { DateTimeInput } from "@web/core/datetime/datetime_input";
 import { MultiSelection } from "@cyllo_analytics/js/sheet_filter/multi_selection"
@@ -18,7 +17,6 @@ export class DomainCreator extends Component {
         this.field = this.props.domain
         this.options = ["=", "!=", ">=", "<=", ">", "<"]
         this.specialOptions = {
-//            many2one: ["IN", "NOT IN"],
             selection: ["IN", "NOT IN"],
         }
         this.state = useState({
@@ -47,8 +45,10 @@ export class DomainCreator extends Component {
             }
             let val = this.options.includes(this.state.operator) ? `'${this.state.value}'` : this.state.value
             let value = this.nonStringTypes(this.field.field_type) ? this.state.value : val
-            let domain = `${this.field.model.table}.${this.field.name} ${this.state.operator} ${value}`
+            let jsonData = this.field.is_json ? "->> 'en_US'" : ''
+            let domain = `${this.field.model.table}.${this.field.name} ${jsonData} ${this.state.operator} ${value}`
             this.props.addToDomain(domain, this.props.index)
+
         }, () => [this.state.operator, this.state.value])
     }
     get multiValue(){

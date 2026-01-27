@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Customizing the portal.share view form -->
-    <record id="view_portal_share_from" model="ir.ui.view">
-        <field name="name">view.portal.share.</field>
+    <record id="view_portal_share_from_inherit_sms" model="ir.ui.view">
+        <field name="name">view.portal.share.from.inherit.sms</field>
         <field name="model">portal.share</field>
         <field name="inherit_id" ref="portal.portal_share_wizard"/>
         <field name="arch" type="xml">

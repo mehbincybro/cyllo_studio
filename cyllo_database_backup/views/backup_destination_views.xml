@@ -5,7 +5,8 @@
         <field name="name">view.backup.destination.kanban</field>
         <field name="model">backup.destination</field>
         <field name="arch" type="xml">
-            <kanban create="false" class="o_modules_kanban">
+            <kanban create="false" class="o_modules_kanban"
+                    action="action_view_configurations" type="object">
                 <field name="name"/>
                 <field name="code"/>
                 <field name="image"/>
@@ -45,8 +46,11 @@
             </p>
         </field>
     </record>
-    <menuitem id="menu_automatic_database_backup_categ" name="Automatic Database Backup"
+    <menuitem id="menu_automatic_database_backup_categ"
+              name="Automatic Database Backup"
               parent="base.menu_custom" sequence="10"/>
-    <menuitem id="menu_backup_configuration" parent="menu_automatic_database_backup_categ"
-              name="Backup Configuration" action="action_view_backup_configuration"/>
+    <menuitem id="menu_backup_configuration"
+              parent="menu_automatic_database_backup_categ"
+              name="Backup Configuration"
+              action="action_view_backup_configuration"/>
 </odoo>

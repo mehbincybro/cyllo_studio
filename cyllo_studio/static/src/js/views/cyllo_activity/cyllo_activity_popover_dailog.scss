@@ -1,0 +1,18 @@
+.studio_activity{
+    .custom-dropdown.o-autocomplete .d-flex input{
+        color:#000000 !important;
+
+    }
+    .activity-add-custom-dropdown .custom-dropdown.o-autocomplete ul{
+          position:fixed !important;
+          margin-top:0% !important;
+          max-height: 50% !important;
+          height: 20% !important;
+        }
+    }
+    .dropdown .dropdown-toggle.btn-link{
+        pointer-events: none !important;
+        }
+    .btn-link.text-dark {
+    pointer-events: none !important;
+    }

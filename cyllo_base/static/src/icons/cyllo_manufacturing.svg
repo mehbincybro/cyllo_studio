@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>
+            .manufacturing_cls-1{fill:#26261A;}.manufacturing_cls-2{fill:#969686;}.manufacturing_cls-3{fill:#BCBBA7;}.manufacturing_cls-4{fill:#c9c9b9;}.manufacturing_cls-5{fill:#848375;}.manufacturing_cls-6{fill:#a9a896;}
+        </style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="manufacturing_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="manufacturing_cls-2" style="fill:#969686 !important;" d="M467.94,317.79V652.32H649.46V197.68Z"/>
+            <path class="manufacturing_cls-3" style="fill:#BCBBA7 !important;" d="M334.46,317.79V652.32H516V197.68Z"/>
+            <path class="manufacturing_cls-4" style="fill:#c9c9b9 !important;" d="M201,317.79V652.32H382.5V197.68Z"/>
+            <polygon class="manufacturing_cls-5" style="fill:#848375 !important;" points="649.46 425 515.98 477.8 515.98 652.32 649.46 652.32 649.46 425"/>
+            <polygon class="manufacturing_cls-6" style="fill:#a9a896 !important;" points="515.98 477.8 382.5 527.51 382.5 652.32 515.98 652.32 515.98 477.8"/>
+            <polygon class="manufacturing_cls-3" style="fill:#BCBBA7 !important;" points="382.5 527.51 200.54 600.23 200.98 652.32 382.5 652.32 382.5 527.51"/>
+        </g>
+    </g>
+</svg>

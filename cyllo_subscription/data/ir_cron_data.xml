@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!--Cron run daily basis to check subscription renewal-->
+    <!-- Cron run daily basis to check subscription renewal -->
     <record id="ir_cron_check_renewal" model="ir.cron">
         <field name="name">Check Renewal</field>
         <field name="model_id" ref="model_subscription_order"/>
@@ -12,7 +12,7 @@
         <field name="numbercall">-1</field>
         <field name="doall" eval="False"/>
     </record>
-    <!--Cron run daily bases to check the subscription status and send mail to customer-->
+    <!-- Cron run daily bases to check the subscription status and send mail to customer -->
     <record id="ir_cron_invoice_post" model="ir.cron">
         <field name="name">Invoice Post</field>
         <field name="model_id" ref="model_account_move"/>

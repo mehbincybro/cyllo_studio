@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!--Cron run daily basis to check inactive tickets-->
+    <!--Cron run on a daily basis to check inactive tickets-->
     <record id="ir_cron_check_inactivity" model="ir.cron">
         <field name="name">Check Inactivity</field>
         <field name="model_id" ref="model_support_service_ticket"/>

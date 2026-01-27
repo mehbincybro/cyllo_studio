@@ -1,0 +1,266 @@
+.o_social_media_dashboard {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+}
+
+.o_left_section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 3; /* Takes up more space on the left */
+}
+
+.o_social_media_posts {
+    flex: 1; /* Takes up the remaining space on the right */
+    max-height: 100%;
+    padding: 20px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    min-height:86vh;
+}
+
+/* Existing styles remain the same for cards and posts */
+.o_social_media_cards {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.o_social_media_card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 20px;
+    flex: 1;
+    text-align: center;
+    //max-height: 235px;
+    overflow-y: auto;
+}
+
+.o_social_media_card i {
+    font-size: 40px;
+    margin-bottom: 10px;
+}
+
+.o_social_media_card h3 {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.o_social_media_card p {
+    font-size: 14px;
+    color: #666;
+}
+
+.o_social_media_card .btn {
+    margin-top: 10px;
+    font-size: 14px;
+}
+
+.o_connected_accounts {
+    background-color: #ffffff;
+    border-radius: 5px;
+    padding-top: 12px;
+}
+
+.o_connected_accounts h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.o_account_cards {
+    display: flex;
+    gap: 21px;
+    flex-wrap: wrap;
+    max-height: 509px;
+    overflow: auto;
+}
+
+.o_account_card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-height: 235px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    width: 100%;
+    flex-shrink: 1;
+    max-width: 300px;
+    cursor: pointer;
+}
+
+.o_account_card .social-icon {
+    min-width: 40px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.o_account_card i {
+    font-size: 40px;
+}
+
+.o_account_card .o_account_details {
+    text-align: left;
+
+  i, span {
+    font-size: 20px;
+  }
+}
+
+.o_account_card h4 {
+    margin: 0 0 8px;
+    font-size: 18px;
+}
+
+.o_account_card p {
+    font-size: 14px;
+    color: #666;
+}
+
+.o_posts_list {
+    max-height: 98%;
+    min-height: 285px;
+    overflow: auto;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit--webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0.6rem;
+    background-color: #fff;
+    border-top: none;
+    box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border-radius: 0 0 8px 8px;
+}
+
+.o_post_item {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+@media (max-width:992px){
+    .o_account_card {
+        max-width:50%;
+    }}
+.o_post_item {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    //margin-bottom: 15px;
+}
+
+.post-profile-image {
+    width: 40px;
+    height: 40px;
+    border-radius: 5px;
+}
+
+.post-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.post-title {
+    font-weight: 600;
+    //margin-bottom: 5px;
+}
+
+.cy-social-market-txt {
+    margin: 0;
+}
+
+.cy-social-market-comment .cy-social-market-txt {
+    display: flex;
+    align-items: center;
+}
+.notification-icon {
+    font-size: 20px;
+    margin-left: auto; /* Align icon to the right */
+}
+
+.custom-modal-input {
+    border-radius: 7px; /* Rounded corners */
+    border: 1px solid #d3d3d3; /* Light gray border */
+    box-shadow: 0px 2px 3px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    padding: 10px; /* Inner padding */
+    width: 100%; /* Full width */
+    box-sizing: border-box; /* Ensures padding doesn't affect width */
+    font-size: 14px; /* Font size */
+    margin-bottom: 8px;
+}
+
+.custom-modal-label {
+    font-weight: bold;
+    margin-bottom: 5px;
+    display: block;
+}
+
+.tabs {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+    gap: 0.4em;
+    border-bottom: none;
+}
+
+.tab-button {
+    flex: 1;
+    background-color: #f0f0f0;
+    border: none;
+    padding: 2px;
+    cursor: pointer;
+    font-size: 22px;
+    text-align: center;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    border-radius: 8px 8px 0 0;
+    min-width: 27px;
+    width: 100%;
+    border-bottom: none;
+}
+
+.tab-button:hover {
+    color: #9ea700;
+    background-color: #fff;
+    z-index: 1111;
+    border-bottom: none;
+}
+
+.tab-button.active {
+    color: #9ea700;
+    background-color: #fff;
+    border-bottom: none;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+}

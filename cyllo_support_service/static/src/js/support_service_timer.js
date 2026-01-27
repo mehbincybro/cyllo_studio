@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-import { cyTimerWidget } from "@cyllo_timer_widget/js/cy_timer_widget";
+import { cyTimerWidget } from "@cyllo_web/js/widgets/timerWidget/cy_timer_widget";
 
 patch(cyTimerWidget.prototype, {
     /**
@@ -12,8 +12,7 @@ patch(cyTimerWidget.prototype, {
         this.orm = useService("orm");
         this.action = useService("action");
         this.busService = this.env.services.bus_service
-        this.channel = "TIMER-STOP"
-        this.busService.addChannel(this.channel)
+        this.busService.addChannel("TIMER-STOP")
         this.busService.addEventListener("notification", this.check_reset.bind(this))
     },
     /**
@@ -46,7 +45,9 @@ patch(cyTimerWidget.prototype, {
      * @param {Object} data - Notification data containing timer_toggle information.
      */
     check_reset(data){
-        if(data.detail[0].payload.timer_toggle){
+        if(data.detail[0].type == 'resume_timer'){
+            this.start()
+        }else if(data.detail[0].payload.timer_toggle && data.detail[0].type == 'stop_timer'){
             if (owl.status(this) !== 'destroyed'){
                 this.reset()
             }

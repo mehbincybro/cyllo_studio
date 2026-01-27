@@ -3,15 +3,15 @@
     <!--    templates for the BarcodeOperationType views-->
     <t t-name="cyllo_barcode.BarcodeStockPicking" owl="1">
         <div class="o_cyllo_barcode_operation" t-ref="BarcodeOperationType">
-            <div class="d-flex w-100 p-0 m-0 bg-white border-bottom">
-                <nav class="navbar navbar-light bg-light w-100 justify-content-between barcode-cy-primary">
+            <div class="d-flex w-100 p-0 m-0 border-bottom">
+                <nav class="navbar navbar-light w-100 justify-content-between">
                     <div class="d-flex align-items-center">
                         <span class="navbar-brand text-light" t-esc="name"/>
                     </div>
                     <form class="form-inline">
-                        <button class="btn btn-outline-light my-2 my-sm-0"
+                        <button class="btn go-back-big-screen btn-secondary my-2 my-sm-0"
                                 type="button"
-                                t-on-click="() => this.actionService.doAction('cyllo_barcode.cyllo_barcode_action')"><i class="fa fa-sign-out"/></button>
+                                t-on-click="() => this.actionService.doAction('cyllo_barcode.cyllo_barcode_action')"><i class="ri-logout-box-r-line fs-3"/></button>
                     </form>
                 </nav>
             </div>

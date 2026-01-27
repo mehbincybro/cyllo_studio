@@ -319,8 +319,8 @@ msgstr "Aantal berichten met leveringsfout"
 #: model:ir.actions.act_window,name:cyllo_twilio_voice_call.out_going_call_list_action
 #: model:ir.model,name:cyllo_twilio_voice_call.model_out_going_call_list
 #: model:ir.ui.menu,name:cyllo_twilio_voice_call.out_going_call_list_menu
-msgid "Out Going Call List"
-msgstr "Out Going Call List"
+msgid "Outgoing call list"
+msgstr "Outgoing call list"
 
 #. module: cyllo_twilio_voice_call
 #: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__outgoing_application_sid

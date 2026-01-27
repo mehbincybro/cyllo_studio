@@ -13,8 +13,9 @@
         <field name="arch" type="xml">
             <tree default_order="sequence">
                 <field name="name"/>
-                <field name="is_fold"/>
+                <field name="fold"/>
                 <field name="is_closed"/>
+                <field name="is_canceled"/>
             </tree>
         </field>
     </record>
@@ -28,8 +29,9 @@
                     <group>
                         <field name="name"/>
                         <field name="sequence"/>
-                        <field name="is_fold"/>
+                        <field name="fold"/>
                         <field name="is_closed"/>
+                        <field name="is_canceled"/>
                     </group>
                 </sheet>
             </form>

@@ -25,7 +25,8 @@
                         <span class="cy-app-install-appbar__item-label">
                             <t t-esc="apps.shortdesc"/>
                         </span>
-                        <span class="cy-app-install-appbar__item-delete" t-on-click="() => this.unlinkApps(apps)">
+                        <span class="cy-app-install-appbar__item-delete"
+                              t-on-click="() => this.unlinkApps(apps)">
                             <i class="cy-app-install-ri-delete-bin-6-line cy-app-install-ri-delete"></i>
                         </span>
                     </li>
@@ -37,7 +38,8 @@
                     class="cy-app-install-btn cy-app-install-btn--lg cy-app-install-btn--block cy-app-install-btn--primary"
                     id="continueBtn"
                     t-on-click="() => this.installApps(props.AppsToInstall)">
-                <span style="width: inherit;">Continue</span>
+                <span>Continue</span>
+                <i class="ri-arrow-right-s-line ms-2"/>
             </button>
         </div>
     </t>

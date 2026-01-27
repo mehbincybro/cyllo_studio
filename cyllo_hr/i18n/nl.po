@@ -16,7 +16,7 @@ msgstr ""
 "Plural-Forms: \n"
 
 #. module: cyllo_hr
-#: model_terms:ir.ui.view,arch_db:cyllo_hr.view_hr_employee_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_hr.view_hr_employee_kanban_inherit_cyllo_hr
 msgid "Activities"
 msgstr "Activiteiten"
 
@@ -26,6 +26,6 @@ msgid "Employee"
 msgstr "Werknemer"
 
 #. module: cyllo_hr
-#: model_terms:ir.ui.view,arch_db:cyllo_hr.view_hr_employee_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_hr.view_hr_employee_kanban_inherit_cyllo_hr
 msgid "View Profile"
 msgstr "Bekijk profiel"

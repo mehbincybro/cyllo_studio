@@ -2,15 +2,16 @@
 <odoo>
     <record id="dashboard_theme_vintage" model="dashboard.theme">
         <field name="name">Vintage</field>
-        <field name="background">rgba(254,248,239,1)</field>
+        <field name="background">#FFFFFF</field>
         <field name="title">#333333</field>
         <field name="subtitle">#aaaaaa</field>
         <field name="label_text">#eeeeee</field>
         <field name="border_width">0</field>
         <field name="border_color">#cccccc</field>
+        <field name="body_header_background">#fbf2f2</field>
     </record>
     <record id="dashboard_theme_vintage_line" model="dashboard.theme.color">
-        <field name="name">#d87c7c</field>
+        <field name="name">#ad6363</field>
         <field name="theme_id" ref="dashboard_theme_vintage"/>
     </record>
     <record id="dashboard_theme_vintage_line2" model="dashboard.theme.color">

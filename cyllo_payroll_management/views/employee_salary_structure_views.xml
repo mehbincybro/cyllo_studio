@@ -64,7 +64,7 @@
             <form string="Employee Function">
                 <sheet>
                     <group col="4">
-                        <field name="name"/>
+                        <field name="name" placeholder="e.g. Employee"/>
                         <field name="code"/>
                         <field name="type_id"/>
                         <field name="parent_id"/>
@@ -115,5 +115,8 @@
         <field name="name">Salary Structures</field>
         <field name="res_model">employee.salary.structure</field>
         <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">Employees salary structures</p>
+        </field>
     </record>
 </odoo>

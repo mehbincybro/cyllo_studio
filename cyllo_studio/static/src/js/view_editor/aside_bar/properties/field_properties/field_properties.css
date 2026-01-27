@@ -1,0 +1,48 @@
+.cy-content_box {
+    padding: 0.5rem;
+    border: 1px solid #828176;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.cy-radio_label{
+    color: #BCBBA7;
+    margin-bottom: 0.5rem !important;
+}
+
+.cy-btn_save {
+    background-color: #9ea700;
+    color: #fff;
+    border: 1px solid #9ea700;
+    padding: 8px 20px;
+    border-radius: 3px;
+    box-shadow: none;
+}
+.cy-btn_save:focus{
+    background-color: #9ea700;
+}
+.cy-cancel_btn {
+    padding: 8px 20px;
+    border-radius: 3px;
+    border: 1px solid #BCBBA7;
+    color: #BCBBA7;
+    font-weight: 500;
+    background-color: transparent;
+}
+
+.cy-cancel_btn:focus{
+    background-color: transparent;
+}
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .d-flex input{
+    color:#BCBBA7 !important;
+}
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .d-flex input:disabled {
+color: #85857d !important;
+}
+.cy-studio-custom-dropdown .custom-dropdown ul{
+   max-height:16rem !important;
+   overflow-y: auto !important;
+}
+.btn_div{
+padding-bottom:15px;
+}

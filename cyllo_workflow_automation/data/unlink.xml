@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="work_function_unlink" model="work.function">
+        <field name="name">On Unlink</field>
+        <field name="func_name">unlink</field>
+        <field name="make_function"><![CDATA[
+def make_unlink():
+    def unlink(self):
+        automation_ids = self.env['work.auto']._get_actions(self, 'unlink')
+        if not automation_ids:
+            return unlink.origin(self)
+
+        before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+        for automation in before_ids.with_context(old_values=None):
+            automation._process({'records': self})
+
+        records = unlink.origin(self.with_env(automation_ids.env))
+
+        after_ids = automation_ids - before_ids
+        for automation in after_ids.with_context(old_values=None):
+            automation._process({})
+
+        return records
+    return unlink
+        ]]></field>
+         <field name="icon"
+                type="base64"
+                file="cyllo_workflow_automation/static/src/img/on-unlink.svg"/>
+    </record>
+</odoo>

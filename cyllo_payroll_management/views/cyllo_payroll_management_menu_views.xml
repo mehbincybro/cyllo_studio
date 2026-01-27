@@ -2,7 +2,9 @@
 <!--MENUS OF PAYROLL MANAGEMENT-->
 <odoo>
     <!-- Main menu -->
-    <menuitem id="menu_cyllo_payroll_management_root" name="Payroll" sequence="1"/>
+    <menuitem id="menu_cyllo_payroll_management_root" name="Payroll"
+              web_icon="cyllo_payroll_management,static/description/cyllo_payroll.svg"
+              sequence="1"/>
     <!-- Sub menu -->
     <menuitem id="menu_contracts_categ" name="Contracts"
               parent="menu_cyllo_payroll_management_root" sequence="1"
@@ -29,13 +31,13 @@
     <menuitem name="Work Entries" id="menu_work_entries_categ"
               parent="menu_cyllo_payroll_management_root" sequence="1"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
-    <menuitem name="Work Entry" id="menu_work_entry"
+    <menuitem id="menu_work_entry" name="Work Entry"
               parent="menu_work_entries_categ" sequence="7"
               action="hr_work_entry.hr_work_entry_action"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
-    <menuitem name="Configuration" id="menu_configuration_categ"
+    <menuitem id="menu_configuration_categ" name="Configuration"
               parent="menu_cyllo_payroll_management_root" sequence="7"/>
-    <menuitem name="Salary" id="menu_salary_categ"
+    <menuitem id="menu_salary_categ" name="Salary"
               parent="menu_configuration_categ" sequence="7"/>
     <menuitem id="menu_structure_type" name="Structure Type"
               parent="menu_salary_categ" sequence="4"
@@ -46,14 +48,14 @@
               parent="menu_end_of_service_categ" sequence="1"
               action="action_view_employee_resignation"/>
     <menuitem id="menu_gratuity_settlement" name="Gratuity Settlement"
-              parent="menu_end_of_service_categ" sequence="3"
+              parent="menu_end_of_service_categ" sequence="4"
               action="action_view_gratuity_settlement"/>
     <menuitem id="menu_approved_resignations" name="Approved Resignations"
               parent="menu_end_of_service_categ" sequence="2"
               action="action_view_approved_resignations"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
     <menuitem id="menu_employees_in_notice_period" name="Employees in Notice Period"
-              parent="menu_end_of_service_categ" sequence="4"
+              parent="menu_end_of_service_categ" sequence="3"
               action="action_view_employees_in_notice_period"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
     <menuitem id="menu_salary_structure" name="Salary Structure"
@@ -62,9 +64,9 @@
     <menuitem id="menu_work_entry_type" name="Work Entry Type"
               parent="menu_work_entries_categ" sequence="2"
               action="hr_work_entry.hr_work_entry_type_action"/>
-    <menuitem id="menu_refused_reason" name="Refused Reason"
+    <menuitem id="menu_resigned_reason" name="Resignation Reason"
               parent="menu_configuration_categ" sequence="1"
-              action="action_view_refused_reason"/>
+              action="action_view_resigned_reason"/>
     <menuitem id="menu_other_inputs" name="Other Inputs"
               parent="menu_salary_categ" sequence="1"
               action="action_view_other_inputs"/>

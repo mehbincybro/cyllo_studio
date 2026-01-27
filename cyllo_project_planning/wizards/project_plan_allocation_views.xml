@@ -18,15 +18,23 @@
                         <span class="alert alert-warning text-warning"
                               style="padding-top: 6px; padding-bottom: 6px;"
                               invisible="not is_modifying"
-                              colspan="2"> Are you sure you want to modify the task's assignees?</span>
+                              colspan="2">Are you sure you want to modify the
+                            task's assignees?
+                        </span>
                         <field name="project_id"/>
                         <field name="task_id"/>
                     </group>
                 </group>
                 <footer>
-                    <button string="Plan Task Allocation" name="action_plan_task_allocations" class="btn-primary"
-                            type="object" data-hotkey="q"/>
-                    <button string="Cancel" class="btn-default" special="cancel" data-hotkey="x"/>
+                    <button string="Plan Task Allocation"
+                            name="action_plan_task_allocations"
+                            class="btn-primary"
+                            type="object"
+                            data-hotkey="q"/>
+                    <button string="Cancel"
+                            class="btn-default"
+                            special="cancel"
+                            data-hotkey="x"/>
                 </footer>
             </form>
         </field>

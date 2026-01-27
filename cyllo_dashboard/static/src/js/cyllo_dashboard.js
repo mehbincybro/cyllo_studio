@@ -1,21 +1,18 @@
 /** @odoo-module */
-// Import necessary modules and components
 import {registry} from "@web/core/registry";
-import {Component, onWillStart, useRef, markup} from "@odoo/owl";
+import {Component, onWillStart, useRef, markup, useEffect} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import {useState} from "@odoo/owl";
 import {jsonrpc} from "@web/core/network/rpc_service";
 import {session} from "@web/session";
-import { CompanyDetailsDialog } from "@cyllo_dashboard/js/company_dialog";
+import {CompanyDetailsDialog} from "@cyllo_dashboard/js/company_dialog";
+import { browser } from "@web/core/browser/browser";
 
-
-// Get the 'actions' category from the registry
 const actionRegistry = registry.category("actions");
 
 function htmlToText(html) {
     const doc = new DOMParser().parseFromString(html, 'text/html');
     const result = [];
-
     function getText(node) {
         if (node.nodeType === Node.TEXT_NODE) {
             result.push(node.textContent);
@@ -42,13 +39,17 @@ function textToHtml(text) {
 export class UserDashboard extends Component {
     setup() {
         super.setup(...arguments);
+        this.user = useService("user");
+        this.notification = useService("notification");
+        this.origin = browser.location;
         this.orm = useService('orm');
         this.menuService = useService("menu");
         this.dialogService = useService("dialog");
-        this.root = useRef("root")
-        this.rootNonAdmin = useRef("root-non-admin")
-        this.userID = session.uid
-        this.session = session
+        this.root = useRef("root");
+        this.chartCanvas = useRef('system_ram');
+        this.rootNonAdmin = useRef("root-non-admin");
+        this.userID = session.uid;
+        this.session = session;
         this.state = useState({
             shortcuts: {},
             loginUserDetails: {},
@@ -60,6 +61,8 @@ export class UserDashboard extends Component {
             nonAdmin: {},
             notifType: false,
             autoEdit: false,
+            showLoading: true,
+            bannerUrl: "/cyllo_dashboard/static/src/img/coverImage.png"
         })
         this.action = useService("action");
         this.getActivities();
@@ -71,6 +74,7 @@ export class UserDashboard extends Component {
             this.getIdleTime();
             this.renderWeatherNotification();
             this.renderPerformanceInsight();
+
             await this.orm.call('res.users', 'get_change_pwd_view_id').then((result) => {
                 this.view_id = result;
             });
@@ -81,11 +85,66 @@ export class UserDashboard extends Component {
                 this.userId = result.id;
                 this.tz = result.current_tz
             });
-
             await this.orm.call('res.users', 'get_auto_edit_value').then((result) => {
                 this.state.autoEdit = result;
             });
+            await this.orm.call('res.users', 'clean_up_menus', [this.orm.user.userId]);
+            const userBanner = await this.orm.searchRead(
+                "res.users",
+                [["id", "=", this.userId]],
+                ["banner_image"]
+            );
+            if (userBanner && userBanner.length > 0 && userBanner[0].banner_image) {
+                this.state.bannerUrl = `data:image/png;base64,${userBanner[0].banner_image}`;
+            } else {
+                this.state.bannerUrl = false;
+            }
         });
+        useEffect((ev) => {
+            if (ev) {
+                this.state.showLoading = false
+                this.renderChart()
+            } else {
+                this.state.showLoading = true
+            }
+        }, () => [this.state.performanceInsights.ram_percent])
+    }
+    imageLoader(userid){
+        return `${this.origin.origin}/web/image?model=res.users&field=avatar_128&id=${userid}`
+    }
+
+    renderChart() {
+        const ctx = this.chartCanvas.el
+        const usedMemory = (this.state.performanceInsights.total_ram * this.state.performanceInsights.ram_percent) / 100
+        const unUsedMemory = this.state.performanceInsights.total_ram - usedMemory
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Used memory', 'Free memory'],
+                    datasets: [{
+                        data: [usedMemory, unUsedMemory],
+                        backgroundColor: [
+                            '#9EA700',
+                            '#ecedcc',
+                        ],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Memory Usage in GB'
+                        }
+                    }
+                }
+            });
+        }
     }
 
     getIdleTime() {
@@ -203,7 +262,7 @@ export class UserDashboard extends Component {
         this.rootNonAdmin.el.querySelector('#signatureEditBtn').style.display = 'none';
     }
 
-    saveSignature(){
+    saveSignature() {
         var textarea = this.rootNonAdmin.el.querySelector('#email-sign-textarea')
         var textContent = textarea.value;
         var htmlContent = textToHtml(textContent);
@@ -212,20 +271,41 @@ export class UserDashboard extends Component {
     }
 
     async onClickPermissions() {
-         this.env.services['action'].doAction({
-             name: "Permissions",
-             type: 'ir.actions.act_window',
-             res_model: 'res.groups',
-             views: [[false, 'tree'], [false, 'form']],
-             domain: [['id', 'in', this.groups]],
-             target: 'current',
-         });
+        this.env.services['action'].doAction({
+            name: "Permissions",
+            type: 'ir.actions.act_window',
+            res_model: 'res.groups',
+            views: [[false, 'tree'], [false, 'form']],
+            domain: [['id', 'in', this.groups]],
+            target: 'current',
+        });
     }
 
-    async renderNonAdminUserDetails(){
-        if(!session.is_admin) {
-           const user = await this.orm.call('res.users', 'get_non_admin_user_details' ,[session.user_id[0]])
-           this.state.nonAdmin = user
+    async uploadBanner(ev) {
+        const file = ev.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64Data = e.target.result.split(",")[1];
+            try {
+                const result = await jsonrpc("/user/upload_banner", { banner_data: base64Data });
+                if (result.success) {
+                    this.state.bannerUrl = `data:image/png;base64,${base64Data}`;
+                    this.notification.add("Banner updated successfully", { type: "success" });
+                } else {
+                    this.notification.add(`Upload failed: ${result.error || "Unknown error"}`, { type: "danger" });
+                }
+            } catch (err) {
+                this.notification.add("Upload failed", { type: "danger" });
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async renderNonAdminUserDetails() {
+        if (!session.is_admin) {
+            const user = await this.orm.call('res.users', 'get_non_admin_user_details', [session.user_id[0]])
+            this.state.nonAdmin = user
         }
     }
 
@@ -237,9 +317,8 @@ export class UserDashboard extends Component {
         return htmlToText(this.state.nonAdmin.signature);
     }
 
-
     async onClickGroups() {
-        const user = await this.orm.call('res.users', 'get_non_admin_user_details' ,[session.user_id[0]])
+        const user = await this.orm.call('res.users', 'get_non_admin_user_details', [session.user_id[0]])
         this.env.services['action'].doAction({
             name: 'Groups',
             type: 'ir.actions.act_window',
@@ -247,12 +326,12 @@ export class UserDashboard extends Component {
             views: [[false, 'tree'], [false, 'form']],
             target: 'current',
             context: {'create': false, 'delete': false},
-            domain: [['id','in', user.groups_id]],
+            domain: [['id', 'in', user.groups_id]],
         });
     }
 
     async onClickAccessRights() {
-        const user = await this.orm.call('res.users', 'get_non_admin_user_details' ,[session.user_id[0]])
+        const user = await this.orm.call('res.users', 'get_non_admin_user_details', [session.user_id[0]])
         this.env.services['action'].doAction({
             name: 'Access Rights',
             type: 'ir.actions.act_window',
@@ -260,12 +339,12 @@ export class UserDashboard extends Component {
             views: [[false, 'tree']],
             target: 'current',
             context: {'create': false, 'delete': false},
-            domain: [['id','in', user.model_access]],
+            domain: [['id', 'in', user.model_access]],
         });
     }
 
     async onClickRecordRules() {
-        const user = await this.orm.call('res.users', 'get_non_admin_user_details' ,[session.user_id[0]])
+        const user = await this.orm.call('res.users', 'get_non_admin_user_details', [session.user_id[0]])
         this.env.services['action'].doAction({
             name: 'Record Rules',
             type: 'ir.actions.act_window',
@@ -273,7 +352,7 @@ export class UserDashboard extends Component {
             views: [[false, 'tree']],
             target: 'current',
             context: {'create': false, 'delete': false},
-            domain: [['id','in', user.rule_groups]],
+            domain: [['id', 'in', user.rule_groups]],
         });
     }
 
@@ -306,7 +385,8 @@ export class UserDashboard extends Component {
         try {
             const menuList = [];
             const menuItems = await this.orm.searchRead('shortcut.menu', [['create_uid', '=', session.uid]]);
-            this.state.shortcuts = menuItems
+            this.state.shortcuts = menuItems.filter(item =>
+            item.window_action_id || item.client_action_id || item.server_action_id);
         } catch (error) {
             console.error('Error fetching shortcuts:', error);
         }
@@ -327,22 +407,13 @@ export class UserDashboard extends Component {
         this.env.services['action'].doAction('reload_context');
     }
 
-    onClickShortCutMenu(data) {
-    try {
-        let menu = this.menuService.getMenuAsTree(data.menu_id[0]);
-        this.menuService.selectMenu(menu);
-    } catch (error) {
-        console.error('Error:', error);
-        // If getMenuAsTree returns undefined, execute the fallback code
-        this.env.services['action'].doAction({
-            name: data.display_name,
-            type: 'ir.actions.act_window',
-            res_model: data.model,
-            views: [[false, 'tree']],
-            target: 'current',
-        });
+    async onClickShortCutMenu(data) {
+            this.action.doAction(data.xml_id, {
+                additionalContext: {
+                    active_id: false,
+                },
+            });
     }
-}
 
     onToggleAutoEdit(ev) {
         this.state.autoEdit = ev.target.checked
@@ -350,16 +421,19 @@ export class UserDashboard extends Component {
         this.env.services['action'].doAction('reload_context');
     }
 
-    onToggleAutoEditNonAdmin(ev){
+    onToggleAutoEditNonAdmin(ev) {
         this.state.autoEdit = ev.target.checked
         this.orm.call("res.users", 'toggle_auto_edit', [ev.target.checked]);
         this.env.services['action'].doAction('reload_context');
     }
 
     onClickShortCutAdd(model) {
-        if (model){
+        if (model) {
             this.env.services['action'].doAction({
-                type: 'ir.actions.act_window', res_model: model, views: [[false, 'form']], target: 'new',
+                type: 'ir.actions.act_window',
+                res_model: model,
+                views: [[false, 'form']],
+                target: 'new',
             });
         }
     }
@@ -412,8 +486,28 @@ export class UserDashboard extends Component {
         });
     }
 
+    handleGroupClick(group) {
+        if (group.type === "meeting") {
+            const today = new Date();
+            const start = today.toISOString().split("T")[0] + " 00:00:00";
+            const end = today.toISOString().split("T")[0] + " 23:59:59";
+
+            this.env.services.action.doAction({
+                type: "ir.actions.act_window",
+                name: "Meetings",
+                res_model: "calendar.event",
+                view_mode: "kanban",
+                views: [[false, "kanban"], [false, "form"]],
+                domain: [["start", ">=", start], ["start", "<=", end]],
+                target: "current",
+            });
+        } else {
+            this.openActivityGroup(group);
+        }
+    }
+
     onClickAction(action, group) {
-        document.body.click(); // hack to close dropdown
+        document.body.click();
         if (action.action_xmlid) {
             this.env.services.action.doAction(action.action_xmlid);
         } else {
@@ -435,12 +529,9 @@ export class UserDashboard extends Component {
         return [[false, "kanban"], [false, "list"], [false, "form"], [false, "activity"],];
     }
 
-    onInputNotifType(ev){
+    onInputNotifType(ev) {
         this.orm.write("res.users", [this.userId], {'notification_type': ev.target.value});
         this.env.services['action'].doAction('reload_context');
-    }
-    onChangeOdooBotStatus(ev){
-        this.orm.write("res.users", [this.userId], {'odoobot_state': ev.target.value});
     }
 
     renderPerformanceInsight() {
@@ -470,5 +561,6 @@ export class UserDashboard extends Component {
         });
     }
 }
+
 UserDashboard.template = "UserDashboard";
 actionRegistry.add('cyllo_user_dashboard', UserDashboard);

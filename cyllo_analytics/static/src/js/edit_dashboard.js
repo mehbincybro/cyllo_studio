@@ -1,13 +1,9 @@
 /** @odoo-module **/
-
 import {registry} from "@web/core/registry";
 import {StackItem, StackKpiItem, StackTableItem} from "./stack_item";
 import {CylloDashboard} from "./cyllo_dashboard";
-import {GraphTile} from "@cyllo_analytics/js/presentation/components/graph_tile";
-
-const {useState, useRef, onMounted} = owl;
-import {KpiSheetChart} from "@cyllo_analytics/js/kpi_sheet_chart";
 import {browser} from "@web/core/browser/browser";
+const {useState, useRef, onMounted} = owl;
 
 
 class EditDashboard extends CylloDashboard {
@@ -23,48 +19,46 @@ class EditDashboard extends CylloDashboard {
             gridStackData: []
         })
         onMounted(this.fetchData)
+        this.rearrangeId = 1
     }
 
     rearrange() {
         try {
-            var position = {x: 0, y: 0, w: 0, h: 0, previousH: 0};
-            var newY = 0
-            var newLineAdded = false
-            for (var val of this.shuffleArrayItems) {
-                var $el = $(this.ref.el).find(`#elem_${val.id}`)
-                var w = val.h ? 4 : 3
-                var h = val.h ? 3 : 1
-                if (position.x + w > 12) {
-                    position.x = 0
-                    position.y += newY
-                    newY = 0
+            const newPosition = {x: 0, y: 0, w: 0, h: 0, items: {0: [0]}, type: "kpi"}
+            for (const val of this.shuffleArrayItems) {
+                const {height: chartHeight, width: chartWidth} = this.getChartSizes(val.type, this.rearrangeId)
+                if (val.type !== 'kpi' && newPosition.type === 'kpi') {
+                    newPosition.x = 0
+                    newPosition.y = Math.max(...newPosition.items[newPosition.y])
                 }
-                if (position.previousH == 1 && h > 1 && !newLineAdded) {
-                    position.y += newY ? 1 : 0
-                    position.x = 0
-                    newLineAdded = true
+                if ((newPosition.x + chartWidth) > 12) {
+                    newPosition.x = 0
+                    newPosition.y = Math.max(...newPosition.items[newPosition.y])
                 }
-                position.previousH = h
-                Object.assign(this.stack.engine.nodes.find(item => val.id == item.id), {
-                    x: position.x,
-                    y: position.y,
-                    w,
-                    h,
+                newPosition.type = val.type
+                if (!newPosition.items[newPosition.y]) {
+                    newPosition.items[newPosition.y] = [newPosition.y + chartHeight]
+                } else {
+                    newPosition.items[newPosition.y].push(newPosition.y + chartHeight)
+                }
+                const $el = $(this.ref.el).find(`#elem_${val.id}`)
+                Object.assign(this.stack.engine.nodes.find(item => val.id === item.id), {
+                    x: newPosition.x,
+                    y: newPosition.y,
+                    w: chartWidth,
+                    h: chartHeight,
                 });
-                $el.attr('gs-x', position.x)
-                $el.attr('gs-y', position.y)
-                $el.attr('gs-w', w)
-                $el.attr('gs-h', h)
-                position.x += w
-                position.w = w
-                position.h = h
-                newY = newY < position.h ? position.h : newY
-                var stack_item = this.stackItems[`elem_${val.id}`]
-                stack_item.reRender(false, h, w)
+                $el.attr('gs-x', newPosition.x)
+                $el.attr('gs-y', newPosition.y)
+                $el.attr('gs-w', chartWidth)
+                $el.attr('gs-h', chartHeight)
+                const stackItem = this.stackItems[`elem_${val.id}`]
+                stackItem.reRender(false, chartHeight, chartWidth)
+                newPosition.x += chartWidth
             }
             this.state.change = true
-        }
-        catch {}
+            this.rearrangeId++
+        }catch {}
     }
 
     get shuffleArrayItems() {
@@ -142,7 +136,8 @@ class EditDashboard extends CylloDashboard {
                     var params = {
                         themeColor: this.themeState.theme.theme_color_ids,
                         unit: this.state.width,
-                        graph_height
+                        graph_height,
+                        isDarkMode: this.state.darkMode
                     }
                     this.stackItems[element.id] = new StackItem(element, props, this.stack, this.themeState.currentTheme, params)
                 }
@@ -215,14 +210,6 @@ class EditDashboard extends CylloDashboard {
     }
 
     /**
-     * Get grid stack options.
-     * @returns {Object} - The grid stack options.
-     */
-    get gridStackOptions() {
-        return {}
-    }
-
-    /**
      * Navigate back to the original dashboard.
      * @returns {Object} - The action to navigate back.
      */
@@ -246,12 +233,13 @@ class EditDashboard extends CylloDashboard {
             w: graph_width,
             h: graph_height,
             id: item.id,
-            ...this.gridStackOptions
+            ...this.gridStackOptions,
+            type: item.type
         }
         if (this.state.rearrange) {
             girdOptions = {...girdOptions, x, y}
         }
-        if (item.type == 'kpi') {
+        if (item.type === 'kpi') {
             girdOptions.noResize = true
         }
         return girdOptions;

@@ -9,10 +9,14 @@
             <xpath expr="//header" position="inside">
                 <field name="first_time" invisible="1"/>
                 <div class="cy-app-install-guidance-message alert-success"
+                     role="status"
                      invisible="first_time">
                     You will be able to create and edit the user by navigating to
                     Settings → Users &amp; Companies → Users
                 </div>
+            </xpath>
+            <xpath expr="//field[@name='login']" position="attributes">
+                <attribute name="readonly">not first_time and id == context.get('uid')</attribute>
             </xpath>
         </field>
     </record>

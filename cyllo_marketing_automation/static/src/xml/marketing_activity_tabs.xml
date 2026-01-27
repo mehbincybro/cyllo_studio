@@ -3,15 +3,15 @@
     <!-- Marketing Tabs Template -->
     <t t-name="MarketingTabs" owl="1">
         <!-- Marketing Tabs Component -->
-        <div class="row mx-2 my-4">
+        <div class="row mx-0 my-4">
             <div class="main-contents col o_notebook cy-marketing-auto_tab-view p-0"
                  t-ref="tabContent">
-                <ul class="nav nav-tabs " role="tablist">
+                <ul class="nav nav-tabs px-2 mt-2" role="tablist">
                     <t t-foreach="props.activities" t-as="activity"
                        t-key="activity.id">
                         <li class="nav-item cy-nav-item-style-width" role="presentation"
                             t-on-click="() => this.onClickTab(activity)" t-att-title="activity.name">
-                             <a class="nav-link nav-link cy-sidebar-nav cy-marketing-auto-tab"
+                             <a class="nav-link nav-link cy-marketing-auto-tab"
                                 t-attf-class="{{activity_index === 0 and 'active'}}"
                                 data-bs-toggle="tab"
                                 t-attf-href="#tab-{{activity.id}}" role="tab"

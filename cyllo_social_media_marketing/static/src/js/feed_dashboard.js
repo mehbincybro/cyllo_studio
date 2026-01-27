@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { registry } from "@web/core/registry";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, onMounted, useRef } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { useState } from "@odoo/owl";
 
@@ -13,15 +13,25 @@ export class SocialMediaFeed extends Component {
         this.state = useState({
             Feeds: false,
             fields: ['id', 'description', 'author_name', 'author_link', 'posted_date', 'author_link_url', 'posted_image', 'profile_image_url', 'posted_image_url', 'profile_image', 'likes_count', 'comments_count', 'post_id'],
-            demo:false
+            demo:false,
+            posts: [],
+            nextPage: null,
+            loading: false,
+            currentAccount: null,
         });
         onWillStart(async () => {
             this.state.Feeds = await this.orm.searchRead('social.media.feed', [], this.state.fields)
-            this.state.FbFeeds = this.state.Feeds.filter(r => r.fb_media_number !== false)
-            this.state.InstaFeeds = this.state.Feeds.filter(r => r.ig_media_number !== false)
             this.state.YoutubeFeeds = this.state.Feeds.filter(r => r.youtube_number !== false)
             this.detailsRefresh(this)
-        })
+        });
+        onMounted(() => {
+            document.querySelectorAll("textarea").forEach((textarea) => {
+                textarea.addEventListener("input", () => {
+                    textarea.style.height = "auto";
+                    textarea.style.height = textarea.scrollHeight + "px";
+                });
+            });
+        });
     }
 
     detailsRefresh(self) {
@@ -74,14 +84,14 @@ export class SocialMediaFeed extends Component {
     }
     DirectPartner(res_id) {
         this.actionService.doAction({
-    res_model: 'res.partner',
-    res_id: res_id,
-    target: "current",
-    type: "ir.actions.act_window",
-    views: [
-        [false, "form"]
-    ],
-});
+            res_model: 'res.partner',
+            res_id: res_id,
+            target: "current",
+            type: "ir.actions.act_window",
+            views: [
+                [false, "form"]
+            ],
+         });
     }
     ComputeDemoData(feed) {
         var YtDetails = document.getElementById(("Details_" + feed));

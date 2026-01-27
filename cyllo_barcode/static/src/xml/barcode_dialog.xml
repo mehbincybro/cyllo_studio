@@ -4,8 +4,8 @@
     <t t-name="BarcodeDialog">
         <Dialog size="'md'" title="props.title" modalRef="modalRef">
             <video t-ref="videoPreview" muted="true" autoplay="true"
-                 playsinline="true" class="w-100 h-100"/>
-            <p t-esc="this.state.alert" />
+                   playsinline="true" class="w-100 h-100"/>
+            <p t-esc="this.state.alert"/>
             <t t-set-slot="footer">
                 <button class="btn" t-att-class="props.confirmClass"
                         t-on-click="OnclickConfirmDialogue"

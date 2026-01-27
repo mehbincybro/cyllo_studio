@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import base64
 import json
 import requests
@@ -32,37 +52,6 @@ class GoogleDriveConnector(models.Model):
     state = fields.Selection(selection=[('draft', 'Draft'), ('connected', 'Connected')],
                              default='draft', help="State of the item: Draft or Connected.")
 
-    def generate_google_drive_refresh_token(self):
-        """Generate a new Google Drive access token from the refresh token if it has expired. This method attempts
-        to generate a new Google Drive access token using the provided refresh token. If the refresh token is valid
-        and not expired, it obtains a new access token, updates the access token and its validity period, and stores
-        them in the database.
-        :return: None
-        :raises: UserError if an error occurs during the token generation
-         process, such as invalid credentials or an expired refresh token."""
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-        data = {
-            'refresh_token': self.google_drive_refresh_token,
-            'client_id': self.google_client_key,
-            'client_secret': self.google_client_secret,
-            'grant_type': 'refresh_token',
-        }
-        try:
-            res = requests.post('https://accounts.google.com/o/oauth2/token', data=data, headers=headers)
-            res.raise_for_status()
-            response = res.content and res.json() or {}
-            if response:
-                expires_in = response.get('expires_in')
-                self.write({
-                    'google_drive_access_token': response.get('access_token'),
-                    'google_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in)})
-        except requests.HTTPError as error:
-            error_key = error.response.json().get("error", "nc")
-            error_msg = _("An error occurred while generating the token. Your authorization code may be invalid or "
-                          "has already expired [%s]. You should check your Client ID and secret on the Google APIs"
-                          " plateform or try to stop and restart your calendar synchronisation.", error_key)
-            raise UserError(error_msg)
-
     def action_get_access(self):
         """Generate an OAuth2 authorization URL for obtaining Google Drive access. This method constructs an OAuth2
         authorization URL that users can visit to grant access to their Google Drive account. The generated URL
@@ -89,41 +78,6 @@ class GoogleDriveConnector(models.Model):
             'target': 'self',
             'url': f'https://accounts.google.com/o/oauth2/auth?{encoded_params}',
         }
-
-    def get_google_drive_tokens(self, authorize_code):
-        """Exchange an authorization code for Google Drive tokens.
-        :param authorize_code: The authorization code received from
-        Google Drive.
-        :type authorize_code: str
-        :return: A dictionary containing Google Drive tokens and related data.
-        :rtype: dict
-        """
-        base_url = request.env['ir.config_parameter'].get_param('web.base.url')
-        headers = {"content-type": "application/x-www-form-urlencoded"}
-        data = {
-            'code': authorize_code,
-            'client_id': self.google_client_key,
-            'client_secret': self.google_client_secret,
-            'grant_type': 'authorization_code',
-            'redirect_uri': base_url + '/google_drive/auth'
-        }
-        try:
-            res = requests.post('https://accounts.google.com/o/oauth2/token', params=data, headers=headers)
-            res.raise_for_status()
-            response = res.content and res.json() or {}
-            if response:
-                expires_in = response.get('expires_in')
-                self.write({
-                    'google_drive_access_token': response.get('access_token'),
-                    'google_drive_refresh_token': response.get('refresh_token'),
-                    'google_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
-                    'is_gdrive_access': True,
-                    'state': 'connected'
-                })
-        except requests.HTTPError:
-            error_msg = _(
-                "Something went wrong during your token generation. Maybe your Authorization Code is invalid")
-            raise UserError(error_msg)
 
     def action_export_files(self):
         """Export selected files to Google Drive. This method exports the selected files to Google Drive. It
@@ -174,6 +128,72 @@ class GoogleDriveConnector(models.Model):
                     'sticky': False,
                 }
             }
+
+    def generate_google_drive_refresh_token(self):
+        """Generate a new Google Drive access token from the refresh token if it has expired. This method attempts
+        to generate a new Google Drive access token using the provided refresh token. If the refresh token is valid
+        and not expired, it obtains a new access token, updates the access token and its validity period, and stores
+        them in the database.
+        :return: None
+        :raises: UserError if an error occurs during the token generation
+         process, such as invalid credentials or an expired refresh token."""
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        data = {
+            'refresh_token': self.google_drive_refresh_token,
+            'client_id': self.google_client_key,
+            'client_secret': self.google_client_secret,
+            'grant_type': 'refresh_token',
+        }
+        try:
+            res = requests.post('https://accounts.google.com/o/oauth2/token', data=data, headers=headers)
+            res.raise_for_status()
+            response = res.content and res.json() or {}
+            if response:
+                expires_in = response.get('expires_in')
+                self.write({
+                    'google_drive_access_token': response.get('access_token'),
+                    'google_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in)})
+        except requests.HTTPError as error:
+            error_key = error.response.json().get("error", "nc")
+            error_msg = _("An error occurred while generating the token. Your authorization code may be invalid or "
+                          "has already expired [%s]. You should check your Client ID and secret on the Google APIs"
+                          " plateform or try to stop and restart your calendar synchronisation.", error_key)
+            raise UserError(error_msg)
+
+    def get_google_drive_tokens(self, authorize_code):
+        """Exchange an authorization code for Google Drive tokens.
+        :param authorize_code: The authorization code received from
+        Google Drive.
+        :type authorize_code: str
+        :return: A dictionary containing Google Drive tokens and related data.
+        :rtype: dict
+        """
+        base_url = request.env['ir.config_parameter'].get_param('web.base.url')
+        headers = {"content-type": "application/x-www-form-urlencoded"}
+        data = {
+            'code': authorize_code,
+            'client_id': self.google_client_key,
+            'client_secret': self.google_client_secret,
+            'grant_type': 'authorization_code',
+            'redirect_uri': base_url + '/google_drive/auth'
+        }
+        try:
+            res = requests.post('https://accounts.google.com/o/oauth2/token', params=data, headers=headers)
+            res.raise_for_status()
+            response = res.content and res.json() or {}
+            if response:
+                expires_in = response.get('expires_in')
+                self.write({
+                    'google_drive_access_token': response.get('access_token'),
+                    'google_drive_refresh_token': response.get('refresh_token'),
+                    'google_drive_token_validity': fields.Date.add(fields.Datetime.now(), seconds=expires_in),
+                    'is_gdrive_access': True,
+                    'state': 'connected'
+                })
+        except requests.HTTPError:
+            error_msg = _(
+                "Something went wrong during your token generation. Maybe your Authorization Code is invalid")
+            raise UserError(error_msg)
 
     def auto_sync_google_drive(self):
         """Method works while auto sync is triggered to export and import files from Google Drive"""

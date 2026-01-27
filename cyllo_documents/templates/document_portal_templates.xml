@@ -97,12 +97,12 @@
                                             <t t-esc="docs.partner_id.name"/>
                                         </td>
                                         <td class="text-end">
-                                            <i class="btn btn-outline-primary fa fa-share" t-attf-data-url="{{docs.brochure_url}}"/>
+                                            <i class="btn btn-primary fa fa-share" t-attf-data-url="{{docs.brochure_url}}"/>
                                             <t t-if="extension == 'url'">
-                                                <a class="btn btn-outline-primary fa fa-expand" t-att-href="docs.content_url" target="_blank"/>
+                                                <a class="btn btn-primary fa fa-expand" t-att-href="docs.content_url" target="_blank"/>
                                             </t>
                                             <t t-else="">
-                                                <a class="btn btn-outline-primary fa fa-download" target="_blank"
+                                                <a class="btn btn-primary fa fa-download" target="_blank"
                                                    t-attf-href="/web/content/#{docs.attachment_id.id}?download=true&amp;access_token="/>
                                             </t>
                                         </td>

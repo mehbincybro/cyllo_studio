@@ -52,4 +52,3 @@ SelectUser.template = "SelectUser";
 SelectUser.components = {
     Dialog, Many2XAutocomplete,MultiRecordSelector
 }
-

@@ -1,48 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_res_partner_form" model="ir.ui.view">
-        <field name="name">view.res.partner.form</field>
+    <record id="view_res_partner_form_inherit_followup" model="ir.ui.view">
+        <field name="name">view.res.partner.form.inherit.followup</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='internal_notes']" position="after">
-                <page string="Follow Ups" invisible="customer_rank &lt;= 0">
-                    <div class="alert alert-warning o_account_reports_followup-no-action"
-                         invisible="move_ids"
+                <page string="Follow Ups">
+                    <div class="o_account_reports_followup-no-action"
                          id='no-action' role="alert">
-                        <p>
-                            <strong>
-                                <field name="name"/>
-                            </strong>
-                            has no due amount.
-                        </p>
-                    </div>
-                    <div invisible="not move_ids">
-                        <div class="oe_inline">
-                            <div style="width: 35%;">
-                                <group>
-                                    <field name="done_customer_followup_id" readonly="0"
-                                           invisible="not done_customer_followup_id"/>
-                                </group>
-                            </div>
-                            <div invisible="not to_do_customer_followup_id">
-                                <p>Next Action:
-                                    <field name="to_do_customer_followup_id" nolabel="1"/><br/>
-
-                                </p>
-                            </div>
-                            <div invisible="not next_followup_action_date">
-                                <p>
-                                    on:
-                                    <field name="next_followup_action_date" nolabel="1"/>
-                                </p>
-                            </div>
-                        </div>
-                        <field name="customer_rank" invisible="1"/>
                         <field name="move_ids" context="{
-                            'tree_view_ref': 'account.invoice_tree_with_onboarding',
-                            'form_view_ref': 'account.invoice_form'
+                            'tree_view_ref': 'cyllo_accounting_follow_up.view_out_invoice_tree_inherit_followup',
                             }"/>
+                        <field name="check_followups" invisible="True"/>
                     </div>
                 </page>
             </xpath>

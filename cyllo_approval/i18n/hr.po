@@ -1,0 +1,1193 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_approval
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-28 09:25+0000\n"
+"PO-Revision-Date: 2025-10-28 09:25+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_approval_request
+msgid ""
+"<p>Dear Sir\n"
+"                </p>\n"
+"                <p>An approval request has been assigned to you. Below are the\n"
+"                    details:\n"
+"                </p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Requested By:</strong>\n"
+"                        <t t-out=\"object.requested_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Date:</strong>\n"
+"                        <t t-out=\"object.requested_date\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Kindly review the request.</p>\n"
+"            "
+msgstr ""
+"<p>Poštovani gospodine\n"
+"                </p>\n"
+"                <p>Dodijeljen vam je zahtjev za odobrenje. U nastavku su\n"
+"                    detalji:\n"
+"                </p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>ID zahtjeva:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Zahtijevao:</strong>\n"
+"                        <t t-out=\"object.requested_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Datum:</strong>\n"
+"                        <t t-out=\"object.requested_date\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Pregledaj zapis\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Molimo pregledajte zahtjev.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_request_approved
+msgid ""
+"<p>Dear<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Your approval request has been approved.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Approved By:</strong>\n"
+"                        <t t-out=\"object.approved_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Approved Date:</strong>\n"
+"                        <t t-out=\"object.approved_date\"></t>\n"
+"                    </li>\n"
+"                    <t t-if=\"object.comment\">\n"
+"                        <li>\n"
+"                            <strong>Comment:</strong>\n"
+"                            <t t-out=\"object.comment\"></t>\n"
+"                        </li>\n"
+"                    </t>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Thank you.</p>\n"
+"            "
+msgstr ""
+"<p>Poštovani<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Vaš zahtjev za odobrenje je odobren.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>ID zahtjeva:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Odobrio:</strong>\n"
+"                        <t t-out=\"object.approved_by_id.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Datum odobrenja:</strong>\n"
+"                        <t t-out=\"object.approved_date\"></t>\n"
+"                    </li>\n"
+"                    <t t-if=\"object.comment\">\n"
+"                        <li>\n"
+"                            <strong>Komentar:</strong>\n"
+"                            <t t-out=\"object.comment\"></t>\n"
+"                        </li>\n"
+"                    </t>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Pregledaj zapis\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Hvala.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model:mail.template,body_html:cyllo_approval.mail_template_request_rejected
+msgid ""
+"<p>Dear<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Your approval request has been rejected.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>Request ID:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Rejected By:</strong>\n"
+"                        <t t-out=\"object.rejected_by_id.name\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        View Record\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Thank you.</p>\n"
+"            "
+msgstr ""
+"<p>Poštovani<t t-out=\"object.requested_by_id.name\"></t>,\n"
+"                </p>\n"
+"                <p>Vaš zahtjev za odobrenje je odbijen.</p>\n"
+"                <ul>\n"
+"                    <li>\n"
+"                        <strong>ID zahtjeva:</strong>\n"
+"                        <t t-out=\"object.name\"></t>\n"
+"                    </li>\n"
+"                    <li>\n"
+"                        <strong>Odbio:</strong>\n"
+"                        <t t-out=\"object.rejected_by_id.name\"></t>\n"
+"                    </li>\n"
+"                </ul>\n"
+"                <p>\n"
+"                    <a t-att-href=\"'/web#id=%s&amp;model=%s&amp;view_type=form' % (object.res_id, object.model_name)\" class=\"btn btn-primary\">\n"
+"                        Pregledaj zapis\n"
+"                    </a>\n"
+"                </p>\n"
+"                <p>Hvala.</p>\n"
+"            "
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_rule_kanban
+msgid "<span class=\"text-bg-danger\">Archived</span>"
+msgstr "<span class=\"text-bg-danger\">Arhivirano</span>"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Accept"
+msgstr "Prihvati"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_needaction
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_needaction
+msgid "Action Needed"
+msgstr "Potrebna radnja"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Activate Rule"
+msgstr "Aktiviraj pravilo"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__active
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__active
+msgid "Active"
+msgstr "Aktivan"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_ids
+msgid "Activities"
+msgstr "Aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_exception_decoration
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Dekoracija iznimke aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_state
+msgid "Activity State"
+msgstr "Stanje aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_type_icon
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Ikona vrste aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__admin_users
+msgid "Admin Users"
+msgstr "Administratorski korisnici"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "All"
+msgstr "Svi"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__allow_comment
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__allow_comment
+msgid "Allow Comment"
+msgstr "Dopusti komentar"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__comment
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_comment
+msgid "Approval Comment"
+msgstr "Komentar odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_count
+msgid "Approval Count"
+msgstr "Broj odobrenja"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+msgid "Approval Logs"
+msgstr "Zapisnici odobrenja"
+
+#. module: cyllo_approval
+#: model:res.groups,name:cyllo_approval.group_approval_manager
+msgid "Approval Managers"
+msgstr "Upravitelji odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_ir_model__approval_need
+msgid "Approval Needed"
+msgstr "Potrebno odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__approval_request_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_request_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_request_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approval Request"
+msgstr "Zahtjev za odobrenje"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_request_approved
+msgid "Approval Request Approved"
+msgstr "Zahtjev za odobrenje odobren"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_approval_request
+msgid "Approval Request Notification"
+msgstr "Obavijest o zahtjevu za odobrenje"
+
+#. module: cyllo_approval
+#: model:mail.template,name:cyllo_approval.mail_template_request_rejected
+msgid "Approval Request Rejected"
+msgstr "Zahtjev za odobrenje odbijen"
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_approval_request
+msgid "Approval Request for {{ object.name }}"
+msgstr "Zahtjev za odobrenje za {{ object.name }}"
+
+#. module: cyllo_approval
+#: model:ir.ui.menu,name:cyllo_approval.menu_approval_request
+#: model_terms:ir.actions.act_window,help:cyllo_approval.action_approval_request_view
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_home_request
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approval Requests"
+msgstr "Zahtjevi za odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approval_rule_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_rule_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_rule_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approval Rule"
+msgstr "Pravilo odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.actions.act_window,name:cyllo_approval.action_approval_rule_view
+#: model:ir.ui.menu,name:cyllo_approval.menu_approval_rule
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_activity
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_pivot
+msgid "Approval Rules"
+msgstr "Pravila odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.actions.act_window,name:cyllo_approval.action_approval_request_view
+#: model:ir.model,name:cyllo_approval.model_approval_request
+msgid "Approval requests"
+msgstr "Zahtjevi za odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_approval_rule
+msgid "Approval rules"
+msgstr "Pravila odobrenja"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#: model:ir.ui.menu,name:cyllo_approval.menu_cyllo_approval_root
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase_order_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase_order_approvals
+#, python-format
+msgid "Approvals"
+msgstr "Odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__is_sequenced
+msgid "Approve in Sequence order"
+msgstr "Odobri po redoslijedu sekvence"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__approved
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approved"
+msgstr "Odobreno"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approved_by_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approved By"
+msgstr "Odobrio"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approved_date
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Approved Date"
+msgstr "Datum odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__approver_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Approver"
+msgstr "Odobravatelj"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approver_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__approver_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approver_ids
+msgid "Approvers"
+msgstr "Odobravatelji"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Archived"
+msgstr "Arhivirano"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_attachment_count
+msgid "Attachment Count"
+msgstr "Broj priloga"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__group
+msgid "Based on Group"
+msgstr "Temeljeno na grupi"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__related
+msgid "Based on Related Users"
+msgstr "Temeljeno na povezanim korisnicima"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__user_type__user
+msgid "Based on User"
+msgstr "Temeljeno na korisniku"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__approval_transferred
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__transferred
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__approval_transferred
+msgid "Can be Transferred"
+msgstr "Može se prenijeti"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Cancel"
+msgstr "Otkaži"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__company_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__company_id
+msgid "Company"
+msgstr "Tvrtka"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Confirm"
+msgstr "Potvrdi"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Count"
+msgstr "Broj"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Create Approval"
+msgstr "Stvori odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__create_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__create_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__create_uid
+msgid "Created by"
+msgstr "Stvorio/la"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__create_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__create_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__create_date
+msgid "Created on"
+msgstr "Stvoreno"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__company_id
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__company_id
+msgid "Current company"
+msgstr "Trenutna tvrtka"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__state
+msgid "Current status of the approval request"
+msgstr "Trenutno stanje zahtjeva za odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approved_date
+msgid "Date when the request was approved"
+msgstr "Datum kada je zahtjev odobren"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__requested_date
+msgid "Date when the request was made"
+msgstr "Datum kada je zahtjev podnesen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__definition_type
+msgid "Define whether this rule is based on a domain or a server action."
+msgstr "Definirajte je li ovo pravilo temeljeno na domeni ili radnji poslužitelja."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__definition_type
+msgid "Definition Type"
+msgstr "Vrsta definicije"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_rule_kanban
+msgid "Delete"
+msgstr "Obriši"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__state__disable
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Disable"
+msgstr "Onemogući"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__display_name
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__display_name
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__display_name
+msgid "Display Name"
+msgstr "Prikazani naziv"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__domain
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__definition_type__domain
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Domain"
+msgstr "Domena"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__domain
+msgid "Domain condition that set for this rule."
+msgstr "Uvjet domene postavljen za ovo pravilo."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__email_notification
+msgid "Email Notification"
+msgstr "Obavijest e-poštom"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "Email Notification Settings"
+msgstr "Postavke obavijesti e-poštom"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__state__enable
+msgid "Enable"
+msgstr "Omogući"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_ir_model__approval_need
+msgid "Enable to add this model to approval module"
+msgstr "Omogućite dodavanje ovog modela modulu odobrenja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__related_user_id
+msgid ""
+"Field in the selected model that determines the related users for approval."
+msgstr ""
+"Polje u odabranom modelu koje određuje povezane korisnike za odobrenje."
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_home_request
+msgid "Follow, download or pay your invoices"
+msgstr "Pratite, preuzmite ili platite svoje račune"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_follower_ids
+msgid "Followers"
+msgstr "Pratitelji"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Pratitelji (partneri)"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_type_icon
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Font awesome ikona npr. fa-tasks"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/approval_request.py:0
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+#, python-format
+msgid "Forward"
+msgstr "Proslijedi"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_forward_form
+msgid "Forward Approval"
+msgstr "Proslijedi odobrenje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__from_user_ids
+msgid "From"
+msgstr "Od"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__group_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__group_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Group"
+msgstr "Grupa"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Group By"
+msgstr "Grupiraj po"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__has_message
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__has_message
+msgid "Has Message"
+msgstr "Ima poruku"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__id
+msgid "ID"
+msgstr "ID"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_exception_icon
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_exception_icon
+msgid "Icon"
+msgstr "Ikona"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_exception_icon
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Ikona za označavanje iznimne aktivnosti."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_needaction
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Ako je označeno, nove poruke zahtijevaju vašu pažnju."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_error
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Ako je označeno, neke poruke imaju grešku u dostavi."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_is_follower
+msgid "Is Follower"
+msgstr "Je pratitelj"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__write_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__write_uid
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__write_uid
+msgid "Last Updated by"
+msgstr "Zadnji ažurirao"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__write_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__write_date
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__write_date
+msgid "Last Updated on"
+msgstr "Zadnje ažurirano"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "Mark As Read"
+msgstr "Označi kao pročitano"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_error
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_error
+msgid "Message Delivery error"
+msgstr "Greška u dostavi poruke"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_ids
+msgid "Messages"
+msgstr "Poruke"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__model_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Model"
+msgstr "Model"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__model_name
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+msgid "Model Name"
+msgstr "Naziv modela"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__model_select
+msgid "Model Selected"
+msgstr "Odabrani model"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_ir_model
+msgid "Models"
+msgstr "Modeli"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__my_activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Rok za moju aktivnost"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "My Approvals"
+msgstr "Moja odobrenja"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "My Requests"
+msgstr "Moji zahtjevi"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__name
+msgid "Name"
+msgstr "Naziv"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_calendar_event_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_calendar_event_id
+msgid "Next Activity Calendar Event"
+msgstr "Sljedeći događaj kalendara aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Rok za sljedeću aktivnost"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_summary
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_summary
+msgid "Next Activity Summary"
+msgstr "Sažetak sljedeće aktivnosti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_type_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_type_id
+msgid "Next Activity Type"
+msgstr "Vrsta sljedeće aktivnosti"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/sys.xml:0
+#, python-format
+msgid "No approvals"
+msgstr "Nema odobrenja"
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "No new notification yet..."
+msgstr "Još nema novih obavijesti..."
+
+#. module: cyllo_approval
+#. odoo-javascript
+#: code:addons/cyllo_approval/static/src/systray/approval_systray.xml:0
+#, python-format
+msgid "Notification Item Image"
+msgstr "Slika stavke obavijesti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_approve
+msgid "Notify on Approval"
+msgstr "Obavijesti o odobrenju"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_reject
+msgid "Notify on Rejection"
+msgstr "Obavijesti o odbijanju"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__notify_on_request
+msgid "Notify on Request"
+msgstr "Obavijesti o zahtjevu"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Broj radnji"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_error_counter
+msgid "Number of errors"
+msgstr "Broj grešaka"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Broj poruka koje zahtijevaju radnju"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Broj poruka s greškom u dostavi"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__pending
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Pending"
+msgstr "Na čekanju"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__read_by_ids
+msgid "Read By Users"
+msgstr "Pročitali korisnici"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Reject"
+msgstr "Odbij"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__rejected
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Rejected"
+msgstr "Odbijen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__rejected_by_id
+msgid "Rejected By"
+msgstr "Odbio"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__res_id
+msgid "Related Record Id"
+msgstr "ID povezanog zapisa"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__related_user_id
+msgid "Related User"
+msgstr "Povezani korisnik"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Reload"
+msgstr "Ponovo učitaj"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data_button
+msgid "Request Approval"
+msgstr "Zahtjev za odobrenje"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+msgid "Request Name"
+msgstr "Naziv zahtjeva"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "Request Transferred Successfully"
+msgstr "Zahtjev uspješno prenesen"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__name
+msgid "Request name"
+msgstr "Naziv zahtjeva"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__requested_by_id
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Requested By"
+msgstr "Zahtijevao"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__requested_date
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+msgid "Requested Date"
+msgstr "Datum zahtjeva"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__requested_by_id
+msgid "Requested User"
+msgstr "Zahtjevani korisnik"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__activity_user_id
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__activity_user_id
+msgid "Responsible User"
+msgstr "Odgovorni korisnik"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approval_rule_id
+msgid "Rule Related to this approval"
+msgstr "Pravilo povezano s ovim odobrenjem"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Greška u dostavi SMS-a"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Search Bank"
+msgstr "Pretraži banku"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__model_id
+msgid "Select the model for which this approval rule applies."
+msgstr "Odaberite model na koji se primjenjuje ovo pravilo odobrenja."
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "Select the user to whom the request will be transferred"
+msgstr "Odaberite korisnika kojem će se zahtjev prenijeti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__sequence_order
+msgid "Sequence"
+msgstr "Sekvenca"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_ir_actions_server
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__server_action_id
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_rule__definition_type__server_action
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "Server Action"
+msgstr "Serverske radnje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__server_trigger
+msgid "Server Trigger"
+msgstr "Okidač poslužitelja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__server_action_id
+msgid "Server action to execute when the rule is triggered."
+msgstr "Radnja poslužitelja za izvršenje kada se pravilo pokrene."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_check_approval__show_request_button
+msgid "Show Request Button"
+msgstr "Prikaži gumb zahtjeva"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__group_id
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__group_id
+msgid "Specific group whose members can approve the request."
+msgstr "Specifična grupa čiji članovi mogu odobriti zahtjev."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__user_id
+msgid "Specific user who can approve the request."
+msgstr "Specifični korisnik koji može odobriti zahtjev."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__user_type
+msgid "Specify how approvers are determined for this rule."
+msgstr "Odredite kako se određuju odobravatelji za ovo pravilo."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_value
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.portal_my_approval_requests
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "State"
+msgstr "Stanje"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_from_id
+msgid "State From"
+msgstr "Stanje od"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_to_id
+msgid "State To"
+msgstr "Stanje do"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__state_values_ids
+msgid "State Values"
+msgstr "Vrijednosti stanja"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_state
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status temeljen na aktivnostima\n"
+"Prekoračenje: Datum dospijeća je već prošao\n"
+"Danas: Datum aktivnosti je danas\n"
+"Planirano: Buduće aktivnosti."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_value
+msgid "Technical name of the state field in the selected model."
+msgstr "Tehnički naziv polja stanja u odabranom modelu."
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid ""
+"The 'From' user and 'To' user cannot be the same. Please choose different "
+"users."
+msgstr ""
+"Korisnik 'Od' i korisnik 'Do' ne mogu biti isti. Molimo odaberite različite "
+"korisnike."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approved_by_id
+msgid "The person who approved the request"
+msgstr "Osoba koja je odobrila zahtjev"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__approver_ids
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__approver_ids
+#: model:ir.model.fields,help:cyllo_approval.field_check_approval__approver_ids
+msgid "The person who approves the request"
+msgstr "Osoba koja odobrava zahtjev"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__rejected_by_id
+msgid "The person who rejected the request"
+msgstr "Osoba koja je odbila zahtjev"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__res_id
+msgid "The record ID for the Related Model"
+msgstr "ID zapisa za povezani model"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_from_id
+msgid "The state from which the transition begins."
+msgstr "Stanje od kojeg počinje prijelaz."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__state_to_id
+msgid "The state to which the transition occurs."
+msgstr "Stanje u koje se događa prijelaz."
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "This Record Needs to be approved"
+msgstr "Ovaj zapis treba odobriti"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_forward__to_user_ids
+msgid "To"
+msgstr "Do"
+
+#. module: cyllo_approval
+#: model:ir.model.fields.selection,name:cyllo_approval.selection__approval_request__state__transferred
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_search
+msgid "Transferred"
+msgstr "Prijenos"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__activity_exception_decoration
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Vrsta iznimne aktivnosti na zapisu."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__user_id
+msgid "User"
+msgstr "Korisnik"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__user_type
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approve_rule_search
+msgid "User Type"
+msgstr "Vrsta korisnika"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__read_by_ids
+msgid "Users who have marked this approval request as read"
+msgstr "Korisnici koji su označili ovaj zahtjev za odobrenje kao pročitan"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_approval_request_tree
+msgid "View"
+msgstr "Pogled"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_request__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__website_message_ids
+msgid "Website Messages"
+msgstr "Poruke web stranice"
+
+#. module: cyllo_approval
+#: model:ir.model.fields,help:cyllo_approval.field_approval_request__website_message_ids
+#: model:ir.model.fields,help:cyllo_approval.field_approval_rule__website_message_ids
+msgid "Website communication history"
+msgstr "Povijest komunikacije web stranice"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.view_purchase.order_approval_data
+msgid "Write your comment here..."
+msgstr "Napišite svoj komentar ovdje..."
+
+#. module: cyllo_approval
+#: model:ir.model.fields,field_description:cyllo_approval.field_approval_rule__x_stage_id
+msgid "X Stage"
+msgstr "X Faza"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#: code:addons/cyllo_approval/wizard/approval_forward.py:0
+#, python-format
+msgid "You are not allowed to transfer the request"
+msgstr "Nije vam dopušteno prenijeti zahtjev"
+
+#. module: cyllo_approval
+#: model_terms:ir.actions.act_window,help:cyllo_approval.action_approval_request_view
+msgid "You can view approval requests from here."
+msgstr "Ovdje možete pregledati zahtjeve za odobrenje."
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_request_approved
+msgid "Your Approval Request {{ object.name }} has been Approved"
+msgstr "Vaš zahtjev za odobrenje {{ object.name }} je odobren"
+
+#. module: cyllo_approval
+#: model:mail.template,subject:cyllo_approval.mail_template_request_rejected
+msgid "Your Approval Request {{ object.name }} has been Rejected"
+msgstr "Vaš zahtjev za odobrenje {{ object.name }} je odbijen"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Your not allowed to approve this record"
+msgstr "Nije vam dopušteno odobriti ovaj zapis"
+
+#. module: cyllo_approval
+#. odoo-python
+#: code:addons/cyllo_approval/models/check_approval.py:0
+#, python-format
+msgid "Your not allowed to reject this record"
+msgstr "Nije vam dopušteno odbiti ovaj zapis"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_approval_forward
+msgid "approval.forward"
+msgstr "odobrenje.proslijedi"
+
+#. module: cyllo_approval
+#: model:ir.model,name:cyllo_approval.model_check_approval
+msgid "check.approval"
+msgstr "provjeri.odobrenje"
+
+#. module: cyllo_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_approval.approval_rule_form
+msgid "e.g. Rule for RFQ"
+msgstr "npr. Pravilo za RFQ"

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="account_asset_asset_multi_company_rule" model="ir.rule">
+        <field name="name">Deferred revenue/expense multi-company</field>
+        <field ref="model_account_asset_asset" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in',
+            company_ids)]
+        </field>
+    </record>
+
+    <record id="account_asset_type_multi_company_rule" model="ir.rule">
+        <field name="name">Deferred revenue/expense type multi-company</field>
+        <field ref="model_account_asset_type" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in',
+            company_ids)]
+        </field>
+    </record>
+
+    <record id="account_fiscal_year_multi_company_rule" model="ir.rule">
+        <field name="name">Fiscal Year multi-company</field>
+        <field ref="model_account_fiscal_year" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in',
+            company_ids)]
+        </field>
+    </record>
+
+    <record id="online_bank_provider_company_rule" model="ir.rule">
+        <field name="name">Online Bank Provider multi-company</field>
+        <field ref="model_online_bank_provider" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in',
+            company_ids)]
+        </field>
+    </record>
+
+    <record id="batch_payment_multi_company_rule" model="ir.rule">
+        <field name="name">Batch Payment multi-company</field>
+        <field ref="model_batch_payment" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in',
+            company_ids)]
+        </field>
+    </record>
+
+</odoo>

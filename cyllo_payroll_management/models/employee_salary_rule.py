@@ -1,8 +1,28 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
-from odoo.addons import decimal_precision as decimal
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools.safe_eval import safe_eval
+from odoo.addons import decimal_precision as decimal
 
 
 class EmployeeSalaryRule(models.Model):
@@ -13,7 +33,7 @@ class EmployeeSalaryRule(models.Model):
     _description = 'Employee Salary Rule'
     _inherit = ['mail.thread', 'mail.activity.mixin']
 
-    name = fields.Char(required=True, translate=True, help='Give the name of the salary rule')
+    name = fields.Char(required=True, translate=True, help='Give a name for the salary rule')
     code = fields.Char(required=True, help="The code of salary rules can be used as reference in computation of "
                                            "other rules. In that case, it is case sensitive.")
     sequence = fields.Integer(required=True, index=True, default=5, help='Use to arrange calculation sequence')
@@ -23,11 +43,12 @@ class EmployeeSalaryRule(models.Model):
                                                "worked_days.WORK100.number_of_days.")
     category_id = fields.Many2one('employee.salary.rule.category', required=True,
                                   help='Salary rule Category reference')
+    parent_category_id = fields.Many2one('employee.salary.rule.category', related='category_id.parent_id', help='Parent category of selected rule category')
     active = fields.Boolean(default=True, help="If the active field is set to false, it will allow you to hide the "
                                                "salary rule without removing it.")
     appears_on_payslip = fields.Boolean(help="Used to display the salary rule on payslip.", default=True)
     parent_rule_id = fields.Many2one('employee.salary.rule', string='Parent Salary Rule', index=True,
-                                     help='Mention the Salary rule category')
+                                     help='Mention the parent Salary rule')
     company_id = fields.Many2one('res.company', help='Company', default=lambda self: self.env.company.id)
     condition_select = fields.Selection([('none', 'Always True'), ('range', 'Range'),
                                          ('python', 'Python Expression')], string="Condition Based on", default='none',
@@ -41,6 +62,7 @@ class EmployeeSalaryRule(models.Model):
                                    # Available variables:
                                    #----------------------
                                    # payslip: object containing the payslips
+                                   # gratuity_settlement_id: payslip field containing gratuity settlement id
                                    # employee: hr.employee object
                                    # contract: hr.contract object
                                    # rules: object containing the rules code (previously computed)
@@ -66,6 +88,8 @@ class EmployeeSalaryRule(models.Model):
                                         # Available variables:
                                         #----------------------
                                         # payslip: object containing the payslips
+                                        # gratuity_settlement_id: payslip field containing gratuity settlement id
+                                        # gratuity_amount: gratuity settlement field containing gratuity amount
                                         # employee: hr.employee object
                                         # contract: hr.contract object
                                         # rules: object containing the rules code (previously computed)
@@ -74,10 +98,11 @@ class EmployeeSalaryRule(models.Model):
                                         # worked_days: object containing the computed worked days.
                                         # inputs: object containing the computed inputs.
                                         # Note: returned value have to be set in the variable 'result'
-                                        result = contract.wage * 0.10''')
+                                        result = contract.wage * 0.10''',
+                                        help='Enter a valid python code for computation')
     amount_percentage_base = fields.Char(string='Percentage based on', help='result will be affected to a variable')
     child_ids = fields.One2many('employee.salary.rule', 'parent_rule_id',
-                                string='Child Salary Rule', copy=True,
+                                string='Child Salary Rule',
                                 help="The list of child salary rules associated with this parent rule.")
     partner_id = fields.Many2one('res.partner',
                                  help="Eventual third party involved in the salary payment of the employees.")
@@ -143,3 +168,4 @@ class EmployeeSalaryRule(models.Model):
                 return 'result' in localdict and localdict['result'] or False
             except:
                 raise UserError(_('Wrong python condition defined for salary rule %s (%s).') % (self.name, self.code))
+

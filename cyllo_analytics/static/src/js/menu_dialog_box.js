@@ -1,5 +1,4 @@
 /** @odoo-module **/
-
 import { Dialog } from "@web/core/dialog/dialog";
 import { Component } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";

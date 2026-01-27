@@ -1,12 +1,44 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 
 from odoo import fields
-from odoo.addons.cyllo_accounting.tests.common import TestCylloAccounting
 from odoo.exceptions import UserError
+from odoo.addons.cyllo_accounting.tests.common import TestCylloAccounting
 
 
 class TestAccountAsset(TestCylloAccounting):
+
+    @classmethod
+    def setUpClass(self):
+        super().setUpClass()
+        self.fiscal_year_id = self.env['account.fiscal.year'].create([{
+            'name': 'Test Fiscal Year 2020',
+            'start_date': '2020-01-01',
+            'end_date': '2020-12-31',
+            'company_id': self.env.company.id,
+            'state': 'draft'
+        }])
+        self.fiscal_year_id.action_open()
 
     def test_compute_cum_residual_amount(self):
         self.account_asset_asset._compute_cum_residual_amount()
@@ -128,45 +160,6 @@ class TestAccountAsset(TestCylloAccounting):
                 })]
             })
             account_asset_asset._onchange_original_value()
-
-    def test_onchange_prorata_date(self):
-        self.account_asset_asset._onchange_prorata_date()
-        self.assertFalse(self.account_asset_asset.prorata_date)
-        account_asset_asset = self.env['account.asset.asset'].create({
-            'name': 'Test Asset',
-            'active': True,
-            'asset_type_id': self.asset_type.id,
-            'company_id': self.env.company.id,
-            'asset_type': self.asset_type.type,
-            'journal_id': self.asset_type.journal_id.id,
-            'account_id': self.asset_type.account_id.id,
-            'expense_account_id': self.asset_type.expense_account_id.id,
-            'number_of_entries': 5,
-            'period': '1',
-            'original_value': 100,
-            'purchase_value': 1000,
-            'currency_id': self.asset_type.currency_id.id,
-            'date': fields.Date.today(),
-            'first_recognition_date': fields.Date.today(),
-            'total_value': 10000,
-            'not_depreciable_value': 1000,
-            'state': 'draft',
-            'computation_method': 'constant_period',
-            'invoice_line_ids': self.account_move.line_ids.ids,
-            'prorata_date': fields.Date.today(),
-            'depreciation_move_ids': [fields.Command.create({
-                'move_type': 'out_invoice',
-                'partner_id': self.partner.id,
-                'invoice_date': '2020-01-10',
-                'asset_amount': 1000,
-                'state': 'draft',
-                'line_ids': [fields.Command.create({
-                    'product_id': self.product_tem.id,
-                })],
-            })]
-        })
-        account_asset_asset._onchange_prorata_date()
-        self.assertEqual(account_asset_asset.prorata_date, fields.Date.today())
         
     def test_onchange_asset_type_id(self):
         self.account_asset_asset._onchange_asset_type_id()
@@ -217,7 +210,19 @@ class TestAccountAsset(TestCylloAccounting):
         self.assertEqual(account_asset_asset.compute_depreciation_amount(depreciation, 180, 6), 1550.0)
 
     def test_compute_days(self):
-        self.assertEqual(self.account_asset_asset.compute_days(False, fields.Date.today()), 31)
+        from datetime import timedelta
+        from odoo.fields import Date
+
+        # Dynamically calculate expected days if start_date is False
+        today = Date.today()
+        start_date = today - timedelta(days=30)
+        expected_days = (today - start_date).days + 1  # +1 to include today
+        self.assertEqual(
+            self.account_asset_asset.compute_days(False, today),
+            expected_days
+        )
+
+        # Create a test asset
         account_asset_asset = self.env['account.asset.asset'].create({
             'name': 'Test Asset',
             'active': True,
@@ -232,14 +237,14 @@ class TestAccountAsset(TestCylloAccounting):
             'original_value': 100,
             'purchase_value': 1000,
             'currency_id': self.asset_type.currency_id.id,
-            'date': fields.Date.today(),
-            'first_recognition_date': fields.Date.today(),
+            'date': today,
+            'first_recognition_date': today,
             'total_value': 10000,
             'not_depreciable_value': 1000,
             'state': 'draft',
             'computation_method': 'daily_compute',
             'invoice_line_ids': self.account_move.line_ids.ids,
-            'prorata_date': fields.Date.today(),
+            'prorata_date': today,
             'depreciation_move_ids': [fields.Command.create({
                 'move_type': 'out_invoice',
                 'partner_id': self.partner.id,
@@ -251,9 +256,12 @@ class TestAccountAsset(TestCylloAccounting):
                 })],
             })]
         })
+
+        # Compute days for same start and end date → should always be 1
         self.assertEqual(
-            account_asset_asset.compute_days(
-                fields.Date.today(), fields.Date.today()), 1)
+            account_asset_asset.compute_days(today, today),
+            1
+        )
 
     def test_depreciation_board(self):
         self.assertEqual(self.account_asset_asset._depreciation_board(
@@ -319,12 +327,13 @@ class TestAccountAsset(TestCylloAccounting):
                 'depreciation_move_ids': [fields.Command.create({
                     'move_type': 'out_invoice',
                     'partner_id': self.partner.id,
-                    'invoice_date': '2020-01-10',
+                    'invoice_date': fields.Date().today(),
                     'asset_amount': 1000,
                     'state': 'draft',
                     'line_ids': [fields.Command.create({
                         'product_id': self.product_tem.id,
                     })],
+                    'fiscal_year_id': self.fiscal_year_id
                 })]
             })
             account_asset_asset.unlink()

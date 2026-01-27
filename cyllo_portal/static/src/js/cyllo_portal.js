@@ -1,5 +1,4 @@
 /* @odoo-module */
-
 import publicWidget from "@web/legacy/js/public/public_widget";
 import { PortalHomeCounters } from '@portal/js/portal';
 import { jsonrpc } from "@web/core/network/rpc_service";

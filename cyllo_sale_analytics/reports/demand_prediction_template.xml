@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record id="report_action_report_demand_prediction" model="ir.actions.report">
+    <record id="report_demand_prediction_pdf"
+            model="ir.actions.report">
         <field name="name">Demand Prediction</field>
         <field name="model">sale.order</field>
         <field name="report_type">qweb-pdf</field>
@@ -16,16 +17,23 @@
                             Demand Prediction Report
                         </h1>
                         <center>
-                            <h1 style="margin-bottom: 2rem; margin-top: 5rem;">Actual Sales from
+                            <h1 style="margin-bottom: 2rem; margin-top: 5rem;">
+                                Actual Sales from
                                 <t t-esc="start_date"/>
                                 to
                                 <t t-esc="end_date"/>
                             </h1>
                             <h1 style="margin-top: 0.5rem;">Predicted Demand For
                                 <t t-esc="period"/>
-                                <t t-if="frequency == 'D'"><span> Days</span></t>
-                                <t t-elif="frequency == 'M'"><span> Months</span></t>
-                                <t t-elif="frequency == 'Y'"><span> Years</span></t>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
                             </h1>
 
                             <div class="col" style="margin-left: -100px;">
@@ -45,21 +53,28 @@
                             <table class="table">
                                 <thead>
                                     <tr style="height: 50px;">
-                                        <th colspan="4" style="font-size:24px; padding-top:15px;">
+                                        <th colspan="4"
+                                            style="font-size:24px; padding-top:15px;">
                                             ACTUAL
                                             SALES
                                         </th>
                                     </tr>
                                     <tr style="height: 50px;">
-                                        <th style="font-size:22px; padding-top:15px;">Periods</th>
-                                        <th style="font-size:22px; padding-top:15px;">Quantity
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Periods
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Quantity
                                             Sold
                                         </th>
-                                        <th style="font-size:22px; padding-top:15px;">Average
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Average
                                             Sales
                                             Price
                                         </th>
-                                        <th style="font-size:22px; padding-top:15px;">Revenue</th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Revenue
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -89,20 +104,27 @@
                                    border="1">
                                 <thead>
                                     <tr style="height: 50px;">
-                                        <th colspan="4" style="font-size:24px; padding-top:15px;">
+                                        <th colspan="4"
+                                            style="font-size:24px; padding-top:15px;">
                                             PREDICTED SALES
                                         </th>
                                     </tr>
                                     <tr style="height: 50px;">
-                                        <th style="font-size:22px; padding-top:15px;">Periods</th>
-                                        <th style="font-size:22px; padding-top:15px;">Quantity
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Periods
+                                        </th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Quantity
                                             Sold
                                         </th>
-                                        <th style="font-size:22px; padding-top:15px;">Average
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Average
                                             Sales
                                             Price
                                         </th>
-                                        <th style="font-size:22px; padding-top:15px;">Revenue</th>
+                                        <th style="font-size:22px; padding-top:15px;">
+                                            Revenue
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -134,16 +156,23 @@
                             Demand Prediction Report
                         </h1>
                         <center>
-                            <h3 style="margin-bottom: 2rem; margin-top: 3rem;">Actual Sales from
+                            <h3 style="margin-bottom: 2rem; margin-top: 3rem;">
+                                Actual Sales from
                                 <t t-esc="start_date"/>
                                 to
                                 <t t-esc="end_date"/>
                             </h3>
                             <h3 style="margin-top: 0.5rem;">Predicted Demand For
                                 <t t-esc="period"/>
-                                <t t-if="frequency == 'D'"><span> Days</span></t>
-                                <t t-elif="frequency == 'M'"><span> Months</span></t>
-                                <t t-elif="frequency == 'Y'"><span> Years</span></t>
+                                <t t-if="frequency == 'D'">
+                                    <span>Days</span>
+                                </t>
+                                <t t-elif="frequency == 'M'">
+                                    <span>Months</span>
+                                </t>
+                                <t t-elif="frequency == 'Y'">
+                                    <span>Years</span>
+                                </t>
                             </h3>
                             <div class="col" style="margin-left: -100px;">
                                 <img t-att-src="chartImg"/>

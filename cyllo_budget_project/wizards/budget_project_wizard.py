@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields, models
 
 
@@ -7,9 +27,11 @@ class BudgetProjectWizard(models.TransientModel):
     _name = 'budget.project.wizard'
     _description = "Wizard for the project details in budget"
 
-    add_create = fields.Selection([('add', 'Add'), ('create', 'Create')], string="Add/Create",
-                                  help="Choose the option to add project")
-    project_id = fields.Many2one('project.project', help="To add a project in budget,choose Project")
+    add_create = fields.Selection(
+        [('add', 'Add'), ('create', 'Create')], string="Add/Create",
+        help="Choose the option to add project")
+    project_id = fields.Many2one(
+        'project.project', help="To add a project in budget,choose Project")
     project_name = fields.Char(help="Name for the creating Project")
     budget_id = fields.Many2one('budget.budget', help="The budget in Project")
 

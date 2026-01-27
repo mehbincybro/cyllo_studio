@@ -20,7 +20,8 @@
                     <div class="oe_title">
                         <h1>
                             <div class="d-flex">
-                                <field name="display_name" class="text-break" options="{'line_breaks': False}" widget="text" readonly="1"/>
+                                <field name="display_name" class="text-break" options="{'line_breaks': False}"
+                                       widget="text" readonly="1"/>
                             </div>
                         </h1>
                     </div>
@@ -115,14 +116,16 @@
         <field name="arch" type="xml">
             <form string="Request document">
                 <header>
-                    <button name="action_send_document_request" string="REQUEST" type="object" class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_send_document_request" string="REQUEST" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
                     <field name="state" widget="statusbar" statusbar_visible="draft,requested,accepted,rejected"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
                             <div class="d-flex">
-                                <field name="display_name" class="text-break" options="{'line_breaks': False}" widget="text" readonly="1"/>
+                                <field name="display_name" class="text-break" options="{'line_breaks': False}"
+                                       widget="text" readonly="1"/>
                             </div>
                         </h1>
                     </div>
@@ -216,8 +219,10 @@
                 <group>
                     <group>
                         <field name="user_id" string="Request To"/>
-                        <field name="workspace_id" string="Workspace"/>
                         <field name="needed_doc" colspan="2" string="Note" placeholder="Document Needed....."/>
+                    </group>
+                    <group>
+                        <field name="workspace_id" string="Workspace"/>
                     </group>
                 </group>
                 <footer>

@@ -3,7 +3,7 @@ import { Chatter } from "@mail/core/web/chatter";
 import { patch } from "@web/core/utils/patch";
 
 patch(Chatter.prototype, {
-    setup() {
+     setup() {
         super.setup();
         this.busService = this.env.services.bus_service
         this.channel = "REFRESH"

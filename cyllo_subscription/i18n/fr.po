@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-27 03:44+0000\n"
-"PO-Revision-Date: 2023-11-27 03:44+0000\n"
+"POT-Creation-Date: 2024-12-31 04:54+0000\n"
+"PO-Revision-Date: 2024-12-31 04:54+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -34,29 +34,35 @@ msgid "<b>Your Subscription is closed</b>"
 msgstr "<b>Votre abonnement est clôturé</b>"
 
 #. module: cyllo_subscription
-#: model:mail.template,body_html:cyllo_subscription.cyllo_subscription_invoices
+#: model:mail.template,body_html:cyllo_subscription.mail_template_invoice_for_subscription
 msgid ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"                <div style=\"justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:40%\">\n"
-"                <h2>\n"
-"                    Hi, <t t-out=\"object.partner_id.name\"></t>\n"
-"                </h2>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Thank you so much for choosing our subscription service!\n"
-"                        We are truly grateful for your trust and excited to provide\n"
-"                        you with exceptional value. Your decision means a lot to us,\n"
-"                        and we look forward to exceeding your expectations!\n"
-"                    </h3>\n"
-"                </div>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Find your Invoice for the subscription of <t t-out=\"object.invoice_line_ids.product_id.name\"></t>\n"
-"                    </h3>\n"
-"                </div>\n"
+"<div id=\"invoice_html\" style=\"margin: 0px; padding: 0px;\">\n"
+"                <div id=\"wrapwrap\" style=\"align-items:center;justify-content: center;border: 2px solid; border-color:#9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; border-radius: 5px; font-size:13px;width:40%\">\n"
+"                    <h2>\n"
+"                        Hi,\n"
+"                        <t t-out=\"object.partner_id.name\"></t>\n"
+"                    </h2>\n"
+"                    <div>\n"
+"                        <h3>\n"
+"                            Thank you so much for choosing our subscription\n"
+"                            service!\n"
+"                            We are truly grateful for your trust and\n"
+"                            excited to provide\n"
+"                            you with exceptional value. Your decision means\n"
+"                            a lot to us,\n"
+"                            and we look forward to exceeding your\n"
+"                            expectations!\n"
+"                        </h3>\n"
 "                    </div>\n"
+"                    <div>\n"
+"                        <h3>\n"
+"                            Find your Invoice for the subscription of\n"
+"                            <t t-out=\"object.invoice_line_ids.product_id.name\"></t>\n"
+"                        </h3>\n"
+"                    </div>\n"
+"                </div>\n"
 "                <br>\n"
-"                <div style=\"display: flex;justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
+"                <div style=\"display: flex;justify-content: center;align-items:center; background-color: #9ea700; padding:0.6rem;padding-left: 15px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
 "                    <a t-attf-href=\"/my/invoices/{{object.id}}\" style=\"text-decoration:none;color:#fff;\">\n"
 "                        Invoice\n"
 "                    </a>\n"
@@ -64,55 +70,60 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"                <div style=\"justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:40%\">\n"
-"                <h2>\n"
-"                    Salut, <t t-out=\"object.partner_id.name\"></t>\n"
-"                </h2>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Merci beaucoup d'avoir choisi notre service d'abonnement!\n"
-"                        Nous sommes vraiment reconnaissants de votre confiance et ravis de vous fournir\n"
-"                        avec une valeur exceptionnelle. Votre décision compte beaucoup pour nous,\n"
-"                        et nous sommes impatients de dépasser vos attentes!\n"
-"                    </h3>\n"
-"                </div>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Retrouvez votre facture pour l'abonnement au <t t-out=\"object.invoice_line_ids.product_id.name\"></t>\n"
-"                    </h3>\n"
-"                </div>\n"
-"                    </div>\n"
-"                <br>\n"
-"                <div style=\"display: flex;justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
-"                    <a t-attf-href=\"/my/invoices/{{object.id}}\" style=\"text-decoration:none;color:#fff;\">\n"
-"                        Facture\n"
-"                    </a>\n"
-"                </div>\n"
-"            </div>\n"
-"        "
+"<div id = \"invoice_html\" style = \"margin: 0px; padding: 0px;\">\n"
+"<div id = \"wrapwrap\" style = \"Align-Items: Centre; Justify-CONTENT: CENTER; Border: 2px Solid; Border-Color: # 9EA700; Padding: 0.6rem; Padding-Left: 35px; text-décoration: Aucun; Border-Radius: 5px;\n"
+"<h2>\n"
+"Salut,\n"
+"<t t-out = \"object.partner_id.name\"> </t>\n"
+"</h2>\n"
+"<div>\n"
+"<h3>\n"
+"Merci beaucoup d'avoir choisi notre abonnement\n"
+"service!\n"
+"Nous sommes vraiment reconnaissants pour votre confiance et\n"
+"ravi de fournir\n"
+"vous avec une valeur exceptionnelle.Votre décision signifie\n"
+"beaucoup pour nous,\n"
+"Et nous sommes impatients de dépasser votre\n"
+"Attentes!\n"
+"</h3>\n"
+"</div>\n"
+"<div>\n"
+"<h3>\n"
+"Trouvez votre facture pour l'abonnement de\n"
+"<t t-out = \"object.invoice_line_ids.product_id.name\"> </t>\n"
+"</h3>\n"
+"</div>\n"
+"</div>\n"
+"<br>\n"
+"<div style = \"Display: flex; Justify-Content: Center; Align-Items: Center; Background-Color: # 9EA700; padding: 0.6rem; padding-left: 15px; text-décoration: Aucun; couleur: #fff;Border-Radius: 5px;\n"
+"<a t-attf-href = \"/ my / invoices / {{object.id}}\" style = \"text-décoration: aucun; couleur: #fff;\">\n"
+"Facture\n"
+"</a>\n"
+"</div>\n"
+"</div>"
 
 #. module: cyllo_subscription
-#: model:mail.template,body_html:cyllo_subscription.cyllo_subscription_renew
+#: model:mail.template,body_html:cyllo_subscription.mail_template_subscription_order_due_reminder_email
 msgid ""
 "<div style=\"margin: 0px; padding: 0px;\">\n"
-"                <div style=\"justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:40%\">\n"
-"                <h2>\n"
-"                    Hi, <t t-out=\"object.partner_id.name\"></t>\n"
-"                </h2>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Your subscription will expire. To keep using our services, please renew.\n"
-"                    </h3>\n"
-"                </div>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        To renew the subscription of <t t-out=\"object.subscription_order_line_ids.product_tmpl_id.name\"></t> Click on the below button\n"
-"                    </h3>\n"
-"                </div>\n"
+"                <div style=\"align-items:center;justify-content: center;border: 2px solid; border-color:#9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; border-radius: 5px; font-size:13px;width:40%\">\n"
+"                    <h2>\n"
+"                        Hi, <t t-out=\"object.partner_id.name\"></t>\n"
+"                    </h2>\n"
+"                    <div>\n"
+"                        <h3>\n"
+"                            Your subscription will expire. To keep using our services, please renew.\n"
+"                        </h3>\n"
 "                    </div>\n"
+"                    <div>\n"
+"                        <h3>\n"
+"                            To renew the subscription of <t t-out=\"object.subscription_order_line_ids.product_tmpl_id.name\"></t> Click on the below button\n"
+"                        </h3>\n"
+"                    </div>\n"
+"                </div>\n"
 "                <br>\n"
-"                <div style=\"display: flex;justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
+"                <div style=\"display: flex;justify-content: center;align-items:center;background-color: #9ea700; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
 "                    <a t-attf-href=\"/details/{{object.id}}\" style=\"text-decoration:none;color:#fff;\">\n"
 "                        Click here\n"
 "                    </a>\n"
@@ -120,30 +131,29 @@ msgid ""
 "            </div>\n"
 "        "
 msgstr ""
-"<div style=\"margin: 0px; padding: 0px;\">\n"
-"                <div style=\"justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:40%\">\n"
-"                <h2>\n"
-"                    Salut, <t t-out=\"object.partner_id.name\"></t>\n"
-"                </h2>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Votre abonnement expirera. Pour continuer à utiliser nos services, veuillez renouveler.\n"
-"                    </h3>\n"
-"                </div>\n"
-"                <div>\n"
-"                    <h3>\n"
-"                        Pour renouveler l'abonnement de <t t-out=\"object.subscription_order_line_ids.product_tmpl_id.name\"></t> Cliquez sur le bouton ci-dessous\n"
-"                    </h3>\n"
-"                </div>\n"
-"                    </div>\n"
-"                <br>\n"
-"                <div style=\"display: flex;justify-content: center;background-color: #714B67; padding:0.6rem;padding-left: 35px;text-decoration: none; color: #fff; border-radius: 5px; font-size:13px;width:7%\">\n"
-"                    <a t-attf-href=\"/details/{{object.id}}\" style=\"text-decoration:none;color:#fff;\">\n"
-"                        Cliquez ici\n"
-"                    </a>\n"
-"                </div>\n"
-"            </div>\n"
-"        "
+"<div style = \"margin: 0px; padding: 0px;\">\n"
+"<Div Style = \"Align-Items: Centre; Justify-Content: Center; Border: 2px Solid; Border-Color: # 9EA700; Padding: 0.6rem; Padding-Left: 35px; Text-Decoration: Aucun; Border-Radius:5px; taille de police: 13px; largeur: 40% \">\n"
+"<h2>\n"
+"Salut, <t t-out = \"object.partner_id.name\"> </ t>\n"
+"</h2>\n"
+"<div>\n"
+"<h3>\n"
+"Votre abonnement expirera.Pour continuer à utiliser nos services, veuillez renouveler.\n"
+"</h3>\n"
+"</div>\n"
+"<div>\n"
+"<h3>\n"
+"Pour renouveler l'abonnement de <t t-out = \"object.subscription_order_line_ids.product_tmpl_id.name\"> </t> Cliquez sur le bouton ci-dessous\n"
+"</h3>\n"
+"</div>\n"
+"</div>\n"
+"<br>\n"
+"<div style = \"Display: flex; justify-content: Centre; Align-Items: Center; Background-Color: # 9EA700; Padding: 0.6rem; Padding-Left: 35px; Text-Decoration: Aucun; Couleur: #fff;Border-Radius: 5px;\n"
+"<a T-ATTF-HREF = \"/ Détails / {{object.id}}\" style = \"Text-Decoration: Aucun; Color: #fff;\">\n"
+"Cliquez ici\n"
+"</a>\n"
+"</div>\n"
+"</div>"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -153,6 +163,11 @@ msgid ""
 msgstr ""
 "<i class=\"fa fa-print\"/>\n"
 "                                        Voir les détails"
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
+msgid "<option value=\"other\">Other</option>"
+msgstr "<option valeur = \"autre\"> autre </opoption>"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -198,12 +213,11 @@ msgstr "Avertissement d'accès"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__action
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Action"
 msgstr "Action"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_needaction
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_needaction
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_needaction
 msgid "Action Needed"
@@ -213,6 +227,7 @@ msgstr "Nécessite une action"
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_order__state_subscription__active
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_report__state_subscription__active
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Active"
 msgstr "Actif"
 
@@ -232,11 +247,6 @@ msgid "Activity State"
 msgstr "État d'activité"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__summery
-msgid "Activity Summery"
-msgstr "Résumé de l'activité"
-
-#. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__activity_type_id
 msgid "Activity Type"
 msgstr "Type d'activité"
@@ -247,20 +257,31 @@ msgid "Activity Type Icon"
 msgstr "Icône de type d'activité"
 
 #. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__summary
+msgid "Activity summary"
+msgstr "Résumé de l'activité"
+
+#. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__dead_line
 msgid "Add dead line for the activity"
 msgstr "Ajouter une date limite pour l'activité"
 
 #. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__partner_state
+msgid ""
+"Administrative divisions of a country. E.g. Fed. State, Departement, Canton"
+msgstr "État partenaire"
+
+#. module: cyllo_subscription
 #: model:ir.actions.act_window,name:cyllo_subscription.action_view_alert
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_order_alert_menu
+#: model:ir.ui.menu,name:cyllo_subscription.menu_alert
 msgid "Alert"
 msgstr "Alerte"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Alert Name"
-msgstr "Nom de l'alerte"
+msgstr "Nom d'alerte"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
@@ -268,7 +289,6 @@ msgid "All"
 msgstr "Tout"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_attachment_count
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_attachment_count
 msgid "Attachment Count"
@@ -276,13 +296,8 @@ msgstr "Nombre de pièces jointes"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_close_reason__available_in_portal
-msgid "Available in portal"
+msgid "Available In Portal"
 msgstr "Disponible sur le portail"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_avg
-msgid "Average Rating"
-msgstr "Évaluation moyenne"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_template__bad_health
@@ -296,48 +311,50 @@ msgid "Be sure you need to close the subscription"
 msgstr "Assurez-vous de devoir fermer l'abonnement"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_close_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_close_form
 msgid "Cancel"
 msgstr "Annuler"
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
 #, python-format
 msgid "Cannot add both subscription and non-subscription products."
-msgstr "Impossible d'ajouter à la fois des produits avec abonnement et sans abonnement."
+msgstr ""
+"Impossible d'ajouter à la fois des produits avec abonnement et sans "
+"abonnement."
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
 #, python-format
 msgid "Cannot add non-subscription product when Subscription is enabled"
-msgstr "Impossible d'ajouter un produit sans abonnement lorsque l'abonnement est activé"
+msgstr ""
+"Impossible d'ajouter un produit sans abonnement lorsque l'abonnement est "
+"activé"
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
 #, python-format
 msgid "Cannot add subscription product when Subscription is disabled"
-msgstr "Impossible d'ajouter un produit d'abonnement lorsque l'abonnement est désactivé"
+msgstr ""
+"Impossible d'ajouter un produit d'abonnement lorsque l'abonnement est "
+"désactivé"
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/sale_order.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order.py:0
 #, python-format
 msgid "Cannot add subscription product with non-subscription product"
-msgstr "Impossible d'ajouter un produit avec abonnement avec un produit sans abonnement"
+msgstr ""
+"Impossible d'ajouter un produit avec abonnement avec un produit sans "
+"abonnement"
 
 #. module: cyllo_subscription
-#: model:ir.actions.server,name:cyllo_subscription.ir_cron_check_subscription_renewal_ir_actions_server
+#: model:ir.actions.server,name:cyllo_subscription.ir_cron_check_renewal_ir_actions_server
 msgid "Check Renewal"
 msgstr "Vérifier le renouvellement"
 
@@ -360,18 +377,30 @@ msgstr "Vérifiez si la facture est créée à partir d'une commande d'abonnemen
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_sale_order_template__invoice_creation
-msgid "Choose a invoice creation method"
+msgid ""
+"Choose a invoice creation method, (Manually:- Invoices must be manually "
+"created if the manual invoice creation option is selected.; Draft:- A draft "
+"invoice is created if the draft option for invoice creation is selected; "
+"Confirmed:- If the Confirmed invoice generating mode is selected, a draft "
+"invoice is generated and automatically changes to the confirmed state when a"
+" daily scheduled action is executed. Sent:- If Sent is selected, at the time"
+" of order confirmation, a mail is sent to the consumer)"
 msgstr "Choisissez une méthode de création de facture"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Choose a mail template"
-msgstr "Choisissez un modèle de courrier"
+msgstr "Choisissez un modèle de messagerie"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
 msgid "Choose a plan."
 msgstr "Choisissez un plan."
+
+#. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__subscription_plan_ids
+msgid "Choose a subscription plan"
+msgstr "Choisissez la formule d'abonnement"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__tax_ids
@@ -384,19 +413,14 @@ msgid "Choose the activity to perform"
 msgstr "Choisissez l'activité à effectuer"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__email_template
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__email_template_id
 msgid "Choose the email template"
-msgstr "Choisissez le modèle d'e-mail"
+msgstr "Choisissez le modèle de messagerie"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__partner_ids
 msgid "Choose the partners in the filed"
 msgstr "Choisissez les partenaires dans le domaine"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__subscription_plan_ids
-msgid "Choose the subscription plan"
-msgstr "Choisissez la formule d'abonnement"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__action
@@ -416,6 +440,7 @@ msgstr "Choisissez votre plan"
 #. module: cyllo_subscription
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_order__state_subscription__churned
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Churned"
 msgstr "Renouvellement"
 
@@ -426,7 +451,7 @@ msgstr "Ville"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Close"
 msgstr "Fermer"
 
@@ -437,19 +462,19 @@ msgstr "Fermer par client"
 
 #. module: cyllo_subscription
 #: model:ir.actions.act_window,name:cyllo_subscription.action_view_close_reasons
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__close_reason
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__close_reason_id
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
 msgid "Close Reason"
 msgstr "Raison de fermeture"
 
 #. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_order_close_reason_menu
+#: model:ir.ui.menu,name:cyllo_subscription.menu_close_reasons
 msgid "Close Reasons"
-msgstr "Raisons proches"
+msgstr "Raisons étroites"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_close_view_form
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_close_form
 msgid "Close Subscription"
 msgstr "Fermer l'abonnement"
 
@@ -477,17 +502,12 @@ msgid "Company Currency"
 msgstr "Devise de l'entreprise"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Conditions"
 msgstr "Conditions"
 
 #. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_configuration_menu
-msgid "Configuration"
-msgstr "Configuration"
-
-#. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_subscription_configuration
+#: model:ir.ui.menu,name:cyllo_subscription.menu_configurations_categ
 msgid "Configurations"
 msgstr "Configurations"
 
@@ -499,7 +519,9 @@ msgstr "Confirmé"
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__sale_order_id
 msgid "Corresponding sale order id is saved in the field"
-msgstr "L'identifiant de la commande de vente correspondant est enregistré dans le champ"
+msgstr ""
+"L'identifiant de la commande de vente correspondant est enregistré dans le "
+"champ"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_time_based_price__cost
@@ -518,13 +540,12 @@ msgstr "Nombre de commandes d'abonnement"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__invoice_count
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__invoice_count
 msgid "Count of the invoice"
 msgstr "Nombre de factures"
 
 #. module: cyllo_subscription
 #: model:ir.actions.server,name:cyllo_subscription.model_consolidate_invoice
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Create Invoice"
 msgstr "Créer une facture"
 
@@ -534,9 +555,9 @@ msgid "Create next activity"
 msgstr "Créer la prochaine activité"
 
 #. module: cyllo_subscription
-#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_product_template_kanban
+#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_products
 msgid "Create some Products!."
-msgstr "Créer des produits!."
+msgstr "Créez des produits!."
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__create_uid
@@ -546,7 +567,7 @@ msgstr "Créer des produits!."
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__create_uid
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__create_uid
 msgid "Created by"
-msgstr ""
+msgstr "Créé par"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__create_date
@@ -556,7 +577,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__create_date
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__create_date
 msgid "Created on"
-msgstr ""
+msgstr "Créé sur"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__currency_id
@@ -594,7 +615,8 @@ msgstr "L'entreprise actuellement connectée s'affiche ici"
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__partner_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__partner_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__partner_id
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Customer"
 msgstr "Client"
 
@@ -674,14 +696,9 @@ msgid "Duration of the subscription"
 msgstr "Durée de l'abonnement"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__email_template
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__email_template_id
 msgid "Email Template"
-msgstr "Modèle d'e-mail"
-
-#. module: cyllo_subscription
-#: model:ir.model,name:cyllo_subscription.model_mail_template
-msgid "Email Templates"
-msgstr "Modèles d'email"
+msgstr "Modèle de messagerie"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_sale_order_line__time_based_price_id
@@ -695,14 +712,12 @@ msgid "Filter good health records"
 msgstr "Filtrer les bons dossiers de santé"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_follower_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_follower_ids
 msgid "Followers"
 msgstr "Abonnés"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_partner_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_partner_ids
 msgid "Followers (Partners)"
@@ -711,7 +726,7 @@ msgstr "Abonnés (Partenaires)"
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__activity_type_icon
 msgid "Font awesome icon e.g. fa-tasks"
-msgstr ""
+msgstr "Icône géniale de police, par exempleFA-TASS"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__monthly_recurrence_max
@@ -730,12 +745,12 @@ msgid "Good Health"
 msgstr "Bonne santé"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Group By"
-msgstr "Regrouper par"
+msgstr "Se regrouper"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__has_message
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__has_message
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__has_message
 msgid "Has Message"
@@ -755,7 +770,7 @@ msgstr "Contrôle de santé"
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__id
 msgid "ID"
-msgstr ""
+msgstr "IDENTIFIANT"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__activity_exception_icon
@@ -768,15 +783,20 @@ msgid "Icon to indicate an exception activity."
 msgstr "Icône pour indiquer une activité d'exception."
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__message_needaction
+#. odoo-python
+#: code:addons/cyllo_subscription/models/product_template.py:0
+#: code:addons/cyllo_subscription/models/product_template.py:0
+#, python-format
+msgid "If Trial Period is added then Unit should be added"
+msgstr "Si une période d'essai est ajoutée, alors l'unité doit être ajoutée"
+
+#. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__message_needaction
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__message_needaction
 msgid "If checked, new messages require your attention."
 msgstr "Si coché, de nouveaux messages demandent votre attention."
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__message_has_error
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__message_has_error
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__message_has_sms_error
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__message_has_error
@@ -794,7 +814,9 @@ msgstr "Si le client peut fermer ceci, activez le champ"
 msgid ""
 "If need to make customer to give request to renew the subscription enable "
 "this field"
-msgstr "Si le client doit faire une demande de renouvellement de l'abonnement, activez ce champ"
+msgstr ""
+"Si le client doit faire une demande de renouvellement de l'abonnement, "
+"activez ce champ"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_sale_order_template__is_subscription
@@ -802,16 +824,10 @@ msgid "If the Quotation is for subscription product enable this field"
 msgstr "Si le devis concerne un produit par abonnement, activez ce champ"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_mail_template__is_subscription_template
-msgid ""
-"If the field is true then the template is used to sent mail on Alert in "
-"subscription"
-msgstr "Si le champ est vrai, le modèle est utilisé pour envoyer du courrier sur Alerte dans l'abonnement"
-
-#. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_sale_order__is_subscription
 msgid "If the product added is a subscription product then this field is true"
-msgstr "Si le produit ajouté est un produit par abonnement, alors ce champ est vrai"
+msgstr ""
+"Si le produit ajouté est un produit par abonnement, alors ce champ est vrai"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_product_product__is_subscription
@@ -825,13 +841,12 @@ msgid "If the reason needs to show in portal enable this field"
 msgstr "Si la raison doit être affichée sur le portail, activez ce champ"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Invoice"
 msgstr "Facture"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__invoice_count
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__invoice_count
 msgid "Invoice Count"
 msgstr "Nombre de factures"
 
@@ -841,15 +856,21 @@ msgid "Invoice Creation"
 msgstr "Izrada fakture"
 
 #. module: cyllo_subscription
-#: model:ir.actions.server,name:cyllo_subscription.ir_cron_action_post_ir_actions_server
+#: model:ir.actions.server,name:cyllo_subscription.ir_cron_invoice_post_ir_actions_server
 msgid "Invoice Post"
 msgstr "Facture Post"
 
 #. module: cyllo_subscription
-#: model:mail.template,subject:cyllo_subscription.cyllo_subscription_invoices
+#: model:mail.template,name:cyllo_subscription.mail_template_invoice_for_subscription
+msgid "Invoice for Subscription"
+msgstr "Facture pour abonnement"
+
+#. module: cyllo_subscription
+#: model:mail.template,subject:cyllo_subscription.mail_template_invoice_for_subscription
 msgid ""
 "Invoice for the subscription of {{object.invoice_line_ids.product_id.name}}"
-msgstr "Facture pour l'abonnement de {{object.invoice_line_ids.product_id.name}}"
+msgstr ""
+"Facture pour l'abonnement de {{object.invoice_line_ids.product_id.name}}"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__account_move_ids
@@ -859,14 +880,12 @@ msgstr "Stocker les enregistrements de factures ici"
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__account_move_ids
 #, python-format
 msgid "Invoices"
 msgstr "Factures"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_is_follower
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_is_follower
 msgid "Is Follower"
@@ -876,7 +895,6 @@ msgstr "Est un abonné"
 #: model:ir.model.fields,field_description:cyllo_subscription.field_account_bank_statement_line__is_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_account_move__is_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_account_payment__is_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_mail_template__is_subscription_template
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__is_subscription
 msgid "Is Subscription"
 msgstr "Est un abonnement"
@@ -894,7 +912,7 @@ msgstr "Pièce comptable"
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__write_uid
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__write_uid
 msgid "Last Updated by"
-msgstr ""
+msgstr "Dernière mise à jour par"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__write_date
@@ -904,7 +922,7 @@ msgstr ""
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__write_date
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__write_date
 msgid "Last Updated on"
-msgstr ""
+msgstr "Dernière mise à jour sur"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_report__state_subscription__lost
@@ -913,14 +931,9 @@ msgstr "Perdu"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__recurring_revenue
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "MRR"
-msgstr ""
-
-#. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.mail_template_menu
-msgid "Mail Template"
-msgstr "Modèle de courrier"
+msgstr "MRR"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__partner_street
@@ -938,18 +951,16 @@ msgid "Maximum MRR"
 msgstr "MRR maximum"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_has_error
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_has_error
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_has_error
 msgid "Message Delivery error"
 msgstr "Erreur d'envoi du message"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_ids
 msgid "Messages"
-msgstr ""
+msgstr "Messages"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__monthly_recurrence_min
@@ -958,15 +969,14 @@ msgstr "MRR minimum"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__monthly_price_sum
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__monthly_price_sum
 msgid "Monthly Recurring Revenue"
-msgstr ""
+msgstr "Revenus récurrents mensuels"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__recurring_revenue
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__recurring_revenue
 msgid "Monthly recurring revenue"
-msgstr ""
+msgstr "Revenus récurrents mensuels"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__product_template__unit__months
@@ -981,9 +991,9 @@ msgid "My Activity Deadline"
 msgstr "Date limite de mon activité"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
 msgid "My Orders"
-msgstr "Mes Ordres"
+msgstr "Mes commandes"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__name
@@ -1010,8 +1020,6 @@ msgstr "Nom du client"
 #. odoo-python
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
 #, python-format
 msgid "New"
 msgstr "Nouveau"
@@ -1037,13 +1045,13 @@ msgid "Next Invoice Date"
 msgstr "Date de la prochaine facture"
 
 #. module: cyllo_subscription
-#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_sale_order_to_renew
-#: model_terms:ir.actions.act_window,help:cyllo_subscription.sale_subscription_action
+#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_orders
+#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_to_renew
 msgid "No Order is found. Let's create one!"
 msgstr "Aucun ordre n'est trouvé. Créons-en un!"
 
 #. module: cyllo_subscription
-#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_product_template_kanban
+#: model_terms:ir.actions.act_window,help:cyllo_subscription.action_view_products
 msgid "No Product is Found!"
 msgstr "Aucun produit n'est trouvé!"
 
@@ -1053,51 +1061,53 @@ msgid "No approval is found. Let's create one!"
 msgstr "Aucune approbation n'est trouvée. Créons-en un!"
 
 #. module: cyllo_subscription
-#: model_terms:ir.actions.act_window,help:cyllo_subscription.mail_template_action
-msgid "No template is found. Let's create one!"
-msgstr "Aucun modèle n'est trouvé. Créons-en un!"
-
-#. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__note
 msgid "Note"
 msgstr "Note"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_needaction_counter
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_needaction_counter
 msgid "Number of Actions"
 msgstr "Nombre d'actions"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_has_error_counter
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_has_error_counter
 msgid "Number of errors"
 msgstr "Nombre d'erreurs"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__message_needaction_counter
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__message_needaction_counter
 msgid "Number of messages requiring action"
 msgstr "Nombre de messages nécessitant une action"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__message_has_error_counter
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__message_has_error_counter
 msgid "Number of messages with delivery error"
 msgstr "Nombre de messages avec des erreurs d'envoi"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_order__state_subscription__trail
-#: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_report__state_subscription__trail
-msgid "On Trail"
-msgstr "En essai"
+#: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_order__state_subscription__trial
+#: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_report__state_subscription__trial
+msgid "On Trial"
+msgstr "En procès"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#. odoo-python
+#: code:addons/cyllo_subscription/models/subscription_order_line.py:0
+#, python-format
+msgid ""
+"Once a subscription order is confirmed, you can't remove one of its lines"
+msgstr ""
+"Une fois une commande d'abonnement confirmée, vous ne pouvez pas supprimer "
+"l'une de ses lignes"
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Order"
 msgstr "Commande"
 
@@ -1113,41 +1123,30 @@ msgstr "Détails de la commande"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__subscription_order_line_ids
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__sale_order_line
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__sale_order_line_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__subscription_order_line_ids
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Order Line"
 msgstr "Ligne de commande"
 
 #. module: cyllo_subscription
-#: model:ir.actions.act_window,name:cyllo_subscription.mail_template_action
-#: model:ir.actions.act_window,name:cyllo_subscription.sale_subscription_action
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__state
+msgid "Order Status"
+msgstr "Statut de commande"
+
+#. module: cyllo_subscription
+#: model:ir.actions.act_window,name:cyllo_subscription.action_view_orders
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_template__order_count
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_subscription_action
+#: model:ir.ui.menu,name:cyllo_subscription.menu_orders
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_form_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_template_form
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_order_view_from_2
 msgid "Orders"
 msgstr "Commandes"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__partner_city
-msgid "Partner City"
-msgstr "Ville partenaire"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__partner_state
-msgid "Partner State"
-msgstr "État partenaire"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__partner_street
 msgid "Partner Street"
 msgstr "Rue partenaire"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__partner_state
-msgid "Partner state"
-msgstr "État partenaire"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__sale_order_template_id
@@ -1158,12 +1157,17 @@ msgstr "Le plan choisi dans l'ordre s'affiche ici"
 #. odoo-python
 #: code:addons/cyllo_subscription/models/product_template.py:0
 #: code:addons/cyllo_subscription/models/product_template.py:0
-#: code:addons/custom/cyllo_subscription/models/product_template.py:0
-#: code:addons/custom/cyllo_subscription/models/product_template.py:0
 #, python-format
 msgid ""
 "Please add Time Based Pricing, because the product is a subscription product"
-msgstr "Veuillez ajouter une tarification basée sur le temps, car le produit est un produit par abonnement."
+msgstr ""
+"Veuillez ajouter une tarification basée sur le temps, car le produit est un "
+"produit par abonnement."
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
+msgid "Please specify:"
+msgstr "Veuillez spécifier:"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__access_url
@@ -1187,8 +1191,9 @@ msgstr "Prix"
 #: model:ir.model,name:cyllo_subscription.model_product_template
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__product_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_time_based_price__product_template_id
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Product"
 msgstr "Produit"
 
@@ -1214,10 +1219,10 @@ msgid "Product:-"
 msgstr "Produit:-"
 
 #. module: cyllo_subscription
-#: model:ir.actions.act_window,name:cyllo_subscription.action_view_product_template_kanban
+#: model:ir.actions.act_window,name:cyllo_subscription.action_view_products
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__subscription_products_ids
-#: model:ir.ui.menu,name:cyllo_subscription.product_root_menu
-#: model:ir.ui.menu,name:cyllo_subscription.product_template_menu
+#: model:ir.ui.menu,name:cyllo_subscription.menu_products
+#: model:ir.ui.menu,name:cyllo_subscription.menu_products_categ
 msgid "Products"
 msgstr "Produits"
 
@@ -1253,42 +1258,6 @@ msgid "Quotation Template Line"
 msgstr "Ligne du modèle de devis"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_avg_text
-msgid "Rating Avg Text"
-msgstr "Note Moyenne Texte"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_last_feedback
-msgid "Rating Last Feedback"
-msgstr "Note Dernier commentaire"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_last_image
-msgid "Rating Last Image"
-msgstr "Note de la dernière image"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_last_value
-msgid "Rating Last Value"
-msgstr "Note Dernière valeur"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_percentage_satisfaction
-msgid "Rating Satisfaction"
-msgstr "Évaluation de la satisfaction"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_last_text
-msgid "Rating Text"
-msgstr "Texte de notation"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_count
-msgid "Rating count"
-msgstr "Nombre de notes"
-
-#. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__rating_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__rating_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__rating_ids
 msgid "Ratings"
@@ -1302,7 +1271,7 @@ msgstr "Raison"
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/controllers/main.py:0
-#: code:addons/custom/cyllo_subscription/controllers/main.py:0
+#: code:addons/cyllo_subscription/controllers/main.py:0
 #, python-format
 msgid "Reason to close the subscription: %s"
 msgstr "Raison de la clôture de l'abonnement: %s"
@@ -1319,9 +1288,9 @@ msgid "Recurrence of the product"
 msgstr "Récurrence du produit"
 
 #. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_temporal_recurrence_action
+#: model:ir.ui.menu,name:cyllo_subscription.menu_recurrence_periods_categ
 msgid "Recurrence periods"
-msgstr "Périodes de récurrence"
+msgstr "Périodes de récidive"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__recurring_revenue
@@ -1341,7 +1310,7 @@ msgstr "Numéro de référence pour identifier la commande "
 #. module: cyllo_subscription
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_order__state_subscription__renew
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__subscription_report__state_subscription__renew
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Renew"
 msgstr "Renouveler"
 
@@ -1372,13 +1341,15 @@ msgstr "Demande de renouvellement"
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_sale_order_line__renewal_date
 msgid "Renewal date for the subscription order created from this line"
-msgstr "Date de renouvellement de la commande d'abonnement créée à partir de cette ligne"
+msgstr ""
+"Date de renouvellement de la commande d'abonnement créée à partir de cette "
+"ligne"
 
 #. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_report_menu
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_report_view
+#: model:ir.ui.menu,name:cyllo_subscription.menu_reporting
+#: model:ir.ui.menu,name:cyllo_subscription.menu_reporting_categ
 msgid "Reporting"
-msgstr "Signalement"
+msgstr "Déclaration"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -1391,7 +1362,6 @@ msgid "Responsible User"
 msgstr "Utilisateur responsable"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__message_has_sms_error
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__message_has_sms_error
 msgid "SMS Delivery error"
@@ -1405,32 +1375,30 @@ msgstr "Vente"
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/sale_order_template.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order_template.py:0
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__sale_order_id
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__sale_order
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__sale_order_id
 #, python-format
 msgid "Sale Order"
 msgstr "Ordre de vente"
 
 #. module: cyllo_subscription
-#: model:mail.template,name:cyllo_subscription.cyllo_subscription_invoices
-#: model:mail.template,name:cyllo_subscription.cyllo_subscription_renew
-msgid "Sale Order: Due Reminder Email"
-msgstr "Ordre de vente: e-mail de rappel d'échéance"
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
+msgid "Sale order"
+msgstr "Commande de vente"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__sale_order_line
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__sale_order_line_id
 msgid "Sale order line"
 msgstr "Ligne de commande de vente"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__sale_order
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__sale_order_id
 msgid "Sale order reference"
 msgstr "Référence de la commande de vente"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_report_view_graph
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_report_view_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_report_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_report_pivot
 msgid "Sales Analysis"
 msgstr "Analyse des ventes"
 
@@ -1445,14 +1413,14 @@ msgid "Sales Order Line"
 msgstr "Ligne de commande"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
 msgid "Sales Team"
 msgstr "Équipe de vente"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
 msgid "Salesperson"
-msgstr "Vendeur"
+msgstr ""
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__access_token
@@ -1491,7 +1459,7 @@ msgid "Set state to renew"
 msgstr "Définir l'état à renouveler"
 
 #. module: cyllo_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_configuration_settings_menu
+#: model:ir.ui.menu,name:cyllo_subscription.menu_settings
 msgid "Settings"
 msgstr "Paramètres"
 
@@ -1499,11 +1467,18 @@ msgstr "Paramètres"
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__state
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__state_of_order
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__state
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "State"
 msgstr "État"
 
 #. module: cyllo_subscription
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__partner_state
+msgid "State Name"
+msgstr "État partenaire"
+
+#. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__state
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_line__state
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__state
 msgid "State of the order"
 msgstr "Etat de la commande"
@@ -1533,9 +1508,9 @@ msgstr ""
 "Prévu : Activités futures.\n"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_account_bank_statement_line__subscription_order_ids
-#: model:ir.model.fields,help:cyllo_subscription.field_account_move__subscription_order_ids
-#: model:ir.model.fields,help:cyllo_subscription.field_account_payment__subscription_order_ids
+#: model:ir.model.fields,help:cyllo_subscription.field_account_bank_statement_line__subscription_order_id
+#: model:ir.model.fields,help:cyllo_subscription.field_account_move__subscription_order_id
+#: model:ir.model.fields,help:cyllo_subscription.field_account_payment__subscription_order_id
 msgid "Store ids of the subscription order to sent on cron"
 msgstr "Identifiants de magasin des commandes d'abonnement à envoyer sur cron"
 
@@ -1547,14 +1522,14 @@ msgstr "Soumettre"
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
 msgid "Subs"
-msgstr ""
+msgstr "Sous-marins"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_template__is_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_product_template_search
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_template_search
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Subscription"
 msgstr "Abonnement"
 
@@ -1568,6 +1543,12 @@ msgstr ""
 "                                    Demande de renouvellement"
 
 #. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_report_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_report_tree
+msgid "Subscription Analysis"
+msgstr "Analyse d'abonnement"
+
+#. module: cyllo_subscription
 #: model:ir.model,name:cyllo_subscription.model_subscription_close
 msgid "Subscription Close"
 msgstr "Fermer l'abonnement"
@@ -1576,6 +1557,13 @@ msgstr "Fermer l'abonnement"
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_closed
 msgid "Subscription Closed"
 msgstr "Abonnement fermé"
+
+#. module: cyllo_subscription
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_bank_statement_line__renewal_date
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_move__renewal_date
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_payment__renewal_date
+msgid "Subscription End"
+msgstr "Fin abonnement"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -1589,18 +1577,15 @@ msgstr "Nom de l'abonnement"
 
 #. module: cyllo_subscription
 #. odoo-python
-#: code:addons/cyllo_subscription/models/sale_order.py:0
 #: code:addons/cyllo_subscription/models/subscription_order_alert.py:0
-#: code:addons/custom/cyllo_subscription/models/sale_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order_alert.py:0
 #: model:ir.actions.act_window,name:cyllo_subscription.action_view_subscription_order
 #: model:ir.model,name:cyllo_subscription.model_subscription_order
-#: model:ir.model.fields,field_description:cyllo_subscription.field_account_bank_statement_line__subscription_order_ids
-#: model:ir.model.fields,field_description:cyllo_subscription.field_account_move__subscription_order_ids
-#: model:ir.model.fields,field_description:cyllo_subscription.field_account_payment__subscription_order_ids
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_bank_statement_line__subscription_order_id
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_move__subscription_order_id
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_payment__subscription_order_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_close__subscription_order_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__subscription_order_id
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_subscription_order_action
+#: model:ir.ui.menu,name:cyllo_subscription.menu_subscription_order
 #, python-format
 msgid "Subscription Order"
 msgstr "Commande d'abonnement"
@@ -1621,7 +1606,15 @@ msgid "Subscription Order Line"
 msgstr "Ligne de commande d'abonnement"
 
 #. module: cyllo_subscription
+#: model:mail.template,name:cyllo_subscription.mail_template_subscription_order_due_reminder_email
+msgid "Subscription Order: Due Reminder Email"
+msgstr "Commande d'abonnement: e-mail de rappel dû"
+
+#. module: cyllo_subscription
+#. odoo-python
+#: code:addons/cyllo_subscription/models/sale_order.py:0
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.portal_subscription
+#, python-format
 msgid "Subscription Orders"
 msgstr "Commandes d'abonnement"
 
@@ -1629,8 +1622,8 @@ msgstr "Commandes d'abonnement"
 #: model:ir.actions.act_window,name:cyllo_subscription.action_view_subscription_plan
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__sale_order_template_id
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__subscription_plan_ids
-#: model:ir.ui.menu,name:cyllo_subscription.subscription_plan_menu
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_order_view_from_2
+#: model:ir.ui.menu,name:cyllo_subscription.menu_subscription_plan
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_form_subscription
 msgid "Subscription Plan"
 msgstr "Plan d'abonnement"
 
@@ -1644,6 +1637,11 @@ msgstr "Produit d'abonnement"
 #: model:ir.model.fields.selection,name:cyllo_subscription.selection__sale_order__state_subscription__quotation
 msgid "Subscription Quotation"
 msgstr "Devis d'abonnement"
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_renewed
+msgid "Subscription Renewed"
+msgstr "Abonnement renouvelé"
 
 #. module: cyllo_subscription
 #: model:ir.model,name:cyllo_subscription.model_subscription_report
@@ -1663,6 +1661,13 @@ msgid "Subscription close reason"
 msgstr "Raison de clôture de l'abonnement"
 
 #. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_account_bank_statement_line__renewal_date
+#: model:ir.model.fields,help:cyllo_subscription.field_account_move__renewal_date
+#: model:ir.model.fields,help:cyllo_subscription.field_account_payment__renewal_date
+msgid "Subscription end date"
+msgstr "Date de fin de l'abonnement"
+
+#. module: cyllo_subscription
 #: model:ir.model,name:cyllo_subscription.model_subscription_order_close_reason
 msgid "Subscription order close reason"
 msgstr "Motif de clôture de la commande d'abonnement"
@@ -1670,18 +1675,24 @@ msgstr "Motif de clôture de la commande d'abonnement"
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
 #, python-format
-msgid "Subscription order is Upsell from the order %s"
-msgstr "La commande d'abonnement est une vente incitative à partir de la commande %s"
+msgid "Subscription order is Created from %s"
+msgstr "L'ordre d'abonnement est créé à partir de% s"
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
 #, python-format
-msgid "Subscription order is renewed from the order "
-msgstr "La commande d'abonnement est renouvelée à partir de la commande "
+msgid "Subscription order is Upsell from the order %s"
+msgstr ""
+"La commande d'abonnement est une vente incitative à partir de la commande %s"
+
+#. module: cyllo_subscription
+#. odoo-python
+#: code:addons/cyllo_subscription/models/subscription_order.py:0
+#, python-format
+msgid "Subscription order is renewed from the order %s"
+msgstr "La commande d'abonnement est renouvelée à partir de la commande% s"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__subscription_order_line_ids
@@ -1706,21 +1717,22 @@ msgstr "Numéro de référence de l'Abonnement"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__subscription_orders
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_subscription
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_subscription_root
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model:ir.ui.menu,name:cyllo_subscription.menu_cyllo_subscription_root
+#: model:ir.ui.menu,name:cyllo_subscription.menu_subscriptions_categ
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Subscriptions"
 msgstr "Abonnements"
 
 #. module: cyllo_subscription
-#: model:ir.actions.act_window,name:cyllo_subscription.action_view_reporting_subscription
-msgid "Subscriptions Report"
+#: model:ir.actions.act_window,name:cyllo_subscription.action_view_reporting
+msgid "Subscriptions Analysis"
 msgstr "Rapport sur les abonnements"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
 msgid "Subscriptions that are not assigned to an account manager."
-msgstr "Abonnements qui ne sont pas attribués à un gestionnaire de compte."
+msgstr "Abonnements qui ne sont pas affectés à un gestionnaire de compte."
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__subtotal
@@ -1733,8 +1745,8 @@ msgid "Subtotal amount"
 msgstr "Montant du sous-total"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__summery
-msgid "Summery"
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__summary
+msgid "Summary"
 msgstr "Résumé"
 
 #. module: cyllo_subscription
@@ -1748,23 +1760,24 @@ msgid "Tell us, why are you leaving?"
 msgstr "Dis-nous, pourquoi pars-tu ?"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "Template"
 msgstr "Modèle"
 
 #. module: cyllo_subscription
 #. odoo-python
 #: code:addons/cyllo_subscription/models/subscription_order.py:0
-#: code:addons/custom/cyllo_subscription/models/subscription_order.py:0
 #, python-format
 msgid ""
 "There is already a draft invoice is present for this order, so please "
 "confirm it or cancel it before proceed."
 msgstr ""
-"Il existe déjà un projet de facture pour cette commande, alors s'il vous plaît "
-"confirmez-le ou annulez-le avant de continuer."
+"Il existe déjà un projet de facture pour cette commande, alors s'il vous "
+"plaît confirmez-le ou annulez-le avant de continuer."
 
 #. module: cyllo_subscription
+#: model:ir.model,name:cyllo_subscription.model_time_based_price
 #: model:ir.model.fields,field_description:cyllo_subscription.field_product_product__time_based_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_product_template__time_based_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_line__time_based_price_id
@@ -1774,8 +1787,8 @@ msgstr "Prix basé sur le temps"
 
 #. module: cyllo_subscription
 #: model:ir.actions.act_window,name:cyllo_subscription.action_view_time_based_price_tree
-#: model:ir.model,name:cyllo_subscription.model_time_based_price
 #: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_line__time_based_price_id
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_product_product_form
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_product_template_only_form
 msgid "Time Based Pricing"
 msgstr "Prix basé sur le temps"
@@ -1787,9 +1800,10 @@ msgid "Time based pricing"
 msgstr "Prix basé sur le temps"
 
 #. module: cyllo_subscription
-#: model:ir.actions.act_window,name:cyllo_subscription.action_view_sale_order_to_renew
-#: model:ir.ui.menu,name:cyllo_subscription.menu_sale_order_to_renew_action
+#: model:ir.actions.act_window,name:cyllo_subscription.action_view_to_renew
+#: model:ir.ui.menu,name:cyllo_subscription.menu_to_renew
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_search
 msgid "To Renew"
 msgstr "Pour renouveler"
 
@@ -1809,46 +1823,100 @@ msgid "Total amount"
 msgstr "Montant total"
 
 #. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__yearly_price_sum
+msgid ""
+"Total annual revenue generated from recurring charges, subscriptions, or "
+"contracts."
+msgstr "Revenus récurrents annuels"
+
+#. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__monthly_price_sum
+msgid ""
+"Total monthly revenue generated from recurring charges, subscriptions, or "
+"contracts."
+msgstr ""
+"Les revenus mensuels totaux générés par les frais, abonnements ou contrats "
+"récurrents."
+
+#. module: cyllo_subscription
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__weekly_price_sum
+msgid ""
+"Total revenue generated on a weekly basis from recurring charges, "
+"subscriptions, or contracts."
+msgstr "Revenus récurrents hebdomadaires"
+
+#. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__number_of_product_sold
 msgid "Total sold product count"
 msgstr "Nombre total de produits vendus"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_line__trail_end
-msgid "Trail End"
-msgstr "Fin d'essai"
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_orders
+msgid "Trial"
+msgstr "Procès"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__trail_end
-msgid "Trail End Date"
-msgstr "Date de fin d'essai"
+#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order_line__trial_end
+msgid "Trial End"
+msgstr "Fin du procès"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_product_product__trail_period
-#: model:ir.model.fields,field_description:cyllo_subscription.field_product_template__trail_period
-msgid "Trail Period"
+#: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__trial_end
+msgid "Trial End Date"
+msgstr "Date de fin du procès"
+
+#. module: cyllo_subscription
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_bank_statement_line__trial_period
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_move__trial_period
+#: model:ir.model.fields,field_description:cyllo_subscription.field_account_payment__trial_period
+#: model:ir.model.fields,field_description:cyllo_subscription.field_product_product__trial_period
+#: model:ir.model.fields,field_description:cyllo_subscription.field_product_template__trial_period
+msgid "Trial Period"
 msgstr "Période d'essai"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order_line__trail_end
-msgid "Trail end date for the subscription order created from this line."
-msgstr "Date de fin d'essai pour la commande d'abonnement créée à partir de cette ligne."
+#: model:ir.model.fields,help:cyllo_subscription.field_sale_order_line__trial_end
+msgid "Trial end date for the subscription order created from this line."
+msgstr ""
+"Date de fin d'essai pour l'ordre d'abonnement créé à partir de cette ligne."
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__trail_end
-msgid "Trail period ending date"
-msgstr "Date de fin de période d'essai"
+#: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__trial_end
+msgid "Trial period ending date"
+msgstr "Date de fin de la période de procès"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_product_product__trail_period
-#: model:ir.model.fields,help:cyllo_subscription.field_product_template__trail_period
-msgid "Trail period for the product"
-msgstr "Période d'essai pour le produit"
+#: model:ir.model.fields,help:cyllo_subscription.field_account_bank_statement_line__trial_period
+#: model:ir.model.fields,help:cyllo_subscription.field_account_move__trial_period
+#: model:ir.model.fields,help:cyllo_subscription.field_account_payment__trial_period
+msgid "Trial period for the corresponding order"
+msgstr "Période d'essai pour l'ordre correspondant"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model:ir.model.fields,help:cyllo_subscription.field_product_product__trial_period
+#: model:ir.model.fields,help:cyllo_subscription.field_product_template__trial_period
+msgid "Trial period for the product (Only integers are supported.)"
+msgstr ""
+"Période d'essai pour le produit (seuls les entiers sont pris en charge.)"
+
+#. module: cyllo_subscription
+#. odoo-python
+#: code:addons/cyllo_subscription/models/product_template.py:0
+#, python-format
+msgid "Trial period should be greater than zero if there is  trial unit"
+msgstr "La période d'essai doit être supérieure à zéro s'il y a unité d'essai"
+
+#. module: cyllo_subscription
+#. odoo-python
+#: code:addons/cyllo_subscription/models/product_template.py:0
+#, python-format
+msgid "Trial period should be greater than zero if there is trial unit"
+msgstr "La période d'essai doit être supérieure à zéro s'il y a unité d'essai"
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Trigger now"
-msgstr "Déclenchez maintenant"
+msgstr "Déclencher maintenant"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__activity_exception_decoration
@@ -1856,9 +1924,9 @@ msgid "Type of the exception activity on record."
 msgstr "Type d’activité d’exception sur l’enregistrement"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.sale_subscription_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_sale_order_search
 msgid "Unassigned"
-msgstr "Non attribué"
+msgstr "Non assisté"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_product_product__unit
@@ -1877,13 +1945,13 @@ msgstr "Unité pour l'abonnement"
 #. module: cyllo_subscription
 #: model:ir.model.fields,help:cyllo_subscription.field_product_product__unit
 #: model:ir.model.fields,help:cyllo_subscription.field_product_template__unit
-msgid "Unit for the trail period"
+msgid "Unit for the trial period"
 msgstr "Unité pour la période d'essai"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_form
 msgid "Upsell"
-msgstr ""
+msgstr "Cochette"
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -1901,14 +1969,12 @@ msgid "We are sorry to see you go."
 msgstr "Nous sommes navrés de vous voir partir."
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,field_description:cyllo_subscription.field_sale_order__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order__website_message_ids
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_order_alert__website_message_ids
 msgid "Website Messages"
 msgstr "Messages du site web"
 
 #. module: cyllo_subscription
-#: model:ir.model.fields,help:cyllo_subscription.field_sale_order__website_message_ids
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order__website_message_ids
 #: model:ir.model.fields,help:cyllo_subscription.field_subscription_order_alert__website_message_ids
 msgid "Website communication history"
@@ -1916,7 +1982,6 @@ msgstr "Historique de communication du site web"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__weekly_price_sum
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__weekly_price_sum
 msgid "Weekly Recurring Revenue"
 msgstr "Revenus récurrents hebdomadaires"
 
@@ -1933,7 +1998,7 @@ msgid "When an approval request is made, you may see it here."
 msgstr "Lorsqu'une demande d'approbation est faite, vous pouvez la voir ici"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "Write a note"
 msgstr "Écrire une note"
 
@@ -1944,7 +2009,6 @@ msgstr "Écrire une note"
 
 #. module: cyllo_subscription
 #: model:ir.model.fields,field_description:cyllo_subscription.field_subscription_report__yearly_price_sum
-#: model:ir.model.fields,help:cyllo_subscription.field_subscription_report__yearly_price_sum
 msgid "Yearly Recurring Revenue"
 msgstr "Revenus récurrents annuels"
 
@@ -1955,9 +2019,22 @@ msgid "Years"
 msgstr "Années"
 
 #. module: cyllo_subscription
-#: model:mail.template,subject:cyllo_subscription.cyllo_subscription_renew
+#. odoo-python
+#: code:addons/cyllo_subscription/models/subscription_order.py:0
+#, python-format
+msgid "You cannot delete order in Sale or Posted state"
+msgstr ""
+"Vous ne pouvez pas supprimer la commande dans la vente ou l'état affiché"
+
+#. module: cyllo_subscription
+#: model:mail.template,subject:cyllo_subscription.mail_template_subscription_order_due_reminder_email
 msgid "Your Subscription is Going to End"
-msgstr "Votre abonnement va prendre fin"
+msgstr "Votre abonnement va se terminer"
+
+#. module: cyllo_subscription
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_renewed
+msgid "Your Subscription is renewed("
+msgstr "Votre abonnement est renouvelé ("
 
 #. module: cyllo_subscription
 #: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_details
@@ -1965,11 +2042,11 @@ msgid "Your subscription valid until"
 msgstr "Votre abonnement valable jusqu'au"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "e.g. Take action"
-msgstr "e.g. Passer à l'action"
+msgstr "par exempleAgir"
 
 #. module: cyllo_subscription
-#: model_terms:ir.ui.view,arch_db:cyllo_subscription.subscription_order_alert_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_subscription.view_subscription_order_alert_form
 msgid "eg:-Need to discuss...."
-msgstr "eg:-Besoin de discuter...."
+msgstr "Par exemple: -nee pour discuter ...."

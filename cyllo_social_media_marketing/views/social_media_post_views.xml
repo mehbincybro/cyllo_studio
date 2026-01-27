@@ -158,13 +158,20 @@
         <field name="name">Timeline</field>
         <field name="tag">social_media_feed_dashboard_tag</field>
     </record>
+    <record id="social_media_dashboard_action" model="ir.actions.client">
+        <field name="name">Dashboard</field>
+        <field name="tag">social_media_dashboard</field>
+    </record>
     <menuitem id="menu_cyllo_social_media_marketing_root"
               name="Social Media Marketing"
-              web_icon="cyllo_social_media_marketing,static/description/social-marketing 2.png"/>
+              web_icon="cyllo_social_media_marketing,static/description/cyllo_social-marketing.svg"/>
+    <menuitem id="menu_dashboard" name="Dashboard" sequence="1"
+              parent="menu_cyllo_social_media_marketing_root"
+              action="social_media_dashboard_action"/>
     <menuitem id="menu_configuration_categ" name="Configuration"
               parent="menu_cyllo_social_media_marketing_root"/>
     <menuitem id="menu_posts" name="Posts" action="action_view_posts"
-              sequence="1"
+              sequence="2"
               parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
     <menuitem name="Timeline" id="menu_timeline" sequence="3"
               action="social_media_feed_dashboard_action"

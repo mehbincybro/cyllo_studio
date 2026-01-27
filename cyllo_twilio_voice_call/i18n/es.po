@@ -319,7 +319,7 @@ msgstr "Número de mensajes con error de entrega"
 #: model:ir.actions.act_window,name:cyllo_twilio_voice_call.out_going_call_list_action
 #: model:ir.model,name:cyllo_twilio_voice_call.model_out_going_call_list
 #: model:ir.ui.menu,name:cyllo_twilio_voice_call.out_going_call_list_menu
-msgid "Out Going Call List"
+msgid "Outgoing call list"
 msgstr "Lista de llamadas en marcha"
 
 #. module: cyllo_twilio_voice_call

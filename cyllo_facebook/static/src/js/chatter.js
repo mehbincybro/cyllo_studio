@@ -14,9 +14,18 @@ patch(Composer, {
 });
 
 patch(Composer.prototype, {
-    setup() {
+    async setup() {
         super.setup();
         this.orm = useService("orm");
+        var self =this
+        if (this.thread.type === "chat") {
+        await this.orm.call("discuss.channel", "action_find_partner_fb", [this.thread.id], {}).then(function(data) {
+        if (data.partner && data.facebook){
+        self.fb_discuss_sent=true
+        self.state.partner=data.partner
+        }
+           })
+           }
         this.state.fb_sent=false
         this.state.model=this.thread.model
         this.state.res_id=this.thread.id
@@ -34,6 +43,9 @@ patch(Composer.prototype, {
         await super.sendMessage();
         if(self.state.fb_sent){
             await this.orm.call("res.partner", "action_message_partner_fb", [self.state.res_id,this.value], {})
+        }
+        if(self.fb_discuss_sent){
+            await this.orm.call("discuss.channel", "action_message_chat_discuss_fb", [self.state.res_id,this.value], {})
         }
     },
 });

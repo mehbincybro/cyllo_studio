@@ -2,6 +2,7 @@
 import {worldMapChart} from "./charts/world_map";
 import {loadingChart} from "./charts/loadingChart"
 
+
 /**
  * Converts a string to title case.
  * @param {string} inputString - The input string to be converted to title case.
@@ -17,6 +18,16 @@ export const convertToTitleCase = (inputString, splitBy = "_") => {
             .join(' ');
     }
     return titleCaseString;
+}
+export const getChartZoom = (chart) => {
+    switch (chart) {
+        case "pictorialBar":
+            return 10
+        case "line":
+            return 10
+        default:
+            return 0
+    }
 }
 
 export class ChartMaker {
@@ -42,22 +53,36 @@ export class ChartMaker {
     }
 
     getDefaultZoom() {
-        const length = this.data.length
+        const length = this.data.length * this.measures.length
+        const START_VALUES = [
+            {threshold: 4500, value: 90},
+            {threshold: 3500, value: 88},
+            {threshold: 2500, value: 86},
+            {threshold: 1500, value: 84},
+            {threshold: 1000, value: 82},
+            {threshold: 500, value: 80},
+            {threshold: 400, value: 75},
+            {threshold: 350, value: 70},
+            {threshold: 100, value: 50},
+            {threshold: 15, value: 30},
+            {threshold: 0, value: 0},
+        ];
         const getStartValue = () => {
-            if (length > 5000) return 99;
-            if (length > 4500 && length <= 5000) return 95;
-            if (length > 3500 && length <= 4500) return 88;
-            if (length > 2500 && length <= 3500) return 83;
-            if (length > 1500 && length <= 2500) return 77;
-            if (length > 1000 && length <= 1500) return 70;
-            if (length > 500 && length <= 1000) return 65;
-            if (length > 100 && length <= 500) return 45;
-            if (length > 15) return 30;
-            if (length <= 15) return 0;
+            for (const {threshold, value} of START_VALUES) {
+                if (length > threshold) {
+                    return value + getChartZoom(this.type) + this.measures.length;
+                }
+            }
+        };
+        let startValue = getStartValue()
+        if (this.type === 'line') {
+            startValue += 5 * (this.measures.length)
+        } else if (this.type === 'bar') {
+            startValue += 8 * (this.measures.length)
         }
-        var dataZoom = [{
+        const dataZoom = [{
             type: 'inside',
-            start: getStartValue(),
+            start: startValue >= 100 ? 95 : startValue,
             end: 100,
             zoomOnMouseWheel: false,
             moveOnMouseMove: true,
@@ -89,6 +114,10 @@ export class ChartMaker {
             data: [this.name]
         }
         var formatter = '{a} <br/>{b} : {c}'
+        this.hasItemStyle = this.measures.includes("itemStyle")
+        if (this.hasItemStyle) {
+            this.measures = this.measures.filter(item => item !== 'itemStyle')
+        }
         this.chartOptions.formatter = formatter
         if (this.measures.length > 2) {
             legends = {
@@ -114,8 +143,27 @@ export class ChartMaker {
         })
         var xAxis = {
             data: [],
-            type: 'category'
+            type: 'category',
+            axisLabel: {
+                interval: 0,  // Show all labels
+                rotate: this.data.length > 6 ? 45 : 0,  // Rotate labels if they are too long
+                fontSize: 10,
+                formatter: function (value) {
+                    // Set maximum length for labels
+                    const maxLength = 12;
+                    if (value.length > maxLength) {
+                        // Find the closest space to the maxLength
+                        let closestSpaceIndex = value.lastIndexOf(' ', maxLength);
+                        if (closestSpaceIndex === -1) {
+                            closestSpaceIndex = maxLength;
+                        }
+                        return value.substring(0, closestSpaceIndex) + '\n' + value.substring(closestSpaceIndex).trim();
+                    }
+                    return value;
+                }
+            }
         }
+
         this.data && this.data.forEach((item, mi) => {
             xAxis.data.push(item[this.dimension])
             this.measures.forEach((key, i) => {
@@ -129,10 +177,11 @@ export class ChartMaker {
         let val = {
             title: {
                 text: convertToTitleCase(this.name, " "),
-                padding: [3, 0, 0, 15],
+                padding: [15, 0, 0, 15],
                 textStyle: {
                     fontSize: 17,
-                    fontWeight: 'normal',
+                    fontWeight: 600,
+                    textBorderColor: 'white', // Add border color
                 }
             },
             legends,
@@ -151,10 +200,11 @@ export class ChartMaker {
                 formatter: formatter
             },
             grid: {
-                left: '12%', // Adjust as needed
-                right: '15%', // Adjust as needed
+                containLabel: true,
+                left: '10', // Adjust as needed
+                right: '10%', // Adjust as needed
                 top: '15%', // Adjust as needed
-                bottom: '20%' // Adjust as needed
+                bottom: '10%' // Adjust as needed
             },
             dataZoom,
         }
@@ -184,10 +234,14 @@ export class ChartMaker {
         this.data && this.data.forEach((item, mi) => {
             axis.data.push(item[this.dimension])
             this.measures.forEach((key, i) => {
-                val.series[i].data.push({
+                const data = {
                     value: item[key],
                     name: axis.data[mi]
-                })
+                }
+                if (this.hasItemStyle) {
+                    data.itemStyle = item["itemStyle"]
+                }
+                val.series[i].data.push(data)
                 val.series[i].radius = radius
                 val.series[i].type = "pie"
             })
@@ -355,6 +409,7 @@ export class ChartMaker {
                     orient: 'vertical',
                     right: 7,
                     bottom: '35%',
+
                 },
                 series: [{
                     name: convertToTitleCase(this.measures[this.measures.length - 1]),
@@ -382,6 +437,11 @@ export class ChartMaker {
             }
         } else {
             option = val
+        }
+        if (this.params?.themeColor?.length) {
+            option.visualMap.inRange = {
+                color: this.params.themeColor
+            }
         }
         return option
     }
@@ -469,7 +529,7 @@ export class ChartMaker {
 
     funnelChart(val) {
         let data = this.dimension_axis === "x" ? val.xAxis.data : val.yAxis.data;
-        data = data.filter(item => item).map(item => typeof item === 'number' ? JSON.stringify(item): item)
+        data = data.filter(item => item).map(item => typeof item === 'number' ? JSON.stringify(item) : item)
         const seriesData = {
             name: convertToTitleCase(this.measures[0]),
             type: 'funnel',
@@ -516,7 +576,7 @@ export class ChartMaker {
             }
         })
         val.legend = {
-            top: 25,
+            top: 34,
             data,
             type: 'scroll',
             orient: 'horizontal',
@@ -540,11 +600,11 @@ export class ChartMaker {
                 dataZoom,
                 title: {
                     text: convertToTitleCase(this.name, " "),
-                    padding: [3, 0, 0, 15],
+                    padding: [15, 0, 0, 15],
                     textStyle: {
                         fontSize: 17,
-                        fontWeight: 'normal',
-
+                        fontWeight: 600,
+                        textBorderColor: 'white', // Add border color
                     }
                 },
                 tooltip: {
@@ -558,7 +618,7 @@ export class ChartMaker {
                     textStyle: {
                         color: '#ccc'
                     },
-                    top: 25,
+                    top: 35,
                 },
                 series: [{
                     name: convertToTitleCase(this.measures[1]),
@@ -577,11 +637,11 @@ export class ChartMaker {
                             borderRadius: 5,
                             color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
                                 offset: 0,
-                                color: '#14c8d4'
+                                color: this.params.themeColor?.length > 3 ? this.params.themeColor[1] : '#14c8d4'
                             },
                                 {
                                     offset: 1,
-                                    color: '#43eec6'
+                                    color: this.params.themeColor?.length > 3 ? this.params.themeColor[2] : '#43eec6'
                                 }
                             ])
                         },

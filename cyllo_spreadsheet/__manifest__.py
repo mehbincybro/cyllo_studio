@@ -1,58 +1,57 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
-    "name": "Spreadsheet",
-    "version": "1.0",
-    "category": "Extra Tools",
-    "summary": """Allow to create & edit spreadsheets""",
-    "description": "Allow to add data to spreadsheet and edit the spreadsheet",
+    'name': 'Spreadsheet',
+    'description': 'This module is used to add features in spreadsheet module',
+    'summary': 'Cyllo Spreadsheet',
+    'version': '1.0.0',
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    "depends": ["web", "spreadsheet", "base_sparse_field", "bus"],
-    "data": [
-        "security/cyllo_spreadsheet_security.xml",
-        "security/ir.model.access.csv",
-        "views/spreadsheet_spreadsheet_views.xml",
-        "data/spreadsheet_spreadsheet_import_mode.xml",
-        "wizards/spreadsheet_spreadsheet_import_views.xml",
+    'depends': ["spreadsheet"],
+    'data': [
+        'security/spreadsheet_security.xml',
+        'security/ir.model.access.csv',
+        'views/spreadsheet_views.xml',
     ],
-    "assets": {
-        "web.assets_backend": [
-            "cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.scss",
-            "cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet/spreadsheet_action.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/pivot_renderer.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/graph_renderer.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/list_renderer.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/kanban_renderer.js",
-            "cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.js",
-            "cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml",
-            "cyllo_spreadsheet/static/src/add_spreadsheet_menu/add_list_spreadsheet.js",
-            "cyllo_spreadsheet/static/src/add_spreadsheet_menu/add_menu_spreadsheet.js",
-            "cyllo_spreadsheet/static/src/css/style.css",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/deleteDialog.js",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/deleteDialog.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/spreadsheet_view.js",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/spreadsheet_view.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/shareDialog.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/shareDialog.js",
-            "cyllo_spreadsheet/static/src/spreadsheet_action/shareMultipleDialog.js",
-            'cyllo_spreadsheet/static/src/lib/*',
+    'icon': '/cyllo_spreadsheet/static/description/spreadsheet.svg',
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_spreadsheet/static/src/style.css',
+            'cyllo_spreadsheet/static/src/actions/*',
+            'cyllo_spreadsheet/static/src/hooks/*',
+            'cyllo_spreadsheet/static/src/lib/*',  # version compatabile with cyllo_analytics
+            'cyllo_spreadsheet/static/src/views/**/*',
+            "cyllo_spreadsheet/static/src/main/spreadsheetLoader.js",
         ],
         "spreadsheet.o_spreadsheet": [
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_controlpanel.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/icon.xml",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_renderer.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_action.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_control_panel.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_download_menus.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/odoo_panels.esm.js",
-            "cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js",
+            "cyllo_spreadsheet/static/src/main/main.js",
+            "cyllo_spreadsheet/static/src/spreadsheet/*",
+            "cyllo_spreadsheet/static/src/topMenuRegistry/**/*",
         ],
+
     },
-    'license': 'LGPL-3',
+    'license': "LGPL-3",
     'installable': True,
     'auto_install': False,
     'application': True,

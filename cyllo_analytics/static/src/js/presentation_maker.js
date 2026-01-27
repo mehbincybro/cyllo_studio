@@ -1,13 +1,13 @@
 /** @odoo-module **/
+import {registry} from "@web/core/registry";
+import {useService} from "@web/core/utils/hooks";
 
-import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
-const { useRef, onMounted, useState, onWillStart, Component, onWillDestroy,useEffect } = owl;
-import { GraphTile } from "./presentation/components/graph_tile"
-import { browser } from "@web/core/browser/browser";
-import { ThemeMaker } from "./theme_maker";
-import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
-import { Table } from "@cyllo_analytics/js/table/table";
+const {useRef, onMounted, useState, onWillStart, Component, onWillDestroy, useEffect} = owl;
+import {GraphTile} from "./presentation/components/graph_tile"
+import {browser} from "@web/core/browser/browser";
+import {ThemeMaker} from "./theme_maker";
+import {useSaveContext} from "@cyllo_analytics/js/useSaveContext";
+import {Table} from "@cyllo_analytics/js/table/table";
 
 let isPlaying = false;
 
@@ -26,19 +26,21 @@ try {
             }
         }
     });
-} catch { console.warn("Internet connection is not available") }
+} catch {
+    console.warn("Internet connection is not available")
+}
 
 class PresentationMaker extends Component {
     /** Class for creating a presentation maker component. */
     setup() {
         this.actionService = useService("action")
         this.orm = useService("orm")
-        const { type } = this.props.action.context;
-        this.chartData = useState({ data: [] , style: null, theme: null, themeData: {} });
-        this.state = useState({ exit: type? false:true, warning: false })
+        const {type} = this.props.action.context;
+        this.chartData = useState({data: [], style: null, theme: null, themeData: {}});
+        this.state = useState({exit: type ? false : true, warning: false})
         this.type = type;
         this.ref = useRef('root')
-        const { id } = useSaveContext()
+        const {id} = useSaveContext()
         this.id = id
         onWillDestroy(() => this.env.bus.trigger("PN:RLD"))
         // Execute actions on component setup
@@ -49,21 +51,21 @@ class PresentationMaker extends Component {
                 theme_maker.getTheme()
             }
         })
-         // Execute actions after the component is mounted
-        onMounted(async ()=> {
+        // Execute actions after the component is mounted
+        onMounted(async () => {
             try {
                 this.reveal = await Reveal.initialize({
                     controls: true,
                     hash: false,
                     autoSlide: (type || this.type) === 'play' ? this.autoSlideTime * 1000 : false
                 })
-            }catch(e) {
+            } catch (e) {
                 console.warn("Internet connection is not available")
             }
 
-
             this.navBar = document.body.querySelector('.o_navbar');
             this.sideBar = document.body.querySelector('.cy-left-sidebar');
+            this.sideBar2 = document.body.querySelector('.cy-submenu-box');
 
             document.addEventListener('webkitfullscreenchange', this.exitHandler.bind(this), false);
             document.addEventListener('mozfullscreenchange', this.exitHandler.bind(this), false);
@@ -74,6 +76,7 @@ class PresentationMaker extends Component {
             this.toggleSideAndHeader();
         })
     }
+
     /**
      * Fetch data for the presentation.
      */
@@ -81,20 +84,22 @@ class PresentationMaker extends Component {
         var data = this.props.action?.context?.rec_id && this.props.action.context
         if (!data) {
             try {
-                data = await this.orm.read("dashboard.presentation",[this.id],[])
+                data = await this.orm.read("dashboard.presentation", [this.id], [])
                 if (!data.length) {
                     this.state.warning = true
                     return;
                 }
-            }catch {
+            } catch {
                 this.state.warning = true
                 return;
             }
             data = data[0]
         }
 
-        const { chart_data, style_json, type, theme, theme_json, auto_slide, auto_slide_time,
-                title_page, title_page_heading, title_page_subheading } = data
+        const {
+            chart_data, style_json, type, theme, theme_json, auto_slide, auto_slide_time,
+            title_page, title_page_heading, title_page_subheading
+        } = data
         this.chartData.data = chart_data
         this.chartData.style = style_json
         this.type = type
@@ -106,22 +111,26 @@ class PresentationMaker extends Component {
         this.chartData.theme = theme
         this.chartData.themeData = theme_json
     }
+
     /**
      * Toggle the visibility of the sidebar and header in full-screen mode.
      */
     toggleSideAndHeader() {
-         let val = this.fullScreen ? 'none' : 'block';
-         this.navBar.style.display = val;
-         this.sideBar.style.display = val;
+        let val = this.fullScreen ? 'none' : 'block';
+        this.navBar.style.display = this.fullScreen ? 'none' : 'flex';
+        this.sideBar.style.display = val;
+        this.sideBar2.style.display = val;
     }
+
     /**
      * Handle the exit from full-screen mode.
      */
     exitHandler() {
         if (!document.webkitIsFullScreen && !document.mozFullScreen && !document.msFullscreenElement) {
-             this.state.exit = true;
+            this.state.exit = true;
         }
     }
+
     /**
      * Exit the presentation mode and navigate to the original dashboard.
      */
@@ -130,6 +139,7 @@ class PresentationMaker extends Component {
         await this.toggleSideAndHeader()
         browser.history.go(-1)
     }
+
     /**
      * Trigger full-screen mode for the presentation.
      */
@@ -140,10 +150,11 @@ class PresentationMaker extends Component {
         this.toggleSideAndHeader();
     }
 }
+
 // Define the template for the PresentationMaker component
 PresentationMaker.template = "cyllo_analytics.PresentationMaker"
 PresentationMaker.components = {
-    GraphTile,Table
+    GraphTile, Table
 }
 // Register the PresentationMaker component in the actions category
 registry.category("actions").add("presentation_maker", PresentationMaker);

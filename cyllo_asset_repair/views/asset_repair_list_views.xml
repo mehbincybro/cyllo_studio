@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Menu item for the asset repair in asset menu-->
+    <menuitem id="menu_asset_repair" name="Repair"
+              parent="cyllo_asset_management.menu_assets_categ"
+              action="cyllo_asset_repair.action_view_assets_repair"
+              sequence="10"/>
+</odoo>

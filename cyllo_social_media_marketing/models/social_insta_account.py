@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import requests
 from dateutil.relativedelta import relativedelta
 
@@ -22,7 +42,7 @@ class SocialInstaAccount(models.Model):
     instagram_base_url = fields.Char(string='Instagram Base Url Latest', required=True,
                                      default="https://graph.facebook.com/v18.0",
                                      help="""Base url of Instagram integration update the latest version.""")
-    Instagram_connection_authenticated = fields.Boolean(string="Instagram Connection Completed",
+    instagram_connection_authenticated = fields.Boolean(string="Instagram Connection Completed",
                                                         help="Boolean field which signifies the connection.")
     meta_app_number = fields.Char(string='Meta App Id', required=True, help="Meta account app id")
     meta_app_secret = fields.Char(string='Meta App Secrets', required=True, help="Meta account app secrets")
@@ -31,8 +51,21 @@ class SocialInstaAccount(models.Model):
     instagram_account_number = fields.Char(string='Instagram Id', help="Connected Instagram account id.")
     instagram_business_account_number = fields.Char(string='Instagram Business Id',
                                                     help="Connected Instagram account id.")
+    company_id = fields.Many2one(string="Related Company",
+                                 comodel_name='res.company',
+                                 default=lambda self: self.env.company.id,
+                                 required=True, index=True,
+                                 help="The company associated with the social media account.")
     state = fields.Selection([('not connected', 'Not Connected'), ('connected', 'Connected')],
                              required=True, default='not connected', tracking=True)
+    is_default = fields.Boolean(string="Is Default", compute="_compute_is_default", store=False)
+
+    def _compute_is_default(self):
+        default_id = self.env['ir.config_parameter'].sudo().get_param(
+            'social_insta_account.default_insta_account_id'
+        )
+        for rec in self:
+            rec.is_default = str(rec.id) == str(default_id)
 
     def action_connect_instagram(self):
         """Function to connect Instagram account and authenticate the connection."""
@@ -50,9 +83,7 @@ class SocialInstaAccount(models.Model):
                 for data in response['data']:
                     name_list.append(data['name'])
                     if data['name'] == self.facebook_insta_page_name:
-                        self.write({'facebook_insta_page_number': data['id'],
-                                    'state': 'connected',
-                                    'Instagram_connection_authenticated': True})
+                        self.write({'facebook_insta_page_number': data['id']})
                         self.message_post(body="Page ID fetched Successfully")
                 if self.facebook_insta_page_name not in name_list:
                     return {
@@ -70,6 +101,14 @@ class SocialInstaAccount(models.Model):
                 self.instagram_account_number = datas.get('data')[0].get('id')
                 if not self.renewal_date or self.renewal_date < fields.date.today():
                     self.refresh_access_token()
+                self.write({
+                            'state': 'connected',
+                            'instagram_connection_authenticated': True
+                })
+
+                self.env['ir.config_parameter'].sudo().set_param(
+                    'social_insta_account.default_insta_account_id', self.id
+                )
             else:
                 return {
                     'type': 'ir.actions.client',
@@ -94,9 +133,17 @@ class SocialInstaAccount(models.Model):
         """Function to disconnect the Instagram account."""
         self.write({
             'state': 'not connected',
-            'Instagram_connection_authenticated': False,
+            'instagram_connection_authenticated': False,
             'renewal_date': False,
         })
+        self.env['ir.config_parameter'].sudo().set_param(
+            'social_insta_account.default_insta_account_id', None
+        )
+
+    def action_default_ig(self):
+        self.env['ir.config_parameter'].sudo().set_param(
+            'social_insta_account.default_insta_account_id', self.id
+        )
 
     def refresh_access_token(self):
         """Function to refresh the Instagram access token."""

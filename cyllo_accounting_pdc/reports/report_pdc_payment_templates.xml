@@ -5,11 +5,16 @@
             <t t-set="o" t-value="o.with_context(lang=lang)"/>
             <t t-set="values" t-value="o._get_payment_receipt_report_values()"/>
             <div class="page">
-                <h3><strong>PDC Payment Receipt: <span t-field="o.name"/></strong></h3>
+                <h3>
+                    <strong>PDC Payment Receipt:
+                        <span t-field="o.name"/>
+                    </strong>
+                </h3>
                 <div class="mb-4 mt-3">
                     <div name="date" class="row">
                         <div class="col-6" t-if="o.date">
-                            Payment Date: <span t-field="o.date"/>
+                            Payment Date:
+                            <span t-field="o.date"/>
                         </div>
                         <div class="col-6" t-if="o.partner_type">
                             <t t-if="o.partner_type == 'customer'">
@@ -17,33 +22,40 @@
                             </t>
                             <t t-if="o.partner_type == 'supplier'">
                                 Vendor:
-                            </t><span t-field="o.partner_id"/>
+                            </t>
+                            <span t-field="o.partner_id"/>
                         </div>
                     </div>
                     <div class="row">
                         <div name="bank"
                              t-if="o.bank_name"
                              class="col-6">
-                            Bank: <span t-field="o.bank_name"/>
+                            Bank:
+                            <span t-field="o.bank_name"/>
                         </div>
                         <div name="cheque_reference"
                              t-if="o.cheque_reference"
                              class="col-6">
-                            Cheque Reference: <span t-field="o.cheque_reference"/>
+                            Cheque Reference:
+                            <span t-field="o.cheque_reference"/>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-6" t-if="o.amount">
-                            Payment Amount: <span t-field="o.amount" t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
-                         </div>
+                            Payment Amount:
+                            <span t-field="o.amount"
+                                  t-options="{'widget': 'monetary', 'display_currency': o.currency_id}"/>
+                        </div>
                         <div class="col-6" t-if="o.ref">
-                            Memo: <span t-field="o.ref"/>
-                         </div>
+                            Memo:
+                            <span t-field="o.ref"/>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-6" t-if="o.payment_status">
-                            Cheque Status: <span t-field="o.payment_status"/>
-                         </div>
+                            Cheque Status:
+                            <span t-field="o.payment_status"/>
+                        </div>
                     </div>
                 </div>
 
@@ -53,15 +65,26 @@
                     <t t-set="partials" t-value="o.move_id._get_reconciled_invoices_partials()[0]"/>
                     <t t-set="invoices" t-value="{partial[2].move_id for partial in partials}"/>
                     <t t-foreach="invoices" t-as="inv">
-                        <t t-if="any(inv.currency_id != par[2].currency_id for par in inv._get_reconciled_invoices_partials()[0])" t-set="otherCurrency" t-value="True"/>
+                        <t t-if="any(inv.currency_id != par[2].currency_id for par in inv._get_reconciled_invoices_partials()[0])"
+                           t-set="otherCurrency" t-value="True"/>
                     </t>
                     <thead>
                         <tr>
-                            <th><span>Invoice Date</span></th>
-                            <th><span>Invoice Number</span></th>
-                            <th><span>Reference</span></th>
-                            <th t-if="otherCurrency" class="text-end"><span>Amount In Currency</span></th>
-                            <th class="text-end"><span>Amount</span></th>
+                            <th>
+                                <span>Invoice Date</span>
+                            </th>
+                            <th>
+                                <span>Invoice Number</span>
+                            </th>
+                            <th>
+                                <span>Reference</span>
+                            </th>
+                            <th t-if="otherCurrency" class="text-end">
+                                <span>Amount In Currency</span>
+                            </th>
+                            <th class="text-end">
+                                <span>Amount</span>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
@@ -69,31 +92,59 @@
                             <!-- MOVE -->
                             <t t-if="inv.move_type != 'entry'">
                                 <tr>
-                                    <td><span t-field="inv.invoice_date"/></td>
-                                    <td><span t-field="inv.name"/></td>
-                                    <td><span t-field="inv.ref"/></td>
+                                    <td>
+                                        <span t-field="inv.invoice_date"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="inv.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="inv.ref"/>
+                                    </td>
                                     <td t-if="otherCurrency"/>
-                                    <td class="text-end"><span t-field="inv.amount_total"/></td>
+                                    <td class="text-end">
+                                        <span t-field="inv.amount_total"/>
+                                    </td>
                                 </tr>
                                 <tr t-foreach="inv._get_reconciled_invoices_partials()[0]" t-as="par">
                                     <t t-set="payment" t-value="par[2].move_id"/>
-                                    <td><span t-field="payment.date"/></td>
-                                    <td><span t-field="payment.name"/></td>
-                                    <td><span t-field="payment.ref"/></td>
+                                    <td>
+                                        <span t-field="payment.date"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="payment.name"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="payment.ref"/>
+                                    </td>
                                     <t t-set="amountPayment" t-value="-payment.amount_total"/>
                                     <t t-set="amountInvoice" t-value="-par[1]"/>
                                     <t t-set="currencyPayment" t-value="payment.currency_id"/>
                                     <t t-set="currencyInvoice" t-value="inv.currency_id"/>
                                     <!-- Fill the column "Amount In Currency" only if necessary -->
-                                    <td t-if="otherCurrency" class="text-end"><span t-if="currencyPayment != currencyInvoice" t-out="amountPayment" t-options="{'widget': 'monetary', 'display_currency': currencyPayment}"/></td>
-                                    <td class="text-end"><span t-out="amountInvoice" t-options="{'widget': 'monetary', 'display_currency': currencyInvoice}"/></td>
+                                    <td t-if="otherCurrency" class="text-end">
+                                        <span t-if="currencyPayment != currencyInvoice" t-out="amountPayment"
+                                              t-options="{'widget': 'monetary', 'display_currency': currencyPayment}"/>
+                                    </td>
+                                    <td class="text-end">
+                                        <span t-out="amountInvoice"
+                                              t-options="{'widget': 'monetary', 'display_currency': currencyInvoice}"/>
+                                    </td>
                                 </tr>
                                 <tr>
                                     <td/>
-                                    <td><strong>Due Amount for <span t-field="inv.name"/></strong></td>
+                                    <td>
+                                        <strong>Due Amount for
+                                            <span t-field="inv.name"/>
+                                        </strong>
+                                    </td>
                                     <td/>
                                     <td t-if="otherCurrency"/>
-                                    <td class="text-end"><strong><span t-field="inv.amount_residual"/></strong></td>
+                                    <td class="text-end">
+                                        <strong>
+                                            <span t-field="inv.amount_residual"/>
+                                        </strong>
+                                    </td>
                                 </tr>
                             </t>
                         </t>

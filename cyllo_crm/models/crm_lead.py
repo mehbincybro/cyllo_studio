@@ -1,0 +1,690 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+import logging
+from datetime import date, datetime, timedelta
+
+from dateutil.relativedelta import relativedelta
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+from odoo.http import request
+
+_logger = logging.getLogger(__name__)
+
+
+class CrmLead(models.Model):
+    """Inherits the base crm.lead model and adds Tasks information in the lead form."""
+    _inherit = 'crm.lead'
+
+    lead_idle_days = fields.Integer(string="Idle days", help="Idle days")
+    last_stage_update_date = fields.Datetime(string="stage change date",
+                                             default=date.today())
+    # Dashboard Fields
+    is_dismissed_notification = fields.Boolean(
+        string='Dismissed Notification',
+        default=False,
+        help="This field is used to indicate if"
+             " the notification for this lead has"
+             " been dismissed by the user."
+    )
+    is_marked_as_read = fields.Boolean(
+        string='Marked as Read',
+        default=False,
+        help="This field is used to indicate if"
+             " the notification for this lead has"
+             " been marked as read by the user."
+    )
+    # Advance followup fields
+    exit_criteria_activity_name = fields.Char()
+    triggered_stage_ids = fields.Many2many('crm.stage',
+                                           relation='crm_lead_stage_triggered_rel',
+                                           column1='lead_id',
+                                           column2='stage_id',
+                                           string='Stages Triggered',
+                                           readonly=True)
+
+    @api.model
+    def create(self, vals):
+        """Override the Create function to create exit criteria activity if the stage have one"""
+        # Create the lead record first
+        lead = super(CrmLead, self).create(vals)
+        stage = lead.stage_id
+        # Check if the lead has a stage
+        if stage:
+            # Look for activities associated with this stage
+            exit_criteria = self.env['crm.stage.activity'].search([
+                ('stage_id', '=', stage.id)
+            ], limit=1)
+            if exit_criteria:
+                lead.exit_criteria_activity_name = exit_criteria.activity_id.name
+                # Optional print/debug
+                _logger.info(
+                    f"Exit Criteria for Lead {lead.id}: {lead.exit_criteria_activity_name}")
+                self.env['crm.stage.activity']._create_exit_criteria_if_needed(
+                    lead.id, stage.id)
+        return lead
+
+    def write(self, values):
+        """Override write to prevent stage changes if exit criteria
+        are not completed and create new exit criteria activity
+        if the new stage have one"""
+        if 'stage_id' in values:
+            # Check if the stage is changing
+            new_stage_id = values['stage_id']
+            for record in self:
+                if record.stage_id.id != new_stage_id:
+                    if record.has_outstanding_exit_criteria():
+                        raise ValidationError(
+                            _("Cannot change stage. Please complete all mandatory activities first.")
+                        )
+                    exit_criteria = self.env['crm.stage.activity'].search([
+                        ('stage_id', '=', new_stage_id)
+                    ], limit=1)
+                    record.exit_criteria_activity_name = exit_criteria.activity_id.name if exit_criteria else False
+                    self.env[
+                        'crm.stage.activity']._create_exit_criteria_if_needed(
+                        record.id, new_stage_id)
+                    # Optional print/debug
+                    _logger.info(
+                        f"Exit Criteria for Lead {record.id}: {record.exit_criteria_activity_name}")
+        return super(CrmLead, self).write(values)
+
+    # crm functions
+    @api.model
+    def _read_group_stage_ids(self, stages, domain, order):
+        """Override to filter stages based on lead/opportunity type"""
+        search_domain = []
+        lead_type = self._context.get('default_type')
+        if lead_type == 'lead':
+            search_domain = [('type', 'in', ['lead', 'both']),
+                             ('is_won', '=', False)]
+        elif lead_type == 'opportunity':
+            search_domain = [('type', 'in', ['opportunity', 'both'])]
+        else:
+            # Ensure 'both' stages are included when type is not explicitly set
+            search_domain = [('type', 'in', ['lead', 'opportunity', 'both'])]
+
+        stage_ids = stages._search(search_domain, order=order,
+                                   access_rights_uid=self._uid)
+        return stages.browse(stage_ids)
+
+    @api.onchange('stage_id')
+    def update_last_stage(self):
+        """method to update last_stage_update field"""
+        self.last_stage_update_date = date.today()
+
+    def action_deal_reminder(self):
+        """cron job for reminding sales persons for the idle leads for more than specified in the settings,deal reminder field"""
+        for rec in self.env['crm.lead'].search(
+                [('stage_id.is_won', '!=', True)]):
+            if rec.company_id and self.env[
+                'ir.config_parameter'].sudo().get_param(
+                'Cyllo_Crm.deal_reminder'):
+                today = date.today()
+                days_difference = (
+                        today - rec.last_stage_update_date.date()).days
+
+                # Get the number of days from the configuration parameter, ensure it's an integer
+                reminder_days = self.env[
+                    'ir.config_parameter'].sudo().get_param(
+                    'Cyllo_Crm.deal_reminder_days')
+                reminder_days = int(
+                    reminder_days) if reminder_days else 0  # Fallback to 0 if the parameter is missing or invalid
+
+                if days_difference > reminder_days:
+                    rec.lead_idle_days = days_difference - reminder_days
+                    template = rec.env.ref('cyllo_crm.deal_reminder')
+                    template.send_mail(rec.id, force_send=True)
+
+    @api.model
+    def retrieve_crm_dashboard(self):
+        """ This function returns the values to populate the custom dashboard in
+            the crm lead along with filter domains for each category"""
+        result = {
+            'my_leads': 0,
+            'my_opportunities': 0,
+            'no_activity': 0,
+            'no_activity_o': 0,
+            'idle': 0,
+            'idle_o': 0,
+            'overdue': 0,
+            'overdue_o': 0,
+            'due_today': 0,
+            'due_today_o': 0,
+            'my_activity': 0,
+            'my_activity_o': 0,
+        }
+        crm_lead = self.env['crm.lead']
+        current_date = fields.Date.today()
+
+        # Base domain for leads
+        base_domain = [('type', '=', 'lead')]
+        base_domain_o = [('type', '=', 'opportunity')]
+
+        # Total active leads
+        result['my_leads'] = crm_lead.search_count(
+            [('type', '=', 'lead'), ('user_id', '=', self.env.user.id)])
+        result['my_opportunities'] = crm_lead.search_count(
+            [('user_id', '=', self.env.user.id)])
+
+        # No activity leads
+        no_activity_domain = base_domain + [('activity_ids', '=', False),
+                                            ('user_id', '=', self.env.user.id)]
+        result['no_activity'] = crm_lead.search_count(no_activity_domain)
+        no_activity_domain_o = base_domain_o + [('activity_ids', '=', False)]
+        result['no_activity_o'] = crm_lead.search_count(no_activity_domain_o)
+
+        # Idle leads (no activity for last 7 days)
+        seven_days_ago = fields.Date.add(current_date, days=-7)
+        idle_domain = base_domain + [
+            ('activity_user_id', '=', self.env.user.id),
+            ('activity_ids.date_deadline', '<', seven_days_ago),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['idle'] = crm_lead.search_count(idle_domain)
+        idle_domain_o = base_domain_o + [
+            ('activity_ids.date_deadline', '<', seven_days_ago),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['idle_o'] = crm_lead.search_count(idle_domain_o)
+
+        # Overdue activities
+        overdue_domain = base_domain + [
+            ('activity_ids.date_deadline', '<', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['overdue'] = crm_lead.search_count(overdue_domain)
+        overdue_domain_o = base_domain_o + [
+            ('activity_ids.date_deadline', '<', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['overdue_o'] = crm_lead.search_count(overdue_domain_o)
+
+        # Due today
+        due_today_domain = base_domain + [
+            ('activity_ids.date_deadline', '=', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['due_today'] = crm_lead.search_count(due_today_domain)
+        due_today_domain_o = base_domain_o + [
+            ('activity_ids.date_deadline', '=', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['due_today_o'] = crm_lead.search_count(due_today_domain_o)
+
+        # Activities today
+        activity_today_domain = base_domain + [
+            ('activity_ids.date_deadline', '>', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['activity_today'] = crm_lead.search_count(activity_today_domain)
+        activity_today_domain_o = base_domain_o + [
+            ('activity_ids.date_deadline', '>', current_date),
+            ('activity_ids.state', '!=', 'done')
+        ]
+        result['activity_today_o'] = crm_lead.search_count(
+            activity_today_domain_o)
+
+        return result
+
+    #   Dashboard functions
+    @api.model
+    def get_dashboard_data(self, domain=None, daterange=None):
+        """
+        Get comprehensive dashboard data for CRM
+        """
+        # Get metrics data
+        metrics = self._get_metrics_data(domain, daterange)
+
+        # Get revenue trend data (last 6 months)
+        revenue_trend = self._get_revenue_trend_data(domain)
+
+        # Get pipeline data
+        pipeline = self._get_pipeline_data(domain)
+
+        # Get activities data for the domain date range
+        activities = self._get_activities_data(domain)
+
+        # Get top performers
+        top_performers = self._get_top_performers_data(domain)
+
+        dashboard_data = {
+            'metrics': metrics,
+            'revenue_trend': revenue_trend,
+            'pipeline': pipeline,
+            'activities': activities,
+            'top_performers': top_performers,
+        }
+
+        return dashboard_data
+
+    def _get_metrics_data(self, domain=None, daterange=None):
+        """Calculate key metrics with month-over-month comparison"""
+        start_date = next(
+            (d[2].split(' ')[0] for d in domain if d[1] == '>='), None)
+        team_id = next(
+            (d[2] for d in domain if d[0] == 'team_id'), None)
+        user_id = next(
+            (d[2] for d in domain if d[0] == 'user_id'), None)
+
+        # Convert the strings to dates and set them as the start and end dates
+        start_date = datetime.strptime(start_date,
+                                       "%Y-%m-%d").date() + timedelta(days=1)
+        prev_start_date = datetime.now().date()
+        prev_end_date = datetime.now().date()
+        if daterange == 'this_month':
+            prev_start_date = start_date - relativedelta(months=1)
+            prev_end_date = start_date - relativedelta(days=1)
+        elif daterange == 'this_year':
+            prev_start_date = start_date - relativedelta(years=1)
+            prev_end_date = start_date - relativedelta(days=1)
+        elif daterange == 'this_week':
+            prev_start_date = start_date - relativedelta(weeks=1)
+            prev_end_date = start_date - relativedelta(days=1)
+        elif daterange == 'this_quarter':
+            prev_start_date = start_date - relativedelta(months=3)
+            prev_end_date = start_date - relativedelta(days=1)
+        elif daterange == 'today':
+            yesterday = start_date - timedelta(days=1)
+            prev_start_date = yesterday
+            prev_end_date = yesterday
+
+        current_leads = self.search(domain)
+        prev_leads = []
+        if prev_start_date != datetime.now().date() and prev_end_date != datetime.now().date():
+            prev_leads_domain = [
+                ('date_closed', '>=', prev_start_date),
+                ('date_closed', '<=', prev_end_date),
+            ]
+            if team_id:
+                prev_leads_domain.append(('team_id', '=', team_id))
+            if user_id:
+                prev_leads_domain.append(('user_id', '=', user_id))
+            prev_leads = self.search(prev_leads_domain)
+
+        current_won_leads = current_leads.filtered(
+            lambda r: r.stage_id.is_won) if current_leads else []
+        previous_won_leads = prev_leads.filtered(
+            lambda r: r.stage_id.is_won) if prev_leads else []
+        current_active_leads = current_leads.filtered(
+            lambda r: not r.stage_id.is_won) if current_leads else []
+        previous_active_leads = prev_leads.filtered(
+            lambda r: not r.stage_id.is_won) if prev_leads else []
+
+        # Calculate metrics
+        current_revenue = sum(
+            current_won_leads.mapped('expected_revenue') or [
+                0]) if current_won_leads else 0
+        last_month_revenue = sum(
+            previous_won_leads.mapped('expected_revenue') or [
+                0]) if previous_won_leads else 0
+
+        active_leads_count = len(current_active_leads)
+        last_month_active_leads = len(previous_active_leads)
+
+        current_conversion_rate = (len(current_won_leads) / len(
+            current_leads) * 100) if current_leads else 0
+        last_month_conversion_rate = (
+                len(previous_won_leads) / len(
+            previous_active_leads) * 100) if previous_active_leads else 0
+
+        deals_closed_count = len(current_won_leads)
+        last_month_deals_closed = len(previous_won_leads)
+
+        # Calculate percentage changes
+        revenue_change = self._calculate_percentage_change(current_revenue,
+                                                           last_month_revenue)
+        leads_change = self._calculate_percentage_change(active_leads_count,
+                                                         last_month_active_leads)
+        conversion_change = current_conversion_rate - last_month_conversion_rate
+        deals_change = self._calculate_percentage_change(deals_closed_count,
+                                                         last_month_deals_closed)
+
+        return {
+            'total_revenue': {
+                'value': current_revenue,
+                'change': revenue_change
+            },
+            'active_leads': {
+                'value': active_leads_count,
+                'change': leads_change
+            },
+            'conversion_rate': {
+                'value': round(current_conversion_rate, 1),
+                'change': round(conversion_change, 1)
+            },
+            'deals_closed': {
+                'value': deals_closed_count,
+                'change': deals_change
+            }
+        }
+
+    def _get_revenue_trend_data(self, domain=None):
+        """Get revenue and leads trend for the last 6 months"""
+        data = []
+        today = datetime.now().date()
+
+        for i in range(5, -1, -1):  # Last 6 months
+            month_start = (today.replace(day=1) - relativedelta(months=i))
+            month_end = (month_start + relativedelta(months=1) - timedelta(
+                days=1))
+
+            # Build domains for revenue
+            won_leads_domain = [
+                ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', month_start),
+                ('date_closed', '<=', month_end)
+            ]
+
+            # Build domains for leads created
+            leads_created_domain = [
+                ('create_date', '>=', month_start),
+                ('create_date', '<=', month_end)
+            ]
+
+            # Add custom domain if provided
+            if domain:
+                won_leads_domain.extend(domain)
+                leads_created_domain.extend(domain)
+
+            # Get revenue for the month
+            won_leads = self.search(won_leads_domain)
+
+            # Get leads created in the month
+            leads_created = self.search(leads_created_domain)
+
+            revenue = sum(won_leads.mapped('expected_revenue') or [0])
+            leads_count = len(leads_created)
+
+            data.append({
+                'month': month_start.strftime('%b'),
+                'revenue': revenue,
+                'leads': leads_count
+            })
+
+        return data
+
+    def _get_pipeline_data(self, domain=None):
+        """Get pipeline distribution by stages"""
+        stages = self.env['crm.stage'].search([])
+
+        # Build domain for total leads
+        total_leads_domain = [('active', '=', True)]
+        if domain:
+            total_leads_domain.extend(domain)
+
+        total_leads = len(self.search(total_leads_domain))
+
+        if total_leads == 0:
+            return []
+
+        pipeline_data = []
+        colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6',
+                  '#06B6D4']
+
+        for i, stage in enumerate(stages):
+            # Build domain for leads in this stage
+            stage_domain = [
+                ('stage_id', '=', stage.id),
+                ('active', '=', True)
+            ]
+            if domain:
+                stage_domain.extend(domain)
+
+            leads_in_stage = len(self.search(stage_domain))
+            percentage = round((leads_in_stage / total_leads) * 100, 1)
+
+            if percentage > 0:  # Only include stages with leads
+                pipeline_data.append({
+                    'stage': stage.name,
+                    'value': percentage,
+                    'color': colors[i % len(colors)]
+                })
+
+        return pipeline_data
+
+    def _get_activities_data(self, domain=None):
+        """Get activities data from leads which deadline is within the date range from domain"""
+        activity_data = []
+        # Get the start and end dates from the domain as strings
+        start_date = next(
+            (d[2].split(' ')[0] for d in domain if d[1] == '>='), None)
+        end_date = next(
+            (d[2].split(' ')[0] for d in domain if d[1] == '<='), None)
+
+        # Convert the strings to dates and set them as the start and end dates
+        start_date = datetime.strptime(start_date,
+                                       "%Y-%m-%d").date() + timedelta(days=1)
+        end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
+        lead_ids = self.search(domain).mapped("id")
+        activities = self.env['mail.activity'].search(
+            [('res_model', '=', 'crm.lead'), ('res_id', 'in', lead_ids),
+             ('date_deadline', '>=', start_date),
+             ('date_deadline', '<=', end_date)])
+
+        for act in activities:
+            activity_data.append({
+                'name': act.activity_type_id.name,
+                'date_deadline': str(act.date_deadline),
+                'user_name': act.user_id.name,
+            })
+        return activity_data
+
+    def _get_top_performers_data(self, domain=None):
+        """Get top-performing sales people for domain"""
+        # Get all sales people with deals
+        salespeople = self.env['res.users'].search([
+            ('groups_id', 'in',
+             self.env.ref('sales_team.group_sale_salesman').ids)
+        ])
+        start_date = next(
+            (d[2] for d in domain if d[1] == '>='), None)
+        end_date = next(
+            (d[2] for d in domain if d[1] == '<='), None)
+
+        performers = []
+        for user in salespeople:
+            # Build domain for won deals
+            won_deals_domain = [
+                ('user_id', '=', user.id),
+                ('stage_id.is_won', '=', True),
+                ('date_closed', '>=', start_date),
+                ('date_closed', '<=', end_date)
+            ]
+
+            # Add a custom domain if provided
+            if domain:
+                won_deals_domain.extend(domain)
+
+            # Get won deals
+            won_deals = self.search(won_deals_domain)
+
+            if won_deals:
+                total_amount = sum(won_deals.mapped('expected_revenue') or [0])
+                deals_count = len(won_deals)
+
+                performers.append({
+                    'name': user.name,
+                    'deals': deals_count,
+                    'amount': total_amount
+                })
+
+        # Sort by amount and return top 4
+        performers.sort(key=lambda x: x['amount'], reverse=True)
+        return performers[:4]
+
+    def _calculate_percentage_change(self, current, previous):
+        """Calculate percentage change between two values"""
+        if previous == 0:
+            return 100 if current > 0 else 0
+        return round(((current - previous) / previous) * 100, 1)
+
+    @api.model
+    def dismiss_notification(self, lead_ids):
+        """Dismiss lead notifications"""
+        leads = self.browse(lead_ids)
+        leads.write({'is_dismissed_notification': True})
+        for lead in leads:
+            lead.is_dismissed_notification = True
+
+            # Also update related activities
+            activities = self.env['mail.activity'].search([
+                ('res_model', '=', 'crm.lead'),
+                ('res_id', '=', lead.id)
+            ])
+
+            activities.write({'is_dismissed_notification': True})
+
+        return True
+
+    @api.model
+    def mark_as_read(self, lead_ids):
+        """Mark lead notifications as read"""
+        leads = self.browse(lead_ids).sudo()
+        leads.write({'is_marked_as_read': True})
+        for lead in leads:
+            lead.is_marked_as_read = True
+
+            # Also update related activities
+            activities = self.env['mail.activity'].search([
+                ('res_model', '=', 'crm.lead'),
+                ('res_id', '=', lead.id)
+            ])
+
+            activities.write({'is_marked_as_read': True})
+
+        return {
+            'updated': len(leads),
+            'sample_result': {lead.id: lead.is_marked_as_read for lead in
+                              leads[:5]}
+        }
+
+    @api.model
+    def get_notifications(self):
+        """Get lead notifications for dashboard"""
+        notifications = []
+        current_date = fields.Date.today()
+        recent_date = fields.Datetime.now() - timedelta(days=7)
+        try:
+            # New leads
+            new_leads = self.search([
+                ('create_date', '>=', recent_date),
+                ('type', '=', 'lead'),
+                ('is_dismissed_notification', '=', False),
+            ], order='create_date desc', limit=10)
+            notifications.extend([
+                self.build_notifications('new_lead', lead, 'New Lead Created',
+                                         f'New lead "{lead.name}" has been created',
+                                         'new_lead', 'normal')
+                for lead in new_leads
+            ])
+
+            overdue_activities = self.env['mail.activity'].search([
+                ('res_model', '=', 'crm.lead'),
+                ('date_deadline', '<=', current_date),
+                ('is_dismissed_notification', '=', False),
+                ('user_id', '=', self.env.user.id)
+            ], limit=5)
+
+            # Batch leads for activities
+            leads_by_id = {lead.id: lead for lead in
+                           self.browse(overdue_activities.mapped('res_id'))}
+            for act in overdue_activities:
+                lead = leads_by_id.get(act.res_id)
+                if not lead:
+                    continue
+
+                is_today = act.date_deadline == current_date
+                title = 'Activity Due Today' if is_today else 'Activity Overdue'
+                base_msg = f'Activity "{act.summary or act.activity_type_id.name}"'
+                message = (
+                    f'Mandatory {base_msg} is overdue' if act.is_exit_criteria
+                    else f'{base_msg} is {"due today" if is_today else "overdue"}')
+                priority = 'high' if act.is_exit_criteria else (
+                    'normal' if is_today else 'medium')
+
+                notifications.append(self.build_notifications(
+                    'today_activity' if is_today else 'overdue_activity',
+                    lead, title, message, 'activity_due', priority
+                ))
+
+            avg_revenue = self.search_read(
+                [('expected_revenue', '>', 0)],
+                ['expected_revenue']
+            )
+
+            if avg_revenue:
+                avg_val = sum(l['expected_revenue'] for l in avg_revenue) / len(
+                    avg_revenue)
+                high_value_leads = self.search([
+                    ('create_date', '>=', recent_date),
+                    ('expected_revenue', '>', avg_val),
+                    ('is_dismissed_notification', '=', False),
+                ], limit=3)
+
+                notifications.extend([
+                    self.build_notifications('high_value', lead,
+                                             'High Value Lead',
+                                             f'High value lead "{lead.name}" created',
+                                             'new_lead', 'high')
+                    for lead in high_value_leads
+                ])
+
+            # Final sorting & limiting
+            return sorted(notifications, key=lambda x: x['create_date'],
+                          reverse=True)[:20]
+
+
+        except Exception as e:
+            # Log error and return empty list
+            import logging
+            _logger = logging.getLogger(__name__)
+            _logger.error(f"Error getting notifications: {str(e)}")
+            return []
+
+    def build_notifications(self, prefix, rec, title, message, ntype, priority):
+        """Create notifications as per the datas passed from get_notification function"""
+        return {
+            'id': f"{prefix}{rec.id}",
+            'title': title,
+            'message': message,
+            'type': ntype,
+            'priority': priority,
+            'is_read': getattr(rec, 'is_marked_as_read', False),
+            'create_date': rec.create_date.isoformat(),
+            'lead_id': getattr(rec, 'id', None),
+            'lead_name': getattr(rec, 'name', ''),
+            'lead_company': getattr(rec, 'partner_name', '') or '',
+            'lead_stage': rec.stage_id.name if getattr(rec, 'stage_id',
+                                                       False) else 'New',
+            'lead_expected_revenue': f"${rec.expected_revenue:,.0f}" if rec.expected_revenue else ''
+        }
+
+    # Advance followup constrain
+    def has_outstanding_exit_criteria(self):
+        """Check if lead has any outstanding exit criteria activities"""
+        self.ensure_one()
+        exit_criteria_activities = self.env['mail.activity'].search_count([
+            ('res_model', '=', 'crm.lead'),
+            ('res_id', '=', self.id),
+            ('is_exit_criteria', '=', True)
+        ])
+        return exit_criteria_activities > 0

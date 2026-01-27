@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 {
     "name": "Document Spreadsheet",
     "version": "1.0",
@@ -17,19 +37,12 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'cyllo_document_spreadsheet/static/src/js/kanbanController.js',
-            'cyllo_document_spreadsheet/static/src/xml/kanbanController.xml',
-            "cyllo_document_spreadsheet/static/src/js/spreadsheet_share_action.js"
+            "cyllo_document_spreadsheet/static/src/js/views/**/*"
         ],
-        "spreadsheet.o_spreadsheet": [
-            "cyllo_document_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_share_action_loader.js",
-            "cyllo_document_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_renderer.js",
-            "cyllo_document_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_action.js",
-        ]
     },
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,
     'application': False,
     'uninstall_hook': 'uninstall_hook',
 }

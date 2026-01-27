@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields, models
 
 
@@ -21,18 +41,16 @@ class CreateExcel(models.TransientModel):
             'is_excel': True
         })
         # Creating spreadsheet record
-        spreadsheet_id = self.env['spreadsheet.spreadsheet'].sudo().create({
+        spreadsheet_id = self.env['spreadsheet.sheet'].sudo().create({
             "name": self.name,
             'document_file_id': document_id.id,
-            'owner_id': self.env.uid,
-            'is_document': True,
+            # 'owner_id': self.env.uid,
+            # 'is_document': True,
         })
-        # Returns client action for displaying created spreadsheet
         return {
             'type': "ir.actions.client",
-            'tag': "action_load_spreadsheet",
-            'params': {
-                'spreadsheet_id': spreadsheet_id.id,
-                'model': 'spreadsheet.spreadsheet',
+            'tag': "main_spreadsheet",
+            'context': {
+                'resId': spreadsheet_id.id,
             },
         }

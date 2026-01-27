@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
@@ -8,10 +28,6 @@ class EmployeePayslipBatchList(models.Model):
     structure and the department"""
     _name = 'employee.payslip.batch.list'
     _description = 'Employee Payslip Batch List'
-
-    def _get_employee_ids(self):
-        """ To return all employee records"""
-        return self.env['hr.employee'].search([])
 
     batch_payslip_id = fields.Many2one('employee.payslip.batch', string='Payslip Reference',
                                        help="Select the payslip run to which this  is associated.")
@@ -28,6 +44,10 @@ class EmployeePayslipBatchList(models.Model):
                                         '(eg: End of the year bonus). If you leave this field empty, a regular '
                                         'payslip will be generated for all the selected employees, based on their '
                                         'contracts configuration.')
+
+    def _get_employee_ids(self):
+        """ To return all employee records"""
+        return self.env['hr.employee'].search([])
 
     @api.depends('department_id')
     def _compute_employee_ids(self):
@@ -46,6 +66,7 @@ class EmployeePayslipBatchList(models.Model):
             batch_data = self.env['employee.payslip.batch'].browse(active_id)
             from_date = batch_data.start_date
             to_date = batch_data.end_date
+            batch_data.employee_payslip_ids.unlink()
         else:
             raise UserError("No active batch found.")
 

@@ -27,7 +27,7 @@
                             <field name="active" invisible="1"/>
                             <field name="user_id" options='{"no_create": True}'/>
                             <field name="lang_id" options='{"no_create": True}'/>
-                            <field name="company_ids" groups="base.group_multi_company"/>
+                            <field name="company_ids" widget="many2many_tags" groups="base.group_multi_company"/>
                             <field name="template_uid"/>
                             <field name="model_id" options='{"no_open": True, "no_create": True}'/>
                             <field name="quality" widget="priority" invisible="quality == 'none'" readonly="1"/>
@@ -41,6 +41,7 @@
                             <field name="report_id" invisible="header_type != 'document'" required="header_type == 'document'"/>
                             <field name="header_text" invisible="header_type != 'text'" required="header_type == 'text'" readonly="state != 'draft'" placeholder="e.g.Our {{1}} is on!"/>
                             <field name="footer_text" readonly="state != 'draft'"/>
+                            <field name="is_button"/>
                             <field name="is_reason_update" invisible="1"/>
                         </group>
                     </group>
@@ -60,6 +61,13 @@
                                 </tree>
                             </field>
                         </page>
+                        <page id="button" name="Button"
+                      invisible="not is_button">
+                    <group>
+                        <field name="button_name" required="is_button"/>
+                        <field name="button_url" required="is_button"/>
+                    </group>
+                </page>
                         <page id="reason" name="Rejection" invisible="not is_reason_update">
                             <field name="reason" readonly="True"/>
                         </page>

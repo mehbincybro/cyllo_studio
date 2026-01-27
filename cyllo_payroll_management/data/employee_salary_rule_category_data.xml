@@ -49,4 +49,8 @@
         <field name="name">Other Allowance</field>
         <field name="code">Other</field>
     </record>
+    <record id="employee_salary_rule_category_gratuity_config" model="employee.salary.rule.category">
+        <field name="name">Gratuity Configuration</field>
+        <field name="code">GRA</field>
+    </record>
 </odoo>

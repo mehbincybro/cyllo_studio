@@ -1,5 +1,26 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from dateutil.relativedelta import relativedelta
+
 from odoo import api, fields, models
 
 
@@ -15,7 +36,7 @@ class SaleOrderLine(models.Model):
     renewal_date = fields.Datetime(help='Renewal date for the subscription order created from this line')
     trial_end = fields.Datetime(help='Trial end date for the subscription order created from this line.')
 
-    @api.onchange('time_based_price_id')
+    @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):
         """Change price when change the time-based pricing"""
         self.price_unit = self.time_based_price_id.cost
@@ -28,6 +49,13 @@ class SaleOrderLine(models.Model):
             elif self.time_based_price_id.subscription_unit == 'years':
                 self.renewal_date = fields.Datetime.now() + relativedelta(years=self.time_based_price_id.duration)
 
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        """When a product is added default value to time_based_price_id field
+        is the first value from the time-based-price model in products"""
+        if self.product_template_id.time_based_ids:
+            self.time_based_price_id = self.product_template_id.time_based_ids[0]
+
     def check_trial_period(self):
         """Check if any trial-period is added in product template"""
         if self.product_template_id.unit == 'days':
@@ -39,9 +67,3 @@ class SaleOrderLine(models.Model):
         else:
             self.trial_end = fields.Datetime.now()
 
-    @api.onchange('product_id')
-    def _onchange_product_id(self):
-        """When a product is added default value to time_based_price_id field
-        is the first value from the time-based-price model in products"""
-        if self.product_template_id.time_based_ids:
-            self.time_based_price_id = self.product_template_id.time_based_ids[0]

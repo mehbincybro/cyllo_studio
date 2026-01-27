@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ChatterComponent">
+        <div id="chatterComponent" class="position-relative" t-att-class="props.preview ? 'chatter-preview' : ''" />
+    </t>
+</templates>

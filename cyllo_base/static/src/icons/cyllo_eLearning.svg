@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>.elearning_cls-1{fill:#26261A;}.elearning_cls-2{fill:#969686;}.elearning_cls-3{fill:#c9c9b9;}</style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="elearning_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <g id="Graduation_Hat_Mortaboard" data-name="Graduation Hat Mortaboard">
+                <path class="elearning_cls-2" style="fill:#969686 !important;"
+                      d="M593.44,396.09a8.6,8.6,0,0,0-8.21-.63L425,467.27,264.77,395.46a8.63,8.63,0,0,0-11.39,4.34,8.74,8.74,0,0,0-.75,3.53V524a8.62,8.62,0,0,0,5.09,7.87l163.75,73.37a8.6,8.6,0,0,0,7.06,0l163.75-73.37a8.62,8.62,0,0,0,5.09-7.87V403.33a8.64,8.64,0,0,0-3.93-7.24Z"/>
+                <path class="elearning_cls-3" style="fill:#c9c9b9 !important;"
+                      d="M678.46,356.8l-249.93-112a8.68,8.68,0,0,0-7.06,0l-249.93,112a8.63,8.63,0,0,0,0,15.74l249.93,112a8.6,8.6,0,0,0,7.06,0l249.93-112a8.63,8.63,0,0,0,0-15.74Z"/>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="social_media_post_rule" model="ir.rule">
+        <field name="name">Social Media Post multi company rule</field>
+        <field name="model_id" ref="model_social_media_post"/>
+        <field name="domain_force">[('company_id', 'in', company_ids +
+            [False])]
+        </field>
+    </record>
+    <record id="social_media_feed_rule" model="ir.rule">
+        <field name="name">Social Media Feed multi company rule</field>
+        <field name="model_id" ref="model_social_media_feed"/>
+        <field name="domain_force">[('company_id', 'in', company_ids +
+            [False])]
+        </field>
+    </record>
+    <record id="social_fb_account_rule" model="ir.rule">
+        <field name="name">Social Facebook Account multi company rule</field>
+        <field name="model_id" ref="model_social_fb_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids +
+            [False])]
+        </field>
+    </record>
+    <record id="social_insta_account_rule" model="ir.rule">
+        <field name="name">Social Instagram Account multi company rule</field>
+        <field name="model_id" ref="model_social_insta_account"/>
+        <field name="domain_force">[('company_id', 'in', company_ids +
+            [False])]
+        </field>
+    </record>
+</odoo>

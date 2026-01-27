@@ -1,0 +1,306 @@
+/* Sidebar styling */
+.chatbot-history-sidebar {
+    position: fixed;
+    width: 300px;
+    height: inherit;
+    margin-top: -10px;
+    margin-left: -10px;
+    border-right: 1px solid #e5e7eb;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+    display: flex;
+    border-radius: 12px 0px 0px 12px;
+    flex-direction: column;
+    transform: translateX(-12px);
+    opacity: 0;
+}
+
+.chatbot-history-sidebar.closing {
+    transform: translateX(-12px);
+    opacity: 0;
+}
+
+.chatbot-history-sidebar.ready {
+    transform: translateX(0);
+    opacity: 1;
+    transition: transform 200ms ease, opacity 200ms ease;
+}
+
+.rename-box {
+    display: flex;
+    align-items: center;
+    padding: 2px;
+}
+
+.rename-textbox {
+    width: 85%;
+}
+
+.rename-textbox input {
+    border: none;
+    padding: 2px 0px;
+    border-radius: 0px;
+    box-shadow: none;
+}
+
+.rename-textbox input:focus {
+    border-bottom: 1px solid #9ea700;
+}
+
+.rename-textbox-buttons {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cancel-rename-button {
+    padding: 5px;
+    border: none;
+    font-size: 10px;
+    background: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cancel-rename-button:hover {
+    color: red;
+}
+
+.rename-session-button {
+    border: none;
+    background: none;
+    padding: 5px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rename-session-button:hover {
+    color: green;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    font-weight: 600;
+    background: #fff;
+    /*border-bottom: 1px solid #eee;*/
+    border-radius: 12px 0px 0px 0px;
+}
+
+.history-header .back-arrow-icon {
+    cursor: pointer;
+}
+
+.sidebar-avatar{
+    width: 38px;
+    height: 38px;
+}
+
+.history-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    border-radius: 0px 0px 0px 12px;
+    background: #fff;
+    font-size: 16px;
+}
+
+.recent-chats-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #acaeb0;
+    background: #fff;
+    margin-bottom: 4px;
+    font-family: 'Inter', sans-serif;
+}
+
+.recent-chats-header i {
+    font-size: 16px;
+    color: #6b7280;
+}
+
+.session-list {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    padding: 0px 15px 10px 15px;
+}
+
+.session-item {
+    position: relative;
+    align-items: center;
+    padding: 5px 12px;
+    /*border-top: 1px solid #fdffdc;*/
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    background: #f2f4dd;
+    z-index: 1;
+    margin-bottom: 5px;
+    font-size: .9rem;
+}
+
+.session-content {
+    flex: 1;
+    cursor: pointer;
+    padding: 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.session-icon {
+    font-size: 14px;
+    color: #9ca3af;
+    flex-shrink: 0;
+    transition: color 0.2s ease;
+}
+
+.session-item:hover .session-icon {
+    color: #6b7280;
+}
+
+.session-title {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding-right: 8px;
+    flex: 1;
+}
+
+.session-menu-button {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.session-menu-button:hover,
+session-item:active {
+    background-color: #f1f1f1;
+}
+
+.session-item:hover .session-menu-button,
+.session-item:active .session-menu-button {
+    opacity: 1;
+}
+
+/* Hover effect for session item */
+.session-item:not(.active):hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    z-index: 10;
+}
+
+/* Submenu styles */
+.submenu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-width: 120px;
+    padding: 4px 0;
+    transform: translateY(4px);
+    transition: all 0.15s ease;
+    z-index: 1000;
+    pointer-events: auto;
+}
+
+.submenu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.history-list {
+    display: flex;
+    justify-content: space-between;
+}
+
+.submenu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #4b5563;
+    white-space: nowrap;
+}
+
+.submenu-item:hover {
+    background-color: #f3f4f6;
+}
+
+.submenu-item i {
+    font-size: 14px;
+    color: #6b7280;
+}
+
+.submenu-item:hover i {
+    color: #1f2937;
+}
+
+.submenu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(4px);
+    pointer-events: auto;
+}
+
+.submenu-item {
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.15s ease;
+}
+
+.submenu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.submenu-item:hover {
+    background-color: #f5f5f5;
+}
+
+/* Prevent hover on session item when submenu is open */
+.session-item.active {
+    background: #f8f9fa;
+    z-index: 1001;
+}
+
+/* Ensure submenu doesn't trigger parent hover */
+.session-item .submenu {
+    pointer-events: none;
+}
+
+.session-item .submenu.show {
+    pointer-events: auto;
+}
+
+/* Disable hover effect when submenu is open */
+.session-item.active:hover {
+    transform: none;
+    box-shadow: none;
+}

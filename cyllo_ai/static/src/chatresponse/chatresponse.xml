@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="ChatResponse">
+        <div class="chat-message response-message">
+             <dotlottie-player
+                                src="https://lottie.host/a67f0b6e-2baa-4912-9609-68750eb652ca/oDZqiBaV7g.json"
+                                background="transparent"
+                                speed="0"
+                                loop=""
+                                autoplay=""
+                                 class="bot-avatar"
+                        />
+            <div class="chat-bubble-wrapper">
+                <!-- Message bubble -->
+                <div class="chat-bubble bot">
+                    <t t-if="props.html" t-out="props.html"/>
+                    <t t-elif="props.text" t-out="props.text"/>
+                </div>
+                <!-- Icons directly below the bubble -->
+                <div t-if="props.interrupted and !state.hideButtons" class="action-icons">
+                    <i class="ri-check-line proceed-icon" t-on-click="handleProceed" title="Proceed"/>
+                    <i class="ri-close-line cancel-icon" t-on-click="handleCancel" title="Cancel"/>
+                </div>
+                 <i t-if="state.hasTable"
+                   class="fa fa-download"
+                   style="padding: 5px;"
+                   t-on-click="downloadTable"
+                   title="Download Table"/>
+            </div>
+        </div>
+        <t t-if="props.chart_config">
+                        <t t-log="'props.chart_config', props.chart_config.__target__"/>
+            <div class="chart-config">
+                <div style="box-shadow: rgba(0, 0, 0, 0.11) 0px 3px 6px 0px; border-radius: 16px; display: grid; padding: 0px; margin:0px;"
+                     class="chat-bubble bot bg-white w-100">
+                    <!--                 Graph Icon (top-right corner)-->
+                    <div class="graph-icon">
+                        <i class="fa fa-window-maximize"
+                           t-on-click="onExpandGraph"
+                           style="padding: 5px;"
+                           title="Maximize Graph"/>
+                        <div t-if="state.showGraphPopup" class="gov-popup">
+                            <div class="gov-popup-header w-2">
+                                    <span>Charts Info</span>
+                                    <button class="chart-close-btn" t-on-click="onExpandGraph">×</button>
+                            </div>
+                            <div style="display: flex; justify-content: end; padding: 10px;">
+                                <t t-foreach="state.chartTypes" t-as="type" t-key="type.name">
+                                    <div class="chart-type-icon"
+                                         t-att-class="{'selected': type.name === state.popupSelectedType}"
+                                         t-on-click="() => onChartTypeSelect(type.name, true)"
+                                         t-att-title="type.label"
+                                         style="width: 30px; height: 30px; border-radius: 6px; padding: 4px;
+                                         box-sizing: border-box; cursor: pointer; transition: all 0.2s;"
+                                         onmouseenter="this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.2)'"
+                                         onmouseleave="this.style.boxShadow='none'">
+                                        <img t-att-src="type.icon" alt=""
+                                             style="width: 100%; height: 100%; object-fit: contain;"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="gov-popup-body">
+                                <div style="width: 100%; min-height: 700px; padding: 10px" t-ref="popupChartContainer"></div>
+                            </div>
+                        </div>
+                        <i class="fa fa-chart-bar"
+                           style="padding: 5px;"
+                           t-on-click="onGraphIconClick"
+                           title="Change Chart Type"/>
+                    </div>
+                    <!-- Chart type popup grid -->
+                    <t t-if="state.showChartOptions">
+                        <div class="chart-type-popup" t-att-class="{'visible': state.showChartOptions}">
+                            <t t-foreach="state.chartTypes" t-as="type" t-key="type.name">
+                                <div class="chart-type-icon"
+                                     t-att-class="{'selected': type.name === state.chatSelectedType}"
+                                     t-on-click="() => onChartTypeSelect(type.name)"
+                                     t-att-title="type.label"
+                                     style="width: 30px; height: 30px; border-radius: 6px; padding: 4px;
+                                     box-sizing: border-box; cursor: pointer; transition: all 0.2s;"
+                                     onmouseenter="this.style.boxShadow='0 4px 6px rgba(0, 0, 0, 0.2)'"
+                                     onmouseleave="this.style.boxShadow='none'">
+                                    <img t-att-src="type.icon" alt=""
+                                         style="width: 100%; height: 100%; object-fit: contain;"/>
+                                </div>
+                            </t>
+                        </div>
+                    </t>
+                    <!-- Dynamic chart container -->
+                    <div t-ref="chartContainer" style="width: 100%; min-height: 400px;padding: 5px;">
+                    </div>
+                </div>
+            </div>
+        </t>
+    </t>
+</templates>

@@ -1,9 +1,28 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import calendar
 from datetime import date
 
 from odoo import _,api, fields, models
-from odoo.exceptions import ValidationError
 from odoo.tools import date_utils
 
 
@@ -15,9 +34,9 @@ class EmployeePayslipBatch(models.Model):
 
     name = fields.Char(required=True, help='Name for the batch payslip')
     employee_payslip_ids = fields.One2many('employee.payslip', 'employee_payslip_batch_id',
-                                           string='The payslips that in the batch')
-    state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Done'), ('paid', 'Paid'),
-                              ('close', 'Closed')], string='Status', index=True, readonly=True, copy=False,
+                                           string='The payslips that in the batch', help='Payslip related to this batch')
+    state = fields.Selection([('draft', 'Draft'), ('confirm', 'Confirmed'), ('done', 'Done'), ('paid', 'Paid'),],
+                             string='Status', index=True, readonly=True, copy=False,
                              default='draft', help='State of the batch')
     start_date = fields.Date(string='Date From', required=True, help="Start date of batch payslip period",
                              default=lambda self: fields.Date.to_string(date.today().replace(day=1)))
@@ -26,7 +45,7 @@ class EmployeePayslipBatch(models.Model):
                            compute='_compute_end_date')
     is_batch_payslip = fields.Boolean(string='Batch Payslip Enabled', default=False,
                                       help="If its checked, indicates that it generated batch payslip")
-    journal_entry_count = fields.Integer()
+    journal_entry_count = fields.Integer(help='Count of journal entries of payslip', compute='_compute_journal_entry_count', store=True)
     batch_move_line = fields.Boolean(string='Batch Payroll Move Line', related='company_id.batch_move_line')
 
     @api.depends('start_date')
@@ -39,15 +58,29 @@ class EmployeePayslipBatch(models.Model):
             else:
                 record.end_date = date_utils.end_of(fields.Date.today(), 'month')
 
+    @api.depends('employee_payslip_ids', 'employee_payslip_ids.account_move_id', 'state')
+    def _compute_journal_entry_count(self):
+        """Compute the count of journal entries for the batch"""
+        for batch in self:
+            if batch.batch_move_line and batch.state in ('done', 'paid'):
+                # For batch with batch_move_line, count move lines with batch_id
+                batch.journal_entry_count = self.env['account.move.line'].search_count([
+                    ('batch_id', '=', batch.id)
+                ])
+            elif not batch.batch_move_line and batch.employee_payslip_ids:
+                # For batch without batch_move_line, count move lines from individual payslips
+                move_ids = batch.employee_payslip_ids.mapped('account_move_id')
+                batch.journal_entry_count = self.env['account.move.line'].search_count([
+                    ('move_id', 'in', move_ids.ids)
+                ])
+            else:
+                batch.journal_entry_count = 0
+
     def action_draft(self):
         """ To rest into draft"""
+        self.employee_payslip_ids.action_set_draft()
         return self.write({'state': 'draft'})
 
-    def action_close(self):
-        """ To close the batch payslip"""
-        for data in self.employee_payslip_ids:
-            data.action_cancel()
-        return self.write({'state': 'close'})
 
     def action_generate_batch(self):
         """This method is used to generate the payslip batch wise, that we
@@ -91,59 +124,61 @@ class EmployeePayslipBatch(models.Model):
         for entry_name, total_amount  in amount_total.items():
             debit_lines = payslip_ids.employee_payslip_line_ids.filtered(lambda line: line.name.strip() == entry_name and line.account_debit_id)
             credit_lines = payslip_ids.employee_payslip_line_ids.filtered(lambda line: line.name.strip() == entry_name and line.account_credit_id)
-            if not debit_lines or not credit_lines:
-                raise ValidationError(
-                    _('Please add both Credit and Debit accounts in the rules.'))
-            debit_account_vals = {
-                'account_id': debit_lines[0].account_debit_id.id,
-                'debit': total_amount,
-                'label': entry_name,
-                'partner_id': payslip_ids[0].employee_id.user_partner_id.id,
-                'account_move_id': account_move.id,
-            }
-            credit_account_vals = {
-                'account_id': credit_lines[0].account_credit_id.id,
-                'credit': total_amount,
-                'label': entry_name,
-                'partner_id': payslip_ids[0].employee_id.user_partner_id.id,
-                'account_move_id': account_move.id,
-            }
-            debit_journal_item = self.env['account.journal.item'].create(debit_account_vals)
-            credit_journal_item = self.env['account.journal.item'].create(credit_account_vals)
-            journal_item_ids.append(fields.Command.link(debit_journal_item.id))
-            journal_item_ids.append(fields.Command.link(credit_journal_item.id))
-            line_vals = {
-                'name': entry_name,
-                'account_id': debit_account_vals['account_id'],
-                'debit': total_amount,
-                'credit': 0.0,
-                'move_id': account_move.id,
-                'batch_id': self.id
-            }
-            line_ids.append(fields.Command.create(line_vals))
-            line_vals = {
-                'name': entry_name,
-                'account_id': credit_account_vals['account_id'],
-                'debit': 0.0,
-                'credit': total_amount,
-                'move_id': account_move.id,
-                'batch_id': self.id
-            }
-            line_ids.append(fields.Command.create(line_vals))
+            if debit_lines:
+                line_vals = {
+                    'name': entry_name,
+                    'account_id': debit_lines[0].account_debit_id.id,
+                    'debit': total_amount,
+                    'credit': 0.0,
+                    'move_id': account_move.id,
+                    'batch_id': self.id
+                }
+                line_ids.append(fields.Command.create(line_vals))
+            if credit_lines:
+                line_vals = {
+                    'name': entry_name,
+                    'account_id': credit_lines[0].account_credit_id.id,
+                    'debit': 0.0,
+                    'credit': total_amount,
+                    'move_id': account_move.id,
+                    'batch_id': self.id
+                }
+                line_ids.append(fields.Command.create(line_vals))
 
         account_move.line_ids = line_ids
-        line_count = self.env['account.move.line'].sudo().search_count([('batch_id', '=', self.id)])
-        self.journal_entry_count = line_count
-        account_move.journal_item_ids = journal_item_ids
         payslip_ids.account_move_id = account_move.id
         payslip_ids.write({'state': 'done'})
         self.write({'state': 'done'})
 
+    def action_register_payment(self):
+        """ This method posts the journal entry for the payslip and updates its state to paid"""
+        move_id = self.employee_payslip_ids[0].account_move_id
+        move_id.write({'state': 'posted'})
+        return move_id.action_register_payment()
+
+    def action_create_payment(self):
+        """This method open the wizard for payment registration of batch
+        payslip"""
+        view = self.env.ref("cyllo_payroll_management.view_employee_payslip_tree_register_payment")
+        return {
+            'name': _('Select Payslips'),
+            'type': 'ir.actions.act_window',
+            'view_mode': 'list',
+            'view': view,
+            'views': [(view.id, 'tree')],
+            'res_model': 'employee.payslip',
+            'target': 'new',
+            'domain': [
+                ('id', 'in', self.employee_payslip_ids.ids),
+                ('state', '=', 'done')
+            ],
+        }
+
     def action_paid(self):
-        """To make payment for the payslips"""
+        """This method update the state of batch payslip and the payslip included
+        in this batch"""
         self.write({'state': 'paid'})
-        for data in self.employee_payslip_ids:
-            data.action_paid()
+        self.employee_payslip_ids.action_paid()
 
     def action_view_journal_entry(self):
         """To view corresponding journal entry"""
@@ -156,3 +191,11 @@ class EmployeePayslipBatch(models.Model):
             'type': 'ir.actions.act_window',
             'domain': [('batch_id', '=', self.id)],
         }
+
+    def mark_fully_paid(self):
+        """This method open a confirmation wizard to confirm the mark as fully
+        paid function"""
+        self.is_batch_payslip = True
+        action = self.env["ir.actions.actions"]._for_xml_id(
+            "cyllo_payroll_management.action_view_employee_payslip_batch_mark_paid")
+        return action

@@ -5,15 +5,22 @@
         <Dropdown autoOpen="false" beforeOpen.bind="beforeOpen"
                   onStateChanged="state => this.state.isOpen = state.open"
                   position="'bottom-end'" menuClass="discussSystray.menuClass"
+                  togglerClass="'p-0'"
                   class="discussSystray.class">
             <t t-set-slot="toggler">
-                <i class="ri-instagram-line cy-icons" role="img"
-                   aria-label="Messages"
-                   t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"/>
-                <span t-if="this.ig_counter"
-                      class="o-mail-MessagingMenu-counter badge rounded-pill">
-                    <t t-esc="this.ig_counter"/>
-                </span>
+                <div class="cy-systray-parent-class">
+                    <div>
+                         <i class="ri-instagram-line cy-icons cy-stray-icon-sp" role="img"
+                            aria-label="Messages"
+                            t-on-click="() => store.discuss.activeTab = ui.isSmall and store.discuss.activeTab === 'main' ? 'main' : store.discuss.activeTab"/>
+                       <span t-if="this.ig_counter" class="o-mail-MessagingMenu-counter badge rounded-pill">
+                           <t t-esc="this.ig_counter"/>
+                       </span>
+                    </div>
+                    <span t-if="props.nameShow" class="cy-systray-label">
+                        Instagram
+                    </span>
+                </div>
             </t>
             <t t-set-slot="default">
                 <div t-att-class="`${discussSystray.contentClass} o-mail-MessagingMenu`">
@@ -41,7 +48,7 @@
                             <div class="flex-grow-1"/>
                             <button t-if="!ui.isSmall or (ui.isSmall and store.discuss.activeTab !== 'channel' and !state.addingChat and !(env.inDiscussApp and store.discuss.activeTab === 'main'))"
                                     t-att-class="ui.isSmall ? 'w-100 p-2 btn btn-secondary m-1' : 'btn btn-link p-2'"
-                                    t-on-click.stop="onClickNewMessage">
+                                    t-on-click.stop="onClickNewMessageInstagram">
                                 <t t-if="ui.isSmall">Start a conversation</t>
                                 <t t-elif="!store.discuss.isActive">New
                                     Message

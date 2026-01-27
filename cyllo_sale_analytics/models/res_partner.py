@@ -1,15 +1,35 @@
 # -*- coding: utf-8 -*-
-
-import pandas as pd
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 import io
 import json
+
+import pandas as pd
 import xlsxwriter
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import StandardScaler
 from odoo import api, fields, models
 from odoo.tools import date_utils
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -17,6 +37,7 @@ pd.set_option('display.max_rows', None)
 
 class ResPartner(models.Model):
     """ Extend the res.partner model to incorporate additional fields or behaviors as needed."""
+
     _inherit = 'res.partner'
 
     def _execute_query(self, date, index):
@@ -63,12 +84,17 @@ class ResPartner(models.Model):
             condition = (((data[comp_freq] > data['threshold_frequency']) |
                           (data[comp_mon] > data['threshold_monetary'])))
             data.loc[condition, 'Churn'] = 'No'
-            freq_mon_data = data.drop(['threshold_monetary', 'threshold_frequency', 'Churn'], axis=1)
-            result = data[[comp_freq, comp_mon, 'threshold_frequency', 'threshold_monetary', 'Churn']]
-            result = result.rename(columns={comp_freq: 'frequency', comp_mon: 'monetary'})
+            freq_mon_data = data.drop(
+                ['threshold_monetary', 'threshold_frequency', 'Churn'], axis=1)
+            result = data[[comp_freq, comp_mon, 'threshold_frequency',
+                           'threshold_monetary', 'Churn']]
+            result = result.rename(
+                columns={comp_freq: 'frequency', comp_mon: 'monetary'})
             try:
-                X_train, X_test, y_train, y_test = train_test_split(result.drop(['Churn'], axis=1), result['Churn'],
-                                                                     test_size=0.33, random_state=42)
+                X_train, X_test, y_train, y_test = train_test_split(
+                    result.drop(['Churn'], axis=1),
+                    result['Churn'],
+                    test_size=0.33, random_state=42)
 
                 scaler = StandardScaler()
                 X_train = scaler.fit_transform(X_train)
@@ -77,13 +103,20 @@ class ResPartner(models.Model):
                 clf.fit(X_train, y_train)
                 test_data = pd.concat(dataframes[1:], axis=1)
 
-                test_freq_columns = [f'frequency_{i}' for i in range(2, int(len(test_data.columns) / 2 + 1))]
-                test_mon_columns = [f'monetary_{i}' for i in range(2, int(len(test_data.columns) / 2 + 1))]
-                test_data['threshold_frequency'] = test_data[test_freq_columns].mean(axis=1) * 0.8
-                test_data['threshold_monetary'] = test_data[test_mon_columns].mean(axis=1) * 0.8
+                test_freq_columns = [f'frequency_{i}' for i in range(2, int(len(
+                    test_data.columns) / 2 + 1))]
+                test_mon_columns = [f'monetary_{i}' for i in range(2, int(len(
+                    test_data.columns) / 2 + 1))]
+                test_data['threshold_frequency'] = test_data[
+                                                       test_freq_columns].mean(
+                    axis=1) * 0.8
+                test_data['threshold_monetary'] = test_data[
+                                                      test_mon_columns].mean(
+                    axis=1) * 0.8
                 freq = test_data.columns[len(test_data.columns) - 4]
                 mon = test_data.columns[len(test_data.columns) - 3]
-                test_result = test_data[[freq, mon, 'threshold_frequency', 'threshold_monetary']]
+                test_result = test_data[
+                    [freq, mon, 'threshold_frequency', 'threshold_monetary']]
                 test_result = test_result.rename(columns={
                     freq: 'frequency',
                     mon: 'monetary',
@@ -100,11 +133,14 @@ class ResPartner(models.Model):
                 else:
                     test_result['prob_yes'] = probabilities[:, 0]
                     test_result['prob_no'] = 1 - probabilities[:, 0]
-                test_result['prob_yes'] = round(test_result['prob_yes'] * 100, 2)
+                test_result['prob_yes'] = (
+                    round(test_result['prob_yes'] * 100, 2))
                 test_result['prob_no'] = round(test_result['prob_no'] * 100, 2)
 
-                total_churn_count = len(test_result[test_result['Churn'] == 'Yes'])
-                total_not_churn_count = len(test_result[test_result['Churn'] == 'No'])
+                total_churn_count = len(
+                    test_result[test_result['Churn'] == 'Yes'])
+                total_not_churn_count = len(
+                    test_result[test_result['Churn'] == 'No'])
                 total_records = len(test_result)
 
                 churn_perc = (total_churn_count / total_records) * 100
@@ -128,21 +164,32 @@ class ResPartner(models.Model):
                 """
                 self.env.cr.execute(customer_names_query)
                 customers = self.env.cr.dictfetchall()
-                test_result['custId'] = [record['customerid'] for record in customers]
-                test_result['custName'] = [record['customername'] for record in customers]
-                test_result['last_purchase_date'] = [record['lastsaleorderdate'].strftime('%d/%m/%Y %H:%M:%S')
-                                                     for record in customers]
-                freq_mon_churn_data = pd.concat([test_result, freq_mon_data], axis=1)
-                cust_wise_details = freq_mon_churn_data.to_dict(orient='records')
+                test_result['custId'] = [record['customerid'] for record in
+                                         customers]
+                test_result['custName'] = [record['customername'] for record in
+                                           customers]
+                test_result['last_purchase_date'] = [
+                    record['lastsaleorderdate'].strftime('%d/%m/%Y %H:%M:%S')
+                    for record in customers]
+                freq_mon_churn_data = pd.concat([test_result, freq_mon_data],
+                                                axis=1)
+                cust_wise_details = freq_mon_churn_data.to_dict(
+                    orient='records')
                 chart_data = data.to_dict(orient='records')
                 for customer in cust_wise_details:
-                    domain = [('partner_id', '=', customer['custId']), ('date_order', '>=', date_range[0][0]),
-                              ('date_order', '<=', date_range[-1][1])]
+                    domain = [('partner_id', '=', customer['custId']),
+                              ('date_order', '>=', date_range[0][0]),
+                              ('date_order', '<=', date_range[-1][1])
+                              ]
                     total_sales = self.env['sale.order'].search_count(domain)
-                    total_amt = sum(self.env['sale.order'].search(domain).mapped('amount_total'))
+                    total_amt = sum(
+                        self.env['sale.order'].search(domain).mapped(
+                            'amount_total'))
                     customer['total_sales'] = round(total_sales, 2)
                     customer['total_amount'] = round(total_amt, 2)
-                sorted_details = sorted(cust_wise_details, key=lambda x: x['total_sales'], reverse=True)
+                sorted_details = sorted(cust_wise_details,
+                                        key=lambda x: x['total_sales'],
+                                        reverse=True)
                 for index, cust in enumerate(sorted_details, start=1):
                     cust['index'] = index
                 vals = {
@@ -190,50 +237,78 @@ class ResPartner(models.Model):
                 date_range = [date_utils.get_quarter(today)]
                 for i in range(int(dur)):
                     if today.month <= 3:
-                        today = today.replace(month=10, year=today.year - 1, day=1)
+                        today = today.replace(month=10, year=today.year - 1,
+                                              day=1)
                     else:
                         today = today.replace(month=(today.month - 3), day=1)
                     date_range.append(date_utils.get_quarter(today))
                 date_range = date_range[1:][::-1]
             elif period == 'Year':
-                date_range = [(today.replace(year=today.year - i - 1, month=today.month, day=today.day),
+                date_range = [(today.replace(year=today.year - i - 1,
+                                             month=today.month,
+                                             day=today.day),
                                date_utils.subtract(
-                                   today.replace(year=today.year - i, month=today.month, day=today.day), days=1))
+                                   today.replace(year=today.year - i,
+                                                 month=today.month,
+                                                 day=today.day),
+                                   days=1))
                               for i in range(int(dur))][::-1]
             elif period == 'Month':
                 date_range = [(date_utils.subtract(today, months=i * 1),
-                               date_utils.subtract(date_utils.subtract(date_utils.add(
-                                   date_utils.subtract(today, months=i * 1), months=1), days=1)))
+                               date_utils.subtract(
+                                   date_utils.subtract(date_utils.add(
+                                       date_utils.subtract(today, months=i * 1),
+                                       months=1), days=1)))
                               for i in range(1, int(dur) + 1)][::-1]
             elif period == 'Half Year':
                 date_range = [(date_utils.subtract(today, months=i * 6),
-                               date_utils.subtract(date_utils.add(date_utils.subtract(today, months=i * 6), months=6),
-                                                   days=1)) for i in range(1, int(dur) + 1)][::-1]
-            date_range_formatted = [(start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"))
+                               date_utils.subtract(date_utils.add(
+                                   date_utils.subtract(today, months=i * 6),
+                                   months=6),
+                                   days=1)) for i in
+                              range(1, int(dur) + 1)][::-1]
+            date_range_formatted = [(start_date.strftime("%d/%m/%Y"),
+                                     end_date.strftime("%d/%m/%Y"))
                                     for start_date, end_date in date_range]
-            data_list = [pd.DataFrame(self._execute_query(year, i)) for i, year in enumerate(date_range, start=1)]
-            return self.predict_churn(*data_list, dates=date_range_formatted, date_range=date_range)
+            data_list = [pd.DataFrame(self._execute_query(year, i)) for i, year
+                         in enumerate(date_range, start=1)]
+            return self.predict_churn(
+                *data_list,
+                dates=date_range_formatted,
+                date_range=date_range)
         elif period_type == 'financial_year':
-            month = self.env['ir.config_parameter'].sudo().get_param('cyllo_analytics.fiscal_year_last_month')
-            day = self.env['ir.config_parameter'].sudo().get_param('cyllo_analytics.fiscal_year_last_day')
-            today = datetime.datetime(fields.Date.today().year, int(month),int(day)).date()
+            month = self.env['ir.config_parameter'].sudo().get_param(
+                'cyllo_analytics.fiscal_year_last_month')
+            day = self.env['ir.config_parameter'].sudo().get_param(
+                'cyllo_analytics.fiscal_year_last_day')
+            today = datetime.datetime(fields.Date.today().year, int(month),
+                                      int(day)).date()
             if period == 'Quarter':
                 date_range = [(date_utils.add(
-                    date_utils.subtract(today, months=i * 3), days=1), date_utils.subtract(date_utils.subtract(
-                                       date_utils.add(date_utils.add(date_utils.subtract(today,months=i * 3),
-                                                                     days=1), months=3), days=1))) for i in
-                                 range(1, int(dur) + 1)][::-1]
+                    date_utils.subtract(today, months=i * 3), days=1),
+                               date_utils.subtract(date_utils.subtract(
+                                   date_utils.add(date_utils.add(
+                                       date_utils.subtract(today, months=i * 3),
+                                       days=1), months=3), days=1)))
+                    for i in range(1, int(dur) + 1)][::-1]
             if period == 'Year':
                 date_range = [(date_utils.add(
-                    date_utils.subtract(today, months=i * 12), days=1), date_utils.subtract(date_utils.subtract(
-                                       date_utils.add(date_utils.add(date_utils.subtract(today, months=i * 12), days=1)
-                                                      , months=12), days=1))) for i in range(1, int(dur) + 1)][::-1]
+                    date_utils.subtract(today, months=i * 12), days=1),
+                               date_utils.subtract(date_utils.subtract(
+                                   date_utils.add(date_utils.add(
+                                       date_utils.subtract(today,
+                                                           months=i * 12),
+                                       days=1)
+                                       , months=12), days=1))) for i
+                    in range(1, int(dur) + 1)][::-1]
             elif period == 'Half Year':
                 date_range = [(date_utils.add(
-                    date_utils.subtract(today, months=i * 6), days=1), date_utils.subtract(date_utils.subtract(
-                                       date_utils.add(date_utils.add(date_utils.subtract(today, months=i * 6),
-                                                                     days=1), months=6), days=1)))
-                                 for i in range(1, int(dur) + 1)][::-1]
+                    date_utils.subtract(today, months=i * 6), days=1),
+                               date_utils.subtract(date_utils.subtract(
+                                   date_utils.add(date_utils.add(
+                                       date_utils.subtract(today, months=i * 6),
+                                       days=1), months=6), days=1)))
+                    for i in range(1, int(dur) + 1)][::-1]
             elif period == 'Month':
                 date_range = []
                 today = fields.Date.today()
@@ -244,10 +319,16 @@ class ResPartner(models.Model):
                         date_utils.start_of(today, 'month'), days=1)
                     date_range.append((start_date, end_date))
                 date_range = date_range[1:][::-1]
-            date_range_formatted = [(start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"))
-                                    for start_date, end_date in date_range]
-            data_list = [pd.DataFrame(self._execute_query(year, i)) for i, year in enumerate(date_range, start=1)]
-            return self.predict_churn(*data_list, dates=date_range_formatted, date_range=date_range)
+            date_range_formatted = [
+                (start_date.strftime("%d/%m/%Y"), end_date.strftime("%d/%m/%Y"))
+                for start_date, end_date in date_range]
+            data_list = [pd.DataFrame(self._execute_query(year, i)) for i, year
+                         in enumerate(date_range, start=1)]
+            return self.predict_churn(
+                *data_list,
+                dates=date_range_formatted,
+                date_range=date_range
+            )
 
     def get_xlsx_report(self, data, response):
         """ Generate an Excel report based on churn prediction data and send it as a response."""
@@ -256,14 +337,17 @@ class ResPartner(models.Model):
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         sheet = workbook.add_worksheet()
         header = workbook.add_format({'bold': True, 'align': 'center'})
-        head = workbook.add_format({'align': 'center', 'bold': True, 'font_size': '15px'})
-        subhead = workbook.add_format({'align': 'center', 'bold': True, 'font_size': '15px'})
+        head = workbook.add_format(
+            {'align': 'center', 'bold': True, 'font_size': '15px'})
+        subhead = workbook.add_format(
+            {'align': 'center', 'bold': True, 'font_size': '15px'})
         cell = workbook.add_format({'align': 'center'})
         row = 7
         column = 0
         if data['churnData']['predict']:
             sheet.merge_range('A2:H3', 'CHURN PREDICTION REPORT', head)
-            sheet.merge_range('A4:H5', f"Prediction based on last {data['numberOfPeriods']} {data['period']}s"
+            sheet.merge_range('A4:H5',
+                              f"Prediction based on last {data['numberOfPeriods']} {data['period']}s"
                               f" ({data['churnData']['date_range'][0][0]} to {data['churnData']['date_range'][-1][1]})",
                               subhead)
             sheet.write(row, column, 'Sl.no', header)

@@ -9,5 +9,6 @@
         <field name="report_file">cyllo_accounting_pdc.report_pdc_payments</field>
         <field name="binding_model_id" ref="model_account_pdc_payment"/>
         <field name="binding_type">report</field>
+        <field name="binding_view_types">form</field>
     </record>
 </odoo>

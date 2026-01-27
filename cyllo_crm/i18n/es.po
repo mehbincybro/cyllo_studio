@@ -1,0 +1,1272 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_crm
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-24 09:45+0000\n"
+"PO-Revision-Date: 2025-10-24 09:45+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__name
+msgid " Dissimilar Fields"
+msgstr "Campos diferentes"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "% from last period"
+msgstr "% del último período"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__res_config_settings__deal_reminder_days__10
+msgid "10"
+msgstr "10"
+
+#. module: cyllo_crm
+#: model:mail.template,body_html:cyllo_crm.email_template_activity_assigned
+msgid ""
+"<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;\">\n"
+"                    <div style=\"border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;\">\n"
+"                        <h2 style=\"color: #007bff; margin: 0;\">Activity Assigned on Lead</h2>\n"
+"                    </div>\n"
+"\n"
+"                    <p>Dear <strong><t t-out=\"ctx.get('user_name')\"></t></strong>,</p>\n"
+"\n"
+"                    <p>An activity has been assigned to you on the lead <strong>\"<t t-out=\"ctx.get('lead_name')\"></t>\"</strong> (Stage: <t t-out=\"ctx.get('stage_name')\"></t>).</p>\n"
+"\n"
+"                    <div style=\"background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;\">\n"
+"                        <p style=\"margin: 0;\"><strong>Activity:</strong> <t t-out=\"ctx.get('activity_name')\"></t></p>\n"
+"                        <p style=\"margin: 5px 0 0 0;\"><strong>Due Date:</strong> <t t-out=\"ctx.get('due_date')\"></t></p>\n"
+"                    </div>\n"
+"\n"
+"                    <p>Kindly ensure this activity is completed by the due date to maintain workflow efficiency.</p>\n"
+"\n"
+"                    <div style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;\">\n"
+"                        <p style=\"margin: 0;\">Best regards,</p>\n"
+"                        <p style=\"margin: 5px 0 0 0;\"><strong>CRM Team</strong></p>\n"
+"                        <t t-if=\"object.company_id.name\">\n"
+"                            <p style=\"margin: 5px 0 0 0; color: #666; font-size: 14px;\">\n"
+"                                <t t-out=\"object.company_id.name\"></t>\n"
+"                            </p>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </div>\n"
+"            "
+msgstr ""
+"<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; line-height: 1.6; color: #333;\">\n"
+"                    <div style=\"border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 20px;\">\n"
+"                        <h2 style=\"color: #007bff; margin: 0;\">Actividad asignada en el lead</h2>\n"
+"                    </div>\n"
+"\n"
+"                    <p>Estimado <strong><t t-out=\"ctx.get('user_name')\"></t></strong>,</p>\n"
+"\n"
+"                    <p>Se te ha asignado una actividad en el lead <strong>\"<t t-out=\"ctx.get('lead_name')\"></t>\"</strong> (Etapa: <t t-out=\"ctx.get('stage_name')\"></t>).</p>\n"
+"\n"
+"                    <div style=\"background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0;\">\n"
+"                        <p style=\"margin: 0;\"><strong>Actividad:</strong> <t t-out=\"ctx.get('activity_name')\"></t></p>\n"
+"                        <p style=\"margin: 5px 0 0 0;\"><strong>Fecha de vencimiento:</strong> <t t-out=\"ctx.get('due_date')\"></t></p>\n"
+"                    </div>\n"
+"\n"
+"                    <p>Por favor, asegúrate de completar esta actividad en la fecha de vencimiento para mantener la eficiencia del flujo de trabajo.</p>\n"
+"\n"
+"                    <div style=\"margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;\">\n"
+"                        <p style=\"margin: 0;\">Saludos cordiales,</p>\n"
+"                        <p style=\"margin: 5px 0 0 0;\"><strong>Equipo CRM</strong></p>\n"
+"                        <t t-if=\"object.company_id.name\">\n"
+"                            <p style=\"margin: 5px 0 0 0; color: #666; font-size: 14px;\">\n"
+"                                <t t-out=\"object.company_id.name\"></t>\n"
+"                            </p>\n"
+"                        </t>\n"
+"                    </div>\n"
+"                </div>\n"
+"            "
+
+#. module: cyllo_crm
+#: model:mail.template,body_html:cyllo_crm.crm_subscription_report_email_template
+msgid ""
+"<div>\n"
+"                    <p>Hi <t t-esc=\"object.user_id.name\"></t>,</p>\n"
+"\n"
+"                    <p>\n"
+"                        Your scheduled subscription report\n"
+"                        <strong>\"<t t-esc=\"object.name.title()\"></t>\"</strong>has been generated.\n"
+"                    </p>\n"
+"\n"
+"                    <p>\n"
+"                        <strong>Report Frequency:</strong>\n"
+"                        <t t-esc=\"object.frequency.title()\"></t>\n"
+"                        <br>\n"
+"                    </p>\n"
+"\n"
+"                    <p>\n"
+"                        Please find the report attached with this email.\n"
+"                    </p>\n"
+"\n"
+"                    <p style=\"margin-top: 20px;\">\n"
+"                        Best regards,\n"
+"                        <br>\n"
+"                        <strong>\n"
+"                            <t t-esc=\"object.company_id.name\"></t>\n"
+"                        </strong>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
+msgstr ""
+"<div>\n"
+"                    <p>Hola <t t-esc=\"object.user_id.name\"></t>,</p>\n"
+"\n"
+"                    <p>\n"
+"                        Tu reporte de suscripción programado\n"
+"                        <strong>\"<t t-esc=\"object.name.title()\"></t>\"</strong> ha sido generado.\n"
+"                    </p>\n"
+"\n"
+"                    <p>\n"
+"                        <strong>Frecuencia del reporte:</strong>\n"
+"                        <t t-esc=\"object.frequency.title()\"></t>\n"
+"                        <br>\n"
+"                    </p>\n"
+"\n"
+"                    <p>\n"
+"                        Por favor, encuentra el reporte adjunto a este correo electrónico.\n"
+"                    </p>\n"
+"\n"
+"                    <p style=\"margin-top: 20px;\">\n"
+"                        Saludos cordiales,\n"
+"                        <br>\n"
+"                        <strong>\n"
+"                            <t t-esc=\"object.company_id.name\"></t>\n"
+"                        </strong>\n"
+"                    </p>\n"
+"                </div>\n"
+"            "
+
+#. module: cyllo_crm
+#: model:mail.template,body_html:cyllo_crm.deal_reminder
+msgid ""
+"<div>\n"
+"                   <p>\n"
+"                       Hello\n"
+"                       <t t-out=\"object.user_id.name\"></t>,\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       The lead \"<t t-out=\"object.name\"></t>\" assigned to you has been idle for a while.\n"
+"                   <br>\n"
+"                        🔹 Lead Name: <t t-out=\"object.name\"></t>\n"
+"                       <br>\n"
+"                        🔹 Customer:  <t t-out=\"object.partner_id.name\"></t>\n"
+"                       <br>\n"
+"                        🔹 Last Activity: <t t-out=\"object.last_stage_update_date\"></t>\n"
+"                       <br>\n"
+"                        🔹 Days Since Last Update: <t t-out=\"object.lead_idle_days\"></t>\n"
+"                       <br>\n"
+"                       <br>\n"
+"\n"
+"Please take the necessary action to follow up. If this lead is no longer relevant, consider updating its status.\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       Thanks and regards\n"
+"                   </p>\n"
+"               </div>\n"
+"           "
+msgstr ""
+"<div>\n"
+"                   <p>\n"
+"                       Hola\n"
+"                       <t t-out=\"object.user_id.name\"></t>,\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       El lead \"<t t-out=\"object.name\"></t>\" que se te ha asignado ha estado inactivo durante un tiempo.\n"
+"                   <br>\n"
+"                        🔹 Nombre del lead: <t t-out=\"object.name\"></t>\n"
+"                       <br>\n"
+"                        🔹 Cliente: <t t-out=\"object.partner_id.name\"></t>\n"
+"                       <br>\n"
+"                        🔹 Última actividad: <t t-out=\"object.last_stage_update_date\"></t>\n"
+"                       <br>\n"
+"                        🔹 Días desde la última actualización: <t t-out=\"object.lead_idle_days\"></t>\n"
+"                       <br>\n"
+"                       <br>\n"
+"\n"
+"Por favor, toma las medidas necesarias para hacer un seguimiento. Si este lead ya no es relevante, considera actualizar su estado.\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       <br>\n"
+"                       Gracias y saludos\n"
+"                   </p>\n"
+"               </div>\n"
+"           "
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid ""
+"<span>Add exit criteria's\n"
+"                                for each stage, which should\n"
+"                                happen, to move to the next stage.\n"
+"                            </span>\n"
+"                            <br/>\n"
+"                            <br/>"
+msgstr ""
+"<span>Agrega criterios de salida\n"
+"                                para cada etapa, que deben\n"
+"                                ocurrir, para pasar a la siguiente etapa.\n"
+"                            </span>\n"
+"                            <br/>\n"
+"                            <br/>"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Active Filters"
+msgstr "Filtros activos"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Activities Overview"
+msgstr "Descripción general de actividades"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_mail_activity
+msgid "Activity"
+msgstr "Actividad"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__activity_due
+msgid "Activity Due"
+msgstr "Actividad vencida"
+
+#. module: cyllo_crm
+#: model:mail.template,description:cyllo_crm.deal_reminder
+msgid "Add Description"
+msgstr "Agregar descripción"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_res_config_settings__module_cyllo_crm_advance_lead
+msgid "Advance Lead"
+msgstr "Lead avanzado"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid "Advance lead creation from Website"
+msgstr "Creación avanzada de leads desde el sitio web"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid "Advanced CRM"
+msgstr "CRM avanzado"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "All Opportunities"
+msgstr "Todas las oportunidades"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "All Salespersons"
+msgstr "Todos los vendedores"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "All Teams"
+msgstr "Todos los equipos"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_lead_duplicate_form
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__user_id
+msgid "Assigned To"
+msgstr "Asignado a"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__user_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__user_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__user_id
+msgid "Assigned user"
+msgstr "Usuario asignado"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_stage__type__both
+msgid "Both"
+msgstr "Ambos"
+
+#. module: cyllo_crm
+#: model:mail.template,name:cyllo_crm.email_template_activity_assigned
+msgid "CRM Lead Activity Assignment"
+msgstr "Asignación de actividad de lead en CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_stage_exit_criteria_line
+msgid "CRM Stage Exit Criteria Line"
+msgstr "Línea de criterio de salida de etapa del CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_stage_activity
+msgid "CRM Stage Required Activities"
+msgstr "Actividades requeridas de etapa del CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_stage
+msgid "CRM Stages"
+msgstr "Etapas del CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_subscription_report
+#: model:mail.template,name:cyllo_crm.crm_subscription_report_email_template
+msgid "CRM Subscription Report"
+msgstr "Reporte de suscripción del CRM"
+
+#. module: cyllo_crm
+#: model:ir.actions.server,name:cyllo_crm.ir_cron_action_to_deal_reminder_ir_actions_server
+msgid "CRM: deal reminder"
+msgstr "CRM: recordatorio de transacción"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__call
+msgid "Call"
+msgstr "Llamada"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_lead_duplicate_form
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_stage_exit_criteria_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: cyllo_crm
+#. odoo-python
+#: code:addons/cyllo_crm/models/crm_lead.py:0
+#, python-format
+msgid "Cannot change stage. Please complete all mandatory activities first."
+msgstr "No se puede cambiar de etapa. Por favor, completa todas las actividades obligatorias primero."
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_stage_activity_tree
+msgid "Channel"
+msgstr "Canal"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_lead_duplicate_form
+msgid "Choose Values"
+msgstr "Elegir valores"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,help:cyllo_crm.field_crm_subscription_report__frequency
+msgid "Choose how frequently you would like to receive the report."
+msgstr "Elige con qué frecuencia deseas recibir el reporte."
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_lead_duplicate_form
+msgid "Choose the required values in the merged lead"
+msgstr "Elige los valores requeridos en el lead fusionado"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__company_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__company_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__company_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__company_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__company_id
+msgid "Company"
+msgstr "Empresa"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__compare_id
+msgid "Compare"
+msgstr "Comparar"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_lead_duplicate_form
+msgid "Compare CRM Leads"
+msgstr "Comparar leads del CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_compare_fields
+msgid "Comparing fields on merging"
+msgstr "Comparación de campos en la fusión"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_res_config_settings
+msgid "Config Settings"
+msgstr "Ajustes de configuración"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_stage_exit_criteria
+msgid "Configure CRM Stage Exit Criteria"
+msgstr "Configurar criterios de salida de etapa del CRM"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid "Configure Exit Criteria"
+msgstr "Configurar criterios de salida"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_stage_exit_criteria_form
+msgid "Configure Stage Exit Criteria"
+msgstr "Configurar criterios de salida de etapa"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_lead2opportunity_partner
+msgid "Convert Lead to Opportunity (not in mass)"
+msgstr "Convertir lead en oportunidad (no en masa)"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__country
+msgid "Country"
+msgstr "País"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__create_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__create_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__create_date
+msgid "Creation Date"
+msgstr "Fecha de creación"
+
+#. module: cyllo_crm
+#: model:ir.actions.client,name:cyllo_crm.action_crm_dashboard
+msgid "Crm Dashboard"
+msgstr "Panel de control del CRM"
+
+#. module: cyllo_crm
+#: model:ir.actions.act_window,name:cyllo_crm.action_crm_subscription_report
+msgid "Crm Subscription Report"
+msgstr "Reporte de suscripción del CRM"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_lead_notification
+msgid "CrmLeadNotification"
+msgstr "NotificaciónLeadCRM"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__currency_id
+msgid "Currency"
+msgstr "Moneda"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Custom Range"
+msgstr "Rango personalizado"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Date Range"
+msgstr "Rango de fechas"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__lost
+msgid "Deal Lost"
+msgstr "Transacción perdida"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_res_config_settings__deal_reminder
+#: model:mail.template,name:cyllo_crm.deal_reminder
+msgid "Deal Reminder"
+msgstr "Recordatorio de transacción"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__won
+msgid "Deal Won"
+msgstr "Transacción ganada"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Dismiss"
+msgstr "Descartar"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__is_dismissed_notification
+msgid "Dismissed Notification"
+msgstr "Notificación descartada"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__display_name
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_dissimilar_fields
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__dissimilar_field_names
+msgid "Dissimilar Fields"
+msgstr "Campos diferentes"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "Due Today"
+msgstr "Vencimiento hoy"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_compare_record
+msgid "Duplicate Lead/Opportunity Record"
+msgstr "Registro de lead/oportunidad duplicado"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__duplicate_ids
+msgid "Duplicate Leads"
+msgstr "Leads duplicados"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__email_from
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__email
+msgid "Email"
+msgstr "Correo electrónico"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid ""
+"Enable automatic reminders for stale deals. When enabled, the system will "
+"check for leads that haven't been updated within the selected number of days"
+" and notify the assigned user via email."
+msgstr ""
+"Habilita recordatorios automáticos para transacciones antiguas. Cuando se habilita, el sistema "
+"verificará los leads que no se han actualizado dentro del número de días seleccionado "
+"y notificará al usuario asignado por correo electrónico."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__exit_criteria_ids
+msgid "Exit Criteria"
+msgstr "Criterios de salida"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__exit_criteria_activity_name
+msgid "Exit Criteria Activity Name"
+msgstr "Nombre de actividad del criterio de salida"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__field_values
+msgid "Field Values"
+msgstr "Valores de campo"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Filters"
+msgstr "Filtros"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__frequency
+msgid "Frequency"
+msgstr "Frecuencia"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "From Date"
+msgstr "Desde la fecha"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Hide Filters"
+msgstr "Ocultar filtros"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__high
+msgid "High"
+msgstr "Alta"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__id
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__id
+msgid "ID"
+msgstr "ID"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__lead_idle_days
+#: model:ir.model.fields,help:cyllo_crm.field_crm_lead__lead_idle_days
+msgid "Idle days"
+msgstr "Días inactivos"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#, python-format
+msgid "Idle leads"
+msgstr "Leads inactivos"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "Idle opportunities"
+msgstr "Oportunidades inactivas"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_mail_activity__is_dismissed_notification
+msgid "Is Dismissed Notification"
+msgstr "Es notificación descartada"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_mail_activity__is_exit_criteria
+msgid "Is Exit Criteria"
+msgstr "Es criterio de salida"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_res_config_settings__is_exit_criteria_configured
+msgid "Is Exit Criteria Configured"
+msgstr "Es criterio de salida configurado"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_mail_activity__is_marked_as_read
+msgid "Is Marked As Read"
+msgstr "Es marcado como leído"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__is_read
+msgid "Is Read"
+msgstr "Es leído"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__function
+msgid "Job Position"
+msgstr "Puesto de trabajo"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__write_uid
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__write_date
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__write_date
+msgid "Last Updated on"
+msgstr "Última actualización en"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__lead_id
+msgid "Lead ID"
+msgstr "ID del lead"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_stage__type__lead
+msgid "Lead Only"
+msgstr "Solo lead"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__lead_updated
+msgid "Lead Updated"
+msgstr "Lead actualizado"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_crm_lead
+msgid "Lead/Opportunity"
+msgstr "Lead/Oportunidad"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__low
+msgid "Low"
+msgstr "Baja"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_res_config_settings_form
+msgid "Mandatory Followups for activities in leads/Opportunity"
+msgstr "Seguimientos obligatorios para actividades en leads/Oportunidades"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__is_marked_notification
+msgid "Marked Notification"
+msgstr "Notificación marcada"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__is_marked_as_read
+msgid "Marked as Read"
+msgstr "Marcado como leído"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__meeting
+msgid "Meeting"
+msgstr "Reunión"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__message
+msgid "Message"
+msgstr "Mensaje"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_subscription_report__frequency__monthly
+msgid "Monthly"
+msgstr "Mensualmente"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "More Notifications"
+msgstr "Más notificaciones"
+
+#. module: cyllo_crm
+#: model:ir.ui.menu,name:cyllo_crm.crm_dashboard
+msgid "My Dashboard"
+msgstr "Mi panel de control"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "My Opportuities with no activity"
+msgstr "Mis oportunidades sin actividad"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#, python-format
+msgid "My activities"
+msgstr "Mis actividades"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#, python-format
+msgid "My leads"
+msgstr "Mis leads"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__name
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: cyllo_crm
+#: model:ir.model.constraint,message:cyllo_crm.constraint_crm_subscription_report_report_name
+msgid "Name already exist"
+msgstr "El nombre ya existe"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__new_lead
+msgid "New Lead"
+msgstr "Nuevo lead"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_inherit_merge_opportunity_form
+msgid "Next"
+msgstr "Siguiente"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid ""
+"No New\n"
+"                                    Notifications"
+msgstr ""
+"Sin nuevas\n"
+"                                    notificaciones"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#, python-format
+msgid "No activity"
+msgstr "Sin actividad"
+
+#. module: cyllo_crm
+#: model_terms:ir.actions.act_window,help:cyllo_crm.action_crm_subscription_report
+msgid "No subscriptions found. Create the first one!"
+msgstr "No se encontraron suscripciones. ¡Crea la primera!"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__normal
+msgid "Normal"
+msgstr "Normal"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_stage_exit_criteria_form
+msgid "Note: Each stage can only have one exit criteria."
+msgstr "Nota: Cada etapa solo puede tener un criterio de salida."
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "Ongoing activities"
+msgstr "Actividades en curso"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_stage__type__opportunity
+msgid "Opportunity Only"
+msgstr "Solo oportunidad"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
+#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
+#, python-format
+msgid "Overdue"
+msgstr "Vencido"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__compare_id
+msgid "Parent Record"
+msgstr "Registro padre"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__phone
+msgid "Phone"
+msgstr "Teléfono"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__priority
+msgid "Priority"
+msgstr "Prioridad"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Quick Actions"
+msgstr "Acciones rápidas"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_ir_cron__ref_model_id
+msgid "Reference Model"
+msgstr "Modelo de referencia"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__lead_id
+msgid "Related Lead"
+msgstr "Lead relacionado"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__lead_fields
+msgid "Report Fields"
+msgstr "Campos del reporte"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__activity_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__activity_id
+msgid "Required Activity"
+msgstr "Actividad requerida"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Reset"
+msgstr "Restablecer"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Revenue & Leads Trend"
+msgstr "Tendencia de ingresos y leads"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_subscription_report_tree
+msgid "Review Processes"
+msgstr "Revisar procesos"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__rule_to_apply
+msgid "Rule"
+msgstr "Regla"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_subscription_report_form
+msgid "Rules"
+msgstr "Reglas"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Sales Pipeline"
+msgstr "Canalización de ventas"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__team_id
+#, python-format
+msgid "Sales Team"
+msgstr "Equipo de ventas"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Salesperson"
+msgstr "Vendedor"
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_stage_exit_criteria_form
+msgid "Save"
+msgstr "Guardar"
+
+#. module: cyllo_crm
+#: model:ir.model,name:cyllo_crm.model_ir_cron
+msgid "Scheduled Actions"
+msgstr "Acciones programadas"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,help:cyllo_crm.field_crm_subscription_report__lead_fields
+msgid ""
+"Select the fields from the Lead/Opportunity model to include in the report. "
+"The order in which you select the fields will be preserved and used as the "
+"column order in the final report."
+msgstr ""
+"Selecciona los campos del modelo Lead/Oportunidad para incluir en el reporte. "
+"El orden en el que selecciones los campos se mantendrá y se utilizará como el "
+"orden de columnas en el reporte final."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,help:cyllo_crm.field_crm_subscription_report__rule_to_apply
+msgid "Set Rules to filter the records"
+msgstr "Establecer reglas para filtrar los registros"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Show"
+msgstr "Mostrar"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid ""
+"Show\n"
+"                                        Less"
+msgstr ""
+"Mostrar\n"
+"                                        menos"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Show Filters"
+msgstr "Mostrar filtros"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__stage_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__stage_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__stage_id
+msgid "Stage"
+msgstr "Etapa"
+
+#. module: cyllo_crm
+#. odoo-python
+#: code:addons/cyllo_crm/wizard/crm_stage_exit_criteria_line.py:0
+#, python-format
+msgid "Stage '%s' is already used in another exit criteria line."
+msgstr "La etapa '%s' ya está siendo utilizada en otra línea de criterio de salida."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_res_config_settings__stage_activity_ids
+msgid "Stage Activity"
+msgstr "Actividad de etapa"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__stage_changed
+msgid "Stage Changed"
+msgstr "Etapa cambió"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__stage_ids
+msgid "Stages"
+msgstr "Etapas"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__triggered_stage_ids
+msgid "Stages Triggered"
+msgstr "Etapas activadas"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Start Selling"
+msgstr "Comenzar a vender"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__state
+msgid "State"
+msgstr "Estado"
+
+#. module: cyllo_crm
+#: model:ir.ui.menu,name:cyllo_crm.menu_crm_subscription_report
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_subscription_report_form
+msgid "Subscription Report"
+msgstr "Reporte de suscripción"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "This Month"
+msgstr "Este mes"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "This Quarter"
+msgstr "Este trimestre"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "This Week"
+msgstr "Esta semana"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "This Year"
+msgstr "Este año"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,help:cyllo_crm.field_crm_lead__is_dismissed_notification
+msgid ""
+"This field is used to indicate if the notification for this lead has been "
+"dismissed by the user."
+msgstr ""
+"Este campo se utiliza para indicar si el usuario ha descartado la notificación "
+"para este lead."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,help:cyllo_crm.field_crm_lead__is_marked_as_read
+#: model:ir.model.fields,help:cyllo_crm.field_crm_lead_notification__is_marked_notification
+msgid ""
+"This field is used to indicate if the notification for this lead has been "
+"marked as read by the user."
+msgstr ""
+"Este campo se utiliza para indicar si el usuario ha marcado como leída la "
+"notificación para este lead."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__title
+msgid "Title"
+msgstr "Título"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "To Date"
+msgstr "Hasta la fecha"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Today"
+msgstr "Hoy"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Top Performers"
+msgstr "Mejores rendimientos"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__notification_type
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage__type
+msgid "Type"
+msgstr "Tipo"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__unread_visible
+msgid "Unread Visible"
+msgstr "No leído visible"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "Updates"
+msgstr "Actualizaciones"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__user_id
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__user_id
+msgid "User"
+msgstr "Usuario"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "View Lead"
+msgstr "Ver lead"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid "View Reports"
+msgstr "Ver reportes"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_subscription_report__frequency__weekly
+msgid "Weekly"
+msgstr "Semanalmente"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid ""
+"Welcome back! Here's what's\n"
+"                        happening with your sales today."
+msgstr ""
+"¡Bienvenido de vuelta! Aquí está lo que está\n"
+"                        pasando con tus ventas hoy."
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__wizard_id
+msgid "Wizard"
+msgstr "Asistente"
+
+#. module: cyllo_crm
+#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_subscription_report__frequency__yearly
+msgid "Yearly"
+msgstr "Anualmente"
+
+#. module: cyllo_crm
+#. odoo-javascript
+#: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
+#, python-format
+msgid ""
+"You're all\n"
+"                                    caught up! Check back later for new lead\n"
+"                                    updates."
+msgstr ""
+"¡Estás al día!\n"
+"                                    Vuelve más tarde para nuevas\n"
+"                                    actualizaciones de leads."
+
+#. module: cyllo_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_crm.view_crm_subscription_report_form
+msgid "eg: Performance Analysis"
+msgstr "ej: Análisis de desempeño"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__is_exit_criteria
+msgid "is exit criteria"
+msgstr "es criterio de salida"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_res_config_settings__deal_reminder_days
+msgid "reminder"
+msgstr "recordatorio"
+
+#. module: cyllo_crm
+#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead__last_stage_update_date
+msgid "stage change date"
+msgstr "fecha de cambio de etapa"
+
+#. module: cyllo_crm
+#: model:mail.template,subject:cyllo_crm.email_template_activity_assigned
+msgid ""
+"{{ ctx.get('activity_name') }} Activity Assigned on Lead {{ "
+"ctx.get('lead_name') }}"
+msgstr ""
+"Actividad {{ ctx.get('activity_name') }} asignada en el lead {{ "
+"ctx.get('lead_name') }}"
+
+#. module: cyllo_crm
+#: model:mail.template,subject:cyllo_crm.crm_subscription_report_email_template
+msgid ""
+"{{ object.frequency.title()}} Subscription Report : {{ object.name.title()}}"
+msgstr ""
+"Reporte de suscripción {{ object.frequency.title()}} : {{ object.name.title()}}"
+
+#. module: cyllo_crm
+#: model:mail.template,subject:cyllo_crm.deal_reminder
+msgid "{{ object.name }}"
+msgstr "{{ object.name }}"

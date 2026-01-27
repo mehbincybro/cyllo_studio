@@ -1,11 +1,14 @@
 /** @odoo-module */
-// Import necessary modules and components
-import { registry } from "@web/core/registry";
-import { Component, useState, useRef} from "@odoo/owl";
-import { useService, useBus} from "@web/core/utils/hooks";
-import { BarcodeDialog } from "./barcode_dialog";
-import { jsonrpc } from "@web/core/network/rpc_service";
+import {registry} from "@web/core/registry";
+import {Component, useState, useRef, onWillStart} from "@odoo/owl";
+import {useService, useBus} from "@web/core/utils/hooks";
+import {BarcodeDialog} from "./barcode_dialog";
+import {jsonrpc} from "@web/core/network/rpc_service";
+import {Dropdown} from "@web/core/dropdown/dropdown";
+import {DropdownItem} from "@web/core/dropdown/dropdown_item";
+
 const actionRegistry = registry.category("actions");
+
 export class CylloBarcode extends Component {
     setup() {
         const barcode = useService("barcode");
@@ -15,13 +18,34 @@ export class CylloBarcode extends Component {
         this.sound = useService("barcodeSound");
         this.notification = useService("notification")
         this.dialog = useService("dialog");
+        this.menuService = useService("menu");
         this.orm = useService("orm")
+        this.user = useService("user");
         this.state = useState({
-            types: []
+            types: [],
+            index: 4
         })
+
         useBus(barcode.bus, "barcode_scanned", (ev) => this.ReadBarcode(ev.detail.barcode))
-        this.getOperationTypes()
+        onWillStart(async () => {
+            await this.getOperationTypes()
+        });
     }
+
+    getMenuItemHref(payload) {
+        const parts = [`menu_id=${payload.id}`];
+        if (payload.actionID) {
+            parts.push(`action=${payload.actionID}`);
+        }
+        return "#" + parts.join("&");
+    }
+
+    onNavBarDropdownItemSelection(menu) {
+        if (menu) {
+            this.menuService.selectMenu(menu);
+        }
+    }
+
     /**
      * Function for all operations types in the corresponding company
      */
@@ -32,6 +56,7 @@ export class CylloBarcode extends Component {
                 ["code", "!=", "mrp_operation"]
             ], ["name"]
         );
+        const operationData = [];
         for (let i = 0; i < StockOperation.length; i++) {
             var PickingDraft = await this.orm.searchCount(
                 "stock.picking", [
@@ -48,7 +73,7 @@ export class CylloBarcode extends Component {
                     ["picking_type_id", "=", StockOperation[i].id],
                     ["state", "=", 'done']
                 ])
-            this.state.types.push({
+            operationData.push({
                 'id': StockOperation[i].id,
                 'name': StockOperation[i].name,
                 PickingDraft,
@@ -56,7 +81,9 @@ export class CylloBarcode extends Component {
                 PickingDone
             })
         }
+        this.state.types = operationData;
     }
+
     /**
      * Function works when the barcode catches the barcode code and passing the code to python
      */
@@ -66,12 +93,12 @@ export class CylloBarcode extends Component {
         const StockPicking = await this.orm.searchRead(
             "stock.picking", [
                 ["name", "=", barcode]
-            ], ["name", "id", ]
+            ], ["name", "id",]
         )
         const PickingBatch = await this.orm.searchRead(
             "stock.picking.batch", [
                 ["name", "=", barcode]
-            ], ["name", "id", ]
+            ], ["name", "id",]
         )
         if (PickingBatch.length > 0) {
             var id = PickingBatch[0].id
@@ -93,6 +120,9 @@ export class CylloBarcode extends Component {
                 name: name,
                 tag: "cyllo_location_client_action",
                 target: "current",
+                params: {
+                    id
+                }
             })
         } else if (barcode === 'action_scrap') {
             this.actionService.doAction({
@@ -106,7 +136,7 @@ export class CylloBarcode extends Component {
                 target: 'self',
             })
         } else {
-            var data = await jsonrpc('/barcode/main-barcode', {
+            const data = await jsonrpc('/barcode/main-barcode', {
                 'code': barcode,
                 'company_id': this.companyService.currentCompany.id,
             })
@@ -131,7 +161,10 @@ export class CylloBarcode extends Component {
                     type: "ir.actions.client",
                     name: data.stock_transfer_name,
                     tag: "cyllo_location_client_action",
-                    target: "current"
+                    target: "current",
+                    params: {
+                        id: data.stock_transfer_id
+                    }
                 })
             } else if (data.type === 'location') {
                 localStorage.setItem('cyllo-barcode-inventory', data.stock_transfer_id)
@@ -140,7 +173,8 @@ export class CylloBarcode extends Component {
                     type: "ir.actions.client",
                     name: data.stock_transfer_name,
                     tag: "cyllo_location_client_action",
-                    target: "current"
+                    target: "current",
+
                 })
             } else {
                 this.sound.Alert.play()
@@ -151,30 +185,63 @@ export class CylloBarcode extends Component {
             }
         }
     }
+
     /**
      * Function for opening the view for the corresponding operation types
      */
     _onClickOperation(operation_id, name) {
+        localStorage.removeItem('cyllo-barcode-batch-name');
         localStorage.setItem('cyllo-barcode-operation-type', operation_id)
         localStorage.setItem('cyllo-barcode-operation-name', name)
         this.actionService.doAction({
-            type: "ir.actions.client",
-            name: "Operation",
-            tag: "cyllo_stock_picking_client_action",
-            target: "current"
+            type: 'ir.actions.act_window',
+            res_model: 'stock.picking',
+            domain: [
+                ["picking_type_id", "=", Number(operation_id)],
+                ["state", "=", "assigned"],
+                "|",
+                ["user_id", "=", this.user.userId],
+                ["user_id", "=", false]
+            ],
+            view_mode: 'kanban',
+            name: name,
+            views: [
+                [false, 'kanban']
+            ],
+            target: 'main',
+            context: {
+                'kanban_view_ref': 'cyllo_barcode.view_stock_picking_kanban'
+            }
         })
     }
+
     /**
      * Function for opening batch view
      */
     _onClickOpenBatch() {
+        localStorage.removeItem('cyllo-barcode-operation-name');
+        localStorage.setItem('cyllo-barcode-batch-name', 'Batch Transfers');
         this.actionService.doAction({
-            type: "ir.actions.client",
-            name: 'Batch Transfer',
-            tag: "cyllo_batch_client_action",
-            target: "current",
-        })
+            type: 'ir.actions.act_window',
+            res_model: 'stock.picking.batch',
+            domain: [
+                ["state", "=", "in_progress"],
+                "|",
+                ["user_id", "=", this.user.userId],
+                ["user_id", "=", false]
+            ],
+            view_mode: 'kanban',
+            name: "Batch Transfers",
+            views: [
+                [false, 'kanban']
+            ],
+            target: 'main',
+            context: {
+                'kanban_view_ref': 'cyllo_barcode.view_stock_picking_batch_kanban'
+            }
+        });
     }
+
     /**
      * Function for opening product quantity view
      */
@@ -186,6 +253,7 @@ export class CylloBarcode extends Component {
             target: "current",
         })
     }
+
     /**
      * Function for open web cam and scan the barcode
      */
@@ -197,6 +265,30 @@ export class CylloBarcode extends Component {
             }
         })
     }
+
+    get availableOperations() {
+        return this.state.types.slice(0, this.state.index)
+    }
+
+    get hasShowMore() {
+        const showMore = this.state.types.length
+        return showMore > 4 && this.state.index < showMore
+    }
+
+    handleShowMore() {
+        if (this.isSmall) {
+            const maxIndex = this.state.types.length;
+            this.state.index = Math.min(this.state.index + 6, maxIndex);
+        } else {
+            this.root.el.querySelector('#BarcodeMainModal').style.display = 'block'
+        }
+    }
+
+    get isSmall() {
+        return this.env.isSmall
+    }
 }
+
 CylloBarcode.template = "cyllo_barcode.Barcode";
+CylloBarcode.components = {Dropdown, DropdownItem}
 actionRegistry.add('cyllo_barcode_tags', CylloBarcode);

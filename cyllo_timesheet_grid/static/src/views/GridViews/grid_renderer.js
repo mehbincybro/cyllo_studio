@@ -31,6 +31,7 @@ export class GridRenderer extends Component {
         this.unblock = unblock;
         this.project = useState({ projectVal: {} })
         this.projectRef = useRef('project-project')
+        this.MainGridRenderer = useRef('MainGridRenderer')
         this.taskRef = useRef('project-task')
         this.task = useState({ taskVal: {} })
         this.timerStartsRunning = useState({timer:false})
@@ -61,6 +62,7 @@ export class GridRenderer extends Component {
             this.isGrouped = this.props.list.isGrouped || false;
             // Update the component state with new records from props
             this.state.records = this.props.list.records;
+            this.closeDrop();
             // Update the table header
             this.updateTableHead();
             // Refresh the data display based on search criteria
@@ -95,7 +97,8 @@ export class GridRenderer extends Component {
          * Retrieves employee work hour data for overtime calculation and checks for day-hour conditions.
          */
         onWillStart(async () => {
-            // Retrieve employee work hour data for overtim calculation
+            // Retrieve employee work hour data for overtime calculation
+
             this.table.employeeWorkHour = await this.orm.call('timesheet.grid', 'overtime_work', [session.uid]);
             // Check for day-hour conditions by invoking the day_hour_check method
             this.isDay = await this.orm.call('timesheet.grid', 'day_hour_check', []).then((result) => {
@@ -195,6 +198,20 @@ export class GridRenderer extends Component {
             // Update the task value
             this.task.taskVal = { id: newRecord, display_name: searchQuery };
         };
+    }
+    async closeDrop(){
+        const self = this
+        window.addEventListener('click', function (event) {
+            const recordContainer = self.MainGridRenderer.el?.querySelector('#recordContainer');
+            const recordLink = self.MainGridRenderer.el?.querySelector('#recordLink');
+            // Check if the clicked element is outside the dropdown or the button
+            if (!recordContainer?.contains(event.target) && !recordLink?.contains(event.target)) {
+                // Hide the dropdown by removing 'show' class
+                if (recordContainer?.classList?.contains('show')) {
+                    recordContainer?.classList?.remove('show')
+                }
+            }
+        });
     }
     /**
      * Starts counting time from a specified starting point and updates the time grid accordingly.
@@ -296,8 +313,8 @@ export class GridRenderer extends Component {
             this.viewDay.currentViewDate.getYear() === new Date().getYear()
         );
         // Set the CSS properties for the table's footer and employee head based on the current date match
-        this.table.cssFoot = isCurrentDate ? '#e7e9ed' : '';
-        this.table.employeeHead = isCurrentDate ? '#ebedca' : '';
+        this.table.cssFoot = isCurrentDate ? '#e7e9ed !important' : '';
+        this.table.employeeHead = isCurrentDate ? '#ebedca !important' : '';
     }
     //Function to set the mouse hover for week and month horizontal and vertical styling
     /**
@@ -521,7 +538,6 @@ export class GridRenderer extends Component {
         const today = new Date()
         var mapped_data = filteredResult.map( data => data.data.task_id[0])
         var remainingHoursForTasks = await this.orm.call("timesheet.grid", 'fetch_remaining_hours' ,[mapped_data])
-        // Specify keys for each value in a tuple
         const keys = ['id', 'remaining_hours', 'allocated_hours', 'effective_hours'];
         // Convert each tuple into an object with specified keys
         remainingHoursForTasks = remainingHoursForTasks.map(values => {
@@ -1082,12 +1098,14 @@ export class GridRenderer extends Component {
         const stopButton = this.element.el.querySelector('.btn_stop_timer');
         const discardButton = this.element.el.querySelector('.btn_discard_timer');
         const shortKey = this.element.el.querySelector('.short_key');
+        const container = this.element.el.querySelector('.cy-record_container')
         if(this.myTimeSheet){
             startButton.style.display = "none";
             stopButton.style.display = "block";
             discardButton.style.display = "block";
             shortKey.style.display = "none";
         }
+        container?.classList.add("div-expanded-start-cy-grid")
         this.timerStartsRunning.timer = true;
         this.grid.record = this.props.list.model.root;
         await this.grid.record.addNewRecord(this.editable === "top");
@@ -1122,6 +1140,8 @@ export class GridRenderer extends Component {
         const stopButton = ev.target.offsetParent.querySelector('.btn_stop_timer');
         const discardButton = ev.target.offsetParent.querySelector('.btn_discard_timer');
         const shortKey = ev.target.offsetParent.querySelector('.short_key');
+        const container = this.element.el.querySelector('.cy-record_container')
+        container.classList.remove("div-expanded-start-cy-grid")
         startButton.style.display = "block";
         stopButton.style.display = "none";
         discardButton.style.display = "none";
@@ -1144,6 +1164,8 @@ export class GridRenderer extends Component {
         const stopButton = this.element.el.querySelector('.btn_stop_timer');
         const discardButton = this.element.el.querySelector('.btn_discard_timer');
         const shortKey = this.element.el.querySelector('.short_key');
+        const container = this.element.el.querySelector('.cy-record_container')
+        container.classList.remove("div-expanded-start-cy-grid")
         const inputVals = this.element.el.querySelector('.analytic-description-input').value;
         const project_id = this.element.el.querySelector('.project-input')?.dataset.projectId;
         const task_id = this.element.el.querySelector('.task-input')?.dataset.taskId;
@@ -1365,7 +1387,7 @@ export class GridRenderer extends Component {
         const monthAndDate = date.toLocaleString("en-US", { month: "short", day: "2-digit" });
         const formattedDate = date.toLocaleString("en-US", { weekday: "short", month: "short", day: "2-digit" });
         const today = new Date();
-        const css = (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getYear() === today.getYear()) ? '#ebedca' : 'unset';
+        const css = (date.getDate() === today.getDate() && date.getMonth() === today.getMonth() && date.getYear() === today.getYear()) ? 'current-date' : '';
         return { 'dateObj': date, 'day': day + ', '+ monthAndDate, 'monthAndDate': monthAndDate, 'css': css, 'formattedDate': formattedDate };
     }
     /**
@@ -1404,7 +1426,6 @@ export class GridRenderer extends Component {
             this.viewDay.currentViewDate = dateObj;
         } else {
             this.block();
-//            dateObj.setDate(dateObj.getDate() - dateObj.getDay());
             this.viewDay.currentViewDate = dateObj;
         }
         this.updateTableHead(selected);

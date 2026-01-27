@@ -2,7 +2,8 @@
 <odoo>
     <record id="mail_template_request_submitted" model="mail.template">
         <field name="name">REQUEST SUBMITTED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.employee_id.work_email}}</field>
         <field name="subject">" Request for service {{object.name}}"</field>
@@ -24,7 +25,8 @@
     </record>
     <record id="mail_template_request_for_service" model="mail.template">
         <field name="name">REQUEST FOR SERVICE</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.service_handler_id.work_email}}</field>
         <field name="subject">" Request for service {{object.name}}"</field>
@@ -46,7 +48,8 @@
     </record>
     <record id="mail_template_request_cancelled" model="mail.template">
         <field name="name">REQUEST CANCELLED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.employee_id.work_email}}</field>
         <field name="subject">" Service request have been cancelled {{object.name}}"</field>
@@ -68,7 +71,8 @@
     </record>
     <record id="mail_template_equipment_returned" model="mail.template">
         <field name="name">EQUIPMENT RETURNED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.employee_id.work_email}}</field>
         <field name="subject">"Equipment have been received {{object.name}}"</field>
@@ -90,7 +94,8 @@
     </record>
     <record id="mail_template_request_cancelled" model="mail.template">
         <field name="name">REQUEST CANCELLED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.service_handler_id.work_email}}</field>
         <field name="subject">"Service request have been cancelled {{object.name}}"</field>
@@ -114,7 +119,8 @@
     </record>
     <record id="mail_template_equipment_ready_to_return" model="mail.template">
         <field name="name">EQUIPMENT READY TO RETURN</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.service_handler_id.work_email}}</field>
         <field name="subject">"Equipment is ready to return{{object.name}}"</field>
@@ -136,10 +142,12 @@
     </record>
     <record id="mail_template_service_completed" model="mail.template">
         <field name="name">SERVICE COMPLETED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.service_handler_id.work_email}}</field>
-        <field name="subject">"Service have been completed: {{object.name}}"</field>
+        <field name="subject">"Service have been completed: {{object.name}}"
+        </field>
         <field name="lang">{{object.employee_id.lang}}</field>
         <field name="auto_delete" eval="True"/>
         <field name="body_html" type="html">
@@ -158,10 +166,11 @@
     </record>
     <record id="mail_template_service_completed" model="mail.template">
         <field name="name">SERVICE COMPLETED</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.employee_id.work_email}}</field>
-        <field name="subject">"Service have been completed: {{object.name}}"</field>
+        <field name="subject">" Service have been completed: {{object.name}}"</field>
         <field name="lang">{{object.employee_id.lang}}</field>
         <field name="auto_delete" eval="True"/>
         <field name="body_html" type="html">
@@ -180,10 +189,11 @@
     </record>
     <record id="mail_template_assigned_on_a_request" model="mail.template">
         <field name="name">ASSIGNED ON A REQUEST</field>
-        <field name="model_id" ref="cyllo_hr_service_management.model_hr_service"/>
+        <field name="model_id"
+               ref="cyllo_hr_service_management.model_hr_service"/>
         <field name="email_from">"{{object.company_id.email}}"</field>
         <field name="email_to">{{object.service_executor_id.work_email}}</field>
-        <field name="subject">"Service request have been assigned :{{object.name}}"</field>
+        <field name="subject">" Service request have been assigned :{{object.name}}"</field>
         <field name="lang">{{object.employee_id.lang}}</field>
         <field name="auto_delete" eval="True"/>
         <field name="body_html" type="html">
@@ -201,3 +211,5 @@
         </field>
     </record>
 </odoo>
+
+

@@ -8,11 +8,17 @@
             <tree>
                 <field name="reference"/>
                 <field name="employee_id"/>
-                <field name="joining_date"/>
                 <field name="contract_type"/>
                 <field name="basic_salary" widget="monetary"/>
                 <field name="gratuity_years"/>
-                <field name="state" widget="badge"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="gratuity_amount" sum="Total"/>
+                <field name="state" widget="badge"
+                       decoration-muted="state == 'draft'"
+                       decoration-info="state == 'submit'"
+                       decoration-primary="state == 'approve'"
+                       decoration-success="state == 'paid'"
+                       decoration-danger="state == 'cancel'"/>
             </tree>
         </field>
     </record>
@@ -23,24 +29,33 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_submit" string="Submit" type="object" class="btn-primary" invisible="state != 'draft'"
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary" invisible="state != 'draft'"
                             groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
-                    <button name="action_approve" string="Approve" type="object" class="btn-primary" invisible="state != 'submit'"
+                    <button name="action_cancel" string="Cancel" type="object" invisible="state in ('paid', 'cancel')"
                             groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
-                    <button name="action_cancel" string="Cancel" type="object" class="btn-primary" invisible="state in ('draft', 'approve', 'cancel')"
+                    <button name="action_set_to_draft" string="Set to draft" type="object" invisible="state != 'cancel'"
                             groups="cyllo_payroll_management.group_cyllo_payroll_management_manager"/>
                     <field name="state" widget="statusbar"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <div class="d-flex">
+                            <div class="d-flex justify-content-between align-items-center" style="padding: 5px;">
+                                <!-- Left Side: Reference Field -->
                                 <field name="reference" class="text-break"/>
+
+                                <!-- Right Side: Gratuity Amount with Label -->
+                                <div class="d-flex align-items-center" invisible="gratuity_amount == 0">
+                                    <label for="gratuity_amount" string="Gratuity Payment:" class="me-1"/>
+                                    <field name="gratuity_amount" class="text-end text-primary" widget="monetary"/>
+                                </div>
                             </div>
                         </h1>
                         <h1>
                             <div class="d-flex">
-                                <field name="employee_id" readonly="state in('approved')" class="text-break"/>
+                                <field name="employee_id"
+                                       readonly="state in ('approve','paid','cancel')"
+                                       class="text-break"/>
                             </div>
                         </h1>
                     </div>
@@ -48,17 +63,25 @@
                         <group>
                             <separator string="Employee Details"/>
                             <field name="currency_id" invisible="True"/>
-                            <field name="contract_type" force_save="1"/>
-                            <field name="joining_date" force_save="1"/>
-                            <field name="basic_salary" force_save="1" options="{'currency_field': 'currency_id'}"
+                            <field name="contract_type"/>
+                            <field name="contract_id" force_save="1"/>
+                            <field name="basic_salary"
+                                   options="{'currency_field': 'currency_id'}"
                                    class="oe_inline" widget="monetary"/>
                         </group>
                         <group>
                             <separator string="Gratuity Details"/>
-                            <field name="gratuity_configuration_id" force_save="1"/>
-                            <field name="gratuity_duration_line_id" force_save="1"/>
-                            <field name="gratuity_amount" force_save="1" widget="monetary"
-                                   options="{'currency_field': 'currency_id'}" class="oe_inline"/>
+                            <field name="gratuity_configuration_id"
+                                   domain="[('id','in',gratuity_configuration_ids)]"
+                                   readonly="state in ('approve','paid','cancel')"/>
+                            <field name="gratuity_configuration_ids" invisible="1"/>
+                            <field name="gratuity_duration_line_id"
+                                   domain="[('gratuity_configuration_id','=',gratuity_configuration_id),('id','in',gratuity_duration_line_ids)]"
+                                   readonly="state in ('approve','paid','cancel')"/>
+                            <field name="gratuity_duration_line_ids" invisible="1"/>
+                            <field name="divide_days"/>
+                            <field name="extra_days"/>
+                            <field name="percentage"/>
                         </group>
                     </group>
                     <group>
@@ -67,12 +90,6 @@
                             <field name="total_working_years" force_save="1"/>
                             <field name="gratuity_years" force_save="1"/>
                             <field name="leave_taken" force_save="1"/>
-                        </group>
-                        <group>
-                            <separator string="Accounting Details"/>
-                            <field name="journal_id" force_save="1"/>
-                            <field name="credit_account_id" force_save="1"/>
-                            <field name="debit_account_id" force_save="1"/>
                         </group>
                     </group>
                 </sheet>

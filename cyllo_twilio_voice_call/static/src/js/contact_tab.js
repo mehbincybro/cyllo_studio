@@ -1,5 +1,5 @@
 /** @odoo-module **/
-const { onMounted } = owl;
+const { onMounted , onWillUnmount} = owl;
 import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, useState, useRef, useSubEnv } from "@odoo/owl";
@@ -15,6 +15,7 @@ export class ContactTab extends Component {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
+        this.contact = useRef("contact")
         this.sid = null,
             this.number = null;
         this.PhoneNumber = null,
@@ -36,13 +37,8 @@ export class ContactTab extends Component {
        Fetch partners when the component starts
      */
     async _fetchPartners() {
-        try {
-            const partners = await this.orm.searchRead("res.partner", [], ["name", "phone", "image_1920"]); // Fetch partners with specific fields
-            this.state.partners = partners;
-        } catch (error) {
-            // Handle error fetching partners
-            console.error("Error fetching partners:", error);
-        }
+        const partners = await this.orm.searchRead("res.partner", [], ["name", "phone", "image_1920", "mobile"]);
+        this.state.partners = partners;
     }
 
     /*
@@ -57,7 +53,6 @@ export class ContactTab extends Component {
     */
     get filteredPartners() {
         const searchTerm = this.state.searchTerms;
-
         if (!searchTerm || !this.state.partners.length) {
             return this.state.partners; // Return all partners if search term is empty or partners list is empty
         }
@@ -167,7 +162,7 @@ export class ContactTab extends Component {
     async _OnClickCall() {
         device = this.props.dial_pad.device
         var self = this;
-        this.number = this.state.selectedPartner.phone
+        this.number = this.state.selectedPartner.mobile || this.state.selectedPartner.phone;
         var id = this.state.selectedPartner.id
         if (this.number) {
         if (!this._isValidPhoneNumber(this.number)) {
@@ -230,7 +225,6 @@ export class ContactTab extends Component {
                     });
 
                 } catch (error) {
-                    // Handle any errors if the promise is rejected
                     console.error("Call rejected:", error);
                 }
             }
@@ -270,7 +264,6 @@ export class ContactTab extends Component {
         }
         this.resetTimer();
     }
-
     /*
         By clicking on it we can move to the recent call templates
     */

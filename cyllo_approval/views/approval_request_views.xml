@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_approval_request_tree" model="ir.ui.view">
+        <field name="name">view.approval.request.tree</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <tree create="false" open_form_view="True">
+                <field name="name"/>
+                <field name="requested_by_id" optional="show"/>
+                <field name="approver_ids" optional="hide"
+                       widget="many2many_tags"/>
+                <field name="approved_by_id" optional="hide"/>
+                <field name="rejected_by_id" optional="hide"/>
+                <field name="requested_date" optional="hide"/>
+                <field name="approved_date" optional="hide"/>
+                <field name="model_name" optional="show"/>
+                <field name="comment" optional="hide"/>
+                <field name="state"
+                       decoration-info="state == 'pending'"
+                       decoration-primary="state == 'transferred'"
+                       decoration-success="state == 'approved'"
+                       decoration-danger="state == 'rejected'" optional="show"/>
+                <field name="approval_rule_id" column_invisible="1"/>
+                <field name="approval_transferred" column_invisible="1"/>
+                <button name="action_view_record" type="object" string="View"/>
+                <button name="action_approve" type="object" string="Accept"
+                        class="btn-icon btn-success btn-uniform" invisible="state == 'approved' or state == 'rejected' or uid not in approver_ids"/>
+                <button name="action_reject" type="object" string="Reject"
+                        class="btn-icon btn-danger btn-uniform" invisible="state == 'approved' or state == 'rejected' or uid not in approver_ids"/>
+                <button name="action_forward" type="object" string="Forward"
+                        class="btn-icon btn-info btn-uniform" invisible="approval_transferred == False or state == 'approved' or state == 'rejected' or uid not in approver_ids"/>
+            </tree>
+        </field>
+    </record>
+    <!-- search view for the approval.request model -->
+    <record id="view_approval_request_search" model="ir.ui.view">
+        <field name="name">view.approval.request.search</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <search string="Approval Request">
+                <field name="requested_by_id"/>
+                <field name="approver_ids"/>
+                <field name="approved_by_id"/>
+                <filter string="Pending" name='pending'
+                        domain="[('state', '=', 'pending')]"/>
+                <filter string="Transferred" name="transferred"
+                        domain="[('state', '=', 'transferred')]"/>
+                <filter string="Approved" name="approved"
+                        domain="[('state', '=', 'approved')]"/>
+                <filter string="Rejected" name="rejected"
+                        domain="[('state', '=', 'rejected')]"/>
+                <filter string="My Requests" name="my_request"
+                        domain="[('requested_by_id', '=', uid)]"/>
+                <filter string="My Approvals" name="my_request"
+                        domain="[('approver_ids', '=', uid)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="State" name="group_by_state"
+                            context="{'group_by':'state'}"/>
+                    <filter string="Requested By"
+                            name="group_by_requested_by_id"
+                            context="{'group_by':'requested_by_id'}"/>
+                    <filter string="Approver" name="group_by_approver_ids"
+                            context="{'group_by':'approver_ids'}"/>
+                    <filter string="Model" name="group_by_model_name"
+                            context="{'group_by':'model_name'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- kanban view for the approval.request model -->
+    <record id="view_approval_request_kanban" model="ir.ui.view">
+        <field name="name">view.approval.request.kanban</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <kanban sample="1">
+                <field name="active" invisible="1"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <t t-if="widget.deletable">
+                            <a role="menuitem" type="delete"
+                               class="dropdown-item">Delete
+                            </a>
+                        </t>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill o_res_partner_kanban">
+                            <div class="ribbon ribbon-top-right"
+                                 invisible="active">
+                                <span class="text-bg-danger">Archived</span>
+                            </div>
+                            <div class="oe_kanban_details d-flex flex-column justify-content-between">
+                                <div>
+                                    <strong class="o_kanban_record_title oe_partner_heading">
+                                        <field name="name"/>
+                                    </strong>
+                                    <div class="o_kanban_tags_section oe_kanban_partner_categories"/>
+                                    <ul>
+                                        <li t-if="record.requested_by_id.raw_value">
+                                            <t t-if="record.requested_by_id.raw_value">
+                                                <field name="requested_by_id"/>
+                                            </t>
+                                        </li>
+                                        <li t-if="record.approver_ids.raw_value">
+                                            <t t-if="record.approver_ids.raw_value">
+                                                <field name="approver_ids"/>
+                                            </t>
+                                        </li>
+                                        <li t-if="record.requested_date.raw_value">
+                                            <t t-if="record.requested_date.raw_value">
+                                                <field name="requested_date"/>
+                                            </t>
+                                        </li>
+                                        <li t-if="record.approved_date.raw_value">
+                                            <t t-if="record.approved_date.raw_value">
+                                                <field name="approved_date"/>
+                                            </t>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left">
+                                        <t t-if="record.model_name.raw_value">
+                                            <field name="model_name"/>
+                                        </t>
+                                        <t t-if="record.state.raw_value">
+                                            <field name="state"
+                                                   widget="label_selection"
+                                                   options="{'classes': {'pending': 'info', 'transferred': 'primary', 'approved': 'success', 'rejected': 'danger'}}"/>
+                                        </t>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <button name="action_view_record"
+                                                type="object" string="View"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Pivot view for the approval.request model -->
+    <record id="view_approval_request_pivot" model="ir.ui.view">
+        <field name="name">view.approval.request.pivot</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <pivot string="Approval Requests" sample="1">
+                <field name="id" string="Count" type="count"/>
+                <field name="state" string="State"/>
+                <field name="requested_by_id" string="Requested By"/>
+                <field name="approver_ids" string="Approver"/>
+                <field name="approved_by_id" string="Approved By"/>
+                <field name="group_id" string="Group"/>
+                <field name="approval_rule_id" string="Approval Rule"/>
+                <field name="requested_date" string="Requested Date"
+                       type="date"/>
+                <field name="approved_date" string="Approved Date" type="date"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- Graph view for the approval.request model -->
+    <record id="view_approval_request_graph" model="ir.ui.view">
+        <field name="name">view.approval.request.graph</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <graph string="Approval Logs">
+                <!-- Measure: Total Logs -->
+                <field name="id" string="Count" type="count"/>
+                <!-- Grouping Options -->
+                <field name="state" string="State"/>
+                <field name="requested_by_id" string="Requested By"/>
+                <field name="approval_rule_id" string="Approval Rule"/>
+                <field name="requested_date" string="Requested Date"
+                       type="date"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_approval_request_view" model="ir.actions.act_window">
+        <field name="name">Approval requests</field>
+        <field name="res_model">approval.request</field>
+        <field name="view_mode">tree,kanban,pivot,graph</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Approval Requests
+            </p>
+            <p>
+                You can view approval requests from here.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_approval_request" name="Approval Requests"
+              action="action_approval_request_view"
+              parent="menu_cyllo_approval_root"/>
+</odoo>

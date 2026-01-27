@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from datetime import datetime
 
 from odoo import _, api, fields, models
@@ -16,7 +36,7 @@ class AdvancePayment(models.TransientModel):
     total_amount = fields.Float(help="Total Amount from the order")
     amount_difference = fields.Float(help="Difference between total amount and"
                                           " advance amount")
-    currency_id = fields.Many2one(comodel_name="res.currency")
+    currency_id = fields.Many2one(comodel_name="res.currency", readonly=True)
     partner_id = fields.Many2one(comodel_name="res.partner")
     date = fields.Datetime(string="Payment Date")
     company_id = fields.Many2one("res.company")
@@ -53,11 +73,13 @@ class AdvancePayment(models.TransientModel):
 
     @api.depends('company_id')
     def _compute_journal_id(self):
-        """Compute the journal"""
+        """Compute the default journal based on company"""
         for wizard in self:
-            wizard.journal_id = self.env['account.journal'].search([
+            domain = [
                 *self.env['account.journal']._check_company_domain(wizard.company_id),
-                ('type', 'in', ('bank', 'cash'))], limit=1)
+                ('type', 'in', ('bank', 'cash'))
+            ]
+            wizard.journal_id = self.env['account.journal'].search(domain, limit=1)
 
     def _compute_total_amount(self):
         """Compute the total amount and payment amount for the current record.
@@ -67,10 +89,10 @@ class AdvancePayment(models.TransientModel):
            For purchases, it retrieves the active purchase order and calculates the total amount similarly."""
         if self._context.get("type") == 'sale':
             active_id = self.env["sale.order"].browse(self._context.get("active_id"))
-            existing_advance_payment_ids = self.env["account.payment"].search(['sale_id', '=', active_id.id])
+            existing_advance_payment_ids = self.env["account.payment"].search([('sale_id', '=', active_id.id)])
         else:
             active_id = self.env["purchase.order"].browse(self._context.get("active_id"))
-            existing_advance_payment_ids = self.env["account.payment"].search(['purchase_id', '=', active_id.id])
+            existing_advance_payment_ids = self.env["account.payment"].search([('purchase_id', '=', active_id.id)])
         for rec in self:
             rec.total_amount = active_id.amount_total - sum(existing_advance_payment_ids.mapped('amount')) \
                 if existing_advance_payment_ids else active_id.amount_total
@@ -113,6 +135,7 @@ class AdvancePayment(models.TransientModel):
                 'company_id': self.env.user.company_id.id,
                 'date': self.date,
                 'amount': self.pay_amount,
+                'currency_id': self.currency_id.id,
                 'payment_type': 'inbound' if self._context.get("type") == 'sale' else 'outbound',
                 'partner_type': 'customer' if self._context.get("type") == 'sale' else 'supplier',
                 'sale_id': self._context.get("active_id") if self._context.get("type") == 'sale' else False,

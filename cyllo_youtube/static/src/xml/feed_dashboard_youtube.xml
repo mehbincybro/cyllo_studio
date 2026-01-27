@@ -5,46 +5,56 @@
        t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('cy-social_glance-container')]"
                position="inside">
-            <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box">
+            <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box"
+                 t-att-class="state.currentAccount == 'Youtube' ? 'active' : ''"
+                 t-on-click="() => this.showYtFeed()">
                 <div class="w-100 d-flex justify-content-between align-items-center flex-wrap">
                 <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
                     <img src="cyllo_youtube/static/src/img/youtube.png"
                          alt="" style="width: 20px;"/>
-                    Youtube
+                    YouTube
                 </div>
                     <div class="d-flex align-items-center gap-2 cy-soical-market_glancecontainer">
-                    <div class="d-flex align-items-center gap-1 pt-2 ">
-                        <i class="ri-focus-2-line cy-icons "/>
-                        <p class="cy-soical-market_txt ">
-                            <t t-esc="state.YoutubeFeeds.length"/></p>
-                    </div>
-                        <div class="d-flex align-items-center gap-1 pt-2">
-                        <i class="ri-heart-line cy-icons"/>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-article-line cy-icons"/>
                             <p class="cy-soical-market_txt">
-                                <t t-esc="state.YtTotalLikes"/></p>
-                    </div>
-                        <div class="d-flex align-items-center gap-1 pt-2">
-                        <i class="ri-chat-3-line cy-icons"/>
+                                <t t-esc="state.YtFeeds.length"/></p>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-heart-line cy-icons"/>
                             <p class="cy-soical-market_txt">
-                                <t t-esc="state.YtTotalComments"/></p>
+                                    <t t-esc="state.YtFeeds?.reduce((sum, post) => sum + (+post.likes_count || 0), 0);"/></p>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            <i class="ri-chat-3-line cy-icons"/>
+                            <p class="cy-soical-market_txt">
+                                    <t t-esc="state.YtFeeds?.reduce((sum, post) => sum + (+post.comments_count || 0), 0)"/></p>
+                        </div>
                     </div>
-                </div>
                 </div>
             </div>
         </xpath>
-        <xpath expr="//div[hasclass('cy-social_maketing-topSection')]"
-               position="inside">
-                 <div class="col  cy-social-marketing-col position-relative">
-                    <div>
-                        <div class="cy-social-market_box cy-border-btm py-3 cy-social_postHead">
-                            <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
-                                <img src="cyllo_youtube/static/src/img/youtube.png"
-                                     alt="" style="width: 25px;"/>
-                                Page Posts: Youtube.
-                            </div>
+        <xpath expr="//div[hasclass('cy-social_maketing-topSection')]" position="inside">
+            <div t-if="state.currentAccount == 'Youtube'" class="col cy-social-marketing-col position-relative">
+                <div>
+                    <div class="cy-social-market_box cy-border-btm py-3 cy-social_postHead">
+                        <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
+                            <img src="cyllo_youtube/static/src/img/youtube.png"
+                                 alt="" style="width: 25px;"/>
+                            <t t-esc="state.YtFeeds[0]?.author_name">Youtube</t>
+                            <select t-on-change="onChannelChange" class="form-select form-select-sm">
+                                <t t-foreach="state.channels" t-as="ch" t-key="ch.id">
+                                    <option t-att-value="ch.id"
+                                            t-att-selected="ch.id == state.selectedChannelId ? 'selected' : false">
+                                        <t t-esc="ch.name"/>
+                                        (<t t-esc="ch.account_name"/>)
+                                    </option>
+                                </t>
+                            </select>
                         </div>
-                        <t t-set="flag_youtube" t-value="true"/>
-                        <t t-if="state.demo">
+                    </div>
+                    <t t-set="flag_youtube" t-value="true"/>
+                    <t t-if="state.demo">
                         <div class="py-2  cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
@@ -94,7 +104,7 @@
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+                        <div class="py-2  cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="/cyllo_youtube/static/src/img/youtube.png"/>
@@ -109,41 +119,41 @@
                                 <span class="badge rounded-pill">Demo</span>
                                 </div>
                             </div>
-                                <p class="cy-soical-market_content">
+                            <p class="cy-soical-market_content">
                                 50% offer for bag !,Buy Now
                             </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.youtube.com/watch?v=tpo0iwghjh</a>
+                            <a href="#"
+                               class="cy-soical_marketing-link">https://www.youtube.com/watch?v=tpo0iwghjh</a>
 
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
                                     <img src="/cyllo_social_media_marketing/static/src/img/demo6.jpg"
                                          alt=""
                                          class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
                                     <div t-on-click="() => this.ComputeDemoData('yt_demo_2')">
                                         <span style="cursor: pointer;">View Insights</span>
                                     </div>
-                                    <div id="Details_yt_demo_2"
-                                         class="d-flex align-items-center gap-2 d-none">
+                                <div id="Details_yt_demo_2"
+                                     class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1">
+                                    <a class="d-flex align-items-center gap-1">
                                         <i class="fa fa-eye cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">4</p>
+                                        <p class="cy-soical-market_txt">4</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
+                                    <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
                                         <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+                        <div class="py-2  cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="/cyllo_youtube/static/src/img/youtube.png"/>
@@ -158,41 +168,41 @@
                                 <span class="badge rounded-pill">Demo</span>
                                 </div>
                             </div>
-                                <p class="cy-soical-market_content">
+                            <p class="cy-soical-market_content">
                                  Flash Sale Alert!
                             </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.youtube.com/watch?v=ugrhjfxfds</a>
+                            <a href="#"
+                               class="cy-soical_marketing-link">https://www.youtube.com/watch?v=ugrhjfxfds</a>
 
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
                                     <img src="/cyllo_social_media_marketing/static/src/img/demo7.jpg"
                                          alt=""
                                          class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
                                     <div t-on-click="() => this.ComputeDemoData('yt_demo_3')">
                                         <span style="cursor: pointer;">View Insights</span>
                                     </div>
-                                    <div id="Details_yt_demo_3"
-                                         class="d-flex align-items-center gap-2 d-none">
+                                <div id="Details_yt_demo_3"
+                                     class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1">
+                                    <a class="d-flex align-items-center gap-1">
                                         <i class="fa fa-eye cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">4</p>
+                                        <p class="cy-soical-market_txt">4</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
+                                    <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
                                         <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+                        <div class="py-2  cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="/cyllo_youtube/static/src/img/youtube.png"/>
@@ -207,41 +217,41 @@
                                 <span class="badge rounded-pill">Demo</span>
                                 </div>
                             </div>
-                                <p class="cy-soical-market_content">
+                            <p class="cy-soical-market_content">
                                 Introducing our latest limited edition collection. Explore unique designs crafted just for you.
                             </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.youtube.com/watch?v=urrfdressw</a>
+                            <a href="#"
+                               class="cy-soical_marketing-link">https://www.youtube.com/watch?v=urrfdressw</a>
 
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
                                     <img src="/cyllo_social_media_marketing/static/src/img/demo8.jpg"
                                          alt=""
                                          class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
                                     <div t-on-click="() => this.ComputeDemoData('yt_demo_4')">
                                         <span style="cursor: pointer;">View Insights</span>
                                     </div>
-                                    <div id="Details_yt_demo_4"
-                                         class="d-flex align-items-center gap-2 d-none">
+                                <div id="Details_yt_demo_4"
+                                     class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1">
+                                    <a class="d-flex align-items-center gap-1">
                                         <i class="fa fa-eye cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">4</p>
+                                        <p class="cy-soical-market_txt">4</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
+                                    <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
                                         <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div class="py-2  cy-social-market_box cy-border-btm">
+                        <div class="py-2  cy-social-market_box cy-border-btm">
                             <div class="d-flex gap-2 pt-3">
                                 <div class="cy-social-market_profile">
                                     <img src="/cyllo_youtube/static/src/img/youtube.png"/>
@@ -256,107 +266,112 @@
                                 <span class="badge rounded-pill">Demo</span>
                                 </div>
                             </div>
-                                <p class="cy-soical-market_content">
+                            <p class="cy-soical-market_content">
                                 Weekly Deal Alert
                             </p>
-                                <a href="#"
-                                   class="cy-soical_marketing-link">https://www.youtube.com/watch?v=Pjugtdrxcx</a>
+                            <a href="#"
+                               class="cy-soical_marketing-link">https://www.youtube.com/watch?v=Pjugtdrxcx</a>
 
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
                                     <img src="/cyllo_social_media_marketing/static/src/img/demo9.jpg"
                                          alt=""
                                          class="img-fluid"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
                                     <div t-on-click="() => this.ComputeDemoData('yt_demo_5')">
                                         <span style="cursor: pointer;">View Insights</span>
                                     </div>
-                                    <div id="Details_yt_demo_5"
-                                         class="d-flex align-items-center gap-2 d-none">
+                                <div id="Details_yt_demo_5"
+                                     class="d-flex align-items-center gap-2 d-none">
                                     <a class="d-flex align-items-center gap-1">
                                         <i class="ri-heart-line cy-icons cy-media_icon"/>
                                         <p class="cy-soical-market_txt">10</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1">
+                                    <a class="d-flex align-items-center gap-1">
                                         <i class="fa fa-eye cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">4</p>
+                                        <p class="cy-soical-market_txt">4</p>
                                     </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
+                                    <a class="d-flex align-items-center gap-1  cy-soical-market_comment">
                                         <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt">3</p>
+                                        <p class="cy-soical-market_txt">3</p>
                                     </a>
                                 </div>
                             </div>
                         </div>
-                            <div>
+                        <div>
                     </div>
                         </t>
-                        <t t-foreach="state.Feeds"
-                           t-as="feed" t-key="feed.id"
-                           t-if="feed.youtube_number!=false">
+                    <t t-if="state.YtFeeds" t-foreach="state.YtFeeds"
+                       t-as="feed" t-key="feed.id">
                             <t t-set="flag_youtube" t-value="false"/>
-                            <div class="py-2  cy-social-market_box cy-border-btm ">
-                            <div class="d-flex gap-2 pt-3">
-                                <div class="cy-social-market_profile">
-                                    <img t-attf-src="{{feed.profile_image_url}}"
-                                         onerror="this.src='/cyllo_youtube/static/src/img/youtube-channel-icon.svg';"/>
+                        <div class="py-2  cy-social-market_box cy-border-btm ">
+
+                                <div class="d-flex justify-content-between gap-2 pt-3">
+                                    <div class="d-flex gap-2">
+                                        <div class="cy-social-market_profile">
+                                            <img t-attf-src="{{feed.profile_image_url}}"
+                                                 onerror="this.src='/cyllo_youtube/static/src/img/youtube.png'"/>
+                                        </div>
+                                        <div>
+                                            <p class="cy-social-market_subhead"><t t-esc="feed.author_name"/></p>
+                                            <span class="cy-social-market_sm-head"><t t-esc="feed.posted_date"/></span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <a t-attf-href="{{feed.author_link_url}}" class="ri-external-link-line"
+                                           data-tooltip="External Link" aria-label="External Link"
+                                           style="font-size: 18px"/>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="cy-social-market_subhead">YouTube</p>
-                                    <span class="cy-social-market_sm-head">
-                                        <t t-esc="feed.posted_date"/>
-                                    </span>
-                                </div>
-                            </div>
-                                <p class="cy-soical-market_content">
+
+                            <p class="cy-soical-market_content">
                                 <t t-esc="feed.description"/>
                             </p>
-                                <a t-attf-href="{{feed.author_link_url}}"
-                                   class="cy-soical_marketing-link"><t t-esc="feed.author_link_url"/></a>
 
-                                <div class="row cy-soical-marketing_post m-0 py-2">
+                            <div class="row cy-soical-marketing_post m-0 py-2">
                                 <div class="col-12 p-0">
                                     <iframe class="embed-responsive-item"
-                                            t-attf-src="https://www.youtube.com/embed/{{feed.youtube_number}}"
+                                            t-attf-src="https://www.youtube.com/embed/{{feed.post_id}}"
                                             frameborder="0"
-                                            style="width: inherit;height: 238px;"
+                                            style="width: inherit; height: 350px;"
                                             allowfullscreen="true"/>
                                 </div>
                             </div>
-                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                    <div t-on-click="() => this.ComputeDataYt(feed)">
-                                        <span style="cursor: pointer;">View Insights</span>
+                            <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                    <div class="d-flex align-items-center" style="font-size: 20px; gap: 16px;">
+                                        <span data-tooltip="Likes" aria-label="Likes">
+                                            <i class="ri-thumb-up-line cy-icons cy-media_icon me-1"/>
+                                            <t t-esc="feed.likes_count"/>
+                                        </span>
+                                        <span data-tooltip="Dislikes" aria-label="Dislikes">
+                                            <i class="ri-thumb-down-line cy-icons cy-media_icon me-1"/>
+                                            <t t-esc="feed.dislikes_count"/>
+                                        </span>
+                                        <span t-on-click="() => this.OpenCommentYoutube(feed)"
+                                              role="button" tabindex="0"
+                                              data-tooltip="Comments" aria-label="Comments">
+                                            <i class="ri-chat-3-line cy-icons cy-media_icon me-1"/>
+                                            <t t-esc="feed.comments_count"/>
+                                        </span>
+                                        <span data-tooltip="Views" aria-label="Views">
+                                            <i class="ri-eye-line cy-icons cy-media_icon me-1"/>
+                                            <t t-esc="feed.views_count"/>
+                                        </span>
                                     </div>
-                                    <div t-attf-id="Details_{{feed.id}}"
-                                         class="d-flex align-items-center gap-2 d-none">
-                                    <a class="d-flex align-items-center gap-1">
-                                        <i class="ri-heart-line cy-icons cy-media_icon"/>
-                                        <p class="cy-soical-market_txt"><t t-esc="feed.likes_count"/></p>
-                                    </a>
-                                        <a class="d-flex align-items-center gap-1">
-                                        <i class="fa fa-eye cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt"><t t-esc="feed.views_count"/></p>
-                                    </a>
-                                        <a class="d-flex align-items-center gap-1  cy-soical-market_comment"
-                                           t-on-click="() => this.OpenCommentYoutube(feed)">
-                                        <i class="ri-chat-3-line  cy-icons cy-media_icon"/>
-                                            <p class="cy-soical-market_txt"><t t-esc="feed.comments_count"/></p>
-                                    </a>
-                                </div>
                             </div>
                         </div>
                         </t>
-                        <div class="cy-social-marketing-nostream"
-                             t-if="flag_youtube  and !state.demo">
+                    <div class="cy-social-marketing-nostream"
+                         t-if="flag_youtube  and !state.demo">
                             <img src="images/undraw_no_data_re_kwbl 1 (1).svg"
                                  alt=""/>
-                            <p class="cy-nostream_add-msg">No Post added yet!</p>
-                            <span class="cy-nostream_add-subtext"><a t-on-click="() => this.CreatePost()" class="cy-social-marketing__link">Add a
+                        <p class="cy-nostream_add-msg">No Post added yet!</p>
+                        <span class="cy-nostream_add-subtext"><a t-on-click="() => this.CreatePost()" class="cy-social-marketing__link">Add a
                                                     post</a>
-                                to keep an eye on your own posts and
-                                monitor all social activities</span>
+                            to keep an eye on your own posts and
+                            monitor all social activities</span>
 
                         </div>
                     </div>
@@ -368,90 +383,158 @@
                  t-ref="social_comment_modal_youtube">
                 <div class="modal-dialog cy-onboarding_modalbox">
                     <div class="modal-content cy-modal_content">
-                        <div class="modal-header  cy-social_commentHead d-flex  pt-4">
-                            <h5 class="cy-social_maketing-title">Comments</h5>
-                            <span class="cy-icons cy-social_cmnt-closebtn"
-                                  t-on-click="() => this.CloseCommentYoutube()"><i class="ri-close-line"/></span>
-                        </div>
-                        <div class="modal-body pt-0 cy-modal_main-body">
-                            <form>
-                                <div class="form-group py-3 ">
-                                    <textarea
-                                            class="form-control cy-button-stroke"
-                                            id="exampleFormControlTextarea1"
-                                            rows="5"
-                                            placeholder="Write a comment...."
-                                            t-ref="new_message_yt"/>
-                                </div>
-                            </form>
-                            <div class="d-flex justify-content-end">
-                                <button class="btn cy-button-primary-stroke text-end"
-                                        t-on-click="() => this.PostCommentYoutube(feed)">POST</button>
+                        <div class="modal-header cy-social_commentHead d-flex">
+                            <div class="d-flex align-items-center gap-2 cy-soical-marketing_insights">
+                                <span>Comments</span>
                             </div>
+                            <button type="button" class="btn-close" aria-label="Close"
+                                    t-on-click="() => this.CloseCommentYoutube()" tabindex="-1"/>
+                        </div>
+
+                        <div class="modal-body pt-0 cy-modal_main-body">
+
                             <t t-foreach="state.comments" t-as="comment"
                                t-key="comment.id" t-if="state.comments">
                                 <div class="cy-social_market-commentReply">
                                     <div class="cy-social_marketComment-box">
-                                        <div class="d-flex justify-content-between">
-                                            <div class="d-flex align-items-center gap-2">
-                                                <span><a href="" class="cy-main-sectionhead ">
-                                                    <t t-esc="comment.username"/></a></span>
-                                                <span class="cy-soical-comment_txt"><t t-esc="comment.timestamp"/></span>
-                                            </div>
-                                            <div class="d-flex align-items-center gap-2 ">
-                                                <div class="badge rounded-pill"
-                                                     t-on-click="convertToLeadYt"
-                                                     t-att-id="comment.id">
-                                                    <i class="fa fa-user"
-                                                       style="color:blue;"/>
-                                                                </div>
 
-                                                <span class="cy-soical-market-count_txt"><t t-esc="comment.like_count"/></span>
-                                                <span class="cy-soical-market-count_txt"><i
-                                                        class="ri-heart-line"/></span>
+                                        <div class="d-flex gap-2">
+                                            <img class="mt-1"
+                                                 t-att-src="comment.author_profile_img"
+                                                 style="border-radius:50%; width:28px; height:28px"/>
+                                            <div class="cy-comment-bubble">
+                                            <div class="d-flex justify-content-between w-100">
+
+                                            <div class="d-flex align-items-center gap-2 w-100">
+                                                 <span style="flex-grow: 1">
+                                                        <a t-on-click="() => this.DirectPartner(comment.partner_id)"
+                                                           class="cy-main-sectionhead">
+                                                            <t t-esc="comment.username"/>
+                                                        </a>
+                                                    </span>
+
+                                                <t t-set="time"
+                                                   t-value="Math.floor((Date.now() - new Date(comment.publishedAt)) / (1000 * 60 * 60 * 24)) + 'd'"/>
+                                                <span class="cy-soical-comment_txt"
+                                                      t-att-data-tooltip="new Date().toLocaleString()"
+                                                      t-att-aria-label="new Date(comment.publishedAt).toLocaleString()">
+                                                        <i class="ri-time-line me-1"/>
+                                                    <t t-esc="time"/>
+                                                </span>
+
+                                                <div class="badge rounded-pill cursor-pointer"
+                                                     t-on-click="() => this.convertToLeadYt()"
+                                                     t-att-id="comment.id"
+                                                     data-tooltip="Create Lead"
+                                                     aria-label="Create Lead">
+                                                        <i class="fa fa-user cy-cmt_rply"/>
+                                                    </div>
+
+                                                <!-- Likes -->
+                                                <div class="d-flex align-items-center gap-1" data-tooltip="Likes"
+                                                     aria-label="Likes">
+                                                        <span class="cy-soical-market-count_txt cy-cmt_rply">
+                                                            <i class="ri-heart-line"/>
+                                                        </span>
+                                                    <span class="cy-soical-market-count_txt cy-cmt_rply">
+                                                            <t t-esc="comment.like_count"/>
+                                                        </span>
+                                                    </div>
                                             </div>
                                         </div>
-                                        <p class="cy-soical-market-cmnttile"><t t-esc="comment.text"/></p>
+                                                <p class="cy-soical-market-cmnttile"><t t-esc="comment.text"/></p>
+
+                                        </div>
+                                        </div>
+
                                         <div>
-                                            <span>
+
+                                        <!-- Reply & View Replies -->
+                                            <div class="d-flex justify-content-start align-items-center mt-1"
+                                                 style="margin-left: 38px">
+                                            <a t-on-click="(ev) => this.ReplyCommentYoutube(ev)"
+                                               class="cursor-pointer d-flex align-items-center gap-1">
                                                 <i class="ri-chat-3-line cy-cmt_rply-icon"/>
+                                                <span class="cy-cmt_rply">Reply</span>
+                                            </a>
+
+                                                <t t-if="comment.reply_count > 0">
+                                                <a class="o_fb_comment_replies btn btn-sm btn-link"
+                                                   href="#"
+                                                   style="margin-left:10px;"
+                                                   t-on-click="onClickViewReplies">
+                                                    View Replies (<t t-esc="comment.reply_count"/>)
+                                                </a>
+                                            </t>
+                                        </div>
+
+                                            <!-- Reply Input -->
+                                            <div class="reply_div d-none"
+                                                 style="margin-left: 38px">
+                                            <input class="form-control cy-button-stroke mt-2"
+                                                   type="text"
+                                                   t-attf-id="yt_{{comment.id}}"
+                                                   placeholder="Write a reply..."
+                                                   autocomplete="off"/>
+                                                <span class="send_button"
+                                                      t-on-click="() => this.ReplyToCommentYoutube(comment, state.activeFeed)">
+                                                <i class="ri-send-plane-2-line"/>
                                             </span>
-                                            <span class="cy-cmt_rply"
-                                                  t-on-click="() => this.ReplyCommentYoutube(comment)">
-                                                Reply</span>
-                                            <div class="reply_div d-none">
-                                                <input class="form-control cy-button-stroke mt-2"
-                                                       type="text"
-                                                       placeholder="Write a reply..."
-                                                       name=""
-                                                       t-attf-id="yt_{{comment.id}}"/>
-                                                <span class="send_button cy-soical-market-count_txt"><i
-                                                        class="ri-send-plane-fill" t-on-click="() => this.ReplyToCommentYoutube(comment,feed)"/></span>
-                                            </div>
-                                            <t t-if="state.type=='youtube'">
-                                                    <a class="o_fb_comment_replies btn btn-sm btn-link" href="#"
-                                                       style="margin-left:10px;" t-on-click="onClickViewReplies">
-                                                        View Replies (<t t-esc="comment.reply_count"/>)
-                                                    </a>
-                                                    <div id="view_replies" t-att-id="comment.id" class="d-none">
+                                        </div>
+
+                                            <div id="view_replies"
+                                                 t-att-id="comment.id"
+                                                 style="margin-left: 38px"
+                                                 class="view_replies d-none">
+
                                                     <t t-if="comment.replies">
-                                                        <t t-foreach="comment.replies" t-as="replies" t-key="replies.id">
-                                                            <span t-esc="replies.snippet.textDisplay" style="margin-left: 20%;"/>
-                                                            <br/>
+                                                        <t t-foreach="comment.replies"
+                                                           t-as="replies"
+                                                           t-key="replies.id">
+
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="cy-reply-line"/>
+                                                                <div class="cy-comment-bubble mb-2">
+                                                                    <a t-on-click="() => this.DirectPartner(replies.partner_id)"
+                                                                       class="cy-main-sectionhead">
+                                                                        <span t-esc="replies?.author"/>
+                                                                    </a>
+                                                                    <p t-esc="replies?.text"/>
+                                                                </div>
+                                                            </div>
                                                         </t>
                                                     </t>
                                                 </div>
-                                            </t>
                                         </div>
                                     </div>
                                 </div>
                             </t>
+                            <div class="text-center my-2" t-if="state.nextPageToken">
+                                <button class="btn btn-outline-primary"
+                                        t-on-click="() => this.LoadMoreComments()">
+                                    Load More
+                                </button>
+                            </div>
+
                         </div>
                         <div class="cy-modal_footer cy-social_cmnt-footer">
-                            <div class="d-flex justify-content-end">
-                                <button class="btn cy-button-primary-stroke"
-                                        t-on-click="() => this.CloseCommentYoutube()">OK</button>
-                            </div>
+                            <form>
+                                <div class="form-group d-flex overflow-hidden">
+                                    <textarea class="form-control"
+                                              id="exampleFormControlTextarea1"
+                                              rows="1"
+                                              role="textbox"
+                                              placeholder="Write a comment...."
+                                              t-ref="new_message_yt"/>
+                                    <div class="d-flex justify-content-end align-items-end">
+                                        <button class="btn text-end"
+                                                style="font-size: 20px"
+                                                t-on-click="(ev) => this.PostCommentYoutube(ev, state.activeFeed)">
+                                            <i class="ri-send-plane-2-line"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>

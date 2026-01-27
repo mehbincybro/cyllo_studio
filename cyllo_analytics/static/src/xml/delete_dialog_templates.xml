@@ -6,7 +6,9 @@
                 <div class="modal-content cy-modal_content w-100">
                     <div class="modal-header  cy-social_commentHead d-flex  pt-4">
                         <h5 class="cy-dashboard_modal-heading"><t t-out="props.title"/></h5>
-                        <span id="sheet_filter_close" class="cy-icons cy-social_cmnt-closebtn" t-on-click="_cancel">
+                        <span id="sheet_filter_close"
+                              class="cy-icons cy-social_cmnt-closebtn"
+                              t-on-click="_cancel">
                             <i class="ri-close-line"/></span>
                     </div>
                     <div class="modal-body py-0">
@@ -20,8 +22,10 @@
                     </div>
                     <div class="cy-modal_footer cy-social_cmnt-footer">
                         <div class="d-flex justify-content-end gap-2">
-                            <button class="btn cy-button-primary-stroke" t-on-click="_confirm">Confirm</button>
-                            <button class="btn cy-button-stroke" t-on-click="_cancel">Close</button>
+                            <button class="btn cy-button-primary-stroke"
+                                    t-on-click="_confirm">Confirm</button>
+                            <button class="btn cy-button-stroke"
+                                    t-on-click="_cancel">Close</button>
                         </div>
                     </div>
                 </div>

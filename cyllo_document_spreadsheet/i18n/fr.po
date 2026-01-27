@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-04 03:16+0000\n"
-"PO-Revision-Date: 2023-12-04 03:16+0000\n"
+"POT-Creation-Date: 2025-02-10 09:04+0000\n"
+"PO-Revision-Date: 2025-02-10 09:04+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -27,7 +27,7 @@ msgstr "Créer"
 
 #. module: cyllo_document_spreadsheet
 #. odoo-javascript
-#: code:addons/cyllo_document_spreadsheet/static/src/xml/kanbanController.xml:0
+#: code:addons/cyllo_document_spreadsheet/static/src/js/views/docView/docController.xml:0
 #: model:ir.actions.act_window,name:cyllo_document_spreadsheet.action_view_create_spreadsheet
 #, python-format
 msgid "Create Spreadsheet"
@@ -46,7 +46,12 @@ msgstr "Créé sur"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__display_name
 msgid "Display Name"
-msgstr "Afficher un nom"
+msgstr "Nom d'affichage"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_sheet__document_file_id
+msgid "Document File"
+msgstr "Dossier de documents"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model,name:cyllo_document_spreadsheet.model_document_trash
@@ -54,17 +59,12 @@ msgid "Document Trash"
 msgstr "Documer les ordures"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model,name:cyllo_document_spreadsheet.model_document_workspace
-msgid "Document Workspace"
-msgstr "Document Workspace"
-
-#. module: cyllo_document_spreadsheet
 #: model:ir.model,name:cyllo_document_spreadsheet.model_document_file
 msgid "Documents"
 msgstr "Documents"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__document_file_id
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_sheet__document_file_id
 msgid "For getting record from document"
 msgstr "Pour obtenir un enregistrement du document"
 
@@ -79,12 +79,12 @@ msgid "ID"
 msgstr "IDENTIFIANT"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__is_document
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_spreadsheet_sheet__is_document
 msgid "Identifying document element"
 msgstr "Identification de l'élément de document"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__is_document
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_sheet__is_document
 msgid "Is Document"
 msgstr "Est document"
 
@@ -101,7 +101,7 @@ msgstr "Dernière mise à jour par"
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_create_excel__write_date
 msgid "Last Updated on"
-msgstr "Dernière mise à jour le"
+msgstr "Dernière mise à jour sur"
 
 #. module: cyllo_document_spreadsheet
 #. odoo-python
@@ -125,24 +125,30 @@ msgid "Name of the spreadsheet"
 msgstr "Nom de la feuille de calcul"
 
 #. module: cyllo_document_spreadsheet
-#: model:ir.model,name:cyllo_document_spreadsheet.model_spreadsheet_spreadsheet
+#: model:ir.model.fields,help:cyllo_document_spreadsheet.field_document_file__excel_thumbnail
+msgid "Preview image of XLS"
+msgstr "Aperçu de l'image de XLS"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model,name:cyllo_document_spreadsheet.model_spreadsheet_sheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_file__spreadsheet_id
 msgid "Spreadsheet"
 msgstr "Tableur"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_trash__spreadsheet_data
-msgid "Spreadsheet data"
+msgid "Spreadsheet Data"
 msgstr "Données de feuille de calcul"
+
+#. module: cyllo_document_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_document_file__excel_thumbnail
+msgid "Spreadsheet Thumbnail"
+msgstr "Vignette de calcul"
 
 #. module: cyllo_document_spreadsheet
 #: model:ir.model.fields,help:cyllo_document_spreadsheet.field_document_trash__spreadsheet_data
 msgid "Stores spreadsheet data into trash"
 msgstr "Stocke les données de feuille de calcul dans les déchets"
-
-#. module: cyllo_document_spreadsheet
-#: model:ir.model.constraint,message:cyllo_document_spreadsheet.constraint_document_workspace_name_uniq
-msgid "This name already exists!"
-msgstr "Ce nom existe déjà!"
 
 #. module: cyllo_document_spreadsheet
 #. odoo-python
@@ -155,8 +161,3 @@ msgstr "Poubelle"
 #: model:ir.model,name:cyllo_document_spreadsheet.model_create_excel
 msgid "Wizard for Creating Excel Sheet"
 msgstr "Wizard pour créer une feuille Excel"
-
-#. module: cyllo_document_spreadsheet
-#: model:ir.model.fields,field_description:cyllo_document_spreadsheet.field_spreadsheet_spreadsheet__document_file_id
-msgid "document"
-msgstr "document"

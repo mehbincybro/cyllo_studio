@@ -3,7 +3,7 @@
     <!--Defines a menu structure for a document module.-->
     <!-- Root Menu: Documents -->
     <menuitem id="menu_cyllo_documents_root" name="Documents"
-              web_icon="cyllo_documents,static/description/document.png" sequence="0"/>
+              web_icon="cyllo_documents,static/description/cyllo_documents.svg" sequence="0"/>
 
     <!-- Sub Menu: Documents (Child of Root) -->
     <menuitem id="menu_documents" name="Documents" action="action_view_documents"

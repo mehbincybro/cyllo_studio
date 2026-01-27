@@ -6,7 +6,7 @@ import { registry } from "@web/core/registry";
  *
  */
 export class SendSMS extends Component {
-    static props = [];
+    static props = ["*"];
     /**
      * Click function for opening wizard and returning back to the user
      */

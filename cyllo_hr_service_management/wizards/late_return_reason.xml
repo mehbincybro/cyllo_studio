@@ -13,7 +13,8 @@
                         </group>
                     </group>
                     <footer>
-                        <button name="action_return" type="object" string="RETURN" class="btn-primary"/>
+                        <button name="action_return" type="object"
+                                string="RETURN" class="btn-primary"/>
                     </footer>
                 </sheet>
             </form>

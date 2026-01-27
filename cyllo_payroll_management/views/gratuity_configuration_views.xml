@@ -9,7 +9,6 @@
                 <field name="name"/>
                 <field name="contract_type"/>
                 <field name="start_date"/>
-                <field name="journal_id"/>
                 <field name="end_date"/>
             </tree>
         </field>
@@ -25,49 +24,40 @@
                     <div class="oe_title">
                         <group>
                             <label for="name" class="oe_edit_only"/>
-                        <h1>
-                            <field name="name"/>
-                        </h1>
-                        <label for="contract_type" class="oe_edit_only"/>
-                        <h6>
-                            <field name="contract_type" style="width:44%"/>
-                        </h6>
+                            <h1>
+                                <field name="name" placeholder="e.g Tenure Bonus"/>
+                            </h1>
+                            <label for="contract_type" class="oe_edit_only"/>
+                            <h6>
+                                <field name="contract_type" style="width:44%"/>
+                            </h6>
                         </group>
                     </div>
                     <group string="Validity Details">
                         <group>
                             <field name="start_date" class="oe_inline"/>
-                        </group>
-                        <group>
                             <field name="end_date" class="oe_inline"/>
+                            <field name="company_id" class="oe_inline"/>
                         </group>
                         <group>
-                            <field name="company_id" class="oe_inline"/>
+                            <field name="include_training" class="oe_inline"/>
+                            <field name="date_from" class="oe_inline"/>
+                            <field name="joining_date" class="oe_inline"
+                                   invisible="date_from != 'manual'" required="date_from == 'manual'"/>
                         </group>
                     </group>
                     <notebook>
                         <page name="gratuity_configuration_rules" string="Rules">
-                            <field name="gratuity_configuration_ids">
+                            <field name="gratuity_configuration_ids" readonly="0">
                                 <tree string="Gratuity Configuration" editable="bottom">
                                     <field name="name"/>
                                     <field name="from_year"/>
                                     <field name="to_year"/>
-                                    <field name="daily_wage"/>
-                                    <field name="working_days"/>
+                                    <field name="divide_days"/>
+                                    <field name="extra_days"/>
                                     <field name="percentage"/>
                                 </tree>
                             </field>
-                        </page>
-                        <page name="accounting" string="Accounting">
-                            <group>
-                                <group name="gratuity_accounting_configuration" string="Journal Configuration">
-                                    <field name="journal_id" string="Journal"/>
-                                </group>
-                                <group string="Accounting Configuration">
-                                    <field name="credit_account_id" string="Credit Account"/>
-                                    <field name="debit_account_id" string="Debit Account"/>
-                                </group>
-                            </group>
                         </page>
                     </notebook>
                 </sheet>

@@ -1,0 +1,662 @@
+:root {
+    --blue: #242E5F;
+    --white: #ffffff;
+    --dark-gray: #505050;
+    --stroke: #DFDFDF;
+}
+
+.o_action_manager {
+    font-family: var(--inter-sans);
+}
+
+.o_form_view_container .o_control_panel {
+    border-bottom: 1px solid var(--stroke);
+}
+
+.o_form_renderer:has(>.o_attachment_preview) {
+    flex-direction: row !important;
+}
+
+.o_form_renderer .o_form_sheet_bg {
+    background-color: #fff;
+    max-width: 100%;
+}
+
+.o_statusbar_buttons button {
+    background-color: #fff;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dark-gray);
+    padding: 8px 12px;
+}
+
+.o_statusbar_buttons button:disabled {
+    background-color: #fff !important;
+    box-shadow: none;
+    color: var(--dark-gray) !important;
+}
+
+.o_statusbar_buttons button:focus,
+.o_statusbar_buttons button:hover {
+    background-color: #fff;
+    box-shadow: none;
+}
+
+.o_form_view .o_form_sheet {
+    border-color: #fff;
+    padding: 0;
+}
+
+.o_statusbar_buttons #create_invoice {
+    background-color: var(--blue);
+    color: var(--white);
+}
+
+.o_statusbar_buttons #create_invoice:hover {
+    background: #849600 !important;
+}
+
+.o_field_widget .o_statusbar_status button {
+    background-color: transparent !important;
+    border: none;
+    color: #8091A7;
+    font-size: 14px !important;
+    font-family: var(--inter-sans);
+}
+
+.o_field_statusbar > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current),
+.o_field_statusbar_duration > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current),
+.o_field_statusbar > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current):hover,
+.o_field_statusbar_duration > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current):hover,
+.o_field_statusbar > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current):focus,
+.o_field_statusbar_duration > .o_statusbar_status > .o_arrow_button.disabled:not(.o_arrow_button_current):focus {
+    color: #8091A7;
+}
+
+.o_field_widget .o_statusbar_status .o_arrow_button.o_arrow_button_current.disabled {
+    background-color: #fff;
+    border: #fff;
+    color: var(--blue);
+}
+
+.o_field_widget .o_statusbar_status .o_arrow_button.o_arrow_button_current {
+    color: #6F7500 !important;
+    font-weight: 600 !important;
+}
+
+.o_field_statusbar .o_statusbar_status .o_arrow_button:active:not(:first-child) {
+    background: transparent;
+}
+
+.o_field_statusbar > .o_statusbar_status > .o_arrow_button:not(:first-child):before,
+.o_field_statusbar_duration > .o_statusbar_status > .o_arrow_button:not(:first-child):before,
+.o_field_statusbar > .o_statusbar_status > .o_arrow_button:not(:first-child):after,
+.o_field_statusbar_duration > .o_statusbar_status > .o_arrow_button:not(:first-child):after {
+    border: none;
+    background-image: url(/cyllo_base/static/src/img/cy_statusbar_arrow.svg);
+    background-position: center;
+    width: 18px;
+    height: 20px;
+    background-repeat: no-repeat;
+    top: 6px !important;
+    border-top: none !important;
+    border-bottom: none !important;
+    border-right: none !important;
+    border-left: none !important;
+}
+
+.o_form_sheet .oe_title {
+    max-width: 100%;
+    width: 100%;
+    padding-top: 1%;
+}
+
+.o_form_renderer .o_form_sheet div[name="options"] {
+    padding-top: 15px;
+}
+
+.o_form_sheet .o_notebook_content .o_inner_group .d-sm-contents {
+    display: contents !important;
+}
+
+.o_form_sheet .o_group .o_group {
+    padding-top: unset;
+}
+
+.o_form_sheet .o_group .o_group {
+    border: none;
+}
+
+.o_notebook .o_notebook_headers {
+    font-size: 14px;
+}
+
+.o_notebook_content .o_tag.o_tag_color_0 {
+    background-color: #d1d6b3 !important;
+    padding: 4px 8px;
+    color: #3d4600 !important;
+    border-radius: 35px !important;
+}
+
+.o_list_renderer .o_list_table tbody > tr > td:not(.o_list_record_selector):not(.o_handle_cell):not(.o_list_button):not(.o_list_record_remove).o_list_text {
+    white-space: unset;
+}
+
+.o_field_widget.o_field_text,
+.o_field_widget.oe_form_field_text .oe_form_text_content {
+    width: 100%;
+    white-space: unset;
+}
+
+.o_list_view .o_resize {
+    padding-left: 2px !important;
+    background-color: var(--stroke) !important;
+}
+
+.o_list_renderer .o_data_row .o_data_cell,
+.o_list_renderer .o_data_row .o_list_record_remove,
+.o_list_renderer .o_field_x2many_list_row_add {
+    padding: 0.7rem 0.5rem;
+    color: #222;
+    font-size: 14px;
+}
+
+.o_form_sheet_bg .o_list_renderer .o_data_row .o_list_record_remove,
+.o_form_sheet_bg .o_list_renderer .o_field_x2many_list_row_add {
+    padding: 0.5rem 0.3rem;
+}
+
+.o_list_renderer .o_list_table thead th {
+    font-size: 14px !important;
+    font-family: var(--inter-sans) !important;
+    font-weight: 600 !important;
+}
+
+.o_notebook_content .o_list_renderer .o_data_row {
+    border-bottom: 1px solid var(--stroke);
+}
+
+.table-hover tbody tr:hover {
+    background-color: #F7F7F7;
+}
+
+.table-hover tbody tr:focus-within,
+.table-hover tbody tr:hover {
+    background-color: #F7F7F7;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:last-child,
+.o_control_panel_navigation .o_cp_pager .btn-group button:first-child {
+    background-color: #fff;
+    padding: 2px;
+    height: 26px;
+    width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:first-child {
+    border-bottom-left-radius: 6px !important;
+    border-top-left-radius: 6px !important;
+    border-right: 0;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:first-child:before {
+    content: "";
+    background-image: url(arrow-left-s-line.svg);
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:last-child {
+    border-top-right-radius: 6px !important;
+    border-bottom-right-radius: 6px !important;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:active {
+    border-color: var(--stroke);
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:last-child:before {
+    content: "";
+    background-image: url(arrow-right-s-line\ \(2\).svg);
+    width: 18px;
+    height: 18px;
+    position: absolute;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:last-child:hover:before {
+    background-image: url(arrow-right-s-line-hover.svg);
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group button:first-child:hover:before {
+    background-image: url(arrow-left-s-line-hover.svg);
+}
+
+.o_control_panel_navigation .o_cp_pager .btn-group .btn:not(:first-child) {
+    margin-left: 0;
+}
+
+.o_form_sheet .oe_title h1 {
+    font-family: var(--inter-sans);
+    font-weight: 600;
+    font-size: 28px;
+    width: 90%;
+}
+
+.o_form_view .o_field_datetime,
+.o_form_view .o_form_uri span {
+    color: #222222;
+}
+
+.o_form_view .o_form_sheet_bg {
+    padding-top: 16px !important;
+}
+
+.o_form_view .o_form_sheet_bg a {
+    color: #657500;
+}
+
+.o_field_statusbar .o_statusbar_status .o_arrow_button:last-child {
+    padding-left: 0;
+}
+
+.o_form_view .o_form_uri span:first-child {
+    color: #6F7500;
+}
+
+.o_form_view .o_form_uri span:first-child:hover {
+    color: var(--primary);
+}
+
+.o_navbar .o_main_navbar {
+    background-color: #fff !important;
+    color: var(--dark-gray);
+    font-size: 14px;
+    padding-bottom: 7px !important;
+    padding-top: 7px !important;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    width: 84%;
+    padding-left: 8px !important;
+}
+
+.o_main_navbar .dropdown-toggle i,
+.o_main_navbar .dropdown-toggle,
+.o_main_navbar .o_nav_entry,
+.o_main_navbar .o_menu_brand {
+    font-size: 14px;
+    color: var(--text);
+}
+
+.o_main_navbar .o_menu_brand:hover {
+    color: var(--dark-gray);
+}
+
+.o_main_navbar .o_menu_brand:focus,
+.o_main_navbar .dropdown-toggle:focus,
+.o_main_navbar .o_menu_sections .o_nav_entry,
+.o_main_navbar .o_menu_sections .o_nav_entry:hover,
+.o_main_navbar .o_menu_sections .dropdown-toggle:hover,
+.o_main_navbar .o_menu_systray .o_nav_entry:hover,
+.o_main_navbar .o_menu_systray .dropdown-toggle:hover {
+    background-color: transparent;
+}
+
+.o_main_navbar .o_menu_systray .dropdown-toggle:hover {
+    background-color: transparent;
+    color: var(--text-color);
+}
+
+.o_pager_counter span {
+    font-size: 12px;
+    color: var(--dark-gray);
+    font-weight: 500;
+}
+
+.o_form_view .o_field_datetime,
+.o_form_view .o_form_uri span {
+    color: #222222;
+    font-size: 14px;
+    padding: 12px 0;
+}
+
+.o_form_view .o_field_datetime {
+    padding: 0 !important;
+}
+
+.o_form_view .o_form_uri span:hover {
+    color: #222;
+}
+
+.o_form_view_container .o_control_panel_main .o_control_panel_actions {
+    order: 2 !important;
+    display: flex !important;
+    justify-content: flex-end !IMPORTANT;
+}
+
+.o_form_view_container .o_control_panel_main .o_control_panel_navigation {
+    order: 1 !important;
+}
+
+.modal-body .o_form_view .o_group .o_inner_group {
+    max-width: 48% !important;
+}
+
+.o_form_view .o_group .o_inner_group:last-child {
+    border-right: none;
+}
+
+.o_form_view .o_group {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    width: 100%;
+}
+
+.o_form_view .o_form_label {
+    color: #121212 !important;
+    font-size: 14px !important;
+    font-family: var(--inter-sans);
+    font-weight: 500 !important;
+}
+
+.o_form_sheet_bg td {
+    background: #ffffff;
+}
+
+.o_form_sheet_bg .btn.px-4.btn-link.ml16 {
+    transform: translateX(-165%);
+}
+
+.o_form_sheet_bg .o_field_x2many_list_row_add .ml16 {
+    left: -46px !important;
+    margin-left: 200px !important;
+    position: relative !important;
+}
+
+.o_form_sheet_bg .tab-pane .oe_invoice_lines_tab .o_field_account-tax-totals-field {
+    transform: translateX(0px) !important;
+}
+
+.o_form_sheet_bg .o_notebook .oe_invoice_lines_tab {
+    justify-content: space-between !important;
+}
+
+.o_form_sheet_bg .tab-pane button {
+    color: #657500;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.o_form_view .oe_invoice_lines_tab .o_group .o_inner_group {
+    max-width: 100% !important;
+}
+
+.o_form_sheet_bg .ribbon-top-right {
+    margin-top: unset !important;
+}
+
+.o_form_sheet_bg thead {
+    background: #ffffff !important;
+}
+
+.o_form_sheet_bg .o_notebook_content .o_inner_group {
+    max-width: 48% !important;
+    border-right: none !important;
+    gap: 15px;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+    content: none;
+}
+
+.o_form_view_container .o_breadcrumb .breadcrumb .text-truncate {
+    color: var(--primary);
+    font-size: 15px;
+    font-family: var(--inter-sans);
+}
+
+.o_form_view_container .o_breadcrumb {
+    display: flex !important;
+    flex-direction: row !important;
+    font-size: 14px;
+    color: #505050;
+    font-weight: 500;
+    align-items: center;
+    gap: 2px;
+}
+
+.o_form_view_container .o_control_panel {
+    position: relative;
+}
+
+.o_form_view_container .o_control_panel_navigation {
+    right: 1.45%;
+    top: 11px;
+    position: absolute;
+}
+
+.o_form_view_container .o_content {
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+}
+
+.o_form_view .o_form_readonly .oe_edit_only {
+    display: inline-block !important;
+}
+
+.o_form_sheet_bg .o_notebook_content .oe_subtotal_footer .o_wrap_label {
+    text-align: inherit !important;
+}
+
+.o_form_sheet_bg .o_notebook_content .oe_subtotal_footer .text-nowrap {
+    position: relative;
+    float: right !important;
+}
+
+.fa-area-chart::before {
+    content: "\ea9b";
+    font-family: "remixicon" !important;
+    font-size: 20px;
+    font-style: normal;
+    color: #9EA700;
+}
+
+.modal.o_technical_modal.o_modal_full .modal-dialog .modal-content .modal-header {
+    background: #9EA700;
+}
+
+.modal-dialog .modal-content .modal-header {
+    background: #fff;
+}
+
+.modal-dialog .modal-content .modal-footer {
+    background: #fff;
+}
+
+.o_form_view .o_form_sheet_bg .o_notebook .o_group .o_inner_group .g-col-sm-2 {
+    grid-column: auto/span 2 !important;
+}
+
+.modal-content .o_form_view .o_inner_group {
+    grid-template-columns: fit-content(150px) 1fr;;
+    gap: 8px 16px;;
+}
+
+.o_form_view .o_notebook .o_inner_group {
+    grid-template-columns: fit-content(150px) 1fr;
+}
+
+.o_form_view .o_form_sheet_bg .o_notebook .o_group .o_inner_group {
+    grid-template-columns: fit-content(150px) 1fr;
+}
+
+.o_field_widget .o_input_dropdown .o_dropdown_button {
+    top: 5px;
+}
+
+#o_employee_right .o_org_chart_group_up .o_org_chart_entry .rounded-pill {
+    border: none !important;
+}
+
+.o_hr_employee_form_view .o_form_renderer .oe_title {
+    border-bottom: none !important;
+}
+
+.o_hr_employee_form_view .o_form_sheet .row.justify-content-between.position-relative {
+    border-bottom: 1px solid var(--stroke);
+}
+
+.o_form_view {
+    background: #dfdfdf;
+}
+
+.o_form_view .o_inner_group.oe_subtotal_footer .o_cell .o_field_widget {
+    text-align: left;
+}
+
+.o_form_view .o_inner_group.oe_subtotal_footer .o_wrap_field:first-child > .o_cell {
+    display: flex;
+    justify-content: right;
+}
+
+.o_form_view .o_form_renderer {
+    flex-direction: column;
+    height: 100%;
+}
+
+.o-mail-Form-chatter {
+    width: 100% !important;
+    height: 48vh;
+}
+
+.o-form-buttonbox .oe_stat_button .o_button_icon,
+.o-form-buttonbox .oe_stat_button .o_field_statinfo .o_stat_value,
+.o-form-buttonbox .oe_stat_button .o_stat_info .o_stat_value {
+    color: #495057;
+}
+
+.o_rightpanel .o_rightpanel_section .o_form_view .oe_button_box {
+    background: #FFFFFF;
+}
+
+.o-form-buttonbox .oe_stat_button.dropdown .o_dropdown_more .oe_stat_button {
+    height: auto;
+    width: 100%;
+    border: 1px solid #dfdfdf;
+    padding-top: 8px;
+    padding-bottom: 8px;
+    background: white;
+}
+
+.o-form-buttonbox .oe_stat_button {
+    order: 2;
+    height: 44px;
+    min-width: 7.5rem;
+}
+
+.o-form-buttonbox .o-dropdown.oe_stat_button {
+    order: 1;
+}
+
+.o-form-buttonbox > div.oe_stat_button:last-child > button {
+    border-radius: unset;
+}
+
+.show > .btn-outline-secondary.dropdown-toggle {
+    background: #fafbf2;
+    border-color: #93a700;
+}
+
+.o-form-buttonbox .o_field_website_redirect_button {
+    order: 3;
+}
+
+.o-form-buttonbox .oe_stat_button.dropdown > .o_button_more {
+    min-width: 7.5rem;
+}
+
+.o_form_view.o_xxl_form_view .o_form_sheet_bg {
+    overflow: visible;
+}
+
+.o_form_renderer:has(.o_attachment_preview) .o_form_sheet_bg {
+    overflow: scroll;
+}
+
+.o-mail-Chatter-content {
+    background: #FFF;
+}
+
+.o-mail-Chatter {
+    background: #FFF;
+}
+
+.o_form_view .o_group .o_field_widget > .btn.o_select_file_button {
+    padding: 5px 10px;
+    background-color: transparent !important;
+    border: 1px solid var(--primary)  !important;
+    color: var(--primary) !important;
+}
+
+.o_form_view .o_group .o_field_widget > .btn.o_select_file_button:hover {
+    background-color: var(--primary) !important;
+    color: #fff !important;
+}
+
+@media (max-width: 870px) {
+    .o_form_view .o_group .o_inner_group {
+        display: block;
+        border-right: none;
+        max-width: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .o_control_panel .o_control_panel_main {
+        align-items: normal !important;
+        flex-direction: column;
+    }
+
+    .o_notebook .o_notebook_headers {
+        width: 100%;
+        border-right: none;
+    }
+
+    .o_form_sheet .o_notebook .o_notebook_content {
+        width: 100%;
+    }
+
+    .o_notebook_content {
+        max-width: 100%;
+    }
+
+    .o_form_sheet .o_notebook {
+        flex-wrap: wrap;
+    }
+
+    .o_form_view .o_group {
+        padding-left: 10px;
+    }
+
+    .o_form_sheet .oe_title {
+        padding-left: 10px;
+    }
+
+    .o_form_sheet .o_inner_group {
+        display: inline-block;
+    }
+
+    .cy-right-sidebar .btn-outline-secondary {
+        border: none;
+    }
+}

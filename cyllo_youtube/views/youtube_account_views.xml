@@ -42,14 +42,14 @@
                     <div class="oe_title">
                         <label for="name"/>
                         <h1>
-                            <field name="name"/>
+                            <field name="name" placeholder="Enter the name"/>
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="client_number"/>
-                            <field name="client_secret"/>
-                            <field name="access_token"/>
+                            <field name="client_number" placeholder="Enter client number"/>
+                            <field name="client_secret" placeholder="Enter client secret"/>
+                            <field name="access_token" readonly="1" placeholder="Access token will be generated"/>
                         </group>
                     </group>
                 </sheet>

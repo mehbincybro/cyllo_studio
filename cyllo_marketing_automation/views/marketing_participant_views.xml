@@ -8,7 +8,9 @@
             <tree>
                 <field name="record"/>
                 <field name="model_name"/>
-                <field name="state" widget='badge' decoration-success="state == 'completed'" decoration-warning="state == 'running'"/>
+                <field name="state" widget='badge'
+                       decoration-success="state == 'completed'"
+                       decoration-warning="state == 'running'"/>
             </tree>
         </field>
     </record>
@@ -28,7 +30,9 @@
                                    options="{'hide_model': True}" readonly="1"/>
                         </h1>
                     </div>
-                    <widget name="web_ribbon" title="Test" bg_color="text-bg-danger" invisible="is_test_participant == False"/>
+                    <widget name="web_ribbon" title="Test"
+                            bg_color="text-bg-danger"
+                            invisible="is_test_participant == False"/>
                     <group>
                         <group>
                             <field name="campaign_id" readonly="1"/>
@@ -40,14 +44,14 @@
                             <field name="is_test_participant" invisible="1"/>
                             <field name="create_date" invisible="1"/>
                             <field name="activity_ids" invisible="1"/>
-                            <field name="marketing_activity_count" invisible="1"/>
+                            <field name="marketing_activity_count"
+                                   invisible="1"/>
                             <field name="activity_executed_ids" invisible="1"/>
                         </group>
                     </group>
                     <field name="activity_ids" invisible="1"
                            class="o_ma_hierarchy_container o_ma_workitem_hierarchy">
-                        <kanban
-                                class="oe_highlight" create="false">
+                        <kanban class="oe_highlight" create="false">
                             <field name="participant_id"/>
                             <field name="name"/>
                             <field name="type"/>
@@ -70,13 +74,12 @@
                     </field>
                     <field name="test_activity_ids" invisible="1"
                            class="o_ma_hierarchy_container o_ma_workitem_hierarchy">
-                        <kanban
-                                class="oe_highlight" create="false">
+                        <kanban class="oe_highlight" create="false">
                             <field name="activity_id"/>
                             <field name="participant_id"/>
                             <field name="state"/>
                             <field name="mail_failure_message"/>
-                            <field name="mail_opened" />
+                            <field name="mail_opened"/>
                             <field name="mail_clicked"/>
                             <field name="mail_replied"/>
                             <field name="mail_bounced"/>
@@ -88,17 +91,20 @@
                     </field>
                     <session class="cy_marketing-activity-session">
                         <sheet>
-                        <div class="cy-component-widgetDiv-main">
-                            <field name="test_activity_ids" widget="TestActivity" class="cy-test_activity_ids-div"/>
-                        </div>
-                    </sheet>
+                            <div class="cy-component-widgetDiv-main">
+                                <field name="test_activity_ids"
+                                       widget="TestActivity"
+                                       class="cy-test_activity_ids-div"/>
+                            </div>
+                        </sheet>
                     </session>
                 </sheet>
             </form>
         </field>
     </record>
     <!-- Record for defining an action window named 'action_view_marketing_participant_action' for the model 'marketing.participant' -->
-    <record id="action_view_marketing_participant_action" model="ir.actions.act_window">
+    <record id="action_view_marketing_participant_action"
+            model="ir.actions.act_window">
         <field name="name">Participants</field>
         <field name="res_model">marketing.participant</field>
         <field name="view_mode">tree,form</field>

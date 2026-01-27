@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+    <defs>
+        <style>.barcode_cls-1{fill:#26261A;}.barcode_cls-2{fill:#BCBBA7;}.barcode_cls-3{fill:#969686;}.barcode_cls-4{fill:#c9c9b9;}</style>
+    </defs>
+    <g id="Layer_2" data-name="Layer 2">
+        <g id="Layer_1-2" data-name="Layer 1">
+            <rect class="barcode_cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61"/>
+            <path class="barcode_cls-2" style="fill:#BCBBA7 !important;" d="M169,215H681V635H169Z"/>
+            <path class="barcode_cls-3" style="fill:#969686 !important;" d="M425,215H681V635H425Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M468.91,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M527.82,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M586.74,279.59h30V570.41h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M468.91,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M527.82,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M233.27,279.59h30V570.41h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M292.18,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M351.09,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M410,279.59h30V570.41H410Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M468.91,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M527.82,279.59h30V503.4h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M586.74,279.59h30V570.41h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M292.18,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-1" style="fill:#26261A !important;" d="M351.09,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M468.91,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M527.82,536.91h30v33.5h-30Z"/>
+            <path class="barcode_cls-4" style="fill:#c9c9b9 !important;" d="M425,279.59h15V570.41H425Z"/>
+        </g>
+    </g>
+</svg>

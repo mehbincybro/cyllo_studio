@@ -29,12 +29,15 @@
         <field name="context">{'search_default_group_budget_id': True}</field>
     </record>
     <!--    Menu-->
-    <menuitem id="menu_budget_categ" name="Budget" sequence="4" groups="account.group_account_invoice"
+    <menuitem id="menu_budget_categ" name="Budget" sequence="4"
+              groups="group_budget_creation,account.group_account_manager"
               parent="account.menu_finance"/>
-    <menuitem parent="account.account_reports_management_menu" id="menu_budget_analysis" name="Budget Analysis"
-              action="action_view_budget_analysis" sequence="20" groups="analytic.group_analytic_accounting"/>
-    <menuitem parent="menu_budget_categ" action="action_view_budget" id="menu_budget" name="Budget" sequence="40"/>
-    <menuitem parent="menu_budget_categ" action="action_view_debt" id="menu_debt" name="Debt" sequence="42"/>
-
-
+    <menuitem parent="account.account_reports_management_menu"
+              id="menu_budget_analysis" name="Budget Analysis"
+              action="action_view_budget_analysis" sequence="20"
+              groups="group_budget_creation,account.group_account_manager"/>
+    <menuitem parent="menu_budget_categ" action="action_view_budget"
+              id="menu_budget" name="Budget" sequence="40"/>
+    <menuitem parent="menu_budget_categ" action="action_view_debt"
+              id="menu_debt" name="Debt" sequence="42"/>
 </odoo>

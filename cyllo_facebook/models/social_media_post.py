@@ -1,4 +1,25 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+import base64
 import requests
 from odoo import _, fields, models
 
@@ -20,8 +41,8 @@ class SocialMediaPost(models.Model):
     def _compute_facebook_attachment_id(self):
         """Computes the attachment ID for Facebook posts."""
         for post in self:
-            jpeg_images = post.ir_attachment_ids.filtered(lambda image: image.mimetype == 'image/jpeg')
-            post.facebook_attachment_id = jpeg_images[0] if jpeg_images else False
+            jpeg_image = next((img for img in post.ir_attachment_ids if img.mimetype == 'image/jpeg'), False)
+            post.facebook_attachment_id = jpeg_image
             post.facebook_attachment_id.public = True
 
     def action_post(self):
@@ -89,6 +110,12 @@ class SocialMediaPost(models.Model):
                     style = 'width:350px; height:200px;'
                     pf_link = f'cyllo_social_media_marketing/static/src/img/profile_pic.jpg'
                     if 'id' in result:
+                        profile_image_bs64=False
+                        if data[
+                            'picture']['data']['url']:
+                            image_response = requests.get(data['picture']['data']['url'] )
+                            profile_image_bs64 = base64.b64encode(
+                            image_response.content).decode('utf-8')
                         self.env['social.media.feed'].create({
                             'description': self.description if self.description else "",
                             'posted_date': fields.Date.today(),
@@ -99,6 +126,7 @@ class SocialMediaPost(models.Model):
                             'author_link_url': author_link,
                             'posted_image': """<img src='%s' style='%s'
                              class='img-fluid'/>""" % (post_image_url, style),
+                            'profile_image_bs64': profile_image_bs64,
                             'author_link': """<a href=""" + author_link + """>""" + data.get('name') + """<a>""",
                             'posted_on_facebook': True,
                             'profile_image_url': data['picture']['data']['url'] if data[

@@ -22,16 +22,18 @@
                     <div class="oe_title">
                         <label for="name"/>
                         <h1>
-                            <field name="name" class="oe_title"/>
+                            <field name="name" class="oe_title" placeholder="e.g. Income"/>
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="chart_id"/>
+                            <field name="company_id" invisible="True"/>
+                            <field name="chart_id" placeholder="Select Consolidation"/>
                             <field name="is_invert_sign"/>
                         </group>
                         <group>
-                            <field name="group_id"/>
+                            <field name="group_id" placeholder="Select Consolidation group"
+                                   domain="[('chart_id', '=', chart_id)]"/>
                         </group>
                     </group>
                     <group string="Consolidated Companies">

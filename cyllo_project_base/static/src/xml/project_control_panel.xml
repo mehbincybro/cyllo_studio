@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_base.ProjectControlPanel"
+       t-inherit="project.ProjectControlPanel" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_control_panel_main')]" position="before">
+            <t t-slot="control-panel-cy-form-cogs"/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_control_panel_main')]"
+               position="attributes">
+            <attribute name="class" add="flex-nowrap" separator=" "/>
+        </xpath>
+    </t>
+</templates>

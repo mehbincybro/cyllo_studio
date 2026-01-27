@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-<!--    Subscription close tree view-->
+    <!-- Subscription close tree view -->
     <record id="view_subscription_order_close_reason_tree" model="ir.ui.view">
         <field name="name">view.subscription.order.close.reason.tree</field>
         <field name="model">subscription.order.close.reason</field>
@@ -11,7 +11,7 @@
             </tree>
         </field>
     </record>
-<!--    Action for subscription close model-->
+    <!-- Action for subscription close model -->
     <record id="action_view_close_reasons" model="ir.actions.act_window">
         <field name="name">Close Reason</field>
         <field name="res_model">subscription.order.close.reason</field>

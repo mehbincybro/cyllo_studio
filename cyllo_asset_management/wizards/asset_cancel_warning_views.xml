@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    Form view for the warning-->
+    <record id="view_asset_cancel_warning_form" model="ir.ui.view">
+        <field name="name">view.asset.cancel.warning.form</field>
+        <field name="model">asset.cancel.warning</field>
+        <field name="arch" type="xml">
+            <form string="Warning">
+                <sheet>
+                    <span>You cannot complete this operation, The related asset is already taken for another
+                        operation.
+                    </span>
+                    <br/>
+                    <span>Are you sure to delete all records ?</span>
+                    <br/>
+                    <br/>
+                </sheet>
+                <footer>
+                    <button name="action_asset_unlink" type="object" string="Delete Records"
+                            class="btn-primary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+    <!--Action for the warning-->
+    <record id="action_view_asset_cancel_warning" model="ir.actions.act_window">
+        <field name="name">Asset Cancel warning</field>
+        <field name="res_model">asset.cancel.warning</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

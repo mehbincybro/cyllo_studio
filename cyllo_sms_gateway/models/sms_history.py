@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 """ This module helps to see the history of all SMSes send. """
 from odoo import fields, models
 
@@ -15,7 +35,7 @@ class SmsHistory(models.Model):
 
     sms_gateway_id = fields.Many2one('sms.gateway.config',
                                      string='Gateway', help='The SMS Gateway.', readonly=True)
-    sms_date = fields.Datetime(string='Date', default=fields.Date().today(),
+    sms_date = fields.Datetime(string='Date', default=fields.Datetime.now,
                                readonly=True, help='Date of sending message(current day).')
     sms_mobile = fields.Char(readonly=True, string='Mobile Number', help='Phone Number to send SMS.')
     sms_text = fields.Text(help='The message to be sent.', readonly=True)
@@ -23,3 +43,4 @@ class SmsHistory(models.Model):
     company_id = fields.Many2one('res.company', required=True,
                                  default=lambda self: self.env.company, help='Active company.')
     user_id = fields.Many2one('res.users', readonly=True, help="User who send this message")
+    sid = fields.Char(string='SID', help='The Unique SMS ID')

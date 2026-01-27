@@ -1,5 +1,24 @@
 # -*- coding: utf-8 -*-
-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
@@ -11,28 +30,47 @@ class BudgetLines(models.Model):
 
     display_name = fields.Char(help='display name of document request')
     account_ids = fields.Many2many('account.account', string='Accounts')
-    analytic_account_id = fields.Many2one('account.analytic.account', help='The Analytic account of the budget Line',
-                                          domain="[('id','in',analytic_account_ids)]")
+    analytic_account_id = fields.Many2one(
+        'account.analytic.account', domain="[('id','in',analytic_account_ids)]",
+        help='The Analytic account of the budget Line')
     include_child = fields.Boolean(help="Including child details")
-    analytic_account_ids = fields.Many2many('account.analytic.account', help='The Analytic account of the budget Line',
-                                            compute='_compute_analytic_account_ids')
-    start_date = fields.Date(help='The Start date of budget', required=True, compute='_compute_start_date',
+    analytic_account_ids = fields.Many2many(
+        'account.analytic.account', compute='_compute_analytic_account_ids',
+        help='The Analytic account of the budget Line')
+    start_date = fields.Date(help='The Start date of budget', required=True,
+                             compute='_compute_start_date',
                              readonly=False, store=True)
     end_date = fields.Date(help='The End date of budget', required=True)
-    budget_type = fields.Selection(string='Earn/Spend', selection=[('earn', 'Earn'), ('spend', 'Spend')],
-                                   help="choose Earn/ Spend", required=True)
-    planned_amount = fields.Monetary(string='Amount', help='Planned amount for the Budget Line ',
-                                     currency_field='currency_id')
-    practical_amount = fields.Monetary(help='The Amount You earned/spent', readonly=True, currency_field='currency_id')
-    theoretical_amount = fields.Monetary(help='The Amount You Supposed to  earn/spend at this date',
-                                         compute='_compute_theoretical_amount', currency_field='currency_id')
-    currency_id = fields.Many2one('res.currency', default=lambda self: self.env.user.company_id.currency_id.id)
-    achievement = fields.Float(help='Shows the ratio between practical amount and theoretical amount', readonly=True)
+    budget_type = fields.Selection(
+        string='Earn/Spend', selection=[('earn', 'Earn'), ('spend', 'Spend')],
+        help="choose Earn/ Spend", required=True)
+    planned_amount = fields.Monetary(
+        string='Amount', help='Planned amount for the Budget Line ',
+        currency_field='currency_id')
+    practical_amount = fields.Monetary(
+        help='The Amount You earned/spent', readonly=True,
+        currency_field='currency_id')
+    theoretical_amount = fields.Monetary(
+        help='The Amount You Supposed to  earn/spend at this date',
+        compute='_compute_theoretical_amount', currency_field='currency_id')
+    currency_id = fields.Many2one(
+        'res.currency',
+        default=lambda self: self.env.user.company_id.currency_id.id)
+    achievement = fields.Float(
+        help='Shows the ratio between practical amount and theoretical amount',
+        readonly=True)
 
-    budget_id = fields.Many2one('budget.budget', help='Refers the budget of line')
-    stage = fields.Selection(selection=[('success', 'Success'), ('positive', 'Positive'), ('fail', 'Failed'),
-                                        ('negative', 'Negative')], help="stages of the budget management")
+    budget_id = fields.Many2one(
+        'budget.budget', help='Refers the budget of line')
+    stage = fields.Selection(
+        selection=[('success', 'Success'), ('positive', 'Positive'),
+                   ('fail', 'Failed'), ('negative', 'Negative')],
+        help="stages of the budget management")
     check_configuration = fields.Boolean()
+    company_id = fields.Many2one(
+        'res.company', 'Company', readonly=True,
+        default=lambda self: self.env.user.company_id,
+        help='Name of the company of the user')
 
     @api.depends('budget_id.start_date', 'budget_id.end_date')
     def _compute_start_date(self):
@@ -44,10 +82,12 @@ class BudgetLines(models.Model):
     @api.depends('planned_amount', 'start_date', 'end_date')
     def _compute_theoretical_amount(self):
         """ Compute Theoretical Amount Based on Planned Amount
-        The Theoretical Amount represents the amount of money you theoretically could have spent or should have received
-         based on the date. For example, suppose your budget is 1200 for 12 months (January to December),
-         and today is 31 of January. In that case, the theoretical amount will be 100 since this is the actual amount
-          that could have been made."""
+        The Theoretical Amount represents the amount of money you theoretically
+        could have spent or should have received based on the date.
+        For example, suppose your budget is 1200 for 12 months
+        (January to December), and today is 31 of January. In that case, the
+        theoretical amount will be 100 since this is the actual amount
+        that could have been made."""
         for record in self:
             if record.start_date and record.end_date and record.start_date <= record.end_date:
                 if record.start_date <= fields.date.today() <= record.end_date:
@@ -65,15 +105,17 @@ class BudgetLines(models.Model):
     def _compute_analytic_account_ids(self):
         """Compute analytic accounts that has no parent """
         for record in self:
-            record.analytic_account_ids = self.env['account.analytic.account'].search(
+            record.analytic_account_ids = self.env[
+                'account.analytic.account'].search(
                 [('analytic_account_id', '=', False)])
 
     def action_budget_configuration(self):
         """This method manages the configuration of budget lines"""
         self.check_configuration = True
         for record in self.analytic_account_id.analytic_account_ids:
-            if record not in self.env['budget.lines.configuration'].search([('budget_line_id', '=', self.id)]).mapped(
-                    'analytic_account_id'):
+            if record not in self.env['budget.lines.configuration'].search(
+                    [('budget_line_id', '=', self.id)]).mapped(
+                'analytic_account_id'):
                 self.env['budget.lines.configuration'].create({
                     'budget_line_id': self.id,
                     'analytic_account_id': record.id,
@@ -92,7 +134,9 @@ class BudgetLines(models.Model):
             'domain': [('budget_line_id', '=', self.id)],
             'context': context,
             'views': [
-                (self.env.ref('cyllo_budget_management.view_budget_lines_configuration_tree').id, 'list'),
+                (self.env.ref(
+                    'cyllo_budget_management.view_budget_lines_configuration_tree').id,
+                 'list'),
             ],
         }
 
@@ -112,7 +156,9 @@ class BudgetLines(models.Model):
             'domain': [('budget_line_id', '=', self.id)],
             'context': context,
             'views': [
-                (self.env.ref('cyllo_budget_management.view_budget_lines_configuration_tree').id, 'list'),
+                (self.env.ref(
+                    'cyllo_budget_management.view_budget_lines_configuration_tree').id,
+                 'list'),
             ],
         }
 
@@ -122,22 +168,28 @@ class BudgetLines(models.Model):
         If not, raises a ValidationError."""
         for record in self:
             if record.start_date:
-                if (record.budget_id.start_date and record.start_date < record.budget_id.start_date) or (
+                if (
+                        record.budget_id.start_date and record.start_date < record.budget_id.start_date) or (
                         record.budget_id.end_date and record.start_date > record.budget_id.end_date):
                     raise ValidationError(
-                        _('"Start Date" of the budget line should be included in the Period of the budget'))
+                        _('"Start Date" of the budget line should be included '
+                          'in the Period of the budget'))
             if record.end_date:
-                if (record.budget_id.start_date and record.end_date < record.budget_id.start_date) or (
+                if (
+                        record.budget_id.start_date and record.end_date < record.budget_id.start_date) or (
                         record.budget_id.end_date and record.end_date > record.budget_id.end_date):
                     raise ValidationError(
-                        _('"End Date" of the budget line should be included in the Period of the budget'))
+                        _('"End Date" of the budget line should be included in '
+                          'the Period of the budget'))
             if record.start_date and record.end_date and record.start_date > record.end_date:
-                raise ValidationError(_('"End Date" should be greater than "Start Date"'))
+                raise ValidationError(_('"End Date" should be greater than '
+                                        '"Start Date"'))
 
     @api.onchange('planned_amount')
     def _onchange_planned_amount(self):
         """ This method is triggered when the `planned_amount` field is changed.
-        It first calls the `_onchange_budget_type` method to adjust the `planned_amount` based on the `budget_type`.
+        It first calls the `_onchange_budget_type` method to adjust the
+        `planned_amount` based on the `budget_type`.
        """
         if self.planned_amount:
             self._onchange_budget_type()
@@ -145,8 +197,10 @@ class BudgetLines(models.Model):
     @api.onchange('budget_type')
     def _onchange_budget_type(self):
         """This method is triggered when the `budget_type` field is changed.
-        If the `budget_type` is `spend` and `planned_amount` is positive, it changes `planned_amount` to negative.
-        If the `budget_type` is `earn` and `planned_amount` is negative, it changes `planned_amount` to positive."""
+        If the `budget_type` is `spend` and `planned_amount` is positive,
+        it changes `planned_amount` to negative.
+        If the `budget_type` is `earn` and `planned_amount` is negative,
+        it changes `planned_amount` to positive."""
         if self.budget_type == 'spend' and self.planned_amount > 0:
             self.planned_amount = - self.planned_amount
         elif self.budget_type == 'earn' and self.planned_amount < 0:
@@ -155,8 +209,9 @@ class BudgetLines(models.Model):
     def action_view_moves(self):
         """
            This action opens a view  for the model `account.move.line`.
-           The view only includes records that have a `parent_state` of `posted`, an `account_id`
-           in the list of account ids associated with the current budget line's category, and a `date`
+           The view only includes records that have a `parent_state` of
+           `posted`, an `account_id` in the list of account ids associated with
+           the current budget line's category, and a `date`
            that falls within the start and end dates of the current budget line.
            """
         if self.analytic_account_id:
@@ -170,7 +225,8 @@ class BudgetLines(models.Model):
                  ('date', '<=', self.end_date),
                  ('account_id', 'in', analytic_accounts)])
             if self.account_ids:
-                moves = moves.filtered(lambda rec: rec.general_account_id.id in self.account_ids.ids)
+                moves = moves.filtered(lambda
+                                           rec: rec.general_account_id.id in self.account_ids.ids)
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Entries'),
@@ -180,10 +236,9 @@ class BudgetLines(models.Model):
             }
         else:
             accounts = self.account_ids.ids
-            moves = self.env['account.move.line'].search([('date', '>=', self.start_date),
-                                                          ('date', '<=', self.end_date),
-                                                          ('account_id', 'in',
-                                                           accounts)]).ids
+            moves = self.env['account.move.line'].search(
+                [('date', '>=', self.start_date), ('date', '<=', self.end_date),
+                 ('account_id', 'in', accounts)]).ids
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Entries'),
@@ -198,4 +253,5 @@ class BudgetLines(models.Model):
         for record in self:
             if not record.account_ids and not record.analytic_account_id:
                 raise ValidationError(
-                    _('Please Select Any of the accounts, Either Chart of account or Analytic Account'))
+                    _('Please Select Any of the accounts, Either Chart of '
+                      'account or Analytic Account'))

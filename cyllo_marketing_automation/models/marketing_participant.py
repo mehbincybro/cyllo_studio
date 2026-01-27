@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 
 
@@ -16,23 +36,34 @@ class MarketingParticipant(models.Model):
                                   help='Campaign related to participant')
     model_name = fields.Char(related='campaign_id.model_id.name',
                              string='Model', help='Model Name')
-    record = fields.Reference(selection='_selection_models', inverse='_inverse_record',
-                              help='Reference record of each participants',required=True)
+    record = fields.Reference(selection='_selection_models',
+                              inverse='_inverse_record',
+                              help='Reference record of each participants',
+                              required=True)
     record_id = fields.Integer(help='Id of the selected record')
-    test_activity_ids = fields.One2many('marketing.activity.line', 'participant_id', string='Activity Lines',
+    test_activity_ids = fields.One2many('marketing.activity.line',
+                                        'participant_id',
+                                        string='Activity Lines',
                                         help='Activities for participants')
     is_test_participant = fields.Boolean(string='Test Participant',
                                          help='Check the record is test participant or not')
-    test_date_started = fields.Datetime(default=fields.Datetime.now, string='Date',
+    test_date_started = fields.Datetime(default=fields.Datetime.now,
+                                        string='Date',
                                         help='Date and time of the record created')
-    is_inactive = fields.Boolean(string='Inactive', help='To check whether the participant is executed or not')
+    is_inactive = fields.Boolean(string='Inactive',
+                                 help='To check whether the participant is executed or not')
     record_count = fields.Integer(help='Count of the activities')
-    state = fields.Selection([('running', 'Running'), ('completed', 'Completed')],
-                             help='Current state of the participant')
-    activity_ids = fields.Many2many('marketing.activity', compute='_compute_activity_ids', string='Activities',
+    state = fields.Selection(
+        [('running', 'Running'), ('completed', 'Completed')],
+        help='Current state of the participant')
+    activity_ids = fields.Many2many('marketing.activity',
+                                    compute='_compute_activity_ids',
+                                    string='Activities',
                                     help='All Activity lists')
-    marketing_activity_count = fields.Integer(string='Activity Count', help='Marketing activity count')
-    activity_executed_ids = fields.Many2many('mailing.trace', string='Mail Trace',
+    marketing_activity_count = fields.Integer(string='Activity Count',
+                                              help='Marketing activity count')
+    activity_executed_ids = fields.Many2many('mailing.trace',
+                                             string='Mail Trace',
                                              help='Mails delivered from each lines')
 
     @api.depends('test_activity_ids')
@@ -97,7 +128,8 @@ class MarketingParticipant(models.Model):
                 list: A list of tuples representing model choices, where each
                 tuple contains the model name and its display name.
         """
-        target = self.env['ir.model'].sudo().search([('is_mail_thread', '=', True)])
+        target = self.env['ir.model'].sudo().search(
+            [('is_mail_thread', '=', True)])
         return [(record.model, record.name) for record in target]
 
     @api.model
@@ -120,9 +152,12 @@ class MarketingParticipant(models.Model):
                 dict: The result of the 'test_participant_trigger' method in
                 dictionary form.
         """
-        activity_line = self.env['marketing.activity.line'].browse(data['activity_line'])
-        record = self.env['marketing.participant'].browse(data['participant_id'])
-        activity_line.activity_id.test_participant_trigger(record, activity_line)
+        activity_line = self.env['marketing.activity.line'].browse(
+            data['activity_line'])
+        record = self.env['marketing.participant'].browse(
+            data['participant_id'])
+        activity_line.activity_id.test_participant_trigger(record,
+                                                           activity_line)
         if not record.is_inactive:
             record.is_inactive = True
 
@@ -154,6 +189,7 @@ class MarketingParticipant(models.Model):
             'state': 'running',
             'record_count': data['record_count'],
             'is_test_participant': data['is_test_participant'],
-            'test_activity_ids': [fields.Command.create({'activity_id': item}) for item in campaign.activity_ids.ids]
+            'test_activity_ids': [fields.Command.create({'activity_id': item})
+                                  for item in campaign.activity_ids.ids]
         }
         return self.create(new_participant).id

@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <!-- Support Service root menu -->
-    <menuitem id="menu_cyllo_support_service_root" name="Support Service"/>
+    <menuitem id="menu_cyllo_support_service_root" name="Support Service"
+              web_icon="cyllo_support_service,static/description/cyllo_support-service.svg"/>
     <menuitem id="menu_dashboard" name="Dashboard"
               action="action_view_dashboard"
               parent="menu_cyllo_support_service_root" sequence="1"/>
@@ -39,7 +40,7 @@
               action="action_view_stage"
               parent="menu_configuration_categ"/>
     <!-- Support Service submenu 'Team' under 'Configuration' menu -->
-    <menuitem id="menu_team" name="Team"
+    <menuitem id="menu_team" name="Support Team"
               action="action_view_team"
               parent="menu_configuration_categ"/>
 </odoo>

@@ -6,6 +6,8 @@ import {ThemeMaker} from "../theme_maker";
 import {SelectUser} from "./components/select_user";
 import {useService} from "@web/core/utils/hooks";
 import {_t} from "@web/core/l10n/translation";
+import {chatHistory} from "./chatHistory";
+import {ChatThread, scrollToView, setStringByLetter} from "./components/chatThread"
 
 /**
  * Converts a data URL to a Blob.
@@ -35,12 +37,24 @@ export class ExplainAIModal extends Component {
         this.dialogService = useService("dialog")
         this.actionService = useService("action")
         this.orm = useService("orm")
-        this.rpc = useService("rpc")
         this.rootRef = useRef("root")
         this.messageRef = useRef("message")
         this.threadService = useService("mail.thread");
         this.attachmentUploadService = useService("mail.attachment_upload");
-        this.state = useState({imgSrc: "", name: "", explanation: "Loading....!!!", error: true, data: false, apiError: false})
+        this.state = useState({
+            imgSrc: "",
+            name: "",
+            explainByLetter: "",
+            explanation: false,
+            error: true,
+            data: false,
+            apiError: false,
+            cut: 100,
+            chatMode: false,
+            chat: "",
+            isResponding: false,
+        })
+        this.chatHistory = useState(new chatHistory())
         var theme_maker = new ThemeMaker(this.props.theme)
         theme_maker.getTheme()
         onWillStart(async () => {
@@ -71,7 +85,7 @@ export class ExplainAIModal extends Component {
             data: this.state.data,
             name: options.name || '',
             measures: eval(options.measure),
-            dimension: options.dimension, // TODO: Test with gpt generated dimension
+            dimension: options.dimension,
             dimension_axis: options.dimension_axis,
             type: options.type,
         }
@@ -125,7 +139,7 @@ export class ExplainAIModal extends Component {
     }
 
     get explain() {
-        return this.state.explanation
+        return this.state.explanation ? this.state.explanation : ""
     }
 
     shareToUser() {
@@ -136,21 +150,41 @@ export class ExplainAIModal extends Component {
     }
 
     parseExplain(explanation) {
-        const md = window.markdownit();
-        const parsedHTML = md.render(explanation);
+        let parsedHTML = ""
+        try{
+            const md = window.markdownit();
+            parsedHTML = md.render(explanation);
+        }
+        catch (e){
+            console.error(e)
+            parsedHTML = "<div>Oops!! No Internet Connection</div>"
+        }
         return markup(parsedHTML);
     }
 
     async explainWithAi(retry = false) {
         const {data} = this.props.options
-        const [error, apiError ,explanation] = await this.orm.call("dashboard.sheet", "explain_with_ai", [this.state.data, retry])
-        this.state.error = error
-        this.state.apiError = apiError
+        const requestId = this.chatHistory.addInitialMessage(this.state.data, 0)
+        const chatId = this.chatHistory.addMessage({role: "assistant", content: ""}, 0)
+        const {is_error, api_error, cut, explanation, request_token, response_token} = await this.orm.call("dashboard.sheet", "explain_with_ai", [this.state.data, retry])
+        this.chatHistory.updateToken(request_token, requestId)
+        this.chatHistory.updateMessageNToken(explanation, response_token, chatId)
+        this.state.error = is_error
+        this.state.cut = Math.ceil(cut * 100)
+        this.state.apiError = api_error
+        this.state.explanation = ""
+        this.state.explainByLetter = ""
+        setStringByLetter(this.state, 'explainByLetter', explanation, '.explain-footer')
         return this.parseExplain(explanation)
+    }
+    openChatMode() {
+        this.state.chatMode = true
     }
 
     async retry() {
         if (this.state.error) return;
+        this.state.explanation = ""
+        this.state.explainByLetter = ""
         this.state.explanation = await this.explainWithAi(true)
     }
 
@@ -197,6 +231,30 @@ export class ExplainAIModal extends Component {
         });
     }
 
+    async handleChatKeydown(ev) {
+        if(!this.state.isResponding && !ev.shiftKey && ev.key === "Enter" && this.state.chat.trim()) {
+            ev.preventDefault()
+            await this.makeResponse()
+        }
+    }
+
+    async makeResponse() {
+        const chat = this.state.chat
+        this.state.chat = ""
+        this.state.isResponding = true
+        await this.getResponse(chat)
+    }
+
+    async getResponse(chat) {
+        const requestId = this.chatHistory.addMessage({role: "user", content: chat}, 0)
+        const chatId = this.chatHistory.addMessage({role: "assistant", content: ""}, 0)
+        setTimeout(() => scrollToView('.proxy-bottom'), 200)
+        const {is_error, api_error, cut, explanation, request_token, response_token} = await this.orm.call("dashboard.sheet", "chat_with_ai", [chat, this.chatHistory.conversationHistory])
+        this.chatHistory.updateToken(request_token, requestId)
+        this.chatHistory.updateMessageNToken(explanation, response_token, chatId)
+        this.state.isResponding = false
+    }
+
     get style() {
         return {
             height: `55vh;`,
@@ -209,10 +267,14 @@ export class ExplainAIModal extends Component {
         currentTheme: {type: String, optional: true},
         options: {type: Object, optional: false},
         theme: {type: Object, optional: false},
+        isDarkMode: {type: Boolean, optional: true},
+    }
+    static defaultProps = {
+        isDarkMode: false
     }
 }
 
 ExplainAIModal.template = "ExplainAIModal";
 ExplainAIModal.components = {
-    Dialog, GraphTile
+    Dialog, GraphTile, ChatThread
 }

@@ -8,8 +8,8 @@ import { SupportServiceOverview } from './support_service_overview';
 export class SupportServiceDashBoardKanbanRenderer extends KanbanRenderer {
     /* Extending KanbanRenderer to add the dashboard in the kanban view of support service team */
     setup() {
-    super.setup()
-    this.overView = this.props.list.evalContext.overview;
+        super.setup()
+        this.overView = this.props.list.evalContext.overview;
     }
 }
 

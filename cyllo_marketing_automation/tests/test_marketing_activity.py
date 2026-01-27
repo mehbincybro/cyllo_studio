@@ -1,7 +1,29 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+import logging
 from odoo import fields
 from odoo.tests import common
 
+_logger = logging.getLogger(__name__)
 
 class TestMarketingActivity(common.TransactionCase):
 
@@ -14,6 +36,7 @@ class TestMarketingActivity(common.TransactionCase):
             called, and the expected domain is compared with the actual domain
             set in the activity.
         """
+        _logger.info('Starts test_compute_domain')
         campaign = self.env['marketing.campaign'].create({
             'name': 'Campaign',
             'filter': '[("id", "=", 1)]'
@@ -33,6 +56,7 @@ class TestMarketingActivity(common.TransactionCase):
         activity._compute_domain()
         expected_domain = ['&', ("id", "=", 1), ('id', '=', 1)]
         self.assertEqual(activity.domain, str(expected_domain))
+        _logger.info('Ends test_compute_domain')
 
     def test_marketing_execute(self):
         """
@@ -43,6 +67,7 @@ class TestMarketingActivity(common.TransactionCase):
             marketing_execute method is then called on the activity, and it is
             asserted that the state of the activity line is set to 'processed'.
         """
+        _logger.info('Starts test_marketing_execute')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -68,6 +93,7 @@ class TestMarketingActivity(common.TransactionCase):
         })
         activity.marketing_execute()
         self.assertEqual(activity_line.state, 'processed')
+        _logger.info('Ends test_marketing_execute')
 
     def test_test_participant_trigger(self):
         """
@@ -80,6 +106,7 @@ class TestMarketingActivity(common.TransactionCase):
             the participant and activity line, and it is asserted that the
             result is True.
         """
+        _logger.info('Starts test_test_participant_trigger')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -105,6 +132,7 @@ class TestMarketingActivity(common.TransactionCase):
         })
         result = activity.test_participant_trigger(participant, activity_line)
         self.assertTrue(result)
+        _logger.info('Ends test_test_participant_trigger')
 
     def test_generate_schedule_trigger_next_activity(self):
         """
@@ -117,6 +145,7 @@ class TestMarketingActivity(common.TransactionCase):
             the activity with the participant, and it is asserted that
             the cron_id of the resulting schedule is the expected cron.
         """
+        _logger.info('Starts test_generate_schedule_trigger_next_activity')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -145,6 +174,7 @@ class TestMarketingActivity(common.TransactionCase):
         result = activity.generate_schedule_trigger_next_activity(activity,
                                                                   participant)
         self.assertEqual(result.cron_id, cron)
+        _logger.info('Ends test_generate_schedule_trigger_next_activity')
 
     def test_execute_server(self):
         """
@@ -157,6 +187,7 @@ class TestMarketingActivity(common.TransactionCase):
             participant is marked as inactive and the activity line
             state is 'processed'.
         """
+        _logger.info('Starts test_execute_server')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -184,6 +215,7 @@ class TestMarketingActivity(common.TransactionCase):
         activity._execute_server(participant, activity, activity_line)
         self.assertTrue(participant.is_inactive)
         self.assertEqual(activity_line.state, 'processed')
+        _logger.info('Ends test_execute_server')
 
     def test_execute_mail(self):
         """
@@ -196,6 +228,7 @@ class TestMarketingActivity(common.TransactionCase):
             participant and activity line. It is asserted that the
             activity line state is 'processed' and the result is True.
         """
+        _logger.info('Starts test_execute_mail')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -220,18 +253,23 @@ class TestMarketingActivity(common.TransactionCase):
             'participant_id': participant.id,
             'state': 'schedule'
         })
+        partner = self.env['res.partner'].create({
+            'name': 'Test Partner',
+            'email': 'testpartner@example.com',
+        })
         activity_line.write({
             'mail_trace_ids': [(0, 0, {'model': 'res.partner',
-                                       'record_id': self.env.ref(
-                                           'hr.work_contact_mit').id,
+                                       'res_id': partner.id,
                                        'marketing_activity_line_id': activity_line.id,
                                        })]
         })
         result = activity._execute_mail(participant, activity, activity_line)
         self.assertEqual(activity_line.state, 'processed')
         self.assertTrue(result)
+        _logger.info('Ends test_execute_mail')
 
     def test_execute_actions(self):
+        _logger.info('Starts test_execute_actions')
         campaign = self.env['marketing.campaign'].create(
             {'name': 'Campaign 1',
              'state': 'running'
@@ -258,3 +296,4 @@ class TestMarketingActivity(common.TransactionCase):
         })
         activity.execute_actions(participant)
         self.assertEqual(activity_line.state, 'processed')
+        _logger.info('Ends test_execute_actions')
