@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Data for employee salary structure type-->
+    <record id="salary_structure_type_regular" model="salary.structure.type">
+        <field name="name">Regular</field>
+    </record>
+    <record id="salary_structure_type_employee" model="salary.structure.type">
+        <field name="name">Employee</field>
+    </record>
+    <record id="salary_structure_type_worker" model="salary.structure.type">
+        <field name="name">Worker</field>
+    </record>
+</odoo>

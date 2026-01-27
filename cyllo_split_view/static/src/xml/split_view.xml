@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_split_view.SplitView" owl="1">
+        <li t-on-click="on_click_SplitView">
+            <a class="nav-link cy-navitem-list split" href="#">
+            <i class="fa fa-columns split_tree_view"
+               id="split_tree_view"/>Split View</a>
+        </li>
+    </t>
+</templates>

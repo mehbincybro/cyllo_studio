@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+    <!-- templates for the BarcodeLocation views-->
+    <t t-name="cyllo_barcode.BarcodeLocation" owl="1">
+        <div class="container-fluid o_cyllo_barcode_location p-0" t-ref="BarcodeLocationRoot">
+            <div class="d-flex w-100 p-0 m-0 bg-white border-bottom">
+                <nav class="navbar navbar-light bg-light w-100 justify-content-between barcode-cy-primary">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-arrow-left text-light p-2 cursor-pointer" t-on-click="OpenMainScreen" />
+                        <span class="navbar-brand text-light" t-esc="state.data.name" />
+                    </div>
+                    <form class="form-inline">
+                        <button class="btn btn-outline-light my-2 my-sm-0" type="button" style="margin-right: 10px" t-on-click="_onClickScanProduct"><i class="fa fa-barcode" /></button>
+                        <button class="btn btn-outline-light my-2 my-sm-0" type="button" t-on-click="() => this.actionService.doAction('cyllo_barcode.cyllo_barcode_action')">
+                            <i class="fa fa-sign-out"/></button>
+                    </form>
+                </nav>
+            </div>
+            <div t-if="state.data.state != 'done'">
+                <div class="justify-content-center d-flex border-bottom" t-if="this.type == 'location'">
+                    <a class="navbar-brand text-dark adjustment_location_header">Scan Product/ Destination Location <i class="fa fa-barcode" /> </a>
+                </div>
+                <div class="justify-content-center d-flex border-bottom" t-else="">
+                    <a class="navbar-brand text-dark adjustment_location_header">Scan Product <i class="fa fa-barcode" /> </a>
+                </div>
+            </div>
+            <div class="container cyllo-barcode-adjustment-container" t-if="state.data.state != 'done'">
+                <div class="card-columns row" style="padding-bottom: 10px;gap: 1rem;">
+                    <t t-foreach="state.transfer" t-as="transfer" t-key="transfer['id']">
+
+                        <CylloBarcodeLocationLines transfer="transfer" open_modal="transfer.open_modal" destination="state.data.destination" pick_name="state.data.name" type="type" />
+                    </t>
+                </div>
+            </div>
+            <div  t-else="" class="row cyllo-barcode_section">
+                <div class="cyllo-barcode--container cyllo_barcode-verify-container">
+                    <div class="cy-barcode-img_container">
+                        <img src="/cyllo_barcode/static/src/img/box.svg"  alt="verified product" class="cy-validate-img"/>
+                    </div>
+                    <h2 class="cyllo-barcode-verifyheader">This picking is already done !</h2>
+                    <p class="cyll-barcode-verfy-descripition">You can create return order by clicking below button.</p>
+                    <button class="btn cy-button-stroke cy-return-btn" t-on-click="_onClickReturn"><i class="ri-arrow-left-line"/>Return</button>
+                </div>
+            </div>
+            <div class="position-fixed bottom-0 w-100 d-flex">
+                <div class="col-md-12 btn-adjustment justify-content-center barcode-cy-primary align-items-center text-light d-flex" t-if="state.data.state != 'done'" t-on-click="_onClickApplyPicking" style="height:45px">
+                    Apply
+                </div>
+            </div>
+        </div>
+    </t>
+    <!-- templates for the BarcodeLocationLines views-->
+    <t t-name="cyllo_barcode.BarcodeLocationLines" owl="1">
+        <div class="card mb-3 barcode-cy-primary col-md-4 cyllo-barcode-cards" t-ref="root-LocationLines">
+            <div class="row no-gutters selecting-card" t-on-dblclick="onDblClick">
+                <div t-if="state.transfer.image" class="col-md-4 cy-barcode-adjustment-image" t-attf-style="background-image :url('data:image/png;base64,{{state.transfer.image}}');">
+                    <button class="btn btn-dark border-0 rounded-circle m-1 p-1 position-absolute edit_adjust_line" data-tooltip="Open Edit Window" aria-label="Open Edit Window" t-on-click="() => this.root.el.querySelector('#LocationLinesModal').style.display = 'block'">
+                        <i class="fa fa-pencil fa-fw" />
+                    </button>
+                    <button class="btn btn-dark border-0 rounded-circle m-1 p-1 position-absolute cancel_adjust_line" data-tooltip="Delete Product" aria-label="Delete Product" t-on-click="_onclickCancel">
+                        <i class="fa fa-trash fa-fw" />
+                    </button>
+                </div>
+                <div t-else="" class="col-md-4 cy-barcode-adjustment-image" style="background-image :url('/cyllo_barcode/static/src/img/stock_static.jpg'); background-position: 50% 50%; background-size: 170%; cy-barcode-adjustment-image">
+                    <button class="btn btn-dark border-0 rounded-circle m-1 p-1 position-absolute edit_adjust_line" data-tooltip="Open Edit Window" aria-label="Open Edit Window" t-on-click="() => this.root.el.querySelector('#LocationLinesModal').style.display = 'block'">
+                        <i class="fa fa-pencil fa-fw" />
+                    </button>
+                    <button class="btn btn-dark border-0 rounded-circle m-1 p-1 position-absolute cancel_adjust_line" data-tooltip="Cancel Operations" aria-label="Cancel Operations" t-on-click="_onclickCancel">
+                        <i class="fa fa-trash fa-fw" />
+                    </button>
+                </div>
+                <div class="col-md-8 px-2">
+                    <div class="d-flex flex-row-reverse">
+                        <div t-on-click="() => this._onClickOpenModal(true)" t-if="state.transfer.tracking != 'none'" class="cursor-pointer">
+                            <i class="fa fa-bars text-white" />
+                        </div>
+                    </div>
+                    <div class="card-body barcode-cy-primary">
+                        <h5 class="card-title text-light d-flex justify-content-center" t-esc="state.transfer.product_name" />
+                        <p class="card-text text-light">
+                        <div class="barcode-location-text "><i class="fa fa-map-marker" /> <span t-esc="state.transfer.destination" /></div>
+                        </p>
+                        <p t-if="state.transfer.product_code" class="card-text text-light"><i class="fa fa-tag" />
+                            <span t-esc="state.transfer.product_code" />
+                        </p>
+                        <p class="card-text text-light"><i class="fa fa-cubes" />
+                            <i class="fa btn text-light fa-minus" t-on-click="() => this._onClickExternalOperation('minus')" t-if="state.transfer.tracking == 'none'" />
+                            <span t-esc="state.transfer.quantity" t-if="state.transfer.tracking == 'none'" />
+                            <spam t-if="state.transfer.tracking != 'none' and state.transfer.operation_type == 'incoming'" t-esc="state.transfer.line_quantity" style="margin-left: 5px;" />
+                            <spam t-if="state.transfer.tracking != 'none' and (state.transfer.operation_type.includes('internal') or state.transfer.operation_type.includes('outgoing'))" t-esc="state.transfer.line_quant_int" style="margin-left: 5px;" />
+                            <b> / <span t-esc="state.transfer.product_uom_qty" /></b>
+                            <i class="fa btn text-light fa-plus" t-on-click="() => this._onClickExternalOperation('add')" t-if="state.transfer.tracking == 'none'" />
+                            <button class="btn btn-primary btn-lg" t-if="state.transfer.quantity == 0 and state.transfer.tracking == 'none'" t-esc="'+' + state.transfer.product_uom_qty" t-on-click="() => this.UpdateQuantity(state.transfer.product_uom_qty)" />
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div id="MoveLinesModal" class="barcode-modal">
+                <!-- Modal content -->
+                <div class="barcode-modal-content">
+                    <h2 class="cyllo-barcode--header" t-esc="props.pick_name + ' - ' + state.transfer.product_name" />
+                    <i class="ri-close-line  barcode-close" t-on-click="() => this._onClickOpenModal(false)" />
+                    <div class="barcode-adjustment-line-content d-grid">
+                        <table class="table table-striped mt-3" style="border: 1px solid #dfdfdf;">
+                            <thead style="background-color: #dedede;color: #212529;">
+                                <tr>
+                                    <th scope="col" style="font-weight: bold;">#</th>
+                                    <th scope="col" style="font-weight: bold;">Product</th>
+                                    <th scope="col" style="font-weight: bold;" t-if="state.transfer.tracking == 'serial'">Serial Number</th>
+                                    <th scope="col" style="font-weight: bold;" t-else="">Lot Name</th>
+                                    <th scope="col" style="font-weight: bold;">Quantity</th>
+                                    <th scope="col" style="font-weight: bold;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-set="series" t-value="1" />
+                                <tr t-foreach="state.move_lines" t-as="rec" t-key="rec.id">
+                                    <th scope="row"><span t-esc="series" /></th>
+                                    <t t-set="series" t-value="series + 1" />
+                                    <td><span t-esc="rec.product_id[1]" /></td>
+                                    <td>
+                                        <t t-if="rec.lot_serial_name" ><span t-esc="rec.lot_serial_name" /></t>
+                                        <t t-elif="state.transfer.tracking == 'serial'"><span>Please scan serial number</span></t>
+                                        <t t-else=""><span>Please scan the Lot Name</span></t>
+                                    </td>
+                                    <td><span t-esc="rec.quantity" /></td>
+                                    <td t-if="rec.lot_serial_name"><i class="ri-checkbox-circle-fill text-success" style="font-size:18px" /></td>
+                                    <td t-else=""><i class="ri-error-warning-fill text-danger" style="font-size:21px" /></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div id="LocationLinesModal" class="barcode-modal cyllo-Barcode-modal">
+                <!-- Modal content -->
+                <div class="barcode-modal-content">
+                    <i class="ri-close-line barcode-close" t-on-click="_onClickDiscardChanges" />
+                    <div class="barcode-adjustment-line-content d-grid">
+                        <h4 class="card-text text-dark"><i class="fa fa-tags" />
+                            <span class="btn" t-esc="state.transfer.product_name" t-on-click="() => this._onClickOpenWizard('product.product', state.transfer.product)" />
+                        </h4>
+                        <div class="d-flex" style="margin: 6px 0;"><i class="fa fa-cubes text-dark" style="font-size: 23px;padding-top: 3px;" />
+                            <input type="number" min="0" class="form-control input_for_quantity" t-att-value="state.transfer.quantity" style="margin-left:3px;" />
+                        </div>
+                        <div id="barcode-numpad-container" class="d-grid justify-content-center">
+                            <ul id="barcode-numpad-keyboard">
+                                <li class="letter" t-on-click="() => this._onclickNumber('1')">1</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('2')">2</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('3')">3</li>
+                                <li class="letter barcode-numpad-clearl" t-on-click="() => this._onclickNumber('4')">4</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('5')">5</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('6')">6</li>
+                                <li class="letter barcode-numpad-clearl" t-on-click="() => this._onclickNumber('7')">7</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('8')">8</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('9')">9</li>
+                                <li class="letter" t-on-click="() => this._onClickDialOperation('minus')">-1</li>
+                                <li class="letter  barcode-numpad-clearl" t-on-click="_onClickDialDecimal">.</li>
+                                <li class="letter" t-on-click="() => this._onclickNumber('0')">0</li>
+                                <li class="letter" t-on-click="_onClickDialRemove"><i class="fa fa-long-arrow-left" /></li>
+                                <li class="letter" t-on-click="() => this._onClickDialOperation('add')">+1</li>
+                            </ul>
+                        </div>
+                        <t t-if="state.transfer.tracking == 'serial' and this.state.transfer.operation_type == 'incoming'">
+                            <div class="d-flex">
+                                <input type="text" class="form-control input_for_sn" t-att-value="state.transfer.next_serial" style="margin-left:3px;" placeholder="Add Serial code..." />
+                                <button class="btn btn-primary w-25" style="border-radius:0px !important;" t-on-click="() => this.OnAssign(this.root.el.querySelector('.input_for_sn').value)">
+                                    Assign Serial Numbers
+                                </button>
+                            </div>
+                        </t>
+                        <t t-elif="state.transfer.tracking == 'lot' and this.state.transfer.operation_type == 'incoming'">
+                            <div class="d-flex" style="margin: 6px 0;">
+                                <input type="text" class="form-control input_for_lot" style="margin-left:3px;" placeholder="Lots..." />
+                                <button class="btn btn-primary w-25" style="border-radius:0px !important;" t-on-click="() => this.OnAssignLots(this.root.el.querySelector('.input_for_lot').value)">
+                                    Assign Lots
+                                </button>
+                            </div>
+                        </t>
+                        <div>
+                        </div>
+                        <h4 class="card-text text-dark barcode-location-text mt-5"><i class="fa fa-map-marker" />
+                            <span t-esc="state.transfer.source" class="btn" t-on-click="() => this._onClickOpenWizard('stock.location', state.transfer.source_id)" />
+                            <i class="fa fa-long-arrow-right" />
+                            <span t-esc="state.transfer.destination" class="btn" t-on-click="() => this._onClickOpenWizard('stock.location', state.transfer.destination_id)" />
+                        </h4>
+                    </div>
+                    <div class="row barcode-modal-buttons">
+                        <div class="col-md-6 btn-adjustment-clear justify-content-center align-items-center text-dark d-flex border" t-on-click="_onClickDiscardChanges">
+                            Discard
+                        </div>
+                        <div class="col-md-6 btn-adjustment justify-content-center barcode-cy-primary align-items-center text-light d-flex" t-on-click="() => this._onClickApplyChanges(this.root.el.querySelector('.input_for_quantity').value)">
+                            Apply
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

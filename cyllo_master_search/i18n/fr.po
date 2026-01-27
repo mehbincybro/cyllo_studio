@@ -1,0 +1,39 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_master_search
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-30 10:39+0000\n"
+"PO-Revision-Date: 2023-11-30 10:39+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_master_search
+#: model:ir.model.fields,help:cyllo_master_search.field_ir_model__master_search
+msgid "Enable this to include the model in the master search."
+msgstr "Activez cela pour inclure le modèle dans la recherche maître."
+
+#. module: cyllo_master_search
+#: model:ir.model.fields,field_description:cyllo_master_search.field_ir_model__master_search
+msgid "Master Search"
+msgstr "Master Search"
+
+#. module: cyllo_master_search
+#: model:ir.model,name:cyllo_master_search.model_ir_model
+msgid "Models"
+msgstr "Des modèles"
+
+#. module: cyllo_master_search
+#. odoo-javascript
+#: code:addons/cyllo_master_search/static/src/xml/cyllo_search_bar.xml:0
+#: code:addons/custom/cyllo_master_search/static/src/xml/cyllo_search_bar.xml:0
+#, python-format
+msgid "Search..."
+msgstr "Recherche..."

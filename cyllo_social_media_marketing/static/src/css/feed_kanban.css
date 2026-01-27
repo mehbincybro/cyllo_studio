@@ -1,0 +1,15 @@
+#profile_image {
+    float:left;
+    width:25%;
+    height:280px;
+}
+#user_name{
+    float:left;
+    width:50%;
+    height:280px;
+}
+#posted_date{
+    float:right;
+    width:25%;
+    height:280px;
+}

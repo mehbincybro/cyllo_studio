@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_account_fiscal_year,access.account.fiscal.year,model_account_fiscal_year,account.group_account_readonly,1,0,0,0
+access_account_fiscal_year_manager,access.account.fiscal.year,model_account_fiscal_year,account.group_account_manager,1,1,1,1
+access_account_fiscal_year_invoice,access.account.fiscal.year,model_account_fiscal_year,account.group_account_invoice,1,1,1,1
+
+access_account_fiscal_year_period,access.account.fiscal.year.period,model_account_fiscal_year_period,account.group_account_readonly,1,0,0,0
+access_account_fiscal_year_period_manager,access.account.fiscal.year.period,model_account_fiscal_year_period,account.group_account_manager,1,1,1,1
+access_account_fiscal_year_period_invoice,access.account.fiscal.year.period,model_account_fiscal_year_period,account.group_account_invoice,1,1,1,1
+
+access_fiscal_year_close,access.fiscal.year.close,model_fiscal_year_close,account.group_account_invoice,1,1,1,0

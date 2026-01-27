@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Displaying product information on the website's rental page -->
+    <template id="rental_product_details" name="Product Details">
+        <t t-call="website.layout">
+            <div class="dummy_class p-5" style="background: aliceblue;">
+                <span id="dummy_span"/>
+                <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                <div class="p-5" style="background:white;">
+                    <section class="oe_website_sale">
+                        <div class="row">
+                            <div class="col-12 col-md-6">
+                                <div class="carousel slide sticky-top mb-3 overflow-hidden">
+                                    <div class="cy-selected-rental_product">
+                                        <img t-attf-src="/web/image/product.product/#{product.id}/image_1024"
+                                             class="cy-selected-rental_img" style="width: 100%; height: 500px;"
+                                             itemprop="image" loading="lazy"/>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-6">
+                                <div class="cy-rental_product--details">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb p-0 mb-2 m-lg-0">
+                                            <li class="breadcrumb-item o_not_editable">
+                                                <a href="/rental">
+                                                    All Rental Products
+                                                </a>
+                                            </li>
+                                            <li class="breadcrumb-item active">
+                                                <span t-esc="product.name"/>
+                                            </li>
+                                        </ol>
+                                    </nav>
+                                    <h1 id="p_name">
+                                        <t t-esc="product.name"/>
+                                    </h1>
+                                    <form action="/create/rental_order" method="post" enctype="multipart/form-data"
+                                          t-attf-disabled="{{product.qty_available == 0}}">
+                                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                                        <div class="row rental_dates">
+                                            <span id="p_id" t-esc="product.id" style="display:none;"/>
+                                            <div class="col-12 col-sm-6">
+                                                <label class="cy-helpdesk_ticket-label">
+                                                    Start Date:
+                                                </label>
+                                                <div class="input-group date datepicker">
+                                                    <input type="datetime-local" id="pickup_date"
+                                                           class="form-control cy-helpdesk-ticket_input"
+                                                           name="Date" required="1"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6">
+                                                <label class="cy-helpdesk_ticket-label">
+                                                    End date :
+                                                </label>
+                                                <div class="input-group date datepicker ">
+                                                    <input type="datetime-local" id="return_date"
+                                                           class="form-control  cy-helpdesk-ticket_input"
+                                                           name="Return Date" required="1"/>
+                                                    <input id="product_id" class="form-control s_website_form end"
+                                                           name="Product ID" type="hidden"/>
+                                                    <input id="product_name" class="form-control s_website_form end"
+                                                           name="Product Name" type="hidden"/>
+                                                    <input id="amount" class="form-control s_website_form end"
+                                                           name="Amount" type="hidden"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6">
+                                                <label class="cy-helpdesk_ticket-label">
+                                                    Quantity
+                                                </label>
+                                                <span class="text-success" t-if="product.qty_available > 0">
+                                                    Total available quantity is
+                                                    <b t-esc="product.qty_available"/>
+                                                </span>
+                                                <span class="text-danger" t-else="">
+                                                    <t t-esc="product.name"/>
+                                                    Out of stock
+                                                </span>
+                                                <div class="col-sm ">
+                                                    <input type="number" id="quantity" class="form-control cy-helpdesk-ticket_input"
+                                                           name="Quantity"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 col-sm-6">
+                                                <label class="cy-helpdesk_ticket-label">
+                                                    Duration :
+                                                </label>
+                                                <div class="col-sm ">
+                                                    <input type="text" id="duration" class="form-control cy-helpdesk-ticket_input"
+                                                           readonly="1"/>
+                                                </div>
+                                            </div>
+                                            <div class="col-12 ">
+                                                <label class="cy-helpdesk_ticket-label ">
+                                                    Subtotal :
+                                                </label>
+                                                <input type="text" id="total" class="form-control cy-helpdesk-ticket_input "
+                                                       readonly="1"/>
+                                            </div>
+                                            <div class="col-12">
+                                                <label class="cy-helpdesk_ticket-label">
+                                                    Total :
+                                                </label>
+                                                <input type="text" id="price_total" class="form-control cy-helpdesk-ticket_input"
+                                                       readonly="1"/>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="d-flex justify-content-end">
+                                                <t t-set="AvailableQty" t-value="product.qty_available"/>
+                                                <button type="submit" id="add_to_rental_cart" t-att-disabled="AvailableQty == 0"
+                                                        class="btn cy-rental-button-primary-stroke cy-helpdesk_submit">
+                                                    Add to cart
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                    <div class="cy-rental_selected-charge mt-4">
+                                        <span id="p_id" t-esc="product.id" style="display:none;"/>
+                                        <p class="product-price mb-0">
+                                            <div class="d-flex gap-5">
+                                                <!-- Column for Rental Charges -->
+                                                <div class="rental-column">
+                                                    <b t-if="product.rental_charging_ids">
+                                                        Rental Charges
+                                                    </b>
+                                                    <br/>
+                                                    <t t-foreach="product.rental_charging_ids" t-as="charges">
+                                                        <div class="d-flex align-items-center gap-2 ">
+                                                            <span class="cy-recard-title cy-card-text" t-esc="charges.rental_period.capitalize() + ':'"/>
+                                                            <span class="cy-rental-charge" t-esc="charges.currency_id.symbol"/>
+                                                            <span class="cy-rental-charge" t-esc="charges.price"/>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                                <!-- Column for Extra Charges -->
+                                                <div class="extra-charges-column" t-if="product.is_extra_cost">
+                                                    <b>Extra Charge</b>
+                                                    <br/>
+                                                    <div class="d-flex align-items-center gap-2 ">
+                                                        <span class="cy-recard-title cy-card-text fw-bolder">
+                                                            Amount of <span class="cy-rental-charge" t-esc="product.currency_id.symbol"/>
+                                                            <span class="cy-rental-charge" t-esc="product.extra_hourly_price"/> will be added after
+                                                            <span class="text-danger" t-esc="product.apply_after"/>hours
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Success message template for Form submission -->
+    <template id="form_submit_success" name="Form Successfully Submitted">
+        <div id="wrap" class="oe_structure oe_empty">
+            <center>
+                <div>
+                    <p class="lead">Rental Order created successfully..</p>
+                </div>
+            </center>
+        </div>
+    </template>
+</odoo>

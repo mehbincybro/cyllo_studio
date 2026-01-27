@@ -1,0 +1,187 @@
+# -*- coding: utf-8 -*-
+import base64
+from datetime import timedelta
+import requests
+from werkzeug import urls
+from odoo import _, fields, models
+from odoo.exceptions import ValidationError
+from odoo.tools.safe_eval import datetime, json
+
+
+class YoutubeAccount(models.Model):
+    """
+    Model representing a Social Media YouTube Account.
+    """
+    _name = "youtube.account"
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _description = "Social Media YouTube Account"
+
+    client_number = fields.Char(string='Client Id', required=True, help="Client id")
+    client_secret = fields.Char(string='Client secret ', required=True, help="Client secret")
+    name = fields.Char(string="Account Name", required=True, help="Any preferable name of the account")
+    access_token = fields.Char(help="Access token for this account ")
+    refresh_token = fields.Char(string='Refresh Token of Account', help="Refresh token for this account ")
+    channel_count = fields.Integer(string="Number of channel", help="Number of channels related to this account")
+    state = fields.Selection([('new', 'Not Connected'), ('sync', 'Connected'), ('expired', 'Expired')],
+                             'Status', readonly=True, index=True, default='new', help='State of youtube account')
+    token_expiry_date = fields.Datetime(string='Validity of Token', help="Validity of access token")
+
+    def action_get_authorization_url(self):
+        """
+        Get the authorization URL for connecting to YouTube API.
+        """
+        scopes = [
+            'https://www.googleapis.com/auth/youtube.force-ssl',
+            'https://www.googleapis.com/auth/youtube',
+            'https://www.googleapis.com/auth/youtube.readonly'
+        ]
+        authority = 'https://accounts.google.com/o/oauth2/auth'
+        base_url = self.env['ir.config_parameter'].get_param('web.base.url')
+        action_id = self.env.ref('cyllo_youtube.action_view_youtube_account').id
+        redirect_url = base_url + '/web#id=%d&action=%d&view_type=form&model=youtube.account' % (self.id, action_id)
+        state = {
+            'id': self.id,
+            'url_return': redirect_url
+        }
+        encoded_params = urls.url_encode({
+            'client_id': self.client_number,
+            'redirect_uri': self.env['ir.config_parameter'].get_param('web.base.url') + '/odoo_youtube',
+            'response_type': 'code',
+            'state': json.dumps(state),
+            'scope': ' '.join(scopes),
+            'prompt': 'consent',
+            'access_type': 'offline',
+        })
+        auth_url = "%s?%s" % (authority, encoded_params)
+        return {
+            'type': 'ir.actions.act_url',
+            'target': 'self',
+            'url': auth_url,
+        }
+
+    def authenticate_with_youtube(self, authorization_code):
+        """
+        Authenticate with YouTube API using authorization code.
+        """
+        token_url = "https://oauth2.googleapis.com/token"
+        data = {
+            "code": authorization_code,
+            "client_id": self.client_number,
+            "client_secret": self.client_secret,
+            'redirect_uri': self.env['ir.config_parameter'].get_param('web.base.url') + '/odoo_youtube',
+            "grant_type": "authorization_code",
+            'access_type': 'offline',
+        }
+        response = requests.post(token_url, data=data)
+        if response.status_code == 200:
+            access_token = response.json().get('access_token')
+            self.access_token = access_token
+            self.refresh_token = response.json().get('refresh_token')
+            self.state = 'sync'
+            self.token_expiry_date = datetime.datetime.now() + timedelta(
+                seconds=(response.json().get('expires_in') - 1500)) if response.json().get('expires_in') else False
+            self.action_refresh_access_token()
+            channels = self.env['youtube.channel'].search([('youtube_account_id', '=', self.id)])
+            for channel in channels:
+                channel.write({
+                    'is_active': True
+                })
+        else:
+            error_message = response.json().get('error_description', 'Unknown error occurred.')
+            raise ValidationError(_("Failed to authenticate with YouTube: %s") % error_message)
+
+    def action_refresh_access_token(self):
+        """
+        Refresh the access token for the YouTube account.
+        """
+        token_url = "https://oauth2.googleapis.com/token"
+        scopes = [
+            'https://www.googleapis.com/auth/youtube.force-ssl',
+            'https://www.googleapis.com/auth/youtube',
+            'https://www.googleapis.com/auth/youtube.readonly'
+        ]
+        data = {
+            "client_id": self.client_number,
+            "client_secret": self.client_secret,
+            'scope': ' '.join(scopes),
+            "refresh_token": self.refresh_token,
+            "grant_type": "refresh_token",
+            'access_type': 'offline',
+        }
+        response = requests.post(token_url, data=data)
+        if response.status_code == 200:
+            tokens = response.json()
+            self.access_token = tokens.get('access_token')
+            self.token_expiry_date = datetime.datetime.now() + timedelta(
+                seconds=(response.json().get('expires_in') - 1500)) if response.json().get('expires_in') else False
+        else:
+            error_message = response.json().get('error_description', 'Unknown error occurred.')
+            raise ValidationError(_("Failed to refresh access token: %s") % error_message)
+
+    def action_disconnect(self):
+        """
+        Function for disconnecting the YouTube account.
+        """
+        channels = self.env['youtube.channel'].search([('youtube_account_id', '=', self.id)])
+        for channel in channels:
+            channel.write({
+                'is_active': False
+            })
+        self.write({
+            'state': 'new'
+        })
+
+    def action_get_channel_details(self):
+        """
+        Get details of channels associated with the YouTube account.
+        """
+        if not self.token_expiry_date:
+            self.action_refresh_access_token()
+        elif self.token_expiry_date <= datetime.datetime.now():
+            self.action_refresh_access_token()
+        headers = {
+            'Authorization': f'Bearer {self.access_token}',
+            'Accept': 'application/json',
+        }
+        params = {
+            'part': 'snippet',
+            'mine': 'true'
+        }
+        channel_url = "https://www.googleapis.com/youtube/v3/channels"
+        response = requests.get(channel_url, headers=headers, params=params)
+        if response.status_code == 200:
+            channels_data = response.json().get('items', [])
+            self.channel_count = len(channels_data)
+            for channel in channels_data:
+                channel_temp = self.env['youtube.channel'].sudo().search([('youtube_number', '=', channel['id'])])
+                if not channel_temp:
+                    image_base64 = None
+                    if channel['snippet']['thumbnails']:
+                        image_url = channel['snippet']['thumbnails']['default']['url']
+                        response = requests.get(image_url)
+                        if response:
+                            image_base64 = base64.b64encode(response.content).decode('utf-8')
+                    if channel:
+                        self.env['youtube.channel'].sudo().create({
+                            'name': channel['snippet']['title'],
+                            'youtube_account_id': self.id,
+                            'is_active': True,
+                            'youtube_number': channel['id'],
+                            'youtube_etag': channel['etag'],
+                            'customUrl': channel['snippet']['customUrl'] if channel['snippet']['customUrl'] else None,
+                            'channel_image': image_base64
+                        })
+
+    def action_open_channel(self):
+        """
+        Action to open associated YouTube channels.
+        """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Channels',
+            'view_mode': 'tree,form',
+            'res_model': 'youtube.channel',
+            'domain': [('youtube_account_id', '=', self.id)],
+            'context': "{'create': False}"
+        }

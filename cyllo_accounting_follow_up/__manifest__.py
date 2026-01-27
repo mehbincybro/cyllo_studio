@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'Cyllo Accounting Follow-ups',
+    'version': "1.0.0",
+    'category': 'Accounting',
+    'summary': """Accounting Follow-ups""",
+    'description': "Follow-up features on accounting module",
+    'license': 'LGPL-3',
+    'author': "Cyllo",
+    'website': "https://www.cyllo.com",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'depends': ['base', 'account'],
+    'data': [
+        'data/mail_template_data.xml',
+        'data/ir_actions_server_data.xml',
+        'data/ir_cron_data.xml',
+        'security/ir.model.access.csv',
+        'views/account_followup_line_views.xml',
+        'views/res_partner_views.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}

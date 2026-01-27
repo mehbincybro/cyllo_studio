@@ -1,0 +1,16 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_account_payment_line,access.account.payment.line,model_account_payment_line,base.group_user,1,0,0,0
+access_account_payment_line_invoice,access.account.payment.line,model_account_payment_line,account.group_account_invoice,1,1,1,1
+
+access_account_asset_type,access.account.asset.type,model_account_asset_type,account.group_account_readonly,1,0,0,0
+access_account_asset_type_manager,access.account.asset.type,model_account_asset_type,account.group_account_manager,1,1,1,1
+access_account_asset_type_invoice,access.account.asset.type,model_account_asset_type,account.group_account_invoice,1,1,1,1
+
+access_account_asset_asset,access.account.asset.asset,model_account_asset_asset,account.group_account_readonly,1,0,0,0
+access_account_asset_asset_manager,access.account.asset.asset,model_account_asset_asset,account.group_account_manager,1,1,1,1
+access_account_asset_asset_invoice,access.account.asset.asset,model_account_asset_asset,account.group_account_invoice,1,1,1,1
+
+access_account_asset_modify,access.account.asset.modify,model_account_asset_modify,account.group_account_readonly,1,0,0,0
+access_account_asset_modify_manager,access.account.asset.modify,model_account_asset_modify,account.group_account_manager,1,1,1,1
+access_account_asset_modify_invoice,access.account.asset.modify,model_account_asset_modify,account.group_account_invoice,1,1,1,1

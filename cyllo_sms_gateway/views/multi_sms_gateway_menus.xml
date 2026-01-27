@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem name="SMS Gateway" id="menu_sms_gateway_categ"
+              parent="base.menu_administration"
+              groups="cyllo_sms_gateway.group_cyllo_sms_gateway"/>
+    <!-- Menu to access SMS Gateways -->
+    <menuitem name="Gateway List" id="menu_gateway_list"
+              parent="cyllo_sms_gateway.menu_sms_gateway_categ"
+              action="cyllo_sms_gateway.action_view_sms_gateway_config"
+              groups="cyllo_sms_gateway.group_cyllo_sms_gateway"/>
+    <!-- Menu to access SMS History -->
+    <menuitem name="SMS History" id="menu_sms_history"
+              parent="cyllo_sms_gateway.menu_sms_gateway_categ"
+              action="cyllo_sms_gateway.action_view_sms_history"
+              groups="cyllo_sms_gateway.group_cyllo_sms_gateway"/>
+</odoo>

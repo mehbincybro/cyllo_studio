@@ -1,0 +1,46 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'Twilio Voice Call',
+    'version': '1.0',
+    'category': 'Productivity ',
+    'summary': """Make a voice call using twilio""",
+    'description': """The module helps you to make a call using the 
+     twilio account.""",
+    'author': "Cyllo",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'website': "https://www.cyllo.com",
+    'depends': ['base', 'contacts', 'web'],
+    'data': [
+        'security/cyllo_twilio_voice_call_groups.xml',
+        'security/ir.model.access.csv',
+        'data/ir_sequence_data.xml',
+        'views/incoming_call_list_views.xml',
+        'views/res_config_settings_views.xml',
+        'views/out_going_call_list_views.xml',
+    ],
+    'external_dependencies': {
+        'python': ['twilio'],
+    },
+    'assets': {
+        'web.assets_backend': [
+            'https://cdn.jsdelivr.net/npm/@twilio/voice-sdk@2.0.1/dist/twilio.min.js',
+            'cyllo_twilio_voice_call/static/src/xml/systray_icon.xml',
+            'cyllo_twilio_voice_call/static/src/xml/outgoing_call_templates.xml',
+            'cyllo_twilio_voice_call/static/src/xml/contact_tab.xml',
+            'cyllo_twilio_voice_call/static/src/xml/recent_tab.xml',
+            'cyllo_twilio_voice_call/static/src/xml/incoming_call_templates.xml',
+            'cyllo_twilio_voice_call/static/src/js/systray_icon.js',
+            'cyllo_twilio_voice_call/static/src/js/outgoing_call.js',
+            'cyllo_twilio_voice_call/static/src/js/incoming_call.js',
+            'cyllo_twilio_voice_call/static/src/js/recent_tab.js',
+            'cyllo_twilio_voice_call/static/src/js/contact_tab.js',
+            'cyllo_twilio_voice_call/static/src/css/dial_pad.css',
+            'cyllo_twilio_voice_call/static/src/css/remixicon.css',
+        ],
+    },
+    'license': "LGPL-3",
+    'installable': True,
+    'application': True,
+    'auto_install': False,
+}

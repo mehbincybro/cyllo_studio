@@ -1,0 +1,2448 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_documents
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-06 03:32+0000\n"
+"PO-Revision-Date: 2023-12-06 03:32+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__security
+msgid ""
+" Privet : only the uploaded user can view\n"
+"                    Managers & Owner : Document shared with Managers "
+msgstr ""
+"Privet: يمكن للمستخدم الذي تم تحميله فقط عرضه\n"
+"                    المديرون والمالك: وثيقة مشتركة مع المديرين"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__privacy_visibility
+msgid ""
+"- Invited internal users: when following a workspace, internal users will get access to all of its documents without distinction \n"
+"\n"
+"All internal users: all internal users can access the workspace and all of its documents without distinction.\n"
+"\n"
+msgstr ""
+"- المستخدمون الداخليون المدعونون: عند اتباع مساحة عمل ، سيتمكن المستخدمون الداخليون من الوصول إلى جميع مستنداتها دون تمييز\n"
+"\n"
+"جميع المستخدمين الداخليين: يمكن لجميع المستخدمين الداخليين الوصول إلى مساحة العمل وجميع مستنداتها دون تمييز."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_home_menu_req
+msgid ""
+"/\n"
+"                    Upload Request"
+msgstr ""
+"/\n"
+"                    طلب تحميل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_home_menu_doc
+msgid "/ Documents"
+msgstr "/ وثائق"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_home_menu_req
+msgid "/ Upload Request"
+msgstr "/ طلب تحميل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                    Google Drive Accounts"
+msgstr ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                    حسابات محرك Google"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                    One Drive Accounts"
+msgstr ""
+"<i class=\"fa fa-arrow-right\"/>\n"
+"                                    حسابات محرك واحدة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid ""
+"<i class=\"fa fa-fw o_button_icon fa-lg fa-refresh\"/>\n"
+"                                        Sync now"
+msgstr ""
+"<i class=\"fa fa-fw o_button_icon fa-lg fa-refresh\"/>\n"
+"                                        زامن الآن \"لنقل البيانات"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid ""
+"<i class=\"fa fa-lock document_lock_icon\" invisible=\"not is_locked\" "
+"title=\"Locked Document\"/>"
+msgstr ""
+"<i class=\"fa fa-lock document_lock_icon\" invisible=\"not is_locked\" "
+"title = \"documed document\"/>"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_form
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                Document Template\n"
+"                                            </span>"
+msgstr ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                قالب المستند\n"
+"                                            </span>"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid ""
+"<span style=\"font-size:13px; color:#8f8888;\">\n"
+"                                            Choose Workspace*\n"
+"                                        </span>\n"
+"                                        <select class=\"form-control product\" id=\"workspace\" name=\"workspace\" default=\"None\" style=\"color:#8879B0; font-size:16px; border:1px solid #8879B0; text-align: center;\">\n"
+"                                        </select>"
+msgstr ""
+"<span style = \"font-size: 13px ؛ color:#8f8888 ؛\">\n"
+"                                            اختر مساحة العمل*\n"
+"                                        </span>\n"
+"                                        <select class=\"form-control product\" id=\"workspace\" name=\"workspace\" default=\"None\" style=\"color:#8879B0; font-size:16px; border:1px solid #8879B0; text-align: center;\">\n"
+"                                        </select>"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_view
+msgid "<strong class=\"text-muted\">Owner</strong>"
+msgstr "<strong class = \"text-muted\"> المالك </strong>"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.no_request_template
+msgid "<strong>Currently No Requests !</strong>"
+msgstr "<strong> حاليا لا طلبات! </strong>"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__request_document__state__accepted
+msgid "Accepted"
+msgstr "قبلت"
+
+#. module: cyllo_documents
+#: model:ir.module.category,description:cyllo_documents.module_document_module
+msgid "Access for Document module"
+msgstr "الوصول إلى وحدة المستندات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_needaction
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_needaction
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_needaction
+msgid "Action Needed"
+msgstr "الإجراءات اللازمة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Actions"
+msgstr "أجراءات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__active
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__active
+msgid "Active"
+msgstr "نشيط"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_ids
+msgid "Activities"
+msgstr "أنشطة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "استثناء النشاط الديكور"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_state
+msgid "Activity State"
+msgstr "حالة النشاط"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "أيقونة نوع النشاط"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Add"
+msgstr "يضيف"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Add URL"
+msgstr "إضافة رابط"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/js/kanbancontroller.js:0
+#, python-format
+msgid "Add Url"
+msgstr "إضافة رابط"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__document_file_id
+msgid "Add document here"
+msgstr "أضف وثيقة هنا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__template
+msgid "Add the template here"
+msgstr "أضف القالب هنا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__stamp
+msgid "Add your stamp"
+msgstr "أضف طابعك"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_req_nav
+msgid "All"
+msgstr "الجميع"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_workspace__privacy_visibility__employees
+msgid "All internal users"
+msgstr "جميع المستخدمين الداخليين"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/google_drive_connector.py:0
+#, python-format
+msgid ""
+"An error occurred while generating the token. Yourauthorization code may be "
+"invalid or has already expired [%s].You should check your Client ID and "
+"secret on the Google APIs plateform or try to stop and restart your calendar"
+" synchronisation."
+msgstr ""
+"حدث خطأ أثناء توليد الرمز المميز.قد يكون رمز yourauthorization غير صالح أو "
+"انتهى بالفعل [٪ s]."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+msgid "Approve"
+msgstr "يعتمد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_template_request__state__approved
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "Approved"
+msgstr "موافقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "Archive"
+msgstr "أرشيف"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Archive/Unarchive"
+msgstr "أرشيف/غير متشائم"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__attachment_id
+msgid "Attached item"
+msgstr "البند المرفق"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__attachment_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__attachment_id
+msgid "Attachment"
+msgstr "مرفق"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_attachment_count
+msgid "Attachment Count"
+msgstr "عدد المرفقات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__attachment_id
+msgid "Attachment associated with the document request"
+msgstr "المرفق المرتبط بطلب المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__create_user_avatar
+msgid "Author"
+msgstr "مؤلف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__auto_delete
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__auto_delete
+msgid "Auto Delete"
+msgstr "هذا الحفل"
+
+#. module: cyllo_documents
+#: model:ir.actions.server,name:cyllo_documents.auto_delete_file_ir_actions_server
+msgid "Auto Document Delete"
+msgstr "حذف وثيقة السيارات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__auto_sync_google_drive
+msgid "Auto Sync Google Drive"
+msgstr "Auto Sync Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__auto_sync_one_drive
+msgid "Auto Sync One Drive"
+msgstr "تتم مزامنة ONEDRIVE"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__state
+msgid "Avatar of the author"
+msgstr "الصورة الرمزية للمؤلف"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "CSV"
+msgstr "CSV"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_delete_trash_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_archive_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_copy_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_delete_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_download_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_lead_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_mail_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_trash_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_share_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_task_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_unlock_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_share_view_form
+#, python-format
+msgid "Cancel"
+msgstr "يلغي"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_details
+msgid "Chat"
+msgstr "محادثة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__manager_id
+msgid "Choose Manager"
+msgstr "اختر المدير"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__user_id
+msgid "Choose USer"
+msgstr "اختر المستخدم"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__user_ids
+msgid "Choose User"
+msgstr "اختر المستخدم"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__state
+msgid ""
+"Choose the current state of the item: Requested, Accepted, or Rejected."
+msgstr "اختر الوضع الحالي للعنصر: مطلوب أو مقبول أو رفض."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_client_key
+msgid "Client id from azure portal"
+msgstr "معرف العميل من Azure Portal"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_client_key
+msgid "Client id from google cloud console"
+msgstr "معرف العميل من Google Cloud Console"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_secret
+msgid "Client secret from azure portal"
+msgstr "سر العميل من بوابة Azure"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_client_secret
+msgid "Client secret from google cloud console"
+msgstr "سر العميل من Google Cloud Console"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__company_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__company_id
+msgid "Company"
+msgstr "شركة"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_res_config_settings
+msgid "Config Settings"
+msgstr "تهيئة الإعدادات "
+
+#. module: cyllo_documents
+#: model:ir.ui.menu,name:cyllo_documents.cyllo_documents_config_menu
+msgid "Configuration"
+msgstr "إعدادات"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.google_drive_connector_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.one_drive_connector_view_form
+msgid "Connect"
+msgstr "يتصل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__google_drive_connector__state__connected
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__one_drive_connector__state__connected
+msgid "Connected"
+msgstr "متصل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_view
+msgid "Contact"
+msgstr "اتصال"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__content_type
+msgid "Content Type"
+msgstr "نوع المحتوى"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__content_url
+msgid "Content URL"
+msgstr "عنوان URL للمحتوى"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__content_url
+msgid "Content Url"
+msgstr "عنوان URL للمحتوى"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__content_type
+msgid "Content type"
+msgstr "نوع المحتوى"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.work_space_view_form
+msgid "Copy"
+msgstr "ينسخ"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Copy/Move"
+msgstr "نسخ/تحرك"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Create Date"
+msgstr "إنشاء تاريخ"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Create Lead"
+msgstr "إنشاء الرصاص"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "Create Mail"
+msgstr "إنشاء البريد"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_req_nav
+#, python-format
+msgid "Create Request"
+msgstr "إنشاء طلب"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Create Task"
+msgstr "إنشاء مهمة"
+
+#. module: cyllo_documents
+#: model_terms:ir.actions.act_window,help:cyllo_documents.request_document_action
+#: model_terms:ir.actions.act_window,help:cyllo_documents.request_document_action_outgoing
+msgid "Create a Request for document from user"
+msgstr "إنشاء طلب لمستند من المستخدم"
+
+#. module: cyllo_documents
+#: model_terms:ir.actions.act_window,help:cyllo_documents.document_workspace_action
+msgid "Create a Workspace"
+msgstr "إنشاء مساحة عمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__module_crm
+msgid "Create lead"
+msgstr "إنشاء الرصاص"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__module_project
+msgid "Create task"
+msgstr "إنشاء مهمة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__create_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__create_uid
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Created by"
+msgstr "انشأ من قبل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__create_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__create_date
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Created on"
+msgstr "تم إنشاؤها على"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.google_drive_connector_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.one_drive_connector_view_form
+msgid "Credentials"
+msgstr "أوراق اعتماد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_url_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "DISCARD"
+msgstr "ينبذ"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "DOC"
+msgstr "مستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__date
+msgid "Date"
+msgstr "تاريخ"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__delete_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__delete_date
+msgid "Date Delete"
+msgstr "حذف التاريخ"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__delete_date
+msgid "Date when the document will be deleted"
+msgstr "التاريخ الذي سيتم فيه حذف المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__requested_date
+msgid "Date when the request was made"
+msgstr "التاريخ عند تقديم الطلب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__days
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__days
+msgid "Days"
+msgstr "أيام"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Delete"
+msgstr "يمسح"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_delete_trash_view_form
+msgid "Delete Permanently"
+msgstr "الحذف بشكل نهائي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__deleted_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__deleted_date
+msgid "Deleted Date"
+msgstr "موعد محذوف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__description
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__description
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__description
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_workspace_form_view
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Description"
+msgstr "وصف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__description
+msgid "Description about the workSpace"
+msgstr "وصف حول مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__description
+msgid "Description of the document"
+msgstr "وصف المستند"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+msgid "Discard"
+msgstr "ينبذ"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__document_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__doc_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_calendar
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_calendar
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Document"
+msgstr "وثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_template_request__state__document_approval
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_req_nav
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "Document Approval"
+msgstr "موافقة الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__document_count
+msgid "Document Count"
+msgstr "عدد المستندات"
+
+#. module: cyllo_documents
+#: model:ir.actions.server,name:cyllo_documents.schedule_delete_file_ir_actions_server
+msgid "Document Delete"
+msgstr "حذف المستند"
+
+#. module: cyllo_documents
+#: model:ir.actions.report,name:cyllo_documents.action_download_doc
+msgid "Document Download"
+msgstr "تنزيل المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__document_file_id
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__document_file_ids
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__document_file_ids
+msgid "Document File"
+msgstr "ملف المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__document_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__document_file_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__document_file_ids
+msgid "Document Files"
+msgstr "ملفات المستندات"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_lock
+msgid "Document Lock"
+msgstr "قفل الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.module.category,name:cyllo_documents.module_document_module
+msgid "Document Management"
+msgstr "إدارة المستندات"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Document Name"
+msgstr "اسم الملف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__needed_doc
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Document Needed"
+msgstr "وثيقة مطلوبة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "Document Needed....."
+msgstr "وثيقة مطلوبة ....."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_share__url
+msgid "Document Public URL"
+msgstr "توثيق عنوان URL العام"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/request_document.py:0
+#: model:ir.actions.act_window,name:cyllo_documents.document_template_request_action
+#: model:ir.model,name:cyllo_documents.model_document_template_request
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_form
+#, python-format
+msgid "Document Request"
+msgstr "طلب المستند"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_request_template_action
+#: model:ir.ui.menu,name:cyllo_documents.document_request_template_menu
+msgid "Document Request Template"
+msgstr "قالب طلب الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_home_document
+msgid "Document Requests"
+msgstr "طلبات الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "Document Search"
+msgstr "البحث عن المستندات"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_share
+msgid "Document Share"
+msgstr "حصة الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_share_preview
+msgid "Document Share Preview"
+msgstr "معاينة مشاركة المستند"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_document_request
+msgid "Document Template Requests"
+msgstr "طلبات قالب المستند"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_trash
+msgid "Document Trash"
+msgstr "توثيق القمامة"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_url_action
+msgid "Document URL"
+msgstr "وثيقة URL"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_workspace
+msgid "Document Workspace"
+msgstr "وثيقة مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__deleted_date
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__deleted_date
+msgid "Document auto delete date"
+msgstr "توثيق تاريخ الحذف التلقائي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__content_type
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__content_type
+msgid "Document content type"
+msgstr "وثيقة نوع المحتوى"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__date
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__date
+msgid "Document create date"
+msgstr "وثيقة إنشاء تاريخ"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__attachment
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__attachment
+msgid "Document data"
+msgstr "بيانات الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__auto_delete
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__auto_delete
+msgid "Document delete status"
+msgstr "حالة حذف الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__extension
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__extension
+msgid ""
+"Document extension, \n"
+"                                         helps to determine the file type"
+msgstr ""
+"تمديد الوثيقة ،\n"
+"                                         يساعد على تحديد نوع الملف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__mimetype
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__mimetype
+msgid "Document mimetype"
+msgstr "وثيقة محاكاة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__name
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__name
+#: model:ir.model.fields,help:cyllo_documents.field_document_url__name
+msgid "Document name"
+msgstr "اسم الملف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__needed_doc
+msgid "Document needed by requestor"
+msgstr "الوثيقة التي يحتاجها الطلب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__user_id
+msgid ""
+"Document owner name, if the document \n"
+"                                      belongs to a specific partner"
+msgstr ""
+"اسم مالك المستند ، إذا كان المستند\n"
+"                                      ينتمي إلى شريك معين"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__user_id
+msgid ""
+"Document owner name, if the document \n"
+"                              belongs to a specific partner"
+msgstr ""
+"اسم مالك المستند ، إذا كان المستند\n"
+"                              ينتمي إلى شريك معين"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__partner_id
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__partner_id
+msgid "Document related"
+msgstr "وثيقة ذات صلة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__user_ids
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__user_ids
+msgid "Document related users"
+msgstr "مستخدمي المستندات المرتبطة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_tree
+msgid "Document request"
+msgstr "طلب المستند"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_template_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_template_view_tree
+msgid "Document request template"
+msgstr "قالب طلب الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+msgid "Document requests"
+msgstr "طلبات الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__brochure_url
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__brochure_url
+msgid "Document sharable URL"
+msgstr "وثيقة عنوان URL القابلة للمشاركة"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_file_action
+#: model:ir.model,name:cyllo_documents.model_document_file
+#: model:ir.ui.menu,name:cyllo_documents.document_file_menu
+#: model:ir.ui.menu,name:cyllo_documents.document_file_menu_sub
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_workspace_form_view
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_home_document
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Documents"
+msgstr "وثائق"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_details
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_view
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Download"
+msgstr "تحميل"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Download Zip File"
+msgstr "قم بتنزيل ملف zip"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__google_drive_connector__state__draft
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__one_drive_connector__state__draft
+msgid "Draft"
+msgstr "مسودة"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Dropdown"
+msgstr "اسقاط"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__employee_id
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "Employee"
+msgstr "موظف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__employee_id
+msgid "Employee associated with the request"
+msgstr "الموظف المرتبط بالطلب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_details
+msgid "Employee:"
+msgstr "موظف:"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__module_crm
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Enable to create lead from documents"
+msgstr "تمكين إنشاء الرصاص من المستندات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__module_project
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Enable to create task from documents"
+msgstr "تمكين إنشاء مهمة من المستندات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_drive_folder_key
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_folder_key
+msgid "Enter folder id if you want export into specific folder"
+msgstr "أدخل معرف المجلد إذا كنت تريد التصدير إلى مجلد محدد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.google_drive_connector_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.one_drive_connector_view_form
+msgid "Export"
+msgstr "يصدّر"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__extension
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__extension
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "Extension"
+msgstr "امتداد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Extra"
+msgstr "إضافي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_file__priority__1
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__priority__1
+msgid "Favorite"
+msgstr "مفضل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__priority
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__priority
+msgid "Favorite button"
+msgstr "الزر المفضل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "Favourite"
+msgstr "مفضل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__attachment
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__attachment
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_file__content_type__file
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__content_type__file
+msgid "File"
+msgstr "ملف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__file_url
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__file_url
+msgid "File URL"
+msgstr "ملف URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__url
+msgid "File Url"
+msgstr "ملف URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_follower_ids
+msgid "Followers"
+msgstr "متابعون"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "أتباع (شركاء)"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "الرمز الرائع على سبيل المثالFA-TASKS"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Google Accounts"
+msgstr "حسابات Google"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_client_secret
+msgid "Google Client Secret"
+msgstr "سر العميل Google"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__is_gdrive_access
+msgid "Google Drive Access"
+msgstr "وصول Google Drive"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.google_drive_connector_view_form
+msgid "Google Drive Account"
+msgstr "حساب محرك Google"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/res_config_settings.py:0
+#, python-format
+msgid "Google Drive Accounts"
+msgstr "حسابات محرك Google"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_client_key
+msgid "Google Drive Client Id"
+msgstr "معرف عميل Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.google_drive_connector_action
+#: model:ir.model,name:cyllo_documents.model_google_drive_connector
+msgid "Google Drive Connector"
+msgstr "موصل Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_drive_folder_key
+msgid "Google Drive Folder Id"
+msgstr "معرف مجلد Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_drive_token_validity
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_token_validity
+msgid "Google Drive Token Validity"
+msgstr "صحة الرمز المميز لـ Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__google_drive_file_key
+msgid "Google Drive file id"
+msgstr "معرف ملف محرك Google"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_drive_refresh_token
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_refresh_token
+msgid "Google drive Refresh token"
+msgstr "Google Drive Refresh Token"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__google_drive_access_token
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_access_token
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_drive_access_token
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_access_token
+msgid "Google drive access token"
+msgstr "Google Drive Access Token"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__google_drive_folder_id
+msgid "Google drive folder id"
+msgstr "معرف مجلد Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_drive_refresh_token
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_refresh_token
+msgid "Google drive refresh token"
+msgstr "Google Drive Refresh Token"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__is_gdrive_access
+msgid "Got google drive Access or not"
+msgstr "حصلت على وصول Google Drive أم لا"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "Group By"
+msgstr "مجموعة من"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__template
+msgid "HTML template content"
+msgstr "محتوى قالب HTML"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__has_message
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__has_message
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__has_message
+msgid "Has Message"
+msgstr "لديه رسالة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "History"
+msgstr "تاريخ"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__id
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__id
+msgid "ID"
+msgstr "بطاقة تعريف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_exception_icon
+msgid "Icon"
+msgstr "أيقونة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "أيقونة للإشارة إلى نشاط استثناء."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__google_drive_folder_id
+msgid "Id of workspace in google drive if created"
+msgstr "معرف مساحة العمل في Google Drive إذا تم إنشاؤه"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__onedrive_folder_id
+msgid "Id of workspace in one drive if created"
+msgstr "معرف مساحة العمل في محرك واحد إذا تم إنشاؤه"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__message_needaction
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__message_needaction
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "إذا تم التحقق منها ، تتطلب رسائل جديدة انتباهك."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__message_has_error
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__message_has_error
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__message_has_error
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "إذا تم التحقق منها ، فإن بعض الرسائل لديها خطأ في التسليم."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__stamp
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "Image"
+msgstr "صورة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__stamp
+msgid "Image associated with the document"
+msgstr "الصورة المرتبطة بالوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.request_document_action
+#: model:ir.ui.menu,name:cyllo_documents.request_document_menu
+msgid "Incoming Requests"
+msgstr "طلبات واردة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__active
+msgid "Indicates if the document request is active or not"
+msgstr "يشير ما إذا كان طلب المستند نشطًا أم لا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_work_space__move
+msgid "Indicates whether to perform a move operation"
+msgstr "يشير إلى ما إذا كنت تريد إجراء عملية تحركية"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Integration"
+msgstr "اندماج"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_workspace__privacy_visibility__followers
+msgid "Invited internal users (private)"
+msgstr "المستخدمون الداخليون المدعوون (خاص)"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_is_follower
+msgid "Is Follower"
+msgstr "هو أتباع"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__write_uid
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__write_uid
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__write_date
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__write_date
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Last Updated on"
+msgstr "آخر تحديث على"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Link Copied to Clipboard"
+msgstr "تم نسخ الرابط إلى الحافظة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__activity_ids
+msgid "List of activity ids"
+msgstr "قائمة معرفات النشاط"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__is_lock
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_form
+msgid "Lock"
+msgstr "قفل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "Lock Document"
+msgstr "وثيقة قفل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__is_locked
+msgid "Lock document"
+msgstr "وثيقة قفل"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/document_preview_template.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_download
+#, python-format
+msgid "Logo"
+msgstr "شعار"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Mail"
+msgstr "بريد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__manager_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__manager_id
+#: model:res.groups,name:cyllo_documents.view_all_document
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "Manager"
+msgstr "مدير"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__manager_id
+msgid "Manager of the document"
+msgstr "مدير الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_details
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_template
+msgid "Manager:"
+msgstr "مدير:"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__manager_id
+msgid "Managers"
+msgstr "المديرون"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__security__managers_and_owner
+msgid "Managers & Owner"
+msgstr "المديرين والمالك"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_has_error
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_has_error
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_has_error
+msgid "Message Delivery error"
+msgstr "خطأ تسليم الرسائل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_ids
+msgid "Messages"
+msgstr "رسائل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__mimetype
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__mimetype
+msgid "Mime Type"
+msgstr "نوع التمثيل الصامت"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__move
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.work_space_view_form
+msgid "Move"
+msgstr "يتحرك"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_delete_trash_view_form
+msgid "Move to Trash"
+msgstr "ارسال الى سلة المحذوفات"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_delete_trash_view_form
+msgid "Move to Trash/Delete Document Permanently"
+msgstr "انتقل إلى القمامة/حذف المستند بشكل دائم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_req_nav
+msgid "My"
+msgstr "لي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "الموعد النهائي للنشط"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+msgid "My requests"
+msgstr "طلباتي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__name
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__name
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__name
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__name
+msgid "Name"
+msgstr "اسم"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__name
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__name
+msgid "Name for Connector"
+msgstr "اسم الموصل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__name
+msgid "Name of the WorkSpace."
+msgstr "اسم مساحة العمل."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__display_name
+msgid "Name of the workSpace."
+msgstr "اسم مساحة العمل."
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/document_template_request.py:0
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_template_request__state__new
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_req_nav
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_search
+#, python-format
+msgid "New"
+msgstr "جديد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.no_request_template
+msgid "New Request"
+msgstr "طلب جديد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "الموعد النهائي للنشاط التالي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_summary
+msgid "Next Activity Summary"
+msgstr "ملخص النشاط التالي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_type_id
+msgid "Next Activity Type"
+msgstr "نوع النشاط التالي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_file__priority__0
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__priority__0
+msgid "None"
+msgstr "لا أحد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "Note"
+msgstr "ملحوظة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_needaction_counter
+msgid "Number of Actions"
+msgstr "عدد الإجراءات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__document_count
+msgid "Number of documents uploaded under this workSpace"
+msgstr "عدد المستندات التي تم تحميلها تحت مساحة العمل هذه"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_has_error_counter
+msgid "Number of errors"
+msgstr "عدد الأخطاء"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "عدد الرسائل التي تتطلب إجراء"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "عدد الرسائل ذات خطأ التسليم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_archive_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_copy_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_delete_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_download_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_lead_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_mail_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_trash_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_share_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_task_form
+msgid "OK"
+msgstr "نعم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.one_drive_connector_view_form
+msgid "One Drive Account"
+msgstr "حساب OneDrive"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/res_config_settings.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+#, python-format
+msgid "One Drive Accounts"
+msgstr "حسابات OneDrive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_client_key
+msgid "One Drive Client Id"
+msgstr "معرف عميل OneDrive"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.one_drive_connector_action
+#: model:ir.model,name:cyllo_documents.model_one_drive_connector
+msgid "One Drive Connector"
+msgstr "موصل محرك واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_folder_key
+msgid "One Drive Folder Id"
+msgstr "معرف مجلد محرك واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__one_drive_secret
+msgid "One Drive Secret"
+msgstr "سر محرك واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__one_drive_file_key
+msgid "One Drive file id"
+msgstr "معرف ملف محرك واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__onedrive_folder_id
+msgid "One drive folder id"
+msgstr "معرف مجلد محرك واحد"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_view
+msgid "Open Url"
+msgstr "رابط مفتوح"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.request_document_action_outgoing
+#: model:ir.ui.menu,name:cyllo_documents.request_document_menu_outgoing
+msgid "Outgoing Requests"
+msgstr "الطلبات الصادرة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__user_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__user_id
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+msgid "Owner"
+msgstr "مالك"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "PDF"
+msgstr "بي دي إف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__partner_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__partner_id
+msgid "Partner"
+msgstr "شريك"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_lock__password
+msgid "Password to lock document"
+msgstr "كلمة المرور لقفل المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__preview
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__preview
+msgid "Preview"
+msgstr "معاينة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+msgid "Preview Document"
+msgstr "وثيقة المعاينة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__preview
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__preview
+msgid "Preview URL"
+msgstr "معاينة URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__priority
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__priority
+msgid "Priority"
+msgstr "أولوية"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__security__private
+msgid "Private"
+msgstr "خاص"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "REQUEST"
+msgstr "طلب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__reject_reason
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Reason"
+msgstr "سبب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__reject_reason
+msgid "Reason for rejection"
+msgstr "سبب الرفض"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Reject"
+msgstr "يرفض"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "Reject reason"
+msgstr "رفض السبب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__request_document__state__rejected
+msgid "Rejected"
+msgstr "مرفوض"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "Related User"
+msgstr "المستخدم ذي الصلة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_share__document_ids
+#: model:ir.model.fields,help:cyllo_documents.field_work_space__doc_ids
+msgid "Related documents"
+msgstr "الوثائق ذات الصلة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_url__workspace_id
+msgid "Related workspace"
+msgstr "مساحة العمل ذات الصلة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Request"
+msgstr "طلب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Request Date"
+msgstr "تاريخ الطلب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "Request To"
+msgstr "طلب إلى"
+
+#. module: cyllo_documents
+#: model:ir.ui.menu,name:cyllo_documents.document_template_request_menu
+msgid "Request a Template"
+msgstr "طلب قالب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+msgid "Request document"
+msgstr "طلب وثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_request_document
+msgid "Request document from user"
+msgstr "طلب المستند من المستخدم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.no_request_template
+msgid "Request for your document here."
+msgstr "طلب المستند الخاص بك هنا."
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__request_document__state__requested
+msgid "Requested"
+msgstr "مطلوب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+msgid "Requested By"
+msgstr "بتوصية من"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__requested_date
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Requested Date"
+msgstr "موعد مطلوب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__requested_by_id
+msgid "Requested User"
+msgstr "المستخدم المطلوب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Requested by"
+msgstr "بتوصية من"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Requested to"
+msgstr "طلب إلى"
+
+#. module: cyllo_documents
+#: model:ir.ui.menu,name:cyllo_documents.document_request_menu
+msgid "Requests"
+msgstr "الطلبات"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__activity_user_id
+msgid "Responsible User"
+msgstr "المستخدم المسؤول"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Restore"
+msgstr "يعيد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "خطأ تسليم الرسائل القصيرة"
+
+#. module: cyllo_documents
+#: model_terms:ir.actions.act_window,help:cyllo_documents.document_file_action
+msgid "Save your documents..."
+msgstr "احفظ مستنداتك ..."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Security"
+msgstr "حماية"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__security
+msgid "Security Type"
+msgstr "نوع الأمن"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#, python-format
+msgid "Select"
+msgstr "يختار"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__manager_id
+msgid "Select Manager"
+msgstr "حدد مدير"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__workspace_id
+msgid "Select a workspace with google drive id to upload into it"
+msgstr "حدد مساحة عمل مع معرف Google Drive للتحميل فيه"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__workspace_id
+msgid "Select a workspace with one drive id to upload into it"
+msgstr "حدد مساحة عمل مع معرف محرك واحد للتحميل فيه"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__state
+msgid "Select the state of the item: Draft or Connected."
+msgstr "حدد حالة العنصر: مسودة أو متصلة."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__workspace_id
+msgid "Select the workspace associated with this item."
+msgstr "حدد مساحة العمل المرتبطة بهذا العنصر."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__document_id
+msgid "Selected document template"
+msgstr "قالب المستند المحدد"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_config_settings_action
+#: model:ir.ui.menu,name:cyllo_documents.res_config_settings_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_workspace_form_view
+msgid "Settings"
+msgstr "إعدادات"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#. odoo-python
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: code:addons/cyllo_documents/wizards/document_share.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+#, python-format
+msgid "Share"
+msgstr "يشارك"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_share_action
+msgid "Share Document"
+msgstr "مشاركة الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__size
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+msgid "Size"
+msgstr "مقاس"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/google_drive_connector.py:0
+#, python-format
+msgid ""
+"Something went wrong during your token generation. Maybe your Authorization "
+"Code is invalid"
+msgstr "حدث خطأ ما خلال جيل الرمز المميز.ربما رمز التفويض الخاص بك غير صالح"
+
+#. module: cyllo_documents
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__security__specific_users
+msgid "Specific Users"
+msgstr "مستخدمين محددين"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__stamp
+msgid "Stamp"
+msgstr "ختم"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__state
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__state
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__state
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__state
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "State"
+msgstr "ولاية"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__state
+msgid "State of the item: Draft or Connected."
+msgstr "حالة العنصر: مسودة أو متصلة."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"الحالة بناءً على الأنشطة\n"
+"متأخر: تم تمرير تاريخ الاستحقاق بالفعل\n"
+"اليوم: تاريخ النشاط اليوم\n"
+"المخطط: الأنشطة المستقبلية."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_form
+msgid "Submit"
+msgstr "يُقدِّم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+msgid "Submit Approval"
+msgstr "إرسال الموافقة"
+
+#. module: cyllo_documents
+#: model:ir.actions.server,name:cyllo_documents.schedule_google_drive_sync_ir_actions_server
+msgid "Sync Google Drive"
+msgstr "مزامنة Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__sync_google_workspace
+msgid "Sync Google Workspace"
+msgstr "Sync Google Workspace"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "Sync Now"
+msgstr "زامن الآن \"لنقل البيانات"
+
+#. module: cyllo_documents
+#: model:ir.actions.server,name:cyllo_documents.schedule_one_drive_sync_ir_actions_server
+msgid "Sync One Drive"
+msgstr "مزامنة OneDrive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__sync_one_drive_workspace
+msgid "Sync OneDrive Workspace"
+msgstr "مزامنة مساحة العمل OneDrive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__sync_google_drive
+msgid "Sync With Google Drive"
+msgstr "المزامنة مع Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__sync_one_drive
+msgid "Sync With One Drive"
+msgstr "مزامنة مع محرك واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__template
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__template
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_template_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_template_request_view_form
+msgid "Template"
+msgstr "نموذج"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__name
+msgid "Template name"
+msgstr "اسم القالب"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_details
+msgid "Template:"
+msgstr "نموذج:"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_submit_template
+msgid "Thank You!"
+msgstr "شكرًا لك!"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "There are currently no Documents for your account."
+msgstr "لا توجد حاليًا مستندات لحسابك."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__is_locked
+msgid "To make document lock"
+msgstr "لجعل قفل المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__trash
+msgid "To specify deleted items"
+msgstr "لتحديد العناصر المحذوفة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_google_drive_connector__google_drive_token_validity
+#: model:ir.model.fields,help:cyllo_documents.field_one_drive_connector__one_drive_token_validity
+msgid "Token validity of the google drive"
+msgstr "صحة الرمز المميز لمحرك Google"
+
+#. module: cyllo_documents
+#. odoo-python
+#: code:addons/cyllo_documents/models/document_trash.py:0
+#: model:ir.actions.act_window,name:cyllo_documents.document_trash_action
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__trash
+#: model:ir.ui.menu,name:cyllo_documents.document_trash_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+#, python-format
+msgid "Trash"
+msgstr "نفاية"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Trash Document"
+msgstr "وثيقة القمامة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_res_config_settings__trash
+msgid "Trash Limit"
+msgstr "حد القمامة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+msgid "Type"
+msgstr "يكتب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "نوع نشاط الاستثناء المسجل."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_url_view_form
+msgid "UPLOAD"
+msgstr "رفع"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__brochure_url
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__brochure_url
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "URL"
+msgstr "عنوان URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__content_url
+msgid "URL associated with the document content"
+msgstr "عنوان URL المرتبط بمحتوى المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_url__url
+msgid "URL to upload"
+msgstr "عنوان URL للتحميل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__unique_id
+msgid "Unique Access ID"
+msgstr "معرف الوصول الفريد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_share__unique_id
+msgid "Unique identifier for access"
+msgstr "معرف فريد للوصول"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.view_document_lock_unlock_form
+msgid "Unlock"
+msgstr "الغاء القفل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "Unlock Document"
+msgstr "فتح المستند"
+
+#. module: cyllo_documents
+#. odoo-javascript
+#: code:addons/cyllo_documents/static/src/xml/KanbanController.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.helpdesk_website_inherit
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+#, python-format
+msgid "Upload"
+msgstr "رفع"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+msgid "Upload Document"
+msgstr "وثيقة تحميل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__url
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_file__content_type__url
+#: model:ir.model.fields.selection,name:cyllo_documents.selection__document_trash__content_type__url
+msgid "Url"
+msgstr "عنوان URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__preview
+msgid "Url Preview"
+msgstr "معاينة عنوان URL"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_url
+msgid "Url Upload Wizard"
+msgstr "معالج تحميل URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__user_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_request_template__user_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__user_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__user_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__user_id
+#: model:res.groups,name:cyllo_documents.view_own_document
+msgid "User"
+msgstr "مستخدم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_documents
+msgid "User Name"
+msgstr "اسم المستخدم"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "User can choose where to save the file"
+msgstr "يمكن للمستخدم اختيار مكان حفظ الملف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__user_id
+msgid "User creating the request"
+msgstr "المستخدم إنشاء الطلب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__requested_by_id
+msgid "User who created request"
+msgstr "المستخدم الذي أنشأ طلب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_share__user_ids
+msgid "Users"
+msgstr "المستخدمون"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_share__user_ids
+msgid "Users associated with this record"
+msgstr "المستخدمون المرتبطون بهذا السجل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__create_user_avatar
+msgid "Users image"
+msgstr "صورة المستخدمين"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__privacy_visibility
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_workspace_form_view
+msgid "Visibility"
+msgstr "الرؤية"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_template_request__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__website_message_ids
+msgid "Website Messages"
+msgstr "رسائل الموقع"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__website_message_ids
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__website_message_ids
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__website_message_ids
+msgid "Website communication history"
+msgstr "تاريخ اتصال الموقع"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_work_space
+msgid "Work Space"
+msgstr "مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.document_workspace_action
+msgid "WorkSpace"
+msgstr "مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_workspace__company_id
+msgid "WorkSpace belongs to this company"
+msgstr "مساحة العمل تنتمي إلى هذه الشركة"
+
+#. module: cyllo_documents
+#: model:ir.actions.act_window,name:cyllo_documents.work_space_action
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__workspace_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_trash__workspace_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_url__workspace_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_workspace__display_name
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__workspace_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_work_space__workspace_id
+#: model:ir.ui.menu,name:cyllo_documents.document_workspace_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_workspace_form_view
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.portal_my_document_request
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_incoming_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.request_document_view_tree
+msgid "Workspace"
+msgstr "مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_google_drive_connector__workspace_id
+#: model:ir.model.fields,field_description:cyllo_documents.field_one_drive_connector__workspace_id
+msgid "Workspace Id"
+msgstr "معرف مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_request_document__workspace
+msgid "Workspace Name"
+msgstr "اسم مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_request_document__workspace
+msgid "Workspace name"
+msgstr "اسم مساحة العمل"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__description
+msgid "Write the description here"
+msgstr "اكتب الوصف هنا"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_search
+msgid "XLSX"
+msgstr "XLSX"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_trash_view_form
+msgid "Your file need..."
+msgstr "ملفك بحاجة ..."
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_request_submit_template
+msgid "Your request has been successfully submitted."
+msgstr "قد تم تسجيل طلبك بنجاح."
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__days
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__days
+msgid "auto delete in days"
+msgstr "حذف تلقائي في الأيام"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__sync_google_drive
+msgid "checkbox to sync with Google Drive"
+msgstr "مربع الاختيار للمزامنة مع Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__sync_one_drive
+msgid "checkbox to sync with One Drive"
+msgstr "مربع الاختيار للمزامنة مع محرك أقراص واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__sync_google_workspace
+msgid "checkbox to sync workspace with Google Drive"
+msgstr "مربع الاختيار لمزامنة مساحة العمل مع Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__sync_one_drive_workspace
+msgid "checkbox to sync workspace with Onedrive"
+msgstr "مربع الاختيار لمزامنة مساحة العمل مع OneDrive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__company_id
+msgid "choose company"
+msgstr "اختر الشركة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__size
+msgid "computed size of document"
+msgstr "حجم المستند المحسوب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__content_url
+msgid "content url"
+msgstr "عنوان URL للمحتوى"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "csv"
+msgstr "CSV"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.res_config_settings_view_form
+msgid "days"
+msgstr "أيام"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_template_request__display_name
+msgid "display name of document request"
+msgstr "عرض اسم طلب المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__document_file_id
+msgid "document file"
+msgstr "ملف المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_delete_trash__document_file_id
+msgid "document file id"
+msgstr "معرف ملف الوثيقة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__active
+msgid "document is active or not"
+msgstr "المستند نشط أم لا"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_delete_trash
+msgid "document permanent delete or move to trash"
+msgstr "توثيق حذف دائم أو الانتقال إلى القمامة"
+
+#. module: cyllo_documents
+#: model:ir.model,name:cyllo_documents.model_document_request_template
+msgid "document request template"
+msgstr "قالب طلب الوثيقة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "docx"
+msgstr "docx"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_lock__is_lock
+msgid "field for document is lock or not"
+msgstr "حقل المستند هو القفل أم لا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__is_crm_install
+msgid "field to check crm installed or not"
+msgstr "حقل للتحقق من تثبيت CRM أم لا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__is_project_install
+msgid "field to check project installed or not"
+msgstr "حقل للتحقق من تثبيت المشروع أم لا"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_delete_trash__document_file_id
+msgid "file if of document to delete"
+msgstr "ملف إذا من المستند لحذف"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_lock__document_file_id
+msgid "id of document file"
+msgstr "معرف ملف المستند"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__google_drive_file_key
+msgid "id of file from google drive"
+msgstr "معرف الملف من Google Drive"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__one_drive_file_key
+msgid "id of file from one drive"
+msgstr "معرف الملف من محرك أقراص واحد"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__is_crm_install
+msgid "is crm installed"
+msgstr "هو تثبيت CRM"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_file__is_project_install
+msgid "is project installed"
+msgstr "هو تثبيت المشروع"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__file_url
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__file_url
+msgid ""
+"it store url while adding\n"
+"                                                   an url document"
+msgstr ""
+"يخزن عنوان URL أثناء الإضافة\n"
+"                                                   وثيقة عنوان URL"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "jpeg"
+msgstr "JPEG"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "jpg"
+msgstr "JPG"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_request_template__name
+msgid "name of template"
+msgstr "اسم القالب"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,field_description:cyllo_documents.field_document_lock__password
+msgid "password"
+msgstr "كلمة المرور"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "pdf"
+msgstr "بي دي إف"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "png"
+msgstr "بي إن جي"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "pptx"
+msgstr "PPTX"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__trash
+msgid "set the time limit for the deleted files"
+msgstr "قم بتعيين المهلة الزمنية للملفات المحذوفة"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__auto_sync_google_drive
+msgid "set time limit to auto sync your google drive"
+msgstr "حدد المهلة الزمنية لمزامنة تلقائي"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_res_config_settings__auto_sync_one_drive
+msgid "set time limit to auto sync your one drive"
+msgstr "حدد المهلة الزمنية لمزامنة تلقائية"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_url__preview
+msgid "store generated url preview"
+msgstr "معاينة URL التي تم إنشاؤها بواسطة المتجر"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "txt"
+msgstr "رسالة قصيرة"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "url"
+msgstr "عنوان URL"
+
+#. module: cyllo_documents
+#: model:ir.model.fields,help:cyllo_documents.field_document_file__workspace_id
+#: model:ir.model.fields,help:cyllo_documents.field_document_trash__workspace_id
+msgid "workspace name"
+msgstr "اسم مساحة العمل"
+
+#. module: cyllo_documents
+#: model_terms:ir.ui.view,arch_db:cyllo_documents.document_file_view_kanban
+msgid "xlsx"
+msgstr "XLSX"

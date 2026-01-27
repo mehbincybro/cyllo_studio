@@ -1,0 +1,161 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_sticky_notes
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-01 03:52+0000\n"
+"PO-Revision-Date: 2023-12-01 03:52+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_add_templates.xml:0
+#, python-format
+msgid "CLOSE"
+msgstr "يغلق"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__colour
+msgid "Color"
+msgstr "لون"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__company_id
+msgid "Company"
+msgstr "شركة"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,help:cyllo_sticky_notes.field_sticky_note__create_date
+msgid "Create date of a note"
+msgstr "إنشاء تاريخ ملاحظة"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__create_date
+msgid "Created Date"
+msgstr "تاريخ الإنشاء"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__create_uid
+msgid "Created by"
+msgstr "انشأ من قبل"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,help:cyllo_sticky_notes.field_sticky_note__company_id
+msgid "Current Company"
+msgstr "الشركة الحالية"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__description
+msgid "Description"
+msgstr "وصف"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__id
+msgid "ID"
+msgstr "بطاقة تعريف"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث على"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_create_templates.xml:0
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_update_templates.xml:0
+#, python-format
+msgid "Note a description"
+msgstr "لاحظ وصفًا"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_create_templates.xml:0
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_update_templates.xml:0
+#, python-format
+msgid "Note a title"
+msgstr "لاحظ العنوان"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_note_templates.xml:0
+#, python-format
+msgid "Notes"
+msgstr "ملحوظات"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_create_templates.xml:0
+#, python-format
+msgid "Save"
+msgstr "يحفظ"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model,name:cyllo_sticky_notes.model_sticky_note
+msgid "Sticky Note"
+msgstr "ملاحظة خفيفة"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_note_icon_templates.xml:0
+#, python-format
+msgid "Sticky Notes"
+msgstr "ورق ملاحظات"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,field_description:cyllo_sticky_notes.field_sticky_note__title
+msgid "Title"
+msgstr "عنوان"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/xml/sticky_notes_update_templates.xml:0
+#, python-format
+msgid "Update"
+msgstr "تحديث"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,help:cyllo_sticky_notes.field_sticky_note__colour
+msgid "color of the note"
+msgstr "لون الملاحظة"
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,help:cyllo_sticky_notes.field_sticky_note__description
+msgid "description of the note"
+msgstr "وصف الملاحظة"
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/js/sticky_notes_create.js:0
+#, python-format
+msgid "please add the description to save ..."
+msgstr "الرجاء إضافة الوصف لحفظ ..."
+
+#. module: cyllo_sticky_notes
+#. odoo-javascript
+#: code:addons/cyllo_sticky_notes/static/src/js/sticky_notes_create.js:0
+#, python-format
+msgid "please add the title to save ..."
+msgstr "الرجاء إضافة العنوان لحفظ ..."
+
+#. module: cyllo_sticky_notes
+#: model:ir.model.fields,help:cyllo_sticky_notes.field_sticky_note__title
+msgid "title of the note"
+msgstr "عنوان الملاحظة"

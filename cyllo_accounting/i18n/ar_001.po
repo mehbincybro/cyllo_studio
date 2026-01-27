@@ -1,0 +1,1251 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_accounting
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-13 09:07+0000\n"
+"PO-Revision-Date: 2023-12-13 09:07+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_payment.py:0
+#, python-format
+msgid ""
+"\n"
+"There are already some invoice lines.First remove the lines"
+msgstr ""
+"\n"
+"هناك بالفعل بعض خطوط الفاتورة. بعد إزالة الخطوط"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_move.py:0
+#, python-format
+msgid "%s: Depreciation"
+msgstr "%s: الاستهلاك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__account_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__account_id
+msgid "Account"
+msgstr "حساب"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_asset_asset
+msgid "Account Asset"
+msgstr "أصول الحساب"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_asset_modify
+msgid "Account Asset Modify"
+msgstr "تعديل أصول الحساب"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_asset_type
+msgid "Account Asset Type"
+msgstr "نوع أصول الحساب"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Account for deferred expense"
+msgstr "حساب النفقات المؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Account for deferred revenue"
+msgstr "حساب الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Account for recognizing the expense"
+msgstr "حساب الاعتراف بالنفقات"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Account for recognizing the revenue"
+msgstr "حساب الاعتراف بالإيرادات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_needaction
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_needaction
+msgid "Action Needed"
+msgstr "الإجراءات اللازمة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__active
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__active
+msgid "Active"
+msgstr "نشيط"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_ids
+msgid "Activities"
+msgstr "أنشطة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_exception_decoration
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "استثناء النشاط الديكور"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_state
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_state
+msgid "Activity State"
+msgstr "حالة النشاط"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_type_icon
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "أيقونة نوع النشاط"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/wizard/account_asset_modify.py:0
+#, python-format
+msgid "All revenues are posted"
+msgstr "يتم نشر جميع الإيرادات"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#, python-format
+msgid "All the lines must be posted"
+msgstr "يجب نشر جميع الخطوط"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#, python-format
+msgid "All the lines should be from the same account"
+msgstr "يجب أن تكون جميع الخطوط من نفس الحساب"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__pay_amount
+msgid "Amount Due"
+msgstr "المبلغ المستحق"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_search
+msgid "Archived"
+msgstr "أرشفة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__asset_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_id
+msgid "Asset"
+msgstr "أصل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_amount
+msgid "Asset Amount"
+msgstr "مبلغ الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__asset_type
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_type
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_type
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_type
+msgid "Asset Type"
+msgstr "نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_days
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_days
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_days
+msgid "Asset days"
+msgstr "أيام الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__name
+msgid "Asset name"
+msgstr "اسم الأصل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__name
+msgid "Asset type"
+msgstr "نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move_line__asset_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_ids
+msgid "Assets"
+msgstr "أصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_attachment_count
+msgid "Attachment Count"
+msgstr "عدد المرفقات"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_modify_form
+msgid "Cancel"
+msgstr "يلغي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__state__cancel
+msgid "Cancelled"
+msgstr "ألغيت"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__check_increment
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__check_increment
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__check_increment
+msgid "Check Increment move"
+msgstr "تحقق من حركة الزيادة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__state__close
+msgid "Closed"
+msgstr "مغلق"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__company_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__company_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__company_id
+msgid "Company"
+msgstr "شركة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__computation_method
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__computation_method
+msgid "Computation Method"
+msgstr "طريقة الحساب"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Compute"
+msgstr "احسب"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Confirm"
+msgstr "يتأكد"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__computation_method__constant_period
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__computation_method__constant_period
+msgid "Constant Period"
+msgstr "فترة ثابتة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__create_from_payment
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__create_from_payment
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__create_from_payment
+msgid "Create Move From Payment"
+msgstr "إنشاء انتقال من الدفع"
+
+#. module: cyllo_accounting
+#: model_terms:ir.actions.act_window,help:cyllo_accounting.action_view_deferred_expenses
+msgid "Create new deferred expense"
+msgstr "إنشاء مصروفات مؤجلة جديدة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.actions.act_window,help:cyllo_accounting.action_view_deferred_expense_types
+msgid "Create new deferred expense type"
+msgstr "قم بإنشاء نوع مصاريف جديد مؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.actions.act_window,help:cyllo_accounting.action_view_deferred_revenues
+msgid "Create new deferred revenue"
+msgstr "إنشاء إيرادات مؤجلة جديدة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.actions.act_window,help:cyllo_accounting.action_view_deferred_revenue_types
+msgid "Create new deferred revenue type"
+msgstr "إنشاء نوع إيرادات مؤجل جديد"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__create_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__create_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__create_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__create_uid
+msgid "Created by"
+msgstr "انشأ من قبل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__create_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__create_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__create_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__create_date
+msgid "Created on"
+msgstr "تم إنشاؤها على"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__cum_residual_amount
+msgid "Cumulative Amount"
+msgstr "كمية تراكمية"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__currency_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__currency_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__currency_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__currency_id
+msgid "Currency"
+msgstr "عملة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__computation_method__daily_compute
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__computation_method__daily_compute
+msgid "Daily Computation"
+msgstr "الحساب اليومي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__date
+msgid "Date"
+msgstr "تاريخ"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_end_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_end_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_end_date
+msgid "Date of asset"
+msgstr "تاريخ الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__asset_type__expense
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__type__expense
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_move_line__move_asset_type__expense
+msgid "Deferred Expense"
+msgstr "نفقات مؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Deferred Expense Account"
+msgstr "حساب النفقات المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_search
+msgid "Deferred Expense Type"
+msgstr "نوع المصاريف المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_tree
+msgid "Deferred Expense Types"
+msgstr "أنواع المصاريف المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.actions.act_window,name:cyllo_accounting.action_view_deferred_expense_types
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+msgid "Deferred Expense types"
+msgstr "أنواع المصاريف المؤجلة"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_move.py:0
+#: model:ir.actions.act_window,name:cyllo_accounting.action_view_deferred_expenses
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_move_form
+#, python-format
+msgid "Deferred Expenses"
+msgstr "مصروفات مؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__asset_type__revenue
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__type__revenue
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_move_line__move_asset_type__revenue
+msgid "Deferred Revenue"
+msgstr "الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Deferred Revenue Account"
+msgstr "حساب الإيرادات المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_search
+msgid "Deferred Revenue Type"
+msgstr "نوع الإيرادات المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_tree
+msgid "Deferred Revenue Types"
+msgstr "أنواع الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.actions.act_window,name:cyllo_accounting.action_view_deferred_revenue_types
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+msgid "Deferred Revenue types"
+msgstr "أنواع الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_move.py:0
+#: model:ir.actions.act_window,name:cyllo_accounting.action_view_deferred_revenues
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_move_form
+#, python-format
+msgid "Deferred Revenues"
+msgstr "الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_tree
+msgid "Deferred expense"
+msgstr "نفقات مؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Deferred expense name"
+msgstr "اسم النفقات المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Deferred expense type"
+msgstr "نوع المصاريف المؤجل"
+
+#. module: cyllo_accounting
+#: model:ir.ui.menu,name:cyllo_accounting.menu_deferred_expense_types
+msgid "Deferred expense types"
+msgstr "أنواع المصاريف المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.ui.menu,name:cyllo_accounting.menu_deferred_expenses
+msgid "Deferred expenses"
+msgstr "مصروفات مؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_tree
+msgid "Deferred revenue"
+msgstr "الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Deferred revenue name"
+msgstr "اسم الإيرادات المؤجل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Deferred revenue type"
+msgstr "نوع الإيرادات المؤجل"
+
+#. module: cyllo_accounting
+#: model:ir.ui.menu,name:cyllo_accounting.menu_deferred_revenue_types
+msgid "Deferred revenue types"
+msgstr "أنواع الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move_line__asset
+msgid "Deferred revenue/expense"
+msgstr "الإيرادات/المصاريف المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move_line__asset_type_id
+msgid "Deferred revenue/expense type"
+msgstr "نوع الإيرادات/المصاريف المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.ui.menu,name:cyllo_accounting.menu_deferred_revenues
+msgid "Deferred revenues"
+msgstr "الإيرادات المؤجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__depreciation_move_ids
+msgid "Depreciation Lines"
+msgstr "خطوط الاستهلاك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__display_name
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__display_name
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__display_name
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__state__done
+msgid "Done"
+msgstr "منتهي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__state__draft
+msgid "Draft"
+msgstr "مسودة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__number_of_entries
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__number_of_entries
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__number_of_entries
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_modify_form
+msgid "Duration"
+msgstr "مدة"
+
+#. module: cyllo_accounting
+#. odoo-javascript
+#: code:addons/cyllo_accounting/static/src/js/relational_utils.js:0
+#, python-format
+msgid "Error"
+msgstr "خطأ"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Expense"
+msgstr "مصروف"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__expense_account_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__expense_account_id
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Expense Account"
+msgstr "حساب المصاريف"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Expense Board"
+msgstr "مجلس النفقات"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Expense Date"
+msgstr "تاريخ النفقات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__first_recognition_date
+msgid "First Recognition Date"
+msgstr "تاريخ الاعتراف الأول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_follower_ids
+msgid "Followers"
+msgstr "متابعون"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "أتباع (شركاء)"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__activity_type_icon
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "الرمز الرائع على سبيل المثالFA-TASKS"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/wizard/account_asset_modify.py:0
+#, python-format
+msgid ""
+"For Keeping the audit trail, you cannot delete the journal entries once they"
+" have been posted.Instead, you can cancel the journal entry"
+msgstr ""
+"للحفاظ على مسار التدقيق ، لا يمكنك حذف إدخالات دفتر اليومية بمجرد نشرها."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_bank_statement_line__residual_amount
+#: model:ir.model.fields,help:cyllo_accounting.field_account_move__residual_amount
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment__residual_amount
+msgid "For changing the amount residual"
+msgstr "لتغيير المبلغ المتبقي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__modify_value
+msgid "Gross Increase Value"
+msgstr "زيادة القيمة الإجمالية"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_search
+msgid "Group By..."
+msgstr "مجموعة من..."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__has_message
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__has_message
+msgid "Has Message"
+msgstr "لديه رسالة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__id
+msgid "ID"
+msgstr "بطاقة تعريف"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_exception_icon
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_exception_icon
+msgid "Icon"
+msgstr "أيقونة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__activity_exception_icon
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "أيقونة للإشارة إلى نشاط استثناء."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__message_needaction
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "إذا تم التحقق منها ، تتطلب رسائل جديدة انتباهك."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__message_has_error
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__message_has_error
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "إذا تم فحصها ، فإن بعض الرسائل لديها خطأ في التسليم."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment__multi_invoice_payment
+msgid "If it is true then can choose multiple invoices for payment"
+msgstr "إذا كان هذا صحيحًا ، فيمكنك اختيار فواتير متعددة للدفع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__move_id
+msgid "Invoice"
+msgstr "فاتورة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__payment_line_ids
+msgid "Invoices"
+msgstr "فواتير"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_is_follower
+msgid "Is Follower"
+msgstr "هو أتباع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__journal_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__journal_id
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_expense_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+msgid "Journal"
+msgstr "مجلة"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+#, python-format
+msgid "Journal Entries"
+msgstr "إدخالات دفتر اليومية"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_move
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Journal Entry"
+msgstr "إفتتاحية المجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_move_line
+msgid "Journal Item"
+msgstr "عنصر المجلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__invoice_line_ids
+msgid "Journal Items"
+msgstr "عناصر المجلة"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_move.py:0
+#, python-format
+msgid ""
+"Journal Items of {account} should have a label in order to generate an asset"
+msgstr "يجب أن تحتوي عناصر دفتر اليومية من {account} على تسمية لإنشاء أصل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__journal_id
+msgid "Journal for this type"
+msgstr "مجلة هذا النوع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__write_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__write_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__write_uid
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__write_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__write_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__write_date
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث على"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Lines"
+msgstr "خطوط"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_main_attachment_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "المرفق الرئيسي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_has_error
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_has_error
+msgid "Message Delivery error"
+msgstr "خطأ تسليم الرسائل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_ids
+msgid "Messages"
+msgstr "رسائل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_modify_form
+msgid "Modify"
+msgstr "يُعدِّل"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Modify Expense"
+msgstr "تعديل المصاريف"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Modify Revenue"
+msgstr "تعديل الإيرادات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__period__1
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_modify__period__1
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__period__1
+msgid "Months"
+msgstr "شهور"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__move_ids
+msgid "Move"
+msgstr "يتحرك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move_line__move_asset_type
+msgid "Move Asset Type"
+msgstr "نقل نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move_line__multi_invoice_payment
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__multi_invoice_payment
+msgid "Multi Invoice Payment"
+msgstr "دفع الفاتورة متعددة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__my_activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "الموعد النهائي للنشط"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__name
+msgid "Name of the asset type"
+msgstr "اسم نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "الموعد النهائي للنشاط التالي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_summary
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_summary
+msgid "Next Activity Summary"
+msgstr "ملخص النشاط التالي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_type_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_type_id
+msgid "Next Activity Type"
+msgstr "نوع النشاط التالي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__computation_method__no_prorata
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__computation_method__no_prorata
+msgid "No Prorata"
+msgstr "لا"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__not_depreciable_value
+msgid "Not Depreciable Value"
+msgstr "لا قيمة للاستهلاك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_needaction_counter
+msgid "Number of Actions"
+msgstr "عدد الإجراءات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__entries_count
+msgid "Number of entries"
+msgstr "عدد الادخالات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_has_error_counter
+msgid "Number of errors"
+msgstr "عدد الأخطاء"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "عدد الرسائل التي تتطلب إجراء"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "عدد الرسائل ذات خطأ التسليم"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__original_value
+msgid "Original Value"
+msgstr "القيمة الأصلية"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__paid_amount
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Paid Amount"
+msgstr "المبلغ المدفوع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__paid_amount
+msgid "Paid amount from payment"
+msgstr "المبلغ المدفوع من الدفع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__partner_id
+msgid "Partner"
+msgstr "شريك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__partner_id
+msgid "Partner of corresponding Invoice"
+msgstr "شريك الفاتورة المقابلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Pay Amount"
+msgstr "مقدار الأجر"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__pay_amount
+msgid "Pay amount from Invoice"
+msgstr "المبلغ من الفاتورة"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_payment_line
+msgid "Payment Item"
+msgstr "عنصر الدفع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__payment_id
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__payment_id
+msgid "Payment Reference"
+msgstr "إشارة دفع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment__payment_line_ids
+msgid "Payment lines"
+msgstr "خطوط الدفع"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/wizard/account_payment_register.py:0
+#: model:ir.model,name:cyllo_accounting.model_account_payment
+#, python-format
+msgid "Payments"
+msgstr "المدفوعات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__period
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__period
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__period
+msgid "Period"
+msgstr "فترة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__prorata_date
+msgid "Prorata Date"
+msgstr "بيانات Prorata"
+
+#. module: cyllo_accounting
+#: model:ir.actions.act_window,name:cyllo_accounting.action_view_account_asset_modify
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_modify_form
+msgid "Re-evaluate"
+msgstr "إعادة التقييم"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__name
+msgid "Reason"
+msgstr "سبب"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Recognized expense"
+msgstr "نفقات معترف بها"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Recognized revenue"
+msgstr "الإيرادات المعترف بها"
+
+#. module: cyllo_accounting
+#: model:ir.model,name:cyllo_accounting.model_account_payment_register
+msgid "Register Payment"
+msgstr "تسجيل الدفع "
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+msgid "Related Expenses"
+msgstr "النفقات ذات الصلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Related Sales"
+msgstr "المبيعات ذات الصلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__total_residual
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__total_residual
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__total_residual
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Residual"
+msgstr "المتبقية"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_residual_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_residual_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_residual_amount
+msgid "Residual Amount"
+msgstr "اضطرابات الصدمة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__residual_value
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_modify__residual_value
+msgid "Residual Value"
+msgstr "القيمة المتبقية"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#: code:addons/cyllo_accounting/wizard/account_asset_modify.py:0
+#, python-format
+msgid "Residual value should be greater than zero"
+msgstr "يجب أن تكون القيمة المتبقية أكبر من الصفر"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__activity_user_id
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__activity_user_id
+msgid "Responsible User"
+msgstr "المستخدم المسؤول"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Revenue"
+msgstr "ربح"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_type_deferred_revenue_tree
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Revenue Account"
+msgstr "حساب الإيرادات"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Revenue Board"
+msgstr "مجلس الإيرادات"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Revenue Date"
+msgstr "تاريخ الإيرادات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__state__running
+msgid "Running"
+msgstr "جري"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "خطأ تسليم الرسائل القصيرة"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+#, python-format
+msgid "Save Template"
+msgstr "حفظ القالب"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__asset_type_id
+#: model:ir.model.fields,help:cyllo_accounting.field_account_move_line__asset_type_id
+msgid "Select Asset Type"
+msgstr "حدد نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment__move_ids
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__move_id
+msgid "Select Invoices"
+msgstr "حدد الفواتير"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__set_asset_move
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__set_asset_move
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__set_asset_move
+msgid "Set Asset Move"
+msgstr "تعيين خطوة الأصول"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_expense_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_asset_deferred_revenue_form
+msgid "Set to Running"
+msgstr "ضبط على الجري"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__state
+msgid "Status"
+msgstr "حالة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__activity_state
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"الحالة بناءً على الأنشطة\n"
+"متأخر: تم تمرير تاريخ الاستحقاق بالفعل\n"
+"اليوم: تاريخ النشاط اليوم\n"
+"المخطط: الأنشطة المستقبلية."
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#, python-format
+msgid ""
+"The amount you have entered does not match the Related Purchase's value "
+msgstr "لا يتطابق المبلغ الذي أدخلته مع قيمة الشراء ذات الصلة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__number_of_entries
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_modify__number_of_entries
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__number_of_entries
+msgid "The number of entries"
+msgstr "عدد الإدخالات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__period
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_modify__period
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__period
+msgid "The time between the entries"
+msgstr "الوقت بين الإدخالات"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment_line__total_amount
+msgid "Total Amount"
+msgstr "المبلغ الإجمالي"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__total_invoice_amount
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment__total_invoice_amount
+msgid "Total Invoice Amount"
+msgstr "المبلغ الإجمالي للفاتورة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Total Paid"
+msgstr "مجموع المبالغ المدفوعة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__total_amount
+msgid "Total amount from Invoice"
+msgstr "إجمالي المبلغ من الفاتورة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__total_value
+msgid "Total depreciable Value"
+msgstr "إجمالي قيمة قابلة للاستهلاك"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__purchase_value
+msgid "Total purchase value"
+msgstr "إجمالي قيمة الشراء"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_payment_form
+msgid "Total to Pay"
+msgstr "إجمالي الدفع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__type
+msgid "Type"
+msgstr "يكتب"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__activity_exception_decoration
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "نوع نشاط الاستثناء المسجل."
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_type__website_message_ids
+msgid "Website Messages"
+msgstr "رسائل الموقع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__website_message_ids
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_type__website_message_ids
+msgid "Website communication history"
+msgstr "تاريخ اتصال الموقع"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_asset_asset__state
+msgid ""
+"When it is created, the status is 'Draft'.\n"
+"If the it is confirmed, the status in 'Running' and the lines can be posted.\n"
+"You can close it\n"
+msgstr ""
+"عند إنشائها ، تكون الحالة \"مسودة\".\n"
+"إذا تم تأكيد ذلك ، يمكن نشر الحالة في \"الجري\" ويمكن نشر الخطوط.\n"
+"\n يمكنك إغلاقه"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_asset__period__12
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_modify__period__12
+#: model:ir.model.fields.selection,name:cyllo_accounting.selection__account_asset_type__period__12
+msgid "Years"
+msgstr "سنين"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#, python-format
+msgid "You cannot delete a document that is in %s state."
+msgstr "لا يمكنك حذف وثيقة في حالة ٪."
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_asset.py:0
+#, python-format
+msgid ""
+"You cannot delete a record linked to posted entries.\n"
+"You can cancel the linked journal entries."
+msgstr ""
+"لا يمكنك حذف سجل مرتبط بالإدخالات المنشورة.\n"
+"يمكنك إلغاء إدخالات المجلات المرتبطة."
+
+#. module: cyllo_accounting
+#. odoo-javascript
+#: code:addons/cyllo_accounting/static/src/js/relational_utils.js:0
+#, python-format
+msgid "You cannot register payment for draft journal entries"
+msgstr "لا يمكنك تسجيل الدفع لمسودة إدخالات دفتر اليومية"
+
+#. module: cyllo_accounting
+#. odoo-python
+#: code:addons/cyllo_accounting/models/account_move.py:0
+#, python-format
+msgid "You cannot reset to draft, The related asset is already posted"
+msgstr "لا يمكنك إعادة تعيينه إلى صياغة ، يتم نشر الأصول ذات الصلة بالفعل"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__asset_count
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__asset_count
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__asset_count
+msgid "asset Moves"
+msgstr "يتحرك الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_asset_asset__asset_type_id
+msgid "asset type"
+msgstr "نوع الأصول"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_move_line__asset
+msgid "create deferred revenue/expense based on the move"
+msgstr "إنشاء الإيرادات/المصاريف المؤجلة على أساس هذه الخطوة"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,help:cyllo_accounting.field_account_payment_line__currency_id
+msgid "currency of corresponding Invoice"
+msgstr "عملة الفاتورة المقابلة"
+
+#. module: cyllo_accounting
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting.view_account_asset_modify_form
+msgid "in"
+msgstr "في"
+
+#. module: cyllo_accounting
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_bank_statement_line__residual_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_move__residual_amount
+#: model:ir.model.fields,field_description:cyllo_accounting.field_account_payment__residual_amount
+msgid "residual"
+msgstr "المتبقية"

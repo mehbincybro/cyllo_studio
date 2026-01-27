@@ -1,0 +1,562 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_spreadsheet
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-01 08:59+0000\n"
+"PO-Revision-Date: 2023-12-01 08:59+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_spreadsheet
+#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet_import
+msgid "Add Item to Spreadsheet"
+msgstr "أضف عنصرًا إلى جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_sheet_to_spreadsheet
+msgid "Add sheet to spreadsheet"
+msgstr "أضف ورقة إلى جدول بيانات"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/spreadsheet.xml:0
+#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_add_to_spreadsheet
+#, python-format
+msgid "Add to spreadsheet"
+msgstr "أضف إلى جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
+msgid "Adding access rights"
+msgstr "إضافة حقوق الوصول"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
+msgid "Adding name of spreadsheet"
+msgstr "إضافة اسم جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "After next"
+msgstr "بعد القادم"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Before Previous"
+msgstr "قبل السابق"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
+#, python-format
+msgid "Cancel"
+msgstr "يلغي"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "Change name"
+msgstr "تغيير الإسم"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
+msgid "Client id"
+msgstr "معرف العميل"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
+msgid "Code"
+msgstr "شفرة"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
+msgid "Commands"
+msgstr "الأوامر"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "Confirm"
+msgstr "يتأكد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
+msgid "Contains the spreadsheet information"
+msgstr "يحتوي على معلومات جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
+msgid "Contributors"
+msgstr "المساهمين"
+
+#. module: cyllo_spreadsheet
+#: model:spreadsheet.spreadsheet.import.mode,name:cyllo_spreadsheet.spreadsheet_spreadsheet_import_mode_create_spreadsheet
+msgid "Create spreadsheet"
+msgstr "إنشاء جدول بيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_uid
+msgid "Created by"
+msgstr "انشأ من قبل"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__create_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__create_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__create_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__create_date
+msgid "Created on"
+msgstr "تم إنشاؤها على"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__client_id
+msgid "Current id"
+msgstr "المعرف الحالي"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
+msgid "Current model name"
+msgstr "اسم النموذج الحالي"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
+msgid "Data"
+msgstr "بيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__display_name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__display_name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__display_name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__display_name
+msgid "Display Name"
+msgstr "اسم العرض"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet_download_menus.js:0
+#, python-format
+msgid "Download"
+msgstr "تحميل"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_tree
+msgid "Edit"
+msgstr "يحرر"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
+msgid "Excel file name"
+msgstr "اسم ملف Excel"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "File"
+msgstr "ملف"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
+msgid "File Name"
+msgstr "اسم الملف"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Filters"
+msgstr "المرشحات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__data
+msgid "For adding spreadsheet data as a data file "
+msgstr "لإضافة بيانات جدول البيانات كملف بيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__filename
+msgid "For getting file name"
+msgstr "للحصول على اسم الملف"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode
+msgid "For getting import mode code"
+msgstr "للحصول على رمز وضع الاستيراد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__name
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
+msgid "For getting the name"
+msgstr "للحصول على الاسم"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__code
+msgid "For identifying the import mode"
+msgstr "لتحديد وضع الاستيراد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
+msgid "For uploading your excel file and edit it inside spreadsheet "
+msgstr "لتحميل ملف Excel الخاص بك وتحريره داخل جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
+msgid "Getting spreadsheet"
+msgstr "الحصول على جدول بيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__group_ids
+msgid "Groups"
+msgstr "مجموعات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__id
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__id
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__id
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__id
+msgid "ID"
+msgstr "بطاقة تعريف"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
+msgid "Import Data"
+msgstr "بيانات الاستيراد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import_mode
+msgid "Import Mode"
+msgstr "وضع الاستيراد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet_import
+msgid "Import data to spreadsheet"
+msgstr "استيراد البيانات إلى جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#, python-format
+msgid ""
+"Insert list in\n"
+"            spreadsheet"
+msgstr ""
+"أدخل قائمة في\n"
+"            جدول"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_uid
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_uid
+msgid "Last Updated by"
+msgstr "آخر تحديث بواسطة"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__write_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__write_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__write_date
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__write_date
+msgid "Last Updated on"
+msgstr "آخر تحديث على"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#, python-format
+msgid "Link menu in spreadsheet"
+msgstr "قائمة الارتباط في جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "Link to Odoo menu"
+msgstr "رابط لقائمة Odoo"
+
+#. module: cyllo_spreadsheet
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_manager
+msgid "Manager"
+msgstr "مدير"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
+msgid "Mode"
+msgstr "وضع"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__mode_id
+msgid "Mode of import"
+msgstr "طريقة الاستيراد"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__model
+msgid "Model"
+msgstr "نموذج"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Month"
+msgstr "شهر"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__name
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_form
+msgid "Name"
+msgstr "اسم"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__name
+msgid "Name of the import mode"
+msgstr "اسم وضع الاستيراد"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Next"
+msgstr "التالي"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__next_revision_id
+msgid "Next revision id"
+msgstr "معرف المراجعة التالي"
+
+#. module: cyllo_spreadsheet
+#: model_terms:ir.ui.view,arch_db:cyllo_spreadsheet.view_spreadsheet_spreadsheet_import_form
+msgid "OK"
+msgstr "نعم"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
+msgid "Owner"
+msgstr "مالك"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__owner_id
+msgid "Owner who created the spreadsheet"
+msgstr "المالك الذي أنشأ جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__contributor_ids
+msgid "Person who can edit the spreadsheet"
+msgstr "الشخص الذي يمكنه تحرير جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
+msgid "Person who can only read the spreadsheet"
+msgstr "الشخص الذي يمكنه قراءة جدول البيانات فقط"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Previous"
+msgstr "سابق"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Quarter"
+msgstr "ربع"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__reader_ids
+msgid "Readers"
+msgstr "القراء"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Relative Period"
+msgstr "الفترة النسبية"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
+msgid "Res Id"
+msgstr "معرف الدقة"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
+msgid "Revision id"
+msgstr "معرف المراجعة"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Save"
+msgstr "يحفظ"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
+msgid "Saving spreadsheet informationfrom the js file"
+msgstr "حفظ معلومات جدول البيانات من ملف JS"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import_mode__sequence
+msgid "Sequence"
+msgstr "تسلسل"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__server_revision_id
+msgid "Server revision id"
+msgstr "معرف مراجعة الخادم"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/add_spreadsheet_menu/cog_menu.xml:0
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__spreadsheet_id
+#: model:ir.module.category,name:cyllo_spreadsheet.ir_module_category_spreadsheet
+#: model:ir.ui.menu,name:cyllo_spreadsheet.menu_spreadsheet
+#, python-format
+msgid "Spreadsheet"
+msgstr "جدول"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_cy_revision
+msgid "Spreadsheet Cyllo Revision"
+msgstr "مراجعة جدول البيانات Cylo"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_data
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_data
+msgid "Spreadsheet Data"
+msgstr "بيانات جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_raw
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_raw
+msgid "Spreadsheet Raw"
+msgstr "جدول البيانات الخام"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
+msgid "Spreadsheet Revision"
+msgstr "مراجعة جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_spreadsheet_abstract
+msgid "Spreadsheet abstract for inheritance"
+msgstr "مجردة جداول البيانات للميراث"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet_import__import_data
+msgid "Spreadsheet data"
+msgstr "بيانات جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_binary_data
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_binary_data
+msgid "Spreadsheet file"
+msgstr "ملف جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:ir.actions.act_window,name:cyllo_spreadsheet.action_view_spreadsheet_spreadsheet
+msgid "Spreadsheets"
+msgstr "جداول البيانات"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "Stacked"
+msgstr "مرصوصة"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__res_id
+msgid "Storing id of parent model"
+msgstr "تخزين معرف النموذج الأصل"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__commands
+msgid "Storing spreadsheet data and row details"
+msgstr "تخزين بيانات جدول البيانات وتفاصيل الصف"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__excel_file_name
+msgid "Storing uploaded file name"
+msgstr "تخزين اسم الملف الذي تم تحميله"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_abstract__thumbnail
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_spreadsheet__thumbnail
+msgid "Thumbnail"
+msgstr "ظفري"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,field_description:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
+msgid "Type"
+msgstr "يكتب"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_cy_revision__type
+msgid "Type of revision for each record"
+msgstr "نوع المراجعة لكل سجل"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#. odoo-python
+#: code:addons/cyllo_spreadsheet/models/spreadsheet_spreadsheet.py:0
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "Unnamed"
+msgstr "لم يكشف عن اسمه"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_abstract__spreadsheet_revision_ids
+#: model:ir.model.fields,help:cyllo_spreadsheet.field_spreadsheet_spreadsheet__spreadsheet_revision_ids
+msgid "Used to store the changes on the spreadsheet"
+msgstr "تستخدم لتخزين التغييرات على جدول البيانات"
+
+#. module: cyllo_spreadsheet
+#: model:res.groups,name:cyllo_spreadsheet.group_cyllo_spreadsheet_group_user
+msgid "User"
+msgstr "مستخدم"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/filter.esm.js:0
+#, python-format
+msgid "Year"
+msgstr "سنة"
+
+#. module: cyllo_spreadsheet
+#. odoo-javascript
+#: code:addons/cyllo_spreadsheet/static/src/spreadsheet/bundle/spreadsheet.xml:0
+#, python-format
+msgid "name is required"
+msgstr "مطلوب اسم"
+
+#. module: cyllo_spreadsheet
+#: model:ir.model,name:cyllo_spreadsheet.model_ir_websocket
+msgid "websocket message handling"
+msgstr "التعامل مع رسائل websocket "

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_analytics.KpiSheet" owl="1">
+        <div class="d-flex p-5 kpi_sheet">
+            <t t-if="this.state.measureView == 'View 1'">
+                <div class="progress cy-sheet_progress-container"
+                     role="progressbar"
+                     aria-label="Example with label" aria-valuenow="25"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                    <div class="progress-bar cy-sheet_progress-state"
+                         style="width: 15%"/>
+                </div>
+            </t>
+            <div class="cy-sheet_progress-card cy-sheet_progress-secondary-card pb-5 position-relative">
+                <div class="d-flex align-items-center gap-2 justify-content-end kpi_description_box position-absolute">
+                    <div class="cy-sheet_info-icon cy_kpi ">
+                        <t t-if="this.state.description">
+                            <button class="cy_kpi_icon">
+                                <i class="ri-information-line"/>
+                                <div class="cy-sheet_info-content"><t t-esc="this.state.description"/>
+                                </div>
+                            </button>
+                        </t>
+                    </div>
+                </div>
+                <div class="d-flex cy_kpi_around align-items-center">
+                    <div class="p-2 heading-min-h d-flex justify-content-evenly w-100" style="min-width: 55%">
+                        <div class="p-1 ">
+                            <button class="cy_kpi_icon">
+                                <i t-att-class="this.state.iconDefault" class="kpi-icon"/>
+                            </button>
+                        </div>
+                        <div>
+                            <span class="cy-sheet_card-heading" t-if="this.state.name">
+                                <t t-esc="this.state.name"/>
+                            </span>
+                            <span class="cy-sheet_card-progress-count">
+                                <div class="overflow-hidden" style="text-overflow: ellipsis;">
+                                    <t t-esc="kpiData"/>
+                                    <t t-if="this.state.target">  /
+                                        <t t-esc="this.state.target"/>
+                                    </t>
+                                </div>
+                            </span>
+                            <t t-if="this.state.measureView == 'View 1' and this.state.target">
+                                <div class="progress-container" t-ref="proBar">
+                                    <div class="progress cy-kpi-progress-bar" t-attf-style="width: {{stylePercentageWidth}}%;"/>
+                                    <div class="percentage-sheet cy-kpi-progress-bar-value" t-attf-style="left: {{stylePercentageWidth}}%;">
+                                        <span><t t-out="kpiTarget"/>%</span></div>
+                                    <div class="progress cy-kpi-progress-bar_2" t-attf-style="width: {{stylePercentageWidth}}%;">
+                                        <span><t t-out="kpiTarget"/>%</span>
+                                    </div>
+                                </div>
+                            </t>
+                            <t t-if="this.state.measureView == 'View 2'">
+                                <span class="cy-sheet_prgress-state_count"
+                                      t-if="this.state.target"><t t-esc="kpiTarget"/> %
+                                    <i t-att-class="state.className"/>
+                                </span>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row py-2 p-5" t-ref="KpiConfig">
+            <div class="col-sm-6">
+                <div class="col-12 mb-2 position-relative">
+                    <label for="inputAddress" class="form-label  cy-modal-form_label">KPI Icon</label>
+                    <button class="cy-sheet_icon-selection" t-on-click="onClickKpiIcon">
+                        <i class="cy-icons" t-att-class="this.state.iconDefault"/>
+                    </button>
+                    <div class="cy-sheet_icon-selection-box position-absolute">
+                        <div class="modal-content cy-sheet_icon-selectBox">
+                            <div class="modal-header cy-sheet_selection-box-head  d-flex align-items-center">
+                                <h5 class=" cy-sheet_selection-heading-txt">Select Icon</h5>
+                                <span id="closeBtn" class="cy-icons cy-social_cmnt-closebtn" t-on-click="onCloseKpiIcon">
+                                    <i class="ri-close-line"/></span></div>
+                            <div class="modal-body pt-0">
+                                <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2">
+                                    <li t-foreach="IconClass" t-as="icons" t-key="icons_index">
+                                        <div class="cy-icon_box-item"  t-on-click = "()=> this.selectIcon(icons)">
+                                            <i class="cy-icons" t-att-class="icons"/>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="cy-selected_icon">
+
+                    </div>
+                </div>
+                <div class="col-12  mb-2">
+                    <label for="inputAddress" class="form-label  cy-modal-form_label">KPI Target</label>
+                    <input type="text" oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           class="form-control cy-button-stroke" id="inputAddress"
+                           placeholder="Target Value" t-model="state.target"/>
+                </div>
+                <div class="col-12 mb-2">
+                    <label for="inputAddress" class="form-label cy-modal-form_label">Measuring view</label>
+                    <div class="form-check">
+                        <input class="form-check-input cy-sheet_checkbox" type="radio" name="measuringView"
+                               id="view1" value="View 1" t-model="state.measureView"/>
+                        <label class="form-check-label cy-sheet-graph-name pt-0" for="view1">
+                            View 1
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input cy-sheet_checkbox" type="radio" name="measuringView" id="view2"
+                               value="View 2" t-model="state.measureView"/>
+                        <label class="form-check-label cy-sheet-graph-name pt-0" for="view2">
+                            View 2
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="col-12  mb-2">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" value=""
+                               id="flexCheckDefault" t-model="state.redirect"/>
+                        <label class="form-check-label  cy-modal-form_label" for="flexCheckDefault">
+                            Redirected to Record
+                        </label>
+                    </div>
+                </div>
+                 <div class="col-12 mb-2">
+                    <label for="inputAddress" class="form-label  cy-modal-form_label">Description</label>
+                    <textarea class="form-control cy-button-stroke" id="exampleFormControlTextarea1" rows="8"
+                              t-model="state.description"/>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

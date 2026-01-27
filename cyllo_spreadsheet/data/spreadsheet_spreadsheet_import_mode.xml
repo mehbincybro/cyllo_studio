@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo noupdate="1">
+    <!--        Multi company rule for spreadsheet-->
+    <record id="rule_spreadsheet_spreadsheet_company" model="ir.rule">
+        <field name="name">spreadsheet.spreadsheet: MultiCompany</field>
+        <field name="model_id" ref="model_spreadsheet_spreadsheet"/>
+        <field name="domain_force">['|',('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- Creating record for spreadsheet import mode -->
+    <record id="spreadsheet_spreadsheet_import_mode_create_spreadsheet"
+            model="spreadsheet.spreadsheet.import.mode">
+        <field name="code">new</field>
+        <field name="name">Create spreadsheet</field>
+        <field name="sequence" eval="10"/>
+        <field name="group_ids" eval="[Command.link(ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+    </record>
+    <record id="spreadsheet_spreadsheet_import_mode_add_to_spreadsheet"
+            model="spreadsheet.spreadsheet.import.mode">
+        <field name="code">add</field>
+        <field name="name">Add to spreadsheet</field>
+        <field name="sequence" eval="15"/>
+        <field name="group_ids" eval="[Command.link(ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+    </record>
+    <record id="spreadsheet_spreadsheet_import_mode_add_sheet_to_spreadsheet"
+            model="spreadsheet.spreadsheet.import.mode">
+        <field name="code">add_sheet</field>
+        <field name="name">Add sheet to spreadsheet</field>
+        <field name="sequence" eval="16"/>
+        <field name="group_ids" eval="[Command.link(ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+    </record>
+</odoo>

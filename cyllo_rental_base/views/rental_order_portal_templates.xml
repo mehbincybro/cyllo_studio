@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Template for portal document -->
+    <template id="portal_my_home_rental_order" name="Show Rental Order" customize_show="True"
+              inherit_id="portal.portal_my_home" priority="100">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="before">
+            <t t-set="portal_client_category_enable" t-value="True"/>
+        </xpath>
+        <xpath expr="//div[@id='portal_client_category']" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Rental Orders</t>
+                <t t-set="text">Track your rental orders</t>
+                <t t-set="icon" t-value="'/cyllo_rental_base/static/src/icon/key.svg'"/>
+                <t t-set="url" t-value="'/my/rentals'"/>
+                <t t-set="placeholder_count" t-value="'rental_order_count'"/>
+            </t>
+        </xpath>
+    </template>
+    <!-- Template for portal breadcrumbs -->
+    <template id="portal_my_home_menu_rental" name="Portal layout : Rental menu entries"
+              inherit_id="portal.portal_breadcrumbs" priority="65">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'rental_record'" class="breadcrumb-item active">
+                <span>My Rental Orders</span>
+            </li>
+            <li t-if="page_name == 'rental_portal_form'" class="breadcrumb-item active">
+                <a t-attf-href="/my/rentals" aria-label="Home" title="My Rental Orders">
+                    <span>My Rental Orders</span>
+                </a>
+                <span>/
+                    <t t-out="object.name"/>
+                </span>
+            </li>
+        </xpath>
+    </template>
+</odoo>

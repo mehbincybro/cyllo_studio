@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- WhatsappChatInput Template -->
+<templates id="template">
+    <t t-name="WhatsappChatInput" owl="1">
+        <div class="border-top bg-white chat-input">
+            <form class="d-flex align-items-center gap-2 h-100" t-if="!state.recording">
+                <div class="w-100 h-100 cy-whatsapp-chat-input-box" t-if="!state.recording">
+                    <div class="position-relative h-100 d-flex align-items-center cy-input-chat-container">
+                        <input type="text" class="form-control chatbox-inputbox h-100 ms-3" id="chat_input"
+                               t-ref="textarea" placeholder="Enter Message..." t-on-keyup="composeMessage"/>
+                        <div class="whatsapp_composer_icons justify-content-center d-flex w-20">
+                            <i class="btn border-0 rounded-pill fa fa-smile-o" aria-label="Emojis" t-ref="emoji-button"/>
+                            <input type="file" id="fileInput" accept=".txt,.pdf,.ppt,.doc,.xls,.docx,.pptx,.xlsx"
+                                   t-ref="fileInput" style="display:none;" t-on-change="viewFilePreview"/>
+                            <label for="fileInput">
+                                <i t-if="!props.preview" class="fa fa-paperclip btn border-0 rounded-pill"/>
+                            </label>
+                            <input type="file" accept=".jpeg, .jpg, .png" id="imageUpload" t-ref="imageInput" style="display:none;" t-on-change="viewImagePreview"/>
+                            <label for="imageUpload">
+                                <i t-if="!props.preview" class="fa fa-camera border-0 btn rounded-pill "/>
+                            </label>
+                            <i t-if="!props.preview" t-on-click="onClickVoice" class="fa fa-microphone btn border-0 rounded-pill"/>
+                            <i class="fa fa-paper-plane border-0 btn rounded-pill" t-on-click="sendMessage" t-if="state.composer"/>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <form class="d-flex align-items-center gap-2" t-if="state.recording">
+                <audio controls="" t-ref="audioPlayer">
+                    <source type="audio/mp3"/>
+                </audio>
+                <div class="whatsapp_composer_icons d-flex">
+                    <i class="fa fa-microphone border-0 btn rounded-pil" t-on-click="onClickVoice"/>
+                    <span class="voice-recording" t-att-style="state.onMic ? 'display: block;' : 'display:none ;'"/>
+                    <i class="fa fa-trash border-0 btn rounded-pil" t-on-click="deleteAudio"/>
+                    <i class="fa fa-paper-plane border-0 btn rounded-pil" t-on-click="sendVoiceMessage" t-att-style="state.onMic ? 'display: none;' : 'display:block ;'"/>
+                </div>
+            </form>
+        </div>
+    </t>
+</templates>

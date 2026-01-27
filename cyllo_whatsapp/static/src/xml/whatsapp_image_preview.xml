@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!-- WhatsappImagePreview Template -->
+    <t t-name="WhatsappImagePreview" owl="1">
+        <div class="whatsapp_image_preview_container">
+            <div class="h-10 position-absolute w-100" style="background-color: #e9e9ef;">
+                <i class="fa fa-close" t-on-click="props.closePreview"/>
+                <div t-if="props.image" class="justify-content-center align-items-center d-flex w-100">
+                    <i class="fa fa-fw fa-rotate-right" t-on-click="() => this.props.rotateImage('+',this.imagePreview)"/>
+                    <i class="fa fa-fw fa-rotate-left" t-on-click="() => this.props.rotateImage('-',this.imagePreview)"/>
+                    <i class="fa fa-fw fa-search-plus" t-on-click="zoomInImage"/>
+                    <i class="fa fa-fw fa-search-minus" t-on-click="zoomOutImage"/>
+                </div>
+                <div t-if="props.inputFile" style="padding: 0px 0em;text-align: center;">
+                    <t t-out="props.inputFile.name"/>
+                </div>
+            </div>
+            <div class="w-100 d-flex justify-content-center position-relative mx-auto align-items-center"
+                 style="height: 80%;top: 10%;">
+                <img t-if="props.image" t-ref="imagePreview" t-att-src="props.image" class="whatsapp_image_preview" style="transform: rotate(0deg);"/>
+                <img t-if="!props.image and props.inputFile" t-attf-src="/cyllo_whatsapp/static/images/{{fileType}}" class="whatsapp_image_preview" t-on-click="props.viewDocument"/>
+            </div>
+        </div>
+    </t>
+</templates>

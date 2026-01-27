@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.DeleteDialog">
+        <div class="cy-onboard_modal-container cy_sheet_filter_container cy-kpi_modal-container">
+            <div class="modal-dialog  cy-dashboard_modal-box">
+                <div class="modal-content cy-modal_content w-100">
+                    <div class="modal-header  cy-social_commentHead d-flex  pt-4">
+                        <h5 class="cy-dashboard_modal-heading"><t t-out="props.title"/></h5>
+                        <span id="sheet_filter_close" class="cy-icons cy-social_cmnt-closebtn" t-on-click="_cancel">
+                            <i class="ri-close-line"/></span>
+                    </div>
+                    <div class="modal-body py-0">
+                        <form class="p-4">
+                            <div class="row py-2">
+                                <div class="col-12  mb-3 px-2">
+                                    <t t-out="props.body"/>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="cy-modal_footer cy-social_cmnt-footer">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button class="btn cy-button-primary-stroke" t-on-click="_confirm">Confirm</button>
+                            <button class="btn cy-button-stroke" t-on-click="_cancel">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

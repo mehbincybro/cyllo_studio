@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates id="template">
+    <!-- WhatsappWelcome Template -->
+    <t t-name="WhatsappWelcome" owl="1">
+        <div class="whatsapp_welcome" style="height: 100vh;">
+            Welcome to Whatsapp Web
+        </div>
+    </t>
+</templates>

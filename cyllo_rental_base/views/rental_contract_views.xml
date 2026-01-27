@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--  Tree view  -->
+    <record id="view_rental_contract_tree" model="ir.ui.view">
+        <field name="name">view.rental.contract.tree</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <tree string="Rental Contract">
+                <field name="name"/>
+                <field name="contract_start_date"/>
+                <field name="contract_end_date"/>
+                <field name="partner_id"/>
+                <field name="currency_id"/>
+                <field name="state"
+                       decoration-success="state == 'in_contract'"
+                       decoration-info="state == 'expired'"
+                       decoration-danger="state == 'closed'"
+                       widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    <!--  Kanban View  -->
+    <record id="view_rental_contract_kanban" model="ir.ui.view">
+        <field name="name">view.rental.contract.kanban</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click oe_kanban_content">
+                            <div class="row">
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div>
+                                <field name="contract_start_date"/>
+                                -
+                                <field name="contract_end_date"/>
+                            </div>
+                            <div>
+                                <field name="partner_id"/>
+                            </div>
+                            <div>
+                                <field name="state"
+                                       decoration-success="state == 'in_contract'"
+                                       decoration-info="state == 'expired'"
+                                       decoration-danger="state == 'closed'"
+                                       widget="badge"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Calendar view -->
+    <record id="view_rental_contract_calendar" model="ir.ui.view">
+        <field name="name">view.rental.contract.calendar</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <calendar string="Rental contract calendar" date_start="create_date" color="state">
+                <field name="currency_id" invisible="1"/>
+                <field name="partner_id"/>
+                <field name="contract_start_date"/>
+                <field name="contract_end_date"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+
+    <!-- Graph view -->
+    <record id="view_rental_contract_graph" model="ir.ui.view">
+        <field name="name">view.rental.contract.graph</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <graph string="Rental contract graph">
+                <field name="name"/>
+            </graph>
+        </field>
+    </record>
+    <!-- Pivot view -->
+    <record id="view_rental_contract_pivot" model="ir.ui.view">
+        <field name="name">view.rental.contract.pivot</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <pivot string="Rental contract pivot">
+                <field name="name" type="row"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- Search view -->
+    <record id="view_rental_contract_search" model="ir.ui.view">
+        <field name="name">view.rental.contract.search</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <search string="Rental Contract">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter string="In Contract" name="in_contract" domain="[('state', '=', 'in_contract')]"/>
+                <filter string="Expired" name="expired" domain="[('state', '=', 'expired')]"/>
+                <filter string="Closed" name="closed" domain="[('state', '=', 'returned')]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Partner" name="partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Form view -->
+    <record id="view_rental_contract_form" model="ir.ui.view">
+        <field name="name">view.rental.contract.form</field>
+        <field name="model">rental.contract</field>
+        <field name="arch" type="xml">
+            <form string="Rental Contract">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,in_contract,expired,closed"/>
+                    <button name="action_create_invoice" string="Create Invoice"
+                            class="oe_highlight" type="object" invisible="state != 'draft'"/>
+                    <button name="action_create_invoice" string="Renew Contract"
+                            class="oe_highlight" type="object" invisible="state in ['draft','in_contract']"/>
+                    <button name="action_close" string="Close Contract"
+                            class="oe_highlight" type="object" invisible="state != 'in_contract'"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button class="oe_stat_button" type="object" name="action_get_invoice" string="Invoice"
+                                icon="fa-pencil-square-o" invisible="not is_paid"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Title"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="partner_id" readonly="state in ['in_contract','expired','closed']"/>
+                        <field name="invoice_ids" invisible="1"/>
+                        <field name="is_paid" invisible="1"/>
+                        <field name="contract_start_date" readonly="state in ['in_contract','expired','closed']"/>
+                        <field name="contract_end_date" readonly="state in ['in_contract']"/>
+                        <field name="contract_template_id" readonly="state in ['in_contract','expired','closed']"/>
+                        <field name="contract_price" widget="monetary" readonly="state in ['in_contract','expired','closed']"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Contract Lines">
+                            <field name="contract_line_ids" mode="tree" nolabel="1"
+                                   readonly="state in ['in_contract','expired','closed']"
+                                   widget="one2many">
+                                <form>
+                                    <field name="product_ids" invisible="1"/>
+                                </form>
+                                <tree string="Rental Order Lines" editable="bottom">
+                                    <field name="product_id" force_save="1" options="{'no_open': True}"
+                                           domain="[('id', 'in',product_ids ), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                           widget="sol_product_many2one"/>
+                                    <field name="product_ids" column_invisible="1"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="charge_per"/>
+                                    <field name="price_unit"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                    <field name="contract_id" column_invisible="1"/>
+                                    <field name="product_uom_category_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+</odoo>

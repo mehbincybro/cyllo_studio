@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_consolidation_chart,access.consolidation.chart,model_consolidation_chart,base.group_user,1,1,1,1
+access_consolidation_account,access.consolidation.account,model_consolidation_account,base.group_user,1,1,1,1
+access_consolidation_group,access.consolidation.group,model_consolidation_group,base.group_user,1,1,1,1
+access_consolidation_period,access.consolidation.period,model_consolidation_period,base.group_user,1,1,1,1
+access_consolidation_company_period,access.consolidation.company.period,model_consolidation_company_period,base.group_user,1,1,1,1
+access_consolidation_journal,access.consolidation.journal,model_consolidation_journal,base.group_user,1,1,1,1
+access_consolidation_journal_line,access.consolidation.journal.line,model_consolidation_journal_line,base.group_user,1,1,1,1

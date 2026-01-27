@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<template xml:space="preserve">
+    <!-- Create sticky note template from systray-->
+    <t t-name="StickyNotesItem" owl="1">
+        <div class="sticky" id="sticky_note"
+             t-att-style="'padding: 25px; border-radius: 10px; min-height: 160px; word-wrap: break-word; background-color: ' + props.colour">
+            <h2 class="note-heading">
+                <t t-esc="props.title"/>
+            </h2>
+            <p class="note-description">
+                <t t-esc="props.description"/>
+            </p>
+            <div style="display:flex;margin-top:42px;">
+                <div class="o_remove" t-on-click="() => this._remove(props.id)" t-att-id="props.id">
+                    <i class="ri-delete-bin-7-line"/>
+                </div>
+                <div class="o_edit" t-on-click="() => this._edit(props.id, props.title, props.description, props.colour)">
+                    <i class="ri-edit-box-line"/>
+                </div>
+                <div class="note-date">
+                    <p style="float: right;padding-top:3px;">
+                        <span t-esc="props.create_date"/>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <br/>
+     </t>
+</template>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    Pivot view in the report-->
+    <record id="view_subscription_report_pivot" model="ir.ui.view">
+         <field name="name">view.subscription.report.pivot</field>
+         <field name="model">subscription.report</field>
+         <field name="arch" type="xml">
+             <pivot string="Sales Analysis" sample="1">
+                 <field name="recurring_revenue"/>
+                 <field name="weekly_price_sum"/>
+                 <field name="monthly_price_sum"/>
+                 <field name="yearly_price_sum"/>
+                 <field name="partner_id" type="row"/>
+             </pivot>
+         </field>
+    </record>
+<!--    Graph View-->
+    <record id="view_subscription_report_graph" model="ir.ui.view">
+         <field name="name">view.subscription.report.graph</field>
+         <field name="model">subscription.report</field>
+         <field name="arch" type="xml">
+             <graph string="Sales Analysis" type="line" sample="1">
+                 <field name="recurring_revenue"/>
+                 <field name="weekly_price_sum"/>
+                 <field name="monthly_price_sum"/>
+                 <field name="yearly_price_sum"/>
+                 <field name="partner_id"/>
+             </graph>
+         </field>
+    </record>
+<!--    Pie graph view-->
+    <record id="view_subscription_report_graph_pie" model="ir.ui.view">
+         <field name="name">view.subscription.report.graph.pie</field>
+         <field name="model">subscription.report</field>
+         <field name="mode">primary</field>
+         <field name="inherit_id" ref="view_subscription_report_graph"/>
+         <field name="arch" type="xml">
+            <graph position="attributes">
+                <attribute name="type">pie</attribute>
+            </graph>
+         </field>
+    </record>
+<!--    Bar graph view-->
+     <record id="view_subscription_report_graph_bar" model="ir.ui.view">
+         <field name="name">view.sale.report.graph.bar</field>
+         <field name="model">subscription.report</field>
+         <field name="mode">primary</field>
+         <field name="inherit_id" ref="view_subscription_report_graph"/>
+         <field name="arch" type="xml">
+            <graph position="attributes">
+                <attribute name="type">bar</attribute>
+                <attribute name="order">DESC</attribute>
+            </graph>
+         </field>
+    </record>
+<!--    Action to show the report-->
+    <record id="action_view_reporting_subscription" model="ir.actions.act_window">
+        <field name="name">Subscriptions Report</field>
+        <field name="res_model">subscription.report</field>
+        <field name="view_mode">pivot,graph</field>
+    </record>
+</odoo>

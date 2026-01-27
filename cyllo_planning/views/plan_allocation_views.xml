@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--    Tree view for plan allocation-->
+    <record id="view_plan_allocation_tree" model="ir.ui.view">
+        <field name="name">view.plan.allocation.tree</field>
+        <field name="model">plan.allocation</field>
+        <field name="arch" type="xml">
+            <tree string="Planning Allocation" multi_edit="1">
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+                <field name="duration" widget="float_time"/>
+                <field name="employee_id"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <field name="allocation_type_id"/>
+            </tree>
+        </field>
+    </record>
+    <!--    Form view for plan allocation-->
+    <record id="view_plan_allocation_form" model="ir.ui.view">
+        <field name="name">view.plan.allocation.form</field>
+        <field name="model">plan.allocation</field>
+        <field name="arch" type="xml">
+            <form string="Planning Allocation">
+                <sheet>
+                    <div class="oe_title oe_inline">
+                        <h1>
+                            <group>
+                                <field name="start_datetime"/>
+                                <field name="end_datetime"/>
+                            </group>
+                        </h1>
+                    </div>
+                    <group>
+                        <group name="allocation_info" string="Allocation Information">
+                            <field name="name" invisible="1"/>
+                            <field name="employee_id"/>
+                            <field name="duration" widget="float_time"/>
+                            <field name="user_id"/>
+                            <field name="company_id"/>
+                            <field name="allocation_type_id"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!--    Calendar view for plan allocation-->>
+    <record id="view_plan_allocation_calendar" model="ir.ui.view">
+        <field name="name">view.plan.allocation.calendar</field>
+        <field name="model">plan.allocation</field>
+        <field name="arch" type="xml">
+            <calendar string="Planning Allocation"
+                      form_view_id="%(cyllo_planning.view_plan_allocation_form)d"
+                      event_open_popup="true"
+                      date_start="start_datetime"
+                      date_stop="end_datetime"
+                      quick_create="0"
+                      color="color"
+                      mode="week">
+                <field name="name"/>
+                <field name="employee_id" filters="1"/>
+                <field name="user_id" filters="1"/>
+                <field name="allocation_type_id" filters="1"/>
+            </calendar>
+        </field>
+    </record>
+    <!--    Gantt view for plan allocation-->
+    <record id="view_plan_allocation_gantt" model="ir.ui.view">
+        <field name="name">view.plan.allocation.gantt</field>
+        <field name="model">plan.allocation</field>
+        <field name="arch" type="xml">
+            <gantt string="Planning Allocation"
+                   start_date="start_datetime"
+                   end_date="end_datetime"
+                   color="color"
+                   show_all="True"
+                   group_by="employee_id">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="color"/>
+                <field name="employee_id"/>
+                <field name="start_datetime"/>
+                <field name="end_datetime"/>
+            </gantt>
+        </field>
+    </record>
+    <!--    Action view for plan allocation-->
+    <record id="action_view_planning_allocation" model="ir.actions.act_window">
+        <field name="name">Planning Allocation</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">plan.allocation</field>
+        <field name="view_mode">calendar,tree,form,gantt</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your Planning Allocation
+            </p><p>
+            Use these created Planning Allocation while raising Service requests.
+        </p>
+        </field>
+    </record>
+    <!-- This Menu Item will appear in the Upper bar, That's why It needs NO parent or action -->
+    <menuitem id="menu_cyllo_planning_root" name="Planning"
+              web_icon="cyllo_planning,static/description/planning 2.png"
+              sequence="3"/>
+    <!--    Menu for plan allocation-->
+    <menuitem id="menu_planning_allocation" name="Planning Allocation"
+              parent="cyllo_planning.menu_cyllo_planning_root"
+              action="action_view_planning_allocation"
+              sequence="2"/>
+</odoo>

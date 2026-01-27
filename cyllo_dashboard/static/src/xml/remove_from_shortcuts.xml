@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_dashboard.RemoveFromShortcuts" owl="1">
+        <li class="nav-item" t-on-click="removeFromShortcuts" t-if="state.isAddedToShortcut == true and this.env.config.actionId">
+             <a class="nav-link cy-navitem-list" href="#">Remove From Shortcuts</a>
+        </li>
+    </t>
+</templates>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates id="template">
+    <!-- WhatsappSidebar Template -->
+    <t t-name="WhatsappSidebar" owl="1">
+        <div t-if="state.configuration">
+            <div class="o_form">
+                <div class="o_form_sheet">
+                    <div class="o_form_group o_form_label mt-3">
+                        <button name="back" class="btn btn-secondary" t-on-click="updateConfig">Back
+                        </button>
+                    </div>
+                    <div class="o_form_group mt-3 config_div config_border_above">
+                        <label for="token" class="o_form_label">Access Token
+                        </label>
+                        <div class="o_form_input config_div">
+                            <input name="token" type="text" class="o_input text-truncate" t-attf-value="{{state.user['token']}}" t-ref="token"/>
+                        </div>
+                    </div>
+                    <div class="o_form_group config_div config_border">
+                        <label for="phone_uid" class="o_form_label">
+                            Phone Number ID
+                        </label>
+                        <div class="o_form_input ">
+                            <input name="phone_uid" type="text" class="o_input" t-attf-value="{{state.user['phone_uid']}}" t-ref="phone_uid"/>
+                        </div>
+                    </div>
+                    <div class="o_form_group config_div config_border">
+                        <label for="app_uid" class="o_form_label">App ID</label>
+                        <div class="o_form_input">
+                            <input name="app_uid" type="text" class="o_input" t-attf-value="{{state.user['app_uid']}}" t-ref="app_uid"/>
+                        </div>
+                    </div>
+                    <div class="o_form_group config_div config_border">
+                        <label for="account_uid" class="o_form_label">
+                            Business Account ID
+                        </label>
+                        <div class="o_form_input mb-3 config_border_down">
+                            <input name="account_uid" type="text" class="o_input " t-attf-value="{{state.user['account_uid']}}" t-ref="account_uid"/>
+                        </div>
+                    </div>
+                    <div class="o_form_group updt_button">
+                        <button name="update" class="btn btn-primary" t-on-click="updateConfig">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div t-else="">
+            <div class="chatbox-left-content p-3  px-4 border-bottom">
+                <div class="chatbox-left-container w-100">
+                    <div class="d-flex align-items-center w-100 justify-space-between ">
+                        <div class="flex-shrink-0 me-3 align-self-center">
+                            <img class="img-fluid rounded-circle border border-dark avatar-img me-3"
+                                 t-attf-src="/web/image/res.users/{{env.session.uid}}/image_1920" alt=""/>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h5 class="font-size-16 mb-1">
+                                <a href="#" class="text-dark">
+                                    <t t-esc="this.env.session.name"/>
+                                </a>
+                            </h5>
+                            <p class="text-muted mb-0">Available</p>
+                        </div>
+                        <div class="profile-option">
+                            <Dropdown position="'bottom-end'">
+                                <t t-set-slot="toggler">
+                                    <a>
+                                        <i class="fa fa-ellipsis-v fa-fw "/>
+                                    </a>
+                                </t>
+                                <DropdownItem>
+                                    <a class="dropdown-item" t-on-click="getUserProfile">
+                                        Profile
+                                    </a>
+                                </DropdownItem>
+                                <DropdownItem>
+                                    <a class="dropdown-item" t-on-click="getTemplate">
+                                        Template
+                                    </a>
+                                </DropdownItem>
+                                <DropdownItem>
+                                    <a class="dropdown-item" t-on-click="updateConfig">
+                                        Configuration
+                                    </a>
+                                </DropdownItem>
+                            </Dropdown>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="search-partner w-100 p-3 border-bottom">
+                <Dropdown position="'bottom-end'">
+                    <t t-set-slot="toggler">
+                        <div class="ch-search-box position-relative">
+                            <i class="ri-search-line checkbox-search  icon-style"/>
+                            <input type="text" class="form-control chatbox-inputbox" data-hotkey="k" autofocus='true' t-on-focus="onKeyUpSearch"
+                                   t-on-keyup="onKeyUpSearch" t-ref="searchBox" placeholder=" Search Partner (ALT+K)"/>
+                        </div>
+                    </t>
+                    <DropdownItem t-if="state.dropdown" t-foreach="state.partnerHistory" t-as="partner" t-key="partner.id"
+                                  t-out="partner.name" onSelected.bind="() => this.onSelectPartner(partner)"/>
+                </Dropdown>
+            </div>
+            <div class="overflow-auto" style="height: 78vh;">
+                <t t-foreach="props.channels" t-as="channel" t-key="channel.id">
+                    <WhatsappPartnerProfile channel="channel"/>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

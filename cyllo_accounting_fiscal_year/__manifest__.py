@@ -1,0 +1,25 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'Cyllo Accounting Fiscal Year',
+    'version': '1.0.0',
+    'category': 'Accounting',
+    'summary': """Accounting Fiscal Year""",
+    'description': "Create periods of fiscal years and also can open or close each period.",
+    'author': "Cyllo",
+    'website': "https://www.cyllo.com",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'depends': ['base', 'account'],
+    'data': [
+        'data/ir_actions_server_data.xml',
+        'security/ir.model.access.csv',
+        'wizards/fiscal_year_close_views.xml',
+        'views/account_fiscal_year_views.xml',
+        'views/account_fiscal_year_period_views.xml',
+        'views/account_move_views.xml',
+    ],
+    'license': 'LGPL-3',
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}

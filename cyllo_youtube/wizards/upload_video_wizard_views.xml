@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_upload_video_wizard_form" model="ir.ui.view">
+        <field name="name">view.upload.video.wizard.form</field>
+        <field name="model">upload.video.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Reports">
+                <group>
+                    <field name="video_path" widget="file_to_path"/>
+                </group>
+                <footer>
+                    <button string="Ok" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

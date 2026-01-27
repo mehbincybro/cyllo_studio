@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_partner_form" model="ir.ui.view">
+        <field name="name">view.res.partner.form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='internal_notes']" position="after">
+                <page name="Whatsapp Number">
+                    <group style="display: inline-block;">
+                        <label for="phone_number"/>
+                        <div style="display: inline-flex;">
+                            <field name="phone_country_code_id" class="o_address_zip" style="min-width: 200px;" placeholder="Country code"/>
+                            <field name="phone_number" placeholder="Phone Number"/>
+                        </div>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

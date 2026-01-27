@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Menu items -->
+    <menuitem id="menu_cyllo_rental_base_root" name="Rental Management"/>
+    <menuitem id="menu_master_data_categ" parent="menu_cyllo_rental_base_root"
+              name="Master Data" sequence="1"/>
+    <menuitem id="menu_rental_order" name="Rental Order"
+              parent="menu_master_data_categ"
+              action="action_view_rental_order" sequence="1"
+              groups="cyllo_rental_base.group_cyllo_rental_base_group_user_own_documents,group_cyllo_rental_base_group_user_all_documents,cyllo_rental_base.group_cyllo_rental_base_group_manager"/>
+    <menuitem id="menu_ready_for_returning" name="Ready For Returning"
+              parent="menu_master_data_categ"
+              action="action_view_ready_for_returning" sequence="2"
+              groups="cyllo_rental_base.group_cyllo_rental_base_group_user_own_documents,group_cyllo_rental_base_group_user_all_documents,cyllo_rental_base.group_cyllo_rental_base_group_manager"/>
+    <menuitem id="menu_ready_for_pickup" name="Ready For Pickup"
+              parent="menu_master_data_categ"
+              action="action_view_ready_for_pickup" sequence="3"
+              groups="cyllo_rental_base.group_cyllo_rental_base_group_user_own_documents,group_cyllo_rental_base_group_user_all_documents,cyllo_rental_base.group_cyllo_rental_base_group_manager"/>
+    <menuitem id="menu_operations_categ" name="Operations"
+              parent="menu_cyllo_rental_base_root" sequence="2"/>
+    <menuitem id="menu_contacts" name="Contacts"
+              action="contacts.action_contacts" parent="menu_operations_categ"
+              sequence="1"/>
+    <menuitem id="menu_products" name="Products"
+              parent="menu_operations_categ"
+              action="action_view_products" sequence="2"/>
+    <menuitem id="menu_configuration_categ" name="Configuration"
+              parent="menu_cyllo_rental_base_root" sequence="3"/>
+    <menuitem id="menu_contracts_lease" name="Contracts/Lease"
+              parent="menu_configuration_categ"
+              action="action_view_contracts_lease" sequence="3"
+              groups="cyllo_rental_base.group_cyllo_rental_base_group_user_own_documents,cyllo_rental_base.group_cyllo_rental_base_group_user_all_documents,cyllo_rental_base.group_cyllo_rental_base_group_manager"/>
+    <menuitem id="menu_rental_orders_categ" name="Rental Orders" parent="website_sale.menu_ecommerce">
+        <menuitem id="menu_rental_orders" name="Rental Orders" action="action_view_rental_order_website"/>
+    </menuitem>
+</odoo>

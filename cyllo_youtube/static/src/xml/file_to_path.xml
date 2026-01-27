@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!-- This template represents the structure for displaying widget to upload video . -->
+    <t t-name="cyllo_youtube.FileToPathConvertor" owl="1">
+            <input type="file" t-ref="video_file"
+                   t-on-change="this._onSelectFile"/>
+        </t>
+</templates>

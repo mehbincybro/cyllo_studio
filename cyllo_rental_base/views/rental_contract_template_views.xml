@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_rental_contract_template_form" model="ir.ui.view">
+        <field name="name">view.rental.contract.template.form</field>
+        <field name="model">rental.contract.template</field>
+        <field name="arch" type="xml">
+            <form string="Rental Contract Template">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="price" widget="monetary"/>
+                        <field name="company_id" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Contract Lines">
+                            <field name="contract_line_ids" mode="tree" nolabel="1" widget="one2many">
+                                <form>
+                                    <field name="product_ids" invisible="1"/>
+                                </form>
+                                <tree string="Rental Order Lines" editable="bottom">
+                                    <field name="product_id" force_save="1" options="{'no_open': True}"
+                                           domain="[('id', 'in',product_ids ), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                           widget="sol_product_many2one"/>
+                                    <field name="product_ids" column_invisible="1"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="price_unit"/>
+                                    <field name="charge_per"/>
+                                    <field name="contract_id" column_invisible="1"/>
+                                    <field name="product_uom_category_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_rental_contract_template_tree" model="ir.ui.view">
+        <field name="name">view.rental.contract.template.tree</field>
+        <field name="model">rental.contract.template</field>
+        <field name="arch" type="xml">
+            <tree string="Rental Contract Template">
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_contracts_lease_template" model="ir.actions.act_window">
+        <field name="name">Rental Contract Template</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.contract.template</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_contracts_lease_template" name="Contracts/Lease Template"
+              parent="menu_configuration_categ"
+              action="action_view_contracts_lease_template" sequence="4"
+              groups="cyllo_rental_base.group_cyllo_rental_base_group_user_own_documents,cyllo_rental_base.group_cyllo_rental_base_group_user_all_documents,cyllo_rental_base.group_cyllo_rental_base_group_manager"/>
+</odoo>

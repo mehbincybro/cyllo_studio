@@ -1,0 +1,40 @@
+.cy_product_kanban .oe_kanban_details{
+    text-align: center;
+}
+
+.cy_product_kanban{
+    justify-content: center;
+    align-items: center;
+    height:90% !important;
+}
+
+.cy_product_kanban .o_kanban_record_top{
+    align-items: center;
+    width: 100%;
+    justify-content: center;
+}
+
+.cy_product_kanban .o_kanban_record_headings{
+    text-align: center;
+}
+
+.cy_product_kanban .o_kanban_image{
+    height:100%;
+    width:100% !important;
+    display:flex;
+    justify-content:center;
+    align-items: center;
+}
+
+.cy_product_kanban .o_kanban_image img{
+    width:unset !important;
+    height:unset !important;
+}
+
+.cy_o_kanban_record{
+    width:15% !important;
+}
+
+.cy_o_kanban_record .oe_kanban_details {
+    margin-bottom: unset;
+}

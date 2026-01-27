@@ -1,0 +1,214 @@
+/** @odoo-module **/
+import { registry } from "@web/core/registry"
+import { onWillStart, onMounted, useState, Component, useRef, useEffect} from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { _t } from "@web/core/l10n/translation";
+import {useResize} from "@cyllo_base/js/hooks"
+import { FilterDropdown } from "@cyllo_analytics/js/filterDropdown"
+
+export class SalesPredictionDashboard extends Component {
+    setup() {
+        this.graphState = useState({
+            'start_date': '',
+            'end_date': '',
+            'frequency': 'D',
+            'period': 10,
+            'formattedDate': {
+                'startDate': '',
+                'endDate': '',
+                'frequency': '',
+                'period':'',
+            }
+        })
+        this.stateChart = useState({
+            typeChart: 'bar',
+            chartDataSales: true,
+            status: "block",
+            chartData: '',
+            actual_sale_data: '',
+            predict_sale_data: '',
+            res: 0
+        })
+        this.state = useState({ width: 0 })
+        this.orm = useService('orm')
+        this.actionService = useService("action")
+        this.root = useRef('root')
+        this.notification = useService("notification");
+        useResize("root", (width) => this.state.width = width / 12);
+        useEffect(() => {
+            const render = async () => {
+                if (this.myChart) {
+                    this.myChart.dispose()
+                }
+                await this.renderGraph()
+            }
+            if (this.stateChart.res) {
+                let promise = render();
+            }
+        }, () => [this.state.width, this.stateChart.res, this.stateChart.chartData]);
+
+        onMounted(async () => {
+            await this.renderSalesChart(this.graphState.graph_type);
+        });
+        useEffect(() => {
+            const getLimit = (freq) => {
+                switch (freq) {
+                    case "D":
+                       return 250;
+                    case "M":
+                       return 150;
+                    case "Y":
+                       return 50;
+                }
+            }
+            const maxLimit = getLimit(this.graphState.frequency)
+            this.graphState.period = this.graphState.period < 0 ? 0 : this.graphState.period > maxLimit ? maxLimit : this.graphState.period
+        }, () => [this.graphState.period, this.graphState.frequency])
+    }
+
+    async filter_date(ev) {
+        await this.renderSalesChart();
+    }
+    get dateToday() {
+        var today = new Date().toISOString().split('T')[0]
+        return today
+    }
+
+    async renderSalesChart() {
+        var date_dict = {
+            'start_date': this.graphState.start_date,
+            'end_date': this.graphState.end_date,
+            'period': this.graphState.period,
+            'frequency': this.graphState.frequency,
+        };
+
+        this.orm.call('sale.order','forecast_configure',[date_dict]).then(async (results) =>  {
+            if(results[0]){
+                this.stateChart.chartDataSales = true;
+                this.stateChart.status = "block";
+                this.stateChart.chartData = results[0];
+                this.stateChart.actual_sale_data = results[4]
+                this.stateChart.predict_sale_data = results[5]
+                this.stateChart.res = results[1]
+                if (!this.graphState.start_date && !this.graphState.end_date){
+                    this.graphState.start_date = results[2];
+                    this.graphState.end_date = results[3];
+                }
+            }
+            else if(results[0] == false || results == false){
+                this.stateChart.chartDataSales = false;
+                this.stateChart.status = "none";
+            }
+            this.graphState.formattedDate.startDate = moment(this.graphState.start_date).format('YYYY/MM/DD')
+            this.graphState.formattedDate.endDate = moment(this.graphState.end_date).format('YYYY/MM/DD')
+            this.graphState.formattedDate.period = this.graphState.period
+            this.graphState.formattedDate.frequency = this.graphState.frequency
+            });
+        }
+    async renderGraph() {
+        // this.myChart.dispose()
+        this.myChart = echarts.init(this.root.el?.querySelector('#sale_forecast_chart'), null);
+        let { chartData: forecast_data, res } = this.stateChart
+        let {actual_sale_data, predict_sale_data} = this.stateChart
+        let forecastLength = actual_sale_data.length + predict_sale_data.length
+        let option = {
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                }
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: Object.keys(forecast_data)
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: '{value}              '
+                },
+                axisPointer: {
+                    snap: true
+                }
+            },
+            series: [{
+                type: this.stateChart.typeChart,
+                smooth: true,
+                data: Object.values(forecast_data),
+            }],
+            visualMap: {
+                show: false,
+                dimension: 0,
+                pieces: [{
+                    lte: 0,
+                    color: 'blue'
+                },
+                {
+                    gt:0,
+                    lte: res - 1,
+                    color: 'blue'
+                },
+                {
+                    gt: res - 1,
+                    color: 'red'
+                }
+                ]
+            },
+            dataZoom: [{
+                type: 'inside',
+                id: 'insideX',
+                XAxisIndex: 0,
+                start: forecastLength > 30 ? 45 : 0,
+                end: 100,
+                zoomOnMouseWheel: false,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true
+            }]
+        };
+        option && this.myChart.setOption(option);
+    }
+
+    async exportSalePDF(){
+        var chart = this.root.el?.querySelector('.cy-sales-forcaste_graph-area')
+        var canvas = await html2canvas(chart)
+        var chartImg = canvas.toDataURL('image/png');
+        return this.actionService.doAction({
+            type: "ir.actions.report",
+            report_type: "qweb-pdf",
+            report_name: 'cyllo_sale_analytics.report_sales_prediction',
+            report_file: "cyllo_sale_analytics.report_sales_prediction",
+            data: {
+                chartImg,
+                'start_date': moment(this.graphState.start_date).format('YYYY/MM/DD'),
+                'end_date': moment(this.graphState.end_date).format('YYYY/MM/DD'),
+                'actual_sale_data': this.stateChart.actual_sale_data,
+                'predict_sale_data': this.stateChart.predict_sale_data,
+                'chart_data_sales': this.stateChart.chartDataSales,
+                'period' : this.graphState.period,
+                'frequency' : this.graphState.frequency,
+            }
+        });
+    }
+
+    async exportSalePNG(){
+        var content = this.root.el?.querySelector('.cy-sales-forcaste_graph-area');
+        if (content){
+            var canvas = await html2canvas(content);
+            var image = canvas.toDataURL('image/png');
+            var link = document.createElement('a');
+            link.download = 'Sales_Prediction_Dashboard.png';
+            link.href = image;
+            link.click();
+        }
+    }
+
+    onClickTypeChart(type){
+        this.stateChart.typeChart = type;
+        this.renderGraph();
+    }
+}
+
+SalesPredictionDashboard.components = { FilterDropdown }
+SalesPredictionDashboard.template = "SalesPredictionDashboard";
+registry.category("actions").add("sales_prediction", SalesPredictionDashboard);

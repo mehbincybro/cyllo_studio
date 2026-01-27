@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rental products page -->
+    <template id="rental_shop" name="Rental" active="True" customize_show="True">
+        <t t-call="website.layout">
+            <div class="p-5" style="background: aliceblue;">
+                <section>
+                    <div style="background: white;">
+                        <div class="row p-5">
+                            <div class="col-md-3 col-lg-2 d-md-block cyllo-mainsub--sidebar">
+                                <div class="sticky-top" style="margin-top: 24px;top:73px !important;">
+                                    <div class="products_header btn-toolbar flex-nowrap align-items-center justify-content-between gap-3 mb-3">
+                                        <t t-call="cyllo_rental_base.rental_search"/>
+                                    </div>
+                                    <ul class="nav flex-column">
+                                        <li class="nav-item">
+                                            <a href="/rental/" t-attf-class="nav-link d-flex align-items-center gap-2  cyllo-sidebar-nav #{'active-sidebar' if not categ_id else ''}">
+                                                All Rental Products
+                                            </a>
+                                        </li>
+                                        <t t-foreach="categories" t-as="category">
+                                            <li class="nav-item">
+                                                <a id="print_rental_order" t-attf-href="/rental/?category=#{category.id}"
+                                                   t-attf-class="nav-link d-flex align-items-center gap-2  cyllo-sidebar-nav #{'active-sidebar' if category.id == int(categ_id) else ''}">
+                                                    <div>
+                                                        <span t-out="category.name"/>
+                                                    </div>
+                                                </a>
+                                            </li>
+                                        </t>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="container col-md-9 col-lg-10">
+                                <div class="card-container py-4 row">
+                                    <t t-if="products">
+                                        <t t-foreach="products" t-as="product">
+                                            <div class="col-md-4">
+                                                <div class="card mb-4 cyllo-card-container">
+                                                    <div class="card-body">
+                                                        <div class="d-flex cyllo-rental_card">
+                                                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
+                                                            <div class="cyllo-rental_product">
+                                                                <a t-attf-href="/rental_shop/product/#{product.id}" class="oe_product_image_link d-block h-100 position-relative">
+                                                                    <img t-attf-src="/web/image/product.product/#{product.id}/image_1024"
+                                                                         class="cyllo-rental-img" loadin="lazy" alt="Product image"/>
+                                                                </a>
+                                                            </div>
+                                                            <div class="ms-3">
+                                                                <h5 class="card-title">
+                                                                    <a t-attf-href="/rental_shop/product/#{product.id}" class="text-decoration-none">
+                                                                        <t t-esc="product.name"/>
+                                                                    </a>
+                                                                </h5>
+                                                                <p class="card-text">
+                                                                    <t t-esc="product.description"/>
+                                                                </p>
+                                                                <p class="card-text">
+                                                                    <b>Rental Charges</b>
+                                                                    <t t-foreach="product.rental_charging_ids" t-as="charges">
+                                                                        <div class="d-flex align-items-center gap-2 ">
+                                                                            <span class="cyllo-recard-title cy-card-text" t-esc="charges.rental_period.capitalize() + ':'"/>
+                                                                            <span class="cy-card-text" t-esc="charges.price"/>
+                                                                        </div>
+                                                                    </t>
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="text-center text-muted mt128 mb256">
+                                            <h3 class="mt8">No Results</h3>
+                                            <p>No results for <strong t-esc="search"/></p>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <hr class="border-600 s_hr_1px w-100 mx-auto s_hr_dotted"/>
+            </div>
+        </t>
+    </template>
+    <template id="portal_rental_table" name="Table Rental Orders">
+        <t t-if="table_content">
+            <table class="table mt16">
+                <tbody>
+                    <t t-foreach="table_content" t-as="record">
+                        <tr>
+                            <td>
+                                <div>
+                                    <div class="request_top">
+                                        <span class="request-title">
+                                            <h5>
+                                                <a t-attf-href="/my/rentals/record/#{record.id}" t-esc="record.name"/>
+                                            </h5>
+                                        </span>
+                                        <span class="mr4">
+                                            Partner: <t t-esc="record.partner_id.name"/>
+                                        </span>
+                                    </div>
+                                    <div class="request_content">
+                                        <span t-if="record.state == 'draft'" class="badge text-bg-secondary state_badge">
+                                            Draft
+                                        </span>
+                                        <span t-if="record.state == 'rented'" class="badge text-bg-danger state_badge">
+                                            Rented
+                                        </span>
+                                        <span t-if="record.state == 'ready_to_return'" class="badge text-bg-warning state_badge">
+                                            Ready to return
+                                        </span>
+                                        <span t-if="record.state == 'return'" class="badge text-bg-info state_badge">
+                                            Returned
+                                        </span>
+                                        <span t-if="record.is_invoiced" class="badge text-bg-success state_badge">
+                                            Paid
+                                        </span>
+                                        <div>
+                                            <t t-if="record.date_order">
+                                                <span>
+                                                    Order Date:
+                                                </span>
+                                                <span t-field="record.date_order"/>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </t>
+    </template>
+    <template id="rental_order_data">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Rental Orders</t>
+            </t>
+            <div class="row">
+                <div class="col-md-6 col-6">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active border-white" data-bs-toggle="tab"
+                                    data-bs-target="#all" type="button" role="tab" aria-controls="profile"
+                                    aria-selected="false">All
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white" data-bs-toggle="tab" data-bs-target="#draft" type="button"
+                                    role="tab" aria-controls="profile" aria-selected="false">Draft
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white" data-bs-toggle="tab" data-bs-target="#rented" type="button"
+                                    role="tab" aria-controls="profile" aria-selected="false">Rented
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link border-white" data-bs-toggle="tab" data-bs-target="#returned" type="button"
+                                    role="tab" aria-controls="profile" aria-selected="false">Returned
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="tab-content">
+                <t t-set="url" t-value="'/rental/'"/>
+                <t t-set="description" t-value="'There are no rental request yet!.'"/>
+                <div class="tab-pane fade show active w-100" id="all" role="tabpanel">
+                    <t t-if="len(all_records) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="all_records"/>
+                        <t t-call="cyllo_rental_base.portal_rental_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="draft" role="tabpanel">
+                    <t t-if="len(draft_records) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="draft_records"/>
+                        <t t-call="cyllo_rental_base.portal_rental_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="rented" role="tabpanel">
+                    <t t-if="len(rented_records) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="rented_records"/>
+                        <t t-call="cyllo_rental_base.portal_rental_table"/>
+                    </t>
+                </div>
+                <div class="tab-pane fade w-100" id="returned" role="tabpanel">
+                    <t t-if="len(return_records) == 0">
+                        <t t-call="cyllo_portal.no_record_portal"/>
+                    </t>
+                    <t t-else="">
+                        <t t-set="table_content" t-value="return_records"/>
+                        <t t-call="cyllo_rental_base.portal_rental_table"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+    <template id="portal_rental_order_record_template" name="Rental Portal Template"
+              inherit_id="portal.portal_sidebar" primary="True">
+        <xpath expr="//div[hasclass('o_portal_sidebar')]" position="inside">
+            <t t-set="o_portal_fullwidth_alert" groups="base.group_user">
+                <t t-call="portal.portal_back_in_edit_mode">
+                    <t t-set="backend_url" t-value="'/web#return_label=Website&amp;model=rental.order&amp;id=%s&amp;' % object.id"/>
+                </t>
+            </t>
+            <div id="extra_payment" t-if="object.is_portal_extra == True"
+                 class="alert alert-warning alert-dismissible fade show d-print-none css_editable_mode_hidden">
+                Make payment for the extra time first
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"/>
+            </div>
+            <div class="row mt16 o_cy_portal_sidebar o_portal_rental_order_sidebar">
+                <t t-call="cyllo_portal.cyllo_portal_record_sidebar" id="rental_portal_sidebar">
+                    <t t-set="classes" t-value="'col-lg-auto d-print-none'"/>
+                    <t t-set="title">
+                        <h2 t-field="object.amount_total"/>
+                    </t>
+                    <t t-set="entries">
+                        <div class="d-flex flex-column gap-1 order-md-last order-lg-first" id="rental_sidebar_button">
+                            <div class="d-flex flex-column gap-4">
+                                <div class="o_download_pdf">
+                                    <a class="btn btn-primary o_print_btn d-block" t-attf-href="/my/rentals/record/#{object.id}?report_type=pdf"
+                                       id="print_rental_order" title="View Details" target="_blank">
+                                        <i class="fa fa-print"/>
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column gap-4" id="payment_div">
+                                <div class="o_download_pdf" t-if="object.is_invoiced == False">
+                                    <a class="btn btn-secondary mt24 w-100 mb8" t-attf-href="/rental/payment/"
+                                       id="pay_rental_order" title="Pay Now" target="_blank">
+                                        <i class="fa fa-fw fa-arrow-circle-right"/>
+                                        Pay Now
+                                    </a>
+                                </div>
+                                 <div class="o_download_pdf" t-if="(object.state == 'rented' or object.state=='partial_return') and object.is_picked_up == True">
+                                    <button class="btn btn-secondary mt24 w-100 mb8 button_return" title="Return" target="_blank">
+                                        <i class="fa fa-fw fa-rotate-left"/>
+                                        Return
+                                    </button>
+                                </div>
+                                <div class="o_download_pdf" t-if="object.is_portal_extra == True">
+                                    <a class="btn btn-secondary mt24 w-100 mb8" t-attf-href="/rental-extra-payment"
+                                       id="pay_rental_order" title="Pay Extra Now" target="_blank">
+                                        <i class="fa fa-fw fa-arrow-circle-right"/>
+                                        Pay Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <br/>
+                        <div class="navspy flex-grow-1 ps-0" t-ignore="true" role="complementary">
+                            <ul class="nav flex-column bs-sidenav"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.date_order">
+                            <small>
+                                <b>Order Date</b>
+                            </small>
+                            <div t-field="object.date_order"/>
+                        </div>
+                        <br/>
+                        <div t-if="object.company_id">
+                            <h6>
+                                <small class="text-muted">Your contact</small>
+                            </h6>
+                            <div class="o_portal_contact_details d-flex flex-column gap-2">
+                                <div class="d-flex justify-content-start align-items-center gap-2">
+                                    <img t-att-src="'/logo.png?company=%s' % object.company_id.id" style="padding: 0px; margin: 0px; height: auto; width: 80px;"
+                                         t-att-alt="'%s' % object.company_id.name"/>
+                                    <div>
+                                        <h6 class="mb-0" t-out="object.company_id.name"/>
+                                        <a href="#discussion" class="d-flex align-items-center gap-2 small fw-bold">
+                                            Send message
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+                <div id="quote_content" class="col-12 col-lg justify-content-end quote_content_rental">
+                    <div class="p-3 o_cy_portal_border border">
+                        <span id="rental_order_id" class="d-none" t-esc="object.id"/>
+                        <div class="modal fade" id="RentalReturnModal" tabindex="-1" role="dialog" aria-labelledby="RentalReturnModalLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="RentalReturnModalLabel">
+                                            Rental Return Details
+                                        </h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"/>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="">
+                                            <spam>*Please Select Transfer</spam>
+                                            <select name="picking_selection" class="form-control" id="picking_selection">
+                                                <option />
+                                                <t t-foreach="object.picking_ids" t-as="pick">
+                                                    <option t-att-value="pick.id" t-esc="pick.name"/>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <!-- Table for displaying product details -->
+                                        <table class="table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Product Name</th>
+                                                    <th>Quantity</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="modalTableBody">
+                                                <!-- Modal body content will be dynamically generated here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="modal-footer justify-content-start">
+                                        <button class="btn btn-primary me-1" id="confirm_return_rental">
+                                            Return
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="my-0 col-12 col-lg flex-grow-1 mb-1 mb-lg-0">
+                            <t t-if="object.state == 'draft'">Request - </t>
+                            <t t-else=""> Rental Order - </t>
+                            <t t-esc="object.name"/>
+                            <div style="display:inline-table;float:right;">
+                                <span t-if="object.state == 'draft'" class="badge text-bg-secondary state_badge mt-2" style="font-size:15px;">
+                                    Draft
+                                </span>
+                                <span t-if="object.state == 'return'" class="badge text-bg-info state_badge mt-2" style="font-size:15px;">
+                                    Returned
+                                </span>
+                                <span t-if="object.state == 'rented'" class="badge text-bg-danger state_badge mt-2" style="font-size:15px;">
+                                    Rented
+                                </span>
+                                <span t-if="object.state == 'partial_return'" class="badge text-bg-info state_badge mt-2" style="font-size:15px;">
+                                    Partially Returned
+                                </span>
+                                <span t-if="object.state == 'ready_to_return'" class="badge text-bg-warning state_badge mt-2" style="font-size:15px;">
+                                    Ready to return
+                                </span>
+                                <span t-if="object.is_invoiced" class="badge text-bg-success state_badge mt-2" style="font-size:15px;">
+                                    Paid
+                                </span>
+                                <span t-if="not object.is_picked_up and object.state=='rented'" class="badge text-bg-warning state_badge mt-2" style="font-size:15px;">
+                                    Waiting for pick up
+                                </span>
+                            </div>
+                        </h2>
+                        <br/>
+                        <div id="informations" class="row mt-4">
+                            <!-- ======  Employee Information  ====== -->
+                            <div id="customer_info" class="col-12 col-lg-6 offset-lg-1 ms-auto">
+                                <hr class="my-0"/>
+                                <strong t-esc="object.partner_id.name"/>
+                                <div t-field="object.partner_shipping_id" t-options="{ 'widget': 'contact', 'fields': [ 'name', 'address', 'phone', 'email']}"/>
+                            </div>
+                            <div class="row mt-5 mb-1" id="date_information">
+                                <div class="col mb-2" t-if="object.date_order">
+                                    <strong>Order Date</strong>
+                                    <br/>
+                                    <span t-field="object.date_order" t-options='{"widget": "date"}'/>
+                                </div>
+                            </div>
+                            <div id="rental_invoices" t-if="object.payment_ids" class="col-12 col-lg-6 mb-4 mt-5">
+                                <h4 class="mb-1">Invoices</h4>
+                                <hr class="mt-1 mb-2"/>
+                                <t t-foreach="object.payment_ids" t-as="i">
+                                    <t t-set="report_url" t-value="i.get_portal_url()"/>
+                                    <t t-set="authorized_tx_ids" t-value="i.authorized_transaction_ids"/>
+                                    <div class="d-flex flex-column">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <a t-att-href="report_url">
+                                                <span t-out="i.name"/>
+                                            </a>
+                                            <div t-if="i.payment_state in ('paid', 'in_payment')" class="small badge text-bg-success orders_label_text_align">
+                                                <i class="fa fa-fw fa-check"/>
+                                                Paid
+                                            </div>
+                                            <div t-elif="authorized_tx_ids" class="small badge text-bg-success orders_label_text_align">
+                                                <i class="fa fa-fw fa-check"/>
+                                                Authorized
+                                            </div>
+                                            <div t-else="" class="small badge text-bg-info orders_label_text_align">
+                                                <i class="fa fa-fw fa-clock-o"/>
+                                                Waiting Payment
+                                            </div>
+                                        </div>
+                                        <div class="small d-lg-inline-block">
+                                            Date:
+                                            <span class="text-muted" t-field="i.invoice_date"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                        <hr/>
+                        <!-- ====== Property Information ======-->
+                        <section id="details" style="page-break-inside: auto;" class="mt32 row">
+                            <h3 id="rental_order_details" style="font-size: 20px;">
+                                Order Details
+                            </h3>
+                            <br/>
+                            <div class="row mt-5 mb-1" id="order_information">
+                                <div class="col mb-2" t-if="object.user_id.name">
+                                    <strong>Responsible Person :</strong>
+                                    <span t-field="object.user_id.name"/>
+                                </div>
+                                <div>
+                                    <table class="table table-sm">
+                                        <thead class="bg-100">
+                                            <tr>
+                                                <th class="text-start">Product</th>
+                                                <th class="col-2">Pickup Date</th>
+                                                <th class="col-2">Return Date</th>
+                                                <th class="col-2">Duration</th>
+                                                <th class="col-2">Unit Price</th>
+                                                <th class="col-2">Quantity</th>
+                                                <th class="col-2">Sub Total</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="sale_tbody">
+                                            <t t-foreach="object.order_line_ids" t-as="line">
+                                                <tr>
+                                                    <td class="col-3" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                                        <span t-esc="line.product_id.name"/>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <t t-esc="line.pickup_date"/>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <t t-esc="line.return_date"/>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <t t-esc="line.duration"/>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <t t-esc="line.price_unit"/>
+                                                    </td>
+                                                    <td class="col-2">
+                                                        <t t-esc="line.product_uom_qty"/>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span class="oe_order_line_price_subtotal" t-esc="object.company_id.currency_id.symbol"/>
+                                                        <span class="oe_order_line_price_subtotal" t-esc="line.price_subtotal"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="page-break-inside: avoid;">
+                                    <div class="col-xs-7 col-md-5 ms-auto">
+                                        <table class="table table-sm">
+                                            <tbody>
+                                                <tr class="border-black o_subtotal">
+                                                    <td>
+                                                        <strong>Untaxed Amount</strong>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span t-esc="object.currency_id.symbol"/>
+                                                        <span t-esc="object.amount_untaxed"/>
+                                                    </td>
+                                                </tr>
+                                                <t t-if="object.amount_tax">
+                                                    <tr>
+                                                        <td>
+                                                            <span class="text-nowrap">
+                                                                Tax
+                                                            </span>
+                                                        </td>
+                                                        <td class="text-end o_price_total">
+                                                            <span class="text-nowrap">
+                                                                <span t-esc="object.currency_id.symbol"/>
+                                                                <t t-esc="object.amount_tax"/>
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                </t>
+                                                <tr class="border-black o_total">
+                                                    <td>
+                                                        <strong>Total</strong>
+                                                    </td>
+                                                    <td class="text-end">
+                                                        <span t-esc="object.currency_id.symbol"/>
+                                                        <span t-esc="object.amount_total"/>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        <br/>
+                        <hr/>
+                        <div id="rental_communication">
+                            <h3>Communication history</h3>
+                            <t t-call="portal.message_thread"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <template id="rental_search" name="Rental Searchbox">
+        <form action="/rental/search" t-attf-class="input-group #{_classes}" role="search">
+            <t t-set="search_placeholder">Search...</t>
+            <input type="search" name="search" t-att-class="'search-query form-control oe_search_box border-0 bg-light %s' % _input_classes"
+                   t-att-placeholder="placeholder if placeholder else search_placeholder" t-att-value="search"/>
+            <button type="submit" t-att-class="'btn oe_search_button %s' % (_submit_classes or 'btn-light')" aria-label="Search" title="Search">
+                <i class="oi oi-search"/>
+                <span t-if="search" class="oe_search_found">
+                    <small>(<t t-out="search_count or 0"/> found)</small>
+                </span>
+            </button>
+        </form>
+    </template>
+</odoo>

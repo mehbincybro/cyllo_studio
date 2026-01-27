@@ -1,0 +1,28 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'Cyllo Accounting PDC',
+    'version': '1.0.0',
+    'category': 'Accounting',
+    'summary': """Accounting Post Dated Cheque""",
+    'description': "Post Dated Cheque management on accounting module",
+    'license': 'LGPL-3',
+    'author': "Cyllo",
+    'website': "https://www.cyllo.com",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'depends': ['base', 'account'],
+    'data': [
+        'data/account_payment_method_data.xml',
+        'security/ir.model.access.csv',
+        'wizards/account_pdc_payment_register_views.xml',
+        'wizards/account_pdc_bounce_reason_views.xml',
+        'reports/report_pdc_payment_templates.xml',
+        'reports/reports.xml',
+        'views/account_pdc_payment_views.xml',
+        'views/account_move_views.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+    'post_init_hook': '_post_init_account',
+}

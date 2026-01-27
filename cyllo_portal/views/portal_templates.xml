@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="cy_portal_record_sidebar" name="My Portal Record Sidebar">
+        <div t-attf-class="#{classes}">
+            <div class="o_cy_portal_sidebar_content o_cy_portal_border border sticky-lg-top d-lg-inline-block mb-4 mb-lg-0 p-3 p-lg-0"
+                 id="sidebar_content">
+                <div class="mb-4 p-3 sticky-top">
+                    <div t-if="title" class="position-relative d-flex align-items-center justify-content-md-center justify-content-lg-between flex-wrap gap-2">
+                        <t t-out="title"/>
+                    </div>
+                    <t t-if="entries" t-out="entries"/>
+                    <div class="d-none d-lg-block mt-5 small text-center text-muted">
+                        Powered by
+                        <a target="_blank" href="http://www.odoo.com?utm_source=db&amp;utm_medium=portal" title="odoo">
+                            <img src="/web/static/img/logo.png" alt="Odoo Logo" height="15"/>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- Replace the existing portal wrapper -->
+    <template id="custom_portal_layout" inherit_id="portal.portal_layout">
+        <xpath expr="//div[hasclass('o_portal_wrap')]" position="replace">
+            <div class="container mb64">
+                <t t-if="my_details">
+                    <div class="row justify-content-between mt-4">
+                        <div t-attf-class="col-12 col-md">
+                            <t t-out="0"/>
+                        </div>
+                        <div id="o_my_sidebar" class="pt-3 pt-lg-0 col-12 col-md col-lg-4 col-xl-3 d-none o_my_sidebar">
+                            <div class="o_my_contact" t-if="sales_user">
+                                <t t-call="portal.portal_contact"/>
+                            </div>
+                            <div class="o_portal_my_details">
+                                <h4>Details
+                                    <a role="button" href="/my/account" class="btn btn-sm btn-link"><i class="fa fa-pencil"/>Edit</a>
+                                </h4>
+                                <hr class="mt-1 mb-0"/>
+                                <div t-field="user_id.partner_id" t-options='{"widget": "contact", "fields": ["email", "phone", "address", "name"]}'/>
+                            </div>
+                            <div class="o_portal_my_security mt-3">
+                                <h4>Account Security</h4>
+                                <hr class="mt-1 mb-1"/>
+                                <a href="/my/security"><i class="fa fa-pencil mx-1"/>Edit Security Settings</a>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <t t-out="0"/>
+                </t>
+            </div>
+        </xpath>
+    </template>
+    <!-- Template for login and security section -->
+    <template id="portal_details_template">
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container">
+                    <div class="content">
+                        <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                        <t t-call="portal.portal_searchbar"/>
+                        <div class="card-div">
+                            <h3>Login and Security</h3>
+                        </div>
+                        <div t-if="change" class="alert alert-success text-center o_form_header alert-dismissible">
+                            <span>You successfully updated your account details!</span>
+                        </div>
+                        <div class="card card-div">
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Name:</span>
+                                        <span t-esc="user.name"/>
+                                    </div>
+                                    <a href="/login/security/edit/name" class="btn button-edit">Edit</a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Email:</span>
+                                        <span t-esc="user.email"/>
+                                    </div>
+                                    <a href="/login/security/edit/email" class="btn button-edit">Edit</a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">Mobile Number:</span>
+                                        <span t-esc="user.phone"/>
+                                    </div>
+                                    <a href="/login/security/edit/phone" class="btn button-edit">Edit</a>
+                                </div>
+                            </div>
+                            <div class="card-div-inside">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="width">
+                                        <span class="span-style">2-step verification:</span>
+                                        <span>Add a layer of security. Require a verification code in addition to your password.</span>
+                                    </div>
+                                    <a href="/my/security" class="btn button-edit">Turn On</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <a href="/my/home" class="btn button-done">Done</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Template for user details editing section -->
+    <template id="portal_details_edit_template">
+        <t t-call="website.layout">
+            <div>
+                <form action="/login/security/save">
+                    <t t-if="user_name">
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Name</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the name associated with your account, you may do so
+                                                below. Be sure to click the Done button when you are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style" for="name">New Name
+                                        </label>
+                                        <input type="text" name="name" t-attf-class="form-control s_website_form_input" required="True"/>
+                                        <div>
+                                            <button type="submit" class="button-done">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="user_mail">
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Email</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the email associated with your account,
+                                                you may do so below. Be sure to click the Done button when you are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style" for="name">New Email</label>
+                                        <input type="email" name="email" t-attf-class="form-control s_website_form_input" required="True"/>
+                                        <div>
+                                            <button type="submit" class="button-done">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                    <t t-if="user_phone">
+                        <div>
+                            <div class="card-div">
+                                <t t-set="breadcrumbs_searchbar" t-value="True"/>
+                                <t t-call="portal.portal_searchbar"/>
+                            </div>
+                            <div class="card-div">
+                                <h3>Change User Phone Number</h3>
+                            </div>
+                            <div class="card-div">
+                                <div class="card content">
+                                    <div class="content-div">
+                                        <div>
+                                            <span>
+                                                If you want to change the phone number associated with your account,
+                                                you may do so below. Be sure to click the Done button when you are done.
+                                            </span>
+                                        </div>
+                                        <label class="col-form-label label-optional span-style" for="name">New Phone Number</label>
+                                        <input type="phone" name="phone" t-attf-class="form-control s_website_form_input" required="True"/>
+                                        <div>
+                                            <button type="submit" class="button-done">Done</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </form>
+            </div>
+        </t>
+    </template>
+    <!-- no record template-->
+    <template id="no_record_portal">
+        <div class="empty_record">
+            <center>
+                <img src="/cyllo_portal/static/src/img/no_data_image.png" class="img-fluid null_rec_img2"/>
+                <h3><strong>Currently No Records!</strong></h3>
+                <span class="all_msg" t-if="description" t-esc="description"/>
+                <br/>
+                <a t-att-href="url" t-if="url">Create New</a>
+            </center>
+        </div>
+    </template>
+    <!-- changing the controllers for the address and security menus-->
+    <template id="my_portal_your_address" name="Your Address" inherit_id="portal.portal_my_home" priority="100">
+        <xpath expr="//div[@id='portal_common_category']/t[1]/t[4]" position="replace">
+            <t t-set="url" t-value="'/your_address'"/>
+        </xpath>
+        <xpath expr="//div[@id='portal_common_category']/t[2]/t[4]" position="replace">
+            <t t-set="url" t-value="'/login/security'"/>
+        </xpath>
+    </template>
+</odoo>

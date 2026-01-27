@@ -1,0 +1,23 @@
+.document_preview_template {
+    border: 1px solid #000;
+    height: 100%;
+    padding: 6%;
+    margin: 10%;
+}
+
+.document_preview_action{
+ overflow-y: auto !important;
+}
+.cy-doc-pdf-preview-image {
+    max-width: 265px !important;
+}
+.cy-doc-main:hover {
+    border-color: #b8b6b6 !important;
+}
+.cy-doc-url-preview-img {
+    max-width: 270px !important;
+}
+.cy-doc-type-img {
+    width: 25px;
+    height: 25px;
+}

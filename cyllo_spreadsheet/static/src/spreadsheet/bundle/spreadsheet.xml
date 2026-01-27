@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!-- Template for the component ActionSpreadsheet -->
+    <t t-name="cyllo_spreadsheet.ActionSpreadsheet" owl="1">
+        <div class="o_spreadsheet_cy_container" t-ref="spreadsheet-container">
+        <SpreadsheetControlPanel record="record"/>
+            <SpreadsheetRenderer
+                    record="record"
+                    res_id="spreadsheetId"
+                    model="model"
+                    importData="importData"/>
+        </div>
+    </t>
+    <!--Template for the component SpreadsheetRender -->
+    <t t-name="cyllo_spreadsheet.SpreadsheetRenderer" owl="1">
+        <Spreadsheet model="spreadsheet_model"/>
+        <Dialog title="state.dialogTitle"
+                onClosed.bind="closeDialog"
+                t-if="state.dialogDisplayed">
+            <input type="text" class="form-control"
+                   t-model="state.dialogContent"/>
+            <t t-set-slot="buttons">
+                <button class="btn btn-primary"
+                        t-on-click="confirmDialog">Confirm</button>
+                <button class="btn btn-secondary"
+                        t-on-click="closeDialog">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+    <!--Template for the component SpreadsheetName -->
+    <t t-name="cyllo_spreadsheet.SpreadsheetName" owl="1">
+            <input type="text"
+                   class="o_spreadsheet_cy_name"
+                   title="Change name"
+                   t-ref="spreadsheetName"
+                   t-att-value="state.name"
+                   t-on-change="_onNameChanged"/>
+        <i class="fa fa-exclamation-triangle text-danger" t-if="! state.name"/>
+        <span class="text-danger o_spreadsheet_cy_name_warning"
+              t-if="! state.name"> name is required</span>
+        </t>
+    <!--Template for adding breadcrumb template -->
+    <t t-name="cyllo_spreadsheet.Breadcrumbs.Small" owl="1">
+        <ol class="breadcrumb">
+            <t t-if="breadcrumbs.length > 1">
+                <t t-set="breadcrumb"
+                   t-value="breadcrumbs[breadcrumbs.length - 2]"/>
+                <li class="breadcrumb-item o_back_button btn btn-secondary"/>
+            </t>
+            <li t-if="breadcrumbs.length > 0" class="breadcrumb-item active">
+                <SpreadsheetName name="props.record.name"
+                                 isReadonly="false"
+                                 onChanged="onSpreadsheetNameChanged"/>
+            </li>
+        </ol>
+    </t>
+    <!--    Template for the component BreadCrumbs -->
+    <t t-name="cyllo_spreadsheet.Breadcrumbs" owl="1">
+        <ol class="breadcrumb">
+            <button class="btn" t-on-click="goBack"><i class="ri-arrow-left-s-line"/></button>
+                <li
+                    class="breadcrumb-item active d-flex align-items-center">
+                    <a href="#" class="fw-bold text-truncate">
+                    <SpreadsheetName name="props.record.name"
+                         isReadonly="false"
+                         onChanged="onSpreadsheetNameChanged"/>
+                    </a>
+                </li>
+        </ol>
+    </t>
+    <!-- Template for the component SpreadsheetControlPanel-->
+    <t t-name="cyllo_spreadsheet.SpreadsheetControlPanel" owl="1">
+            <div class="o_control_panel d-flex flex-column gap-3 gap-lg-1 px-3 pt-2 pb-3"
+                 t-ref="root" data-command-category="actions">
+                <div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100"
+                     t-ref="mainButtons">
+                <div t-if="display" class="o_cp_top">
+                    <div class="o_cp_top_left d-flex flex-grow-1 align-items-center">
+                        <t t-if="display">
+                        <t t-slot="control-panel-navigation-additional">
+                                <t t-if="env.isSmall">
+                                    <t t-call="cyllo_spreadsheet.Breadcrumbs.Small"
+                                       t-if="!env.config.noBreadcrumbs"/>
+                                </t>
+                            <t t-else="">
+                                <t t-call="cyllo_spreadsheet.Breadcrumbs"
+                                   t-if="!env.config.noBreadcrumbs"/>
+                                </t>
+                            </t>
+                        </t>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </t>
+    <t t-name="spreadsheet_oca.OdooPanel" owl="1">
+        <div class="o-section">
+            <div class="o-section-title">Link to Odoo menu</div>
+            <div class="o-section-value">
+                <Many2OneField
+                        value="menuId"
+                        relation="'ir.ui.menu'"
+                        record="record"
+                        update.bind="updateMenu"
+                        canOpen="false"
+                />
+            </div>
+        </div>
+    </t>
+    <t t-name="spreadsheet_oca.OdooStackablePanel"
+       t-inherit="spreadsheet_oca.OdooPanel"
+       t-inherit-mode="primary" owl="1">
+            <xpath expr="div[hasclass('o-section')]" position="before">
+                <div class="o-section">
+                    <label>
+                        <div class="o_checkbox">
+                            <input type="checkbox"
+                                   name="stacked"
+                                   t-att-checked="props.definition.stacked"
+                                   t-on-change="onChangeStacked"/>
+                            Stacked
+                        </div>
+                    </label>
+                </div>
+            </xpath>
+        </t>
+</templates>
+
+
+

@@ -1,0 +1,208 @@
+.state_badge{
+    float: right;
+}
+.a-box.address-tile {
+    border-style: dashed;
+    height: 266px;
+    width: 320px;
+    border-width: 2px;
+    box-sizing: border-box;
+    border-color: #C7C7C7;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    text-decoration: none;
+    margin: 0.4rem;
+}
+.a-box.address-tile {
+    border-style: dashed;
+    height: 266px;
+    width: 320px;
+    border-width: 2px;
+    box-sizing: border-box;
+    border-color: #C7C7C7;
+    text-align: center;
+    display: table-cell;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+}
+.address-plus-icon {
+    background: url(/cyllo_portal/static/src/img/plus.svg);
+    width: 40px;
+    height: 50px;
+}
+
+.a-box-inner{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.address_container{
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+}
+
+.button-color{
+color: #4e4e4e ;
+border-color: #4e4e4e ;
+}
+.button-order{
+font-family: futura-pt,Tahoma,Geneva,Verdana,Arial,sans-serif;
+font-style: normal;
+font-size: .75rem;
+font-weight: 700;
+background-color: hsl(90, 40%, 50%);
+color: white;
+}
+.address_contents{
+    width: 40%;
+}
+
+.desktop-address-tile {
+    height: 266px;
+    width: 320px;
+    border-width: 1px;
+    box-sizing: border-box;
+    border-color: #C7C7C7;
+    box-shadow: 0 2px 1px 0 rgba(0,0,0,.16);
+    border-style: solid;
+    padding: 1rem;
+    margin: 0.4rem;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.a-box .a-box-inner {
+    border-radius: 8px;
+    position: relative;
+    padding: 14px 18px;
+}
+.a-section:last-child {
+    margin-bottom: 0;
+}
+
+.a-spacing-small, .a-ws .a-ws-spacing-small {
+    margin-bottom: 8px!important;
+}
+
+.a-unordered-list.a-nostyle, ol.a-nostyle, ul.a-nostyle {
+    margin-left: 0;
+    color: #0F1111;
+}
+
+.a-unordered-list, ol, ul {
+    padding: 0;
+}
+.a-unordered-list, ul {
+    margin: 0 0 0 18px;
+    color: #0F1111;
+}
+
+.a-ordered-list.a-nostyle li, .a-unordered-list.a-nostyle li, ol.a-nostyle li, ul.a-nostyle li {
+    list-style: none;
+}
+
+.a-ordered-list li, .a-unordered-list li, ol li, ul li {
+    word-wrap: break-word;
+    margin: 0;
+}
+.name_address{
+    font-weight: 700;
+}
+.edit-remove-link {
+    display: flex;
+    bottom: 70px;
+    gap: 34px;
+    align-self: flex-end;
+}
+.edit-rmv-buttons{
+    background: none;
+    border: none;
+    color: #3d7173;
+}
+#wrapwrap.o_portal {
+    background-color: #fff !important;
+}
+
+
+
+.address_main_div{
+    width:78%;
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    width: 78%;
+    align-items: center;
+}
+
+.card-div{
+    max-width: fit-content;
+    margin: 0 auto;
+}
+
+.card-div-inside{
+border-bottom:1px solid #e9e3e3;
+padding:1rem;
+}
+
+.rounded-pill-login-security{
+border-radius: 0.5rem !important;
+}
+
+.width{
+    max-width: 70%;
+}
+.content{
+    max-width: 52%;
+    margin: 0 auto;
+    margin-bottom: 10%;
+}
+.content-div{
+    margin: 6%;
+}
+.button-done{
+    margin-top: 1rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 0.8rem;
+    background: #edcc19;
+}
+.button-edit{
+    border-radius: 8px;
+    box-shadow: 0 2px 5px 0 rgba(213,217,217,.5);
+    background: #FFF;
+    border-color: #D5D9D9;
+}
+.span-style{
+    font-size: larger;
+    display: block;
+}
+.nav-tabs .nav-item .nav-link.active  {
+    color: red;
+    border-bottom: 3px solid red !important;
+}
+.nav-tabs {
+  border-bottom: none !important;
+}
+.empty_record{
+    margin-top:9%;
+}
+.null_rec_img2{
+  width:200px;
+}
+.all_msg{
+   font-size:25px;
+}
+.o_cy_portal_border{
+    box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+}

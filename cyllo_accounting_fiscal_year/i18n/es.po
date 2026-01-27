@@ -1,0 +1,481 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_accounting_fiscal_year
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-13 07:21+0000\n"
+"PO-Revision-Date: 2023-12-13 07:21+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model,name:cyllo_accounting_fiscal_year.model_account_fiscal_year
+msgid "Account Fiscal Year"
+msgstr "Cuenta año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_needaction
+msgid "Action Needed"
+msgstr "Accion necesaria"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_fiscal_year_close_form
+msgid "All the periods in this fiscal year will be closed"
+msgstr "Todos los períodos en este año fiscal estarán cerrados"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_attachment_count
+msgid "Attachment Count"
+msgstr "Recuento de adjuntos"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_fiscal_year_close_form
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.actions.server,name:cyllo_accounting_fiscal_year.model_account_fiscal_year_period_action_close_periods
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Close"
+msgstr "Cerca"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__all_periods
+msgid "Close All Periods"
+msgstr "Cerrar todos los períodos"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.actions.act_window,name:cyllo_accounting_fiscal_year.action_view_close_fiscal_year
+msgid "Close Fiscal Year"
+msgstr "Cerrar año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model,name:cyllo_accounting_fiscal_year.model_fiscal_year_close
+msgid "Close fiscal year"
+msgstr "Cerrar año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_fiscal_year_close__end_period
+msgid "Close until this Month Period"
+msgstr "Cierre hasta este mes de mes"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields.selection,name:cyllo_accounting_fiscal_year.selection__account_fiscal_year__state__close
+#: model:ir.model.fields.selection,name:cyllo_accounting_fiscal_year.selection__account_fiscal_year_period__state__close
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_search
+msgid "Closed"
+msgstr "Cerrado"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model,name:cyllo_accounting_fiscal_year.model_res_company
+msgid "Companies"
+msgstr "Compañías"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__company_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_fiscal_year_close_form
+msgid "Confirm"
+msgstr "Confirmar"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#, python-format
+msgid "Create Fiscal Year"
+msgstr "Crear año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#, python-format
+msgid "Create Period"
+msgstr "Crear período"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Create Periods"
+msgstr "Crear períodos"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.actions.act_window,help:cyllo_accounting_fiscal_year.action_view_fiscal_years
+msgid "Create new fiscal year"
+msgstr "Crear un nuevo año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__create_uid
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__create_uid
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__create_date
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__create_date
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__display_name
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__display_name
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields.selection,name:cyllo_accounting_fiscal_year.selection__account_fiscal_year__state__draft
+msgid "Draft"
+msgstr "Borrador"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__end_date
+msgid "End Date"
+msgstr "Fecha final"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year__end_date
+msgid "End date for the fiscal year"
+msgstr "Fecha de finalización para el año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#, python-format
+msgid "First Open the Fiscal Year"
+msgstr "Primero abre el año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_bank_statement_line__fiscal_year_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__name
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__fiscal_year_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_move__fiscal_year_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_payment__fiscal_year_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__fiscal_year_id
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_move_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_search
+msgid "Fiscal Year"
+msgstr "Año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model,name:cyllo_accounting_fiscal_year.model_account_fiscal_year_period
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+msgid "Fiscal Year Period"
+msgstr "Período de año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.actions.act_window,name:cyllo_accounting_fiscal_year.action_view_periods
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_tree
+msgid "Fiscal Year Periods"
+msgstr "Períodos de año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.actions.act_window,name:cyllo_accounting_fiscal_year.action_view_fiscal_years
+#: model:ir.ui.menu,name:cyllo_accounting_fiscal_year.menu_fiscal_years
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_tree
+msgid "Fiscal Years"
+msgstr "Años fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.ui.menu,name:cyllo_accounting_fiscal_year.menu_fiscal_years_and_periods_categ
+msgid "Fiscal Years and Periods"
+msgstr "Años y períodos fiscales"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (socios)"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__start_date
+msgid "From"
+msgstr "De"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_search
+msgid "Group By..."
+msgstr "Agrupar por..."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__has_message
+msgid "Has Message"
+msgstr "Tiene mensaje"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__id
+msgid "ID"
+msgstr "IDENTIFICACIÓN"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si se revisan, los nuevos mensajes requieren su atención."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_error
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si se verifica, algunos mensajes tienen un error de entrega."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_fiscal_year_close__all_periods
+msgid "It will close all the periods in the fiscal year"
+msgstr "Cerrará todos los períodos en el año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model,name:cyllo_accounting_fiscal_year.model_account_move
+msgid "Journal Entry"
+msgstr "Entrada de diario"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__write_uid
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__write_uid
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__write_date
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__write_date
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__write_date
+msgid "Last Updated on"
+msgstr "Ultima actualización en"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de entrega de mensajes"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year__name
+msgid "Name for the fiscal year"
+msgstr "Nombre para el año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren acción"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de entrega"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields.selection,name:cyllo_accounting_fiscal_year.selection__account_fiscal_year__state__open
+#: model:ir.model.fields.selection,name:cyllo_accounting_fiscal_year.selection__account_fiscal_year_period__state__open
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Open"
+msgstr "Abierto"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_search
+msgid "Opened"
+msgstr "Abrió"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_bank_statement_line__period_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__name
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_move__period_id
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_payment__period_id
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_move_search
+msgid "Period"
+msgstr "Período"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__period_ids
+#: model:ir.ui.menu,name:cyllo_accounting_fiscal_year.menu_periods
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Periods"
+msgstr "Períodos"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.actions.server,name:cyllo_accounting_fiscal_year.model_account_fiscal_year_period_action_re_open_periods
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Re-Open"
+msgstr "Reabrir"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de entrega de SMS"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_form
+msgid "Set to draft"
+msgstr "Establecido en el borrador"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__start_date
+msgid "Start Date"
+msgstr "Fecha de inicio"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year__start_date
+msgid "Start date for the fiscal year"
+msgstr "Fecha de inicio del año fiscal."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year__state
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__state
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_period_search
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_account_fiscal_year_search
+msgid "Status"
+msgstr "Estado"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#, python-format
+msgid "The Date %s Must Be Within a Fiscal Year Period"
+msgstr "La fecha %s debe estar dentro de un período de año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_move.py:0
+#, python-format
+msgid "The Fiscal year period is already closed"
+msgstr "El período del año fiscal ya está cerrado"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year.py:0
+#, python-format
+msgid "The ending date must not be prior to the starting date."
+msgstr "La fecha de finalización no debe ser antes de la fecha de inicio."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_bank_statement_line__fiscal_year_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_bank_statement_line__period_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_move__fiscal_year_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_move__period_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_payment__fiscal_year_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_payment__period_id
+msgid "The invoice date within the fiscal year"
+msgstr "La fecha de la factura dentro del año fiscal"
+
+#. module: cyllo_accounting_fiscal_year
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_fiscal_year.view_fiscal_year_close_form
+msgid "The periods until this month will be closed"
+msgstr "Los períodos hasta este mes estarán cerrados"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year.py:0
+#, python-format
+msgid "There are already periods for the fiscal year"
+msgstr "Ya hay períodos para el año fiscal."
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year.py:0
+#, python-format
+msgid ""
+"This fiscal year %s overlaps with %s.\n"
+"Please correct the start and/or end dates of your fiscal years."
+msgstr ""
+"Este año fiscal %s se superpone con %s.\n"
+"Corrija las fechas de inicio y/o finalización de sus años fiscales."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__end_date
+msgid "To"
+msgstr "Fin"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_fiscal_year_close__end_period
+msgid "Until this Period"
+msgstr "Hasta este período"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,field_description:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year.py:0
+#, python-format
+msgid "You cannot delete a fiscal year if there is open periods"
+msgstr "No puede eliminar un año fiscal si hay períodos abiertos"
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year.py:0
+#, python-format
+msgid ""
+"You cannot delete a fiscal year in open state first close the fiscal year."
+msgstr ""
+"No puede eliminar un año fiscal en el estado abierto primero cierre el año fiscal."
+
+#. module: cyllo_accounting_fiscal_year
+#. odoo-python
+#: code:addons/cyllo_accounting_fiscal_year/models/account_fiscal_year_period.py:0
+#, python-format
+msgid "You cannot delete a period in open state first close the period."
+msgstr ""
+"No puede eliminar un período en estado abierto primero cierre el período."
+
+#. module: cyllo_accounting_fiscal_year
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_account_fiscal_year_period__fiscal_year_id
+#: model:ir.model.fields,help:cyllo_accounting_fiscal_year.field_fiscal_year_close__fiscal_year_id
+msgid "fiscal year for the period"
+msgstr "año fiscal para el período"

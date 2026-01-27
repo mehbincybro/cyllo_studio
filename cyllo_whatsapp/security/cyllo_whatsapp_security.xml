@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Company rule for whatsapp template-->
+    <record id="rule_whatsapp_template_company" model="ir.rule">
+        <field name="name">Whatsapp Template Multi Company</field>
+        <field name="model_id" ref="model_whatsapp_template"/>
+        <field name="global" eval="True"/>
+        <field name="domain_force">['|', ('company_ids', '=', False), ('company_ids', 'in', company_ids)]</field>
+    </record>
+</odoo>

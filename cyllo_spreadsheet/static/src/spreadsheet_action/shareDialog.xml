@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_spreadsheet.ShareDialog" owl="1">
+        <Record t-props="recordProps" t-slot-scope="data">
+            <div class="cy-sheet-share-dialog-container cy-kpi_modal-container">
+                <div class="modal-dialog  cy-dashboard_modal-box">
+                    <div class="modal-content cy-modal_content">
+                        <div class="modal-header  cy-social_commentHead d-flex  pt-4">
+                            <h5 class="cy-dashboard_modal-heading">
+                                Share
+                            </h5>
+                            <span class="cy-icons cy-social_cmnt-closebtn" t-on-click="props.close">
+                                <i class="ri-close-line" />
+                            </span>
+                        </div>
+                        <div class="modal-body cy-modal-body py-0 overflow-auto">
+                            <form class="p-4 cy_dash_conf">
+                                <div class="row py-2">
+                                    <div class="col-sm-6 px-2">
+                                        <div class="col-12  mb-2">
+                                            <label for="name" class="form-label  cy-modal-form_label">
+                                                Name
+                                            </label>
+                                            <CharField name="'name'" record="data.record" id="'name'" />
+                                        </div>
+                                        <div class="col-12  mb-2">
+                                            <label for="reader_ids" class="form-label cy-modal-form_label">
+                                                Readers
+                                            </label>
+                                            <div class="o_field_widget d-block">
+                                                <Many2ManyTagsField id="'reader_ids'" name="'reader_ids'" record="data.record" t-props="defaultConfProps" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6 px-2">
+                                        <div class="col-12  mb-2">
+                                            <label for="contributor_ids" class="form-label cy-modal-form_label">
+                                                Contributors
+                                            </label>
+                                            <div class="o_field_widget d-block">
+                                                <Many2ManyTagsField id="'contributor_ids'" name="'contributor_ids'" record="data.record" t-props="defaultConfProps" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="cy-modal_footer cy-social_cmnt-footer">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn cy-button-primary-stroke" t-on-click="onShareSheet">Share
+                                </button>
+                                <button class="btn cy-button-stroke" t-on-click="props.close">Cancel
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Record>
+    </t>
+    <t t-name="cyllo_spreadsheet.ShareMultipleDialog" owl="1">
+        <Dialog size="'md'" title="'Share'">
+            <label for="">Readers</label>
+            <div class="cy_analytic_d input_tags cy_filter_input_tags input_tags_row w-100 col-4  mb-3">
+                <div class="d-flex tags" style="flex-direction: column;">
+                    <t t-log="state.readers"/>
+                    <t t-foreach="state.readers" t-as="rec"
+                       t-key="rec.id">
+                        <div class="badge rounded-pill o_tag d-flex gap-1"
+                             style="width: fit-content;">
+                            <t t-esc="rec.display_name"/>
+                            <i t-on-click="() => this.onRemoveReader(rec)"
+                               class="ri-close-line"/>
+                        </div>
+                    </t>
+                </div>
+            <Many2XAutocomplete
+                resModel="'res.users'"
+                getDomain.bind="() => {}"
+                fieldString="'Readers'"
+                activeActions="{}"
+                update.bind="(ev) => this.onReaderSelect(ev)"
+            />
+            </div>
+            <label for="">Contributors</label>
+            <div class="cy_analytic_d input_tags cy_filter_input_tags input_tags_row w-100 col-4  mb-3">
+                <div class="d-flex tags" style="flex-direction: column;">
+                    <t t-foreach="state.contributors" t-as="rec"
+                       t-key="rec.id">
+                        <div class="badge rounded-pill o_tag d-flex gap-1"
+                             style="width: fit-content;">
+                            <t t-esc="rec.display_name"/>
+                            <i t-on-click="() => this.onRemoveContributor(rec)"
+                               class="ri-close-line"/>
+                        </div>
+                    </t>
+                </div>
+            <Many2XAutocomplete
+                resModel="'res.users'"
+                getDomain.bind="() => {}"
+                fieldString="'Contributors'"
+                activeActions="{}"
+                update.bind="(ev) => this.onContributorSelect(ev)"
+            />
+            </div>
+            <t t-set-slot="footer">
+                <t t-set-slot="footer">
+                    <button class="btn btn-primary" t-on-click="_onConfirm">Share</button>
+                    <button class="btn btn-secondary" t-on-click="onClose">
+                    Discard
+                    </button>
+                </t>
+            </t>
+        </Dialog>
+    </t>
+</templates>

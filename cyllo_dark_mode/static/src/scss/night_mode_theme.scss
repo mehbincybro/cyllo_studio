@@ -1,0 +1,177 @@
+[data-darkreader-scheme="dark"] {
+    .o_content > div {
+        background-image: initial;
+        background-color: rgb(24, 26, 27) !important;
+    }
+    .o_datetime_picker .o_date_picker{
+        background-color: rgb(24, 26, 27) !important;
+        color: rgb(209, 205, 199)
+    }
+    .bg-100, .o-mail-MessageReactionMenu-persona:not(.o-isDeviceSmall):hover button.fa-trash:hover, .text-bg-100 {
+        background-color: var(--darkreader-bg--background-color) !important;
+    }
+    .bg-view, .text-bg-view {
+        --darkreader-bg--background-color: rgb(24, 26, 27)
+        background-color: var(--darkreader-bg--background-color) !important;
+    }
+    .o-mail-ChatWindow {
+        background: black;
+    }
+    .bg-info-light {
+        background-color: rgba(151, 205, 227, 1) !important;
+    }
+}
+
+.cy_image-checkbox {
+    cursor: pointer;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border: 4px solid transparent;
+    outline: 0;
+}
+#cy_check {
+    display: none !important;
+}
+.o_action_manager a {
+    text-decoration: none;
+}
+.cy-view, .o-discuss-GifPicker-search input:focus + .oi-search, .o-discuss-GifPicker-search input:hover + .oi-search, .text-bg-view {
+    background-color: RGBA(255,255,255,1) !important;
+}
+
+.text-900 {
+    color: RGBA(33, 37, 41, 1) !important;
+}
+.bg-200, .o-mail-VoiceRecorder.o-recording, .o-discuss-ChannelMember.cursor-pointer:hover, .text-bg-200 {
+    background-color: RGBA(233, 236, 239, 1) !important;
+}
+.text-dark {
+    color: RGBA(33, 37, 41, 1) !important;
+}
+.o_input {
+    background-color: var(--darkreader-bg--o-input-background-color, rgba(0, 0, 0, 0));
+    color: Black;
+}
+.o_list_renderer .o_list_table .o_list_record_remove button {
+    background-image: none;
+    background-color: initial;
+    color: black;
+}
+.font-monospace {
+    font-family: var(--font-monospace) !important;
+    background: #fcf8e3;
+    color: black;
+}
+.bg-white-muted, .bg-white-disabled, .bg-white-75, .bg-white-50, .bg-white-25, .bg-white, .o-mail-AutoresizeInput:not([disabled]):hover, .o-mail-AutoresizeInput:not([disabled]):focus, .o-EmojiPicker .o-EmojiPicker-search input:focus + .oi-search, .o-EmojiPicker .o-EmojiPicker-search input:hover + .oi-search {
+    background-color: RGBA(255, 255, 255, 1) !important;
+}
+.bg-light {
+    background-color: RGBA(248, 249, 250, 1) !important;
+}
+.o_action_manager a {
+    text-decoration: none;
+}
+/* Base for the switch */
+.cy_switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 21px;
+    margin-top: 15%;
+}
+/* Hide default HTML checkbox */
+.cy_switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+/* The slider */
+.cy_slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+.cy_slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 3px;
+    top: 2px;
+    bottom: 3px;
+    background-color: #121212bf;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+input:checked + .cy_slider {
+background: #151E4E;
+}
+input:checked + .cy_slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(22px) translateY(2px);
+}
+input:checked + .cy_slider::before {
+    background-color: #FA961B !important;
+    left: -2px;
+    top: 0px;
+}
+/* Rounded sliders */
+.cy_slider.cy_round {
+    border-radius: 34px;
+}
+.cy_slider.cy_round.cy_not_apply {
+    border: 1.9px solid #121212ba;
+}
+.cy_slider.cy_round.cy_apply {
+    border: 2px solid black;
+    border-color: black !important;
+}
+.systray_dark_root .cy_slider {
+    width:93%;
+}
+.systray_dark_root{
+    transform: translateX(2px);
+    padding-left: 3px;
+    padding-right: 4px;
+}
+.cy_slider.cy_round:before {
+    border-radius: 50%;
+}
+.systray_dark_root:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+input:checked + .cy_slider .cy_picture {
+    left: calc(100% - 34px);
+}
+/* Add a picture inside the toggle button */
+.cy_switch .cy_picture {
+    position: absolute;
+    content: "";
+    top: 2px;
+    width: 11px;
+    height: 11px;
+    background-size: cover;
+    border-radius: 50%;
+    z-index: 2;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+.cy_switch .cy_picture.cy_moon:hover {
+    cursor:pointer;
+}
+input:checked + .cy_slider .cy_picture.cy_sun {
+    left: calc(100% - 34px);
+}
+input:checked + .cy_slider .cy_picture.cy_moon {
+    left: 4px;
+}
+.cy_switch .cy_checked {
+    display:none;
+}

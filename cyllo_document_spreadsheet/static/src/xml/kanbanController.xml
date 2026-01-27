@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!--Added button for creating spreadsheet form the kanban view -->
+    <t t-inherit="web.KanbanView" t-inherit-mode="extension" owl="1">
+        <xpath expr="//div[hasclass('btn-group')]" position="inside">
+            <a class="cy-navitem-list cursor-pointer on_click_spreadsheet" t-on-click="_onClickSpreadsheet"
+                data-hotkey="spreadsheet">
+                <i class="ri-add-fill"/>
+                Create Spreadsheet
+            </a>
+        </xpath>
+    </t>
+</templates>

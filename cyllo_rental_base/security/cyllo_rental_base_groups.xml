@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Define an Odoo module category for Rental Management -->
+    <record id="ir_module_category_rental" model="ir.module.category">
+        <field name="name">Rental</field>
+        <field name="description">User access levels for Rental module</field>
+        <field name="sequence">20</field>
+    </record>
+    <!-- Define a User Group User: Own Documents for Rental Module -->
+    <record id="group_cyllo_rental_base_group_user_own_documents" model="res.groups">
+        <field name="name">User: Own documents</field>
+        <field name="category_id" ref="cyllo_rental_base.ir_module_category_rental"/>
+    </record>
+    <!-- Define a User Group User: All Documents for Rental Module -->
+     <record id="group_cyllo_rental_base_group_user_all_documents" model="res.groups">
+        <field name="name">User: All documents</field>
+        <field name="category_id" ref="cyllo_rental_base.ir_module_category_rental"/>
+        <field name="implied_ids" eval="[Command.link(ref('group_cyllo_rental_base_group_user_own_documents'))]"/>
+    </record>
+    <!-- Define a User Group Administrator for Rental Module -->
+    <record id="group_cyllo_rental_base_group_manager" model="res.groups">
+        <field name="name">Administrator</field>
+        <field name="category_id" ref="cyllo_rental_base.ir_module_category_rental"/>
+        <field name="implied_ids" eval="[Command.link(ref('group_cyllo_rental_base_group_user_own_documents')),
+            Command.link(ref('group_cyllo_rental_base_group_user_all_documents'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
+</odoo>

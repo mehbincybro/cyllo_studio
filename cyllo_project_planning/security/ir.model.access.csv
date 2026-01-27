@@ -1,0 +1,2 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_project_plan_allocation_manager,access.project.plan.allocation.manager,model_project_plan_allocation,project.group_project_manager,1,1,1,1

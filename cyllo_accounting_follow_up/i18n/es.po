@@ -1,0 +1,441 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_accounting_follow_up
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-13 11:24+0000\n"
+"PO-Revision-Date: 2023-12-13 11:24+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_accounting_follow_up
+#: model:mail.template,body_html:cyllo_accounting_follow_up.mail_template_payment_reminder
+msgid ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px;\">\n"
+"                        Dear <t t-out=\"object.name or ''\"></t>,\n"
+"                        <br>\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Exception made if there was a mistake of ours, it seems that the following amount stays unpaid. Please, take appropriate measures in order to carry out this payment in the next 8 days.\n"
+"                        Would your payment have been carried out after this mail was sent, please ignore this message. Do not hesitate to contact our accounting department.\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Best Regards,\n"
+"                    </p>\n"
+"                    <br>\n"
+"                    <p>Here is your invoice details</p>\n"
+"                    <table style=\"margin-left: 35 px;\">\n"
+"                        <thead>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Invoice Date</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Number</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Due Date</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Amount</strong>\n"
+"                            </th>\n"
+"                        </thead>\n"
+"                        <t t-foreach=\"object.move_ids\" t-as=\"move\">\n"
+"                        <tbody>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.invoice_date or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.name or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.invoice_date_due or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.amount_residual_signed or ''\"></t></td>\n"
+"                        </tbody>\n"
+"                        </t>\n"
+"                    </table>\n"
+"                </div>\n"
+"            "
+msgstr ""
+"<div style=\"margin: 0px; padding: 0px;\">\n"
+"                    <p style=\"margin: 0px; padding: 0px;\">\n"
+"                        Estimado <t t-out=\"object.name or ''\"></t>,\n"
+"                        <br>\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Salvo excepción si hubo un error nuestro, parece que la siguiente cantidad queda impaga. Por favor, tome las medidas oportunas para poder realizar este pago en los próximos 8 días.\n"
+"                        Si su pago se hubiera realizado después de enviar este correo, ignore este mensaje. No dude en contactar con nuestro departamento de contabilidad.\n"
+"                    </p>\n"
+"                    <p>\n"
+"                        Cordial saludo,\n"
+"                    </p>\n"
+"                    <br>\n"
+"                    <p>Aquí están los detalles de su factura.</p>\n"
+"                    <table style=\"margin-left: 35 px;\">\n"
+"                        <thead>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Fecha de la factura</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Número</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Fecha de vencimiento</strong>\n"
+"                            </th>\n"
+"                            <th style=\"border: 1px solid black;\" class=\"col\" align=\"center\">\n"
+"                                <strong>Cantidad</strong>\n"
+"                            </th>\n"
+"                        </thead>\n"
+"                        <t t-foreach=\"object.move_ids\" t-as=\"move\">\n"
+"                        <tbody>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.invoice_date or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.name or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.invoice_date_due or ''\"></t></td>\n"
+"                            <td style=\"border: 1px solid black;\" class=\"col\" align=\"center\"><t t-out=\"move.amount_residual_signed or ''\"></t></td>\n"
+"                        </tbody>\n"
+"                        </t>\n"
+"                    </table>\n"
+"                </div>\n"
+"            "
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_needaction
+msgid "Action Needed"
+msgstr "Accion necesaria"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_partner__done_customer_followup_id
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_users__done_customer_followup_id
+msgid "Action Taken"
+msgstr "Acción tomada"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_ids
+msgid "Activities"
+msgstr "Actividades"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Decoración de excepciones de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_state
+msgid "Activity State"
+msgstr "Estado de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Icono de tipo de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_attachment_count
+msgid "Attachment Count"
+msgstr "Recuento de adjuntos"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__company_id
+msgid "Company"
+msgstr "Compañía"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model,name:cyllo_accounting_follow_up.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__create_date
+msgid "Created on"
+msgstr "Creado en"
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_account_followup_line_form
+msgid "Days of Due Date"
+msgstr "Días de fecha de vencimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__delay
+msgid "Due Days"
+msgstr "Día de vencimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__mail_template_id
+msgid "Email template for followup"
+msgstr "Plantilla de correo electrónico para el seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.actions.server,name:cyllo_accounting_follow_up.ir_cron_execute_followup_ir_actions_server
+msgid "Execute followup"
+msgstr "Ejecutar seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__name
+msgid "Follow Up Level"
+msgstr "Nivel de seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.actions.act_window,name:cyllo_accounting_follow_up.action_view_follow_up_levels
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_res_partner_form
+msgid "Follow Ups"
+msgstr "Seguimientos"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.ui.menu,name:cyllo_accounting_follow_up.menu_follow_up_levels
+msgid "Follow-Up Levels"
+msgstr "Niveles de seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_account_followup_line_form
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_account_followup_line_tree
+msgid "Follow-up Steps"
+msgstr "Pasos de seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_follower_ids
+msgid "Followers"
+msgstr "Seguidores"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Seguidores (socios)"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Icono impresionante de fuentes, p.tareas de fa"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__has_message
+msgid "Has Message"
+msgstr "Tiene mensaje"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__id
+msgid "ID"
+msgstr "IDENTIFICACIÓN"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_exception_icon
+msgid "Icon"
+msgstr "Icono"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Ícono para indicar una actividad de excepción."
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Si se revisan, los nuevos mensajes requieren su atención."
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__message_has_error
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Si está marcado, algunos mensajes tienen un error de entrega."
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_partner__move_ids
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_users__move_ids
+msgid "Invoice Details"
+msgstr "Detalles de la factura"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_is_follower
+msgid "Is Follower"
+msgstr "Es seguidor"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__write_date
+msgid "Last Updated on"
+msgstr "Ultima actualización en"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__mail_template_id
+msgid "Mail Template"
+msgstr "Plantilla de correo"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_main_attachment_id
+msgid "Main Attachment"
+msgstr "Apego principal"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_has_error
+msgid "Message Delivery error"
+msgstr "Error de entrega de mensajes"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_ids
+msgid "Messages"
+msgstr "Mensajes"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Mi fecha límite de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_partner__to_do_customer_followup_id
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_users__to_do_customer_followup_id
+msgid "Next Action"
+msgstr "Proxima accion"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_partner__next_followup_action_date
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_res_users__next_followup_action_date
+msgid "Next Action Date"
+msgstr "Fecha de acción siguiente"
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_res_partner_form
+msgid "Next Action:"
+msgstr "Proxima accion:"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Fecha límite de la próxima actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_summary
+msgid "Next Activity Summary"
+msgstr "Siguiente resumen de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_type_id
+msgid "Next Activity Type"
+msgstr "Siguiente tipo de actividad"
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.actions.act_window,help:cyllo_accounting_follow_up.action_view_follow_up_levels
+msgid "No Follow Ups Found"
+msgstr "No se encontraron seguimientos"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Número de acciones"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_has_error_counter
+msgid "Number of errors"
+msgstr "Número de errores"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Número de mensajes que requieren acción"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Número de mensajes con error de entrega"
+
+#. module: cyllo_accounting_follow_up
+#: model:mail.template,name:cyllo_accounting_follow_up.mail_template_payment_reminder
+msgid "Payment Reminder"
+msgstr "Recordatorio de pago"
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_account_followup_line_form
+msgid "Remind After"
+msgstr "Recordar después"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__activity_user_id
+msgid "Responsible User"
+msgstr "Usuario responsable"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Error de entrega de SMS"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.actions.server,name:cyllo_accounting_follow_up.model_res_partner_action_send_followups
+msgid "Send Follow Up Mail"
+msgstr "Enviar correo de seguimiento"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__send_email
+msgid "Send an Email"
+msgstr "Enviar un correo electrónico"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Estado basado en actividades\n"
+"Alvado: ya se pasa la fecha de vencimiento\n"
+"Hoy: la fecha de actividad es hoy\n"
+"Planificado: actividades futuras."
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__delay
+msgid "The number of days to wait before sending the reminder"
+msgstr "El número de días para esperar antes de enviar el recordatorio"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Tipo de actividad de excepción registrada."
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,field_description:cyllo_accounting_follow_up.field_account_followup_line__website_message_ids
+msgid "Website Messages"
+msgstr "Mensajes del sitio web"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__website_message_ids
+msgid "Website communication history"
+msgstr "Historial de comunicación del sitio web"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model.fields,help:cyllo_accounting_follow_up.field_account_followup_line__send_email
+msgid "When processing, it will send an email"
+msgstr "Al procesar, enviará un correo electrónico"
+
+#. module: cyllo_accounting_follow_up
+#: model:ir.model,name:cyllo_accounting_follow_up.model_account_followup_line
+msgid "account.followup.line"
+msgstr ""
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_res_partner_form
+msgid "has no due amount."
+msgstr "no tiene cantidad debido."
+
+#. module: cyllo_accounting_follow_up
+#: model_terms:ir.ui.view,arch_db:cyllo_accounting_follow_up.view_res_partner_form
+msgid "on:"
+msgstr "en:"
+
+#. module: cyllo_accounting_follow_up
+#: model:mail.template,subject:cyllo_accounting_follow_up.mail_template_payment_reminder
+msgid "{{ object.company_id.name }} Payment Reminder"
+msgstr "{{ object.company_id.name }} Recordatorio de pago"

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record extends the view for social.media.account by adding new fields -->
+    <record id="view_res_company_form" model="ir.ui.view">
+        <field name="name">view.res.company.</field>
+        <field name="model">res.company</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id" ref="base.view_company_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='general_info']" position="after">
+                <page name="insta_info" string="Instagram">
+                    <group name="fb_configuration" string="Configuration">
+                        <field name="instagram_access_token"/>
+                        <field name="instagram_base_url"/>
+                        <label for="facebook_insta_page_name"/>
+                        <div class="o_row">
+                            <field name="facebook_insta_page_name"/>
+                            <button name="action_connect_instagram" type="object"
+                                    string="Fetch page ID"/>
+                        </div>
+                        <field name="facebook_insta_page_number"/>
+                        <field name="Instagram_connection_authenticated"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,574 @@
+# -*- coding: utf-8 -*-
+from openai import AuthenticationError, OpenAI
+from odoo import api, fields, models
+
+
+class DashboardSheet(models.Model):
+    """Dashboard Sheet Model"""
+    _name = 'dashboard.sheet'
+    _description = 'Dashboard Sheet'
+    _inherit = ['image.mixin']
+
+    name = fields.Char(required=True)
+    table_ids = fields.One2many('dashboard.sheet.table', string='Tables', inverse_name="sheet_id")
+    filter_ids = fields.One2many('dashboard.sheet.filter', 'sheet_id', string='Filters')
+    axis_ids = fields.One2many('dashboard.sheet.axis', 'sheet_id', string='Filters')
+    query = fields.Text(string='Query Editor', compute='_compute_query', store=True)
+    query_gen = fields.Text(string='Query Generated')
+    dimension = fields.Char(compute='_compute_dimension')
+    measure = fields.Text(compute='_compute_dimension')
+    type = fields.Char()
+    dimension_axis = fields.Selection([('x', 'X'), ('y', 'Y')])
+    is_enabled = fields.Boolean(string='Enabled', default=True)
+    limit = fields.Integer(default=0)
+    dashboard_sheet_option_ids = fields.One2many("dashboard.sheet.option", "dashboard_sheet_id")
+    kpi_name = fields.Char(string='Name')
+    kpi_target = fields.Float()
+    kpi_view = fields.Selection([('View 1', 'View 1'), ('View 2', 'View 2')], string='KPI Target View')
+    kpi_description = fields.Text()
+    kpi_redirect = fields.Boolean('KPI Redirect')
+    kpi_target_perc = fields.Float('KPI Target Percentage')
+    kpi_icon = fields.Char('KPI Icon')
+    kpi_model = fields.Char('KPI Model')
+    sheet_type_id = fields.Many2one('dashboard.sheet.type', 'Sheet Type')
+    sheet_filter_ids = fields.One2many('dashboard.sheet.global', 'sheet_id')
+
+    @api.model
+    def update_limit(self, limit, ttype):
+        """Method to check if a limit can be updated for a given chart type."""
+        return (limit > 30 or not limit) and ttype in ["pie", "doughnut", "radar", "funnel"]
+
+    @api.model
+    def create(self, vals_list):
+        """ Method to create records."""
+        limit = vals_list.get('limit', 0)
+        ttype = self.env["dashboard.sheet.type"].browse(vals_list.get('sheet_type_id')).name
+        if self.update_limit(limit, ttype):
+            vals_list["limit"] = 30
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Method to write data to the record."""
+        if 'limit' in vals or 'sheet_type_id' in vals:
+            limit = vals.get('limit', self.limit)
+            ttype_id = vals.get('sheet_type_id', self.sheet_type_id.id)
+            ttype = self.env['dashboard.sheet.type'].browse(ttype_id).name
+            if self.update_limit(limit, ttype):
+                vals['limit'] = 30
+        return super().write(vals)
+
+    @api.model
+    def get_config_data(self):
+        """Method to get configuration data."""
+        get_param = self.env['ir.config_parameter'].sudo().get_param
+        is_enable = get_param('cyllo_analytics.limit_record')
+        limit = get_param('cyllo_analytics.limit')
+        return {
+            'is_enable': is_enable,
+            'limit': limit if is_enable else 0,
+            'sheet_types': self.env["dashboard.sheet.type"].search_read([])
+        }
+
+    @api.depends("axis_ids.alias")
+    def _compute_dimension(self):
+        """Method to compute dimension and measure fields based on axis aliases."""
+        for rec in self:
+            dimension = rec.axis_ids.filtered(lambda x: x.type == "dimension").mapped('alias')
+            rec.dimension = dimension[0] if dimension else False
+            measure = rec.axis_ids.filtered(lambda x: x.type == "measure").mapped('alias')
+            rec.measure = str(measure)
+
+    @api.model
+    def get_data(self, model_id):
+        """Get the data for the given model"""
+        model = self.env["ir.model"].browse(model_id)
+        model_obj = self.env[model.model]
+        fields_get = model_obj.fields_get()
+        all_fields = dict(filter(lambda x: x[1].get("store", False), fields_get.items()))
+        return {
+            "name": model.display_name,
+            "model": model.model,
+            "id": model_id,
+            "table": model_obj._table,
+            "fields": all_fields
+        }
+
+    @api.model
+    def update_data(self, data):
+        """Method to update data based on received input."""
+        vals = {}
+        show_position_warning = False
+        if data["image"]:
+            vals["image_1920"] = data["image"].split(",")[1]
+        if data["name"]:
+            vals["name"] = data["name"]
+        if data["limit"]:
+            vals["limit"] = data["limit"]
+        if data["query"]:
+            vals["query_gen"] = data["query"]
+        if data["type"]:
+            vals["type"] = data["type"][1]
+            vals["sheet_type_id"] = data["type"][0]
+        if data["dimension_axis"]:
+            vals["dimension_axis"] = data["dimension_axis"]
+        if data["kpi"]:
+            vals["kpi_target"] = data["kpi"]['target']
+            vals["kpi_view"] = data["kpi"]['measureView']
+            vals["kpi_description"] = data["kpi"]['description']
+            vals["kpi_redirect"] = data["kpi"]['redirect']
+            vals["kpi_name"] = data["kpi"]['name']
+            vals["kpi_target_perc"] = data["kpi"]['kpiTarget'] if isinstance(data["kpi"]['kpiTarget'],
+                                                                             (int, float)) else 0
+            vals["kpi_icon"] = data["kpi"]['icon']
+        if data["id"]:
+            rec = self.browse(data["id"])
+            is_graph_before_now_kpi = rec.type != "kpi" and vals["type"] == "kpi"
+            is_kpi_before_now_graph = rec.type == "kpi" and vals["type"] != "kpi"
+            rec.write(vals)
+            configs = list(map(lambda x: x['id'], data["configs"]))
+            sheet_option_ids = rec.dashboard_sheet_option_ids.filtered(
+                lambda x: x.dashboard_config_id.ids in configs).ids
+            is_new_sheet = not bool(len(data["configs"]) > len(sheet_option_ids))
+            if is_graph_before_now_kpi:
+                for record in rec.dashboard_sheet_option_ids:
+                    new_attributes = {
+                        "x": record.attributes['x'],
+                        "y": record.attributes['y'],
+                        "graph_width": 3,
+                        "graph_height": 1,
+                    }
+                    record.attributes['graph_width'] = 3
+                    record.attributes['graph_height'] = 1
+                    record.write({
+                        "attributes": new_attributes
+                    })
+            if is_kpi_before_now_graph:
+                for record in rec.dashboard_sheet_option_ids:
+                    show_position_warning = True
+                    record.unlink()
+        else:
+            rec = self.create(vals)
+            is_new_sheet = True
+
+        for config_id in data["configs"]:
+            config = self.env["dashboard.config"].browse(config_id["id"])
+            if rec.id not in config.sheet_ids.ids:
+                config.write({'sheet_ids': [fields.Command.link(rec.id)]})
+        sheet_filter = []
+        for where in data["where"]:
+            vals = {
+                "name": where["name"],
+                "domain": where["domain"],
+                "is_active": where["active"],
+            }
+            if not where.get("id", False):
+                vals["sheet_id"] = rec.id
+                sheet_filter_id = self.env["dashboard.sheet.filter"].create(vals)
+                vals["id"] = sheet_filter_id.id
+                sheet_filter.append(vals)
+            else:
+                self.env["dashboard.sheet.filter"].browse(where["id"]).write(vals)
+
+        for join in data["joinData"]:
+            vals = {
+                "name": join["name"],
+                "model": join["model"],
+                "join": join["join"],
+                "linked": join.get('string', False),
+                "field": join.get('field', False),
+                "model_id": join.get('model_id', False),
+            }
+            if not join.get("id", False):
+                vals["sheet_id"] = rec.id
+                self.env["dashboard.sheet.table"].create(vals)
+            else:
+                self.env["dashboard.sheet.table"].browse(join["id"]).write(vals)
+
+        if data.get('dimension', False):
+            vals = {
+                "value": data["dimension"]["value"],
+                "alias": data["dimension"]["alias"],
+                "query": data["dimension"]["query"],
+                "column": data["dimension"]["column"],
+                "type": "dimension"
+            }
+            if not data["dimension"].get("id", False):
+                vals["sheet_id"] = rec.id
+                dmn_rec = self.env["dashboard.sheet.axis"].create(vals)
+                data["dimension"]["id"] = dmn_rec.id
+            else:
+                self.env["dashboard.sheet.axis"].browse(data["dimension"]["id"]).write(vals)
+
+        for measure in data['measure']:
+            vals = {
+                "value": measure["value"],
+                "alias": measure["alias"],
+                "query": measure["query"],
+                "column": measure["column"],
+                "type": "measure"
+            }
+            if not measure.get("id", False):
+                vals["sheet_id"] = rec.id
+                msr_rec = self.env["dashboard.sheet.axis"].create(vals)
+                measure["id"] = msr_rec.id
+            else:
+                self.env["dashboard.sheet.axis"].browse(measure["id"]).write(vals)
+        for group_by in data['group_by']:
+            vals = {
+                "value": group_by["value"],
+                "alias": group_by["alias"],
+                "query": group_by["query"],
+                "column": group_by["column"],
+                "type": "group"
+            }
+            if not group_by.get("id", False):
+                vals["sheet_id"] = rec.id
+                grp_rec = self.env["dashboard.sheet.axis"].create(vals)
+                group_by["id"] = grp_rec.id
+            else:
+                self.env["dashboard.sheet.axis"].browse(group_by["id"]).write(vals)
+
+        for order_by in data['order_by']:
+            vals = {
+                "value": order_by["value"],
+                "alias": order_by["alias"],
+                "query": order_by["query"],
+                "column": order_by["column"],
+                "type": "order"
+            }
+            if not order_by.get("id", False):
+                vals["sheet_id"] = rec.id
+                ord_rec = self.env["dashboard.sheet.axis"].create(vals)
+                order_by["id"] = ord_rec.id
+            else:
+                self.env["dashboard.sheet.axis"].browse(order_by["id"]).write(vals)
+
+        if data['options']:
+            for option in data['options'].values():
+                vals = {
+                    "sheet_id": rec.id,
+                    "global_filter_id": option['global_filter_id'],
+                    "field": option['field'],
+                    "name": option['name']
+                }
+                if self.env["dashboard.sheet.global"].search(
+                        [('sheet_id', '=', rec.id), ('global_filter_id', '=', option['global_filter_id'])]):
+                    self.env["dashboard.sheet.global"].search(
+                        [('sheet_id', '=', rec.id), ('global_filter_id', '=', option['global_filter_id'])]).write(vals)
+                else:
+                    self.env["dashboard.sheet.global"].create(vals)
+
+        rec.unlink_data(data["unlink_list"])
+        return {"rec_id": rec.id, "sheet_filter": sheet_filter, "is_new_sheet": is_new_sheet}
+
+    def set_sheet_position(self, config_id, **kwargs):
+        """Method to set the position of the sheet within a dashboard configuration."""
+        self.write({
+            "dashboard_sheet_option_ids": [fields.Command.create({
+                "dashboard_config_id": config_id,
+                "attributes": kwargs
+            })]
+        })
+
+    def unlink_data(self, unlink_list):
+        """Method to unlink data based on the provided unlink list."""
+        if unlink_list["axis"]:
+            self.env['dashboard.sheet.axis'].browse(unlink_list["axis"]).unlink()
+        if unlink_list["tables"]:
+            self.env['dashboard.sheet.table'].browse(unlink_list["tables"]).unlink()
+        if unlink_list["where"]:
+            self.env['dashboard.sheet.filter'].browse(unlink_list["where"]).unlink()
+        for config in unlink_list["configs"]:
+            attributes = self.env["dashboard.sheet.option"].search(
+                [('dashboard_sheet_id', '=', self.id), ('dashboard_config_id', '=', config)])
+            attributes.unlink()
+            self.env["dashboard.config"].browse(config).write({"sheet_ids": [fields.Command.unlink(self.id)]})
+
+    @api.depends("axis_ids.alias", "table_ids.join", "limit", "filter_ids.is_active", "query_gen")
+    def _compute_query(self):
+        """Generate the query from the given data"""
+        for rec in self:
+            if rec.query_gen:
+                rec.query = rec.query_gen
+                break
+            columns = rec.axis_ids.filtered(lambda x: x.type in ["measure", "dimension"])
+            joins = rec.table_ids.sorted(lambda x: bool(x.linked)).mapped('join')
+            query = f"""SELECT {', '.join(columns.mapped('query'))} FROM {' '.join(joins)}"""
+            where = rec.filter_ids.filtered(lambda x: x.is_active)
+            if where:
+                query += f" WHERE {' AND '.join(where.mapped('domain'))}"
+            columns_group = columns.filtered(lambda x: '(' in x.query)
+            not_columns_group = columns.filtered(lambda x: '(' not in x.query)
+            group_by = rec.axis_ids.filtered(lambda x: x.type == "group")
+            if group_by:
+                query += (f" GROUP BY {', '.join(group_by.mapped('column'))},"
+                          f" {', '.join(not_columns_group.mapped('alias'))}")
+            elif columns_group:
+                query += f" GROUP BY {', '.join(not_columns_group.mapped('alias'))}"
+            order_by = rec.axis_ids.filtered(lambda x: x.type == "order")
+            if order_by:
+                query += f" ORDER BY {', '.join(order_by.mapped('column'))}"
+            else:
+                initial = False
+                if group_by:
+                    initial = group_by.mapped('column')[0]
+                elif columns_group and not_columns_group:
+                    initial = not_columns_group.mapped('alias')[0]
+                else:
+                    main_table = rec.table_ids.filtered(lambda x: not x.linked)
+                    if main_table:
+                        main_table = main_table[-1]
+                        initial = f'{main_table.join}.id' if main_table else False
+                if initial:
+                    query += f" ORDER BY {initial}"
+
+            limit = rec.limit
+            if limit:
+                query += f" LIMIT {limit}"
+            rec.query = query
+
+    @api.model
+    def explain_with_ai(self, prompt_data, regenerate=False):
+        """Generate an explanation using AI for the given graph data."""
+        prompt = ("Generate an explanation using AI for the given graph data. "
+                  f"Graph data {prompt_data}. The AI should provide a "
+                  "comprehensive and insightful short explanation of the "
+                  "data presented in the graph, including key trends, "
+                  "anomalies, and any significant insights. The explanation "
+                  "should be suitable for inclusion in a BI dashboard's "
+                  "'Explain with AI' feature, and it should be clear and "
+                  "understandable to a non-technical audience. Please provide "
+                  "a detailed explanation of the data in the graph, "
+                  "highlighting any critical data points, changes over time, "
+                  "and any correlations or patterns that might be of "
+                  "significance to the viewer. Feel free to use natural "
+                  "language and provide context that enhances the user's "
+                  "understanding of the data. Also, highlight only the "
+                  "important parts (words) with two asterisks at the "
+                  "beginning and at the end, Make sure it is in "
+                  "MarkDown language.")
+        if regenerate:
+            prompt += ("Regenerate the response different from previous "
+                       "one and it should be shorter and very understandable.")
+        model = "gpt-3.5-turbo"
+        try:
+            client = OpenAI(api_key=self.env['ir.config_parameter'].sudo().get_param('cyllo_analytics.openai_api_key'))
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}], temperature=0)
+            return not bool(prompt_data), False, response.choices[0].message.content
+        except AuthenticationError:
+            return True, True, ("Please go to the settings and try adding a valid OpenAI API key. To get an API key, "
+                                "please visit the link [https://platform.openai.com/account/api-keys]("
+                                "https://platform.openai.com/account/api-keys).")
+        except Exception as error:
+            return True, False, error
+
+    def get_sheet_data(self):
+        """Method to retrieve data related to the sheet."""
+        configs = self.env["dashboard.config"].search([]).filtered(lambda x: self.id in x.sheet_ids.ids)
+        where = []
+        for rec in self.filter_ids:
+            data = rec.read(['name', 'domain'])[0]
+            data["active"] = rec.is_active
+            where.append(data)
+        join_data = []
+        all_models = []
+        join = []
+        for rec in self.table_ids:
+            join.append(rec.join)
+            val = {
+                "field": rec.field,
+                "join": rec.join,
+                "model": rec.model,
+                "model_id": rec.model_id.id,
+                "name": rec.name,
+                "string": rec.linked,
+                "id": rec.id
+            }
+            join_data.append(val)
+            all_models.append({"linked_by": val, **self.get_data(rec.model_id.id)})
+        dimension = (self.axis_ids.filtered(lambda x: x.type == "dimension")
+                     .read(["alias", "query", "column", "value", "type"]))
+        measure = (self.axis_ids.filtered(lambda x: x.type == "measure")
+                   .read(["alias", "query", "column", "value", "type"]))
+        group = (self.axis_ids.filtered(lambda x: x.type == "group")
+                 .read(["alias", "query", "column", "value", "type"]))
+        order = (self.axis_ids.filtered(lambda x: x.type == "order")
+                 .read(["alias", "query", "column", "value", "type"]))
+        options = {}
+        for option in self.env["dashboard.sheet.global"].search_read([('sheet_id', '=', self.id)]):
+            options[option['global_filter_id'][0]] = {
+                'id': option['id'], 'global_filter_id': option['global_filter_id'][0],
+                'field': option['field'], 'name': option['name']
+            }
+        return {
+            'dimension': dimension,
+            'dimension_axis': self.dimension_axis,
+            'measure': measure,
+            'groupBy': group,
+            'orderBy': order,
+            'name': self.name,
+            'limit': self.limit,
+            'type': [self.sheet_type_id.id, self.type],
+            'configs': configs.read(['display_name']) if configs else [],
+            'where': where,
+            "join": join,
+            "joinData": join_data,
+            "models": all_models,
+            'options': options,
+            'kpi': {
+                'target': self.kpi_target,
+                'measureView': self.kpi_view,
+                'description': self.kpi_description,
+                'redirect': self.kpi_redirect,
+                'name': self.kpi_name,
+                'kpiTarget': self.kpi_target_perc,
+                'icon': self.kpi_icon,
+                'model': self.kpi_model
+            }
+
+        }
+
+    def get_dashboard_sheet(self):
+        """Method to get dashboard sheet data."""
+        res = self.read()[0]
+        res["name"] = res["name"] + " (COPY)"
+        res["axis_ids"] = self.axis_ids.read()
+        res["filter_ids"] = self.filter_ids.read()
+        res["sheet_filter_ids"] = self.sheet_filter_ids.read()
+        res["sheet_type_id"] = self.sheet_type_id.id
+        res["table_ids"] = self.table_ids.read()
+        return [res]
+
+    def duplicate_sheet(self):
+        """Method to duplicate a dashboard sheet."""
+        res = self.get_dashboard_sheet()
+        val = self.create_duplicate(res)
+        return val.id
+
+    def create_duplicate(self, record):
+        """Method to create a duplicate of a dashboard sheet."""
+        create_val = [{
+            "name": sheet["name"],
+            "type": sheet["type"],
+            "limit": sheet["limit"],
+            "query_gen": sheet["query_gen"],
+            "dimension_axis": sheet["dimension_axis"],
+            "is_enabled": sheet["is_enabled"],
+            "axis_ids": [fields.Command.create({
+                "value": rec['value'],
+                "alias": rec['alias'],
+                "query": rec['query'],
+                "column": rec['column'],
+                "type": rec['type'],
+            }) for rec in sheet["axis_ids"]],
+            "table_ids": [fields.Command.create({
+                "name": table['name'],
+                "model": table['model'],
+                "linked": table['linked'],
+                "field": table['field'],
+                "join": table['join'],
+                "model_id": self.env['ir.model'].search(
+                    [('model', '=', table['model'])]).id,
+            }) for table in sheet["table_ids"]],
+            "filter_ids": [fields.Command.create({
+                "name": filter_data.get("name", False),
+                "domain": filter_data.get("domain", False),
+                "is_active": filter_data.get("is_active", False),
+            }) for filter_data in sheet["filter_ids"]],
+        } for sheet in record]
+        return self.create(create_val)
+
+    def fetch_data(self, field_list, config_id):
+        """Method to fetch data related to the sheet."""
+        sub_data = (self.dashboard_sheet_option_ids.filtered(
+            lambda res: res.dashboard_config_id.id == config_id).sorted(key="id", reverse=False).read(['attributes']))
+        rec = self.read(field_list)[0]
+        rec["dashboard_sheet_option_ids"] = sub_data
+        rec["filter_ids"] = self.filter_ids.read(['name', 'domain', 'is_active', 'sheet_id'])
+        rec["table_ids"] = self.table_ids.read()
+        rec["axis_ids"] = self.axis_ids.read()
+        filters = self.sheet_filter_ids.filtered(lambda res: res.global_filter_id.dashboard_config_id.id == config_id)
+        rec["sheet_filter_ids"] = [filter_id.get_data() for filter_id in filters] if filters else []
+        return rec
+
+
+class DashboardSheetFilter(models.Model):
+    """Dashboard Sheet filter Model"""
+    _name = 'dashboard.sheet.filter'
+    _description = 'Dashboard Sheet filter'
+
+    sheet_id = fields.Many2one('dashboard.sheet')
+    name = fields.Char(required=True)
+    domain = fields.Text()
+    is_active = fields.Boolean("Active", default=True)
+
+
+class DashboardFilter(models.Model):
+    """Dashboard Filter Model"""
+    _name = 'dashboard.filter'
+    _description = 'Dashboard Filter'
+
+    name = fields.Char(required=True)
+    field = fields.Char()
+
+
+class DashboardSheetTable(models.Model):
+    """Model representing tables used in dashboard sheets."""
+    _name = "dashboard.sheet.table"
+    _description = 'Dashboard Sheet Table'
+
+    name = fields.Char(required=True)
+    model = fields.Char(required=True)
+    linked = fields.Char("Linked String")
+    field = fields.Char()
+    join = fields.Text(required=True)
+    sheet_id = fields.Many2one('dashboard.sheet')
+    model_id = fields.Many2one('ir.model')
+
+
+class DashboardSheetAxis(models.Model):
+    """Model representing axis values used in dashboard sheets."""
+    _name = "dashboard.sheet.axis"
+    _description = 'Dashboard Sheet Axis'
+    _rec_name = "value"
+
+    value = fields.Char('Name')
+    alias = fields.Char('Alias')
+    query = fields.Text('Text')
+    column = fields.Char('Column')
+    type = fields.Selection(selection=[('measure', "Measure"), ('dimension', "Dimension"),
+                                       ('group', "Group By"), ('order', "Order By")])
+    sheet_id = fields.Many2one('dashboard.sheet', 'Sheet')
+
+
+class DashboardSheetGlobal(models.Model):
+    """Model representing global filters used in dashboard sheets."""
+    _name = 'dashboard.sheet.global'
+    _description = 'Dashboard Sheet Global'
+
+    global_filter_id = fields.Many2one('dashboard.global.filter')
+    field = fields.Char()
+    name = fields.Char()
+    sheet_id = fields.Many2one('dashboard.sheet')
+
+    def get_data(self):
+        """Retrieve data related to the global filter."""
+        rec = self.read(['field', 'name', 'sheet_id'])[0]
+        rec['global_filter_id'] = self.global_filter_id.read(
+            ['name', 'type', 'dashboard_config_id', 'relation', 'code', 'operator'])[0]
+        return rec
+
+
+class DashboardGlobalFilter(models.Model):
+    """Model representing global filters used in dashboards."""
+    _name = 'dashboard.global.filter'
+    _description = 'Dashboard Global Filter'
+
+    name = fields.Char()
+    type = fields.Char()
+    dashboard_config_id = fields.Many2one('dashboard.config')
+    relation = fields.Char()
+    code = fields.Char()
+    operator = fields.Selection([('=', '='), ('>=', '>='), ('<=', '<='), ('in', 'in')])

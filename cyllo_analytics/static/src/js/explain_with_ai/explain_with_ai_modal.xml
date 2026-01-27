@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="ExplainAIModal" owl="1">
+        <Dialog size="'fs'" contentClass="'explain-ai-modal'">
+            <t t-set-slot="header">
+                <t t-if="fullscreen">
+                    <button class="btn oi text oi-arrow-left" data-bs-dismiss="modal" aria-label="Close"
+                            t-on-click="dismiss"/>
+                </t>
+                <h4 class="modal-title text-break explain-ai-modal-text">
+                    Explain with AI
+                </h4>
+                <t t-if="!fullscreen">
+                    <button type="button" class="btn close-icon-modal ri-close-line text"
+                            aria-label="Close" tabindex="-1" t-on-click="dismiss"/>
+                </t>
+            </t>
+            <div class="d-flex" style="margin-left: 4%;" t-ref="root">
+                <div style="width: 50%; min-height:70vh;">
+                    <GraphTile t-if="state.data" value="chartProps" theme="props.currentTheme"
+                               themeColor="props.theme.theme_color" setImage.bind="setImage" style="style"/>
+                </div>
+                <div class="text-area" style="padding: 1.5%; margin-left: 2%; overflow-y: scroll; width: 50%; height: 70vh">
+                    <p class="text" t-out="explain"/>
+                    <div t-if="state.apiError" class="d-flex justify-content-start align-items-center">
+                        <button class="btn btn-primary" type="button" t-on-click="goToSettings">
+                            Settings
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <div class="explain-footer" style="margin-left: auto;position:relative;" t-ref="message">
+                    <div id="messageContainer"/>
+                    <button class="btn btn-secondary ri-file-copy-line m-1" t-on-click="copyToClip"/>
+                    <button class="btn btn-secondary ri-download-2-line m-1" t-on-click="download"/>
+                    <button class="btn btn-secondary ri-restart-line retry_btn m-1"
+                            t-on-click="retry"><span class="cy-retry">Regenerate</span></button>
+                    <button class="btn btn-secondary ri-user-shared-line retry_btn m-1"
+                            t-on-click="shareToUser"><span class="cy-retry">Share</span></button>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>

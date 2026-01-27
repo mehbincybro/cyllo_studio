@@ -1,0 +1,1168 @@
+.filter_table {
+    height: 78vh;
+    overflow-y: auto;
+}
+
+.default_filter {
+    width: 15em;
+}
+
+.sf-chart-image {
+    font-size: 1.2rem;
+    padding-left: 0.1rem;
+}
+
+.table_heading .note {
+    margin-right: auto;
+    text-align: end;
+    font-size: 15px;
+    color: #AFB7C9;
+}
+
+.churn_prediction_selected_filter h5 {
+    font-size: 1.25rem;
+}
+
+
+.churn_prediction_selected_filter h5 {
+    font-size: 1.25rem;
+}
+
+.cy-dashboard_state {
+    font-size: 14px;
+    color: #505050;
+    font-weight: 500;
+}
+
+.cy-dashboard_state p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+.cy-sticky--header {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 11;
+}
+
+.customer-details-table tbody tr:hover {
+    background: #e7e7e7;
+}
+
+.customer-details-table tbody tr {
+    cursor: pointer;
+}
+
+.customer-details-table th {
+    font-weight: 700;
+}
+
+.cust-details-main {
+    overflow: scroll;
+}
+
+.cy-sale-analysis_head {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+@media (max-width: 575px) {
+    .cy-sale-analysis_head {
+        font-size: 1rem;
+    }
+}
+
+.cy-sale_forecast-graph_img {
+    width: 50px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px !important;
+    background: transparent;
+
+}
+
+
+.cy-sales-forecast_graphtype:hover,
+.cy-sales-forecast_graphtype:focus,
+.cy-sales-forecast_graphtype.active {
+    border-color: #0E3A5D;
+    cursor: pointer;
+}
+
+.cy-chart-type {
+    border-radius: 2px !important;
+
+}
+
+.cy-sale-forecast_graph-container {
+    height: 460px;
+    width: 100%;
+
+}
+
+.cy-sales-forecast-img {
+    width: 100%;
+    height: 100%;
+}
+
+.cy-sales-forcaste_graph-area {
+    padding-right: 0rem;
+}
+
+@media (max-width: 768px) {
+    .cy-sales-forcaste_graph-area {
+        padding-right: 1rem;
+    }
+}
+
+.page_title {
+    font-size: 26px;
+}
+
+.page_sub_title {
+    font-size: 18px;
+}
+
+.churn_prediction_selected_filter .churn_predict_filter_details {
+    border-radius: 6px;
+    border: 1px solid #DFDFDF;
+    text-align: center;
+    height: 100px;
+}
+
+.churn_prediction_selected_filter .churn_predict_filter_details .number {
+    color: black;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.churn_prediction_selected_filter .churn_predict_filter_details .percnt {
+    color: black;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.cy-sales-cust_head {
+    color: #222222;
+    font-size: 1rem;
+    font-weight: 500;
+    white-space: nowrap;
+    margin: 0.5rem 0;
+}
+
+.cy-sale_cust--img-container {
+    padding: 1rem;
+    border: 1px solid #DFDFDF;
+    width: 100%;
+    border-radius: 4px;
+}
+
+.cy-sale-cust_tile {
+    min-width: -webkit-max-content;
+    min-width: -moz-max-content;
+    min-width: max-content;
+}
+
+.cy-sale_cust-graph-title {
+    color: #0E3A5D;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.cy-sale-custom_detail-table {
+    height: 150px;
+    overflow-y: auto;
+    display: block;
+}
+
+@media (max-width: 992px) {
+    .cy-sale-custom_detail-table {
+        height: 340px;
+    }
+}
+
+@media (max-width: 768px) {
+    .cy-sale-custom_detail-table {
+        height: 260px;
+    }
+}
+
+.cy-sale-custom_detail-table tbody td {
+    padding: 0.2rem 2rem;
+}
+
+.cy-dashboard_cell {
+    color: #505050;
+    font-size: 12px;
+    text-align: center;
+    padding: 0.2rem;
+}
+
+.cy-dashboard_cell p {
+    margin-bottom: 0px;
+}
+
+.cy-sales-analysis_customer-header {
+    background-color: #fff;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #DFDFDF;
+    color: black;
+    font-weight: 500;
+    padding: 0.4rem 0.2rem;
+    font-size: 12px;
+}
+
+.cy-sales-analysis_custom-headline {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0.4rem 0;
+    color: black;
+}
+
+.cy-card-container {
+    overflow: hidden;
+}
+
+.cy-card-container {
+    border-radius: 10px;
+    -webkit-box-shadow: 0px 0.5px 2px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0.5px 2px 0px rgba(0, 0, 0, 0.1);
+    border: 1px solid #DFDFDF;
+    background: #fff;
+}
+
+.cy-sales-analysis_custom-headline {
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0.4rem 0;
+    color: black;
+}
+
+.cy-sale-custom_detail-table {
+    height: 150px;
+    overflow-y: auto;
+    display: block;
+}
+
+.cy-sales-analysis__tile {
+    padding: 1rem 1.2rem;
+    background-color: rgba(247, 247, 247, 0.818);
+    border-radius: 5px;
+}
+
+.cy-dashboard_cell p {
+    font-size: 14px;
+}
+
+.cy-danger-txt {
+    color: #FF8982;
+}
+
+.cy-modal-form_label {
+    color: #0E3A5D;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-sheet-graph-name {
+    font-size: 12.8px;
+    padding: 0.4rem 0;
+    color: #505050;
+    font-weight: 500;
+}
+
+.cy-sheet_progress-secondary-card {
+    background-color: #fff;
+    color: black;
+}
+
+.cy-sheet_progress-state {
+    background-color: #1EC39A;
+    border-radius: 20px;
+}
+
+.cy-sheet_progress-container {
+    margin: 0.8rem 0;
+    background-color: #F7F7F7;
+    height: 0.5rem;
+    border-radius: 30px;
+}
+
+.cy-sheet_checkbox {
+    width: 0.8em;
+    height: 0.8em;
+    margin-top: 0.35em;
+    margin-left: -1em;
+}
+
+.custom-table {
+    width: 100%;
+}
+
+.custom-row {
+    border-collapse: collapse;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+}
+
+.custom-cell {
+    text-align: center;
+    padding: 8px;
+    border: none;
+}
+
+.custom-cell:hover {
+    background-color: lightgray;
+}
+
+.table_sty {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.table_sty th,
+.table_sty td {
+    border: 1px solid black;
+    padding: 8px;
+    text-align: center;
+}
+
+.align-centre-table {
+    text-align: center;
+}
+
+.cy-demand-prdt_sm-head {
+    font-size: 14px;
+    color: #222222;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 0.7rem;
+}
+
+.cy-demand-prdt_label {
+    font-size: 12px;
+    color: #505050;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 0rem 0.4rem;
+}
+
+.cy-demand_predict-graph-img {
+    height: 30px !important;
+    width: 50px !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.cy-demand_predict-graph-img i {
+    font-size: 1.2rem;
+}
+
+.cy-demand_predict-graph-img .cy-sheet-img {
+    width: unset;
+    height: unset;
+    padding-left: 0px;
+}
+
+.churn_prediction-graph_img .card {
+    height: 346px !important;
+    width: 100% !important;
+    padding: 1rem;
+    display: flex;
+    justify-content: center !important;
+    align-items: center !important;
+}
+
+.cy-empty_data-img {
+    width: 100px;
+}
+
+.cy-demand-predit_head {
+    font-size: 1.5rem !important;
+    font-weight: 600;
+    color: #0E3A5D;
+    white-space: nowrap;
+}
+
+.cy-demand-predit_subhead {
+    font-size: 1rem !important;
+    color: grey;
+    margin-top: -30px;
+    width: 100%
+
+}
+
+@media (max-width: 768px) {
+    .cy-demand-predit_head {
+        white-space: wrap;
+    }
+}
+
+.cy-demand_predit-input {
+    min-width: 82px;
+    font-size: 12px;
+}
+
+
+.cy-demand_prediction-table {
+    position: relative;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.cy-demand_prediction-table_list {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.cy-demand_prediction-head {
+    background-color: #F7F7F7;
+    position: sticky;
+    top: 0px;
+    left: 0px;
+    font-weight: 500;
+    border: 1px solid #DFDFDF;
+
+}
+
+.cy-demand_predict-list {
+    padding-left: 0px;
+    list-style: none;
+    overflow-y: auto;
+    background-color: #fff;
+    margin: 1rem 0;
+    max-height: 82vh;
+
+
+}
+
+.cy-demand_predict-list_item {
+    padding: 0.5rem 1rem;
+}
+
+.cy-empty_text {
+    max-width: 64%;
+    color: #505050;
+    text-align: center;
+}
+
+.cy-demand_prediction-table th,
+.cy-demand_prediction-table td {
+    border: 1px solid #DFDFDF;
+    border-collapse: collapse;
+    padding: 0.4rem 0.8rem;
+    font-size: 12.8px;
+    color: #505050;
+    text-align: center;
+}
+
+.cy-demand_prediction-table_list th {
+    position: sticky;
+    left: 0px;
+    top: 0px;
+    background-color: #F7F7F7;
+    border: 1px solid #DFDFDF;
+}
+
+.cy-demand_sub-table {
+    overflow: auto;
+}
+
+.cust-frequency {
+    color: #222222 !important;
+}
+
+.cust-frequency:hover {
+    color: red;
+    text-decoration: underline;
+}
+
+.cy-churn_table .ri-eye-line:hover {
+    color: #000 !important;
+}
+
+.cy-churn_table .ri-eye-line {
+    color: #b8b7b7 !important;
+}
+
+.cy-churn_table .ri-arrow-right-circle-fill:hover {
+    color: #000 !important;
+}
+
+.cy-churn_table .cy_sale_redirect {
+    display: none;
+}
+
+.cy-table_mainhead-row {
+    position: sticky;
+    left: 0px;
+    top: 0px;
+    background-color: #F7F7F7;
+}
+
+.cy-demand-predict-subhead {
+    background-color: #F7F7F7;
+}
+
+.cy-demand_prediction-head:after {
+    content: "";
+    width: 100%;
+    background-color: #F7F7F7;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    z-index: -1;
+}
+
+.information-coef {
+    display: none;
+    background-color: #F7F7F7;
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    z-index: 1;
+    position: absolute;
+    right: 2rem;
+    top: 44rem;
+}
+
+.i-icon:hover .information-coef {
+    color: red;
+    display: block;
+}
+
+.no-data-forbid {
+    font-size: 6rem;
+}
+
+.demand_prediction-pdf {
+    background-color: #f0f1f3
+}
+
+.cyllo_demand_prdt_main-container {
+    padding: 0rem;
+    border: 1px solid #dfdfdf;
+    margin: 1rem;
+    margin-top: 0px;
+    background-color: #fff;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+}
+
+.cy-demand-predit_head {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #222222;
+    white-space: nowrap;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-demand-prdt_sm-head {
+    font-size: 14px;
+    color: #222222;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 0.7rem;
+    font-family: "Inter", sans-serif;
+}
+
+.btn-export {
+    margin-top: 4px;
+    width: 4rem !important;
+    font-size: 10px;
+    height: 1.5rem;
+}
+
+.cy-demand-prdt_label {
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+    color: #505050;
+    font-weight: 500;
+    white-space: nowrap;
+    padding: 0rem 0.4rem;
+}
+
+.cy-demand_predit-input {
+    min-width: 82px;
+    font-size: 12px;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-demand_predict-graph-img {
+    height: 50px;
+    width: 50px;
+}
+
+.cy-demand_predict-list {
+    padding-left: 0px;
+    list-style: none;
+
+    overflow-y: auto;
+}
+
+.cy-demand_predict-list_item {
+    padding: 0.5rem 1rem;
+}
+
+.cy-sheet-draggable-btn {
+    background-color: #F7F7F7;
+    cursor: -webkit-grabbing;
+    cursor: pointer;
+    position: relative;
+    padding: 0.5rem;
+    color: #0E3A5D;
+    font-size: 12.8px;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-sheet-draggable-btn:hover {
+    -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 4px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 4px;
+}
+
+.cyllo_demand-prdict_product-cnt {
+    background-color: #fff;
+    padding: 1rem;
+    border: 1px solid #dfdfdf;
+    border-left: 0px;
+}
+
+.cy-demand_predict-btn {
+
+    cursor: pointer;
+    position: relative;
+    padding: 1rem;
+    color: #505050;
+    font-size: 14px;
+    font-family: "Inter", sans-serif;
+    background-color: #fff;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    border-radius: 6px;
+}
+
+.cy-demand_predict-btn:hover, .cy-demand_predict-btn.active {
+    background-color: #f0f1f3;
+    border-right: 0px;
+    color: #94b300;
+}
+
+.cy_demand_predict-nodata {
+    background-color: #fff;
+    padding-left: 0px;
+
+}
+
+.cy-demand_prediction-table {
+    position: relative;
+    overflow: hidden;
+    margin: 1rem 0;
+}
+
+.cy-demand_prediction-table_list {
+    width: 100%;
+    white-space: nowrap;
+}
+
+.cy-demand_sub-table {
+    overflow: auto;
+}
+
+.cy-demand_prediction-head {
+    background-color: #F7F7F7;
+    position: sticky;
+    top: 0px;
+    left: 0px;
+    font-weight: 500;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-demand_prediction-table th, .cy-demand_prediction-table td {
+    border: 1px solid #DFDFDF;
+    border-collapse: collapse;
+    padding: 0.6rem 0.8rem;
+    font-size: 12.8px;
+    font-family: "Inter", sans-serif;
+    color: #505050;
+    text-align: center;
+}
+
+.cy-sheet-img {
+    font-size: 2.6rem;
+    color: #454745;
+    padding-left: 5px
+}
+
+.cy-demand_prediction-table_list tr th:first-child {
+    position: sticky;
+    left: 0px;
+    top: 0px;
+    background-color: #F7F7F7;
+}
+
+.cy-image {
+    width: 100%;
+}
+
+.sale-coef-information {
+    display: none;
+    background-color: #F7F7F7;
+    padding: 12px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+    z-index: 1;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 20rem;
+}
+
+.icon-sale-i:hover .sale-coef-information {
+    color: red;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .cy-demand-predit_head {
+        white-space: wrap;
+    }
+}
+
+.cy-churn_accordion--item {
+    background-color: transparent;
+}
+
+.cy-churn_accordion-btn {
+    background-color: transparent;
+}
+
+.cy-churn_table {
+    overflow: auto;
+}
+
+.cy-churn__success {
+    position: relative;
+    margin-left: 1rem;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+}
+
+.cy-churn__success::before {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50px;
+    background-color: #5EB717;
+    position: absolute;
+    left: -14px;
+}
+
+.cy-ps_profile {
+    text-transform: uppercase;
+    font-size: 10px;
+    font-weight: 400;
+    font-family: "Fira Sans", sans-serif;
+    border-radius: 3px;
+    margin-right: 6px;
+    height: 35px;
+    width: 35px;
+    border-radius: 20px;
+}
+
+.cy-ps_profile-jd {
+    color: #1bb2f1;
+}
+
+.cy-ps_profile-sr {
+    color: #f1821b;
+}
+
+.cy-churn_tile-text {
+    color: #222222;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 0px;
+}
+
+.cy-churn_tabl-header__section .cy-icons {
+    font-size: 13px !important;
+}
+
+.cy-churn_tile--perc {
+    font-size: 42px;
+    color: #505050;
+    font-weight: 300;
+    margin-top: 0.8rem;
+}
+
+.cy-churn_tile-toChurn {
+    background-color: #5EB717 !important;
+}
+
+.cy-churn_tile-notChurn {
+    background-color: #FF4B4B !important;
+}
+
+.cy-churn_tile {
+    border-radius: 2px;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    -webkit-box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.05);
+    box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    width: 49%;
+    height: 209px;
+    margin-bottom: 15px;
+}
+
+.top-churn-tile {
+    margin-right: 2%;
+    /*margin-right: 18px;*/
+}
+
+
+.cy-churn_tile--icon {
+    font-size: 18px;
+    padding: 3px 12px;
+    background-color: #f9aa4f;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    color: #fff;
+    width: 42px;
+    height: 42px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-align: center;
+    -ms-flex-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+}
+
+.cy-marketing-auto_add-parent-container {
+    position: absolute;
+    border-radius: 4px;
+    border: 1px solid #dfdfdf;
+    background: #fff;
+    -webkit-box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.09);
+    box-shadow: 0px 2px 12px 0px rgba(0, 0, 0, 0.09);
+    right: 0px;
+    width: 100%;
+    top: 45px;
+    min-width: 300px;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+    z-index: 1;
+    margin-top: 40px;
+}
+
+.cy-churn-main_head {
+    color: #222222;
+    font-size: 26px !important;
+    font-weight: 400;
+}
+
+.cy-churn-sub_head {
+    font-size: 18px;
+    color: #505050;
+    font-weight: 400;
+}
+
+.cy-churn-filter-btn {
+    text-shadow: none;
+    font-weight: 500;
+}
+
+.cy-churn_tile-activeChurn {
+    background-color: #3E54D5;
+}
+
+.cy-main {
+    background-color: #f0f1f3;
+    height: 94vh;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+.cy-churn_graph .card {
+    border: none;
+    margin-top: 0px !important;
+}
+
+/*.cy-button-primary-stroke {*/
+/*    border-radius: 6px;*/
+/*    border-top: 1px solid #4B9212;*/
+/*    border-right: 1px solid #4B9212;*/
+/*    border-bottom: 1px solid #4B9212;*/
+/*    border-left: 1px solid #4B9212;*/
+/*    -webkit-box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);*/
+/*    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.15);*/
+/*    background: #5EB717;*/
+/*    color: #fff;*/
+/*    font-weight: 600;*/
+/*    font-size: 13px;*/
+/*    text-shadow: 0.200000003px 0.200000003px 0px rgba(0, 0, 0, 0.25);*/
+/*}*/
+
+.cy-button--box {
+    background-color: transparent !important;
+    border: none !important;
+}
+
+.cy-button--box:hover {
+    background-color: #e1e2e3 !important;
+    color: #94b300 !important;
+}
+
+.cy-button--box:hover i {
+    color: #94b300 !important;
+    font-weight: 700;
+}
+
+.cy-border-right {
+    border-right: 1px solid #dfdfdf;
+}
+
+.cy-button-primary-stroke:hover {
+    color: #fff;
+}
+
+.cy-button-primary-stroke:focus {
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    border-color: #2A3779;
+}
+
+.cy-churn__failed::before {
+    background-color: #FF4B4B;
+}
+
+.cy-churn_table--container .cy-listView-table tbody td {
+    padding: 0.4rem 0.5rem;
+}
+
+.apply-filter-btn {
+    text-align: center;
+}
+
+.cy-listView-table tbody tr:hover {
+    background: #eef2ef;
+    cursor: pointer;
+}
+
+.cy-listView-table tbody tr:hover .cy_sale_redirect {
+    display: block;
+}
+
+.cy_sales_prediction .cy-sale-analysis_nav label {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #212529;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-empty_data {
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 60%;
+    width: 100%;
+    top: 60%;
+}
+
+.cy-empty_data {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    width: 100%;
+    top: 60%;
+}
+
+.cy_sale-empty_data {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    left: 55%;
+    width: 100%;
+    height: 50%;
+    top: 40rem;
+}
+
+.cy_churn_info_content {
+    position: absolute;
+    background-color: #222222;
+    border-radius: 4px;
+    padding: 0.3rem 0.5rem 0.3rem 0.5rem;
+    color: #fff;
+    font-size: 12.8px;
+    max-width: 300px;
+    width: -webkit-max-content;
+    width: -moz-max-content;
+    width: max-content;
+    display: none;
+    word-wrap: break-word;
+    top: 10px;
+    right: 39px;
+}
+
+.cy_churn_active_info:hover + .active_cust_explanation {
+    display: block;
+}
+
+.cy_churn_total_cust_info:hover + .total_cust_explanation {
+    display: block;
+    top: 10px;
+    right: 39px;
+}
+
+.cy_churn_perc_info:hover + .churn_perc_explanation {
+    display: block;
+}
+
+.cy_not_churn_perc_info:hover + .not_churn_perc_explanation {
+    display: block;
+}
+
+.cy_churn_info {
+    width: fit-content;
+    position: absolute;
+    top: 5px;
+    right: 8px;
+    color: #a1a1a1;
+    background: none;
+}
+
+.cy_churn_info:hover {
+    color: #000;
+}
+
+.cy_sale_redirect i {
+    color: #b8b7b7 !important;
+}
+
+.cy-button--box {
+    border-radius: 2px !important;
+    border: 1px solid #dfdfdf !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    font-weight: 600;
+}
+
+.cy-button--box:hover {
+    background-color: #e1e2e3 !important;
+    color: #94b300 !important;
+}
+
+.cy-button--box:hover i {
+    color: #94b300 !important;
+    font-weight: 700;
+}
+
+.cy-sales-analysis--hover {
+    transition: left 0.3s ease;
+    font-size: 12.8px;
+    color: #505050 !important;
+    padding: 0px;
+    font-weight: 600;
+
+    display: none;
+    width: max-content;
+
+    overflow: hidden;
+
+}
+
+.cy-template-title-info-container-box {
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+    padding: 0 8.5px 0;
+    margin-top: 0.2rem;
+    border: 1px solid #dfdfdf;
+    border-radius: 25px;
+    background-color: #fff;
+    width: fit-content;
+    font-weight: 500;
+    font-size: 12.8px
+}
+
+.cy-template-title-info-container-box:hover {
+    font-size: 12.8px;
+    color: #505050 !important;
+    background-color: #fff;
+
+    transform: scale(1.1) translateX(24px);
+    box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+    font-weight: 600;
+
+
+}
+
+.cy-template-title-info-container-box:hover .cy-sales-analysis--hover {
+    display: block;
+
+}
+
+.cy-demand-prdt-info-date {
+    display: block;
+}
+
+.cy-template-title-info-container-box:hover .cy-demand-prdt-info-date {
+    display: none;
+}
+
+.demand_prediction_chart {
+    width: 76vw;
+    height: 50vh;
+}
+
+.o_image_40_contain {
+    object-fit: contain;
+    width: 40px;
+    height: 40px;
+}
+
+.cy_kpi-sale-card-container .cy_churn_info {
+    position: absolute;
+    right: 10px;
+    float: right;
+}
+
+.cyllo_demand_prdt_main-container .cy-search {
+    border-radius: 6px 0 0 6px !important;
+    border: 1px solid #ced4da;
+}
+
+.cy-dem-prod-search {
+    background: white;
+    padding: 0.3125rem 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #495057;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    appearance: none;
+    border-radius: 0.5rem;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.cyllo_demand_prdt_main-container .form-control:focus{
+    border: 1px solid #CED4DA;
+    box-shadow: unset !important;
+}

@@ -1,0 +1,2657 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_rental_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-30 08:18+0000\n"
+"PO-Revision-Date: 2023-11-30 08:18+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "&amp; Shipping"
+msgstr "& amp;Verzenden"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "&amp;nbsp;"
+msgstr "& amp; nbsp;"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "<b>Communication:</b>"
+msgstr "<b> Communicatie: </b>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid ""
+"<b>Rental\n"
+"                                                                        Charges\n"
+"                                                                    </b>"
+msgstr ""
+"<b> huur\n"
+"                                                                        Beschuldigingen\n"
+"                                                                    </b>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<b>Shipping:</b>"
+msgstr "<b> Verzending: </b>"
+
+#. module: cyllo_rental_base
+#: model:mail.template,body_html:cyllo_rental_base.email_expiration_rental_contract
+msgid ""
+"<br>\n"
+"                <h4>Dear<t t-out=\"object.partner_id.name\"></t>,\n"
+"                    <br>\n"
+"                    Your rental order<t t-out=\"object.name\"></t>,\n"
+"                    has been expired.\n"
+"                </h4>\n"
+"            "
+msgstr ""
+"<br>\n"
+"                <H4> Beste <T t-out = \"Object.Partner_ID.Name\"> </t>,\n"
+"                    <br>\n"
+"                    Uw huurorder <t t-out = \"object.name\"> </t>,\n"
+"                    is verlopen.\n"
+"                </h4>"
+
+#. module: cyllo_rental_base
+#: model:mail.template,body_html:cyllo_rental_base.email_pickup_rental_order
+msgid ""
+"<br>\n"
+"                <h4>Dear<t t-out=\"object.partner_id.name\"></t>,\n"
+"                    <br>\n"
+"                    Your rental order<t t-out=\"object.name\"></t>,\n"
+"                    has been picked up.\n"
+"                </h4>\n"
+"            "
+msgstr ""
+"<br>\n"
+"                <H4> Beste <T t-out = \"Object.Partner_ID.Name\"> </t>,\n"
+"                    <br>\n"
+"                    Uw huurorder <t t-out = \"object.name\"> </t>,\n"
+"                    is opgepikt.\n"
+"                </h4>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid ""
+"<i class=\"fa fa-check\"/>\n"
+"                        Ship to this address"
+msgstr ""
+"<i class = \"fa fa-check\"/>\n"
+"                        Verzend naar dit adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+msgid ""
+"<i class=\"fa fa-edit\"/>\n"
+"                    Edit"
+msgstr ""
+"<i class = \"fa fa-edit\"/>\n"
+"                    Bewerking"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"<i class=\"fa fa-plus-square\"/>\n"
+"                                                        <span>Add an address\n"
+"                                                        </span>"
+msgstr ""
+"<i class = \"fa fa-plus-square\"/>\n"
+"                                                        <span> Voeg een adres toe\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid ""
+"<i class=\"fa fa-print\"/>\n"
+"                                                Print"
+msgstr ""
+"<i class = \"fa fa-print\"/>\n"
+"                                                Afdrukken"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<i class=\"fa fa-print\"/>\n"
+"                                        View Details"
+msgstr ""
+"<i class = \"fa fa-print\"/>\n"
+"                                        Bekijk details"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<i class=\"oi oi-chevron-left\"/>\n"
+"                                            <span>Back</span>"
+msgstr ""
+"<i class = \"oi oi-chevron-left\"/>\n"
+"                                            <span> terug </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<option value=\"\">Country...\n"
+"                                                </option>"
+msgstr ""
+"<optiewaarde = \"\"> Land ...\n"
+"                                                </option>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<option value=\"\">State /\n"
+"                                                    Province...\n"
+"                                                </option>"
+msgstr ""
+"<optiewaarde = \"\"> status /\n"
+"                                                    Provincie...\n"
+"                                                </option>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<small class=\"form-text text-muted\">\n"
+"                                                        Changing company name or\n"
+"                                                        VAT number is not\n"
+"                                                        allowed once document(s)\n"
+"                                                        have been issued for\n"
+"                                                        your account. Please\n"
+"                                                        contact us directly for\n"
+"                                                        this operation.\n"
+"                                                    </small>"
+msgstr ""
+"<Small Class = \"Form-Text Text-Muted\">\n"
+"                                                        De bedrijfsnaam wijzigen of\n"
+"                                                        Btw -nummer is dat niet\n"
+"                                                        toegestaan zodra document (s)\n"
+"                                                        zijn uitgegeven voor\n"
+"                                                        jouw rekening.Alsjeblieft\n"
+"                                                        Neem rechtstreeks contact met ons op voor\n"
+"                                                        deze bewerking.\n"
+"                                                    </mall>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "<small class=\"text-muted\">Your contact</small>"
+msgstr "<Small Class = \"Text-Muted\"> Uw contact </mall>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<small>\n"
+"                                <b>Order Date</b>\n"
+"                            </small>"
+msgstr ""
+"<small>\n"
+"                                <b> Besteldatum </b>\n"
+"                            </small>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid ""
+"<span class=\"category_selected\">All\n"
+"                                            Rental Products\n"
+"                                        </span>"
+msgstr ""
+"<span class = \"category_selected\"> allemaal\n"
+"                                            Huurproducten\n"
+"                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+msgid ""
+"<span class=\"fa fa-chevron-down fa-border float-end\" role=\"img\" aria-"
+"label=\"Details\" title=\"Details\"/>"
+msgstr ""
+"<span class = \"fa fa-chevron-down fa-borde float-end\" rol = \"img\" aria-"
+"label = \"details\" title = \"details\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "<span class=\"fs-4\">Saved payment methods</span>"
+msgstr "<span class = \"fs-4\"> opgeslagen betalingsmethoden </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Duration :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Duur :\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    End date :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Einddatum :\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Quantity\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Hoeveelheid\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Start Date :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Begin datum :\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Subtotal :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Subtotaal:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Total :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Totaal:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<span class=\"text-nowrap\">\n"
+"                                                            Tax:\n"
+"                                                        </span>"
+msgstr ""
+"<span class = \"text-nowrap\">\n"
+"                                                            Belasting:\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid ""
+"<span>\n"
+"                                        <b>Invoicing and Shipping Address</b>\n"
+"                                    </span>"
+msgstr ""
+"<span>\n"
+"                                        <b> Adres voor factureren en verzending </b>\n"
+"                                    </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid ""
+"<span>\n"
+"                                        <b>Order Date :&amp;nbsp;</b>\n"
+"                                    </span>"
+msgstr ""
+"<span>\n"
+"                                        <b> Besteldatum: & amp; nbsp; </b>\n"
+"                                    </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid "<span>-</span>"
+msgstr "<span>-</span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"<span>Confirm</span>\n"
+"                                    <i class=\"oi oi-chevron-right\"/>"
+msgstr ""
+"<span> Bevestig </span>\n"
+"                                    <i class = \"oi oi-chevron-recht\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<span>Confirmed</span>"
+msgstr "<span> bevestigd </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<span>Next</span>\n"
+"                                            <i class=\"oi oi-chevron-right\"/>"
+msgstr ""
+"<span> Volgende </span>\n"
+"                                            <i class = \"oi oi-chevron-recht\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid ""
+"<span>Order\n"
+"                                                    Date:\n"
+"                                                </span>"
+msgstr ""
+"<span> bestelling\n"
+"                                                    Datum:\n"
+"                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<span>Order</span>"
+msgstr "<span> Bestel </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid ""
+"<span>Unfortunately your order can not be confirmed as\n"
+"                            the amount of your payment does not match the amount\n"
+"                            of your cart.\n"
+"                            Please contact the responsible of the shop for more\n"
+"                            information.\n"
+"                        </span>"
+msgstr ""
+"<span> Helaas kan uw bestelling niet worden bevestigd als\n"
+"                            Het bedrag van uw betaling komt niet overeen met het bedrag\n"
+"                            van je kar.\n"
+"                            Neem contact op met de verantwoordelijke van de winkel voor meer\n"
+"                            informatie.\n"
+"                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "<span>Your Order Id is :</span>"
+msgstr "<span> Uw bestel -ID is: </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"<strong>\n"
+"                                                <i class=\"oi oi-arrow-right\"/>\n"
+"                                                View alternatives\n"
+"                                            </strong>"
+msgstr ""
+"<strong>\n"
+"                                                <i class = \"oi oi-arrow-right\"/>\n"
+"                                                Bekijk alternatieven\n"
+"                                            </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"<strong>No suitable payment option could be\n"
+"                                        found.\n"
+"                                    </strong>\n"
+"                                    <br/>"
+msgstr ""
+"<strong> geen geschikte betalingsoptie zou kunnen zijn\n"
+"                                        gevonden.\n"
+"                                    </strong>\n"
+"                                    <br/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<strong>Order Date</strong>\n"
+"                                <br/>"
+msgstr ""
+"<strong> besteldatum </strong>\n"
+"                                <br/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<strong>Payment Information:</strong>"
+msgstr "<strong> Betalingsinformatie: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "<strong>Sales Person :</strong>"
+msgstr "<strong> Verkooppersoon: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<strong>Total:\n"
+"                                                        </strong>"
+msgstr ""
+"<strong> totaal:\n"
+"                                                        </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "<strong>Total:</strong>"
+msgstr "<strong> totaal: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<strong>Untaxed Amount:\n"
+"                                                        </strong>"
+msgstr ""
+"<strong> Untaxed bedrag:\n"
+"                                                        </strong>"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_warning
+msgid "Access warning"
+msgstr "Toegang waarschuwing"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_needaction
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_needaction
+msgid "Action Needed"
+msgstr "Actie nodig"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_ids
+msgid "Activities"
+msgstr "Activiteiten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Activiteitsuitzondering decoratie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_state
+msgid "Activity State"
+msgstr "Activiteitstoestand"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Activiteitstype pictogram"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a note"
+msgstr "Voeg een notitie toe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a product"
+msgstr "Voeg een product toe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a section"
+msgstr "Voeg een sectie toe"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__delay_amount
+msgid "Additional amount charged for delays in returning the product."
+msgstr ""
+"Extra bedrag in rekening gebracht voor vertragingen bij het retourneren van "
+"het product."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__extra_hourly_price
+msgid "Additional hourly price for renting this product"
+msgstr "Extra uurprijs voor het huren van dit product"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__remarks
+msgid "Additional remarks or notes for the checklist item"
+msgstr "Extra opmerkingen of notities voor het checklistitem"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Address"
+msgstr "Adres"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_manager
+msgid "Administrator"
+msgstr "Beheerder"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "All"
+msgstr "Alle"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__amount
+msgid "Amount"
+msgstr "Hoeveelheid"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_paid
+msgid "Amount Paid"
+msgstr "Betaald bedrag"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__apply_after
+msgid "Apply after (hours)"
+msgstr "Aanvellen na (uren)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__apply_after
+msgid "Apply the extra hourly price after this duration"
+msgstr "Pas de extra uurprijs na deze duur toe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid "Approved"
+msgstr "Goedgekeurd"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_attachment_count
+msgid "Attachment Count"
+msgstr "Bijlage tellen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__is_available
+msgid "Available"
+msgstr "Beschikbaar"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Be aware!"
+msgstr "Pas op! "
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Billing"
+msgstr "Het factureren"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"Billing\n"
+"                                        Address"
+msgstr ""
+"Het factureren\n"
+"                                        Adres"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__can_be_returned
+msgid "Can be returned"
+msgstr "Kan worden geretourneerd"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+msgid "Cancel"
+msgstr "Annuleren"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Changing VAT number is\n"
+"                                                        not allowed once\n"
+"                                                        document(s) have been\n"
+"                                                        issued for your account.\n"
+"                                                        Please contact us\n"
+"                                                        directly for this\n"
+"                                                        operation."
+msgstr ""
+"Veranderen btw -nummer is\n"
+"                                                        niet één keer toegestaan\n"
+"                                                        Document (en) zijn geweest\n"
+"                                                        uitgegeven voor uw account.\n"
+"                                                        Contacteer ons alsjeblieft\n"
+"                                                        Direct hiervoor\n"
+"                                                        operatie."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Changing company name is\n"
+"                                                        not allowed once\n"
+"                                                        document(s) have been\n"
+"                                                        issued for your account.\n"
+"                                                        Please contact us\n"
+"                                                        directly for this\n"
+"                                                        operation."
+msgstr ""
+"Veranderen van de bedrijfsnaam is\n"
+"                                                        niet één keer toegestaan\n"
+"                                                        Document (en) zijn geweest\n"
+"                                                        uitgegeven voor uw account.\n"
+"                                                        Contacteer ons alsjeblieft\n"
+"                                                        Direct hiervoor\n"
+"                                                        operatie."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__is_rental
+msgid "Check this box if this product can be rented"
+msgstr "Vink dit vakje aan als dit product kan worden gehuurd"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__rental_checklist_ids
+msgid "Checklist for rental products and accessories"
+msgstr "Checklist voor huurproducten en accessoires"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "City"
+msgstr "Stad"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__closed
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "Closed"
+msgstr "Gesloten"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Communication history"
+msgstr "Communicatiegeschiedenis"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_res_company
+msgid "Companies"
+msgstr "Bedrijven"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__company_id
+msgid "Company"
+msgstr "Bedrijf"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Company Name"
+msgstr "Bedrijfsnaam"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Confirm"
+msgstr "Bevestigen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"Confirm\n"
+"                                            Order"
+msgstr ""
+"Bevestigen\n"
+"                                            Volgorde"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Confirm Order"
+msgstr "Bevestig bestelling"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_bank_statement_line__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_move__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_payment__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__contract_id
+msgid "Contract"
+msgstr "Contract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_end_date
+msgid "Contract Ending Date"
+msgstr "Contract einddatum"
+
+#. module: cyllo_rental_base
+#: model:mail.template,name:cyllo_rental_base.email_expiration_rental_contract
+msgid "Contract Expiration Notify"
+msgstr "Contract vervallen op de hoogte"
+
+#. module: cyllo_rental_base
+#: model:mail.template,subject:cyllo_rental_base.email_expiration_rental_contract
+msgid "Contract Expired"
+msgstr "Contract verlopen"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_contract_lines
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+msgid "Contract Lines"
+msgstr "Contractlijnen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__name
+msgid "Contract Name"
+msgstr "Contractnaam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_start_date
+msgid "Contract Start Date"
+msgstr "Contract startdatum"
+
+#. module: cyllo_rental_base
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_contracts_lease
+msgid "Contracts/Lease"
+msgstr "Contracten/lease"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__pickup_id
+msgid "Corresponding pickup order"
+msgstr "Bijbehorende pick -up order"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Country"
+msgstr "Land"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.server,name:cyllo_rental_base.ir_cron_scheduler_recurring_action_ir_actions_server
+msgid "Create Recurring Invoice"
+msgstr "Creëer terugkerende factuur"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "Create Request"
+msgstr "Verzoek maken"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__invoice_recurrence
+msgid "Create invoices at every"
+msgstr "Maak een facturen bij elke"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__create_uid
+msgid "Created by"
+msgstr "Gemaakt door"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__create_date
+msgid "Created on"
+msgstr "Gemaakt op"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__currency_id
+msgid "Currency"
+msgstr "Valuta"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__current_rented_quantity
+msgid "Currently Rented Quantity"
+msgstr "Momenteel gehuurde hoeveelheid"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__partner_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_id
+msgid "Customer"
+msgstr "Klant"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__access_url
+msgid "Customer Portal URL"
+msgstr "Klantportaal -URL"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__date_order
+msgid "Date"
+msgstr "Datum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__pickup_date
+msgid "Date and time when the product is picked up."
+msgstr "Datum en tijd wanneer het product wordt opgehaald."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__return_date
+msgid "Date and time when the product is returned."
+msgstr "Datum en tijd wanneer het product wordt geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__pickup_date
+msgid "Date of pickuping the rental products"
+msgstr "Datum van het ophalen van de huurproducten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__day
+msgid "Day"
+msgstr "Dag"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_charging__rental_period__days
+msgid "Days"
+msgstr "Dagen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__delay_product_id
+msgid "Delay product"
+msgstr "Vertraagt het product"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_shipping_id
+msgid "Delivery Address"
+msgstr "Bezorgadres"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__name
+msgid "Description"
+msgstr "Beschrijving"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__name
+msgid "Description of the rental order line."
+msgstr "Beschrijving van de huuroverstellingslijn."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid "Details"
+msgstr "Details"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Disc.%"
+msgstr "Schijf.%"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__discount
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__discount
+msgid "Discount (%)"
+msgstr "Korting (%)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__discount
+msgid "Discount applied to the rental order line."
+msgstr "Korting toegepast op de huurapportage."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__display_name
+msgid "Display Name"
+msgstr "Weergavenaam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__display_type
+msgid "Display type"
+msgstr "Type weergave"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__draft
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Draft"
+msgstr "Voorlopige versie"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Draft Orders"
+msgstr "Opdrachtbestellingen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__duration
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Duration"
+msgstr "Duur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__duration
+msgid "Duration of the rental order line."
+msgstr "Duur van de huuroverstellingslijn."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Edit"
+msgstr "Bewerking"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid "Edit this address"
+msgstr "Verander dit adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Email"
+msgstr "E -mail"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "End Date:"
+msgstr "Einddatum:"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__expired
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "Expired"
+msgstr "Verlopen"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.server,name:cyllo_rental_base.ir_cron_scheduler_expired_contracts_ir_actions_server
+msgid "Expired Contracts"
+msgstr "Verlopen contracten"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Extra Costs"
+msgstr "Extra kosten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__delay_amount
+msgid "Extra fine"
+msgstr "Extra fijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__extra_hours
+msgid "Extra hours"
+msgstr "Extra uren"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__extra_hours
+msgid "Extra hours added to the rental order line."
+msgstr "Extra uren toegevoegd aan de huuraderbestandlijn."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Fees"
+msgstr "Vergoedingen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Fill in your address"
+msgstr "Vul uw adres in"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_follower_ids
+msgid "Followers"
+msgstr "Volgers"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Volgers (partners)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Lettertype Geweldig pictogram b.v.fa-taken"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Group By"
+msgstr "Groep door"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__has_message
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__has_message
+msgid "Has Message"
+msgstr "Heeft bericht"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_charging__rental_period__hours
+msgid "Hours"
+msgstr "Uren"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__id
+msgid "ID"
+msgstr "ID kaart"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_exception_icon
+msgid "Icon"
+msgstr "Icoon"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Pictogram om een uitzonderingsactiviteit aan te geven."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_needaction
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Indien aangevinkt, vereisen nieuwe berichten uw aandacht."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Indien aangevinkt, hebben sommige berichten een leveringsfout."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"If you believe that it is an error,\n"
+"                                        please contact the website\n"
+"                                        administrator."
+msgstr ""
+"Als u gelooft dat het een fout is,\n"
+"                                        Neem contact op met de website\n"
+"                                        beheerder."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__in_contract
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "In Contract"
+msgstr "In contract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__is_available
+msgid "Indicates whether the checklist item is available"
+msgstr "Geeft aan of het checklistitem beschikbaar is"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__can_be_returned
+msgid "Indicates whether the items in the rental order can be returned."
+msgstr "Geeft aan of de items in de huurvolgorde kunnen worden geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__is_picked
+msgid ""
+"Indicates whether the product in the rental order line has been picked."
+msgstr "Geeft aan of het product in de huuroverstellijn is gekozen."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__is_returned
+msgid ""
+"Indicates whether the product in the rental order line has been returned."
+msgstr "Geeft aan of het product in de huuroverstellijn is geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__is_paid
+msgid "Indicates whether the rental contract is paid or not"
+msgstr "Geeft aan of het huurcontract is betaald of niet"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_invoiced
+msgid "Indicates whether the rental order has been invoiced."
+msgstr "Geeft aan of de huurbevel is gefactureerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_picked_up
+msgid "Indicates whether the rented items have been picked up."
+msgstr "Geeft aan of de gehuurde artikelen zijn opgehaald."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_returned
+msgid "Indicates whether the rented items have been returned."
+msgstr "Geeft aan of de gehuurde artikelen zijn geretourneerd."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Invoice"
+msgstr "Factuur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_invoice_id
+msgid "Invoice Address"
+msgstr "Factuuradres"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_is_follower
+msgid "Is Follower"
+msgstr "Is volger"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_invoiced
+msgid "Is Invoiced"
+msgstr "Is gefactureerd"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__is_paid
+msgid "Is paid"
+msgstr "Is betaald"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__is_picked
+msgid "Is picked"
+msgstr "Wordt geplukt"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_picked_up
+msgid "Is picked up"
+msgstr "Wordt opgepikt"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__is_rental
+msgid "Is rental"
+msgstr "Is huur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_returned
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__is_returned
+msgid "Is returned"
+msgstr "Wordt geretourneerd"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_account_move
+msgid "Journal Entry"
+msgstr "Boeking"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__write_uid
+msgid "Last Updated by"
+msgstr "Laatst bijgewerkt door"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__write_date
+msgid "Last Updated on"
+msgstr "Laatst geupdate op"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_order__return_line_ids
+msgid "List of return lines associated with this return order."
+msgstr "Lijst met retourregels die zijn gekoppeld aan deze retourorder."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Managed by"
+msgstr "Beheerd door"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_error
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_error
+msgid "Message Delivery error"
+msgstr "Berichtbezorgingsfout"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_ids
+msgid "Messages"
+msgstr "Berichten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__month
+msgid "Month"
+msgstr "Maand"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Mijn activiteitdeadline"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__name
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Name"
+msgstr "Naam"
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#, python-format
+msgid "New"
+msgstr "Nieuw"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Volgende activiteit deadline"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_summary
+msgid "Next Activity Summary"
+msgstr "Volgende activiteiten samenvatting"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_type_id
+msgid "Next Activity Type"
+msgstr "Volgende activiteitstype"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__next_invoice_date
+msgid "Next Invoice Date"
+msgstr "Volgende factuurdatum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__display_type__line_note
+msgid "Note"
+msgstr "Opmerking"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Aantal acties"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_error_counter
+msgid "Number of errors"
+msgstr "Aantal fouten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Aantal berichten dat actie vereist"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Aantal berichten met leveringsfout"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.pickup_view_form
+msgid "OK"
+msgstr "OK"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.return_view_form
+msgid "Ok"
+msgstr "OK"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Or scan me with your banking app."
+msgstr "Of scant me met je bank -app."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__order_id
+msgid "Order"
+msgstr "Volgorde"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Order Details"
+msgstr "Bestel Details"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Order Lines"
+msgstr "Bestellijnen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__pickup_id
+msgid "Order Pickup"
+msgstr "Bestel ophalen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__name
+msgid "Order Reference"
+msgstr "Bestelreferentie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__state
+msgid "Order Status"
+msgstr "Bestelstatus"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__return_id
+msgid "Order return"
+msgstr "Bestelteruggave"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Orders Revenue"
+msgstr "Bestelt inkomsten"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Other payment methods"
+msgstr "Andere betalingsmethoden"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Partner"
+msgstr "Partner"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid "Partner:"
+msgstr "Partner:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Pay"
+msgstr "Betalen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "Pay now"
+msgstr "Nu betalen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid "Pay with"
+msgstr "Betaal met"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__payment_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__payment_id
+msgid "Payment"
+msgstr "Betaling"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "Betalingstransactie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__extra_hourly_price
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__rental_price
+msgid "Per hour"
+msgstr "Per uur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__rental_period
+msgid "Period"
+msgstr "Periode"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Phone"
+msgstr "Telefoon"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Picked Up"
+msgstr "Opgehaald"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__picking_id
+msgid "Picking"
+msgstr "Het plukken"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.pickup_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Pickup"
+msgstr "Ophalen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__pickup_date
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Pickup Date"
+msgstr "Ophaaldatum"
+
+#. module: cyllo_rental_base
+#: model:mail.template,subject:cyllo_rental_base.email_pickup_rental_order
+msgid "Pickup Done"
+msgstr "Ophalen gedaan"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_pickup_line
+msgid "Pickup Line"
+msgstr "Openingszin"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__pickup_line_ids
+msgid "Pickup Lines"
+msgstr "Openingszinnen"
+
+#. module: cyllo_rental_base
+#: model:mail.template,name:cyllo_rental_base.email_pickup_rental_order
+msgid "Pickup Mail Notify"
+msgstr "Pick -up mail op de hoogte stellen"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Pickup and Return"
+msgstr "Ophalen en terugkomen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__pickup_date
+msgid "Pickup date"
+msgstr "Ophaaldatum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup__pickup_line_ids
+msgid "Pickup product and details"
+msgstr "Pickup -product en details ophalen"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_pickup
+msgid "Pickup wizard"
+msgstr "Pick -up wizard"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_url
+msgid "Portal Access URL"
+msgstr "Portal Access URL"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__price
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+msgid "Price"
+msgstr "Prijs"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxexcl
+msgid "Price Reduce Tax excl"
+msgstr "Prijs verlagen belasting excl"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxinc
+msgid "Price Reduce Tax incl"
+msgstr "Prijs verlagen belasting incl"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Print"
+msgstr "Afdrukken"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Print Order"
+msgstr "Printopdracht"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Print Token"
+msgstr "Print token"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__product_id
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__rental_type__product
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Product"
+msgstr "Product"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_product_product
+msgid "Product Variant"
+msgstr "Productvariant"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__quantity
+msgid "Product quantity"
+msgstr "Product kwantiteit"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__product_id
+msgid "Product to pickup"
+msgstr "Product om op te pakken"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_line_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_ids
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_products
+msgid "Products"
+msgstr "Producten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_ids
+msgid "Products which are available"
+msgstr "Producten die beschikbaar zijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_qty
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__quantity
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__quantity
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_qty
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__quantity
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Quantity"
+msgstr "Hoeveelheid"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__rating_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__rating_ids
+msgid "Ratings"
+msgstr "Waarderingen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_unit
+msgid "Recurring Price"
+msgstr "Terugkerende prijs"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxexcl
+msgid "Reduced price excluding tax for the rental order line."
+msgstr "Verminderde prijs exclusief belasting voor de huurapportage."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxinc
+msgid "Reduced price including tax for the rental order line."
+msgstr "Verminderde prijs inclusief belasting voor de huurapportage."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__remarks
+msgid "Remarks"
+msgstr "Opmerkingen"
+
+#. module: cyllo_rental_base
+#: model:ir.module.category,name:cyllo_rental_base.cyllo_rental_base_management
+#: model:website.menu,name:cyllo_rental_base.rental_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_search
+msgid "Rental"
+msgstr "Verhuur"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"Rental\n"
+"                                                        Charges"
+msgstr ""
+"Verhuur\n"
+"                                                        Beschuldigingen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid "Rental - Checkout"
+msgstr "Huur - Bekijk"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid "Rental - Select Payment Provider"
+msgstr "Huur - selecteer betalingsprovider"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_charging
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_charging_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Rental Charges"
+msgstr "Huurkosten"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_checklist
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_checklist_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Rental Checklist"
+msgstr "Huurchecklist"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_contract_action
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_tree
+msgid "Rental Contract"
+msgstr "Huurcontract"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Rental Dashboard"
+msgstr "Huurdashboard"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_contract
+msgid "Rental Lease/Contract"
+msgstr "Huurlease/contract"
+
+#. module: cyllo_rental_base
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_cyllo_rental_base_root
+msgid "Rental Management"
+msgstr "Huurbeheer"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_order_action
+#: model:ir.model,name:cyllo_rental_base.model_rental_order
+#: model:ir.ui.menu,name:cyllo_rental_base.rental_order_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_calendar
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_tree
+msgid "Rental Order"
+msgstr "Huurder"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_order_line
+msgid "Rental Order Line"
+msgstr "Huurorderlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__order_line_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Rental Order Lines"
+msgstr "Huurorderlijnen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid ""
+"Rental Order created\n"
+"                                        successfully.."
+msgstr ""
+"Opgerichte huuropdracht\n"
+"                                        met succes.."
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_payment_transaction__rental_order_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_my_home_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#, python-format
+msgid "Rental Orders"
+msgstr "Huurbestellingen"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_product_action
+msgid "Rental Products"
+msgstr "Huurproducten"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.report,name:cyllo_rental_base.action_report_rental_order
+msgid "Rental Report"
+msgstr "Huurrapport"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.report,name:cyllo_rental_base.action_report_rental_token
+msgid "Rental Token"
+msgstr "Huurtoken"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_type
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Rental Type"
+msgstr "Huurtype"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_calendar
+msgid "Rental contract calendar"
+msgstr "Huurcontractkalender"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_graph
+msgid "Rental contract graph"
+msgstr "Huurcontractgrafiek"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_pivot
+msgid "Rental contract pivot"
+msgstr "Huurcontract draait"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_location_id
+msgid "Rental location"
+msgstr "Huurlocatie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__rented
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "Rented"
+msgstr "Gehuurd"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Rented Orders"
+msgstr "Gehuurde bestellingen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Request -"
+msgstr "Verzoek -"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_user_id
+msgid "Responsible User"
+msgstr "Verantwoordelijke gebruiker"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__return
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.return_view_form
+msgid "Return"
+msgstr "Opbrengst"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__return_date
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Return Date"
+msgstr "Retourdatum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__return_line_ids
+msgid "Return Lines"
+msgstr "Retourlijnen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__return_date
+msgid "Return date"
+msgstr "Retourdatum"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_return_line
+msgid "Return line"
+msgstr "Retourlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_return_order
+msgid "Return order"
+msgstr "Retouropdracht"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Returned"
+msgstr "Geretourneerd"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Returned Orders"
+msgstr "Geretourneerde bestellingen"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Review Order"
+msgstr "Beoordelingsopdracht"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "SMS -leveringsfout"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__user_id
+msgid "Salesperson"
+msgstr "Verkoper"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Save my payment details"
+msgstr "Bewaar mijn betalingsgegevens"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__display_type__line_section
+msgid "Section"
+msgstr "Sectie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_token
+msgid "Security Token"
+msgstr "Beveiligingstoken"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Select Date"
+msgstr "Selecteer een datum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_bank_statement_line__contract_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_move__contract_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_payment__contract_id
+msgid "Select the associated contract for this record."
+msgstr "Selecteer het bijbehorende contract voor dit record."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid "Select this address"
+msgstr "Selecteer dit adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Send message"
+msgstr "Bericht versturen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__sequence
+msgid "Sequence"
+msgstr "Reeks"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Ship to the same address\n"
+"                                                        <span class=\"ship_to_other text-muted\" style=\"display: none\">\n"
+"                                                            &amp;nbsp;(\n"
+"                                                            <i>Your shipping\n"
+"                                                                address will be\n"
+"                                                                requested later)\n"
+"                                                            </i>\n"
+"                                                        </span>"
+msgstr ""
+"Verstuur naar hetzelfde adres\n"
+"                                                        <span class = \"ship_to_other text-muted\" style = \"Display: None\">\n"
+"                                                            & amp; nbsp; (\n"
+"                                                            <i> Uw verzending\n"
+"                                                                adres zal zijn\n"
+"                                                                later gevraagd)\n"
+"                                                            </i>\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Shipping\n"
+"                                        Address"
+msgstr ""
+"Verzenden\n"
+"                                        Adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid "Shipping Address"
+msgstr "Verzendingsadres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Shop - Confirmed"
+msgstr "Winkel - bevestigd"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Sign Up"
+msgstr "Aanmelden"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Sign in"
+msgstr "Aanmelden"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Start Date:"
+msgstr "Begin datum:"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__state
+msgid "State"
+msgstr "Staat"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"State /\n"
+"                                                Province"
+msgstr ""
+"Staat /\n"
+"                                                Provincie"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__state
+msgid "Status"
+msgstr "Toestand"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status op basis van activiteiten\n"
+"Overleden: de vervaldatum is al aangenomen\n"
+"Vandaag: de activiteitsdatum is vandaag\n"
+"Gepland: toekomstige activiteiten."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Street\n"
+"                                                <span class=\"d-none d-md-inline\">\n"
+"                                                    and Number\n"
+"                                                </span>"
+msgstr ""
+"Straat\n"
+"                                                <span class = \"d-none d-md-inline\">>\n"
+"                                                    en nummer\n"
+"                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Street 2"
+msgstr "Straat # 2"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"Stripe Connect is not available in your country, please use another payment "
+"provider."
+msgstr ""
+"Stripe Connect is niet beschikbaar in uw land, gebruik een andere "
+"betalingsprovider."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Sub Total"
+msgstr "Sub -totaal"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid "Submit"
+msgstr "Indienen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_subtotal
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_subtotal
+msgid "Subtotal"
+msgstr "Subtotaal"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_subtotal
+msgid "Subtotal amount for the rental order line."
+msgstr "Subtotaal bedrag voor de huuroverstellingslijn."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "Subtotal:"
+msgstr "Subtotaal:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "TIN / VAT"
+msgstr "Tin / vat"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Tax excl."
+msgstr "Excl. BTW."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Tax incl."
+msgstr "Incl. btw."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__tax_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_tax
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__tax_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Taxes"
+msgstr "Belastingen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__tax_ids
+msgid "Taxes applied to the rental order line."
+msgstr "Belastingen van toepassing op de huurapportage."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "Taxes:"
+msgstr "Belastingen:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Test Mode"
+msgstr "Testmodus"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "Thank You!"
+msgstr "Bedankt!"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Thank you for your order."
+msgstr "Bedankt voor je bestelling."
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/controllers/main.py:0
+#, python-format
+msgid "The access token is invalid."
+msgstr "Het toegangstoken is ongeldig."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_invoice_id
+msgid "The address for invoicing the rental order."
+msgstr "Het adres voor het factureren van de huuropdracht."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_shipping_id
+msgid "The address where the rented items will be delivered."
+msgstr "Het adres waar de gehuurde artikelen worden geleverd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_paid
+msgid "The amount already paid for the rental order."
+msgstr "Het al betaalde bedrag voor de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__amount
+msgid "The amount associated with the rental contract"
+msgstr "Het bedrag geassocieerd met het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_category_id
+msgid ""
+"The category of the unit of measure for the product in the contract line"
+msgstr "De categorie van de maateenheid voor het product in de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__rental_period
+msgid "The charging period for the rental"
+msgstr "De laadperiode voor de huur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__company_id
+msgid "The company associated with the contract line"
+msgstr "Het bedrijf dat is geassocieerd met de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__company_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__company_id
+msgid "The company associated with the rental order."
+msgstr "Het bedrijf geassocieerd met de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__company_id
+msgid "The company associated with this rental contract"
+msgstr "Het bedrijf dat is geassocieerd met dit huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__company_id
+msgid "The company to which this product belongs"
+msgstr "Het bedrijf waartoe dit product behoort"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__company_id
+msgid "The company to which this rental charge belongs"
+msgstr "Het bedrijf waartoe deze huurprijs behoort"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__currency_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__currency_id
+msgid "The currency used for the rental order."
+msgstr "De valuta die wordt gebruikt voor de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__currency_id
+msgid "The currency used for transactions related to the contract line"
+msgstr ""
+"De valuta die wordt gebruikt voor transacties met betrekking tot de "
+"contractregel"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__currency_id
+msgid "The currency used for transactions related to this product"
+msgstr ""
+"De valuta die wordt gebruikt voor transacties met betrekking tot dit product"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__currency_id
+msgid "The currency used for transactions related to this rental charge"
+msgstr ""
+"De valuta die wordt gebruikt voor transacties met betrekking tot deze "
+"huurkosten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__currency_id
+msgid "The currency used for transactions related to this rental contract"
+msgstr ""
+"De valuta die wordt gebruikt voor transacties met betrekking tot dit "
+"huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__state
+msgid "The current state of the rental contract"
+msgstr "De huidige stand van het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__state
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__state
+msgid "The current status of the rental order."
+msgstr "De huidige status van de huurderorde."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__partner_id
+msgid "The customer associated with this rental contract"
+msgstr "De klant die aan dit huurcontract is geassocieerd"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_id
+msgid "The customer for whom the rental order is created."
+msgstr "De klant voor wie de huurorder is gemaakt."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__return_date
+msgid "The date when the product is returned."
+msgstr "De datum waarop het product wordt geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__date_order
+msgid "The date when the rental order is created."
+msgstr "De datum waarop de huuropdracht wordt gemaakt."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__rental_location_id
+msgid "The default rental location for this product"
+msgstr "De standaard huurlocatie voor dit product"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__discount
+msgid "The discount percentage for the contract line"
+msgstr "Het kortingspercentage voor de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_end_date
+msgid "The end date of the rental contract"
+msgstr "De einddatum van het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__name
+msgid "The name of the checklist item"
+msgstr "De naam van het checklistitem"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__name
+msgid "The name of the rental contract"
+msgstr "De naam van het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__next_invoice_date
+msgid "The next invoice date for the rental contract"
+msgstr "De volgende factuurdatum voor het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__current_rented_quantity
+msgid "The number of products currently in rented state"
+msgstr "Het aantal producten dat momenteel in gehuurde staat is"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__payment_id
+msgid "The payment associated with the rental contract"
+msgstr "De betaling in verband met het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__payment_id
+msgid "The payment record related to the rental order."
+msgstr "Het betalingsrecord met betrekking tot de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__transaction_ids
+msgid "The payment transactions associated with the rental order."
+msgstr "De betalingstransacties die aan de huurbevel zijn gekoppeld."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_id
+msgid "The product associated with the contract line"
+msgstr "Het product geassocieerd met de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__product_id
+msgid "The product associated with this checklist item"
+msgstr "Het product dat is gekoppeld aan dit checklistitem"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__product_id
+msgid "The product associated with this rental charge"
+msgstr "Het product dat is gekoppeld aan deze huurlaad"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__product_id
+msgid "The product being returned."
+msgstr "Het product dat wordt geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__delay_product_id
+msgid "The product used to add extra cost to the rental order"
+msgstr ""
+"Het product dat wordt gebruikt om extra kosten toe te voegen aan de "
+"huurorder"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_line_ids
+msgid "The products associated with this rental contract"
+msgstr "De producten die verband houden met dit huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__quantity
+msgid "The quantity of the product being returned."
+msgstr "De hoeveelheid van het product wordt geretourneerd."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_qty
+msgid "The quantity of the product in the contract line"
+msgstr "De hoeveelheid van het product in de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_qty
+msgid "The quantity of the product in the rental order line."
+msgstr "De hoeveelheid van het product in de huurbestellingslijn."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__quantity
+msgid "The quantity of the products in the rental contract"
+msgstr "De hoeveelheid producten in het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__invoice_recurrence
+msgid "The recurrence period for creating invoices"
+msgstr "De recidiefperiode voor het maken van facturen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_unit
+msgid "The recurring price for the product in the contract line"
+msgstr "De terugkerende prijs voor het product in de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__contract_id
+msgid "The rental contract associated with this contract line"
+msgstr "Het huurcontract dat is gekoppeld aan deze contractlijn"
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/controllers/main.py:0
+#, python-format
+msgid "The rental has been updated. Please refresh the page."
+msgstr "De huur is bijgewerkt.Gelieve de pagina te vernieuwen."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__order_line_ids
+msgid "The rental order lines associated with this order."
+msgstr "De huurbestellingslijnen die aan deze volgorde zijn gekoppeld."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__rental_price
+msgid "The rental price per hour"
+msgstr "De huurprijs per uur"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__return_id
+msgid "The return order to which this line belongs."
+msgstr "De retouropdracht waartoe deze regel behoort."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__user_id
+msgid "The salesperson responsible for the rental order."
+msgstr "De verkoper die verantwoordelijk is voor de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_start_date
+msgid "The start date of the rental contract"
+msgstr "De startdatum van het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__picking_id
+msgid "The stock picking associated with the rental order."
+msgstr "Het aandelenkeuzes geassocieerd met de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_subtotal
+msgid "The subtotal amount for the contract line"
+msgstr "Het subtotale bedrag voor de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__tax_ids
+msgid "The taxes associated with the contract line"
+msgstr "De belastingen die verband houden met de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_total
+msgid "The total amount for the contract line"
+msgstr "Het totale bedrag voor de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_total
+msgid "The total amount including taxes and additional charges."
+msgstr "Het totale bedrag inclusief belastingen en extra kosten."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__amount_total
+msgid "The total amount of the rental contract"
+msgstr "Het totale bedrag van het huurcontract"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_untaxed
+msgid "The total amount without taxes."
+msgstr "Het totale bedrag zonder belastingen."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__price
+msgid "The total price for the rental charge"
+msgstr "De totale prijs voor de huurkosten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_tax
+msgid "The total tax amount for the contract line"
+msgstr "Het totale belastingbedrag voor de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_tax
+msgid "The total tax amount for the rental order."
+msgstr "Het totale belastingbedrag voor de huurbevel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__display_type
+msgid "The type of display for the rental order line."
+msgstr "Het type display voor de huuraderregel."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_id
+msgid "The unit of measure for the product in the contract line"
+msgstr "De maateenheid voor het product in de contractlijn"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_id
+msgid "The unit of measure for the product in the rental order line."
+msgstr "De maateenheid voor het product in de huuroverstellingslijn."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_unit
+msgid "The unit price of the rental order line."
+msgstr "De eenheidsprijs van de huurbestellingslijn."
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Month"
+msgstr "Deze maand"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Week"
+msgstr "Deze week"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Year"
+msgstr "Dit jaar"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_payment_transaction__rental_order_ids
+msgid ""
+"This field stores the rental orders associated with the current record."
+msgstr ""
+"Dit veld slaat de huurbestellingen op die verband houden met het huidige "
+"record."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Title"
+msgstr "Titel"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__amount_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_total
+msgid "Total"
+msgstr "Totaal"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_tax
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_tax
+msgid "Total Tax"
+msgstr "Totale belasting"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_total
+msgid "Total amount for the rental order line."
+msgstr "Totaal bedrag voor de huurapportage."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_tax
+msgid "Total tax amount for the rental order line."
+msgstr "Totaal belastingbedrag voor de huurapportage."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__transaction_ids
+msgid "Transactions"
+msgstr "Transacties"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "True"
+msgstr "WAAR"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Type van de uitzonderingsactiviteit opgenomen."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__name
+msgid "Unique reference for the rental order."
+msgstr "Unieke referentie voor de huurderorde."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_unit
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Unit Price"
+msgstr "Eenheid prijs"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_id
+msgid "Unit of Measure"
+msgstr "Maateenheid"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_category_id
+msgid "Unit of Measure (UoM) category of the product."
+msgstr "Categorie van het product (UOM) van het product (UOM)."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Unpublished"
+msgstr "Niet gepubliceerd"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_untaxed
+msgid "Untaxed Amount"
+msgstr "Niet -belasting bedrag"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_category_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_category_id
+msgid "UoM Category"
+msgstr "UOM -categorie"
+
+#. module: cyllo_rental_base
+#: model:ir.module.category,description:cyllo_rental_base.cyllo_rental_base_management
+msgid "User access levels for Rental module"
+msgstr "Gebruikerstoegangsniveaus voor huurmodule"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_user_all_documents
+msgid "User: All documents"
+msgstr "Gebruiker: alle documenten"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_user_own_documents
+msgid "User: Own documents"
+msgstr "Gebruiker: eigen documenten"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "View Details"
+msgstr "Bekijk details"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__website_message_ids
+msgid "Website Messages"
+msgstr "Website -berichten"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__website_message_ids
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__website_message_ids
+msgid "Website communication history"
+msgstr "Website communicatiegeschiedenis"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__week
+msgid "Week"
+msgstr "Week"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__year
+msgid "Year"
+msgstr "Jaar"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"You are editing your <b>billing and\n"
+"                                            shipping\n"
+"                                        </b> addresses at the same time!\n"
+"                                            <br/>\n"
+"                                            If you want to modify your shipping\n"
+"                                            address, create a"
+msgstr ""
+"U bewerkt uw <b> facturering en\n"
+"                                            Verzenden\n"
+"                                        </b> adressen tegelijkertijd!\n"
+"                                            <br/>\n"
+"                                            Als u uw verzending wilt wijzigen\n"
+"                                            adres, maak een"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Your Address"
+msgstr "Jouw adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Your payment has been authorized."
+msgstr "Uw betaling is geautoriseerd."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Zip Code"
+msgstr "Postcode"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"new\n"
+"                                            address"
+msgstr ""
+"nieuw\n"
+"                                            adres"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "or"
+msgstr "of"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "to follow your order."
+msgstr "om uw bestelling te volgen."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "— created on"
+msgstr "- gemaakt op"

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form View-->
+    <record id="view_salary_structure_type_form" model="ir.ui.view">
+        <field name="name">view.salary.structure.type.form</field>
+        <field name="model">salary.structure.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <div class="d-flex">
+                                <field name="name" class="text-break"/>
+                            </div>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="country_id"/>
+                            <field name="default_wage_type"/>
+                            <field name="salary_structure_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="default_schedule_pay"/>
+                            <field name="default_working_hour_id"/>
+                            <field name="default_work_entry_type_id"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!--    List View-->
+    <record id="view_salary_structure_type_tree" model="ir.ui.view">
+        <field name="name">view.salary.structure.type.tree</field>
+        <field name="model">salary.structure.type</field>
+        <field name="arch" type="xml">
+            <tree name="type_tree">
+                <field name="name"/>
+                <field name="country_id"/>
+                <field name="default_wage_type"/>
+                <field name="default_schedule_pay"/>
+                <field name="default_working_hour_id"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Action-->
+    <record id="action_view_structure_type" model="ir.actions.act_window">
+        <field name="name">Salary Structure Type</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">salary.structure.type</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Salary Structure Type
+            </p>
+            <p>
+                Create New Salary Structure Type Here
+            </p>
+        </field>
+    </record>
+</odoo>

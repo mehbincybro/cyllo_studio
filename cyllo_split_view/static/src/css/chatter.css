@@ -1,0 +1,37 @@
+@media only screen and (min-width: 768px) {
+    .o_FormRenderer_chatterContainer:not(.o-aside):not(.o-full-width) .o_ChatterContainer{
+         max-width: 99%;
+    }
+}
+
+.clicked-split{
+    border-radius: 5px;
+    background-color: #f3f0f0;
+    width: 95px;
+    height: 28px;
+}
+.split{
+    width: 95px;
+    height: 28px;
+}
+.split_icon{
+    color: #9EA700
+}
+.split_container{
+}
+
+.split_container.o_attachment_preview {
+    display: none;
+}
+.expense_hidden {
+    display: none !important;
+}
+.name_position{
+    width: auto !important;
+    position: relative;
+    left: 30px;
+}
+.name_padding{
+    height: 100px;
+}
+

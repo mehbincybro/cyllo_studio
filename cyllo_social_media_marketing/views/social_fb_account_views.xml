@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record defines the views for social media post. -->
+    <record id="view_social_fb_account_form" model="ir.ui.view">
+        <field name="name">view.social.fb.account.form</field>
+        <field name="model">social.fb.account</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_connect" type="object" string="Connect" invisible="state != 'not connected'" class="btn-primary"/>
+                    <button name="action_disconnect" type="object" string="Disconnect" invisible="state != 'connected'" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <label for="facebook_page_name"/>
+                        <h1>
+                            <field name="facebook_page_name" readonly="state == 'connected'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="meta_app_number" readonly="state == 'connected'"/>
+                            <field name="meta_app_secret" readonly="state == 'connected'"/>
+                            <field name="facebook_page_number" readonly="state == 'connected'"/>
+                            <field name="facebook_access_token" readonly="state == 'connected'"/>
+                            <field name="facebook_user_access_token" readonly="state == 'connected'"/>
+                        </group>
+                        <group>
+                            <field name="facebook_base_url" readonly="state == 'connected'"/>
+                            <field name="facebook_connection_authenticated"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_social_fb_account_tree" model="ir.ui.view">
+        <field name="name">view.social.fb.account.tree</field>
+        <field name="model">social.fb.account</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="facebook_page_name"/>
+                <field name="meta_app_number"/>
+                <field name="meta_app_secret"/>
+                <field name="facebook_page_number"/>
+            </tree>
+        </field>
+    </record>
+    <record id="action_view_facebook_accounts" model="ir.actions.act_window">
+        <field name="name">Facebook Accounts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.fb.account</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new facebook Account
+            </p>
+            <p>
+                You can link facebook account.
+            </p>
+        </field>
+    </record>
+    <menuitem id="menu_facebook_accounts" name="Facebook Accounts"
+              parent="cyllo_social_media_marketing.menu_configuration_categ"
+              action="action_view_facebook_accounts"/>
+</odoo>

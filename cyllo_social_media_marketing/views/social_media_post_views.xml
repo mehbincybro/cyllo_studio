@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record defines the views for social media post. -->
+    <record id="view_social_media_post_form" model="ir.ui.view">
+        <field name="name">view.social.media.post.form</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <form string="Social Media Post">
+                <header>
+                    <button name="action_post" type="object" string="Post"
+                            class="btn-primary"
+                            invisible="state not in ('draft','queue')"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,queue,post"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_feed" type="object"
+                                string="Feed" icon="fa-newspaper-o"
+                                class="oe_stat_button">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_value">
+                                    <field name="feed_count" nolabel="1"
+                                           widget="statinfo"/>
+                                </span>
+                                <span class="o_stat_text">Feed</span>
+                            </div>
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"
+                                   placeholder="eg: This is a post regarding end of season Sale"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="posted_date"/>
+                            <field name="mode" widget="radio"/>
+                            <field name="post_url" widget="url"
+                                   invisible="mode!='url'"
+                                   placeholder="Provide jpg format url"/>
+                            <field name="ir_attachment_ids"
+                                   widget="many2many_binary"
+                                   invisible="mode!='attachment'"/>
+                            <field name="description" widget="text_emojis"
+                                   placeholder="eg: Grab your offer before the end of season"/>
+                        </group>
+                        <group>
+                            <field name="company_id"/>
+                            <field name="user_id"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="view_social_media_post_tree" model="ir.ui.view">
+        <field name="name">view.social.media.post.tree</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <tree string="Social Media Post">
+                <field name="name"/>
+                <field name="posted_date"/>
+                <field name="company_id"/>
+                <field name="state"/>
+                <field name="description" optional="hide"/>
+                <field name="user_id" optional="hide"/>
+                <field name="mode" optional="hide"/>
+                <field name="feed_count" optional="hide"/>
+            </tree>
+        </field>
+    </record>
+    <record id="view_social_media_post_search" model="ir.ui.view">
+        <field name="name">view.social.media.post.search</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <search string="Social Media Post">
+                <field name="name"/>
+                <filter string="Archived" name="inactive"
+                        domain="[('active', '=', False)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Posted Date" name="posted_date" domain="[]"
+                            context="{'group_by': 'posted_date'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <record id="view_social_media_post_kanban" model="ir.ui.view">
+        <field name="name">view.social.media.post.kanban</field>
+        <field name="model">social.media.post</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" records_draggable="0">
+                <field name="name"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click mb-2">
+                            <div class="row">
+                                <div class="col-8">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <span class="badge rounded-pill">
+                                        <field name="state" widget="badge"
+                                               decoration-success="state == 'post'"
+                                               decoration-info="state == 'draft'"
+                                               decoration-warning="state == 'queue'"/>
+                                    </span>
+                                </div>
+                            </div>
+                            <div>
+                                <strong>Mode:</strong>
+                                <field name="mode"/>
+                            </div>
+                            <div>
+                                <strong>Description:</strong>
+                                <field name="description"/>
+                            </div>
+                            <div class="oe_kanban_footer mt-1">
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="create_uid"
+                                               widget="many2one_avatar_user"
+                                               domain="[('share', '=', False)]"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="action_view_posts" model="ir.actions.act_window">
+        <field name="name">Posts</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">social.media.post</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Social Media Post
+            </p>
+            <p>
+                You can make contents which can be posted to selected social
+                media from here.
+            </p>
+        </field>
+    </record>
+    <record id="social_media_feed_dashboard_action" model="ir.actions.client">
+        <field name="name">Timeline</field>
+        <field name="tag">social_media_feed_dashboard_tag</field>
+    </record>
+    <menuitem id="menu_cyllo_social_media_marketing_root"
+              name="Social Media Marketing"
+              web_icon="cyllo_social_media_marketing,static/description/social-marketing 2.png"/>
+    <menuitem id="menu_configuration_categ" name="Configuration"
+              parent="menu_cyllo_social_media_marketing_root"/>
+    <menuitem id="menu_posts" name="Posts" action="action_view_posts"
+              sequence="1"
+              parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
+    <menuitem name="Timeline" id="menu_timeline" sequence="3"
+              action="social_media_feed_dashboard_action"
+              parent="cyllo_social_media_marketing.menu_cyllo_social_media_marketing_root"/>
+</odoo>

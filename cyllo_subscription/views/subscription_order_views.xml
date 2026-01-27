@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+<!--    Subscription order tree view-->
+    <record id="view_subscription_order_tree" model="ir.ui.view">
+        <field name="name">view.subscription.order.tree</field>
+        <field name="model">subscription.order</field>
+        <field name="arch" type="xml">
+            <tree create="0" delete="0">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="time_based_price_id"/>
+                <field name="state_subscription" widget="badge"
+                       decoration-success="state_subscription == 'active'"
+                       decoration-warning="state_subscription == 'renew'"
+                       decoration-info="state_subscription == 'quotation'"
+                       decoration-danger="state_subscription == 'churned'"
+                       decoration-bf="state_subscription == 'trial'"/>
+                <field name="state" optional="show"/>
+            </tree>
+        </field>
+    </record>
+<!--    Subscription order form view-->
+    <record id="view_subscription_order_form" model="ir.ui.view">
+        <field name="name">view.subscription.order.form</field>
+        <field name="model">subscription.order</field>
+        <field name="arch" type="xml">
+            <form create="0">
+                <header>
+                    <button name="action_post" type="object" string="Create Invoice" invisible="state_subscription == 'churned'"/>
+                    <button name="action_renew_order" type="object" string="Renew"/>
+                    <button name="action_upsell" type="object" string="Upsell"/>
+                    <button name="action_close_subscription" type="object" string="Close" invisible="state_subscription not in ('active', 'renew')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,posted"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button type="object"  name="action_show_invoices" invisible="invoice_count == 0"
+                            class="oe_stat_button"
+                            icon="fa-pencil-square-o">
+                            <field name="invoice_count" string="Invoice" widget="statinfo" invisible="invoice_count == 0"/>
+                        </button>
+                        <button type="object"  name="action_view_report"
+                            class="oe_stat_button"
+                            icon="fa-line-chart">
+                            <field name="recurring_revenue" string="MRR" widget="statinfo"/>
+                        </button>
+                    </div>
+                    <field name="state_subscription" class="float-end fs-6"
+                       widget="badge"
+                       decoration-success="state_subscription == 'active'"
+                       decoration-warning="state_subscription == 'renew'"
+                       decoration-info="state_subscription == 'quotation'"
+                       decoration-danger="state_subscription == 'churned'"
+                       decoration-muted="state_subscription == 'trial'"/>
+                    <h2><field name="name"/></h2>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                            <field name="partner_street" invisible="not partner_street"/>
+                            <field name="partner_city" invisible="not partner_city"/>
+                            <field name="partner_state" invisible="not partner_state"/>
+                            <field name="sale_order_template_id" domain="[('is_subscription', '=', True)]"/>
+                            <field name="time_based_price_id"/>
+                        </group>
+                        <group>
+                            <field name="trial_end"/>
+                            <field name="renewal_date"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Order Line">
+                            <field name="subscription_order_line_ids">
+                                <tree editable="bottom" create="0">
+                                    <field name="product_id"/>
+                                    <field name="product_tmpl_id"/>
+                                    <field name="time_based_price_id"/>
+                                    <field name="quantity"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="tax_ids" widget="many2many_tags"/>
+                                    <field name="subtotal"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+<!--    Field in action button to create consolidated invoice-->
+    <record id="model_consolidate_invoice" model="ir.actions.server">
+        <field name="name">Create Invoice</field>
+        <field name="model_id" ref="cyllo_subscription.model_subscription_order"/>
+        <field name="binding_model_id" ref="cyllo_subscription.model_subscription_order"/>
+        <field name="state">code</field>
+        <field name="code">
+            action = records.consolidated_invoice()
+        </field>
+    </record>
+<!--    Subscription order sequence number-->
+    <record id="ir_sequence_name" model="ir.sequence">
+        <field name="name">Name</field>
+        <field name="code">subscription.order</field>
+        <field name="prefix">SUB/</field>
+        <field name="padding">4</field>
+        <field name="company_id" eval="False"/>
+    </record>
+<!--    Action to show only the record to renew-->
+    <record id="action_view_sale_order_to_renew" model="ir.actions.act_window">
+        <field name="name">To Renew</field>
+        <field name="res_model">subscription.order</field>
+        <field name="domain">[('state_subscription', '=', 'renew')]</field>
+        <field name="view_mode">tree,kanban,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+            No Order is found. Let's create one!
+            </p>
+        </field>
+    </record>
+<!--    Subscription order action-->
+    <record id="action_view_subscription_order" model="ir.actions.act_window">
+        <field name="name">Subscription Order</field>
+        <field name="res_model">subscription.order</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>

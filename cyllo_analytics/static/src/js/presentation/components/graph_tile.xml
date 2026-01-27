@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="GraphTile">
+        <div t-attf-id="elem_{{ state.rec_id }}"
+             t-att-class="props.toggleClass"
+             class="card cp mr-1 mt-1 align-items-stretch cy_tile"
+             t-on-click.prevent.stop="onClickChart" t-att-style="state.cardStyle">
+            <t t-if="props.footer" t-slot="footer"/>
+            <div t-ref="root" t-att-style="state.style"/>
+            <t t-if="state.hasData" t-slot="ai-footer"/>
+        </div>
+    </t>
+</templates>

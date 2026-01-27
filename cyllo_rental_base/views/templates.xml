@@ -1,0 +1,765 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Checkout page of rental orders -->
+    <template id="rental_checkout">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Rental - Checkout</t>
+            <t t-set="no_footer" t-value="1"/>
+            <div id="wrap">
+                <div class="container oe_website_sale py-2">
+                    <t t-set="same_shipping" t-value="bool(order.partner_shipping_id==order.partner_id or only_services)"/>
+                    <div class="row">
+                        <div class="col-12">
+                            <t t-call="cyllo_rental_base.rental_wizard_checkout">
+                                <t t-set="step" t-value="20"/>
+                            </t>
+                        </div>
+                        <div class="col-12 col-xl-auto order-xl-2 d-none d-xl-block">
+                            <t t-call="cyllo_rental_base.rental_cart_summary">
+                                <t t-set="redirect" t-valuef="/rental/payment"/>
+                            </t>
+                        </div>
+                        <div class="col-12 col-xl order-xl-1 oe_cart">
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <h3 class="o_page_header mt8">
+                                        Billing Address
+                                    </h3>
+                                </div>
+                                <div class="col-lg-6 one_kanban">
+                                    <t t-call="cyllo_rental_base.rental_address_kanban">
+                                        <t t-set='contact' t-value="order.partner_id"/>
+                                        <t t-set='selected' t-value="1"/>
+                                        <t t-set='readonly' t-value="1"/>
+                                        <t t-set='allow_edit' t-value="1"/>
+                                    </t>
+                                </div>
+                            </div>
+                            <t t-if="not only_services"
+                               groups="account.group_delivery_invoice_address">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <h3 class="o_page_header mt16 mb4">
+                                            Shipping Address
+                                        </h3>
+                                    </div>
+                                </div>
+                                <div class="row all_shipping">
+                                    <div class="col-lg-12">
+                                        <div class="row mt8">
+                                            <div class="col-md-12 col-lg-12 one_kanban">
+                                                <form action="/rental/address" method="post" class=''>
+                                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"
+                                                           t-nocache="The csrf token must always be up to date."/>
+                                                    <a role="button" href="#" class='a-submit btn btn-secondary mb-2 btn-block'>
+                                                        <i class="fa fa-plus-square"/>
+                                                        <span>Add an address</span>
+                                                    </a>
+                                                </form>
+                                            </div>
+                                            <t t-foreach="shippings" t-as="ship">
+                                                <div class="col-md-12 col-lg-6 one_kanban mb-2">
+                                                    <t t-call="cyllo_rental_base.rental_address_kanban">
+                                                        <t t-set='contact' t-value="ship"/>
+                                                        <t t-set='selected' t-value="order.partner_shipping_id==ship"/>
+                                                        <t t-set='readonly' t-value="bool(len(shippings)==1)"/>
+                                                        <t t-set='edit_billing' t-value="bool(ship==order.partner_id)"/>
+                                                        <t t-set="allow_edit" t-value="not order.partner_id or (ship.id in order.partner_id.child_ids.ids)"/>
+                                                    </t>
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                            <div class="d-flex justify-content-between mt-3">
+                                <a role="button" href="/rental/confirm_order" class="btn btn-primary mb32">
+                                    <span>Confirm</span>
+                                    <i class="oi oi-chevron-right"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- Address kanban -->
+    <template id="rental_address_kanban" name="Kanban address">
+        <form action="/rental_order/payment" method="POST" class="d-none">
+            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
+            <input type="hidden" name="partner_id" t-att-value="contact.id"/>
+            <t t-if='edit_billing'>
+                <input type="hidden" name="callback" value="/rental_order/payment?use_billing"/>
+            </t>
+            <input type='submit'/>
+        </form>
+        <div t-attf-class="card #{selected and 'border border-primary' or 'js_change_rental_shipping'}">
+            <div class='card-body' style='min-height: 130px;'>
+                <a t-if="allow_edit" href="#" class="btn btn-link float-end p-0 js_edit_rental_address no-decoration"
+                   role="button" title="Edit this address" aria-label="Edit this address">
+                    <i class='fa fa-edit'/>
+                </a>
+                <t t-esc="contact" t-options="dict(widget='contact', fields=['name', 'address'], no_marker=True)"/>
+            </div>
+            <div class='card-footer' t-if='not readonly'>
+                <span class='btn-ship' t-att-style="'' if selected else 'display:none;'">
+                    <a role="button" href='#' class="btn btn-block btn-primary">
+                        <i class='fa fa-check'/>
+                        Ship to this address
+                    </a>
+                </span>
+                <span class='btn-ship' t-att-style="'' if not selected else 'display:none;'">
+                    <a role="button" href='#' class="btn btn-block btn-secondary">
+                        Select this address
+                    </a>
+                </span>
+            </div>
+        </div>
+    </template>
+    <!-- Rental wizard checkout -->
+    <template id="rental_wizard_checkout" name="Wizard Checkout">
+        <t t-set="website_sale_order" t-value="website_sale_order"/>
+        <div class="row">
+            <div class="col-xl">
+                <div class="wizard container">
+                    <div class="progress-wizard row g-0">
+                        <a class="no-decoration col"
+                           t-att-href="step&gt;=10 and '/rental/payment' or '#'">
+                            <div id="wizard-step10" t-att-class="'progress-wizard-step %s' % (step == 10 and 'active' or step&gt;10 and 'complete' or 'disabled')">
+                                <div class="progress-wizard-bar d-none d-md-block"/>
+                                <span class="progress-wizard-dot d-none d-md-inline-block"/>
+                                <div class="text-center progress-wizard-steplabel">
+                                    Review Order
+                                </div>
+                            </div>
+                        </a>
+                        <a class="no-decoration col" t-att-href="step&gt;=20 and '/rental/payment' or '#'">
+                            <div id="wizard-step20"
+                                 t-att-class="'progress-wizard-step %s' % (step == 20 and 'active' or step&gt;20 and 'complete' or 'disabled')">
+                                <div class="progress-wizard-bar d-none d-md-block"/>
+                                <span class="progress-wizard-dot d-none d-md-inline-block"/>
+                                <div class="text-center progress-wizard-steplabel">
+                                    Address
+                                </div>
+                            </div>
+                        </a>
+                        <a class="no-decoration col"
+                           t-att-href="step&gt;=40 and '/rental/payment' or '#'">
+                            <div id="wizard-step40" t-att-class="'progress-wizard-step %s' % (step == 40 and 'active' or step&gt;40 and 'complete' or 'disabled')">
+                                <div class="progress-wizard-bar d-none d-md-block"/>
+                                <span class="progress-wizard-dot d-none d-md-inline-block"/>
+                                <div class="text-center progress-wizard-steplabel">
+                                    Confirm Order
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- To add and edit addresses -->
+    <template id="rental_address" name="Address Management">
+        <t t-set="no_footer" t-value="1"/>
+        <t t-call="website.layout">
+            <div id="wrap">
+                <div class="container oe_website_sale py-2">
+                    <div class="row">
+                        <div class="col-12">
+                            <t t-call="cyllo_rental_base.rental_wizard_checkout">
+                                <t t-set="step" t-value="20"/>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 col-xl-auto order-xl-2 d-none d-xl-block">
+                            <t t-call="cyllo_rental_base.rental_cart_summary">
+                                <t t-set="hide_promotions">True</t>
+                                <t t-set="redirect" t-valuef="/rental/address"/>
+                            </t>
+                        </div>
+                        <div class="col-12 col-xl order-xl-1 oe_cart">
+                            <div>
+                                <t t-if="mode == ('new', 'billing')">
+                                    <h2 class="o_page_header mt8">
+                                        <span t-if="account_on_checkout != 'mandatory'">
+                                            Fill in your address
+                                        </span>
+                                        <small class="text-muted" t-if="account_on_checkout == 'optional'">
+                                            or
+                                        </small>
+                                        <a t-if="account_on_checkout != 'disabled'" role="button"
+                                           href='/web/login?redirect=/rental/payment' style="margin-top: -11px">Sign in</a>
+                                    </h2>
+                                </t>
+                                <t t-if="mode == ('edit', 'billing')">
+                                    <h2 class="o_page_header mt8">Your Address</h2>
+                                </t>
+                                <t t-if="mode[1] == 'shipping'">
+                                    <h2 class="o_page_header mt8">Shipping Address</h2>
+                                </t>
+                                <t t-if="partner_id == website_sale_order.partner_shipping_id.id == website_sale_order.partner_invoice_id.id">
+                                    <div class="alert alert-warning" role="alert" t-if="not only_services">
+                                        <h4 class="alert-heading">Be aware!</h4>
+                                        <p groups="account.group_delivery_invoice_address">
+                                            You are editing your <b>billing and shipping</b> addresses at the same time!
+                                            <br/>
+                                            If you want to modify your shipping address, create a <a href='/rental/address'>
+                                            new address</a>.
+                                        </p>
+                                    </div>
+                                </t>
+                                <t t-if="error" t-foreach="error.get('error_message', [])" t-as="err">
+                                    <h5 class="text-danger" t-esc="err"/>
+                                </t>
+                                <form t-if="account_on_checkout != 'mandatory' or not is_public_user"
+                                      action="/rental/address" method="post" class="checkout_autoformat">
+                                    <div class="row">
+                                        <div t-attf-class="mb-3 #{error.get('name') and 'o_has_error' or ''} col-lg-12 div_name">
+                                            <label class="col-form-label" for="name">Name
+                                            </label>
+                                            <input type="text" name="name" t-attf-class="form-control #{error.get('name') and 'is-invalid' or ''}"
+                                                   t-att-value="'name' in checkout and checkout['name']"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <div t-attf-class="mb-3 #{error.get('email') and 'o_has_error' or ''} col-lg-6" id="div_email">
+                                            <label t-attf-class="col-form-label #{mode[1] == 'shipping' and 'label-optional' or ''}" for="email">Email</label>
+                                            <input type="email" name="email" t-attf-class="form-control #{error.get('email') and 'is-invalid' or ''}"
+                                                   t-att-value="'email' in checkout and checkout['email']"/>
+                                        </div>
+                                        <div t-attf-class="mb-3 #{error.get('phone') and 'o_has_error' or ''} col-lg-6" id="div_phone">
+                                            <label class="col-form-label" for="phone">Phone</label>
+                                            <input type="tel" name="phone"
+                                                   t-attf-class="form-control #{error.get('phone') and 'is-invalid' or ''}"
+                                                   t-att-value="'phone' in checkout and checkout['phone']"/>
+                                        </div>
+                                        <t t-if="website._display_partner_b2b_fields()">
+                                            <div class="w-100"/>
+                                            <t t-set='vat_warning' t-value="'vat' in checkout and checkout['vat'] and not can_edit_vat"/>
+                                            <t t-if="mode == ('new', 'billing') or (mode == ('edit', 'billing') and (can_edit_vat or 'vat' in checkout and checkout['vat']))">
+                                                <div t-attf-class="mb-3 #{error.get('company_name') and 'o_has_error' or ''} col-lg-6 mb-0">
+                                                    <label class="col-form-label fw-normal label-optional" for="company_name">
+                                                        Company Name
+                                                    </label>
+                                                    <input type="text" name="company_name"
+                                                           t-attf-class="form-control #{error.get('company_name') and 'is-invalid' or ''}"
+                                                           t-att-value="'commercial_company_name' in checkout and checkout['commercial_company_name'] or 'company_name' in checkout and checkout['company_name']"
+                                                           t-att-readonly="'1' if vat_warning else None"/>
+                                                    <small t-if="vat_warning" class="form-text text-muted d-block d-lg-none">
+                                                        Changing company name is not allowed once document(s) have been issued for your account.
+                                                        Please contact us directly for this operation.
+                                                    </small>
+                                                </div>
+                                                <div t-attf-class="mb-3 #{error.get('vat') and 'o_has_error' or ''} col-lg-6 div_vat mb-0">
+                                                    <label class="col-form-label fw-normal label-optional" for="vat">TIN / VAT
+                                                    </label>
+                                                    <input type="text" name="vat" t-attf-class="form-control #{error.get('vat') and 'is-invalid' or ''}"
+                                                           t-att-value="'vat' in checkout and checkout['vat']" t-att-readonly="'1' if vat_warning else None"/>
+                                                    <small t-if="vat_warning" class="form-text text-muted d-block d-lg-none">
+                                                        Changing VAT number is not allowed once document(s) have been issued for your account.
+                                                        Please contact us directly for this operation.
+                                                    </small>
+                                                </div>
+                                                <div t-if="vat_warning" class="col-12 d-none d-lg-block mb-1">
+                                                    <small class="form-text text-muted">
+                                                        Changing company name or VAT number is not allowed once document(s) have been issued for
+                                                        your account. Please contact us directly for this operation.
+                                                    </small>
+                                                </div>
+                                            </t>
+                                        </t>
+                                        <div class="w-100"/>
+                                        <div t-attf-class="mb-3 #{error.get('street') and 'o_has_error' or ''} col-lg-12 div_street">
+                                            <label class="col-form-label" for="street">Street
+                                                <span class="d-none d-md-inline">
+                                                    and Number
+                                                </span>
+                                            </label>
+                                            <input type="text" name="street" t-attf-class="form-control #{error.get('street') and 'is-invalid' or ''}"
+                                                   t-att-value="'street' in checkout and checkout['street']"/>
+                                        </div>
+                                        <div t-attf-class="mb-3 #{error.get('street2') and 'o_has_error' or ''} col-lg-12 div_street2">
+                                            <label class="col-form-label label-optional" for="street2">Street 2
+                                            </label>
+                                            <input type="text" name="street2" t-attf-class="form-control #{error.get('street2') and 'is-invalid' or ''}"
+                                                   t-att-value="'street2' in checkout and checkout['street2']"/>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <t t-set='zip_city' t-value='country and [x for x in country.get_address_fields() if x in ["zip", "city"]] or ["city", "zip"]'/>
+                                        <t t-if="'zip' in zip_city and zip_city.index('zip') &lt; zip_city.index('city')">
+                                            <div t-attf-class="mb-3 #{error.get('zip') and 'o_has_error' or ''} col-md-4 div_zip">
+                                                <label class="col-form-label label-optional" for="zip">Zip Code
+                                                </label>
+                                                <input type="text" name="zip" t-attf-class="form-control #{error.get('zip') and 'is-invalid' or ''}"
+                                                       t-att-value="'zip' in checkout and checkout['zip']"/>
+                                            </div>
+                                        </t>
+                                        <div t-attf-class="mb-3 #{error.get('city') and 'o_has_error' or ''} col-md-8 div_city">
+                                            <label class="col-form-label" for="city">City
+                                            </label>
+                                            <input type="text" name="city" t-attf-class="form-control #{error.get('city') and 'is-invalid' or ''}"
+                                                   t-att-value="'city' in checkout and checkout['city']"/>
+                                        </div>
+                                        <t t-if="'zip' in zip_city and zip_city.index('zip') &gt; zip_city.index('city')">
+                                            <div t-attf-class="mb-3 #{error.get('zip') and 'o_has_error' or ''} col-md-4 div_zip">
+                                                <label class="col-form-label label-optional" for="zip">Zip Code</label>
+                                                <input type="text" name="zip" t-attf-class="form-control #{error.get('zip') and 'is-invalid' or ''}"
+                                                       t-att-value="'zip' in checkout and checkout['zip']"/>
+                                            </div>
+                                        </t>
+                                        <div class="w-100"/>
+                                        <div t-attf-class="mb-3 #{error.get('country_id') and 'o_has_error' or ''} col-lg-6 div_country">
+                                            <label class="col-form-label" for="country_id">Country
+                                            </label>
+                                            <select id="country_id" name="country_id" t-attf-class="form-select #{error.get('country_id') and 'is-invalid' or ''}"
+                                                    t-att-mode="mode[1]">
+                                                <option value="">Country...</option>
+                                                <t t-foreach="countries" t-as="c">
+                                                    <option t-att-value="c.id" t-att-selected="c.id == (country and country.id or -1)">
+                                                        <t t-esc="c.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div t-attf-class="mb-3 #{error.get('state_id') and 'o_has_error' or ''} col-lg-6 div_state"
+                                             t-att-style="(not country or not country.state_ids) and 'display: none'">
+                                            <label class="col-form-label" for="state_id">State /
+                                                Province
+                                            </label>
+                                            <select name="state_id" t-attf-class="form-select #{error.get('state_id') and 'is-invalid' or ''}" data-init="1">
+                                                <option value="">State /
+                                                    Province...
+                                                </option>
+                                                <t t-foreach="country_states" t-as="s">
+                                                    <option t-att-value="s.id" t-att-selected="s.id == ('state_id' in checkout and country and checkout['state_id'] != '' and int(checkout['state_id']))">
+                                                        <t t-esc="s.name"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="w-100"/>
+                                        <t t-if="mode == ('new', 'billing') and not only_services">
+                                            <div class="col-lg-12">
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" id='shipping_use_same' class="mr8"
+                                                               name='use_same' value="1" checked='checked'/>
+                                                        Ship to the same address
+                                                        <span class='ship_to_other text-muted' style="display: none">
+                                                            &amp;nbsp;(<i>Your shipping address will be requested later)</i>
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
+                                    <input type="hidden" name="submitted" value="1"/>
+                                    <input type="hidden" name="partner_id" t-att-value="partner_id or '0'"/>
+                                    <input type="hidden" name="callback" t-att-value="callback"/>
+                                    <!-- Example -->
+                                    <input type="hidden" name="field_required" t-att-value="'phone,name'"/>
+                                    <div class="d-flex justify-content-between">
+                                        <a role="button" t-att-href="mode == ('new', 'billing') and '/rental/payment' or '/rental_order/payment'"
+                                           class="btn btn-secondary mb32">
+                                            <i class="oi oi-chevron-left"/>
+                                            <span>Back</span>
+                                        </a>
+                                        <a role="button" href="#" class="btn btn-primary mb32 a-submit a-submit-disable a-submit-loading">
+                                            <span>Next</span>
+                                            <i class="oi oi-chevron-right"/>
+                                        </a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+    <!-- This template is used to display address information on payment page. -->
+    <template id="address_on_payment_rent" name="Address on payment">
+        <div class="card">
+            <div class="card-body" id="shipping_and_billing">
+                <a class="float-end no-decoration" href="/rental_order/payment">
+                    <i class="fa fa-edit"/>
+                    Edit
+                </a>
+                <t t-set="same_shipping" t-value="bool(order.partner_shipping_id==order.partner_id or only_services)"/>
+                <div>
+                    <b>Billing<t t-if="same_shipping and not only_services">&amp; Shipping</t>:
+                    </b>
+                    <span t-esc="order.partner_id" t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')" class="address-inline"/>
+                </div>
+                <div t-if="not same_shipping and not only_services" groups="account.group_delivery_invoice_address">
+                    <b>Shipping:</b>
+                    <span t-esc="order.partner_shipping_id" t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')" class="address-inline"/>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- Rental payment information and providers -->
+    <template id="rental_payment" name="Payment">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Rental - Select Payment Provider</t>
+            <t t-set="no_footer" t-value="1"/>
+            <div id="wrap">
+                <div class="container oe_website_sale py-2">
+                    <div class="row">
+                        <div class="col-12" t-if="errors">
+                            <t t-foreach="errors" t-as="error">
+                                <div class="alert alert-danger" t-if="error" role="alert">
+                                    <h4>
+                                        <t t-esc="error[0]"/>
+                                    </h4>
+                                    <t t-esc="error[1]"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="col-12 col-xl-auto order-xl-2">
+                            <t t-call="cyllo_rental_base.rental_cart_summary"/>
+                        </div>
+                        <div class="col-12 col-xl order-xl-1 oe_cart">
+                            <div id='address_on_payment'>
+                                <t t-call="cyllo_rental_base.address_on_payment_rent"/>
+                            </div>
+                            <div class="oe_structure clearfix mt-3" id="oe_structure_website_sale_payment_1"/>
+                            <t t-if="order.amount_total">
+                                <div class="mt-3">
+                                    <h3 class="mb24">Pay with</h3>
+                                </div>
+                                <div t-if="providers or tokens" id="payment_method">
+                                    <t t-call="payment.form"/>
+                                    <t t-call="cyllo_rental_base.payment_footer"/>
+                                </div>
+                                <div t-else="" class="alert alert-warning">
+                                    <strong>No suitable payment option could be found.</strong>
+                                    <br/>
+                                    <div t-if="not request.env.is_admin()">
+                                        If you believe that it is an error, please contact the website administrator.
+                                    </div>
+                                    <div class="mt-2" groups="base.group_system">
+                                        <a t-if="request.env.company.country_id.is_stripe_supported_country" t-attf-href="/web#action=#{action_activate_stripe_id}"
+                                           role="button" class="btn btn-primary" t-out="'ACTIVATE STRIPE'"
+                                        />
+                                        <div t-else="" class="d-inline"
+                                             title="Stripe Connect is not available in your country, please use another payment provider.">
+                                            <button t-out="'ACTIVATE STRIPE'" class="btn btn-primary" disabled="true"/>
+                                        </div>
+                                        <a role="button" class="btn-link alert-warning ps-2" t-attf-href="/web#action=#{payment_action_id}">
+                                            <strong>
+                                                <i class="oi oi-arrow-right"/>
+                                                View alternatives
+                                            </strong>
+                                        </a>
+                                    </div>
+                                </div>
+                            </t>
+                            <div class="js_payment mt-3" t-if="not order.amount_total"
+                                 id="payment_method" name="o_website_sale_free_cart">
+                                <form name="o_wsale_confirm_order" target="_self"
+                                      action="/rental/payment/validate/#{order.id}" method="post">
+                                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()" t-nocache="The csrf token must always be up to date."/>
+                                    <t t-call="cyllo_rental_base.payment_footer">
+                                        <t t-set="submit_button_label">Confirm Order</t>
+                                    </t>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure" id="oe_structure_website_sale_payment_2"/>
+            </div>
+        </t>
+    </template>
+    <!-- This template is used to display a rental order summary in the right column of a page. -->
+    <template id="rental_cart_summary" name="Cart-rental right column">
+        <div class="card">
+            <div class="card-body p-xl-0">
+                <div class="toggle_summary d-xl-none">
+                    <span class='fa fa-chevron-down fa-border float-end' role="img" aria-label="Details" title="Details"/>
+                </div>
+                <div class="toggle_summary_div d-none d-xl-block">
+                    <table class="table table-striped table-sm" id="cart_products" t-if="rental_order and rental_order.order_line_ids">
+                        <thead>
+                            <tr>
+                                <th class="border-top-0 td-img">Product</th>
+                                <th class="border-top-0"/>
+                                <th class="border-top-0 td-qty">Quantity</th>
+                                <th class="border-top-0 text-center td-price">Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="paid_products" t-value="rental_order.payment_ids.invoice_line_ids.mapped('product_id').ids"/>
+                            <t t-set="order_line_products" t-value="rental_order.order_line_ids.mapped('product_id').ids"/>
+                            <t t-if="len(paid_products) == len(order_line_products)">
+                                <tr t-foreach="rental_order.order_line_ids" t-as="line">
+                                    <td colspan="2" t-if="not line.product_id.product_tmpl_id"/>
+                                    <t t-else="">
+                                        <td class='td-img text-center'>
+                                            <span t-if="line.product_id.image_128">
+                                                <img t-att-src="image_data_uri(line.product_id.image_128)" class="img o_image_64_max rounded" t-att-alt="line.name"/>
+                                            </span>
+                                            <span t-else="" t-field="line.product_id.image_128" t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}"/>
+                                        </td>
+                                        <td class='td-product_name'>
+                                            <div name="cart_summary_description_short">
+                                                <strong t-field="line.product_id.name"/>
+                                            </div>
+                                        </td>
+                                    </t>
+                                    <td class='text-center td-qty'>
+                                        <div t-esc="int(line.product_uom_qty)"/>
+                                    </td>
+                                    <td class="text-center td-price">
+                                        <span t-if="website.show_line_subtotals_tax_selection == 'tax_excluded'"
+                                              t-field="line.price_total" style="white-space: nowrap;"
+                                              t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                                        <span t-else="" t-field="line.rental_price_reduce_taxinc" style="white-space: nowrap;"
+                                              t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <t t-else="">
+                                <tr t-foreach="rental_order.order_line_ids"
+                                    t-as="line">
+                                    <t t-if="line.product_id.id not in paid_products">
+                                        <td colspan="2"
+                                            t-if="not line.product_id.product_tmpl_id"/>
+                                        <t t-else="">
+                                            <td class='td-img text-center'>
+                                                <span t-if="line.product_id.image_128">
+                                                    <img t-att-src="image_data_uri(line.product_id.image_128)" class="img o_image_64_max rounded" t-att-alt="line.name"/>
+                                                </span>
+                                                <span t-else="" t-field="line.product_id.image_128"
+                                                      t-options="{'widget': 'image', 'qweb_img_responsive': False, 'class': 'rounded o_image_64_max'}"/>
+                                            </td>
+                                            <td class='td-product_name'>
+                                                <div name="cart_summary_description_short">
+                                                    <strong t-field="line.product_id.name"/>
+                                                </div>
+                                            </td>
+                                        </t>
+                                        <td class='text-center td-qty'>
+                                            <div t-esc="int(line.product_uom_qty)"/>
+                                        </td>
+                                        <td class="text-center td-price">
+                                            <span t-if="website.show_line_subtotals_tax_selection == 'tax_excluded'" t-field="line.price_total" style="white-space: nowrap;"
+                                                  t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                                            <span t-else="" t-field="line.rental_price_reduce_taxinc" style="white-space: nowrap;"
+                                                  t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                                        </td>
+                                    </t>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+                    <t t-call="cyllo_rental_base.rental_total"/>
+                </div>
+            </div>
+        </div>
+    </template>
+    <!-- To display the confirmation details for a rental order -->
+    <template id="rental_confirmation">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Shop - Confirmed</t>
+            <div id="wrap">
+                <div class="container oe_website_sale py-2">
+                    <h1>
+                        <span>Order</span>
+                        <em t-field="order.name"/>
+                        <t t-if="order.state == 'rented'">
+                            <span>Confirmed</span>
+                        </t>
+                    </h1>
+                    <div class="row">
+                        <div class="col-12 col-xl">
+                            <div class="oe_cart">
+                                <t t-set="tx_sudo" t-value="order.get_portal_last_transaction()"/>
+                                <t t-if="tx_sudo.state == 'done'">
+                                    <div class="thanks_msg">
+                                        <h2>Thank you for your order.
+                                            <a role="button" class="btn btn-primary d-none d-md-inline-block"
+                                               href="/rental/print" target="_blank" aria-label="Print" title="Print">
+                                                <i class="fa fa-print"/>Print
+                                            </a>
+                                        </h2>
+                                    </div>
+                                </t>
+                                <t t-if="request.env['res.users']._get_signup_invitation_scope() == 'b2c' and request.website.is_public_user()">
+                                    <p class="alert alert-info mt-3" role="status">
+                                        <a role="button" t-att-href='order.partner_id.signup_prepare() and order.partner_id.with_context(relative_url=True).signup_url'
+                                           class='btn btn-primary'>Sign Up
+                                        </a>
+                                        to follow your order.
+                                    </p>
+                                </t>
+                                <div class="oe_structure clearfix mt-3" id="oe_structure_website_sale_confirmation_1"/>
+                                <h3 class="text-start mt-3">
+                                    <strong>Payment Information:</strong>
+                                </h3>
+                                <t t-set="tx_sudo" t-value="order.get_portal_last_transaction()"/>
+                                <table class="table">
+                                    <tbody>
+                                        <tr>
+                                            <td colspan="2">
+                                                <t t-esc="tx_sudo.provider_id.name"/>
+                                            </td>
+                                            <td class="text-end" width="100">
+                                                <strong>Total:</strong>
+                                            </td>
+                                            <td class="text-end" width="100">
+                                                <strong t-field="tx_sudo.amount" t-options="{'widget': 'monetary', 'display_currency': order.currency_id}"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <t t-call="cyllo_rental_base.rental_payment_confirmation_status"/>
+                                <div class="card mt-3">
+                                    <div class="card-body">
+                                        <t t-set="same_shipping" t-value="bool(order.partner_shipping_id==order.partner_invoice_id or only_services)"/>
+                                        <div>
+                                            <b>Billing <t t-if="same_shipping and not only_services">&amp; Shipping</t>:</b>
+                                            <span t-esc='order.partner_invoice_id' t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')"
+                                                  class="address-inline"/>
+                                        </div>
+                                        <div t-if="not same_shipping and not only_services" groups="account.group_delivery_invoice_address">
+                                            <b>Shipping:</b>
+                                            <span t-esc='order.partner_shipping_id' t-options="dict(widget='contact', fields=['address'], no_marker=True, separator=', ')"
+                                                  class="address-inline"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="oe_structure mt-3" id="oe_structure_website_sale_confirmation_2"/>
+                            </div>
+                        </div>
+                        <div class="col-12 col-xl-auto">
+                            <t t-set="rental_order" t-value="order"/>
+                            <t t-call="cyllo_rental_base.rental_cart_summary">
+                                <t t-set="hide_promotions" t-value="1"/>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure" id="oe_structure_website_sale_confirmation_3"/>
+            </div>
+            <input t-if='website.plausible_shared_key' type='hidden' class='js_plausible_push' data-event-name='Shop'
+                   t-attf-data-event-params='{"CTA": "Order Confirmed", "amount": "#{"%3s-%3s" % (max(0, round(order.amount_total/100)*100 - 50), round(order.amount_total/100)*100 + 50)}"}'/>
+        </t>
+    </template>
+    <!-- Total cost summary for a rental order -->
+    <template id="rental_total">
+        <div id="rental_total" t-att-class="extra_class or ''" t-if="rental_order and rental_order.order_line_ids">
+            <table class="table mb-0">
+                <tr id="empty">
+                    <t t-if='not no_rowspan'>
+                        <td rowspan="10" class="border-0"/>
+                    </t>
+                    <td class="col-md-2 col-3 border-0"/>
+                    <td class="col-md-2 col-3 border-0"/>
+                </tr>
+                <tr id="rental_order_total_untaxed">
+                    <td class="text-end border-0">Subtotal:</td>
+                    <td class="text-xl-end border-0">
+                        <span t-field="rental_order.amount_untaxed" class="monetary_field" style="white-space: nowrap;"
+                              t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                    </td>
+                </tr>
+                <tr id="rental_order_total_taxes">
+                    <td class="text-end border-0">Taxes:</td>
+                    <td class="text-xl-end border-0">
+                        <span t-field="rental_order.amount_tax" class="monetary_field" style="white-space: nowrap;"
+                              t-options="{'widget': 'monetary', 'display_currency': rental_order.currency_id}"/>
+                    </td>
+                </tr>
+                <tr id="rental_order_total">
+                    <td class="text-end border-top border-bottom-0">
+                        <strong>Total:</strong>
+                    </td>
+                    <td class="text-xl-end border-top border-bottom-0">
+                        <strong t-field="rental_order.amount_total" class="monetary_field"
+                                t-options='{"widget": "monetary", "display_currency": rental_order.currency_id}'/>
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </template>
+    <!-- To display the payment and confirmation status of a rental order -->
+    <template id="rental_payment_confirmation_status">
+        <div class="oe_website_sale_tx_status mt-3" t-att-data-order-id="order.id"
+             t-att-data-order-tracking-info="json.dumps(order_tracking_info)">
+            <t t-set="tx_sudo" t-value="order.get_portal_last_transaction()"/>
+            <div t-attf-class="card #{(tx_sudo.state == 'pending' and 'bg-info') or
+                (tx_sudo.state == 'done' and order.amount_total == tx_sudo.amount and 'alert-success') or
+                (tx_sudo.state == 'done' and order.amount_total != tx_sudo.amount and 'bg-warning') or
+                (tx_sudo.state == 'authorized' and 'alert-success') or 'bg-danger'}">
+                <div class="card-header">
+                    <a role="button" groups="base.group_system" class="btn btn-sm btn-link text-white float-end" target="_blank" aria-label="Edit" title="Edit"
+                       t-att-href="'/web#model=%s&amp;id=%s&amp;action=%s&amp;view_type=form' % ('payment.provider', tx_sudo.provider_id.id, 'payment.action_payment_provider')">
+                        <i class="fa fa-pencil"/>
+                    </a>
+                    <t t-if="tx_sudo.state == 'pending'">
+                        <t t-out="tx_sudo.provider_id.sudo().pending_msg"/>
+                    </t>
+                    <t t-if="tx_sudo.state == 'done'">
+                        <span t-if='tx_sudo.provider_id.sudo().done_msg' t-out="tx_sudo.provider_id.sudo().done_msg"/>
+                    </t>
+                    <t t-if="tx_sudo.state == 'done' and order.amount_total != tx_sudo.amount">
+                        <span>
+                            Unfortunately your order can not be confirmed as the amount of your payment does not match the amount of your cart.
+                            Please contact the responsible of the shop for more information.
+                        </span>
+                    </t>
+                    <t t-if="tx_sudo.state == 'cancel'">
+                        <t t-out="tx_sudo.provider_id.sudo().cancel_msg"/>
+                    </t>
+                    <t t-if="tx_sudo.state == 'authorized'">
+                        <t t-if="tx_sudo.provider_id.sudo().auth_msg" t-out="tx_sudo.provider_id.sudo().auth_msg"/>
+                        <span t-else="">Your payment has been authorized.</span>
+                    </t>
+                    <t t-if="tx_sudo.state == 'error'">
+                        <span t-esc="tx_sudo.state_message"/>
+                    </t>
+                </div>
+                <t t-if="tx_sudo.provider_code == 'custom'">
+                    <div t-if="order.name" class="card-body">
+                        <b>Communication:</b>
+                        <span t-esc='order.name'/>
+                    </div>
+                    <div t-if="tx_sudo.provider_id.sudo().qr_code">
+                        <t t-set="qr_code" t-value="tx_sudo.company_id.partner_id.bank_ids[:1].build_qr_code_base64(order.amount_total,tx_sudo.reference, None, tx_sudo.currency_id, tx_sudo.partner_id)"/>
+                        <div class="card-body" t-if="qr_code">
+                            <h3>Or scan me with your banking app.</h3>
+                            <img class="border border-dark rounded" t-att-src="qr_code"/>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </template>
+    <!-- Payment footer -->
+    <template id="payment_footer" name="Payment">
+        <!-- Parameters description:
+            - submit_button_label: The label of the submit button; default: 'Pay Now'. -->
+        <t t-set="submit_button_label" t-value="submit_button_label or 'Pay Now'"/>
+        <div name="o_checkbox_container" class="form-check mt-2 o_accept_tc_button"/>
+        <div class="float-end mt-2">
+            <t t-call="payment.submit_button"/>
+        </div>
+    </template>
+    <template id="rental_cart_button" inherit_id="website_sale.header_cart_link" name="Rental Cart Button">
+        <xpath expr="//t[@t-set='show_cart']" position="after">
+            <t t-set="rental_cart_quantity" t-value="request.session['rental_cart_quantity'] if 'rental_cart_quantity' in request.session else 0"/>
+            <a href="/rental/cart" t-attf-class="#{_link_class}">
+                <div>
+                    <img src="/cyllo_rental_base/static/src/icon/rent.png" class="fa-stack"/>
+                    <sup t-attf-class="my_rental_cart_quantity badge text-bg-primary #{_badge_class} #{'d-none' if (rental_cart_quantity == 0) else ''}"
+                         t-esc="rental_cart_quantity" t-att-data-order-id="request.session.get('sale_order_id', '')"/>
+                </div>
+                <span t-if="_text" t-attf-class="#{_text_class}">Rental Cart</span>
+            </a>
+        </xpath>
+    </template>
+</odoo>

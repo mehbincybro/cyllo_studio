@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record extends the view for social.media.feed by adding an image representing Instagram . -->
+    <record id="view_social_media_feed_kanban" model="ir.ui.view">
+        <field name="name">view.social.media.feed.kanban</field>
+        <field name="model">social.media.feed</field>
+        <field name="inherit_id"
+               ref="cyllo_social_media_marketing.view_social_media_feed_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('column')][3]" position="after">
+                <div style=" position: absolute; top: 20px; right: 15px">
+                    <img src="cyllo_instagram/static/src/4188690.png" width="30px;"
+                         alt="Instagram"
+                         invisible="not posted_on_ig"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='likes_count']" position="after">
+                <button type="object"
+                        name="action_fetch_data_from_ig_feed"
+                        class="fa fa-users"
+                        string="Fetch Contacts From Feed"
+                         invisible="not posted_on_ig"/>
+                 <field name="posted_on_ig" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- This record defines an action for handling Instagram comments. -->
+    <record id="action_instagram_comment" model="ir.actions.client">
+        <field name="name">Instagram Comments</field>
+        <field name="tag">insta_comments</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

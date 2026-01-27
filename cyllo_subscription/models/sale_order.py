@@ -1,0 +1,114 @@
+# -*- coding: utf-8 -*-
+from dateutil.relativedelta import relativedelta
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+
+class SaleOrder(models.Model):
+    """Inherit the model and creating a model for subscription"""
+    _inherit = "sale.order"
+
+    is_subscription = fields.Boolean(help='If the product added is a subscription product then this field is true',
+                                     compute='_compute_is_subscription', store=True)
+    state_subscription = fields.Selection(
+        selection=[('quotation', 'Subscription Quotation'), ('sub_order', 'Subscription Order Created')],
+        default='quotation', string='Subscription State', help='State of the subscription')
+    subscription_orders = fields.Integer(string='Subscriptions', help='Subscription orders',
+                                         compute='_compute_subscription_orders')
+
+    @api.depends('order_line')
+    def _compute_is_subscription(self):
+        """Check if subscription product is added or not"""
+        for rec in self:
+            rec.is_subscription = len(rec.order_line.filtered(lambda x: x.product_id.is_subscription)) > 0
+
+    def action_confirm(self):
+        """Check if the order line has a subscription and non-subscription
+        product if it is so needed to block it.
+        Create subscription orders from each order line"""
+        status = []
+        for order in self.order_line:
+            if order.product_template_id.is_subscription is True:
+                status.append(True)
+            else:
+                status.append(False)
+        if len(set(status)) > 1:
+            subscription_list = [rec.product_id.is_subscription for rec in self.order_line]
+            if len(set(subscription_list)) > 1:
+                raise ValidationError(_('Cannot add subscription product with non-subscription product'))
+        elif len(set(status)) == 1:
+            for line in self.order_line:
+                if line.product_template_id.is_subscription:
+                    # Create subscription order from each order line
+                    inv = self.env['subscription.order'].create({
+                        'partner_id': line.order_id.partner_id.id,
+                        'sale_order_id': self.id,
+                        'sale_order_template_id': self.sale_order_template_id.id,
+                        'time_based_price_id': line.time_based_price_id.id,
+                        'renewal_date': line.trial_end if line.product_template_id.trial_period >= 1 else
+                        fields.Datetime.now(),
+                        'trial_end': line.trial_end,
+                        'state': 'posted' if self.sale_order_template_id.invoice_creation else 'sale',
+                        'subscription_order_line_ids': [
+                            (fields.Command.create({
+                                'product_id': line.product_id.id,
+                                'time_based_price_id': line.time_based_price_id.id,
+                                'quantity': line.product_uom_qty,
+                                'tax_ids': line.tax_id,
+                                'subtotal': line.price_subtotal,
+                                'total_price': line.price_total,
+                            }))
+                        ],
+                    })
+                    self.is_subscription = True
+                    sub_record = self.env['subscription.order'].browse(inv.id)
+                    if sub_record.trial_end > fields.Datetime.now():
+                        sub_record.state_subscription = 'trial'
+                    else:
+                        sub_record.state_subscription = 'active'
+                    if self.sale_order_template_id.invoice_creation in['draft', 'confirmed', 'sent']:
+                        sub_record.action_post()
+        res = super().action_confirm()
+        return res
+
+    @api.onchange('sale_order_template_id')
+    def _onchange_sale_order_template_id(self):
+        """Change the renewal date when subscription plan changes"""
+        res = super()._onchange_sale_order_template_id()
+        for line in self.order_line:
+            line.check_trial_period()
+            line.price_unit = line.time_based_price_id.cost if line.time_based_price_id else 0.0
+            subscription_unit = line.time_based_price_id.subscription_unit
+            duration = line.time_based_price_id.duration if line.time_based_price_id else 0
+            if subscription_unit in ('weeks', 'months', 'years'):
+                delta = relativedelta(**{subscription_unit: duration})
+                line.renewal_date = fields.Datetime.now() + delta
+        return res
+
+    def _compute_subscription_orders(self):
+        """
+        Compute the number of subscription orders associated with the sale
+        order and update related fields accordingly.
+        :return: None
+        """
+        for rec in self:
+            rec.subscription_orders = self.env['subscription.order'].search_count([('sale_order_id', '=', rec.id)])
+            if rec.subscription_orders > 0:
+                rec.state_subscription = 'sub_order'
+
+    def action_subscriptions(self):
+        """
+        Open a window displaying subscription orders associated with the
+        sale order.
+        :return: Action dictionary to open the subscription orders window
+        :rtype: dict
+        """
+        subscription_orders = self.env['subscription.order'].search([('sale_order_id', '=', self.id)])
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Subscription Orders'),
+            'res_model': 'subscription.order',
+            'view_mode': 'tree,form',
+            'target': 'current',
+            'domain': [('id', 'in', subscription_orders.ids)]
+        }

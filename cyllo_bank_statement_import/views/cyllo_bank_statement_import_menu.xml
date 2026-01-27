@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Menu item for the "Bank Statement" module -->
+    <menuitem id="menu_bank_statement_categ" name="Bank Statement"
+              parent="account.menu_finance" sequence="3"/>
+    <!-- Sub-menu item to initiate the bank statement import -->
+    <menuitem id="menu_import_bank_statement" name="Import Bank Statement"
+              parent="menu_bank_statement_categ" sequence="0"
+              action="action_view_import_bank_statement"/>
+    <!-- Sub-menu item for accessing the bank statements -->
+    <menuitem id="menu_bank_statement" name="Bank Statement"
+              parent="menu_bank_statement_categ" sequence="1"
+              action="account.action_bank_statement_tree"/>
+</odoo>

@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<odoo noupdate="1">
+    <!--Follow-up Email template -->
+    <record id="mail_template_payment_reminder" model="mail.template">
+        <field name="name">Payment Reminder</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="email_from">{{ (object.company_id.email_formatted or user.email_formatted) }}</field>
+        <field name="partner_to">{{ object.id }}</field>
+        <field name="subject">{{ object.company_id.name }} Payment Reminder</field>
+        <field name="body_html" type="html">
+            <div style="margin: 0px; padding: 0px;">
+                <p style="margin: 0px; padding: 0px;">
+                    Dear <t t-out="object.name or ''"/>,
+                    <br/>
+                </p>
+                <p>
+                    Exception made if there was a mistake of ours, it seems that the following amount stays unpaid. Please, take appropriate measures in order to carry out this payment in the next 8 days.
+                    Would your payment have been carried out after this mail was sent, please ignore this message. Do not hesitate to contact our accounting department.
+                </p>
+                <p>
+                    Best Regards,
+                </p>
+                <br/>
+                <p>Here is your invoice details</p>
+                <table style="margin-left: 35 px;" >
+                    <thead>
+                        <th style="border: 1px solid black;" class="col" align="center" >
+                            <strong>Invoice Date</strong>
+                        </th>
+                        <th style="border: 1px solid black;" class="col" align="center" >
+                            <strong>Number</strong>
+                        </th>
+                        <th style="border: 1px solid black;" class="col" align="center" >
+                            <strong>Due Date</strong>
+                        </th>
+                        <th style="border: 1px solid black;" class="col" align="center" >
+                            <strong>Amount</strong>
+                        </th>
+                    </thead>
+                    <t t-foreach="object.move_ids" t-as="move">
+                        <tbody>
+                            <td style="border: 1px solid black;" class="col" align="center" ><t t-out="move.invoice_date or ''"/></td>
+                            <td style="border: 1px solid black;" class="col" align="center" ><t t-out="move.name or ''"/></td>
+                            <td style="border: 1px solid black;" class="col" align="center" ><t t-out="move.invoice_date_due or ''"/></td>
+                            <td style="border: 1px solid black;" class="col" align="center" ><t t-out="move.amount_residual_signed or ''"/></td>
+                        </tbody>
+                    </t>
+                </table>
+            </div>
+        </field>
+        <field name="lang">{{ object.lang }}</field>
+    </record>
+</odoo>

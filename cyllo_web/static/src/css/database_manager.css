@@ -1,0 +1,306 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+body {
+    background-color: #f5f5f5 !important;
+    font-family: "Inter", sans-serif;
+    background-image: url("/cyllo_base/static/src/img/cloud-bg.png");
+}
+
+.cyllo-modal_content {
+    border: 1px solid #E4E4E4;
+    border-bottom: 2px solid #E4E4E4;
+    padding: 2rem;
+    border-radius: 8px;
+    font-family: "Inter", sans-serif;
+}
+
+.cy-modal_header {
+    padding: 0px !Important;
+    align-items: flex-start;
+    padding-bottom: 0.4rem !important;
+}
+
+.cy-modal_footer {
+    padding: 0;
+    border-top: none;
+    justify-content: flex-start;
+}
+
+.cy-modal_sub-title {
+    font-size: 14px;
+    color: #777777;
+}
+
+.cy-modal-title {
+    font-size: 22px;
+    color: #222222;
+    font-weight: bold;
+}
+
+.cy-dashboard-container {
+    background-color: #fff;
+    width: 965px;
+    min-height: 480px;
+}
+
+.cy-modal_body {
+    padding: 1.2rem 0 !important;
+}
+
+.cy-dashboard-left-side-img {
+    background-image: url(/cyllo_web/static/src/img/cy-dashboard.png);
+    height: 100%;
+    border-radius: 20px;
+    background-repeat: no-repeat;
+    position: relative;
+    background-size: cover;
+}
+
+.cy-dashboard-left-side_manager .cy-dashboard-left-side-img {
+    height: 700px;
+    background-size: cover;
+    border-radius: 18px;
+}
+
+.cy-dashboard-left-side_manager .cy-logo-dashboard-left {
+    top: 647px;
+}
+
+.cy-h6-header {
+    color: #6F7500;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.p-cy-section {
+    font-size: 16px;
+    margin-bottom: 18px;
+}
+
+.cy-logo-dashboard-left {
+    position: absolute;
+    bottom: 10px;
+}
+
+.cy-dashboard-container-right .manage-btn {
+    border: 1px solid #e4e4e4;
+    font-size: 13px;
+}
+
+.cy-dashboard-container-right .manage-btn:hover {
+    color: #666;
+    background-color: #F8F8F8;
+}
+
+.cy-database-content {
+    padding: 15px;
+    border-bottom: 1px solid #DFDFDF;
+}
+
+.cy-database-content:hover {
+    background-color: #F8F8F8;
+}
+
+.cy-database-name:hover {
+    font-size: 14px;
+    color: #9ea700;
+    cursor: pointer;
+}
+
+.cy-database-name {
+    font-size: 14px;
+    color: #3C4D62;
+}
+
+.cy-database-button-container {
+    border: 1px solid #e4e4e4;
+    border-radius: 8px;
+}
+
+.cy-database-button-container a:hover {
+    text-decoration: none;
+}
+
+.cy-database-button-container i {
+    font-size: 13px;
+}
+
+.cy-database-button-container a i:hover {
+    color: #9ea700 !important;
+}
+
+.cy-box-upload {
+    height: 25px;
+    width: 33%;
+}
+
+.cy-box-copy {
+    height: 25px;
+    width: 33%;
+    border-left: 1px solid #e4e4e4;
+    border-right: 1px solid #e4e4e4;
+}
+
+.cy-box-delete {
+    height: 25px;
+    width: 33%;
+}
+
+.cy-container {
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+a {
+    color: #3C4D62 !important;
+}
+
+a:hover {
+    color: #9ea700 !important;
+    text-decoration: underline;
+}
+
+.btn-primary {
+    background-color: hsl(63, 100%, 33%) !important;
+    color: var(--white-color);
+    border: none !important;
+    border-radius: 0.25rem;
+}
+
+.btn-primary.focus, .btn-primary:focus {
+    box-shadow: unset !important;
+}
+
+.cy-form_group {
+    margin-bottom: .6rem !important;
+}
+
+.cy-modal__label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #505050;
+    padding: 0.5rem 0;
+    min-width: 70px;
+}
+
+.cy-required {
+    color: #FF4B4B;
+    font-size: 12px;
+    padding: 0 0.2rem;
+}
+
+.cy-input_control {
+    border-radius: 2px !important;
+    border: 1px solid #D9D9D9 !important;
+    font-size: 14px !important;
+    color: #0C0520 !important;
+    height: 35px !important;
+    font-weight: 500 !important;
+    transition: all 0.3s linear !important;
+}
+
+.cy-input_control:focus {
+    box-shadow: inset 1px 1px 5px 0 rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s linear !important;
+    border: 1px solid #9EA700 !important;
+    outline: none !important;
+}
+
+.cy-input-container {
+    position: relative;
+}
+
+.cy-eye {
+    position: absolute;
+    z-index: 5;
+    top: 10%;
+    right: 3%;
+}
+
+.cy-check_box:focus {
+    border: 1px solid #9EA700;
+    box-shadow: none;
+}
+
+.cy-check_box:checked {
+    background-color: #9EA700;
+    border: 1px solid #9EA700;
+}
+
+.cy-radio_label {
+    color: #505050;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.cy-primary_btn {
+    width: 100%;
+    background-color: #9EA700;
+    border: 1px solid #9EA700;
+    margin: 0.4rem 0;
+    transition: all 0.3s linear;
+    height: 45px;
+    border-radius: 5px;
+}
+
+.cy-primary_btn:hover {
+    background-color: #6F7500;
+    border-color: #6F7500;
+}
+
+.cy-primary_btn:active:focus,
+.cy-primary_btn:active,
+.cy-primary_btn:focus {
+    box-shadow: none;
+    background-color: #9EA700;
+    outline: none;
+}
+
+.cy-file_btn {
+    color: #505050;
+    font-size: 12px;
+    margin-top: 0.3rem;
+    position: relative;
+}
+
+.cy-file_btn::file-selector-button {
+    color: #fff;
+    background-color: #505050;
+    font-size: 12px;
+    display: block;
+    font-weight: 600;
+    border-radius: 2px;
+    border: 1px solid #505050;
+    padding: 8px 20px;
+    padding-left: 32px;
+    margin-bottom: 0.2rem;
+}
+
+.cy-file_btn::before {
+    content: '';
+    width: 1rem;
+    height: 1rem;
+    display: block;
+    position: absolute;
+    top: 0.55rem;
+    left: 0.8rem;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,1)'%3E%3Cpath fill='none' d='M0 0h24v24H0z'%3E%3C/path%3E%3Cpath d='M14.8287 7.75737L9.1718 13.4142C8.78127 13.8047 8.78127 14.4379 9.1718 14.8284C9.56232 15.219 10.1955 15.219 10.586 14.8284L16.2429 9.17158C17.4144 8.00001 17.4144 6.10052 16.2429 4.92894C15.0713 3.75737 13.1718 3.75737 12.0002 4.92894L6.34337 10.5858C4.39075 12.5384 4.39075 15.7042 6.34337 17.6569C8.29599 19.6095 11.4618 19.6095 13.4144 17.6569L19.0713 12L20.4855 13.4142L14.8287 19.0711C12.095 21.8047 7.66283 21.8047 4.92916 19.0711C2.19549 16.3374 2.19549 11.9053 4.92916 9.17158L10.586 3.51473C12.5386 1.56211 15.7045 1.56211 17.6571 3.51473C19.6097 5.46735 19.6097 8.63317 17.6571 10.5858L12.0002 16.2427C10.8287 17.4142 8.92916 17.4142 7.75759 16.2427C6.58601 15.0711 6.58601 13.1716 7.75759 12L13.4144 6.34316L14.8287 7.75737Z'%3E%3C/path%3E%3C/svg%3E");
+}
+
+.cy-modal_sub-text {
+    font-size: 12px;
+    color: #777777;
+    line-height: 18px;
+    margin-top: 0.4rem;
+}
+
+
+
+@media (max-width: 991px) {
+    .cy-database-button-container {
+        margin-top: 10px;
+    }
+}

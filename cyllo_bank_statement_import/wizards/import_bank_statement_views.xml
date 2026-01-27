@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Wizard view to upload files -->
+    <record id="view_import_bank_statement_form" model="ir.ui.view">
+        <field name="name">view.import.bank.statement.form</field>
+        <field name="model">import.bank.statement</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <p>
+                        <center>
+                            <i>Upload CSV or XLSX or XLS or OFX or QIF file format</i>
+                        </center>
+                    </p>
+                    <group>
+                        <group>
+                            <field name="attachment" filename="file_name"/>
+                            <field name="file_name" invisible="1"/>
+                            <field name="journal_id" invisible="0" domain="[('type', '=', 'bank')]"/>
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="action_statement_import" class="oe_highlight"
+                                string="IMPORT" type="object" help="Import bank statement in CSV or XLSX format"/>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Wizard action record -->
+    <record id="action_view_import_bank_statement" model="ir.actions.act_window">
+        <field name="name">Import Statements</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">import.bank.statement</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_import_bank_statement_form"/>
+        <field name="target">new</field>
+    </record>
+</odoo>

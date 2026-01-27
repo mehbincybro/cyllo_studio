@@ -1,0 +1,69 @@
+# -*- coding: utf-8 -*-
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
+
+
+class EmployeeSalaryStructure(models.Model):
+    """The class is used to manage and create the salary """
+    _name = 'employee.salary.structure'
+    _description = 'Salary Structure'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+
+    @api.model
+    def _get_parent(self):
+        """ This method is used to retrieve the parent record representing the base payroll structure. """
+        return self.env.ref('cyllo_payroll_management.employee_salary_structure_base_for_new_structures', False)
+
+    name = fields.Char(required=True, help='The name of the record.')
+    code = fields.Char(string='Reference', required=True, help='A unique reference code for the record.')
+    type_id = fields.Many2one('salary.structure.type', required=True, ondelte='restrict',
+                              help='The type of this salary structure')
+    schedule_pay = fields.Selection(related='type_id.default_schedule_pay')
+    company_id = fields.Many2one('res.company', required=True, copy=False,
+                                 default=lambda self: self.env.company.id,
+                                 help='The company associated with this record')
+    country_id = fields.Many2one('res.country', help='To choose the country',
+                                 default=lambda self: self.env.company.country_id)
+    note = fields.Text(string='Description', help='Additional description or notes related to the record')
+    parent_id = fields.Many2one('employee.salary.structure',
+                                help='The parent payroll structure for this record.', default=_get_parent)
+    children_ids = fields.One2many('employee.salary.structure', 'parent_id', copy=True,
+                                   help='The child payroll structures associated with this record.')
+    employee_salary_rule_ids = fields.Many2many('employee.salary.rule', 'structure_id',
+                                                'rule_id', string='Salary Rules', ondelete='restrict',
+                                                help='The salary rules associated with this payroll structure.')
+    journal_id = fields.Many2one('account.journal', 'Salary Journal', company_dependent=True,
+                                 default=lambda self: self.env['account.journal'].sudo().search([
+                                     ('type', '=', 'general'), ('company_id', '=', self.env.company.id)], limit=1),
+                                 ondelete='restrict', help='The journal of payslip where the journal entry posted')
+    other_input_line_type_ids = fields.Many2many('employee.payslip.other.input', string='Other Input Line',
+                                                 help='The other input types')
+    unpaid_work_entry_type_ids = fields.Many2many('hr.work.entry.type',
+                                                  'hr_payroll_structure_hr_work_entry_type_rel',
+                                                  string='Unpaid Work Entry Types',
+                                                  help='The unpaid work entry types are added here')
+
+    @api.constrains('parent_id')
+    def _check_parent_id(self):
+        """Check for recursive salary structures"""
+        if not self._check_recursion():
+            raise ValidationError(_('You cannot create a recursive salary structure.'))
+
+    @api.returns('self', lambda value: value.id)
+    def copy(self, default=None):
+        """Create a copy of the current payroll structure"""
+        self.ensure_one()
+        default = dict(default or {}, code=_("%s (copy)") % self.code)
+        return super(EmployeeSalaryStructure, self).copy(default)
+
+    def _get_all_rules(self):
+        """ To gte the all rules """
+        all_rules = [rule for struct in self for rule in struct.employee_salary_rule_ids._recursive_search_of_rules()]
+        return all_rules
+
+    def _get_parent_structure(self):
+        """Get the parent structure and the current structure as a combined """
+        parent = self.mapped('parent_id')
+        if parent:
+            parent = parent._get_parent_structure()
+        return parent + self

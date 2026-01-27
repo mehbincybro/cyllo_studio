@@ -1,0 +1,1157 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_marketing_automation
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-03 10:59+0000\n"
+"PO-Revision-Date: 2024-01-03 10:59+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
+msgid "<span>Activity</span><br/>"
+msgstr "<Span> Aktivnost </span> <br/>"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
+msgid "<span>After</span>"
+msgstr "<span> nakon </span>"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
+msgid "<span>Participants</span><br/>"
+msgstr "<Span> sudionici </span> <br/>"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_kanban
+msgid "<span>Test</span><br/>"
+msgstr "<Span> test </span> <br/>"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_needaction
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_needaction
+msgid "Action Needed"
+msgstr "Potrebna radnja"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__activity_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__activity_ids
+msgid "Activities"
+msgstr "Aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__test_activity_ids
+msgid "Activities for participants"
+msgstr "Aktivnosti za sudionike"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__activity_ids
+msgid "Activities of the current campaign"
+msgstr "Aktivnosti trenutne kampanje"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_activity_actions
+#: model:ir.actions.client,name:cyllo_marketing_automation.marketing_activity_action
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__activity_id
+#, python-format
+msgid "Activity"
+msgstr "Aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__activity_count
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__marketing_activity_count
+msgid "Activity Count"
+msgstr "Broj aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
+msgid "Activity Domain"
+msgstr "Domena aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__test_activity_ids
+msgid "Activity Lines"
+msgstr "Linije aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__model_id
+msgid "Activity Model"
+msgstr "Model aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__type
+msgid "Activity Type"
+msgstr "Vrsta aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__activity_count
+msgid "Activity count"
+msgstr "Broj aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__activity_id
+msgid "Activity in the activity line"
+msgstr "Aktivnost u liniji aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Add New Activity"
+msgstr "Dodajte novu aktivnost"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Add Parent Activity"
+msgstr "Dodajte roditeljsku aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Add to Templates"
+msgstr "Dodajte u predloške"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__activity_ids
+msgid "All Activity lists"
+msgstr "Popis svih aktivnosti"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Another Activity"
+msgstr "Još jedna aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Attach a file"
+msgstr "Priložite datoteku"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_attachment_count
+msgid "Attachment Count"
+msgstr "Brojanje privrženosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_mailing_mailing__cy_automation_template
+msgid "Automation Template"
+msgstr "Predložak automatizacije"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Bounce"
+msgstr "Odskakivati"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__cancel
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__cancel
+msgid "CANCELLED"
+msgstr "Otkazan"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__campaign_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__campaign_id
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "Campaign"
+msgstr "Kampanja"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__campaign_id
+msgid "Campaign related to activity"
+msgstr "Kampanja vezana za aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__campaign_id
+msgid "Campaign related to participant"
+msgstr "Kampanja vezana za sudionika"
+
+#. module: cyllo_marketing_automation
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_campaign_action
+#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_campaign_menu
+msgid "Campaigns"
+msgstr "Kampanje"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Cancel"
+msgstr "Otkazati"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__is_test_participant
+msgid "Check the record is test participant or not"
+msgstr "Provjerite je li zapis sudionik testa ili ne"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__model_id
+msgid "Choose a target model to generate campaign"
+msgstr "Odaberite ciljni model za generiranje kampanje"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_id
+msgid "Choose any predefined templateto apply the filter for the domain"
+msgstr ""
+"Odaberite bilo koji unaprijed definirani templateto Primijenite filter za "
+"domenu"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__model_id
+msgid "Choose target model to filter records"
+msgstr "Odaberite ciljni model za filtriranje zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__activity_trigger_type
+msgid "Choose the activity trigger type"
+msgstr "Odaberite vrstu okidača aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__user_id
+msgid "Choose the responsible user for this campaign"
+msgstr "Odaberite odgovornog korisnika za ovu kampanju"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__activity_trigger
+msgid "Choose the time need to trigger your activity"
+msgstr "Odaberite vrijeme koje treba pokrenuti vašu aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__trigger_schedule_type
+msgid "Choose trigger type of the activity"
+msgstr "Odaberite vrstu okidača aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__type
+msgid "Choose your activity type"
+msgstr "Odaberite vrstu aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__mailing_mailing_id
+msgid ""
+"Choose your mail template \n"
+"Note: Choose different template for each activity. Otherwise may cause to duplicate mailing"
+msgstr ""
+"Odaberite svoj predložak pošte\n"
+"Napomena: Odaberite različit predložak za svaku aktivnost.Inače može uzrokovati dupliciranje pošte"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Click"
+msgstr "Klik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_participant__state__completed
+msgid "Completed"
+msgstr "Dovršen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_filter_menu
+msgid "Configuration"
+msgstr "Konfiguracija"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__record_count
+msgid "Count of the activities"
+msgstr "Broj aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__user_id
+msgid "Created By"
+msgstr "Napravio"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__create_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__create_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__create_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__create_uid
+msgid "Created by"
+msgstr "Napravio"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__test_date_started
+msgid "Created date and time"
+msgstr "Stvoreni datum i vrijeme"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__create_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__create_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__create_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__create_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__create_date
+msgid "Created on"
+msgstr "Stvoren na"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__state
+msgid "Current state of the activity line"
+msgstr "Trenutno stanje linije aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__state
+msgid "Current state of the participant"
+msgstr "Trenutno stanje sudionika"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__test_date_started
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__test_date_started
+msgid "Date"
+msgstr "Datum"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__test_date_started
+msgid "Date and time of the record created"
+msgstr "Datum i vrijeme stvorenog zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__day
+msgid "Day"
+msgstr "Dan"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__display_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__display_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__display_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__display_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__display_name
+msgid "Display Name"
+msgstr "Zaslon"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__domain
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__domain_activity
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__filter
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__domain
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_activity_form
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_filter_form
+msgid "Domain"
+msgstr "Domena"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_domain
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__domain
+msgid "Domain to filter the records"
+msgstr "Domena za filtriranje zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__error
+msgid "ERROR"
+msgstr "Pogreška"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Email Content"
+msgstr "Sadržaj e -pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_mail_compose_message
+msgid "Email composition wizard"
+msgstr "Čarobnjak za sastavljanje e-pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__name
+msgid "Enter a name for the campaign"
+msgstr "Unesite ime za kampanju"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__name
+msgid "Enter a name for the filter"
+msgstr "Unesite ime za filter"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__name
+msgid "Enter a name for you activity"
+msgstr "Unesite naziv za vašu aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_failure_message
+msgid "Failure Message"
+msgstr "Poruka o neuspjehu"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_domain
+msgid "Favorite filter domain"
+msgstr "Omiljena domena filtra"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__marketing_filter_id
+msgid "Favourite"
+msgstr "Omiljen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_filter_menu_favourite
+msgid "Favourites"
+msgstr "Favoriti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_filter_action
+msgid "Filter"
+msgstr "filtar"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__name
+msgid "Filter Name"
+msgstr "Naziv filtra"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_follower_ids
+msgid "Followers"
+msgstr "Sljedbenici"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Sljedbenici (partneri)"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "Group By"
+msgstr "Grupirati"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__has_message
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__has_message
+msgid "Has Message"
+msgstr "Ima poruku"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__h_level_css
+msgid "Hierarchical style"
+msgstr "Hijerarhijski stil"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__h_level_css
+msgid "Hierarchy Style"
+msgstr "Hijerarhijski stil"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__hour
+msgid "Hour"
+msgstr "Sat"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__id
+msgid "ID"
+msgstr "iskaznica"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__record_id
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__record_id
+msgid "Id of the selected record"
+msgstr "ID odabranog zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_needaction
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Ako se provjeri, nove poruke zahtijevaju vašu pažnju."
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_has_error
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_has_error
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Ako se provjeri, neke poruke imaju pogrešku u isporuci."
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__is_inactive
+msgid "Inactive"
+msgstr "Neaktivan"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_is_follower
+msgid "Is Follower"
+msgstr "Je sljedbenik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_mailing_mailing__cy_automation_template
+msgid "Is marketing automation template"
+msgstr "Je li predložak automatizacije marketinga"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_bounced
+msgid "Is mail bounced"
+msgstr "Je li pošta odbijena"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_clicked
+msgid "Is mail clicked"
+msgstr "Je li pošta kliknuta"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_opened
+msgid "Is mail opened"
+msgstr "Je li pošta otvorena"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_replied
+msgid "Is mail replied"
+msgstr "Je li pošta odgovorena"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__write_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__write_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__write_uid
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__write_uid
+msgid "Last Updated by"
+msgstr "Zadnji put ažurirao"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__write_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__write_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__write_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__write_date
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__write_date
+msgid "Last Updated on"
+msgstr "Zadnji put ažurirano na"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Launch"
+msgstr "Pokrenuti"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Launch Test"
+msgstr "Test pokretanja"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__type__mail
+msgid "Mail"
+msgstr "Pošta"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Mail Body"
+msgstr "Tijelo pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_bounced
+msgid "Mail Bounced"
+msgstr "Pošta odbila"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_clicked
+msgid "Mail Clicked"
+msgstr "Kliknula pošta"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_failure_message
+msgid "Mail Failure Reason"
+msgstr "Razlog neuspjeha pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_opened
+msgid "Mail Opened"
+msgstr "Otvorena pošta"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_replied
+msgid "Mail Replied"
+msgstr "Mail odgovorio"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__mail_trace_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__activity_executed_ids
+msgid "Mail Trace"
+msgstr "Trag pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_bounce
+msgid "Mail: bounced"
+msgstr "Pošta: odbijen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_click
+msgid "Mail: clicked"
+msgstr "Pošta: kliknuto"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_click
+msgid "Mail: not clicked"
+msgstr "Pošta: nije kliknuto"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_open
+msgid "Mail: not opened"
+msgstr "Pošta: nije otvorena"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_not_reply
+msgid "Mail: not replied"
+msgstr "Pošta: nije odgovoreno"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_open
+msgid "Mail: opened"
+msgstr "Pošta: Otvoreno"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__mail_reply
+msgid "Mail: replied"
+msgstr "Pošta: odgovorio"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_mailing_trace
+msgid "Mailing Statistics"
+msgstr "Statistika pošte"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__mail_trace_ids
+msgid "Mails delivered form the activity lines"
+msgstr "Mailovi isporučeni iz linija aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__activity_executed_ids
+msgid "Mails delivered from each lines"
+msgstr "Mailovi isporučeni iz svakog redaka"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__parent_activity_id
+msgid "Main parent activity"
+msgstr "Glavna roditeljska aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_activity
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_mail_compose_message__marketing_activity_id
+msgid "Marketing Activity"
+msgstr "Marketinška aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_mailing_trace__marketing_activity_line_id
+msgid "Marketing Activity Line"
+msgstr "Linija marketinške aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.ui.menu,name:cyllo_marketing_automation.marketing_automation_menu
+msgid "Marketing Automation"
+msgstr "Automatizacija marketinga"
+
+#. module: cyllo_marketing_automation
+#: model:ir.actions.server,name:cyllo_marketing_automation.ir_cron_marketing_automation_run_activity_ir_actions_server
+msgid "Marketing Automation: Run Activity"
+msgstr "Automatizacija marketinga: pokrenuti aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_campaign
+msgid "Marketing Campaign"
+msgstr "Marketinška kampanja"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_filter
+msgid "Marketing Filter"
+msgstr "Marketinški filter"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__mailing_mailing_id
+msgid "Marketing Template"
+msgstr "Marketinški predložak"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__marketing_activity_count
+msgid "Marketing activity count"
+msgstr "Broj marketinških aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_mailing_mailing
+msgid "Mass Mailing"
+msgstr "Grupna e-pošta"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_error
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_has_error
+msgid "Message Delivery error"
+msgstr "Pogreška isporuke poruka"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_ids
+msgid "Messages"
+msgstr "Poruke"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__model_name
+msgid "Model"
+msgstr "Model"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_ir_model_tree
+msgid "Model Description"
+msgstr "Opis modela"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__model_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__model_name
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__model_name
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__model_name
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__model_name
+msgid "Model Name"
+msgstr "Ime modela"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__model_name
+msgid "Model name"
+msgstr "Ime modela"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__model_name
+msgid "Model name of the model"
+msgstr "Naziv modela modela"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__month
+msgid "Month"
+msgstr "Mjesec"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__name
+msgid "Name"
+msgstr "Ime"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_campaign__state__draft
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "New"
+msgstr "Novi"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Not Clicked"
+msgstr "Nije kliknuo"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Not Open"
+msgstr "Nije otvoreno"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Not Replied"
+msgstr "Nije odgovoreno"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Broj radnji"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_has_error_counter
+msgid "Number of errors"
+msgstr "Broj pogrešaka"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Broj poruka koje zahtijevaju radnju"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Broj poruka s pogreškom isporuke"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Open"
+msgstr "Otvoren"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__processed
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__processed
+msgid "PROCESSED"
+msgstr "Obrađen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__parent_activity_id
+msgid "Parent Activity"
+msgstr "Roditeljska aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__sub_parent_activity_id
+msgid "Parent activity of the corresponding activity"
+msgstr "Roditeljska aktivnost odgovarajuće aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__participant_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__participant_id
+msgid "Participant"
+msgstr "Sudionik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__participant_count
+msgid "Participant Count"
+msgstr "Broj sudionika"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__participant_id
+msgid "Participant in the activity line"
+msgstr "Sudionik u liniji aktivnosti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__participant_id
+msgid "Participant related to activity"
+msgstr "Sudionik koji se odnosi na aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.actions.act_window,name:cyllo_marketing_automation.marketing_participant_action
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Participants"
+msgstr "Sudionici"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__participant_count
+msgid "Participants Count"
+msgstr "Sudionici broje"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "Pick or create a/an"
+msgstr "Odaberite ili stvorite a/an"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__reject
+msgid "REJECTED"
+msgstr "Odbijen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__record_id
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record_id
+msgid "Record"
+msgstr "Snimiti"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__record_count
+msgid "Record Count"
+msgstr "Broj zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_mailing_trace__marketing_activity_line_id
+msgid "Record corresponding to marketing line"
+msgstr "Zapis koji odgovara marketinškoj liniji"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__record
+msgid "Reference record of each participants"
+msgstr "Referentni zapis svakog sudionika"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Remove from Templates"
+msgstr "Uklonite iz predložaka"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_childs.xml:0
+#, python-format
+msgid "Replied"
+msgstr "Odgovoran"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__user_id
+msgid "Responsible User"
+msgstr "Odgovorni korisnik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__user_id
+msgid "Responsible user "
+msgstr "Odgovorni korisnik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_campaign__state__running
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_participant__state__running
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "Running"
+msgstr "Trčanje"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__state__schedule
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity_line__state__schedule
+msgid "SCHEDULED"
+msgstr "Zakazan"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Pogreška isporuke SMS -a"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Select a favourite filter"
+msgstr "Odaberite omiljeni filter"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__server_action_id
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__type__server
+msgid "Server Action"
+msgstr "Akcija poslužitelja"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__domain_activity
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__filter
+msgid "Set domain to filter the records"
+msgstr "Postavite domenu za filtriranje zapisa"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__server_action_id
+msgid "Set your server action"
+msgstr "Postavite rad svog poslužitelja"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Settings"
+msgstr "Postavke"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Start"
+msgstr "Početak"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__state
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__state
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__state
+msgid "State"
+msgstr "država"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__state
+msgid "State of the campaign"
+msgstr "Stanje kampanje"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__state
+msgid "Status"
+msgstr "Status"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Stop"
+msgstr "Stop"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_campaign__state__stopped
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "Stopped"
+msgstr "Zaustavljen"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__sub_parent_activity_id
+msgid "Sub Parent"
+msgstr "Podređeni"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Subject"
+msgstr "Subjekt"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__model_id
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_search
+msgid "Target"
+msgstr "Cilj"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__model_id
+msgid "Target Model"
+msgstr "Ciljni model"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "Template"
+msgstr "Predložak"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__template_count
+msgid "Template Count"
+msgstr "Broj predloška"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__template_count
+msgid "Template count"
+msgstr "Broj predloška"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Templates"
+msgstr "Predlošci"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_participant_form
+msgid "Test"
+msgstr "Test"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_participant__is_test_participant
+msgid "Test Participant"
+msgstr "Test sudionik"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__test_count
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__test_count
+msgid "Test Records Count"
+msgstr "Broj evidencije testa"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_marketing_campaign_form
+msgid "Tests"
+msgstr "Testovi"
+
+#. module: cyllo_marketing_automation
+#. odoo-python
+#: code:addons/cyllo_marketing_automation/models/marketing_filter.py:0
+#: code:addons/custom/cyllo_marketing_automation/models/marketing_filter.py:0
+#, python-format
+msgid "The filter domain is not valid for this target model."
+msgstr "Domena filtra nije valjana za ovaj ciljni model."
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "This mailing has no selected design (yet!)."
+msgstr "Ovo slanje nema odabranog dizajna (još!)."
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_participant__is_inactive
+msgid "To check whether the participant is executed or not"
+msgstr "Provjeriti je li sudionik pogubljen ili ne"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__activity_trigger
+msgid "Trigger"
+msgstr "Okidač"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity_line__activity_another_trigger
+msgid "Trigger Next"
+msgstr "Okidač sljedeći"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__trigger_schedule_type
+msgid "Trigger Type"
+msgstr "Okidač"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity_line__activity_another_trigger
+msgid "Trigger the activity next"
+msgstr "Potaknite aktivnost sljedeće"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_activity__activity_trigger_type
+msgid "Type"
+msgstr "Tip"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_campaign__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_marketing_automation.field_marketing_filter__website_message_ids
+msgid "Website Messages"
+msgstr "Poruke web stranice"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_campaign__website_message_ids
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_filter__website_message_ids
+msgid "Website communication history"
+msgstr "Povijest komunikacije na web stranici"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__activity_trigger_type__week
+msgid "Week"
+msgstr "Tjedan"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__activity_another
+msgid "another activity"
+msgstr "Još jedna aktivnost"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields.selection,name:cyllo_marketing_automation.selection__marketing_activity__trigger_schedule_type__begin
+msgid "beginning of workflow"
+msgstr "početak tijeka rada"
+
+#. module: cyllo_marketing_automation
+#: model_terms:ir.ui.view,arch_db:cyllo_marketing_automation.view_mailing_mailing_form
+msgid "e.g. New Sale on all T-shirts"
+msgstr "npr.Nova prodaja na svim majicama"
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_activity_line
+msgid "marketing.activity.line"
+msgstr ""
+
+#. module: cyllo_marketing_automation
+#: model:ir.model,name:cyllo_marketing_automation.model_marketing_participant
+msgid "marketing.participant"
+msgstr ""
+
+#. module: cyllo_marketing_automation
+#: model:ir.model.fields,help:cyllo_marketing_automation.field_marketing_activity__state
+msgid "status of the activity"
+msgstr "status aktivnosti"
+
+#. module: cyllo_marketing_automation
+#. odoo-javascript
+#: code:addons/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#: code:addons/custom/cyllo_marketing_automation/static/src/xml/marketing_activity_template.xml:0
+#, python-format
+msgid "to generate a Test Participant"
+msgstr "Za generiranje sudionika testa"

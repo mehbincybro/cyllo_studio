@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherited the Hr Employee for adding new fields -->
+    <record id="view_hr_employee_form" model="ir.ui.view">
+        <field name="name">view.hr.employee.</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='work_email']" position="after">
+                <field name="is_resigned" invisible="1"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_payslip" type="object" class="oe_stat_button" invisible=" payslip_count == 0" string="Payslip">
+                    <i class="fa-credit-card" title="Payslip"/>
+                    <div class="o_stat_info" style="margin-left:2px;">
+                        <span class="o_stat_text">
+                            Payslip(<field name="payslip_count"/>)
+                        </span>
+                    </div>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_view_employees_in_notice_period" model="ir.actions.act_window">
+        <field name="name">Employees In Notice Period</field>
+        <field name="res_model">hr.employee</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="domain">[('is_resigned', '=', True)]</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">Employees who are in notice period</p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,381 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="CylloSheet" owl="1">
+        <div t-ref="sheet" class="cy_dashboard_sheet" style="width: 100%; height: 100%;
+            max-height: 100%; overflow-y: scroll; overflow-x: hidden;">
+            <div class="row d-flex align-items-center py-2 px-4 cy-border-btm ps-0 cy_sheet_nav_bar">
+                <div class="col cy-main-sectionhead d-flex align-items-center pr-5 justify-content-between">
+                    <div class="d-flex align-items-center">
+
+                        <span class="nav-link cy-template-title d-flex gap-1 align-items-center" t-on-click="goBack" style="cursor: pointer;">
+                            <i class="ri-arrow-left-s-line"
+                               style=";padding-left: 1%; me-5; font-size: 19px;"
+                               title="Go Back"/>
+                            Sheets
+                        </span>
+                        <div class="control-panel d-flex">
+                            <a class="nav-link cy-navitem-list" href="#"
+                               t-if="this.id" t-on-click="onClickNew">
+                                <i class="ri-add-line"/>New
+                            </a>
+                            <a class="nav-link cy-navitem-list save_button"
+                               href="#" t-on-click="onSave">
+                                <i class="ri-save-line"/>Save
+                            </a>
+                            <a class="nav-link cy-navitem-list" href="#"
+                               t-on-click="onClickDiscard">
+                                <i class="ri-restart-line"/>Discard
+                            </a>
+                            <a class="nav-link cy-navitem-list on-delete-sheet"
+                               href="#" t-if="this.id" t-on-click="onDelete">
+                                <i class="ri-delete-bin-line"/>Delete
+                            </a>
+                            <a class="nav-link cy-navitem-list" href="#"
+                               t-if="this.id" t-on-click="onClickDuplicate">
+                                <i class="ri-file-copy-line"/>Duplicate
+                            </a>
+                        </div>
+                    </div>
+                    <div t-if="id" class="d-flex" style="margin-right: 1%; white-space: nowrap;">
+                        <span class="mt-1" style="margin-right: 10%;">
+                            <t t-out="navState.recordValue"/>
+                            /
+                            <t t-out="navState.allRecords.length"/>
+                        </span>
+                        <button class="btn btn-secondary ri-arrow-left-s-fill"
+                                t-on-click="() => this.changeRecord('bwd')"/>
+                        <button class="btn btn-secondary ri-arrow-right-s-fill"
+                                t-on-click="() => this.changeRecord('fwd')"/>
+                    </div>
+                </div>
+
+            </div>
+            <div class="d-flex" style="height: 81vh;">
+                <div class="d-flex" style="width:60%;">
+                    <div class="sidebar card col-sm-6 col-lg-6 py-3"
+                         style="margin-top:0px !important;">
+                        <div class="p-2">
+                            <div class="form-group">
+                                <label for="sheet_name">Sheet name</label>
+                                <input type="text" t-model="state.name" name="sheet_name"
+                                       maxlength="32" class="form-control  cy-button-stroke"/>
+                            </div>
+                        </div>
+
+                        <div class="p-2 model-viewer">
+                            <ModelViewer models="state.models" setModel.bind="setModel"
+                                         checkHasLink.bind="checkHasLink"/>
+                        </div>
+                        <div class="p-2 pt-0 dimensions">
+                            <t t-if="state.selectedType[1] != 'kpi'">
+                                <FieldList t-if="state.models.length"
+                                           mode="'dimension'" data="dimensions" limit="1"/>
+                            </t>
+                        </div>
+                        <div class="p-2 pt-0 measures">
+                            <FieldList t-if="state.models.length" mode="'measure'" data="measures" limit="5"/>
+                        </div>
+                        <div class="p-2" t-if="state.models.length">
+                            <div class="col-12" style="position: relative;">
+                                <label for="limit">Limit</label>
+                                <div id="custom-tooltip-limit" style="cursor: pointer;">
+                                    <span style="font-size: 9px;" class="filter-info">?</span>
+                                    <div id="tooltip-content-limit" class="custom-tooltip-content"
+                                         style="background: white;">
+                                        <div class="tooltip-inner-content-limit">
+                                            <ul>
+                                                <li>Limits the number of records used for this chart.</li>
+                                                <li>Set the value to zero to have no limit.</li>
+                                            </ul>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <Number setValue="(val) => state.limit = val" value="state.limit"
+                                        className="'form-control cy-button-stroke'"
+                                        negative="false" decimal="false"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="sidebar card col-sm-6 col-lg-6 py-3 mt-0" style="margin-top:0px !important;">
+                        <div class="d-flex flex-wrap ">
+                            <t t-foreach="state.sheetTypes" t-as="type"
+                               t-key="type_index">
+                                <div class="col-6 col-sm-6 col-lg-6 p-2 d-flex flex-column align-items-stretch"
+                                     t-att-data-id="type.id"
+                                     t-att-data-name="type.name"
+                                     t-on-click="() => this.onClickSheetType([type.id, type.name])">
+                                    <div class="cy-button-stroke p-2 cy-sheet_graph-contain"
+                                         t-att-class="type.id == state.selectedType[0] ? 'active' : ''">
+                                        <div class="cy-sheet-graph_img">
+                                            <img t-attf-src="data:image/png;base64,#{type.image}"
+                                                 alt="" class="cy-sheet-img"/>
+                                        </div>
+                                    </div>
+                                    <span class="cy-sheet-graph-name text-center">
+                                        <t t-esc="type.name[0].toUpperCase() + type.name.slice(1)"/>
+                                    </span>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+                <div class="main m-3 w-100">
+                    <div class="cy-sheets-previewContainer pb-2">
+                        <div class="input_tags input_tags_row w-fit-content col-4 mb-3 cy-sheet_preview-input"
+                             t-attf-class="{{!state.configs.length and 'warn-no-dashboard'}}"
+                             t-attf-title="{{!state.configs.length and 'Connect Your Dashboards here'}}">
+                            <div class="d-flex tags">
+                                <t t-foreach="state.configs" t-as="config"
+                                   t-key="config_index">
+                                    <div class="badge rounded-pill o_tag d-flex gap-1">
+                                        <t t-esc="config.display_name"/>
+                                        <i t-on-click="() => this.onRemoveDashboard(config)"
+                                           class="ri-close-line"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <Many2XAutocomplete resModel="'dashboard.config'" getDomain.bind="dashboardDomain"
+                                    fieldString="'Dashboard'" activeActions="{}" update.bind="onDashboardSelect"
+                                    placeholder="'Dashboard'"/>
+                        </div>
+
+                        <div class="cy_kpi_sheet cy_kpi_parent mb-2" t-if="state.selectedType[1] == 'kpi'">
+                            <t t-if="!ChartData.generate" t-call="CylloSheetHelper"/>
+                            <KpiSheet t-if="ChartData.generate" query="ChartData" onUpdate.bind="onUpdate"
+                                    kpi="state.kpiValue" name="this.state.name" model="this.state.models"
+                                    query_data="this.query_data">
+                            </KpiSheet>
+                        </div>
+                        <div class="pb-3 cy_table_sheet" t-elif="state.selectedType[1] == 'table'">
+                            <t t-if="!ChartData.generate" t-call="CylloSheetHelper"/>
+                            <Table t-if="ChartData.generate" data="ChartData.data"/>
+                        </div>
+                        <div class="graph" t-else="">
+                            <t t-if="!ChartData.generate" t-call="CylloSheetHelper"/>
+                            <GraphTile t-if="ChartData.generate" value="ChartData.data"
+                                       style="style" setImage.bind="setImage"/>
+                        </div>
+                        <t t-set="axisData" t-value="getAxisData"/>
+                        <DropZone t-if="axis.x" axis="'x'" string="'X axis'" category="'main'"
+                                  limit="axisData.xLimit" type="axisData.xType" children="axisData.x"/>
+                        <DropZone t-if="axis.y" axis="'y'" string="'Y axis'" category="'main'" limit="axisData.yLimit"
+                                  type="axisData.yType" children="axisData.y" info="yZoneInfo"/>
+                        <DropZone t-if="axis.group" string="'Group By'" category="'groupBy'"
+                                  limit="5" type="'groupBy'" children="query_data.groupBy"/>
+                        <DropZone string="'Order By'" category="'orderBy'" limit="5" type="'orderBy'" show="false"
+                                  children="query_data.orderBy"/>
+                    </div>
+                </div>
+            </div>
+            <div class="row py-3 cy-sheet-filter_container">
+                <div class="col-lg-5 h-75">
+                    <ul t-if="state.fields.length" class="nav nav-tabs" id="filterTab" role="tablist">
+                        <li t-if="state.fields.length" class="nav-item" role="presentation">
+                            <button class="nav-link active" id="sheet-tab" data-bs-toggle="tab"
+                                    data-bs-target="#sheet-tab-pane" type="button" role="tab"
+                                    aria-controls="sheet-tab-pane" aria-selected="true">
+                                Sheet Filter
+                            </button>
+                        </li>
+                        <li t-if="state.fields.length and state.configs.length" class="nav-item" role="presentation">
+                            <button class="nav-link" id="global-tab" data-bs-toggle="tab"
+                                    data-bs-target="#global-tab-pane" type="button" role="tab"
+                                    aria-controls="global-tab-pane" aria-selected="false">Global Filter
+                            </button>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="filterTabContent">
+                        <div t-if="state.fields.length" class="tab-pane fade show active"
+                             id="sheet-tab-pane" role="tabpanel" aria-labelledby="sheet-tab" tabindex="0">
+                            <div class="col-6">
+                                <button t-on-click="onFilterClick" class="cy-new-chat-button cy-sheetfilter-btn">
+                                    <i class="ri-add-line"/>
+                                    Add Filter
+                                </button>
+                            </div>
+                            <t t-foreach="query_data.where" t-as="where" t-key="where_index">
+                                <div class="cy-sheet-filter_state cy-button-stroke d-flex justify-content-between text-center p-2 my-3"
+                                     t-att-class="where.active ? 'active': ''"
+                                     t-on-click="() => this.updateWhere(where)">
+                                    <span class="cy-sheet-graph-name" t-esc="where.name"/>
+                                    <div class="d-flex justify-content-end gap-1">
+                                        <button class="btn btn-secondary"
+                                                t-on-click.stop.prevent="() => this.onClickEditFilter(where)">
+                                            <i class="ri-pencil-line"/>
+                                        </button>
+                                        <button class="btn btn-secondary"
+                                                t-on-click.stop.prevent="() => this.onClickDeleteFilter(where_index, where.id)">
+                                            <i class="ri-close-line"/>
+                                        </button>
+                                    </div>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="tab-pane fade mt-2 cy_global_filter-tab" id="global-tab-pane"
+                             role="tabpanel" aria-labelledby="global-tab" tabindex="0">
+                            <ul class="nav nav-tabs" id="filterTab" role="tablist">
+                                <t t-if="state.fields.length and state.configs.length"
+                                   t-foreach="Object.keys(state.globalFilters)" t-as="key" t-key="key_index">
+                                    <li class="nav-item" role="presentation"
+                                        t-on-click="() => this.onClickDashboardPage('#dashboard'+key_index)">
+                                        <button class="nav-link" t-att-id="'sheet-tab'+key_index"
+                                                data-bs-toggle="tab" t-att-class="{ 'active': key_index === 0 }"
+                                                type="button" role="tab" aria-controls="sheet-tab-pane"
+                                                aria-selected="true">
+                                            <t t-esc="key"/>
+                                        </button>
+                                    </li>
+                                </t>
+                            </ul>
+                            <div class="tab-content" id="filterTabContent">
+                                <t t-if="state.fields.length and state.configs.length"
+                                   t-foreach="Object.keys(state.globalFilters)" t-as="key" t-key="key_index">
+                                    <div t-att-id="'dashboard'+key_index"
+                                         class="col-12 align-items-center my-3 tab-pane fade dashboard-note"
+                                         t-att-class="{ 'show': key_index === 0 }"
+                                         role="tabpanel"
+                                         aria-labelledby="sheet-tab"
+                                         tabindex="0">
+                                        <t t-foreach="state.globalFilters[key]"
+                                           t-as="filter" t-key="filter_index">
+                                            <div class="d-flex col-12 align-items-center my-3">
+                                                <span>
+                                                    <t t-esc="filter.name"/>
+                                                </span>
+                                                <t t-set="options" t-value="getGlobalFilters(filter.type, filter.relation)"/>
+                                                <t t-set="defaultOption" t-value="getDefaultOption(options, filter)"/>
+                                                <FieldAutoCompleteGlobal value="defaultOption"
+                                                        options="options" filter="filter.id"
+                                                        placeholder="'Fields'" onClick.bind="onOptionClick"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <span class="cy-sheet-title">Query</span>
+                    <div class="cy-sheet_query-container my-3">
+                        <SQLEditor value="state.query" theme="'lesser-dark'" onBlur.bind="onQueryChange"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+    <t t-name="FieldList" owl="1">
+        <div class="field_list d-flex card">
+            <div class="py-2 ">
+                <div class="card-header">
+                    <t t-esc="props.mode.toUpperCase()"/>
+                    <div class="field-tooltip"
+                         style="cursor: pointer;">
+                        <span style="font-size: 9px;" class="filter-info">?</span>
+                    </div>
+                    <div class="tooltip-content justify-content-around modal_background"
+                         style="background-color: #fff;">
+                        <ul style="padding-left: 13px;">
+                            <t t-if="props.mode == 'dimension'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    A dimension refers to a qualitative attribute or category used to categorize and
+                                    organize data. Dimensions are typically non-numeric fields that provide context to
+                                    the measures in the database.Examples of dimensions in Cyllo could include "Product
+                                    Category," "Customer Type," or "Location."
+                                </li>
+                            </t>
+                            <t t-if="props.mode == 'measure'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    A measure in an Cyllo database represents a quantitative, numeric value that can be
+                                    subjected to mathematical operations or statistical analysis. Measures are fields
+                                    that store numerical data, such as quantities, amounts, or other numeric
+                                    indicators related to business processes. Examples of measures in Cyllo may include
+                                    "Total Sales Amount," "Quantity Sold," or "Average Unit Price."
+                                </li>
+                            </t>
+                        </ul>
+                    </div>
+                </div>
+                <div class="d-flex my-2 ">
+                    <div class="input-group">
+                        <span class="input-group-text cy-search cy-templates_search-icon">
+                            <i class="ri-search-line cy-search-icon cy-sheet_font"/>
+                        </span>
+                        <input class="form-control cy-custom-search cy-template_search-bar cy-sheet_font "
+                               type="search" placeholder=" Search" t-model="state.search"
+                               aria-label="Search"/>
+                    </div>
+                </div>
+            </div>
+            <div class="cy-sheet-selection_box">
+                <t t-foreach="state.data" t-as="field" t-key="field_index">
+                    <t t-set="column" t-value="field.model.table + '.' + field.name"/>
+                    <DragItem is_json="field.is_json" column="column" draggable="'true'" type="props.mode"
+                              value="field.label"/>
+                </t>
+            </div>
+        </div>
+    </t>
+    <t t-name="ModelViewer" owl="1">
+        <label for="tables" class="pb-0">Tables
+            <div class="field-tooltip" style="cursor: pointer;">
+                <span style="font-size: 9px;" class="filter-info">?
+                </span>
+            </div>
+            <div class="tooltip-content justify-content-around modal_background"
+                 style="background-color: #fff;">
+                <ul style="padding-left: 13px;">
+                    <li style="font-size: 0.8rem; font-weight: 400;">
+                        Choose one or more tables from the dropdown. Tables will be linked using relational fields.
+                        All the fields will be grouped into measures and dimensions for analysis.
+                    </li>
+                </ul>
+            </div>
+        </label>
+        <div class="input_tags table_input_tags">
+            <div class="d-flex mb-1" t-foreach="state.models" t-as="model" t-key="model_index">
+                <div class="badge rounded-pill o_tag d-flex">
+                    <t t-esc="model.name"/>
+                    <i t-on-click="() => this.onRemoveModel(model)" class="ri-close-line"/>
+                    <span class="badge rounded text-white" style="background-color: #893448"
+                          t-if="model.linked_by and model.linked_by.string" t-esc="model.linked_by.string"/>
+                </div>
+            </div>
+            <t t-if="state.can_select">
+                <Many2XAutocomplete resModel="'ir.model'" getDomain="getDomain" fieldString="'Models'"
+                        activeActions="{}" update.bind="onSelect"/>
+            </t>
+        </div>
+    </t>
+    <t t-name="LinkSelectDialog">
+        <Dialog size="'md'" title="props.title">
+            <t t-set-slot="header">
+                <div class="d-flex w-100">
+                    <h4>Link Model</h4>
+                    <div t-on-click="props.close" type="button" class="btn-close" aria-label="Close"/>
+                </div>
+            </t>
+            <div class="d-flex m-2" t-foreach="fields" t-as="field" t-key="field_index">
+                <span class="badge rounded text-white"
+                      t-on-click="() => this.setSelected(field_index, field)"
+                      t-attf-style="background-color: {{field_index === state.index ? '#893448' : '#EAEBEC'}};
+                       color: {{field_index !== state.index ? '#893448 !important' : '#FFF !important'}}"
+                      t-if="field.linked_by" t-esc="field.linked_by.string"/>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="confirm">
+                    Link
+                </button>
+                <button class="btn btn-primary" t-on-click="props.close">
+                    close
+                </button>
+            </t>
+        </Dialog>
+    </t>
+    <t t-name="CylloSheetHelper">
+        <div class="pb-3 cy_table_sheet demo_video">
+            <img src="/cyllo_analytics/static/src/img/sheet_help.gif" class="cy_sheet_helper-img"/>
+        </div>
+    </t>
+</templates>

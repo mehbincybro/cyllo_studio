@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="cyllo_web.signup_fields" name="Auth Signup form fields">
+        <div class="cy-auth__form-group field-login">
+            <label class="cy-auth__label" for="login">Your Email<sup class="cy-auth__required">*</sup></label>
+            <input class="cy-auth__input input-text" type="text" name="login"
+                   t-att-value="login" id="login" autofocus="autofocus" autocapitalize="off"
+                   required="required" t-att-readonly="'readonly' if only_passwords else None"/>
+        </div>
+        <div class="cy-auth__form-group field-name">
+            <label class="cy-auth__label" for="name">Your Name<sup class="cy-auth__required">*</sup></label>
+            <input class="cy-auth__input input-text" type="text" name="name"
+                   placeholder="e.g. John Doe"
+                   t-att-value="name" id="name"
+                   required="required" t-att-readonly="'readonly' if only_passwords else None"
+                   t-att-autofocus="'autofocus' if login and not only_passwords else None"/>
+        </div>
+        <div class="cy-auth__form-group field-password">
+            <label class="cy-auth__label" for="password">Password<sup class="cy-auth__required">*</sup></label>
+            <input class="cy-auth__input input-text" type="password" name="password"
+                   id="password"
+                   required="required"
+                   t-att-autofocus="'autofocus' if only_passwords else None"/>
+        </div>
+        <div class="cy-auth__form-group field-confirm_password">
+            <label class="cy-auth__label" for="confirm_password">Confirm Password<sup class="cy-auth__required">*</sup></label>
+            <input class="cy-auth__input input-text" type="password" name="confirm_password" id="confirm_password" required="required"/>
+        </div>
+    </template>
+</odoo>

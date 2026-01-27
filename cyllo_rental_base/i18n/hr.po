@@ -1,0 +1,2646 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_rental_base
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-30 07:10+0000\n"
+"PO-Revision-Date: 2023-11-30 07:10+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "&amp; Shipping"
+msgstr "& amp;dostava"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "&amp;nbsp;"
+msgstr "& nbsp;"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "<b>Communication:</b>"
+msgstr "<b> Komunikacija: </b>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid ""
+"<b>Rental\n"
+"                                                                        Charges\n"
+"                                                                    </b>"
+msgstr ""
+"<b> iznajmljivanje\n"
+"                                                                        Naknade\n"
+"                                                                    </b>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<b>Shipping:</b>"
+msgstr "<b> Stiska: </b>"
+
+#. module: cyllo_rental_base
+#: model:mail.template,body_html:cyllo_rental_base.email_expiration_rental_contract
+msgid ""
+"<br>\n"
+"                <h4>Dear<t t-out=\"object.partner_id.name\"></t>,\n"
+"                    <br>\n"
+"                    Your rental order<t t-out=\"object.name\"></t>,\n"
+"                    has been expired.\n"
+"                </h4>\n"
+"            "
+msgstr ""
+"<br>\n"
+"                <h4> draga <t t-out = \"Object.partner_id.name\"> </t>,\n"
+"                    <br>\n"
+"                    Vaš redoslijed najma <t t-out = \"objekt.name\"> </t>,\n"
+"                    je istekao.\n"
+"                </h4>"
+
+#. module: cyllo_rental_base
+#: model:mail.template,body_html:cyllo_rental_base.email_pickup_rental_order
+msgid ""
+"<br>\n"
+"                <h4>Dear<t t-out=\"object.partner_id.name\"></t>,\n"
+"                    <br>\n"
+"                    Your rental order<t t-out=\"object.name\"></t>,\n"
+"                    has been picked up.\n"
+"                </h4>\n"
+"            "
+msgstr ""
+"<br>\n"
+"                <h4> draga <t t-out = \"object.partner_id.name\"> </t>,\n"
+"                    <br>\n"
+"                    Vaš redoslijed najma <t t-out = \"object.name\"> </t>,\n"
+"                    je pokupio.\n"
+"                </h4>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid ""
+"<i class=\"fa fa-check\"/>\n"
+"                        Ship to this address"
+msgstr ""
+"<i class = \"fa fa-check\"/>\n"
+"                        Pošalji na ovu adresu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+msgid ""
+"<i class=\"fa fa-edit\"/>\n"
+"                    Edit"
+msgstr ""
+"<i class = \"fa fa-edit\"/>\n"
+"                    Uredi"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"<i class=\"fa fa-plus-square\"/>\n"
+"                                                        <span>Add an address\n"
+"                                                        </span>"
+msgstr ""
+"<i class = \"fa fa-plus-square\"/>\n"
+"                                                        <span> Dodajte adresu\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid ""
+"<i class=\"fa fa-print\"/>\n"
+"                                                Print"
+msgstr ""
+"<i class = \"fa fa-print\"/>\n"
+"                                                Ispis"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<i class=\"fa fa-print\"/>\n"
+"                                        View Details"
+msgstr ""
+"<i class = \"fa fa-print\"/>\n"
+"                                        Pregledavati pojedinosti"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<i class=\"oi oi-chevron-left\"/>\n"
+"                                            <span>Back</span>"
+msgstr ""
+"<i class = \"oi oi-chevron-left\"/>\n"
+"                                            <Span> natrag </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<option value=\"\">Country...\n"
+"                                                </option>"
+msgstr ""
+"<option value = \"\"> zemlja ...\n"
+"                                                </option>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<option value=\"\">State /\n"
+"                                                    Province...\n"
+"                                                </option>"
+msgstr ""
+"<option value = \"\"> stanje /\n"
+"                                                    Pokrajina...\n"
+"                                                </option>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<small class=\"form-text text-muted\">\n"
+"                                                        Changing company name or\n"
+"                                                        VAT number is not\n"
+"                                                        allowed once document(s)\n"
+"                                                        have been issued for\n"
+"                                                        your account. Please\n"
+"                                                        contact us directly for\n"
+"                                                        this operation.\n"
+"                                                    </small>"
+msgstr ""
+"<small Class = \"form-text text-muted\">\n"
+"                                                        Promjena naziva tvrtke ili\n"
+"                                                        PDV broj nije\n"
+"                                                        Dopušteni jednom dokumentom\n"
+"                                                        su izdani za\n"
+"                                                        Vaš korisnički račun.Molim\n"
+"                                                        kontaktirajte nas izravno za\n"
+"                                                        ova operacija.\n"
+"                                                    </small>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "<small class=\"text-muted\">Your contact</small>"
+msgstr "<small Class = \"text-muted\"> Vaš kontakt </small>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<small>\n"
+"                                <b>Order Date</b>\n"
+"                            </small>"
+msgstr ""
+"<sila>\n"
+"                                <b> Datum narudžbe </b>\n"
+"                            </small>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid ""
+"<span class=\"category_selected\">All\n"
+"                                            Rental Products\n"
+"                                        </span>"
+msgstr ""
+"<span class = \"kategorija_selected\"> sve\n"
+"                                            Proizvodi za najam\n"
+"                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+msgid ""
+"<span class=\"fa fa-chevron-down fa-border float-end\" role=\"img\" aria-"
+"label=\"Details\" title=\"Details\"/>"
+msgstr ""
+"<Span Class = \"FA FA-Chevron-Down Fa-End Float-End\" Uloga = \"IMG\" aria-"
+"label = \"Detalji\" title = \"Detalji\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "<span class=\"fs-4\">Saved payment methods</span>"
+msgstr "<span class = \"FS-4\"> Spremljeni načini plaćanja </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Duration :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Trajanje:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    End date :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Krajnji datum:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Quantity\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Količina\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Start Date :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Početni datum :\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Subtotal :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Subtotal:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"<span class=\"s_website_form_label_content\">\n"
+"                                                                    Total :\n"
+"                                                                </span>"
+msgstr ""
+"<span class = \"s_website_form_label_content\">\n"
+"                                                                    Ukupno:\n"
+"                                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<span class=\"text-nowrap\">\n"
+"                                                            Tax:\n"
+"                                                        </span>"
+msgstr ""
+"<span class = \"Text-Nowrap\">\n"
+"                                                            Porez:\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid ""
+"<span>\n"
+"                                        <b>Invoicing and Shipping Address</b>\n"
+"                                    </span>"
+msgstr ""
+"<span>\n"
+"                                        <b> Adresa fakturiranja i otpreme </b>\n"
+"                                    </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid ""
+"<span>\n"
+"                                        <b>Order Date :&amp;nbsp;</b>\n"
+"                                    </span>"
+msgstr ""
+"<span>\n"
+"                                        <b> Datum narudžbe: & nbsp; </b>\n"
+"                                    </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid "<span>-</span>"
+msgstr "<span>-</span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"<span>Confirm</span>\n"
+"                                    <i class=\"oi oi-chevron-right\"/>"
+msgstr ""
+"<Span> Potvrdite </span>\n"
+"                                    <i class = \"oi oi-chevron-desno\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<span>Confirmed</span>"
+msgstr "<Span> potvrđeno </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"<span>Next</span>\n"
+"                                            <i class=\"oi oi-chevron-right\"/>"
+msgstr ""
+"<Span> Sljedeće </span>\n"
+"                                            <i class = \"oi oi-chevron-desno\"/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid ""
+"<span>Order\n"
+"                                                    Date:\n"
+"                                                </span>"
+msgstr ""
+"<Span> Narudžba\n"
+"                                                    Datum:\n"
+"                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<span>Order</span>"
+msgstr "<Span> Red </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid ""
+"<span>Unfortunately your order can not be confirmed as\n"
+"                            the amount of your payment does not match the amount\n"
+"                            of your cart.\n"
+"                            Please contact the responsible of the shop for more\n"
+"                            information.\n"
+"                        </span>"
+msgstr ""
+"<span> Nažalost, vaša se narudžba ne može potvrditi kao\n"
+"                            Iznos vaše plaćanja ne odgovara iznosu\n"
+"                            vašeg kolica.\n"
+"                            Molimo kontaktirajte odgovornost trgovine za više\n"
+"                            informacija.\n"
+"                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "<span>Your Order Id is :</span>"
+msgstr "<Span> Vaš ID narudžbe je: </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"<strong>\n"
+"                                                <i class=\"oi oi-arrow-right\"/>\n"
+"                                                View alternatives\n"
+"                                            </strong>"
+msgstr ""
+"<strong>\n"
+"                                                <i class = \"oi oi-arrow-desno\"/>\n"
+"                                                Pogledajte alternative\n"
+"                                            </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"<strong>No suitable payment option could be\n"
+"                                        found.\n"
+"                                    </strong>\n"
+"                                    <br/>"
+msgstr ""
+"<strong> Nije mogla biti odgovarajuća opcija plaćanja\n"
+"                                        pronađeno.\n"
+"                                    </strong>\n"
+"                                    <br/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid ""
+"<strong>Order Date</strong>\n"
+"                                <br/>"
+msgstr ""
+"<strong> Datum narudžbe </strong>\n"
+"                                <br/>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "<strong>Payment Information:</strong>"
+msgstr "<strong> Podaci o plaćanju: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "<strong>Sales Person :</strong>"
+msgstr "<strong> Prodajna osoba: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<strong>Total:\n"
+"                                                        </strong>"
+msgstr ""
+"<strong> Ukupno:\n"
+"                                                        </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "<strong>Total:</strong>"
+msgstr "<strong> Ukupno: </strong>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid ""
+"<strong>Untaxed Amount:\n"
+"                                                        </strong>"
+msgstr ""
+"<strong> UNPASED iznos:\n"
+"                                                        </strong>"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_warning
+msgid "Access warning"
+msgstr "Pristup upozorenju"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_needaction
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_needaction
+msgid "Action Needed"
+msgstr "Potrebna radnja"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_ids
+msgid "Activities"
+msgstr "Aktivnosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Dekoracija iznimke aktivnosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_state
+msgid "Activity State"
+msgstr "Stanje aktivnosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Ikona vrste aktivnosti"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a note"
+msgstr "Dodaj bilješku"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a product"
+msgstr "Dodajte proizvod"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Add a section"
+msgstr "Dodajte odjeljak"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__delay_amount
+msgid "Additional amount charged for delays in returning the product."
+msgstr "Dodatni iznos naplaćen za kašnjenje u vraćanju proizvoda."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__extra_hourly_price
+msgid "Additional hourly price for renting this product"
+msgstr "Dodatna satna cijena za iznajmljivanje ovog proizvoda"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__remarks
+msgid "Additional remarks or notes for the checklist item"
+msgstr "Dodatne primjedbe ili bilješke za stavku kontrolnog popisa"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Address"
+msgstr "Adresa"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_manager
+msgid "Administrator"
+msgstr "Administrator"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "All"
+msgstr "svi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__amount
+msgid "Amount"
+msgstr "Iznos"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_paid
+msgid "Amount Paid"
+msgstr "Uplaćeni iznos"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__apply_after
+msgid "Apply after (hours)"
+msgstr "Nanesite nakon (sati)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__apply_after
+msgid "Apply the extra hourly price after this duration"
+msgstr "Primijenite dodatnu satnu cijenu nakon ovog trajanja"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid "Approved"
+msgstr "Odobren"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_attachment_count
+msgid "Attachment Count"
+msgstr "Brojanje privrženosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__is_available
+msgid "Available"
+msgstr "Dostupno"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Be aware!"
+msgstr "Biti svjestan!"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.address_on_payment_rent
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Billing"
+msgstr "Naplata"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid ""
+"Billing\n"
+"                                        Address"
+msgstr ""
+"Naplata\n"
+"                                        Adresa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__can_be_returned
+msgid "Can be returned"
+msgstr "Može se vratiti"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+msgid "Cancel"
+msgstr "Otkazati"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Changing VAT number is\n"
+"                                                        not allowed once\n"
+"                                                        document(s) have been\n"
+"                                                        issued for your account.\n"
+"                                                        Please contact us\n"
+"                                                        directly for this\n"
+"                                                        operation."
+msgstr ""
+"Promjena broja PDV -a je\n"
+"                                                        Nije dopušteno jednom\n"
+"                                                        Dokumenti su bili\n"
+"                                                        izdan za vaš račun.\n"
+"                                                        Molimo kontaktirajte nas\n"
+"                                                        izravno za ovo\n"
+"                                                        Operacija."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Changing company name is\n"
+"                                                        not allowed once\n"
+"                                                        document(s) have been\n"
+"                                                        issued for your account.\n"
+"                                                        Please contact us\n"
+"                                                        directly for this\n"
+"                                                        operation."
+msgstr ""
+"Promjena naziva tvrtke je\n"
+"                                                        Nije dopušteno jednom\n"
+"                                                        Dokumenti su bili\n"
+"                                                        izdan za vaš račun.\n"
+"                                                        Molimo kontaktirajte nas\n"
+"                                                        izravno za ovo\n"
+"                                                        Operacija."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__is_rental
+msgid "Check this box if this product can be rented"
+msgstr "Potvrdite ovaj okvir može li se ovaj proizvod unajmiti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__rental_checklist_ids
+msgid "Checklist for rental products and accessories"
+msgstr "Popis za iznajmljivanje proizvoda i dodataka"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "City"
+msgstr "Grad"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__closed
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "Closed"
+msgstr "Zatvoreno"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Communication history"
+msgstr "Povijest komunikacije"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_res_company
+msgid "Companies"
+msgstr "Tvrtke"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__company_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__company_id
+msgid "Company"
+msgstr "Tvrtka"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Company Name"
+msgstr "Naziv tvrtke"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Confirm"
+msgstr "Potvrditi"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"Confirm\n"
+"                                            Order"
+msgstr ""
+"Potvrditi\n"
+"                                            Narudžba"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Confirm Order"
+msgstr "Potvrda narudžbe"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_bank_statement_line__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_move__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_account_payment__contract_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__contract_id
+msgid "Contract"
+msgstr "Ugovor"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_end_date
+msgid "Contract Ending Date"
+msgstr "Datum završetka ugovora"
+
+#. module: cyllo_rental_base
+#: model:mail.template,name:cyllo_rental_base.email_expiration_rental_contract
+msgid "Contract Expiration Notify"
+msgstr "Obavijesti o isteku ugovora"
+
+#. module: cyllo_rental_base
+#: model:mail.template,subject:cyllo_rental_base.email_expiration_rental_contract
+msgid "Contract Expired"
+msgstr "Ugovor je istekao"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_contract_lines
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+msgid "Contract Lines"
+msgstr "Ugovornice"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__name
+msgid "Contract Name"
+msgstr "Naziv ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_start_date
+msgid "Contract Start Date"
+msgstr "Datum početka ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_contracts_lease
+msgid "Contracts/Lease"
+msgstr "Ugovori/zakup"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__pickup_id
+msgid "Corresponding pickup order"
+msgstr "Odgovarajuća narudžba preuzimanja"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Country"
+msgstr "Zemlja"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.server,name:cyllo_rental_base.ir_cron_scheduler_recurring_action_ir_actions_server
+msgid "Create Recurring Invoice"
+msgstr "Stvorite ponavljajuću fakturu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "Create Request"
+msgstr "Stvorite zahtjev"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__invoice_recurrence
+msgid "Create invoices at every"
+msgstr "Stvorite fakture na svakom"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__create_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__create_uid
+msgid "Created by"
+msgstr "Napravio"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__create_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__create_date
+msgid "Created on"
+msgstr "Stvoren na"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__currency_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__currency_id
+msgid "Currency"
+msgstr "Valuta"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__current_rented_quantity
+msgid "Currently Rented Quantity"
+msgstr "Trenutno iznajmljena količina"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__partner_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_id
+msgid "Customer"
+msgstr "Kupac"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__access_url
+msgid "Customer Portal URL"
+msgstr "URL portala kupca"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__date_order
+msgid "Date"
+msgstr "Datum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__pickup_date
+msgid "Date and time when the product is picked up."
+msgstr "Datum i vrijeme kada se proizvod pokupi."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__return_date
+msgid "Date and time when the product is returned."
+msgstr "Datum i vrijeme kada se proizvod vrati."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__pickup_date
+msgid "Date of pickuping the rental products"
+msgstr "Datum preuzimanja proizvoda za iznajmljivanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__day
+msgid "Day"
+msgstr "Dan"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_charging__rental_period__days
+msgid "Days"
+msgstr "Dani"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__delay_product_id
+msgid "Delay product"
+msgstr "Odgoditi proizvod"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_shipping_id
+msgid "Delivery Address"
+msgstr "Adresa dostave"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__name
+msgid "Description"
+msgstr "Opis"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__name
+msgid "Description of the rental order line."
+msgstr "Opis linije najamnine."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_shop
+msgid "Details"
+msgstr "Detalji"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Disc.%"
+msgstr "Disk.%"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__discount
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__discount
+msgid "Discount (%)"
+msgstr "Popust (%)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__discount
+msgid "Discount applied to the rental order line."
+msgstr "Popust koji se primjenjuje na liniju narudžbe za najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__display_name
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__display_name
+msgid "Display Name"
+msgstr "Zaslon"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__display_type
+msgid "Display type"
+msgstr "Vrsta zaslona"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__draft
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Draft"
+msgstr "Nacrt"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Draft Orders"
+msgstr "Nacrt naredbi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__duration
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Duration"
+msgstr "Trajanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__duration
+msgid "Duration of the rental order line."
+msgstr "Trajanje linije najamnine."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Edit"
+msgstr "Uredi"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid "Edit this address"
+msgstr "Uredite ovu adresu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Email"
+msgstr "E -pošta"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "End Date:"
+msgstr "Krajnji datum:"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__expired
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "Expired"
+msgstr "Istekao"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.server,name:cyllo_rental_base.ir_cron_scheduler_expired_contracts_ir_actions_server
+msgid "Expired Contracts"
+msgstr "Istekli ugovori"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Extra Costs"
+msgstr "Dodatni troškovi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__delay_amount
+msgid "Extra fine"
+msgstr "Ekstra fino"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__extra_hours
+msgid "Extra hours"
+msgstr "Dodatni sati"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__extra_hours
+msgid "Extra hours added to the rental order line."
+msgstr "Dodatni sati dodani u liniju narudžbe za iznajmljivanje."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Fees"
+msgstr "Naknada"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Fill in your address"
+msgstr "Ispunite svoju adresu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_follower_ids
+msgid "Followers"
+msgstr "Sljedbenici"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Sljedbenici (partneri)"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "FONT AWESOME ikona, npr.FA zadaci"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Group By"
+msgstr "Grupirati"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__has_message
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__has_message
+msgid "Has Message"
+msgstr "Ima poruku"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_charging__rental_period__hours
+msgid "Hours"
+msgstr "Sati"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__id
+msgid "ID"
+msgstr "iskaznica"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_exception_icon
+msgid "Icon"
+msgstr "Ikona"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Ikona za označavanje aktivnosti iznimke."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_needaction
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Ako se provjeri, nove poruke zahtijevaju vašu pažnju."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_sms_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_error
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_sms_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Ako se provjeri, neke poruke imaju pogrešku u isporuci."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"If you believe that it is an error,\n"
+"                                        please contact the website\n"
+"                                        administrator."
+msgstr ""
+"Ako vjerujete da je to pogreška,\n"
+"                                        Molimo kontaktirajte web mjesto\n"
+"                                        administrator."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__state__in_contract
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+msgid "In Contract"
+msgstr "U ugovoru"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__is_available
+msgid "Indicates whether the checklist item is available"
+msgstr "Označava je li dostupan stavka kontrolnog popisa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__can_be_returned
+msgid "Indicates whether the items in the rental order can be returned."
+msgstr "Označava mogu li se vratiti stavke u naredbi najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__is_picked
+msgid ""
+"Indicates whether the product in the rental order line has been picked."
+msgstr "Označava je li odabran proizvod u liniji za najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__is_returned
+msgid ""
+"Indicates whether the product in the rental order line has been returned."
+msgstr "Označava je li vraćen proizvod u liniji najamnine."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__is_paid
+msgid "Indicates whether the rental contract is paid or not"
+msgstr "Ukazuje je li ugovor o najmu plaćen ili ne"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_invoiced
+msgid "Indicates whether the rental order has been invoiced."
+msgstr "Označava je li naredba o najmu fakturirana."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_picked_up
+msgid "Indicates whether the rented items have been picked up."
+msgstr "Označava jesu li iznajmljeni predmeti pokupili."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__is_returned
+msgid "Indicates whether the rented items have been returned."
+msgstr "Označava jesu li iznajmljeni predmeti vraćeni."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Invoice"
+msgstr "Dostavnica"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__partner_invoice_id
+msgid "Invoice Address"
+msgstr "Adresa računa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_is_follower
+msgid "Is Follower"
+msgstr "Je sljedbenik"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_invoiced
+msgid "Is Invoiced"
+msgstr "Je fakturirano"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__is_paid
+msgid "Is paid"
+msgstr "Je plaćeno"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__is_picked
+msgid "Is picked"
+msgstr "Je odabran"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_picked_up
+msgid "Is picked up"
+msgstr "Je pokupljen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__is_rental
+msgid "Is rental"
+msgstr "Je iznajmljivanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__is_returned
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__is_returned
+msgid "Is returned"
+msgstr "Je vraćen"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_account_move
+msgid "Journal Entry"
+msgstr "Temeljnica"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__write_uid
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__write_uid
+msgid "Last Updated by"
+msgstr "Zadnji put ažurirao"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__write_date
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__write_date
+msgid "Last Updated on"
+msgstr "Zadnji put ažurirano na"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_order__return_line_ids
+msgid "List of return lines associated with this return order."
+msgstr "Popis povratnih linija povezanih s ovim redoslijedom povratka."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Managed by"
+msgstr "Upravljao"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_error
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_error
+msgid "Message Delivery error"
+msgstr "Pogreška isporuke poruka"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_ids
+msgid "Messages"
+msgstr "Poruke"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__month
+msgid "Month"
+msgstr "Mjesec"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Moj rok za aktivnost"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__name
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Name"
+msgstr "Ime"
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#: code:addons/cyllo_rental_base/models/rental_order.py:0
+#, python-format
+msgid "New"
+msgstr "Novi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Sljedeći rok za aktivnost"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_summary
+msgid "Next Activity Summary"
+msgstr "Sljedeći sažetak aktivnosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_type_id
+msgid "Next Activity Type"
+msgstr "Sljedeća vrsta aktivnosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__next_invoice_date
+msgid "Next Invoice Date"
+msgstr "Sljedeći datum fakture"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__display_type__line_note
+msgid "Note"
+msgstr "Bilješka"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Broj radnji"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_error_counter
+msgid "Number of errors"
+msgstr "Broj pogrešaka"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Broj poruka koje zahtijevaju radnju"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Broj poruka s pogreškom isporuke"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.pickup_view_form
+msgid "OK"
+msgstr "u redu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.return_view_form
+msgid "Ok"
+msgstr "U redu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Or scan me with your banking app."
+msgstr "Ili me skenirajte sa svojom bankarskom aplikacijom."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__order_id
+msgid "Order"
+msgstr "Narudžba"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Order Details"
+msgstr "Detalji narudžbe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Order Lines"
+msgstr "Crte narudžbe"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__pickup_id
+msgid "Order Pickup"
+msgstr "Naručite preuzimanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__name
+msgid "Order Reference"
+msgstr "Referenca"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__state
+msgid "Order Status"
+msgstr "Stanje narudžbe"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__return_id
+msgid "Order return"
+msgstr "Povratak narudžbe"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Orders Revenue"
+msgstr "Naruči prihod"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Other payment methods"
+msgstr "Ostali načini plaćanja"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Partner"
+msgstr "Partner"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+msgid "Partner:"
+msgstr "Partner:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Pay"
+msgstr "Platiti"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "Pay now"
+msgstr "Plati sada"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid "Pay with"
+msgstr "Plati sa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__payment_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__payment_id
+msgid "Payment"
+msgstr "Plaćanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "Transakcija plaćanja"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__extra_hourly_price
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__rental_price
+msgid "Per hour"
+msgstr "Na sat"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__rental_period
+msgid "Period"
+msgstr "Razdoblje"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Phone"
+msgstr "Telefon"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Picked Up"
+msgstr "Pokupila"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__picking_id
+msgid "Picking"
+msgstr "Branje"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.pickup_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Pickup"
+msgstr "Pokupiti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__pickup_date
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Pickup Date"
+msgstr "Izaberi datum"
+
+#. module: cyllo_rental_base
+#: model:mail.template,subject:cyllo_rental_base.email_pickup_rental_order
+msgid "Pickup Done"
+msgstr "Završeno"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_pickup_line
+msgid "Pickup Line"
+msgstr "Liniju za preuzimanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup__pickup_line_ids
+msgid "Pickup Lines"
+msgstr "Uleti"
+
+#. module: cyllo_rental_base
+#: model:mail.template,name:cyllo_rental_base.email_pickup_rental_order
+msgid "Pickup Mail Notify"
+msgstr "PRIKLJUČA"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Pickup and Return"
+msgstr "Preuzimanje i povratak"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__pickup_date
+msgid "Pickup date"
+msgstr "Izaberi datum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup__pickup_line_ids
+msgid "Pickup product and details"
+msgstr "Proizvod i detalji za preuzimanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_pickup
+msgid "Pickup wizard"
+msgstr "Čarobnjak"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_url
+msgid "Portal Access URL"
+msgstr "URL pristupa portalu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__price
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+msgid "Price"
+msgstr "Cijena"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxexcl
+msgid "Price Reduce Tax excl"
+msgstr "Cijena smanjuje porez bez"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxinc
+msgid "Price Reduce Tax incl"
+msgstr "Cijena smanjenje poreza"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Print"
+msgstr "Ispis"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Print Order"
+msgstr "Narudžba za ispis"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Print Token"
+msgstr "Token za ispis"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_charging__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__product_id
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__rental_type__product
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Product"
+msgstr "Proizvod"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_product_product
+msgid "Product Variant"
+msgstr "Varijanta proizvoda"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__quantity
+msgid "Product quantity"
+msgstr "Količina proizvoda"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_pickup_line__product_id
+msgid "Product to pickup"
+msgstr "Proizvod za preuzimanje"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__contract_line_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_ids
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_products
+msgid "Products"
+msgstr "Proizvodi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_ids
+msgid "Products which are available"
+msgstr "Proizvodi koji su dostupni"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_qty
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_pickup_line__quantity
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__quantity
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_qty
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__quantity
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_cart_summary
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Quantity"
+msgstr "Količina"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__rating_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__rating_ids
+msgid "Ratings"
+msgstr "Ocjena"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_unit
+msgid "Recurring Price"
+msgstr "Ponavljajuća cijena"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxexcl
+msgid "Reduced price excluding tax for the rental order line."
+msgstr "Smanjena cijena isključujući porez za liniju narudžbe."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__rental_price_reduce_taxinc
+msgid "Reduced price including tax for the rental order line."
+msgstr "Smanjena cijena, uključujući porez za liniju narudžbe."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_checklist__remarks
+msgid "Remarks"
+msgstr "Opaske"
+
+#. module: cyllo_rental_base
+#: model:ir.module.category,name:cyllo_rental_base.cyllo_rental_base_management
+#: model:website.menu,name:cyllo_rental_base.rental_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_search
+msgid "Rental"
+msgstr "Iznajmljivanje"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid ""
+"Rental\n"
+"                                                        Charges"
+msgstr ""
+"Iznajmljivanje\n"
+"                                                        Naknade"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid "Rental - Checkout"
+msgstr "Najam - odjava"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid "Rental - Select Payment Provider"
+msgstr "Najam - odaberite davatelja plaćanja"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_charging
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_charging_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Rental Charges"
+msgstr "Troškovi za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_checklist
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_checklist_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_product_product_form
+msgid "Rental Checklist"
+msgstr "Popis za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_contract_action
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_tree
+msgid "Rental Contract"
+msgstr "Ugovor o najmu"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Rental Dashboard"
+msgstr "Nadzornica"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_contract
+msgid "Rental Lease/Contract"
+msgstr "Najam najma/ugovor"
+
+#. module: cyllo_rental_base
+#: model:ir.ui.menu,name:cyllo_rental_base.menu_cyllo_rental_base_root
+msgid "Rental Management"
+msgstr "Upravljanje najamninom"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_order_action
+#: model:ir.model,name:cyllo_rental_base.model_rental_order
+#: model:ir.ui.menu,name:cyllo_rental_base.rental_order_menu
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_calendar
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_graph
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_pivot
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_tree
+msgid "Rental Order"
+msgstr "Najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_rental_order_line
+msgid "Rental Order Line"
+msgstr "Linija za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__order_line_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Rental Order Lines"
+msgstr "Linije za najam"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid ""
+"Rental Order created\n"
+"                                        successfully.."
+msgstr ""
+"Naredba za najam stvorena\n"
+"                                        uspješno.."
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_payment_transaction__rental_order_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_my_home_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#, python-format
+msgid "Rental Orders"
+msgstr "Naredbe za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.act_window,name:cyllo_rental_base.rental_product_action
+msgid "Rental Products"
+msgstr "Proizvodi za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.report,name:cyllo_rental_base.action_report_rental_order
+msgid "Rental Report"
+msgstr "Izvještaj o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.actions.report,name:cyllo_rental_base.action_report_rental_token
+msgid "Rental Token"
+msgstr "Token za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__rental_type
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Rental Type"
+msgstr "Vrsta najma"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_calendar
+msgid "Rental contract calendar"
+msgstr "Kalendar ugovora o najma"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_graph
+msgid "Rental contract graph"
+msgstr "Grafikon ugovora o najma"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_pivot
+msgid "Rental contract pivot"
+msgstr "Ugovor o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_product_product__rental_location_id
+msgid "Rental location"
+msgstr "Mjesto najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__rented
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+msgid "Rented"
+msgstr "Unajmljen"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Rented Orders"
+msgstr "Unajmljene narudžbe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Request -"
+msgstr "Zahtjev -"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__activity_user_id
+msgid "Responsible User"
+msgstr "Odgovorni korisnik"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order__state__return
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.return_view_form
+msgid "Return"
+msgstr "Povratak"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__return_date
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Return Date"
+msgstr "Datum povratka"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_order__return_line_ids
+msgid "Return Lines"
+msgstr "Povratne linije"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_return_line__return_date
+msgid "Return date"
+msgstr "Datum povratka"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_return_line
+msgid "Return line"
+msgstr "Povratna linija"
+
+#. module: cyllo_rental_base
+#: model:ir.model,name:cyllo_rental_base.model_return_order
+msgid "Return order"
+msgstr "Povratak"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_table
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_order_data
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_search
+msgid "Returned"
+msgstr "Vraćen"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Returned Orders"
+msgstr "Vraćene naredbe"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_wizard_checkout
+msgid "Review Order"
+msgstr "Pregled narudžbe"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__message_has_sms_error
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__message_has_sms_error
+msgid "SMS Delivery error"
+msgstr "Pogreška isporuke SMS -a"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__user_id
+msgid "Salesperson"
+msgstr "Prodavač"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Save my payment details"
+msgstr "Spremite moje podatke o plaćanju"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_order_line__display_type__line_section
+msgid "Section"
+msgstr "Odjeljak"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__access_token
+msgid "Security Token"
+msgstr "Sigurnosni token"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Select Date"
+msgstr "Odaberite Datum"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_bank_statement_line__contract_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_move__contract_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_account_payment__contract_id
+msgid "Select the associated contract for this record."
+msgstr "Odaberite povezani ugovor za ovaj zapis."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address_kanban
+msgid "Select this address"
+msgstr "Odaberite ovu adresu"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Send message"
+msgstr "Pošalji poruku"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__sequence
+msgid "Sequence"
+msgstr "Slijed"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Ship to the same address\n"
+"                                                        <span class=\"ship_to_other text-muted\" style=\"display: none\">\n"
+"                                                            &amp;nbsp;(\n"
+"                                                            <i>Your shipping\n"
+"                                                                address will be\n"
+"                                                                requested later)\n"
+"                                                            </i>\n"
+"                                                        </span>"
+msgstr ""
+"Pošaljite na istu adresu\n"
+"                                                        <span class = \"Ship_To_Other tekst-prekriven\" stil = \"zaslon: none\">\n"
+"                                                            & nbsp; (\n"
+"                                                            <i> Vaša poštarina\n"
+"                                                                adresa će biti\n"
+"                                                                zatraženo kasnije)\n"
+"                                                            </i>\n"
+"                                                        </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Shipping\n"
+"                                        Address"
+msgstr ""
+"dostava \n"
+"                                         Adresa"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_checkout
+msgid "Shipping Address"
+msgstr "dostavna adresa"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Shop - Confirmed"
+msgstr "Trgovina - potvrđeno"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Sign Up"
+msgstr "Prijaviti se"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Sign in"
+msgstr "Prijaviti se"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "Start Date:"
+msgstr "Početni datum:"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__state
+msgid "State"
+msgstr "država"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"State /\n"
+"                                                Province"
+msgstr ""
+"Država / \n"
+"                                                 Pokrajina"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__state
+msgid "Status"
+msgstr "Status"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status na temelju aktivnosti\n"
+"Prekasni: datum dospijeća je već donesen\n"
+"Danas: Datum aktivnosti je danas\n"
+"Planirano: buduće aktivnosti."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"Street\n"
+"                                                <span class=\"d-none d-md-inline\">\n"
+"                                                    and Number\n"
+"                                                </span>"
+msgstr ""
+"Ulica\n"
+"                                                <span class = \"d-none d-md-inline\">\n"
+"                                                    i broj\n"
+"                                                </span>"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Street 2"
+msgstr "Ulica 2"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment
+msgid ""
+"Stripe Connect is not available in your country, please use another payment "
+"provider."
+msgstr ""
+"Stripe Connect nije dostupan u vašoj zemlji, koristite drugog davatelja "
+"plaćanja."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "Sub Total"
+msgstr "Podtaman"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_product_details
+msgid "Submit"
+msgstr "podnijeti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_subtotal
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_subtotal
+msgid "Subtotal"
+msgstr "Subtotalan"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_subtotal
+msgid "Subtotal amount for the rental order line."
+msgstr "Subtotalni iznos za liniju najamnine."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "Subtotal:"
+msgstr "Subtotal:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "TIN / VAT"
+msgstr "Lim / posuda"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Tax excl."
+msgstr "Porez bez."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_contract_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Tax incl."
+msgstr "Porezni uklj."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__tax_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_tax
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__tax_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+msgid "Taxes"
+msgstr "Porezi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__tax_ids
+msgid "Taxes applied to the rental order line."
+msgstr "Porezi koji se primjenjuju na liniju narudžbe."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_total
+msgid "Taxes:"
+msgstr "Porezi:"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Test Mode"
+msgstr "Način ispitivanja"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.form_submit_success
+msgid "Thank You!"
+msgstr "Hvala vam!"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "Thank you for your order."
+msgstr "Hvala na Vašoj Narudžbi."
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/controllers/main.py:0
+#, python-format
+msgid "The access token is invalid."
+msgstr "Pristupni token nije valjan."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_invoice_id
+msgid "The address for invoicing the rental order."
+msgstr "Adresa za fakturiranje Naredbe o najmu."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_shipping_id
+msgid "The address where the rented items will be delivered."
+msgstr "Adresa na kojoj će se dostaviti iznajmljeni predmeti."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_paid
+msgid "The amount already paid for the rental order."
+msgstr "Iznos koji je već plaćen za najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__amount
+msgid "The amount associated with the rental contract"
+msgstr "Iznos povezan s ugovorom o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_category_id
+msgid ""
+"The category of the unit of measure for the product in the contract line"
+msgstr "Kategorija mjerne jedinice za proizvod u ugovornoj liniji"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__rental_period
+msgid "The charging period for the rental"
+msgstr "Razdoblje punjenja za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__company_id
+msgid "The company associated with the contract line"
+msgstr "Tvrtka povezana s linijom ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__company_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__company_id
+msgid "The company associated with the rental order."
+msgstr "Tvrtka povezana s narudžbom najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__company_id
+msgid "The company associated with this rental contract"
+msgstr "Tvrtka povezana s ovim ugovorom o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__company_id
+msgid "The company to which this product belongs"
+msgstr "Tvrtka kojoj ovaj proizvod pripada"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__company_id
+msgid "The company to which this rental charge belongs"
+msgstr "Tvrtka kojoj pripada ova naplata"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__currency_id
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__currency_id
+msgid "The currency used for the rental order."
+msgstr "Valuta koja se koristi za redoslijed najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__currency_id
+msgid "The currency used for transactions related to the contract line"
+msgstr "Valuta koja se koristi za transakcije povezane s linijom ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__currency_id
+msgid "The currency used for transactions related to this product"
+msgstr "Valuta koja se koristi za transakcije povezane s ovim proizvodom"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__currency_id
+msgid "The currency used for transactions related to this rental charge"
+msgstr "Valuta koja se koristi za transakcije povezane s ovom najamninom"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__currency_id
+msgid "The currency used for transactions related to this rental contract"
+msgstr ""
+"Valuta koja se koristi za transakcije povezane s ovim ugovorom o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__state
+msgid "The current state of the rental contract"
+msgstr "Trenutno stanje ugovora o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__state
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__state
+msgid "The current status of the rental order."
+msgstr "Trenutno stanje najamnine."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__partner_id
+msgid "The customer associated with this rental contract"
+msgstr "Kupac povezan s ovim ugovorom o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__partner_id
+msgid "The customer for whom the rental order is created."
+msgstr "Kupac za koji se stvara narudžba najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__return_date
+msgid "The date when the product is returned."
+msgstr "Datum kada se proizvod vrati."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__date_order
+msgid "The date when the rental order is created."
+msgstr "Datum kada se stvori narudžba najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__rental_location_id
+msgid "The default rental location for this product"
+msgstr "Zadana lokacija za najam za ovaj proizvod"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__discount
+msgid "The discount percentage for the contract line"
+msgstr "Postotak popusta za liniju ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_end_date
+msgid "The end date of the rental contract"
+msgstr "Krajnji datum ugovora o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__name
+msgid "The name of the checklist item"
+msgstr "Naziv stavke popisa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__name
+msgid "The name of the rental contract"
+msgstr "Naziv ugovora o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__next_invoice_date
+msgid "The next invoice date for the rental contract"
+msgstr "Sljedeći datum fakture za ugovor o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__current_rented_quantity
+msgid "The number of products currently in rented state"
+msgstr "Broj proizvoda koji su trenutno u iznajmljenoj državi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__payment_id
+msgid "The payment associated with the rental contract"
+msgstr "Plaćanje povezano s ugovorom o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__payment_id
+msgid "The payment record related to the rental order."
+msgstr "Zapisnik o plaćanju povezan s narudžbom najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__transaction_ids
+msgid "The payment transactions associated with the rental order."
+msgstr "Platne transakcije povezane s naredbom o najmu."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_id
+msgid "The product associated with the contract line"
+msgstr "Proizvod povezan s linijom ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_checklist__product_id
+msgid "The product associated with this checklist item"
+msgstr "Proizvod povezan s ovom stavkom popisa"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__product_id
+msgid "The product associated with this rental charge"
+msgstr "Proizvod povezan s ovim najamninom"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__product_id
+msgid "The product being returned."
+msgstr "Proizvod se vraća."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_product_product__delay_product_id
+msgid "The product used to add extra cost to the rental order"
+msgstr ""
+"Proizvod koji se koristi za dodavanje dodatnih troškova narudžbi za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_line_ids
+msgid "The products associated with this rental contract"
+msgstr "Proizvodi povezani s ovim ugovorom o najma"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__quantity
+msgid "The quantity of the product being returned."
+msgstr "Količina proizvoda koji se vraća."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_qty
+msgid "The quantity of the product in the contract line"
+msgstr "Količina proizvoda u ugovornoj liniji"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_qty
+msgid "The quantity of the product in the rental order line."
+msgstr "Količina proizvoda u liniji najamnine."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__quantity
+msgid "The quantity of the products in the rental contract"
+msgstr "Količina proizvoda u ugovoru o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__invoice_recurrence
+msgid "The recurrence period for creating invoices"
+msgstr "Razdoblje recidiva za stvaranje faktura"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_unit
+msgid "The recurring price for the product in the contract line"
+msgstr "Ponavljajuća cijena proizvoda u ugovornoj liniji"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__contract_id
+msgid "The rental contract associated with this contract line"
+msgstr "Ugovor o najmu povezan s ovom linijom ugovora"
+
+#. module: cyllo_rental_base
+#. odoo-python
+#: code:addons/cyllo_rental_base/controllers/main.py:0
+#, python-format
+msgid "The rental has been updated. Please refresh the page."
+msgstr "Najam je ažuriran.Molimo osvježite stranicu."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__order_line_ids
+msgid "The rental order lines associated with this order."
+msgstr "Linije za najamnine povezane s ovom naredbom."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__rental_price
+msgid "The rental price per hour"
+msgstr "Cijena najma na sat"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_return_line__return_id
+msgid "The return order to which this line belongs."
+msgstr "Povratni nalog kojem pripada ova linija."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__user_id
+msgid "The salesperson responsible for the rental order."
+msgstr "Prodavač je odgovoran za najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__contract_start_date
+msgid "The start date of the rental contract"
+msgstr "Datum početka ugovora o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__picking_id
+msgid "The stock picking associated with the rental order."
+msgstr "Odabir zaliha povezano s narudžbom najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_subtotal
+msgid "The subtotal amount for the contract line"
+msgstr "Subtotalni iznos za liniju ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__tax_ids
+msgid "The taxes associated with the contract line"
+msgstr "Porezi povezani s linijom ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_total
+msgid "The total amount for the contract line"
+msgstr "Ukupni iznos za liniju ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_total
+msgid "The total amount including taxes and additional charges."
+msgstr "Ukupni iznos, uključujući poreze i dodatne troškove."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__amount_total
+msgid "The total amount of the rental contract"
+msgstr "Ukupni iznos ugovora o najmu"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_untaxed
+msgid "The total amount without taxes."
+msgstr "Ukupni iznos bez poreza."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_charging__price
+msgid "The total price for the rental charge"
+msgstr "Ukupna cijena za najam"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__price_tax
+msgid "The total tax amount for the contract line"
+msgstr "Ukupni iznos poreza za liniju ugovora"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__amount_tax
+msgid "The total tax amount for the rental order."
+msgstr "Ukupni iznos poreza za najam."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__display_type
+msgid "The type of display for the rental order line."
+msgstr "Vrsta zaslona za liniju redoslijeda najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_contract_lines__product_uom_id
+msgid "The unit of measure for the product in the contract line"
+msgstr "Mjerna jedinica za proizvod u ugovornoj liniji"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_id
+msgid "The unit of measure for the product in the rental order line."
+msgstr "Mjerna jedinica za proizvod u liniji redoslijeda najamnina."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_unit
+msgid "The unit price of the rental order line."
+msgstr "Jedinična cijena linije najamnine."
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Month"
+msgstr "Ovaj mjesec"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Week"
+msgstr "Ovaj tjedan"
+
+#. module: cyllo_rental_base
+#. odoo-javascript
+#: code:addons/cyllo_rental_base/static/src/xml/rental_dashboard.xml:0
+#, python-format
+msgid "This Year"
+msgstr "Ove godine"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_payment_transaction__rental_order_ids
+msgid ""
+"This field stores the rental orders associated with the current record."
+msgstr "Ovo polje pohranjuje naredbe za najam povezane s trenutnim zapisom."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.view_rental_order_form
+msgid "Title"
+msgstr "Titula"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__amount_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_total
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_total
+msgid "Total"
+msgstr "Ukupno"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__price_tax
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_tax
+msgid "Total Tax"
+msgstr "Ukupni porez"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_total
+msgid "Total amount for the rental order line."
+msgstr "Ukupni iznos za liniju narudžbe."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__price_tax
+msgid "Total tax amount for the rental order line."
+msgstr "Ukupni iznos poreza za liniju narudžbe."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__transaction_ids
+msgid "Transactions"
+msgstr "Transakcije"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "True"
+msgstr "Pravi"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Vrsta aktivnosti iznimke na zapisu."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__name
+msgid "Unique reference for the rental order."
+msgstr "Jedinstvena referenca za redoslijed najma."
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__price_unit
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_order
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.report_rental_token
+msgid "Unit Price"
+msgstr "Jedinična cijena"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_id
+msgid "Unit of Measure"
+msgstr "Jedinica mjere"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order_line__product_uom_category_id
+msgid "Unit of Measure (UoM) category of the product."
+msgstr "Kategorija proizvoda (UOM) proizvoda."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "Unpublished"
+msgstr "Neobjavljen"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__amount_untaxed
+msgid "Untaxed Amount"
+msgstr "Netadani iznos"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_contract_lines__product_uom_category_id
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order_line__product_uom_category_id
+msgid "UoM Category"
+msgstr "UOM kategorija"
+
+#. module: cyllo_rental_base
+#: model:ir.module.category,description:cyllo_rental_base.cyllo_rental_base_management
+msgid "User access levels for Rental module"
+msgstr "Razine pristupa korisniku za modul za iznajmljivanje"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_user_all_documents
+msgid "User: All documents"
+msgstr "Korisnik: Svi dokumenti"
+
+#. module: cyllo_rental_base
+#: model:res.groups,name:cyllo_rental_base.cyllo_rental_base_group_user_own_documents
+msgid "User: Own documents"
+msgstr "Korisnik: Vlastiti dokumenti"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.portal_rental_order_record_template
+msgid "View Details"
+msgstr "Pregledavati pojedinosti"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_contract__website_message_ids
+#: model:ir.model.fields,field_description:cyllo_rental_base.field_rental_order__website_message_ids
+msgid "Website Messages"
+msgstr "Poruke web stranice"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_contract__website_message_ids
+#: model:ir.model.fields,help:cyllo_rental_base.field_rental_order__website_message_ids
+msgid "Website communication history"
+msgstr "Povijest komunikacije na web stranici"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__week
+msgid "Week"
+msgstr "Tjedan"
+
+#. module: cyllo_rental_base
+#: model:ir.model.fields.selection,name:cyllo_rental_base.selection__rental_contract__invoice_recurrence__year
+msgid "Year"
+msgstr "Godina"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"You are editing your <b>billing and\n"
+"                                            shipping\n"
+"                                        </b> addresses at the same time!\n"
+"                                            <br/>\n"
+"                                            If you want to modify your shipping\n"
+"                                            address, create a"
+msgstr ""
+"Uređujete svoju <b> naplatu i\n"
+"                                            dostava\n"
+"                                        </b> adrese istovremeno!\n"
+"                                            <br/>\n"
+"                                            Ako želite izmijeniti dostavu\n"
+"                                            Adresa, stvorite a"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Your Address"
+msgstr "Vaša adresa"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_payment_confirmation_status
+msgid "Your payment has been authorized."
+msgstr "Vaša je plaćanje odobreno."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "Zip Code"
+msgstr "Poštanski broj"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid ""
+"new\n"
+"                                            address"
+msgstr ""
+"novi \n"
+"                                             adresa"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_address
+msgid "or"
+msgstr "ili"
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.rental_confirmation
+msgid "to follow your order."
+msgstr "slijediti vašu narudžbu."
+
+#. module: cyllo_rental_base
+#: model_terms:ir.ui.view,arch_db:cyllo_rental_base.checkout
+msgid "— created on"
+msgstr "- stvoreno na"

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="account.menu_finance" name="Accounting"/>
+    <!-- Deferred revenue types -->
+    <menuitem id="menu_deferred_revenue_types" name="Deferred revenue types"
+              action="action_view_deferred_revenue_types" parent="account.account_management_menu"/>
+    <!-- Deferred expense types -->
+    <menuitem id="menu_deferred_expense_types" name="Deferred expense types"
+              action="action_view_deferred_expense_types" parent="account.account_management_menu"/>
+    <!-- Deferred revenues -->
+    <menuitem id="menu_deferred_revenues" name="Deferred revenues"
+              action="action_view_deferred_revenues" parent="account.menu_finance_entries_management"/>
+    <!-- Deferred expenses -->
+    <menuitem id="menu_deferred_expenses" name="Deferred expenses"
+              action="action_view_deferred_expenses" parent="account.menu_finance_entries_management"/>
+</odoo>

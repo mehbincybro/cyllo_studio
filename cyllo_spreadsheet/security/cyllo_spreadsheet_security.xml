@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Security groups spreadsheet module -->
+    <record id="ir_module_category_spreadsheet" model="ir.module.category">
+        <field name="name">Spreadsheet</field>
+        <field name="sequence">99</field>
+    </record>
+    <record id="group_cyllo_spreadsheet_group_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="ir_module_category_spreadsheet"/>
+    </record>
+    <record id="group_cyllo_spreadsheet_group_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="ir_module_category_spreadsheet"/>
+        <field name="implied_ids" eval="[(4, ref('group_cyllo_spreadsheet_group_user'))]"/>
+        <field name="users"
+               eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+    <!-- Record rule for spreadsheet -->
+    <record id="rule_spreadsheet_spreadsheet_public_owner" model="ir.rule">
+        <field name="name">Spreadsheet Owner</field>
+        <field name="model_id" ref="model_spreadsheet_spreadsheet"/>
+        <field name="groups" eval="[(4, ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+        <field name="domain_force">[('owner_id','=', user.id)]</field>
+    </record>
+    <record id="rule_spreadsheet_spreadsheet_public_contributor" model="ir.rule">
+        <field name="name">Spreadsheet Contributor</field>
+        <field name="model_id" ref="model_spreadsheet_spreadsheet"/>
+        <field name="groups" eval="[(4, ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+        <field name="domain_force">[('contributor_ids','=', user.id)]</field>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_spreadsheet_spreadsheet_public_reader" model="ir.rule">
+        <field name="name">Spreadsheet Reader</field>
+        <field name="model_id" ref="model_spreadsheet_spreadsheet"/>
+        <field name="groups" eval="[(4, ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_user'))]"/>
+        <field name="domain_force">[('reader_ids','=', user.id)]</field>
+        <field name="perm_write" eval="False"/>
+        <field name="perm_create" eval="False"/>
+        <field name="perm_unlink" eval="False"/>
+    </record>
+    <record id="rule_spreadsheet_spreadsheet_public_manager" model="ir.rule">
+        <field name="name">Spreadsheet Manager</field>
+        <field name="model_id" ref="model_spreadsheet_spreadsheet"/>
+        <field name="groups"
+               eval="[(4, ref('cyllo_spreadsheet.group_cyllo_spreadsheet_group_manager'))]"/>
+        <field name="domain_force">[(1,'=', 1)]</field>
+    </record>
+    <record id="rule_spreadsheet_spreadsheet_import_mode_public" model="ir.rule">
+        <field name="name">Spreadsheet Import mode</field>
+        <field name="model_id"
+               ref="model_spreadsheet_spreadsheet_import_mode"/>
+        <field name="domain_force">[('group_ids','in', user.groups_id.ids)]
+        </field>
+    </record>
+</odoo>

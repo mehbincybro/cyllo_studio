@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="rental_cart_order" name="Rental Cart Order">
+        <t t-call="website.layout">
+            <div class="container">
+                <t t-if="orders">
+                    <div id="rental_cart" class="row position-relative mt-5 mb32">
+                        <div id="rental_cart_total" class="rental_cart_total offset-xl-1 col-lg-5 col-xl-4 order-2">
+                            <t t-call="cyllo_rental_base.rental_cart_total"/>
+                        </div>
+                        <div class="oe_cart col-12 col-lg-7">
+                            <div class="col">
+                                <h3 class="mb-4">Rental Orders</h3>
+                                <div id="cart_product" class="js_rental_cart_lines d-flex flex-column mb32">
+                                    <input type="hidden" id="order_id" t-att-value="orders.id"/>
+                                    <div t-foreach="rental_order_lines" t-as="line"
+                                         class="o_cart_product d-flex align-items-stretch gap-3 ">
+                                        <input type="hidden" id="line_id" t-att-value="line.id"/>
+                                        <t t-if="line.product_id">
+                                            <input type="hidden" id="product_id" t-att-value="line.product_id.id"/>
+                                            <img t-attf-src="/web/image/product.product/#{line.product_id.id}/image_1024"
+                                                 class="o_image_64_max  img rounded"/>
+                                            <div class="flex-grow-1">
+                                                <a t-attf-href="/rental_shop/product/#{line.product_id.id}"
+                                                   t-field="line.product_id.name" class="d-inline align-top h6 fw-bold"/>
+                                                <div class="text-muted d-none d-md-block small">
+                                                    <span class="d-block">
+                                                        Duration:
+                                                        <t t-esc="line.duration"/>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="d-flex flex-column align-items-end">
+                                                <div class="css_quantity input-group mb-2">
+                                                    <a href="#" class="js_rental_add_cart_json btn btn-link d-inline-block border-end-0">
+                                                        <i class="position-relative z-index-1 fa fa-minus"/>
+                                                    </a>
+                                                    <input type="text" readonly="true"
+                                                           class="js_rental_quantity quantity form-control border-start-0 border-end-0"
+                                                           t-att-value="line.product_uom_qty"/>
+                                                    <a href="#"
+                                                       class="js_rental_add_cart_json d-inline-block float_left btn btn-link border-start-0">
+                                                        <i class="fa fa-plus position-relative z-index-1"/>
+                                                    </a>
+                                                </div>
+                                                <t t-call="cyllo_rental_base.line_total"/>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <div class="row position-relative mt-5 mb32">
+                        <h3 class="mb-4">Rental Orders</h3>
+                        <div class="js_cart_lines alert alert-info">
+                            Your Rental cart is empty!
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </t>
+    </template>
+    <template id="rental_cart_total" name="Rental Cart Total">
+        <div class="o_rental_total_card card sticky-lg-top">
+            <div class="card-body p-0 p-lg-4">
+                <table class="table mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="border-0 pb-2 ps-0 pt-0 text-start text-muted" colspan="2">
+                                Subtotal:
+                            </td>
+                            <td class="text-end border-0 pb-2 pe-0 pt-0">
+                                <span class="sub_total" style="white-space: nowrap;"
+                                      t-field="orders.amount_untaxed"
+                                      t-options="{'widget': 'monetary', 'display_currency': orders.currency_id}"/>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted border-0 ps-0 pt-0 pb-3" colspan="2">
+                                Taxes
+                            </td>
+                            <td class="text-end border-0 pe-0 pt-0 pb-3">
+                                <span class="total_tax" style="white-space: nowrap;" t-field="orders.amount_tax"
+                                      t-options="{'widget': 'monetary', 'display_currency': orders.currency_id}"/>
+                            </td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="border-0 ps-0 pt-3" colspan="2">
+                                <strong>Total</strong>
+                            </td>
+                            <td class="text-end border-0 px-0 pt-3">
+                                <strong class="monetary_field text-end p-0">
+                                    <span class="oe_currency_value grand_total" t-field="orders.amount_total"
+                                          t-options="{'widget': 'monetary', 'display_currency': orders.currency_id}"/>
+                                </strong>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="o_download_pdf">
+                <a class="btn btn-primary o_print_btn d-block" t-attf-href="/rental/payment/"
+                   id="print_rental_order" title="View Details" target="_blank">
+                    <i class="fa fa-fw fa-arrow-circle-right"/>
+                    Pay Now
+                </a>
+            </div>
+        </div>
+    </template>
+    <template id="line_total" name="Rental Cart Lines">
+        <div class="mb-0 h6 fw-bold text-end">
+            <t t-if="line">
+                <span t-att-id="line.id" class="line_sub_total"
+                      style="white-space: nowrap;" t-field="line.price_subtotal"
+                      t-options="{'widget': 'monetary', 'display_currency': line.currency_id}"/>
+            </t>
+        </div>
+    </template>
+</odoo>

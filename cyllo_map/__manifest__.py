@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+{
+    'name': 'Cyllo Map',
+    'version': "1.0",
+    'summary': "Integrate map view functionalities.",
+    'description': "The module aims to enhance functionality by integrating map viewing capabilities. Users can"
+                   "visualize geographical data and utilize location-based coordinates for various purposes.",
+    'author': "Cyllo",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'website': 'https://www.cyllo.com',
+    'depends': ['hr', 'website', 'contacts', 'base_geolocalize'],
+    'data': [
+        'views/res_partner_views.xml',
+        'views/openstreet_map_snippet.xml',
+    ],
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_map/static/src/js/address_from_map.js',
+            'cyllo_map/static/src/xml/address_from_map.xml',
+            'cyllo_map/static/src/js/address_autofill.js',
+            'cyllo_map/static/src/xml/address_autofill.xml',
+            'cyllo_map/static/src/scss/style.scss',
+            'cyllo_map/static/src/js/lib/leaflet/leaflet.js',
+            'cyllo_map/static/src/js/lib/leaflet/leaflet.css',
+            'cyllo_map/static/src/js/map_view_controller.js',
+            'cyllo_map/static/src/js/map_view_renderer.js',
+            'cyllo_map/static/src/js/map_view_arch_parser.js',
+            'cyllo_map/static/src/js/map_view.js',
+            'cyllo_map/static/src/xml/map_view_controller.xml',
+            'cyllo_map/static/src/xml/map_view_renderer.xml',
+            'cyllo_map/static/src/xml/map_view_arch_parser.xml',
+        ],
+        'web.assets_frontend': [
+            'cyllo_map/static/src/js/lib/leaflet/leaflet.js',
+            'cyllo_map/static/src/js/lib/leaflet/leaflet.css',
+            'cyllo_map/static/src/js/openstreet_map_snippet.js',
+        ],
+    },
+    'license': 'LGPL-3',
+    "uninstall_hook": "uninstall_hook",
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}

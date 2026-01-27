@@ -1,0 +1,595 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_twilio_voice_call
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-12-06 07:11+0000\n"
+"PO-Revision-Date: 2023-12-06 07:11+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "API Key"
+msgstr "API sleutel"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "API Secret"
+msgstr "API -geheim"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__account_sid
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Account SID"
+msgstr "Account Sid"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_needaction
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_needaction
+msgid "Action Needed"
+msgstr "Actie nodig"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_ids
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_ids
+msgid "Activities"
+msgstr "Activiteiten"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_exception_decoration
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_exception_decoration
+msgid "Activity Exception Decoration"
+msgstr "Activiteitsuitzondering decoratie"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_state
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_state
+msgid "Activity State"
+msgstr "Activiteitstoestand"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_type_icon
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_type_icon
+msgid "Activity Type Icon"
+msgstr "Activiteitstype pictogram"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__api_key
+msgid "Api Key"
+msgstr "API sleutel"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__api_secret
+msgid "Api Secret"
+msgstr "API -geheim"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_attachment_count
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_attachment_count
+msgid "Attachment Count"
+msgstr "Bijlage tellen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__auth_token
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Auth Token"
+msgstr "AUTH TOKEN"
+
+#. module: cyllo_twilio_voice_call
+#. odoo-javascript
+#: code:addons/cyllo_twilio_voice_call/static/src/xml/incoming_call_templates.xml:0
+#: code:addons/cyllo_twilio_voice_call/static/src/xml/outgoing_call_templates.xml:0
+#, python-format
+msgid "Avatar"
+msgstr "Avatar"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__call_sid
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__call_sid
+msgid "Call Sid"
+msgstr "Bel Sid"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__user
+msgid "Caller"
+msgstr "Beller"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model,name:cyllo_twilio_voice_call.model_res_config_settings
+msgid "Config Settings"
+msgstr "Configuratie instellingen"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.actions.act_window,help:cyllo_twilio_voice_call.incoming_call_list_action
+msgid "Create Twilio Voice Call"
+msgstr "Creëer Twilio spraakoproep"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__create_uid
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__create_uid
+msgid "Created by"
+msgstr "Gemaakt door"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__create_date
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__create_date
+msgid "Created on"
+msgstr "Gemaakt op"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__display_name
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__display_name
+msgid "Display Name"
+msgstr "Weergavenaam"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__duration
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__duration
+msgid "Duration"
+msgstr "Duur"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__duration
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__duration
+msgid "Duration of the call"
+msgstr "Duur van de oproep"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Enable Twilio Device For Receiving and Making Calls"
+msgstr "Schakel Twilio -apparaat in voor het ontvangen en bellen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__end_time
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__end_time
+msgid "End Time"
+msgstr "Eindtijd"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_follower_ids
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_follower_ids
+msgid "Followers"
+msgstr "Volgers"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_partner_ids
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_partner_ids
+msgid "Followers (Partners)"
+msgstr "Volgers (partners)"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__activity_type_icon
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__activity_type_icon
+msgid "Font awesome icon e.g. fa-tasks"
+msgstr "Lettertype Geweldig pictogram b.v.fa-taken"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__from_number
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__from_number
+msgid "From"
+msgstr "Van"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.inspection_request_view_search
+msgid "From Number"
+msgstr "Van nummer"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__from_number
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__from_number
+msgid "From number to call any number"
+msgstr "Van nummer om een nummer te bellen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__has_message
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__has_message
+msgid "Has Message"
+msgstr "Heeft bericht"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__id
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__id
+msgid "ID"
+msgstr "ID kaart"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_exception_icon
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_exception_icon
+msgid "Icon"
+msgstr "Icoon"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__activity_exception_icon
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__activity_exception_icon
+msgid "Icon to indicate an exception activity."
+msgstr "Pictogram om een uitzonderingsactiviteit aan te geven."
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__message_needaction
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__message_needaction
+msgid "If checked, new messages require your attention."
+msgstr "Indien aangevinkt, vereisen nieuwe berichten uw aandacht."
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__message_has_error
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__message_has_error
+msgid "If checked, some messages have a delivery error."
+msgstr "Indien aangevinkt, hebben sommige berichten een leveringsfout."
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.actions.act_window,name:cyllo_twilio_voice_call.incoming_call_list_action
+#: model:ir.ui.menu,name:cyllo_twilio_voice_call.incoming_call_list_menu
+msgid "Incoming Call List"
+msgstr "Inkomende oproeplijst"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_is_follower
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_is_follower
+msgid "Is Follower"
+msgstr "Is volger"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__write_uid
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__write_uid
+msgid "Last Updated by"
+msgstr "Laatst bijgewerkt door"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__write_date
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__write_date
+msgid "Last Updated on"
+msgstr "Laatst geupdate op"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_has_error
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_has_error
+msgid "Message Delivery error"
+msgstr "Berichtbezorgingsfout"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_ids
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_ids
+msgid "Messages"
+msgstr "Berichten"
+
+#. module: cyllo_twilio_voice_call
+#. odoo-javascript
+#: code:addons/cyllo_twilio_voice_call/static/src/xml/outgoing_call_templates.xml:0
+#, python-format
+msgid "Mobile Number"
+msgstr "Mobiel nummer"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__my_activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__my_activity_date_deadline
+msgid "My Activity Deadline"
+msgstr "Mijn activiteitdeadline"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_date_deadline
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_date_deadline
+msgid "Next Activity Deadline"
+msgstr "Volgende activiteit deadline"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_summary
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_summary
+msgid "Next Activity Summary"
+msgstr "Volgende activiteiten samenvatting"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_type_id
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_type_id
+msgid "Next Activity Type"
+msgstr "Volgende activiteitstype"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_needaction_counter
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_needaction_counter
+msgid "Number of Actions"
+msgstr "Aantal acties"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__message_has_error_counter
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__message_has_error_counter
+msgid "Number of errors"
+msgstr "Aantal fouten"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__message_needaction_counter
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__message_needaction_counter
+msgid "Number of messages requiring action"
+msgstr "Aantal berichten dat actie vereist"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__message_has_error_counter
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__message_has_error_counter
+msgid "Number of messages with delivery error"
+msgstr "Aantal berichten met leveringsfout"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.actions.act_window,name:cyllo_twilio_voice_call.out_going_call_list_action
+#: model:ir.model,name:cyllo_twilio_voice_call.model_out_going_call_list
+#: model:ir.ui.menu,name:cyllo_twilio_voice_call.out_going_call_list_menu
+msgid "Out Going Call List"
+msgstr "Out Going Call List"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__outgoing_application_sid
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Outgoing Application SID"
+msgstr "Uitgaande applicatie Sid"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__from_number
+msgid "Phone Number"
+msgstr "Telefoonnummer"
+
+#. module: cyllo_twilio_voice_call
+#. odoo-javascript
+#: code:addons/cyllo_twilio_voice_call/static/src/xml/incoming_call_templates.xml:0
+#, python-format
+msgid "Phone Number:"
+msgstr "Telefoonnummer:"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.incoming_call_list_view_form
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.out_going_call_list_view_form
+msgid "Play Recording"
+msgstr "Speel opname"
+
+#. module: cyllo_twilio_voice_call
+#. odoo-javascript
+#: code:addons/cyllo_twilio_voice_call/static/src/js/outgoing_call.js:0
+#, python-format
+msgid "Please enter a phone number to call"
+msgstr "Voer een telefoonnummer in om te bellen"
+
+#. module: cyllo_twilio_voice_call
+#. odoo-javascript
+#: code:addons/cyllo_twilio_voice_call/static/src/js/outgoing_call.js:0
+#, python-format
+msgid "Please enter the correct phone number to call"
+msgstr "Voer het juiste telefoonnummer in om te bellen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__user
+msgid "Receiver"
+msgstr "Ontvanger"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__to_number
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__to_number
+msgid "Receiving number for testing"
+msgstr "Ontvangstnummer voor testen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__record_sid
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__record_sid
+msgid "Record Details"
+msgstr "Record details"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__record_sid
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__record_sid
+msgid "Record Sid of the call"
+msgstr "Not Sid of the Call"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__reference
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__reference
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.inspection_request_view_search
+msgid "Reference"
+msgstr "Referentie"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__reference
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__reference
+msgid "Reference to the model"
+msgstr "Verwijzing naar het model"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__activity_user_id
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__activity_user_id
+msgid "Responsible User"
+msgstr "Verantwoordelijke gebruiker"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.inspection_request_view_search
+msgid "Search"
+msgstr "Zoekopdracht"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Set Up Device"
+msgstr "Zet apparaat in"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__start_time
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__start_time
+msgid "Start Time"
+msgstr "Starttijd"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__status
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__status
+msgid "Status"
+msgstr "Toestand"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__activity_state
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__activity_state
+msgid ""
+"Status based on activities\n"
+"Overdue: Due date is already passed\n"
+"Today: Activity date is today\n"
+"Planned: Future activities."
+msgstr ""
+"Status op basis van activiteiten\n"
+"Overleden: de vervaldatum is al aangenomen\n"
+"Vandaag: de activiteitsdatum is vandaag\n"
+"Gepland: toekomstige activiteiten."
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__status
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__status
+msgid "Status of the call"
+msgstr "Status van de oproep"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_incoming_call_list__to_number
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_out_going_call_list__to_number
+msgid "To"
+msgstr "Naar"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add account sid"
+msgstr "Om een account toe te voegen SID"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add api key"
+msgstr "Om API -sleutel toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add api secret"
+msgstr "Om API -geheim toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add auth token"
+msgstr "Om Auth Token toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add outgoing application sid"
+msgstr "Om uitgaande toepassing SID toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "To add phone number"
+msgstr "Om telefoonnummer toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__account_sid
+msgid "To add the account sidfor the twilio account"
+msgstr "Om het account Sid voor de Twilio -account toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__api_key
+msgid "To add the api keyfor the twilio account"
+msgstr "Om de API -sleutel voor de Twilio -account toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__api_secret
+msgid "To add the api secretfor the twilio account"
+msgstr "Om het API -geheim voor de Twilio -account toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__auth_token
+msgid "To add the auth tokenfor the twilio account"
+msgstr "Om de AUTH -token voor de Twilio -account toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__outgoing_application_sid
+msgid "To add the outgoing application sidfor the twilio account"
+msgstr "Om de uitgaande applicatie Sid voor de Twilio -account toe te voegen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__from_number
+msgid "To add the twilio phone number to call"
+msgstr "Om het Twilio -telefoonnummer toe te voegen om te bellen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__call_sid
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__call_sid
+msgid "To get the call sid"
+msgstr "Om de oproep Sid te krijgen"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__end_time
+msgid "To get the time and date when the call is ended"
+msgstr "Om de tijd en datum te krijgen wanneer de oproep is beëindigd"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__start_time
+msgid "To get the time and date when the call is started"
+msgstr "Om de tijd en datum te krijgen wanneer de oproep wordt gestart"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__start_time
+msgid "To get the time and date, when the call is started"
+msgstr "Om de tijd en datum te krijgen, wanneer de oproep wordt gestart"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__end_time
+msgid "To get the time and date,when the call is ended"
+msgstr "Om de tijd en datum te krijgen, wanneer de oproep is beëindigd"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.ui.menu,name:cyllo_twilio_voice_call.twilio_menu
+msgid "Twilio"
+msgstr "Twilio"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Twilio Credential's"
+msgstr "Twilio Credential's"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Twilio Device"
+msgstr "Twilio -apparaat"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,field_description:cyllo_twilio_voice_call.field_res_config_settings__twilio_device_setup
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_res_config_settings__twilio_device_setup
+msgid "Twilio Device Set Up"
+msgstr "Twilio -apparaat ingesteld"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Twilio Phone Number"
+msgstr "Twilio telefoonnummer"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.res_config_settings_view_form
+msgid "Twilio Set Up Device"
+msgstr "Twilio Set -Up -apparaat"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model,name:cyllo_twilio_voice_call.model_incoming_call_list
+msgid "Twilio Voice Call"
+msgstr "Twilio Voice Call"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__activity_exception_decoration
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__activity_exception_decoration
+msgid "Type of the exception activity on record."
+msgstr "Type van de uitzonderingsactiviteit op record."
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.inspection_request_view_search
+msgid "User"
+msgstr "Gebruiker"
+
+#. module: cyllo_twilio_voice_call
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_incoming_call_list__user
+#: model:ir.model.fields,help:cyllo_twilio_voice_call.field_out_going_call_list__user
+msgid "User for the call"
+msgstr "Gebruiker voor de oproep"
+
+#. module: cyllo_twilio_voice_call
+#: model_terms:ir.ui.view,arch_db:cyllo_twilio_voice_call.inspection_request_view_search
+msgid "to Number"
+msgstr "om te tellen"

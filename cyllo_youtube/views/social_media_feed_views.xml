@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record extends the view for social.media.feed by adding an image representing YouTube. -->
+    <record id="view_social_media_feed_kanban" model="ir.ui.view">
+        <field name="name">view.social.media.feed.kanban</field>
+        <field name="model">social.media.feed</field>
+        <field name="inherit_id"
+               ref="cyllo_social_media_marketing.view_social_media_feed_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('column')][3]" position="after">
+                <div style=" position: absolute; top: 20px; right: 15px">
+                    <img src="cyllo_youtube/static/src/img/youtube.png"
+                         width="30px;"
+                         alt="YouTube"
+                         invisible="not posted_on_youtube"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='likes_count']" position="after">
+                <field name="posted_on_youtube" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+    <!-- This record defines an action for handling YouTube comments. -->
+    <record id="action_youtube_comment" model="ir.actions.client">
+        <field name="name">Youtube Comments</field>
+        <field name="tag">youtube_comments</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Data for salary structure -->
+    <record id="employee_salary_structure_base_for_new_structures" model="employee.salary.structure">
+        <field name="code">BASE</field>
+        <field name="name">Base for new structures</field>
+        <field name="employee_salary_rule_ids" eval="[Command.set([ref('employee_salary_rule_basic_salary'), ref('employee_salary_rule_gross'), ref('employee_salary_rule_net_salary'), ref('employee_salary_rule_attachment_of_salary'), ref('employee_salary_rule_child_support'), ref('employee_salary_rule_assignment_of_salary')])]"/>
+        <field name="company_id" ref="base.main_company"/>
+        <field name="type_id" ref="cyllo_payroll_management.salary_structure_type_regular"/>
+        <field name="journal_id" ref="cyllo_payroll_management.account_journal_salaries"/>
+    </record>
+</odoo>

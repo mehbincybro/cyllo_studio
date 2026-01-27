@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_dashboard.AddToShortcuts" owl="1">
+        <li class="nav-item" t-on-click="addToShortcuts" t-if="state.isAddedToShortcut == false and this.env.config.actionId">
+             <a class="nav-link cy-navitem-list" href="#">Add to Shortcuts</a>
+        </li>
+    </t>
+</templates>

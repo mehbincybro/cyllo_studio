@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- This record extends the view for social.media.post by adding a new field'-->
+    <record id="view_social_media_post_form" model="ir.ui.view">
+        <field name="name">view.social.media.post.form</field>
+        <field name="model">social.media.post</field>
+        <field name="priority" eval="10"/>
+        <field name="inherit_id"
+               ref="cyllo_social_media_marketing.view_social_media_post_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='posted_date']" position="after">
+                <field name="post_on_youtube" widget="boolean_toggle"
+                       invisible="mode not in ('upload')"/>
+                <field name="youtube_channel_id"
+                       domain="[('is_active', '=', True)]"
+                       invisible="not post_on_youtube"
+                       required="post_on_youtube"/>
+            </xpath>
+            <xpath expr="//button[@name='action_post']" position="after">
+                <button name="action_upload_video" type="object"
+                        string="Upload Video"
+                        class="btn-primary"
+                        invisible="mode != 'upload'or state != 'draft'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

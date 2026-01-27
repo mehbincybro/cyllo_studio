@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Form view -->
+    <record id="view_rental_order_form" model="ir.ui.view">
+        <field name="name">view.rental.order.form</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <form string="Rental Order">
+                <header>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,rented,ready_to_return,return"/>
+                    <button name="action_confirm" string="Confirm" class="oe_highlight" type="object"
+                            invisible="state != 'draft'" readonly="state != 'draft'"/>
+                    <button name="action_pay_now" string="Create Invoice" class="oe_highlight" type="object"
+                            invisible="state in ('draft') or is_invoiced"/>
+                    <button name="action_pay_extra" string="Create Invoice For Extra Charge" class="btn btn-secondary" type="object"
+                            invisible="state in ('draft') or not create_inv_for_extra_cost"/>
+                    <button name="action_pickup" string="Pickup" class="oe_highlight" type="object"
+                            invisible=" state == 'draft' or is_picked_up"/>
+                    <button name="action_return" string="Validate Returns" class="oe_highlight" type="object"
+                            invisible="state in ('draft','rented','partial_return','return')"/>
+                    <button name="action_ready_to_return" string="Ready To Return" class="oe_highlight" type="object"
+                            invisible="state in ('draft', 'ready_to_return','return') or is_returned or not can_be_returned"/>
+                    <button name="action_print_token" string="Print Token" class="oe_highlight" type="object"/>
+                    <button name="action_add_extra_charge" string="Add Extra Charge" class="oe_highlight" type="object"
+                            invisible="state not in ('rented') or not is_extra_cost"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_see_returns" type="object" class="oe_stat_button" icon="fa-rotate-left"
+                                invisible="return_count == 0">
+                            <field name="return_count" string="Returns" widget="statinfo"/>
+                        </button>
+                        <button name="action_see_deliveries" type="object" class="oe_stat_button" icon="fa-truck" invisible="picking_count == 0">
+                            <field name="picking_count" string="Deliveries" widget="statinfo"/>
+                        </button>
+                        <button class="oe_stat_button" type="object" name="action_get_invoice" string="Invoices"
+                                icon="fa-pencil-square-o" invisible="not payment_ids"/>
+                        <field name="payment_ids" invisible="1"/>
+                        <field name="create_inv_for_extra_cost" invisible="1"/>
+                    </div>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" widget="res_partner_many2one" readonly="state != 'draft'"/>
+                            <field name="partner_shipping_id" readonly="state != 'draft'"/>
+                            <field name="partner_invoice_id" readonly="state != 'draft'"/>
+                            <field name="is_extra_cost" invisible="1"/>
+                            <field name="picking_ids"  invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date_order" readonly="state != 'draft'"/>
+                            <field name="currency_id" readonly="state != 'draft'"/>
+                            <field name="company_id" readonly="state != 'draft'"/>
+                        </group>
+                        <field name="is_picked_up" invisible="1"/>
+                        <field name="is_returned" invisible="1"/>
+                        <field name="is_invoiced" invisible="1"/>
+                        <field name="can_be_returned" invisible="1"/>
+                        <field name="return_picking_ids" invisible="1"/>
+                    </group>
+                    <notebook>
+                        <page string="Order Lines" name="order_lines">
+                            <field name="order_line_ids" widget="section_and_note_one2many" mode="tree" readonly="state != 'draft'">
+                                <form>
+                                    <field name="product_ids" invisible="1"/>
+                                    <field name="display_type" column_invisible="1"/>
+                                    <field name="sequence" column_invisible="1"/>
+                                </form>
+                                <tree string="Rental Order Lines" editable="bottom" limit="200">
+                                    <control>
+                                        <create name="add_product_control" string="Add a product"/>
+                                        <create name="add_section_control" string="Add a section"
+                                                context="{'default_display_type': 'line_section'}"/>
+                                        <create name="add_note_control" string="Add a note"
+                                                context="{'default_display_type': 'line_note'}"/>
+                                    </control>
+                                    <field name="sequence" widget="handle"/>
+                                    <!-- We do not display the type because we don't want the user to be bothered with that information if he has no section or note. -->
+                                    <field name="display_type" column_invisible="1"/>
+                                    <field name="rental_type" required="display_type == False"/>
+                                    <field name="product_id" required="display_type == False and rental_type == 'product'"
+                                           force_save="1" options="{'no_open': True}"
+                                           domain="[('id', 'in',product_ids ), '|', ('company_id', '=', False), ('company_id', '=', parent.company_id)]"
+                                           widget="sol_product_many2one"/>
+                                    <field name="product_ids" column_invisible="1"/>
+                                    <field name="lot_ids" options="{'no_create': True}"
+                                           domain="[('product_id','=',product_id),('location_id','=',product_location_id),('product_qty','!=',0)]"
+                                           widget="many2many_tags"/>
+                                    <field name="product_location_id" column_invisible="1"/>
+                                    <field name="product_tracking" column_invisible="1"/>
+                                    <field name="pickup_date"/>
+                                    <field name="return_date"/>
+                                    <field name="name" widget="section_and_note_text" optional="show"/>
+                                    <field name="duration"/>
+                                    <field name="price_unit"/>
+                                    <field name="product_uom_category_id" column_invisible="1"/>
+                                    <field name="product_uom_qty"/>
+                                    <field name="product_uom_id"/>
+                                    <field name="qty_delivered"/>
+                                    <field name="qty_invoiced"/>
+                                    <field name="tax_ids" widget="many2many_tags" options="{'no_create': True}"
+                                           domain="[('type_tax_use','=','sale'),('company_id','=',parent.company_id)]"
+                                           context="{'active_test': True}" optional="show"/>
+                                    <field name="discount" string="Disc.%" groups="product.group_discount_per_so_line"
+                                           optional="show" widget="sol_discount"/>
+                                    <field name="price_subtotal" string="Tax excl."/>
+                                    <field name="price_total" string="Tax incl." optional="hide"/>
+                                    <!-- Other fields -->
+                                    <field name="state" column_invisible="1"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="company_id" column_invisible="1"/>
+                                </tree>
+                            </field>
+                            <group name="note_group" col="6" class="mt-2 mt-md-0">
+                                <group colspan="4">
+                                    <field name="note" colspan="2" nolabel="1" readonly="state != 'draft'"/>
+                                </group>
+                                <group class="oe_subtotal_footer" colspan="2" name="rental_order_total">
+                                    <field name="amount_untaxed"/>
+                                    <field name="amount_tax"/>
+                                    <div class="oe_inline o_td_label">
+                                        <label for="amount_total">Total</label>
+                                    </div>
+                                    <field name="amount_total" nolabel="1" class="oe_subtotal_footer_separator"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Other Info" name="Other Information">
+                            <group string="Sales">
+                                <field name="website_id" readonly="1"/>
+                                <field name="user_id" readonly="state != 'draft'"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Tree view -->
+    <record id="view_rental_order_tree" model="ir.ui.view">
+        <field name="name">view.rental.order.tree</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <tree string="Rental Order">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date_order"/>
+                <field name="user_id"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="website_id" optional="True"/>
+                <field name="state" widget="badge"
+                       decoration-warning="state == 'rented'"
+                       decoration-info="state in ('draft')"
+                       decoration-success="state in ('return')"
+                       decoration-danger="state == 'ready_to_return'"/>
+                <field name="amount_total" widget="monetary"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Calendar view -->
+    <record id="view_rental_order_calendar" model="ir.ui.view">
+        <field name="name">view.rental.order.calendar</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <calendar string="Rental Order" date_start="date_order" color="state">
+                <field name="currency_id" invisible="1"/>
+                <field name="partner_id"/>
+                <field name="amount_total" widget="monetary"/>
+                <field name="state" filters="1" invisible="1"/>
+            </calendar>
+        </field>
+    </record>
+    <!-- Graph view -->
+    <record id="view_rental_order_graph" model="ir.ui.view">
+        <field name="name">view.rental.order.graph</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <graph string="Rental Order">
+                <field name="partner_id"/>
+                <field name="amount_total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+    <!-- Pivot view -->
+    <record id="view_rental_order_pivot" model="ir.ui.view">
+        <field name="name">view.rental.order.pivot</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Rental Order">
+                <field name="partner_id" type="row"/>
+                <field name="amount_total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <!-- Search view -->
+    <record id="view_rental_order_search" model="ir.ui.view">
+        <field name="name">view.rental.order.search</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <search string="Rental Order">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="state"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Picked Up" name="picked_up" domain="[('is_picked_up', '=', True)]"/>
+                <filter string="Returned" name="returned" domain="[('is_returned', '=', True)]"/>
+                <filter string="Ready To Return" name="ready_to_return" domain="[('state', '=', 'ready_to_return')]"/>
+                <filter string="Ready For Picking Up" name="ready_for_pickup" domain="[('is_picked_up', '=', False),('state','=','rented')]"/>
+                <filter string="Website Rental" name="website_rental" domain="[('website_id', '!=', False)]"/>
+                <group expand="1" string="Group By">
+                    <filter string="Partner" name="partner" context="{'group_by': 'partner_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    <!-- Kanban view -->
+    <record id="view_rental_order_kanban" model="ir.ui.view">
+        <field name="name">view.rental.order.kanban</field>
+        <field name="model">rental.order</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click oe_kanban_content">
+                            <div class="row">
+                                <strong>
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div>
+                                <field name="amount_total" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                                <field name="currency_id"/>
+                            </div>
+                            <div>
+                                <field name="partner_id"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <!-- Actions -->
+    <record id="action_view_rental_order" model="ir.actions.act_window">
+        <field name="name">Rental Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.order</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar</field>
+    </record>
+    <record id="action_view_rental_order_website" model="ir.actions.act_window">
+        <field name="name">Rental Order</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.order</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar</field>
+        <field name="context">{'search_default_website_rental': 1}
+        </field>
+    </record>
+    <record id="action_view_contracts_lease" model="ir.actions.act_window">
+        <field name="name">Rental Contract</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.contract</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar</field>
+    </record>
+    <record id="action_view_products" model="ir.actions.act_window">
+        <field name="name">Rental Products</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">kanban,form,tree</field>
+        <field name="context">{'search_default_filter_to_rent': 1,
+            'default_sale_ok': True,
+            'default_is_rental': True,
+            'default_purchase_ok': False,
+            'default_detailed_type': 'consu'}
+        </field>
+    </record>
+    <record id="action_view_ready_for_returning" model="ir.actions.act_window">
+        <field name="name">Ready To Return</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.order</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar</field>
+        <field name="context">{'search_default_ready_to_return': 1}</field>
+    </record>
+    <record id="action_view_ready_for_pickup" model="ir.actions.act_window">
+        <field name="name">Ready To Pickup</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">rental.order</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar</field>
+        <field name="context">{'search_default_ready_for_pickup': 1}</field>
+    </record>
+</odoo>

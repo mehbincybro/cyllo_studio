@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record for defining a client action named 'marketing_activity_action' -->
+    <record id="marketing_activity_action" model="ir.actions.client">
+        <field name="name">Activity</field>
+        <field name="tag">marketing_activity_tags</field>
+        <field name="context">{'active_ids': active_ids }</field>
+    </record>
+</odoo>
