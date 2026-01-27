@@ -20,12 +20,19 @@
 #
 #############################################################################
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, timedelta
 
 from dateutil.relativedelta import relativedelta
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+import datetime
 from odoo.http import request
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage
+from datetime import datetime
+from zoneinfo import ZoneInfo
+import pytz
+from lxml import html
 
 _logger = logging.getLogger(__name__)
 
@@ -60,6 +67,38 @@ class CrmLead(models.Model):
                                            column2='stage_id',
                                            string='Stages Triggered',
                                            readonly=True)
+    ex_probability = fields.Float('Probability', copy=False,
+                                  readonly=False, store=True)
+    partner_work_status = fields.Html(
+        string="Work Status",
+        compute="_compute_partner_work_status",
+    )
+
+    partner_local_time = fields.Datetime(string="Partner Local Time")
+    recent_summary_ids = fields.One2many('crm.recent.summary', 'lead_id',
+                                         string='Recent Summary',
+                                         compute='_compute_recent_summary_ids')
+    is_pinned = fields.Boolean(
+        string='Pinned',
+        default=False,
+        help="Pin this message to the top of the chatter",
+    )
+    is_installed = fields.Boolean(
+        string='Installed',
+        default=False,
+        compute='_compute_is_installed'
+    )
+    count = fields.Integer(compute='_compute_count',
+                           string="Count",
+                           help="Total number of Automations")
+
+    has_activities = fields.Boolean(
+        string='Has Activities',
+        compute='_compute_has_activities',
+        store=True
+    )
+
+
 
     @api.model
     def create(self, vals):
@@ -688,3 +727,364 @@ class CrmLead(models.Model):
             ('is_exit_criteria', '=', True)
         ])
         return exit_criteria_activities > 0
+
+    def action_get_customer_local_time(self):
+        """
+        Function for getting partner time and current time using the
+        NEW 'google_search' tool name.
+        """
+        if self.partner_work_status:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': "Customer Current Time",
+                    'message': "Success! Action completed.",
+                    'type': 'success',
+                    'sticky': False,
+                }
+            }
+
+        TEST_GOOGLE_API_KEY = request.env[
+            'ir.config_parameter'
+        ].sudo().get_param('cyllo_agent.api_key')
+
+        if not TEST_GOOGLE_API_KEY:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': "Missing Google API Key",
+                    'message': "Google API Key is missing. Please configure it before proceeding.",
+                    'type': 'danger',
+                    'sticky': False,
+                }
+            }
+
+        llm = ChatGoogleGenerativeAI(
+            model='gemini-2.5-flash',
+            google_api_key=TEST_GOOGLE_API_KEY
+        )
+
+        message = HumanMessage(
+            content=[
+                {
+                    "type": "text",
+                    "text": (
+                        f"Search Google and provide the official working hours of "
+                        f"{self.partner_id.name} ({self.state_id.name}, {self.country_id.name}). "
+                        f"First, show today's working shift in HH:MM to HH:MM format. "
+                        f"Then show the time zone of the location (for example: America/Los_Angeles). "
+                        f"Then list the working hours for each weekday in HH:MM to HH:MM format. "
+                        f"Do not add extra text, explanations, headings, or formatting. "
+                        f"If the company cannot be found or no official working hours are available, "
+                        f"output exactly: 'Sorry, company is not found'."
+                    )
+                }
+            ]
+        )
+
+        try:
+            response = llm.invoke([message])
+            data = response.content.split('\n')
+
+            if len(data) > 1:
+                # Save values
+                self.partner_id.partner_working_hours = data[0]
+                self.partner_id.partner_time_zone = data[1]
+
+                # Days of week
+                days = [
+                    "Monday", "Tuesday", "Wednesday",
+                    "Thursday", "Friday", "Saturday", "Sunday"
+                ]
+
+                # Build HTML table
+                table_html = """
+                <table style="border-collapse: collapse; width: 100%; margin: 10px 0;">
+                    <thead>
+                        <tr style="background-color: #f0f0f0;">
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Information</th>
+                            <th style="border: 1px solid #ddd; padding: 8px; text-align: left;">Details</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                """
+
+                # ---- Time Zone Row ----
+                table_html += f"""
+                    <tr style="background-color: #ffffff;">
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            <strong>Time Zone</strong>
+                        </td>
+                        <td style="border: 1px solid #ddd; padding: 8px;">
+                            {data[1]}
+                        </td>
+                    </tr>
+                """
+
+                for i, day in enumerate(days):
+                    if i + 2 >= len(data):
+                        break
+
+                    value = data[i + 2]
+
+                    # Remove "Monday:" from "Monday: 09:00 to 17:00"
+                    if ':' in value:
+                        _, value = value.split(':', 1)
+                        value = value.strip()
+
+                    # Alternating row background
+                    bg_color = "#f9f9f9" if i % 2 else "#ffffff"
+
+                    # Make value text red if closed
+                    value_style = "color: red;" if value in ["00:00 to 00:00",
+                                                             "Closed"] else ""
+
+                    table_html += f"""
+                        <tr style="background-color: {bg_color};">
+                            <td style="border: 1px solid #ddd; padding: 8px;">
+                                <strong>{day}</strong>
+                            </td>
+                            <td style="border: 1px solid #ddd; padding: 8px; {value_style}">
+                                {value}
+                            </td>
+                        </tr>
+                    """
+
+                table_html += """
+                    </tbody>
+                </table>
+                """
+
+                # Save table to partner
+                self.partner_id.write({
+                    'partner_working_details': table_html
+                })
+
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': "Customer Current Time",
+                        'message': "Success! Action completed.",
+                        'type': 'success',
+                        'sticky': False,
+                        'next': {
+                            'type': 'ir.actions.client',
+                            'tag': 'reload',
+                        }
+                    }
+                }
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': "Customer Current Time",
+                    'message': "Company not found while fetching working hours",
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+
+        except Exception as e:
+            _logger.warning(f"Error during Gemini invocation: {e}")
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': "Customer Current Time",
+                    'message': "Company not found while fetching working hours",
+                    'type': 'info',
+                    'sticky': False,
+                }
+            }
+
+    def _compute_partner_work_status(self):
+        """Compute Partner Work Status using day-wise working hours"""
+        for record in self:
+            if not record.partner_id or not record.partner_id.partner_time_zone:
+                record.partner_local_time = False
+                record.partner_work_status = False
+                continue
+
+            partner_time = datetime.now(
+                ZoneInfo(record.partner_id.partner_time_zone)
+            )
+
+            record.partner_local_time = partner_time.astimezone(
+                pytz.UTC
+            ).replace(tzinfo=None)
+
+            parsed_data = record._parse_working_details(
+                record.partner_id.partner_working_details
+            )
+
+            today = partner_time.strftime('%A')
+            current_time = partner_time.time()
+
+            # No working hours defined
+            if today not in parsed_data:
+                status = "Closed"
+                color = "gray"
+
+            else:
+                today_hours = parsed_data[today]
+
+                if today_hours.lower() == 'closed':
+                    status = "Closed"
+                    color = "red"
+                else:
+                    try:
+                        end_time_str = today_hours.split(' to ')[-1]
+                        end_time = datetime.strptime(
+                            end_time_str, "%H:%M"
+                        ).time()
+
+                        status = "Open" if current_time < end_time else "Closed"
+                        color = "green" if status == "Open" else "red"
+
+                    except Exception:
+                        status = "Closed"
+                        color = "gray"
+
+            record.partner_work_status = f"""
+                <h5>
+                    <span style="color: {color}; font-weight: bold;">
+                        {status} : Current Time {partner_time.strftime("%H:%M")}
+                    </span>
+                </h5>
+            """
+
+            _logger.info(
+                f"Partner local time: {record.partner_local_time}, "
+                f"Day: {today}, Status: {status}"
+            )
+
+    def _parse_working_details(self, html_content):
+        """Parse partner working details HTML into day-wise dict"""
+        result = {}
+
+        if not html_content:
+            return result
+
+        tree = html.fromstring(html_content)
+        rows = tree.xpath('//tbody/tr')
+
+        for row in rows:
+            tds = row.xpath('./td')
+            if len(tds) != 2:
+                continue
+
+            label = tds[0].xpath('string(.)').strip()
+            value = tds[1].xpath('string(.)').strip()
+
+            # Skip Time Zone row
+            if label.lower() == 'time zone':
+                continue
+
+            result[label] = value
+
+        return result
+
+    def action_create_automation(self):
+        """function for creating automation"""
+        model = self.env['ir.model'].search(
+            [('model', '=', self._name)],
+            limit=1
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Create Automation'),
+            'res_model': 'base.automation',
+            'view_mode': 'form',
+            'target': 'new',
+            'views': [(
+                self.env.ref(
+                    'cyllo_crm.view_base_automation_quick_form'
+                ).id,
+                'form'
+            )],
+            'context': {
+                'default_model_id': model.id if model else False,
+                'default_trigger': 'on_time',
+                'default_filter_pre_domain': "[('id', '=', %d)]" % self.id,
+                'default_temporary_filter_pre_domain': "[('id', '=', %d)]" % self.id,
+            },
+        }
+
+    def action_get_automation(self):
+        """Action for getting the popup view of all related changes of current lead"""
+        model = self.env['ir.model'].search(
+            [('model', '=', self._name)],
+            limit=1
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Automation'),
+            'res_model': 'base.automation',
+            'domain': [
+                ('filter_pre_domain', '=', "[('id', '=', %d)]" % self.id),
+                ('model_id', '=', model.id)],
+            'view_mode': 'tree',
+            'target': 'current',
+            'order': 'id asc',
+            'context': {
+                'create': False,
+                'edit': False,
+                'delete': False,
+            },
+        }
+
+    def _compute_is_installed(self):
+        """Function for checking is installed automation"""
+        is_installed = self.env['ir.module.module'].search([
+            ('name', '=', 'base_automation'),
+            ('state', '=', 'installed')
+        ], limit=1)
+        if is_installed:
+            self.is_installed = True
+        else:
+            self.is_installed = False
+
+    def _compute_count(self):
+        """Function for finding the count of automations"""
+        if self.is_installed:
+            model = self.env['ir.model'].search(
+                [('model', '=', self._name)],
+                limit=1
+            )
+            domain = f"[('id', '=', {self.id})]"
+            self.count = self.env['base.automation'].search_count(
+                [('filter_pre_domain', '=', domain),
+                 ('model_id', '=', model.id)])
+        else:
+            self.count = 0
+
+
+    def action_open_activity_graph(self):
+        """Open activity graph for the current lead"""
+        self.ensure_one()
+        return {
+            'name': 'Lead Activities Analysis',
+            'type': 'ir.actions.act_window',
+            'res_model': 'mail.activity',
+            'view_mode': 'graph',
+            'target': 'new',
+            'domain': [
+                ('res_model', '=', 'crm.lead'),
+                ('res_id', '=', self.id),
+            ],
+            'context': {
+                'group_by': 'activity_type_id',
+                'graph_mode': 'pie',
+            }
+        }
+
+    @api.depends('activity_ids')
+    def _compute_has_activities(self):
+        """compute activity ids for setting the visibility of button"""
+        for lead in self:
+            lead.has_activities = bool(lead.activity_ids)
+

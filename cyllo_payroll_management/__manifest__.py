@@ -31,7 +31,7 @@
     'website': "https://www.cyllo.com",
     'depends': ['hr_contract', 'mail', 'account', 'hr_work_entry',
                 'hr_attendance', 'hr_work_entry_contract',
-                'hr_work_entry_holidays', 'contacts', 'hr_holidays','hr_expense'],
+                'hr_work_entry_holidays', 'contacts', 'hr_holidays'],
     'icon': '/cyllo_payroll_management/static/description/payroll.svg',
     'data': [
         'security/cyllo_payroll_management_groups.xml',
@@ -63,7 +63,6 @@
         'views/employee_training_period_views.xml',
         'views/employee_payslip_other_input_views.xml',
         'views/employee_salary_attachment_views.xml',
-        'views/hr_expense_sheet_views.xml',
         'views/account_move_views.xml',
         'wizards/batch_payslip_mark_paid.xml',
         'wizards/resignation_request_confirm.xml',

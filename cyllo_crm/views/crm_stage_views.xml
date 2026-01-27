@@ -8,6 +8,9 @@
             <field name="name" position="after">
                 <field name="type" invisible="1"/>
             </field>
+            <field name="is_won" position="after">
+                <field name="rotting_days" widget="duration" options="{'units': 'day'}"/>
+            </field>
         </field>
     </record>
 </odoo>

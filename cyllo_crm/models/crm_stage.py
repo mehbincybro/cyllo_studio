@@ -33,6 +33,11 @@ class CrmStage(models.Model):
     ], string='Type', default='both'
     )
 
+    rotting_days = fields.Integer(sting='Rotting Days',
+                                help='The number of days a lead or opportunity stays in this stage without any activity or progress; '
+        'after this period, it will move to the Lost stage. '
+        'If set to 0, no automatic action will be taken.')
+
     # Dashboard
     @api.model
     def get_pipeline_stages(self):

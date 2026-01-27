@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <templates xml:space="preserve">
+        <!-- Extend the CogMenuForm to add a custom button -->
+        <t t-inherit="cyllo_web.CogMenuForm" t-inherit-mode="primary" owl="1">
+            <!-- Add a new button right after the "New" button -->
+            <xpath expr="//li[a/i[contains(@class,'ri-add-line')]]" position="after">
+                <li class="nav-item" t-if="true" t-on-click="props.uploadVisitingCard" accesskey="U">
+                    <a class="nav-link cy-navitem-list" href="#">
+                        <i class="ri-upload-2-line"/>Upload Visiting Card
+                    </a>
+                </li>
+            </xpath>
+        </t>
+    </templates>
+</odoo>

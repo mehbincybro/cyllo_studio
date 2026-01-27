@@ -39,7 +39,19 @@
                             </div>
                         </div>
                     </setting>
+                    <setting id="module_cyllo_crm_project_setting"
+                         help="Enable creating a project from a won CRM lead.">
+                    <field name="module_cyllo_crm_project"/>
+                    <div class="content-group"
+                         invisible="not module_cyllo_crm_project">
+                        <span>
+                            When enabled, users can create a project directly
+                            from a won CRM lead.
+                        </span>
+                    </div>
+                </setting>
                 </block>
+
             </xpath>
         </field>
     </record>

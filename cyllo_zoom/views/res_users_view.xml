@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_res_users_zoom_acc_form" model="ir.ui.view">
+        <field name="name">view.res.users.form</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='preferences']" position="after">
+                <page name="zoom_account_details" string="Zoom Account">
+                    <group string="Configure Zoom">
+                        <field name="zoom_status" widget="statusbar"/>
+                        <p>
+                            Set up the zoom account credentials for creating
+                            meetings
+                            <a href="https://developers.zoom.us/docs/integrations/oauth/"
+                               title="Zoom OAuth Documentation"
+                               class="o_doc_link"
+                               target="_blank">
+                            </a>
+                        </p>
+                        <group>
+                            <group>
+                                <field name="zoom_client" string="Client ID"
+                                       placeholder="e.g. qwertyuiihgcx"/>
+                                <field name="zoom_client_secret"
+                                       string="Client secret" password="True"/>
+                                <field name="zoom_token" password="True"
+                                       placeholder="e.g. EGQUOTRWHRWERTYTHETHWRBTEJETHGQE"
+                                       style="display:inline-block; width: 400px;"/>
+                                <button name="action_connect_zoom" type="object"
+                                        string="Connect" class="btn-primary"/>
+                                <button class="btn-primary"
+                                        string="Refresh Token" type="object"
+                                        name="action_zoom_meet_refresh_token"
+                                        icon="fa-refresh"/>
+                            </group>
+                            <group>
+                                <field name="zoom_recordings"
+                                       string="Zoom Recording Location"
+                                       placeholder="/home/user/Documents/Zoom"/>
+                                <field name="zoom_redirect_uri"
+                                       string="Redirect uri"
+                                       placeholder="e.g. https://localhost:8017"/>
+                                <field name="zoom_code"
+                                       placeholder="e.g. 1234562345"/>
+                                <field name="zoom_token_expiry"
+                                       placeholder="e.g. 123456789"/>
+                            </group>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

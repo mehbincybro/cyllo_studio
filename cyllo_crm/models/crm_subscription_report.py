@@ -20,10 +20,10 @@
 #
 #############################################################################
 import base64
-import xlsxwriter
 from datetime import datetime, timedelta
 from io import BytesIO
 
+import xlsxwriter
 from odoo import api, fields, models
 
 

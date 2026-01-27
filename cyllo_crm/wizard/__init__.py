@@ -23,5 +23,6 @@ from . import crm_lead_to_opportunity_partner
 from . import crm_lead_to_opportunity_compare_fields
 from . import crm_stage_exit_criteria
 from . import crm_stage_exit_criteria_line
+from . import crm_lead_activity_graph_wizard
 
 
