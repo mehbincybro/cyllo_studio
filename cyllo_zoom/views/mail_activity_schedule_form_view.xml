@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="mail_activity_schedule_view_form_cyllo_zoom"
+                model="ir.ui.view">
+            <field name="name">
+                mail.activity.schedule.view.form.inherit.cyllo.zoom
+            </field>
+            <field name="model">mail.activity.schedule</field>
+            <field name="inherit_id"
+                   ref="mail.mail_activity_schedule_view_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='activity_type_id']"
+                       position="after">
+                    <field name="is_zoom_meet" invisible="1"/>
+                    <field name="start" invisible="not is_zoom_meet" placeholder="Meeting starts at"/>
+                    <field name="stop" invisible="not is_zoom_meet" placeholder="Meeting ends"/>
+                    <field name="partner_ids" widget="many2many_tags"
+                           invisible="not is_zoom_meet"
+                           placeholder="Optionally include additional attendees."/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

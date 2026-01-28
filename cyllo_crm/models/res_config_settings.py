@@ -48,29 +48,20 @@ class ResConfigSettings(models.TransientModel):
 
     module_cyllo_crm_advance_lead = fields.Boolean(string="Advance Lead")
 
-    @api.onchange('module_cyllo_crm_advance_lead')
-    def _onchange_module_cyllo_crm_advance_lead(self):
-        if self.module_cyllo_crm_advance_lead:
-            self.group_use_lead = True
+    module_cyllo_crm_project = fields.Boolean(string="Cyllo CRM Project", help="Allows creating a project from a won CRM lead.", config_parameter='Cyllo_Crm.module_cyllo_crm_project')
+
 
     def set_values(self):
-        """Override set_values to handle module uninstallation properly"""
-        super(ResConfigSettings, self).set_values()
+        super().set_values()
+        # Install Project module if option enabled
+        if self.module_cyllo_crm_project:
+            module_cyllo_crm_project = self.env['ir.module.module'].sudo().search(
+                [('name', '=', 'cyllo_crm_project'), ('state', '!=', 'installed')],
+                limit=1
+            )
+            if module_cyllo_crm_project:
+                module_cyllo_crm_project.button_immediate_install()
 
-        # Uninstall the modules if group_use_lead is not enabled
-        if not self.group_use_lead:
-            modules_to_uninstall = ['cyllo_crm_review',
-                                    'cyllo_crm_advance_lead']
-            module_model = self.env['ir.module.module'].sudo()
-
-            for module_name in modules_to_uninstall:
-                module = module_model.search(
-                    [('name', '=', module_name), ('state', '=', 'installed')],
-                    limit=1)
-                if module:
-                    # Defer uninstall using a post-commit hook to avoid uninstalling while still using the field
-                    self.env.cr.postcommit.add(
-                        lambda m=module: m.button_immediate_uninstall())
 
     def action_configure_exit_criteria(self):
         """trigger a popup in crm settings and load previously created exit criterias"""

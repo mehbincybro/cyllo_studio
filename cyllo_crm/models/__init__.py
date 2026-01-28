@@ -26,3 +26,8 @@ from . import crm_lead_notification
 from . import mail_activity
 from . import crm_subscription_report
 from . import crm_stage_activity
+from . import crm_recent_summary
+from . import mail_message
+from . import res_partner
+from . import base_automation
+

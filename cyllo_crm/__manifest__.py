@@ -28,13 +28,17 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm', 'crm_iap_enrich', 'web'],
+    'depends': ['cyllo_base', 'crm', 'crm_iap_enrich', 'web',
+                'base_automation'],
     'data': [
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
+        'data/crm_lost_reason_data.xml',
         'data/mail_template.xml',
+        'wizard/crm_leads_to_change_views.xml',
         'views/res_config_settings_views.xml',
         'views/crm_stage_views.xml',
+        'views/crm_lead_views.xml',
         # Dashboard
         'views/crm_dashboard_views.xml',
         # Subscription Report
@@ -42,11 +46,16 @@
         # Advance follow
         'views/crm_stage_activity_view.xml',
         'wizard/crm_leads_to_change_views.xml',
-        'wizard/crm_stage_exit_criteria_views.xml'
+        'wizard/crm_stage_exit_criteria_views.xml',
+        'views/base_automation_views.xml',
+        # 'views/mail_activity_view.xml',
 
     ],
     'assets': {
         'web.assets_backend': [
+            'cyllo_crm/static/src/js/message.js',
+            'cyllo_crm/static/src/js/chatter.js',
+            'cyllo_crm/static/src/xml/pinned_messages.xml',
             'cyllo_crm/static/src/xml/crm_lead_compare.xml',
             'cyllo_crm/static/src/js/crm_lead_compare.js',
             'cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml',

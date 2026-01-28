@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="crm_lost_reason_rotting_days" model="crm.lost.reason">
+            <field name="name">Rotting Days</field>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>
+
