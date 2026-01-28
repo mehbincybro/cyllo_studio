@@ -34,6 +34,7 @@
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+        'data/conf_menu_inherit.xml',
         'data/asset_asset_actions_data.xml',
         'data/mail_template_data.xml',
         'data/ir_cron_data.xml',

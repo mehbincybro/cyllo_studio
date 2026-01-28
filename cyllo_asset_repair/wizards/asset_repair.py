@@ -41,7 +41,7 @@ class AssetRepair(models.TransientModel):
     @api.onchange('scheduled_date')
     def _onchange_scheduled_date(self):
         """Function for checking the schedduled date"""
-        purchase_date = self.asset_id.asset_item_id.purchase_date
+        purchase_date = self.asset_id.date
         if self.scheduled_date and self.scheduled_date <= purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}.The schedule Date should be greater than the Purchase Date'))

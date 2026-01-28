@@ -18,6 +18,22 @@
                     </setting>
                 </block>
             </xpath>
+            <xpath expr="//block[@id='print_vendor_checks_setting_container']" position="after">
+                <block title="Asset Management" name="cy-asset-management">
+                    <setting
+                            help="Manage assets and their related operations.">
+                        <field name="module_cyllo_asset_management"/>
+                    </setting>
+                    <setting
+                            help="Manage and track maintenance for assets.">
+                            <field name="module_cyllo_asset_maintenance"/>
+                    </setting>
+                    <setting
+                            help="Manage and track asset repair operations.">
+                            <field name="module_cyllo_asset_repair"/>
+                    </setting>
+                </block>
+            </xpath>
             <xpath expr="//block[@id='pay_invoice_online_setting_container']" position="inside">
                 <setting help="Advance payment option on sales and purchase">
                     <field name="module_cyllo_advance_payment"/>

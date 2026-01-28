@@ -45,11 +45,13 @@ class AssetSellDispose(models.Model):
     depreciated_amount = fields.Float()
     current_depreciated_amount = fields.Float()
     is_posted = fields.Boolean()
+    disposal_type = fields.Selection([('dispose', 'Dispose'), ('lost', 'Lost'), ('scrap', 'Scrap')],
+                                     default='dispose', string="Dispose Type", required=True)
 
     @api.constrains('date')
     def _constrains_date(self):
         for record in self:
-            purchase_date = record.asset_asset_id.asset_item_id.purchase_date
+            purchase_date = record.asset_asset_id.date
             if record.date and record.date < purchase_date:
                 raise UserError(
                     _(f'The Asset is Purchased on {purchase_date}. The Date should be greater or equal to the Purchase Date'))
@@ -128,7 +130,7 @@ class AssetSellDispose(models.Model):
                 'amount_total_signed'))
             self.update_depreciation_entries()
             self.asset_asset_id.depreciated_entry_ids.filtered(lambda l: l.state == 'draft').unlink()
-            self.asset_asset_id.depreciation_line_ids.filtered(lambda e: not e.journal_reference).unlink()
+            self.asset_asset_id.sudo().depreciation_line_ids.filtered(lambda e: not e.journal_reference).unlink()
             move_lines = []
             move_lines.append({
                 'name': self.asset_asset_id.name,
@@ -223,37 +225,84 @@ class AssetSellDispose(models.Model):
                 'accumulative_depreciation': previous_amount,
                 'salvage_value': salvage_value,
             })
-        for depreciation in modify_vals:
-            line = self.env['asset.depreciation.line'].create(depreciation)
-            self.asset_asset_id.depreciation_line_ids = [fields.Command.link(line.id)]
-            move_lines = []
-            move_lines.append({
-                'name': self.asset_asset_id.name,
-                'account_id': self.asset_asset_id.asset_depreciation_account_id.id,
-                'credit': depreciation['depreciation_expense'],
-                'debit': 0.0,
-                'currency_id': self.asset_asset_id.currency_id.id,
-            })
-            move_lines.append({
-                'name': self.asset_asset_id.name,
-                'account_id': self.asset_asset_id.asset_depreciation_account_id.id,
-                'credit': 0.0,
-                'debit': depreciation['depreciation_expense'],
-                'currency_id': self.asset_asset_id.currency_id.id,
-            })
-            vals = {
-                'move_type': 'entry',
-                'asset_asset_id': self.asset_asset_id.id,
-                'ref': _("%s: Depreciation", self.asset_asset_id.name),
-                'date': depreciation['date'],
-                'invoice_date_due': depreciation['date'],
-                'journal_id': self.asset_asset_id.asset_journal_id.id,
-                'auto_post': 'at_date',
-                'currency_id': self.asset_asset_id.currency_id.id,
-                'depreciation_line_id': line.id,
-                'line_ids': [fields.Command.create(lines) for lines in move_lines],
-            }
-            journal_items = self.asset_asset_id.depreciated_entry_ids.create(vals)
-            past_journals = journal_items.filtered(lambda x: x.invoice_date_due <= self.date)
-            if past_journals:
-                past_journals._post()
+
+        if self.disposal_type == 'dispose':
+            for depreciation in modify_vals:
+                line = self.env['asset.depreciation.line'].sudo().create(depreciation)
+                self.asset_asset_id.depreciation_line_ids = [fields.Command.link(line.id)]
+                move_lines = []
+                move_lines.append({
+                    'name': self.asset_asset_id.name,
+                    'account_id': self.asset_asset_id.asset_depreciation_account_id.id,
+                    'credit': depreciation['depreciation_expense'],
+                    'debit': 0.0,
+                    'currency_id': self.asset_asset_id.currency_id.id,
+                })
+                move_lines.append({
+                    'name': self.asset_asset_id.name,
+                    'account_id': self.asset_asset_id.asset_depreciation_account_id.id,
+                    'credit': 0.0,
+                    'debit': depreciation['depreciation_expense'],
+                    'currency_id': self.asset_asset_id.currency_id.id,
+                })
+                vals = {
+                    'move_type': 'entry',
+                    'asset_asset_id': self.asset_asset_id.id,
+                    'ref': _("%s: Depreciation", self.asset_asset_id.name),
+                    'date': depreciation['date'],
+                    'invoice_date_due': depreciation['date'],
+                    'journal_id': self.asset_asset_id.asset_journal_id.id,
+                    'auto_post': 'at_date',
+                    'currency_id': self.asset_asset_id.currency_id.id,
+                    'depreciation_line_id': line.id,
+                    'line_ids': [fields.Command.create(lines) for lines in move_lines],
+                }
+                journal_items = self.asset_asset_id.depreciated_entry_ids.create(vals)
+                past_journals = journal_items.filtered(lambda x: x.invoice_date_due <= self.date)
+                if past_journals:
+                    past_journals._post()
+        if self.disposal_type in ('lost','scrap'):
+            if self.disposal_type == 'scrap':
+                self.env['asset.scrap'].sudo().create({
+                    'asset_id': self.asset_asset_id.id,
+                    'status': 'scraped'
+                })
+            for depreciation in modify_vals:
+                if depreciation['depreciation_expense'] > 0:
+                    if depreciation['salvage_value'] == 0:
+                        depreciation['journal_reference'] = '/'
+                    if self.asset_asset_id.is_entry:
+                        line = self.env['asset.depreciation.line'].sudo().create(depreciation)
+                        self.asset_asset_id.sudo().depreciation_line_ids = [fields.Command.link(line.id)]
+                        if depreciation['salvage_value'] != 0:
+                            move_lines = []
+                            move_lines.append({
+                                'name': self.asset_asset_id.name,
+                                'account_id': self.asset_asset_id.sudo().asset_depreciation_account_id.id,
+                                'credit': depreciation['depreciation_expense'],
+                                'debit': 0.0,
+                                'currency_id': self.asset_asset_id.currency_id.id,
+                            })
+                            move_lines.append({
+                                'name': self.asset_asset_id.name,
+                                'account_id': self.asset_asset_id.asset_expense_account_id.id,
+                                'credit': 0.0,
+                                'debit': depreciation['depreciation_expense'],
+                                'currency_id': self.asset_asset_id.currency_id.id,
+                            })
+                            vals = {
+                                'move_type': 'entry',
+                                'asset_asset_id': self.asset_asset_id.id,
+                                'ref': _("%s: Depreciation", self.asset_asset_id.name),
+                                'date': depreciation['date'],
+                                'invoice_date_due': depreciation['date'],
+                                'journal_id': self.asset_asset_id.asset_journal_id.id,
+                                'auto_post': 'at_date',
+                                'currency_id': self.asset_asset_id.currency_id.id,
+                                'depreciation_line_id': line.id,
+                                'line_ids': [fields.Command.create(lines) for lines in move_lines],
+                            }
+                            journal_items = self.asset_asset_id.depreciated_entry_ids.create(vals)
+                            past_journals = journal_items.filtered(lambda x: x.invoice_date_due <= self.date)
+                            if past_journals:
+                                past_journals._post()

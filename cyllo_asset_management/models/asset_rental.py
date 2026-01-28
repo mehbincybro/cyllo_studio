@@ -35,7 +35,8 @@ class AssetRental(models.Model):
     _inherit = ['mail.thread']
 
     asset_id = fields.Many2one('asset.asset', required=True)
-    start_date = fields.Date(string="Period", required=True, tracking=True, help="Select an Asset before setting the period. Start and End Dates must be after the Asset's Purchase Date, and End Date must be later than Start Date.")
+    start_date = fields.Date(string="Period", required=True, tracking=True,
+                             help="Select an Asset before setting the period. Start and End Dates must be after the Asset's Purchase Date, and End Date must be later than Start Date.")
     end_date = fields.Date(string="End", required=True, tracking=True)
     customer_id = fields.Many2one('res.partner', required=True, tracking=True)
     email = fields.Char(related='customer_id.email')
@@ -59,6 +60,17 @@ class AssetRental(models.Model):
     is_return = fields.Boolean(copy=False)
     is_invoice = fields.Boolean(copy=False)
     active = fields.Boolean(default=True)
+    asset_ids = fields.Many2many('asset.asset', compute="_compute_asset_ids")
+
+    @api.depends('company_id')
+    def _compute_asset_ids(self):
+        for record in self:
+            if (self.env.user.has_group('account.group_account_manager') or
+                    self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_admin')):
+                record.asset_ids = self.env['asset.asset'].search([])
+            elif self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_users'):
+                record.asset_ids = self.env['asset.reservation'].search([('employee_id.user_id', '=', self.env.user.id),
+                                                                         ('status', '=', 'reserve')]).mapped('asset_id')
 
     @api.depends('payment_terms')
     def _compute_rent_amount(self):
@@ -81,13 +93,18 @@ class AssetRental(models.Model):
     @api.onchange('start_date', 'end_date')
     def _onchange_lease_date(self):
         """Function for checking the start and end date"""
-        purchase_date = self.asset_id.asset_item_id.purchase_date
+        purchase_date = self.sudo().asset_id.date
         if self.start_date and self.end_date:
             if self.end_date < self.start_date:
                 raise UserError(_('The End Date is greater than the Start Date'))
             elif (self.start_date < purchase_date) or (self.end_date < purchase_date):
                 raise UserError(
                     _(f'The Asset id Purchased on {purchase_date}.The Start Date and End Date should be greater than the Purchase Date'))
+            if self.reservation_id:
+                reserved_date = self.reservation_id.start_date
+                if self.start_date < reserved_date:
+                    raise UserError(
+                        _(f'The Asset is Reserved on {reserved_date}. The Start Date should be greater than the Reserved start Date'))
 
     def unlink(self):
         """Function the unlink the lease records"""
@@ -100,13 +117,14 @@ class AssetRental(models.Model):
 
     def action_create_rental(self):
         """Button action for create rental for the assets"""
-        if not self.asset_id.is_rental_asset:
+        asset_id=self.sudo().asset_id
+        if not asset_id.is_rental_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
-        elif self.asset_id.is_rental:
+        elif asset_id.is_rental:
             raise UserError(_('You cannot complete this operation, The related asset is already taken for the Rent.'))
-        repair_asset = self.env['account.asset.repair'].search(
+        repair_asset = self.sudo().env['account.asset.repair'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'repairing'])])
-        maintenance_asset = self.env['account.asset.maintenance'].search(
+        maintenance_asset = self.sudo().env['account.asset.maintenance'].search(
             [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'ongoing'])])
         if (maintenance_asset and self.start_date <= maintenance_asset.scheduled_date) or (
                 maintenance_asset and self.end_date <= maintenance_asset.scheduled_date) or (
@@ -118,7 +136,7 @@ class AssetRental(models.Model):
         else:
             self.status = 'rent'
             context = {
-                'asset': self.asset_id.name,
+                'asset': asset_id.name,
                 'start_date': self.start_date,
                 'end_date': self.end_date,
                 'customer': self.customer_id.name
@@ -130,9 +148,11 @@ class AssetRental(models.Model):
                 'email_to': self.email
             }
             template.with_context(**context).send_mail(res_id=self.id, email_values=email_values, force_send=True)
-            self.asset_id.is_rental = True
+            asset_id.is_rental = True
+            asset_id.status = 'rented'
             if self.reservation_id:
-                self.asset_id.is_reserve = False
+                asset_id.is_reserve = True
+                asset_id.status = 'reserved'
                 self.reservation_id.write({
                     'status': 'rent'})
                 # Generate Invoice
@@ -220,27 +240,43 @@ class AssetRental(models.Model):
 
     def action_return_asset(self):
         """Button action for returning the assets"""
+        asset_id=self.sudo().asset_id
         invoice = self.env['account.move'].search([('rent_id', '=', self.id), ('payment_state', '!=', 'paid')])
         if invoice:
             raise UserError(
                 _('You cannot complete this operation, The invoices amount is not paid'))
         else:
             self.is_return = True
+            asset_id.is_rental = False
             self.status = 'return'
-            self.asset_id.is_rental = False
             if self.reservation_id:
-                self.asset_id.is_reserve = False
-                self.reservation_id.write({
-                    'status': 'cancel'})
+                if self.reservation_id.end_date > fields.date.today():
+                    asset_id.is_reserve = True
+                    self.reservation_id.write({
+                        'status': 'reserve'})
+                else:
+                    asset_id.is_reserve = False
+                    self.reservation_id.write({
+                        'status': 'cancel'})
+            if asset_id.is_reserve == True:
+                asset_id.status = 'reserved'
+            elif asset_id.is_confirm == True:
+                asset_id.status = 'running'
+            else:
+                asset_id.status = 'draft'
 
     def action_cancel(self):
         """Button action for cancel the rental assets"""
         self.status = 'cancel'
         self.asset_id.is_rental = False
+        if self.reservation_id:
+            self.asset_id.is_reserve = False
+            self.reservation_id.write({
+                'status': 'cancel'})
 
     def action_reset_to_draft(self):
         """Button action for reset the rental assets to draft state"""
-        if self.asset_id.status in ('sell', 'disposed', 'cancel', 'lost'):
+        if self.asset_id.status in ('sell', 'disposed', 'cancel', 'lost', 'rented'):
             raise UserError(_(f'You cannot reset to draft.The related asset is in {self.asset_id.status} state.'))
         self.status = 'draft'
         self.is_return = False

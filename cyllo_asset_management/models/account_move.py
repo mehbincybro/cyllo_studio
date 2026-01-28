@@ -103,10 +103,10 @@ class AccountMove(models.Model):
         post_move = super()._post(soft)
         post_move.create_account_asset_moves()
         for move in self:
-            if not move.depreciation_line_id.is_depreciated:
+            if not move.sudo().depreciation_line_id.is_depreciated:
                 move.asset_asset_id.salvage_value -= move.amount_total_signed
                 move.asset_asset_id.parent_id.salvage_value -= move.amount_total_signed
-            depreciation_line = move.asset_asset_id.depreciation_line_ids.filtered(
+            depreciation_line = move.asset_asset_id.sudo().depreciation_line_ids.filtered(
                 lambda d: d.id == move.depreciation_line_id.id)
             depreciation_line.write({
                 'journal_reference': move.name

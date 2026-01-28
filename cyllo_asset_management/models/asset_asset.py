@@ -48,7 +48,7 @@ class AssetAsset(models.Model):
                                   help='Currency of company')
     status = fields.Selection(
         [('draft', 'Draft'), ('running', 'Running'), ('reserved', 'Reserved'), ('leased', 'Leased'),
-         ('assigned', 'Assigned'),
+         ('assigned', 'Assigned'), ('rented', 'Rented'),
          ('lost', 'Lost'), ('repair', 'Repairing'), ('maintenance', 'Maintenance'),
          ('sell', 'Sell'), ('disposed', 'Dispose'), ('cancel', 'Cancelled')],
         default="draft", copy=False, tracking=True)
@@ -100,6 +100,8 @@ class AssetAsset(models.Model):
     asset_expense_account_id = fields.Many2one('account.account',
                                                domain="[('account_type', '=', 'expense')]",
                                                related='asset_item_id.asset_expense_account_id', readonly=False)
+    asset_loss_account_id = fields.Many2one('account.account', required=True,
+                                            related='asset_item_id.asset_loss_account_id', readonly=False)
     asset_journal_id = fields.Many2one('account.journal',
                                        related='asset_item_id.asset_journal_id', readonly=False)
     depreciated_entry_ids = fields.One2many('account.move', 'asset_asset_id', string='Depreciation Lines')
@@ -117,6 +119,12 @@ class AssetAsset(models.Model):
     total_depreciation_days = fields.Integer()
     pre_salvage_value = fields.Float()
     reference_note = fields.Char()
+    under_warranty = fields.Boolean(string="Warranty Included")
+    warranty_period_type = fields.Selection(string="Period",
+                                            selection=[('days', 'Days'), ('months', 'Months'),
+                                                       ('years', 'Year')], required=True)
+    warranty_period = fields.Integer()
+    warranty_end_date = fields.Date(string="Warranty Upto", compute="_compute_warranty_end_date")
 
     @api.depends('modified_asset_ids')
     def _compute_modified_count(self):
@@ -134,7 +142,8 @@ class AssetAsset(models.Model):
         """Check original value"""
         if self.original_value and self.original_value <= 0:
             self.original_value = abs(self.original_value)
-        elif self.original_value and self.salvage_value and round(self.salvage_value, 2) > round(self.original_value, 2):
+        elif self.original_value and self.salvage_value and round(self.salvage_value, 2) > round(self.original_value,
+                                                                                                 2):
             raise UserError(_('The Salvage Value should not be Greater than the Original Value.'))
 
     @api.onchange('asset_item_id')
@@ -160,7 +169,7 @@ class AssetAsset(models.Model):
     @api.onchange('depreciation_date')
     def _onchange_depreciation_date(self):
         """Change depreciating date"""
-        purchase_date = self.asset_item_id.purchase_date
+        purchase_date = self.date
         if self.depreciation_date and purchase_date and self.depreciation_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}.The Depreciation Date should be greater than the Purchase Date'))
@@ -168,7 +177,7 @@ class AssetAsset(models.Model):
     @api.onchange('prorata_date')
     def _onchange_prorata_date(self):
         """Change prorata date"""
-        purchase_date = self.asset_item_id.purchase_date
+        purchase_date = self.date
         if self.prorata_date and purchase_date and self.prorata_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}.The Prorata Date should be greater than the Purchase Date'))
@@ -218,7 +227,7 @@ class AssetAsset(models.Model):
 
     def action_reserve_assets(self):
         """Action reserve assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -240,7 +249,7 @@ class AssetAsset(models.Model):
 
     def action_assign_assets(self):
         """Action assign assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -265,7 +274,7 @@ class AssetAsset(models.Model):
 
     def action_lease_assets(self):
         """Action lease assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
         if not self.is_lease_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a lease asset.'))
         elif self.status in states:
@@ -292,7 +301,7 @@ class AssetAsset(models.Model):
 
     def action_rent_assets(self):
         """Action rent assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
         if not self.is_rental_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
         elif self.status in states:
@@ -319,7 +328,7 @@ class AssetAsset(models.Model):
 
     def action_repair_assets(self):
         """Action repair assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -357,7 +366,7 @@ class AssetAsset(models.Model):
 
     def action_maintenance_assets(self):
         """Action maintenance assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.is_repair or self.is_maintenance:
@@ -394,7 +403,7 @@ class AssetAsset(models.Model):
 
     def action_lost_missing_assets(self):
         """Action lost missing assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
@@ -410,11 +419,12 @@ class AssetAsset(models.Model):
             return {
                 'name': _('Lost'),
                 'view_mode': 'form',
-                'res_model': 'asset.lost',
+                'res_model': 'asset.sell.dispose',
                 'type': 'ir.actions.act_window',
                 'context': {
                     'default_asset_asset_id': self.id,
-                    'default_is_posted': posted
+                    'default_asset_action': 'dispose',
+                    'default_disposal_type': 'lost'
                 },
                 'target': 'new'
             }
@@ -423,7 +433,8 @@ class AssetAsset(models.Model):
 
     def action_sell_dispose_assets(self):
         """Action sell dispose assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'assigned', 'reserved', 'repair',
+                  'maintenance']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
@@ -450,7 +461,8 @@ class AssetAsset(models.Model):
 
     def action_view_reservation(self):
         """Action view reservation"""
-        reserved_asset = self.env['asset.reservation'].search([('asset_id', '=', self.id), ('status', '=', 'reserve')])
+        reserved_asset = self.env['asset.reservation'].search([('asset_id', '=', self.id),
+                                                               ('status', 'not in', ['draft', 'cancel'])])
         return {
             'name': 'Reservation',
             'view_mode': 'form',
@@ -613,7 +625,7 @@ class AssetAsset(models.Model):
     def action_revaluate_asset(self):
         """Button action for the revaluating the asset"""
         previous_salvage = sum(self.depreciation_line_ids.mapped('depreciation_expense'))
-        if self.salvage_value > previous_salvage :
+        if self.salvage_value > previous_salvage:
             self.depreciation_line_ids.unlink()
             self.depreciated_entry_ids.unlink()
             self.action_compute_depreciation()
@@ -1204,3 +1216,16 @@ class AssetAsset(models.Model):
         total_value += sum(
             self.modified_asset_ids.filtered(lambda a: a.status == 'running').mapped('salvage_value'))
         self.salvage_value = total_value
+
+    @api.depends('warranty_period', 'warranty_period_type')
+    def _compute_warranty_end_date(self):
+        for record in self:
+            if record.warranty_period and record.warranty_period_type:
+                if record.warranty_period_type == 'days':
+                    record.warranty_end_date = record.date + relativedelta(days=record.warranty_period)
+                if record.warranty_period_type == 'months':
+                    record.warranty_end_date = record.date + relativedelta(months=record.warranty_period)
+                if record.warranty_period_type == 'years':
+                    record.warranty_end_date = record.date + relativedelta(years=record.warranty_period)
+            else:
+                record.warranty_end_date = fields.Date.today()

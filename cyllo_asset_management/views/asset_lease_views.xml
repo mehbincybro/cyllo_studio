@@ -70,7 +70,8 @@
                     <button type="object" name="action_return_asset" string="Return Asset" class="oe_highlight"
                             invisible="status != 'lease'"/>
                     <button type="object" name="action_reset_to_draft" string="Reset to Draft" class="btn-secondary"
-                            invisible="status != 'cancel'"/>
+                            invisible="status != 'cancel'"
+                            groups="account.group_account_manager,cyllo_asset_management.group_cyllo_asset_admin"/>
                     <field name="status" widget="statusbar" statusbar_visible="draft,lease"/>
                 </header>
                 <sheet>
@@ -83,8 +84,11 @@
                     </div>
                     <group>
                         <group>
+                            <field name="asset_ids" invisible="True"/>
                             <field name="asset_id"
-                                   domain="[('is_lease','=', False), ('is_assign','=', False), ('is_rental','=', False), ('is_lease_asset','=', True), ('status', 'not in', ('sell', 'disposed', 'cancel', 'lost'))]"/>
+                                   domain="[('is_lease','=', False), ('is_assign','=', False), ('is_rental','=', False),
+                                    ('is_lease_asset','=', True), ('id', 'in', asset_ids),
+                                    ('status', 'not in', ('sell', 'disposed', 'cancel', 'lost'))]"/>
                             <field name="customer_id" readonly="status != 'draft'"/>
                             <field name="email" readonly="status != 'draft'"/>
                         </group>

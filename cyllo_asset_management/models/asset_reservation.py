@@ -48,7 +48,7 @@ class AssetReservation(models.Model):
     @api.onchange('start_date', 'end_date')
     def _onchange_reservation_date(self):
         """Function for checking starting and ending date"""
-        purchase_date = self.asset_id.asset_item_id.purchase_date
+        purchase_date = self.asset_id.date
         if self.start_date and self.end_date and purchase_date:
             if self.end_date < self.start_date:
                 raise UserError(_('The End Date should be greater than the Start Date'))
@@ -95,6 +95,7 @@ class AssetReservation(models.Model):
             }
             template.with_context(**context).send_mail(res_id=self.id, email_values=email_values, force_send=True)
             self.asset_id.is_reserve = True
+            self.asset_id.status = 'reserved'
             self.status = 'reserve'
             return {'type': 'ir.actions.act_window_close'}
 
@@ -109,7 +110,7 @@ class AssetReservation(models.Model):
             'context': {
                 'default_asset_id': self.asset_id.id,
                 'default_employee_id': self.employee_id.id,
-                'default_reservation_id': self.id
+                'default_reservation_id': self.id,
             },
             'target': 'new'
         }
@@ -138,7 +139,7 @@ class AssetReservation(models.Model):
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
         return {
             'name': _('Rental'),
-            'view_id': self.env.ref('cyllo_asset_management.view_asset_rental_form').id,
+            'view_id': self.env.ref('cyllo_asset_management.view_asset_rental_form2').id,
             'view_mode': 'form',
             'res_model': 'asset.rental',
             'type': 'ir.actions.act_window',
@@ -152,11 +153,16 @@ class AssetReservation(models.Model):
 
     def action_unreserve(self):
         """Button action for unreserving the assets"""
+        asset_id=self.sudo().asset_id
         self.status = 'cancel'
-        self.asset_id.is_reserve = False
+        asset_id.is_reserve = False
+        if asset_id.is_confirm == True:
+            asset_id.status = 'running'
+        else:
+            asset_id.status = 'draft'
 
     def action_reset_to_draft(self):
         """Button action for reset the records to draft  state"""
-        if self.asset_id.status in ('sell', 'disposed', 'cancel', 'lost'):
+        if self.asset_id.status in ('sell', 'disposed', 'cancel', 'lost', 'rented'):
             raise UserError(_(f'You cannot reset to draft.The related asset is in {self.asset_id.status} state.'))
         self.status = 'draft'

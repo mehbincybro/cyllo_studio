@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+    <!--    Assets Manager Group-->
+    <record id="group_cyllo_asset_admin" model="res.groups">
+        <field name="name">Asset Manager</field>
+        <field name="category_id" ref="base.module_category_accounting_accounting"/>
+        <field name="implied_ids" eval="[Command.link(ref('account.group_account_invoice'))]"/>
+        <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
+    </record>
     <!--    Assets User Group-->
     <record id="group_cyllo_asset_users" model="res.groups">
         <field name="name">Asset Users</field>
@@ -120,11 +127,12 @@
     <record id="rule_asset_lease_user" model="ir.rule">
         <field name="name">Asset Lease User</field>
         <field name="model_id" ref="model_asset_lease"/>
-        <field name="domain_force">[('customer_id.user_id', '=', user.id)]</field>
+        <field name="domain_force">['|',('customer_id.user_id', '=', user.id),
+            ('reservation_id.employee_id.user_id', '=', user.id)]</field>
         <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
         <field name="perm_read" eval="True"/>
-        <field name="perm_write" eval="False"/>
-        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="False"/>
     </record>
     <!--Record Rule  for Admin on Asset Rental-->
@@ -138,11 +146,12 @@
     <record id="rule_asset_rental_user" model="ir.rule">
         <field name="name">Asset Rental User</field>
         <field name="model_id" ref="model_asset_rental"/>
-        <field name="domain_force">[('customer_id.user_id', '=', user.id)]</field>
+        <field name="domain_force">['|',('customer_id.user_id', '=', user.id),
+            ('reservation_id.employee_id.user_id', '=', user.id)]</field>
         <field name="groups" eval="[Command.link(ref('cyllo_asset_management.group_cyllo_asset_users'))]"/>
         <field name="perm_read" eval="True"/>
-        <field name="perm_write" eval="False"/>
-        <field name="perm_create" eval="False"/>
+        <field name="perm_write" eval="True"/>
+        <field name="perm_create" eval="True"/>
         <field name="perm_unlink" eval="False"/>
     </record>
 </odoo>

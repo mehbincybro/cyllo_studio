@@ -32,7 +32,8 @@
                 <filter name="scrap" string="Scarp" domain="[('status', '=', 'scrap')]"/>
                 <group expand="0" string="Group By...">
                     <filter string="Status" name="status" domain="[]" context="{'group_by':'status'}"/>
-                    <filter string="Responsible User" name="responsible_user" domain="[]" context="{'group_by':'user_id'}"/>
+                    <filter string="Responsible User" name="responsible_user" domain="[]"
+                            context="{'group_by':'user_id'}"/>
                     <filter string="Employee" name="employee" domain="[]" context="{'group_by':'employee_id'}"/>
                 </group>
             </search>
@@ -73,12 +74,20 @@
                             <field name="asset_item_id" readonly="status not in ('new, confirm')"/>
                             <field name="asset_type_id" readonly="status not in ('new, confirm')"/>
                             <field name="company_id" readonly="status not in ('new, confirm')"/>
+                            <label for="under_warranty" name="warranty_period" string="Under Warranty"/>
+                            <div class="o_row">
+                                <field name="under_warranty" style="width:25% !important;"/>
+                                <label for="warranty_percentage" name="warranty_percentage"
+                                       string="Deduction %" invisible="not under_warranty"/>
+                                <field name="warranty_percentage" invisible="not under_warranty"/>
+                            </div>
                         </group>
                         <group>
                             <field name="date" readonly="status not in ('new, confirm')"/>
                             <field name="employee_id" readonly="status not in ('new, confirm')"/>
                             <field name="department_id" readonly="status not in ('new, confirm')"/>
-                            <field name="user_id" readonly="status not in ('new, confirm')" options="{'no_create': True, 'no_create_edit': True}"/>
+                            <field name="user_id" readonly="status not in ('new, confirm')"
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
                             <field name="scheduled_date" readonly="status not in ('new, confirm') or not asset_id"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="is_scrap" invisible="1"/>
