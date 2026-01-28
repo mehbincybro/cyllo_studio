@@ -74,13 +74,6 @@
                             <field name="asset_item_id" readonly="status not in ('new, confirm')"/>
                             <field name="asset_type_id" readonly="status not in ('new, confirm')"/>
                             <field name="company_id" readonly="status not in ('new, confirm')"/>
-                            <label for="under_warranty" name="warranty_period" string="Under Warranty"/>
-                            <div class="o_row">
-                                <field name="under_warranty" style="width:25% !important;"/>
-                                <label for="warranty_percentage" name="warranty_percentage"
-                                       string="Deduction %" invisible="not under_warranty"/>
-                                <field name="warranty_percentage" invisible="not under_warranty"/>
-                            </div>
                         </group>
                         <group>
                             <field name="date" readonly="status not in ('new, confirm')"/>

@@ -122,9 +122,15 @@ class AssetAsset(models.Model):
     under_warranty = fields.Boolean(string="Warranty Included")
     warranty_period_type = fields.Selection(string="Period",
                                             selection=[('days', 'Days'), ('months', 'Months'),
-                                                       ('years', 'Year')], required=True)
+                                                       ('years', 'Year')], default="days")
     warranty_period = fields.Integer()
     warranty_end_date = fields.Date(string="Warranty Upto", compute="_compute_warranty_end_date")
+    under_insurance = fields.Boolean(string="Has Insurance")
+    insurance_provider = fields.Text(string="Insurance Provider")
+    insurance_type = fields.Text(string="Insurance Type")
+    insurance_number = fields.Char(string="Insurance ID")
+    insurance_start_date = fields.Date()
+    insurance_end_date = fields.Date()
 
     @api.depends('modified_asset_ids')
     def _compute_modified_count(self):
@@ -145,6 +151,12 @@ class AssetAsset(models.Model):
         elif self.original_value and self.salvage_value and round(self.salvage_value, 2) > round(self.original_value,
                                                                                                  2):
             raise UserError(_('The Salvage Value should not be Greater than the Original Value.'))
+
+    @api.constrains('warranty_period')
+    def _check_original_value(self):
+        """Check warranty period positive number"""
+        if self.warranty_period < 0:
+            raise UserError(_('The Warranty period should not be a negative Value.'))
 
     @api.onchange('asset_item_id')
     def _onchange_asset_item_id(self):
@@ -181,6 +193,13 @@ class AssetAsset(models.Model):
         if self.prorata_date and purchase_date and self.prorata_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}.The Prorata Date should be greater than the Purchase Date'))
+
+    @api.onchange('insurance_start_date')
+    def _onchange_insurance_start_date(self):
+        """Function for checking the invoice start date"""
+        if self.insurance_start_date and self.insurance_start_date < self.date:
+            raise UserError(
+                _(f'The Asset is Purchased on {self.date}. The insurance start date should be greater than the Purchase Date'))
 
     @api.onchange('salvage_value')
     def _onchange_salvage_value(self):
