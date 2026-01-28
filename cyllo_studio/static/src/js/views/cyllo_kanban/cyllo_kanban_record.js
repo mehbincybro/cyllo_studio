@@ -437,49 +437,111 @@ export class CylloKanbanRecord extends KanbanRecord {
      * Opens the RibbonDialog with all ribbons found within the record or root container.
      * @param {Event} ev - The click event object.
      */
-    handleRibbonClick(ev) {
-        ev.stopPropagation();
-        const ribbonEl = ev.currentTarget;
-        const kanbanRecord = ribbonEl.closest(
-            '.oe_kanban_record, .o_kanban_record, [data-id], .kanban-record'
-        );
-        let allRibbons = [];
-        if (kanbanRecord) {
-            // Ribbons within the specific kanban record
-            allRibbons = kanbanRecord.querySelectorAll('[data-ribbon], .ribbon');
-        } else {
-            // Fallback: try the component's root element
-            const rootElement =
-                this.rootRef?.el ||
-                this.owl?.bdom?.el ||
-                ribbonEl.closest('.cy-studio-kanban-border')?.parentElement;
-            if (rootElement) {
-                allRibbons = rootElement.querySelectorAll(
-                    '[data-ribbon], .ribbon, [cy-xpath*="ribbon"]'
-                );
-            }
-        }
-        if (allRibbons.length) {
-            this.openRibbonDialog(Array.from(allRibbons));
+//    handleRibbonClick(ev) {
+//        ev.stopPropagation(); // Prevent card opening
+//        const ribbonEl = ev.currentTarget;
+//        const kanbanRecord = ribbonEl.closest(
+//            '.oe_kanban_record, .o_kanban_record, [data-id], .kanban-record'
+//        );
+//        let allRibbons = [];
+//        if (kanbanRecord) {
+//            // Ribbons within the specific kanban record
+//            allRibbons = kanbanRecord.querySelectorAll('[data-ribbon], .ribbon');
+//        } else {
+//            // Fallback: try the component's root element
+//            const rootElement =
+//                this.rootRef?.el ||
+//                this.owl?.bdom?.el ||
+//                ribbonEl.closest('.cy-studio-kanban-border')?.parentElement;
+//            if (rootElement) {
+//                allRibbons = rootElement.querySelectorAll(
+//                    '[data-ribbon], .ribbon, [cy-xpath*="ribbon"]'
+//                );
+//            }
+//        }
+//        if (allRibbons.length) {
+//            this.openRibbonDialog(Array.from(allRibbons));
+//        }
+//    }
+//
+//    /**
+//     * Opens a RibbonDialog for the provided ribbon elements.
+//     * @param {HTMLElement[]} ribbonElements - List of ribbon DOM elements to edit.
+//     */
+//    openRibbonDialog(ribbonElements) {
+//    this.dialogService.add(RibbonDialog, {
+//        fields: this.kanbanFields,
+//        ribbonElement: ribbonElements,
+//        viewDetails: {
+//            viewId: this.env?.config?.viewId,
+//            viewType: this.env?.config?.viewType || this.props.viewType || "kanban",
+//            model: this.action.currentController.props.resModel,
+//            active_fields: this.props.record.fields,
+//        },
+//    })
+//    }
+
+
+
+/**
+ * Handles click events on a ribbon element in the Kanban card.
+ * Opens the RibbonDialog with all ribbons found within the record or root container.
+ * @param {Event} ev - The click event object.
+ */
+handleRibbonClick(ev) {
+    ev.stopPropagation(); // Prevent card opening
+    const ribbonEl = ev.currentTarget;
+    const kanbanRecord = ribbonEl.closest(
+        '.oe_kanban_record, .o_kanban_record, [data-id], .kanban-record'
+    );
+    let allRibbons = [];
+
+    if (kanbanRecord) {
+        // Ribbons within the specific kanban record
+        allRibbons = kanbanRecord.querySelectorAll('[data-ribbon], .ribbon[cy-xpath]');
+    } else {
+        // Fallback: try the component's root element
+        const rootElement =
+            this.rootRef?.el ||
+            this.owl?.bdom?.el ||
+            ribbonEl.closest('.cy-studio-kanban-border')?.parentElement;
+        if (rootElement) {
+            allRibbons = rootElement.querySelectorAll(
+                '[data-ribbon], .ribbon[cy-xpath]'
+            );
         }
     }
 
-    /**
-     * Opens a RibbonDialog for the provided ribbon elements.
-     * @param {HTMLElement[]} ribbonElements - List of ribbon DOM elements to edit.
-     */
-    openRibbonDialog(ribbonElements) {
+    if (allRibbons.length) {
+        this.openRibbonDialog(Array.from(allRibbons));
+    }
+}
+
+/**
+ * Opens a RibbonDialog for the provided ribbon elements.
+ * Works for both Kanban and Form views.
+ * @param {HTMLElement[]} ribbonElements - List of ribbon DOM elements to edit.
+ */
+openRibbonDialog(ribbonElements) {
+    // Build fields list
+    const fields = [];
+    if (this.props.list?.activeFields) {
+        for (const [fieldName, field] of Object.entries(this.props.list.activeFields)) {
+            fields.push({ value: fieldName, label: field.string });
+        }
+    }
+
     this.dialogService.add(RibbonDialog, {
-        fields: this.kanbanFields,
+        fields: fields,
         ribbonElement: ribbonElements,
         viewDetails: {
             viewId: this.env?.config?.viewId,
-            viewType: this.env?.config?.viewType || this.props.viewType || "kanban",
+            viewType: this.env?.config?.viewType || 'kanban',
             model: this.action.currentController.props.resModel,
-            active_fields: this.props.record.fields,
+            active_fields: this.props.list?.activeFields || this.props.record?.fields,
         },
-    })
-    }
+    });
+}
 
     /**
      * Handles a click on a span (text) element inside the Kanban card.

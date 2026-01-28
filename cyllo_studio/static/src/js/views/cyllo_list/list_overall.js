@@ -46,13 +46,27 @@ import {
 import {
 	validateField
 } from "@cyllo_studio/js/actions/utils";
+import {
+    useService
+} from "@web/core/utils/hooks";
 
 export class ListOverall extends Component {
 	static template = "cyllo_studio.ListOverall";
 	setup() {
+	    this.rpc = useService("rpc");
         this.state = useState({
-            invisible : false
+            invisible : false,
         })
+		this.state.recordNameOptions = [];
+        this.state.currentRecName = null;
+        this.loadRecordNameData();
+         const model =
+         this.props?.viewInfo?.action?.res_model ||
+         this.props?.archInfo?.model ||
+         this.props?.resModel ||
+         this.props?.model ||
+         null;
+        this.state.isStudioModel = model && model.startsWith("x_");
 		onWillStart(() => {
             this.state.invisible =  sessionStorage.getItem('invisible');
 			const {
@@ -131,6 +145,56 @@ export class ListOverall extends Component {
 	get defaultSortValue() {
 		return this.props.mode.defaultOrder?.[0]?.name || null;
 	}
+
+    /**
+     * Loads available model fields and the currently configured display name.
+     * Updates `state.recordNameOptions` and `state.currentRecName`.
+     */
+    async loadRecordNameData() {
+    const model =
+        this.props?.viewInfo?.action?.res_model ||
+        this.props?.archInfo?.model ||
+        this.props?.resModel ||
+        this.props?.model ||
+        null;
+    console.log("model =", model);
+    if (!model) {
+        this.state.recordNameOptions = [];
+        this.state.currentRecName = "";
+        return;
+    }
+    const fields = await this.rpc("/cyllo_studio/get_model_fields", { model });
+    this.state.recordNameOptions = fields.map(f => ({
+        label: f.label,
+        value: f.name,
+    }));
+    const data = await this.rpc("/web/dataset/call_kw/ir.model/search_read", {
+        model: "ir.model",
+        method: "search_read",
+        args: [[["model", "=", model]], ["cy_display_field"]],
+        kwargs: {},
+    });
+    this.state.currentRecName = data?.[0]?.cy_display_field || "";
+    }
+
+     /**
+     * Saves the selected field as the display name for the model.
+     * Updates backend and reloads the view to reflect the change.
+     */
+    onRecordNameChange = async (newValue) => {
+      const model =
+        this.props?.viewInfo?.action?.res_model ||
+        this.props?.archInfo?.model ||
+        this.props?.resModel ||
+        this.props?.model ||
+        null;
+      await this.rpc("/cyllo_studio/set_display_name", {
+        model: model,
+        field: newValue,
+      });
+      this.state.currentRecName = newValue;
+      window.location.reload();
+    };
 
 	/**
      * Getter: Returns the default record insertion position.

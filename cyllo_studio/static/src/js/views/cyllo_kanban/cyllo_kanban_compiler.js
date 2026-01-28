@@ -94,9 +94,9 @@ export class CylloKanbanCompiler extends KanbanCompiler {
      */
     compileNode(node, params = {}, evalInvisible = true) {
         const invisible_session = sessionStorage.getItem('invisible');
-        if (invisible_session) {
+//        if (invisible_session) {
             evalInvisible = false;
-        }
+//        }
         let compiledNode = super.compileNode(node, params, evalInvisible);
         if (!compiledNode) {
             return compiledNode;
@@ -122,7 +122,7 @@ export class CylloKanbanCompiler extends KanbanCompiler {
             compiledNode.style = (compiledNode.getAttribute("style") || "") + "display:none;";
         }
         }
-        if (invisible_session && node.nodeType === 1) {
+        if (node.nodeType === 1) {
             const invisible = getModifier(node, "invisible");
 
             if (invisible && invisible !== "False" && invisible !== "0") {

@@ -25,6 +25,8 @@ from odoo import api, Command, models
 class IrModel(models.Model):
     _inherit = 'ir.model'
 
+    cy_display_field = fields.Char("Cyllo Display Field")
+
     def create_access_right(self, access_rights):
         """Create access rights for the model."""
         if access_rights:

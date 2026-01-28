@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, useState } from "@odoo/owl";
+import { Component, useState, onWillStart } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { ListOverall } from "@cyllo_studio/js/views/cyllo_list/list_overall";
 import { FormOverall } from "@cyllo_studio/js/views/cyllo_form/form_overall";
@@ -45,7 +45,15 @@ export class OverallView extends Component {
     this.notification = useService("effect");
     this.actionService = useService("action");
     this.state = useState({
-      viewType: "",
+      showInvisible: ""
+    });
+      onWillStart(() => {
+      const checked = !!sessionStorage.getItem("invisible") === "1";;
+      console.log("cheka",checked)
+      this.state.showInvisible = checked;
+      console.log("this.sa",this.state.showInvisible)
+      document.body.classList.toggle("cy-hide-invisible", !checked);
+      this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
     });
   }
 
@@ -53,18 +61,55 @@ export class OverallView extends Component {
    * Toggle display of invisible fields and reload the view.
    * @param {Event} ev - The checkbox change event.
    */
-  showInvisibleFields(ev) {
-    const checked = ev.target.checked;
-    if (checked) {
-        sessionStorage.setItem("invisible", true);
-    } else {
-        sessionStorage.removeItem("invisible");
-    }
-    // Mark that we need to re-enter edit after reload
-    sessionStorage.setItem("cyllo_auto_edit", "1");
+//  showInvisibleFields(ev) {
+//    const want = !!ev.target.checked;
+//    if (this.state.showInvisible === want){
+//     return;
+//    }
+//    this.state.showInvisible = want;
+//    if (want){
+//     sessionStorage.setItem("invisible", "1");
+//    }
+//    else{
+//     sessionStorage.removeItem("invisible");
+//    }
+//    document.body.classList.toggle("cy-hide-invisible", !want);
+//    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", want);
+//    this.actionService.doAction("studio_reload");
+//  }
 
-    window.location.reload();
-  }
+//showInvisibleFields(ev) {
+//    const checked = !!ev.target.checked;
+//this.state.showInvisible = checked;
+//
+//    if (checked) {
+//        sessionStorage.setItem("invisible", "1");
+//    } else {
+//        sessionStorage.removeItem("invisible");
+//    }
+//    document.body.classList.toggle("cy-hide-invisible", !checked);
+//
+//    try {
+//        this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+//    } catch (e) {
+//        // ignore
+//    }
+//}
+showInvisibleFields(ev) {
+    var checked = !!ev.target.checked;
+    this.state.showInvisible = checked;
+    if (checked) {
+
+//        this.actionService.doAction("studio_reload");
+        document.body.classList.add("cy-show-invisible");
+    } else {
+//        this.actionService.doAction("studio_reload");
+        sessionStorage.removeItem("invisible");
+        document.body.classList.remove("cy-show-invisible");
+    }
+    this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+}
+
 
   /**
    * Common properties passed to all overall view components.

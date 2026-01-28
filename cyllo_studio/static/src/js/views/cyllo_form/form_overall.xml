@@ -3,18 +3,41 @@
     <t t-name="cyllo_studio.FormOverall">
         <div class="form_overall_container">
             <div>
+                <t t-if="state.isStudioModel">
+                    <div class="components-container  m-2">
+                        <label>Display Name</label>
+                    </div>
+                    <div class="dropdown-checkbox-container" style="margin: 9px 12px 0 17px;">
+                        <div class="cy-studio-custom-dropdown">
+                            <CylloStudioDropdown
+                                    t-props="{
+                                        options: state.recordNameOptions,
+                                        defaultValue: state.currentRecName,
+                                        onChange: onRecordNameChange,
+                                        searchable: true,
+                                        placeholder: 'Select field'
+                                    }"/>
+                        </div>
+                    </div>
+                </t>
+
                 <div class="components-container  m-2">
                     <label>Components</label>
                 </div>
                 <div style="margin-left: 18px;">
                     <label class="components-title" style="font-size: 15px;">Columns</label>
                     <div class="cy-studio-columns" id="cyComponents">
-                        <div class="cy-components-column column-1" t-att-style="props.sheet ? 'pointer-events: none; opacity: 0.5;' : ''">
+                        <div class="cy-components-column column-1"
+                             t-att-style="props.sheet ? 'pointer-events: none; opacity: 0.5;' : ''">
                             <div class="cy-components-span">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="38px" viewBox="0 0 512 512" fill="none">
-                                    <rect x="79" y="124" width="354" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="79" y="220" width="354" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="79" y="316" width="354" height="72" rx="6" stroke="#000000" stroke-width="8"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="38px" viewBox="0 0 512 512"
+                                     fill="none">
+                                    <rect x="79" y="124" width="354" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="79" y="220" width="354" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="79" y="316" width="354" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
                                 </svg>
                             </div>
                             <div class="cy-components-text">Single</div>
@@ -79,6 +102,54 @@
                                 </div>
                                 <div class="cy-components-text">Tree</div>
                             </div>
+<!--                              <div class="cy-components-column field">-->
+<!--                                <div class="cy-components-span">-->
+<!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
+<!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
+<!--                                         viewBox="0 0 24 24">-->
+<!--                                        <path d="M10 3.75a.75.75 0 1 0 0-1.5H6a.75.75 0 0 0 0 1.5h1.25v2.5H4A2.75 2.75 0 0 0 1.25 9v6A2.75 2.75 0 0 0 4 17.75h3.25v2.5H6a.75.75 0 1 0 0 1.5h4a.75.75 0 1 0 0-1.5H8.75V3.75zm-2.75 12.5H4A1.25 1.25 0 0 1 2.75 15V9A1.25 1.25 0 0 1 4 7.75h3.25zM22.75 9v6A2.75 2.75 0 0 1 20 17.75h-8a.75.75 0 1 1 0-1.5h8A1.25 1.25 0 0 0 21.25 15V9A1.25 1.25 0 0 0 20 7.75h-8a.75.75 0 1 1 0-1.5h8A2.75 2.75 0 0 1 22.75 9z"/>-->
+<!--                                    </svg>-->
+<!--                                </div>-->
+<!--                                <div class="cy-components-text">Kanban</div>-->
+<!--                            </div>-->
+
+                                 <div class="cy-components-column kanban">
+                                <div class="cy-components-span">
+<!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
+<!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
+<!--                                         viewBox="0 0 24 24">-->
+<!--                                        <path d="M21 21.75H3A1.752 1.752 0 0 1 1.25 20V4A1.752 1.752 0 0 1 3 2.25h18A1.752 1.752 0 0 1 22.75 4v16A1.752 1.752 0 0 1 21 21.75zm-18-18a.25.25 0 0 0-.25.25v16a.25.25 0 0 0 .25.25h18a.25.25 0 0 0 .25-.25V4a.25.25 0 0 0-.25-.25z"/>-->
+<!--                                        <path d="M18 16.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+<!--                                        <circle cx="6" cy="16" r="1"/>-->
+<!--                                        <path d="M18 12.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+<!--                                        <circle cx="6" cy="12" r="1"/>-->
+<!--                                        <path d="M18 8.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+<!--                                        <circle cx="6" cy="8" r="1"/>-->
+<!--                                    </svg>-->
+                                    <i class="ri-bar-chart-2-line" style="font-size:24px;"></i>
+                                </div>
+                                <div class="cy-components-text">Kanban</div>
+                            </div>
+                                  <div class="cy-components-column cy-studio-ribbon">
+                                <div class="cy-components-span">
+                                   	<svg width="30px" height="40px" viewBox="0 0 512 512" fill="none"
+                                 xmlns="http://www.w3.org/2000/svg">
+								<path d="M95 133H417C420.866 133 424 136.134 424 140V372C424 375.866 420.866 379 417 379H95C91.134 379 88 375.866 88 372V140C88 136.134 91.134 133 95 133Z"
+                                      stroke="black" stroke-width="26"/>
+                                <g clip-path="url(#clip0_7354_4862)">
+									<rect x="268.424" y="97.9961" width="275.267" height="60"
+                                          transform="rotate(45 268.424 97.9961)" fill="black"/>
+								</g>
+                                <defs>
+									<clipPath id="clip0_7354_4862">
+										<rect width="240" height="240" fill="white" transform="translate(197 120)"/>
+									</clipPath>
+								</defs>
+							</svg>
+                                </div>
+                                <div class="cy-components-text">Ribbon</div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
@@ -89,7 +160,9 @@
                 </div>
                 <div style="margin:10px;">
                     <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck" id="canCreate" type="checkbox" name="create" style="display: none;" t-model="props.mode.create" t-on-click="(ev)=> this.props.handleView('create',!props.mode.create)"/>
+                        <input class="checkbox-input ViewCheck" id="canCreate" type="checkbox" name="create"
+                               style="display: none;" t-model="props.mode.create"
+                               t-on-click="(ev)=> this.props.handleView('create',!props.mode.create)"/>
                         <label class="checkbox-label" for="canCreate">
                             <span class="checkbox-indicator">
                                 <svg width="12px" height="9px" viewbox="0 0 12 9">
@@ -100,7 +173,9 @@
                         </label>
                     </div>
                     <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck" type="checkbox" id="canEdit" name="edit" style="display: none;" t-model="props.mode.edit" t-on-click="(ev)=> this.props.handleView('edit',!props.mode.edit)"/>
+                        <input class="checkbox-input ViewCheck" type="checkbox" id="canEdit" name="edit"
+                               style="display: none;" t-model="props.mode.edit"
+                               t-on-click="(ev)=> this.props.handleView('edit',!props.mode.edit)"/>
                         <label class="checkbox-label" for="canEdit">
                             <span class="checkbox-indicator">
                                 <svg width="12px" height="9px" viewbox="0 0 12 9">
@@ -111,7 +186,9 @@
                         </label>
                     </div>
                     <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck d-none" type="checkbox" id="canDelete" name="delete" style="display: none;" t-model="props.mode.delete" t-on-click="(ev)=> this.props.handleView('delete',!props.mode.delete)"/>
+                        <input class="checkbox-input ViewCheck d-none" type="checkbox" id="canDelete" name="delete"
+                               style="display: none;" t-model="props.mode.delete"
+                               t-on-click="(ev)=> this.props.handleView('delete',!props.mode.delete)"/>
                         <label class="checkbox-label" for="canDelete">
                             <span class="checkbox-indicator">
                                 <svg width="12px" height="9px" viewbox="0 0 12 9">
@@ -122,7 +199,9 @@
                         </label>
                     </div>
                     <div class="checkbox-item">
-                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showInvisibleElements" name="checkbox4"  t-att-checked="state.invisible ? 'checked' : null"  t-on-click="(ev)=> this.props.showInvisibleFields(ev)"/>
+                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showInvisibleElements"
+                               name="checkbox4" t-att-checked="state.showInvisible"
+                               t-on-click="(ev)=>this.props.showInvisibleFields(ev)"/>
                         <label class="checkbox-label" for="showInvisibleElements">
                             <span class="checkbox-indicator">
                                 <svg width="12px" height="9px" viewbox="0 0 12 9">

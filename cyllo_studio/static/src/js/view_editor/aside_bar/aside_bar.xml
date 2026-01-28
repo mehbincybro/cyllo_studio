@@ -40,15 +40,22 @@
             <t t-if="state.type === 'KanbanFieldProperties'">
                 <KanbanFieldProperties t-props="KanbanFieldPropertiesProps"/>
             </t>
-            <t t-if="state.type === 'ribbon'">
+<!--            <t t-if="state.type === 'ribbon'">-->
+<!--                <RibbonProperties t-props="KanbanComponentProps"/>-->
+<!--            </t>-->
+            <t t-if="state.type === 'ribbon' and props.viewDetails.viewType === 'form'">
+                <RibbonProperties t-props="FormRibbonProps"/>
+            </t>
+
+            <t t-if="state.type === 'ribbon' and props.viewDetails.viewType === 'kanban'">
                 <RibbonProperties t-props="KanbanComponentProps"/>
             </t>
             <t t-if="state.type === 'button'">
                 <ButtonProperties t-props="KanbanComponentProps"/>
             </t>
-            <t t-if="state.type === 'text' and props.viewDetails.viewType === 'form'">
-                <TextProperties t-props="SiblingTextProps"/>
-            </t>
+            <t t-if="state.type === 'text' and props.viewDetails.viewType === 'form'  and !props.kanbanComponent">
+				<TextProperties t-props="SiblingTextProps"/>
+			</t>
             <t t-elif="state.type === 'text'">
                 <TextProperties t-props="KanbanSpanProps"/>
             </t>

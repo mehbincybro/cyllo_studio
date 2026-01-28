@@ -130,15 +130,20 @@ export class CylloListArchParser extends listView.ArchParser {
                 const label = fieldInfo.field.label;
                 const invisible_session = sessionStorage.getItem('invisible');
                 const invisible_node = node.getAttribute("optional")
-                if (invisible_node == "hide") {
-                    //condition
-                }
+//                if (invisible_node == "hide") {
+//                    //condition
+//                }
+                const optionalAttr = node.getAttribute?.("optional");
+                const modifierInvisible = fieldInfo?.modifiers?.invisible || false;
+                const attrsInvisible = fieldInfo?.attrs?.invisible || false;
+                const isInvisible = optionalAttr === "hide" || modifierInvisible || attrsInvisible;
                 columns.push({
                     ...fieldInfo,
                     id: `column_${nextId++}`,
                     className: node.getAttribute("class"), // for oe_edit_only and oe_read_only
                     optional: node.getAttribute("optional") || false,
                     type: "field",
+                    striped: isInvisible,
                     hasLabel: !(
                         archParseBoolean(fieldInfo.attrs.nolabel) || fieldInfo.field.noLabel
                     ),

@@ -264,67 +264,138 @@ export class RibbonDialog extends Component {
 /**
  * Persist ribbon changes via RPC, preserving invisibility conditions.
  */
+//    async handelSave() {
+//    // Reflect only DOM display for preview; do NOT overwrite invisible expressions
+//    try {
+//        this.state.ribbons.forEach((ribbonState, idx) => {
+//            const element = ribbonState.element;
+//            if (!element) return;
+//
+//            // Update first child content and color
+//            const children = Array.from(element.children || []);
+//            const firstChild = children.find((c) => (c.textContent || '').trim().length > 0) || children[0];
+//            if (firstChild) {
+//                if (ribbonState.firstElementContent != null) {
+//                    firstChild.textContent = ribbonState.firstElementContent;
+//                }
+//                if (ribbonState.color) {
+//                    Array.from(firstChild.classList).forEach(cls => cls.startsWith('text-bg-') && firstChild.classList.remove(cls));
+//                    firstChild.classList.add(ribbonState.color);
+//                }
+//            }
+//
+//            // Apply invisible expression for live preview (checkbox or domain)
+//            const expr = ribbonState.invisible;
+//            if (expr === 'True') {
+//                element.style.display = 'none';
+//            } else if (expr === 'False') {
+//                element.style.display = '';
+//            } else {
+//                // For domain expressions, optionally leave visible (or evaluate for preview)
+//                element.style.display = '';
+//            }
+//            element.setAttribute('data-invisible', expr);
+//        });
+//    } catch (e) {
+//        console.warn('Failed to update live ribbon DOM:', e);
+//    }
+//
+//    // Save ribbons via RPC
+//    const ribbonsToSave = this.filterAndModifyArray(this.state.ribbons);
+//    const viewType = this.props.viewDetails.viewType;
+//    const endpoint = viewType === "form"
+//            ? "cyllo_studio/form/update/ribbons"
+//            : "cyllo_studio/kanban/update/ribbons";
+//    const response = await this.rpc(endpoint, {
+//        ...this.props.viewDetails,
+//        ribbons: ribbonsToSave,
+//    });
+//
+//    if (response) {
+//        let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//        let cleanedStr = response.replace(/\s+/g, ' ').trim();
+//        storedArray.push(cleanedStr);
+//        sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//        sessionStorage.setItem('ReDO', JSON.stringify([]));
+//    }
+//    try {
+//        const sel = this.state.ribbons[this.state.selectedIndex];
+//        if (sel && (sel.path || sel.child_xpath)) {
+//            sessionStorage.setItem('SelectedRibbonXPath', sel.path || sel.child_xpath);
+//        }
+//    } catch (e) {}
+//
+//    this.action.doAction('studio_reload');
+//    this.props.close();
+//    }
+
+
 async handelSave() {
-    // Reflect only DOM display for preview; do NOT overwrite invisible expressions
     try {
-        this.state.ribbons.forEach((ribbonState, idx) => {
-            const element = ribbonState.element;
-            if (!element) return;
+        // Don't manipulate DOM here - let the backend handle it
+        // The preview updates in applyRibbonStateToDOM are enough
 
-            // Update first child content and color
-            const children = Array.from(element.children || []);
-            const firstChild = children.find((c) => (c.textContent || '').trim().length > 0) || children[0];
-            if (firstChild) {
-                if (ribbonState.firstElementContent != null) {
-                    firstChild.textContent = ribbonState.firstElementContent;
-                }
-                if (ribbonState.color) {
-                    Array.from(firstChild.classList).forEach(cls => cls.startsWith('text-bg-') && firstChild.classList.remove(cls));
-                    firstChild.classList.add(ribbonState.color);
-                }
-            }
+        // Prepare ribbons data for backend
+        const ribbonsToSave = this.filterAndModifyArray(this.state.ribbons);
+        const viewType = this.props.viewDetails.viewType;
 
-            // Apply invisible expression for live preview (checkbox or domain)
-            const expr = ribbonState.invisible;
-            if (expr === 'True') {
-                element.style.display = 'none';
-            } else if (expr === 'False') {
-                element.style.display = '';
-            } else {
-                // For domain expressions, optionally leave visible (or evaluate for preview)
-                element.style.display = '';
-            }
-            element.setAttribute('data-invisible', expr);
+        // Determine the correct endpoint
+        const endpoint = viewType === "form"
+            ? "cyllo_studio/form/update/ribbons"
+            : "cyllo_studio/kanban/update/ribbons";
+
+        // Block UI during save
+        this.env.services.ui.block();
+
+        const response = await this.rpc(endpoint, {
+            ...this.props.viewDetails,
+            ribbons: ribbonsToSave,
         });
-    } catch (e) {
-        console.warn('Failed to update live ribbon DOM:', e);
-    }
-
-    // Save ribbons via RPC
-    const ribbonsToSave = this.filterAndModifyArray(this.state.ribbons);
-    const response = await this.rpc('cyllo_studio/kanban/update/ribbons', {
-        ...this.props.viewDetails,
-        ribbons: ribbonsToSave,
-    });
-
-    if (response) {
-        let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-        let cleanedStr = response.replace(/\s+/g, ' ').trim();
-        storedArray.push(cleanedStr);
-        sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-        sessionStorage.setItem('ReDO', JSON.stringify([]));
-    }
-
-    // Persist selected ribbon XPath
-    try {
-        const sel = this.state.ribbons[this.state.selectedIndex];
-        if (sel && (sel.path || sel.child_xpath)) {
-            sessionStorage.setItem('SelectedRibbonXPath', sel.path || sel.child_xpath);
+        console.log("resp",response)
+        if (response) {
+            // Update undo/redo history
+            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+            let cleanedStr = response.replace(/\s+/g, ' ').trim();
+            storedArray.push(cleanedStr);
+            console.log("store",storedArray)
+            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+            sessionStorage.setItem('ReDO', JSON.stringify([]));
         }
-    } catch (e) {}
 
-    this.action.doAction('studio_reload');
-    this.props.close();
+        // Store the selected ribbon's path for restoration after reload
+        console.log("12324")
+        try {
+            const sel = this.state.ribbons[this.state.selectedIndex];
+            console.log("sse",sel)
+            if (sel && sel.path) {
+                sessionStorage.setItem('SelectedRibbonXPath', sel.path);
+            }
+        } catch (e) {
+            console.log("42342")
+            console.warn('Failed to store selected ribbon:', e);
+        }
+
+        this.env.services.ui.unblock();
+
+        // Close dialog before reload
+        this.props.close();
+
+        // Reload the studio view
+        this.action.doAction('studio_reload');
+
+    } catch (error) {
+        console.error('Failed to save ribbons:', error);
+        this.env.services.ui.unblock();
+        this.action.doAction({
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'message': 'Failed to save ribbons. Please try again.',
+                'type': 'danger',
+                'sticky': false,
+            }
+        });
+    }
 }
 
     /**

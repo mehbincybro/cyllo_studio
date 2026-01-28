@@ -44,39 +44,75 @@ export class RibbonProperties extends Component {
      * @param {Event} ev - The triggering event (mousedown or click)
      */
     async handleAutoSave(ev) {
-        if(!this.properties.string){
-           return this.notification.add({
-              title: _t("Validation Error"),
-              message: "Unable to save the ribbon.",
-              description: "PLease provide a label to save",
-              type: "notification_panel",
-              notificationType: "warning",
-           });
-        }
-        if (ev.type === 'mousedown') {
-            this.saveHandled = true;
-        } else if (ev.type === 'click' && this.saveHandled) {
-            this.saveHandled = false;
-            return;
-        }
-        this.env.services.ui.block();
-        try {
-            const response = await this.rpc("cyllo_studio/kanban/add/ribbon", {
+    if(!this.properties.string){
+       return this.notification.add({
+          title: _t("Validation Error"),
+          message: "Unable to save the ribbon.",
+          description: "Please provide a label to save",
+          type: "notification_panel",
+          notificationType: "warning",
+       });
+    }
+    if (ev.type === 'mousedown') {
+        this.saveHandled = true;
+    } else if (ev.type === 'click' && this.saveHandled) {
+        this.saveHandled = false;
+        return;
+    }
+    this.env.services.ui.block();
+    try {
+        const viewType = this.props.viewDetails.viewType;
+        const endpoint = viewType === "form"
+            ? "cyllo_studio/form/add/ribbon"
+            : "cyllo_studio/kanban/add/ribbon";
+
+        // Get the ribbon element for form-specific properties
+        const ribbonElement = this.props.element;
+        let requestData = {
+            path: this.props.properties.elementInfo.path,
+            position: this.props.properties.elementInfo.position,
+            ...this.props.viewDetails,
+            properties: { ...this.properties },
+             viewType:this.props.viewDetails.viewType,
+                viewId: this.props.viewDetails.viewId,
+                model: this.props.viewDetails.model,
+        };
+
+        // For form view updates
+        if (viewType === "form") {
+            requestData = {
+                viewType:this.props.viewDetails.viewType,
+                viewId: this.props.viewDetails.viewId,
+                model: this.props.viewDetails.model,
                 path: this.props.properties.elementInfo.path,
+                properties: { ...this.properties },
                 position: this.props.properties.elementInfo.position,
                 ...this.props.viewDetails,
-                properties: { ...this.properties },
-            });
-            if (response) {
-                handleUndoRedo(response);
-            }
-            this.env.bus.trigger("CLEAR-MENU");
-        } finally {
-            this.env.services.ui.unblock();
+                };
         }
-        this.action.doAction("studio_reload");
+        console.log("res",requestData["path"])
 
+        const response = await this.rpc(endpoint, requestData);
+
+        if (response) {
+            handleUndoRedo(response);
+        }
+        this.env.bus.trigger("CLEAR-MENU");
+    } catch (error) {
+        console.error("Error saving ribbon:", error);
+        this.notification.add({
+            title: _t("Error"),
+            message: "Failed to save ribbon",
+            description: error.message || "An unexpected error occurred",
+            type: "notification_panel",
+            notificationType: "danger",
+        });
+    } finally {
+        this.env.services.ui.unblock();
     }
+//    this.action.doAction("studio_reload");
+}
+
     /**
      * Cancels ribbon editing and closes the sidebar.
      *
@@ -106,6 +142,17 @@ export class RibbonProperties extends Component {
      * @param {string} color - CSS class representing the color
      */
     handleSelectColor(color) {
+//        console.log("Selected color:", color);
+//        this.properties.color = color;
+//        this.state.showDropdown = false;
+//        this.props.element.firstChild.className = color;
+        let span = this.props.element.querySelector("span");
+        if (!span) {
+            span = document.createElement("span");
+            this.props.element.appendChild(span);
+        }
+        span.className = color;
+
         this.properties.color = color;
         this.state.showDropdown = false;
         this.props.element.firstChild.className = color;
@@ -117,7 +164,16 @@ export class RibbonProperties extends Component {
      * @param {Event} event - Input change event
      */
     handleLabelChange({ target }) {
-        this.props.element.firstChild.textContent = target.value;
+//        this.props.element.firstChild.textContent = target.value;
+//        this.properties.string = target.value;
+        let span = this.props.element.querySelector("span");
+
+        if (!span) {
+            span = document.createElement("span");
+            span.className = this.properties.color || "text-bg-danger";
+            this.props.element.appendChild(span);
+        }
+        span.textContent = target.value;
         this.properties.string = target.value;
     }
 
