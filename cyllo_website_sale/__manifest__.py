@@ -28,8 +28,13 @@
     'company': "Cyllo",
     'maintainer': 'Cyllo',
     'website': "https://www.cyllo.com",
-    'data': ['views/templates.xml'],
+    'data': ['views/templates.xml',
+             'views/website_sale_templates.xml'
+             ],
     'assets': {
+        'web.assets_frontend': [
+            'cyllo_website_sale/static/src/js/website_sale.js',
+        ],
         'website.backend_assets_all_wysiwyg': [
             ('remove', 'website_sale/static/src/js/components/wysiwyg_adapter/wysiwyg_adapter.js'),
             'cyllo_website_sale/static/src/js/wysiwyg_adapter.js'

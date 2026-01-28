@@ -37,6 +37,7 @@
         'data/ir_sequence_data.xml',
         'data/ir_actions_server_data.xml',
         'data/subscription_renew_templates_data.xml',
+        'data/subscription_closed_templates_data.xml',
         'data/invoice_mail_templates_data.xml',
         'reports/subscription_report_views.xml',
         'reports/subscription_report_template.xml',

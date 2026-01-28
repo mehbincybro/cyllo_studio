@@ -88,6 +88,7 @@ class SubscriptionOrder(models.Model):
     amount_total = fields.Monetary(string='Total', compute='_compute_amounts')
     parent_id = fields.Many2one(string='Parent Subscription Order',
                                 comodel_name='subscription.order')
+    end_date = fields.Datetime(string='End Date')
 
     def _compute_invoice_count(self):
         """Compute invoice count"""
