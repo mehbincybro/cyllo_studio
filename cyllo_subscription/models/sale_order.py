@@ -81,52 +81,42 @@ class SaleOrder(models.Model):
         if sub_lines and non_sub_lines:
             raise ValidationError(_('Cannot add subscription product with non-subscription product.'))
 
-        status = [True if order.product_template_id.is_subscription else False
-                  for order in self.order_line]
-        if len(set(status)) > 1:
-            subscription_list = [rec.product_id.is_subscription for rec in
-                                 self.order_line]
-            if len(set(subscription_list)) > 1:
-                raise ValidationError(
-                    _('Cannot add subscription product with non-subscription product'))
-        elif len(set(status)) == 1:
-            for line in self.order_line:
-                if line.product_template_id.is_subscription:
-                    # Create subscription order from each order line
-                    order = self.env['subscription.order'].create({
-                        'partner_id': line.order_id.partner_id.id,
-                        'sale_order_id': self.id,
-                        'sale_order_template_id': self.sale_order_template_id.id,
+        for line in sub_lines:
+            # Create subscription order
+            sub_order = self.env['subscription.order'].create({
+                'partner_id': self.partner_id.id,
+                'sale_order_id': self.id,
+                'sale_order_template_id': self.sale_order_template_id.id,
+                'time_based_price_id': line.time_based_price_id.id,
+                'end_date': line.end_date,
+                'renewal_date': line.trial_end if line.product_template_id.trial_period >= 1 else fields.Datetime.now(),
+                'trial_end': line.trial_end,
+                'state': 'posted' if self.sale_order_template_id.invoice_creation else 'sale',
+                'subscription_order_line_ids': [
+                    fields.Command.create({
+                        'product_id': line.product_id.id,
                         'time_based_price_id': line.time_based_price_id.id,
-                        'renewal_date': line.trial_end if line.product_template_id.trial_period >= 1 else
-                        fields.Datetime.now(),
-                        'trial_end': line.trial_end,
-                        'state': 'posted' if self.sale_order_template_id.invoice_creation else 'sale',
-                        'subscription_order_line_ids': [
-                            (fields.Command.create({
-                                'product_id': line.product_id.id,
-                                'time_based_price_id': line.time_based_price_id.id,
-                                'quantity': line.product_uom_qty,
-                                'tax_ids': line.tax_id,
-                                'subtotal': line.price_subtotal,
-                                'total_price': line.price_total,
-                            }))
-                        ],
+                        'quantity': line.product_uom_qty,
+                        'tax_ids': line.tax_id.ids,
+                        'subtotal': line.price_subtotal,
+                        'total_price': line.price_total,
                     })
-                    self.is_subscription = True
-                    sub_record = self.env['subscription.order'].browse(order.id)
-                    if sub_record:
-                        self.state_subscription = 'sub_order'
-                    if sub_record.trial_end > fields.Datetime.now():
-                        sub_record.state_subscription = 'trial'
-                    else:
-                        sub_record.state_subscription = 'active'
-                    if self.sale_order_template_id.invoice_creation in ['draft',
-                                                                        'confirmed',
-                                                                        'sent']:
-                        sub_record.action_post()
-        res = super().action_confirm()
-        return res
+                ],
+            })
+
+            # Update states
+            self.is_subscription = True
+            self.state_subscription = 'sub_order'
+
+            if sub_order.trial_end and sub_order.trial_end > fields.Datetime.now():
+                sub_order.state_subscription = 'trial'
+            else:
+                sub_order.state_subscription = 'active'
+
+            if self.sale_order_template_id.invoice_creation in ['draft', 'confirmed', 'sent']:
+                sub_order.action_post()
+
+        return super(SaleOrder, self).action_confirm()
 
     def action_subscriptions(self):
         """

@@ -152,6 +152,8 @@ class SubscriptionOrder(models.Model):
 
     def action_post(self):
         """Create invoice for subscription"""
+        if self.end_date and self.renewal_date and self.end_date < self.renewal_date:
+            raise ValidationError(_("The requested billing period exceeds the current subscription duration."))
         if self.env['account.move'].search_count(
                 [('invoice_origin', '=', self.name),
                  ('state', '=', 'draft')]) >= 1:
@@ -240,7 +242,7 @@ class SubscriptionOrder(models.Model):
         order = self.create({
             'partner_id': self.partner_id.id,
             'company_id': self.company_id.id,
-            'renewal_date': fields.Datetime.now(),
+            'renewal_date': self.renewal_date,
             'parent_id':self.id,
             'sale_order_template_id': self.sale_order_template_id.id,
             'time_based_price_id': self.time_based_price_id.id,
@@ -357,3 +359,18 @@ class SubscriptionOrder(models.Model):
                 'cyllo_subscription.mail_template_subscription_order_due_reminder_email')
             body['email_to'] = record.partner_id.email
             body.sudo().send_mail(record.id, force_send=True)
+
+    def check_subscription_close(self):
+        records = self.search([('end_date', '<',fields.Datetime.now()),('state_subscription', '!=', 'churned')])
+        if records:
+            records.write({'state_subscription': 'churned'})
+            for record in records:
+                body = self.env.ref(
+                    'cyllo_subscription.mail_template_subscription_order_closed_reminder_email')
+                body['email_to'] = record.partner_id.email
+                body.sudo().send_mail(record.id, force_send=True)
+                record.message_post(
+                    body=_('Subscription order has been closed.'),
+                    message_type='comment', subtype_xmlid='mail.mt_comment')
+
+

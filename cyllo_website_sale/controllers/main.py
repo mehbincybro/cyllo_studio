@@ -19,45 +19,62 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields
+from odoo import http
 from odoo.http import request, route
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantController
 
 
 class WebsiteSaleSubscription(WebsiteSale):
+
     @route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True)
     def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, **kw):
-        # Standard update (this builds the initial notification_info)
-        res = super().cart_update_json(product_id, line_id, add_qty, set_qty, **kw)
 
-        # Use the line_id returned by super() for accuracy
+        res = super().cart_update_json(
+            product_id, line_id, add_qty, set_qty, **kw
+        )
+
         order = request.website.sale_get_order()
-        sol_line = order.order_line.browse(res['line_id'])
 
-        # Add our custom subscription data to the line
-        plan_id = kw.get('time_based_price_id') if kw.get('time_based_price_id') else sol_line.time_based_price_id
-        if plan_id and res.get('line_id'):
-            plan = request.env['time.based.price'].sudo().browse(int(plan_id))
-            if sol_line.exists():
-                # Update the database
+        if res.get('line_id'):
+            sol_line = order.order_line.browse(res['line_id'])
+
+            plan_id = kw.get('time_based_price_id') or sol_line.time_based_price_id
+            if plan_id and sol_line.exists():
+                plan = request.env['time.based.price'].sudo().browse(int(plan_id))
+
                 sol_line.write({
                     'time_based_price_id': plan.id,
-                    'price_unit': plan.cost,
                     'end_date': kw.get('end_date'),
                 })
+
                 sol_line._onchange_time_based_price_id()
-                if not sol_line.trial_end:
-                    sol_line.write({
-                        'trial_end': fields.Datetime.now(),
-                    })
-                # Update the notification data so the popup shows the correct price
-                show_tax = order.website_id.show_line_subtotals_tax_selection == 'tax_included'
+                sol_line._compute_price_unit()
+                sol_line._compute_amount()
+
+                currency = order.pricelist_id.currency_id
+                show_tax = (
+                    order.website_id.show_line_subtotals_tax_selection == 'tax_included'
+                )
+
                 if 'notification_info' in res:
                     for notify_line in res['notification_info'].get('lines', []):
                         if notify_line.get('id') == sol_line.id:
-                            notify_line['line_price_total'] = sol_line.price_total if show_tax else sol_line.price_subtotal
-                            notify_line['name'] = f"{sol_line.product_id.name} ({plan.name})"
+                            notify_line.update({
+                                'price_unit': sol_line.price_unit,
+                                'line_price_total': (
+                                    sol_line.price_total
+                                    if show_tax else sol_line.price_subtotal
+                                ),
+                                'currency_id': currency.id,
+                                'display_price': sol_line.price_unit,
+                                'name': f"{sol_line.product_id.name} ({plan.name})",
+                            })
+                    res['notification_info'].setdefault(
+                        'cart_quantity',
+                        order.cart_quantity
+                    )
+
         return res
 
 class CustomWebsiteSale(WebsiteSaleVariantController):
@@ -85,3 +102,22 @@ class CustomWebsiteSale(WebsiteSaleVariantController):
 
         res.update(combination_info)
         return res
+
+
+class WebsiteSaleCartCheck(http.Controller):
+
+    @http.route(['/shop/cart/get_info_json'], type='json', auth="public", website=True)
+    def get_cart_info_json(self):
+        order = request.website.sale_get_order()
+        if not order:
+            return {'has_subscription': False, 'has_normal': False}
+
+        # Check for presence of different product types
+        lines = order.order_line.filtered(lambda l: not l.is_delivery)
+        has_sub = any(l.product_id.is_subscription for l in lines)
+        has_normal = any(not l.product_id.is_subscription for l in lines)
+
+        return {
+            'has_subscription': has_sub,
+            'has_normal': has_normal
+        }

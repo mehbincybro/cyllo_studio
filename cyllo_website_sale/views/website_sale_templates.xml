@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <template id="subscription_shop_item" inherit_id="website_sale.products_item">
+        <xpath expr="//div[hasclass('product_price')]/span" position="attributes">
+            <attribute name="t-attf-class" add="{{'d-none' if product.is_subscription else ''}}" separator=" "/>
+        </xpath>
+
+        <xpath expr="//div[hasclass('product_price')]" position="inside">
+            <t t-if="product.is_subscription and product.sudo().time_based_ids">
+                <t t-set="sub_pricing" t-value="product.sudo().time_based_ids[0]"/>
+
+                <t t-set="converted_cost" t-value="sub_pricing.currency_id._convert(
+                sub_pricing.cost,
+                website.currency_id,
+                product.env.company,
+                datetime.date.today()
+            )"/>
+
+                <t t-set="final_price" t-value="converted_cost"/>
+                <t t-if="website.show_line_subtotals_tax_selection == 'tax_included'">
+                    <t t-set="taxes" t-value="product.taxes_id._filter_taxes_by_company(product.env.company)"/>
+                    <t t-set="final_price"
+                       t-value="taxes.compute_all(converted_cost, website.currency_id, 1, product=product)['total_included']"/>
+                </t>
+
+                <div class="subscription_price_display d-inline-block">
+                    <span class="h6 mb-0"
+                          t-out="final_price"
+                          t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+
+                    <span class="small text-muted">/
+                        <t t-out="sub_pricing.subscription_unit"/>
+                    </span>
+                </div>
+            </t>
+        </xpath>
+    </template>
+    <template id="website_sale_subscription_options" inherit_id="website_sale.product">
+        <xpath expr="//form[@action='/shop/cart/update']" position="inside">
+            <t t-if="product.is_subscription">
+                <div class="mb-3">
+                    <t t-set="curr_website_currency" t-value="website.currency_id"/>
+                    <t t-set="today" t-value="datetime.date.today()"/>
+
+                    <select name="time_based_price_id"
+                            class="form-select form-select-sm js_subscription_plan_select" required="True">
+                        <t t-foreach="product.sudo().time_based_ids" t-as="t_price">
+                            <t t-set="converted_cost"
+                               t-value="t_price.currency_id._convert(t_price.cost, curr_website_currency, product.env.company, today)"/>
+
+                            <t t-set="display_cost" t-value="converted_cost"/>
+                            <t t-if="website.show_line_subtotals_tax_selection == 'tax_included'">
+                                <t t-set="taxes"
+                                   t-value="product.taxes_id._filter_taxes_by_company(product.env.company)"/>
+                                <t t-set="display_cost"
+                                   t-value="taxes.compute_all(converted_cost, curr_website_currency, 1, product=product)['total_included']"/>
+                            </t>
+
+                            <option t-att-value="t_price.id"
+                                    t-att-data-price="display_cost"
+                                    t-att-data-unit="t_price.subscription_unit">
+                                <t t-out="t_price.name"/>
+                                (
+                                <t t-out="display_cost"
+                                   t-options="{'widget': 'monetary', 'display_currency': curr_website_currency}"/>
+                                )
+                            </option>
+                        </t>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date"
+                           name="end_date"
+                           class="form-control"
+                           required="required"
+                           t-att-min="datetime.date.today().strftime('%Y-%m-%d')"/>
+                </div>
+                <input type="hidden" name="add_qty" value="1"/>
+            </t>
+        </xpath>
+    </template>
+</odoo>
+
+
+
+

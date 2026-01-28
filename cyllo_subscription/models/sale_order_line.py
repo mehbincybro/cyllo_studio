@@ -35,6 +35,7 @@ class SaleOrderLine(models.Model):
                                           help='Field shows the recurrence of the product')
     renewal_date = fields.Datetime(help='Renewal date for the subscription order created from this line')
     trial_end = fields.Datetime(help='Trial end date for the subscription order created from this line.')
+    end_date = fields.Datetime(string='End Date')
 
     @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):
@@ -66,4 +67,10 @@ class SaleOrderLine(models.Model):
             self.trial_end = fields.Datetime.now() + relativedelta(months=self.product_template_id.trial_period)
         else:
             self.trial_end = fields.Datetime.now()
+
+    @api.constrains('end_date')
+    def _check_end_date(self):
+        for record in self:
+            if record.end_date and record.end_date < record.order_id.date_order:
+                raise ValidationError(_("Invalid End Date: The subscription end date cannot be prior to the order date."))
 
