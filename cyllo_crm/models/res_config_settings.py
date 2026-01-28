@@ -50,8 +50,13 @@ class ResConfigSettings(models.TransientModel):
 
     module_cyllo_crm_project = fields.Boolean(string="Cyllo CRM Project", help="Allows creating a project from a won CRM lead.", config_parameter='Cyllo_Crm.module_cyllo_crm_project')
 
+    @api.onchange('module_cyllo_crm_advance_lead')
+    def _onchange_module_cyllo_crm_advance_lead(self):
+        if self.module_cyllo_crm_advance_lead:
+            self.group_use_lead = True
 
     def set_values(self):
+        """Override set_values to handle module uninstallation properly"""
         super().set_values()
         # Install Project module if option enabled
         if self.module_cyllo_crm_project:

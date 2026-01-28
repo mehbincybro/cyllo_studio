@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+
+    <record id="view_visiting_card_upload_wizard_form" model="ir.ui.view">
+        <field name="name">visiting.card.upload.wizard.form</field>
+        <field name="model">visiting.card.upload.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Upload Visiting Card">
+                <group>
+                    <field name="visiting_card_file"
+                           filename="visiting_card_filename"/>
+                </group>
+
+                <footer>
+                    <button name="action_upload"
+                            string="Upload"
+                            type="object"
+                            class="btn-primary"/>
+                    <button string="Cancel"
+                            class="btn-secondary"
+                            special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>

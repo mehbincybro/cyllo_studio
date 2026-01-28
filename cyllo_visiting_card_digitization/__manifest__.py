@@ -34,12 +34,13 @@
     'external_dependencies': {
         'python': ['numpy', 'pandas', 'camelot-py', 'opencv-python', 'PyMuPDF']
     },
-    'assets': {
-        'web.assets_backend': [
-                'cyllo_visiting_card_digitization/views/crm_upload_visiting_card_button.xml',
-            'cyllo_visiting_card_digitization/static/src/js/crm_upload_visiting_card_button.js',
-        ],
-    },
+    'data': [
+         'security/ir.model.access.csv',
+        'views/cyllo_visiting_card_views.xml',
+        'views/crm_visiting_card_upload.xml',
+        'wizard/visiting_card_upload_wizard_views.xml',
+        # 'views/upload_visiting_card_button_kanban.xml',
+    ],
     'license': "LGPL-3",
     'installable': True,
     'auto_install': False,

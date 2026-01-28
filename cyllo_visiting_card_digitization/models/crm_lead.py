@@ -22,8 +22,20 @@
 from odoo import models
 from odoo.exceptions import UserError
 
+
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     def action_upload_visiting_card(self):
-        raise UserError("✅ SUCCESS — button is wired correctly")
+        TEST_GOOGLE_API_KEY = self.env[
+            'ir.config_parameter'].sudo().get_param(
+            'cyllo_agent.api_key')
+        if not TEST_GOOGLE_API_KEY:
+            raise UserError('API KEY not set')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Upload Visiting Card',
+            'res_model': 'visiting.card.upload.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+        }

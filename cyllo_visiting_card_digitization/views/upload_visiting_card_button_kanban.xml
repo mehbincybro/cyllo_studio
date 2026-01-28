@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="crm_case_kanban_view_leads_visiting_card_button" model="ir.ui.view">
+        <field name="name">crm.lead.kanban.lead.inherit.visiting.card.button</field>
+        <field name="model">crm.lead</field>
+        <field name="inherit_id" ref="crm.crm_case_kanban_view_leads"/>
+        <field name="arch" type="xml">
+            <xpath expr="//kanban/header/button[hasclass('o_button_generate_leads')]" position="after">
+                <h1>Hello</h1>
+            </xpath>
+        </field>
+    </record>
+</odoo>
