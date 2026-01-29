@@ -47,14 +47,12 @@ class AccountAssetMaintenance(models.Model):
 
     is_scrap = fields.Boolean()
     active = fields.Boolean(default=True)
-    under_warranty = fields.Boolean(string="Under Warranty", related='asset_id.under_warranty')
-    warranty_percentage = fields.Float(string="Warranty Deduction in %", default=100)
 
     @api.onchange('scheduled_date')
     def _onchange_scheduled_date(self):
         """Function for checking scheduled date"""
         purchase_date = self.asset_id.date
-        if self.scheduled_date and self.scheduled_date <= purchase_date:
+        if self.scheduled_date and self.scheduled_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}.The schedule Date should be greater than the Purchase Date'))
 

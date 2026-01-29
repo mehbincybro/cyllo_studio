@@ -20,3 +20,4 @@
 #
 #############################################################################
 from . import asset_repair
+from . import asset_insurance_wizard

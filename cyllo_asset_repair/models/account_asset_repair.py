@@ -50,12 +50,30 @@ class AccountAssetRepair(models.Model):
     active = fields.Boolean(default=True)
     under_warranty = fields.Boolean(string="Under Warranty", related='asset_id.under_warranty')
     warranty_percentage = fields.Float(string="Warranty Deduction in %", default=100)
+    has_warranty = fields.Boolean(default=False, compute="_compute_has_warranty")
+    has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
+
+    @api.depends('asset_id')
+    def _compute_has_warranty(self):
+        """Function for checking Warranty period"""
+        if self.asset_id.under_warranty and self.asset_id.warranty_end_date > fields.Date.today():
+            self.has_warranty = True
+        else:
+            self.has_warranty = False
+
+    @api.depends('asset_id')
+    def _compute_has_insurance(self):
+        """Function for checking insurance period"""
+        if self.asset_id.under_insurance and self.asset_id.insurance_end_date > fields.Date.today():
+            self.has_insurance = True
+        else:
+            self.has_insurance = False
 
     @api.onchange('scheduled_date')
     def _onchange_scheduled_date(self):
         """Function for checking the scheduled date"""
         purchase_date = self.asset_id.date
-        if self.scheduled_date and self.scheduled_date <= purchase_date:
+        if self.scheduled_date and self.scheduled_date < purchase_date:
             raise UserError(
                 _(f'The Asset is Purchased on {purchase_date}. The schedule Date should be greater than the Purchase Date'))
 
@@ -173,21 +191,57 @@ class AccountAssetRepair(models.Model):
 
     def action_create_invoice(self):
         """Button action for creating the invoice for the repair"""
-        repair_invoice = self.env['account.move'].create({
-            'ref': self.asset_id.name,
-            'partner_id': self.employee_id.id,
-            'move_type': 'out_invoice',
-            'state': 'draft',
-            'repair_id': self.id,
-            'invoice_line_ids': [fields.Command.create({
-                'product_id': lines.product_id.id,
-                'name': self.asset_id.asset_item_id.name,
+        insurance_percentage = self.env.context.get('insurance_percentage', 0)
+        from_wizard = self.env.context.get('from_insurance_wizard', False)
+        if from_wizard and insurance_percentage > 0:
+            repair_invoice = self.env['account.move'].create({
+                'ref': self.asset_id.name,
+                'partner_id': self.employee_id.id,
                 'move_type': 'out_invoice',
-                'quantity': lines.product_qty,
-                'price_unit': lines.unit_price,
-                'price_subtotal': lines.price_subtotal
-            }) for lines in self.repair_line_ids if lines.repair_action != 'remove']
-        })
+                'state': 'draft',
+                'repair_id': self.id,
+                'asset_id': False,
+                'invoice_line_ids': [fields.Command.create({
+                    'product_id': lines.product_id.id,
+                    'name': self.asset_id.asset_item_id.name,
+                    'move_type': 'out_invoice',
+                    'quantity': lines.product_qty,
+                    'price_unit': lines.price_subtotal - (lines.price_subtotal * (insurance_percentage / 100)),
+                    'price_subtotal': lines.price_subtotal - (lines.price_subtotal * (insurance_percentage / 100)),
+                }) for lines in self.repair_line_ids if lines.repair_action != 'remove']
+            })
+        elif self.under_warranty and self.warranty_percentage > 0:
+            repair_invoice = self.env['account.move'].create({
+                'ref': self.asset_id.name,
+                'partner_id': self.employee_id.id,
+                'move_type': 'out_invoice',
+                'state': 'draft',
+                'repair_id': self.id,
+                'invoice_line_ids': [fields.Command.create({
+                    'product_id': lines.product_id.id,
+                    'name': self.asset_id.asset_item_id.name,
+                    'move_type': 'out_invoice',
+                    'quantity': lines.product_qty,
+                    'price_unit': lines.unit_price - (lines.unit_price * (self.warranty_percentage / 100)),
+                    'price_subtotal': lines.unit_price - (lines.price_subtotal * (self.warranty_percentage / 100)),
+                }) for lines in self.repair_line_ids if lines.repair_action != 'remove']
+            })
+        else:
+            repair_invoice = self.env['account.move'].create({
+                'ref': self.asset_id.name,
+                'partner_id': self.employee_id.id,
+                'move_type': 'out_invoice',
+                'state': 'draft',
+                'repair_id': self.id,
+                'invoice_line_ids': [fields.Command.create({
+                    'product_id': lines.product_id.id,
+                    'name': self.asset_id.asset_item_id.name,
+                    'move_type': 'out_invoice',
+                    'quantity': lines.product_qty,
+                    'price_unit': lines.unit_price,
+                    'price_subtotal': lines.price_subtotal
+                }) for lines in self.repair_line_ids if lines.repair_action != 'remove']
+            })
         self.is_invoice = True
 
     def action_view_invoice(self):
@@ -200,4 +254,19 @@ class AccountAssetRepair(models.Model):
             'res_id': repair_invoice.id,
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
+        }
+
+    def action_claim_insurance(self):
+        total_amount = sum(line.price_subtotal for line in self.repair_line_ids if line.repair_action != 'remove')
+        return {
+            'name': _('Claim Insurance'),
+            'view_mode': 'form',
+            'res_model': 'asset.insurance',
+            'type': 'ir.actions.act_window',
+            'context': {
+                'default_asset_id': self.asset_id.id,
+                'default_total_amount': total_amount,
+                'default_repair_id': self.id,
+            },
+            'target': 'new'
         }

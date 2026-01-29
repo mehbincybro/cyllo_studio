@@ -187,10 +187,22 @@
                                            invisible="not under_warranty"/>
                                     <div class="o_row" invisible="not under_warranty">
                                         <field name="warranty_period" readonly="is_confirm"
-                                               style="width:25% !important;"/>
-                                        <field name="warranty_period_type" nolabel="1" readonly="is_confirm"/>
+                                               style="width:25% !important;" required="under_warranty"/>
+                                        <field name="warranty_period_type" nolabel="1" readonly="is_confirm"
+                                               required="under_warranty"/>
                                     </div>
                                     <field name="warranty_end_date" invisible="not under_warranty"/>
+                                </group>
+                                <group string="Insurance">
+                                    <field name="under_insurance"/>
+                                    <field name="insurance_provider" invisible="not under_insurance"/>
+                                    <field name="insurance_type" invisible="not under_insurance"/>
+                                    <field name="insurance_number" invisible="not under_insurance"
+                                           required="under_insurance"/>
+                                    <field name="insurance_start_date" widget="daterange"
+                                           options="{'end_date_field': 'insurance_end_date'}"
+                                           required="under_insurance" invisible="not under_insurance"/>
+                                    <field name="insurance_end_date" invisible="1"/>
                                 </group>
                             </group>
                         </page>

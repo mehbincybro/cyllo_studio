@@ -39,6 +39,7 @@
         'views/account_asset_repair_views.xml',
         'views/asset_repair_list_views.xml',
         'wizards/asset_repair.xml',
+        'wizards/assset_insurance_wizard_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
