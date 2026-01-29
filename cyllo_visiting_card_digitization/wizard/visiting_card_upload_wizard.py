@@ -19,7 +19,27 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from odoo import models, fields
 
 
-from . import crm_lead
-from . import cyllo_visiting_card
+class VisitingCardUploadWizard(models.TransientModel):
+    _name = 'visiting.card.upload.wizard'
+    _description = 'Upload Visiting Card Wizard'
+
+    visiting_card_file = fields.Binary(
+        string="Upload Visiting Card",
+        required=True
+    )
+
+    visiting_card_filename = fields.Char(
+        string="File Name"
+    )
+
+    def action_upload(self):
+        self.ensure_one()
+        self.env['cyllo.visiting.card'].create({
+            'visiting_card_file': self.visiting_card_file,
+            'visiting_card_filename': self.visiting_card_filename,
+        })
+
+        return {'type': 'ir.actions.act_window_close'}

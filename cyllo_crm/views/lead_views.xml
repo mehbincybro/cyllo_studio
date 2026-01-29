@@ -5,14 +5,6 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//header/field[@name='stage_id']" position="replace">
-                <field name="stage_id" widget="statusbar_duration"
-                       options="{'clickable': '1', 'fold_field': 'fold'}"/>
-                <button name="action_upload_visiting_card"
-                        type="object"
-                        string="Upload Visiting Card"
-                        class="btn-primary"/>
-            </xpath>
             <xpath expr="//header/field[@name='stage_id']"
                    position="attributes">
                 <attribute name="domain">

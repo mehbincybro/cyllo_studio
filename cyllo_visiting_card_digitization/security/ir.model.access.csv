@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_cyllo_visiting_card_user,cyllo.visiting.card user,model_cyllo_visiting_card,base.group_user,1,1,1,0
+access_visiting_card_upload_wizard,visiting.card.upload.wizard access,model_visiting_card_upload_wizard,base.group_user,1,1,1,1
