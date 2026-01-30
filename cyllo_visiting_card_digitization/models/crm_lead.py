@@ -27,15 +27,28 @@ class CrmLead(models.Model):
     _inherit = 'crm.lead'
 
     def action_upload_visiting_card(self):
-        TEST_GOOGLE_API_KEY = self.env[
-            'ir.config_parameter'].sudo().get_param(
-            'cyllo_agent.api_key')
-        if not TEST_GOOGLE_API_KEY:
-            raise UserError('API KEY not set')
+        # TEST_GOOGLE_API_KEY = self.env[
+        #     'ir.config_parameter'].sudo().get_param(
+        #     'cyllo_agent.api_key')
+        # if not TEST_GOOGLE_API_KEY:
+        #     raise UserError('API KEY not set')
+
         return {
             'type': 'ir.actions.act_window',
             'name': 'Upload Visiting Card',
             'res_model': 'visiting.card.upload.wizard',
             'view_mode': 'form',
             'target': 'new',
+        }
+
+    def notify_visiting_card(self):
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': "Visiting Card Processing",
+                'message': "Not an image. Will try as PDF.",
+                'type': 'info',
+                'sticky': False,
+            }
         }

@@ -1,27 +1,65 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_visiting_card_upload_wizard_form" model="ir.ui.view">
-        <field name="name">visiting.card.upload.wizard.form</field>
-        <field name="model">visiting.card.upload.wizard</field>
+    <!-- Form View -->
+    <record id="view_cyllo_visiting_card_form" model="ir.ui.view">
+        <field name="name">cyllo.visiting.card.form</field>
+        <field name="model">cyllo.visiting.card</field>
         <field name="arch" type="xml">
-            <form string="Upload Visiting Card">
-                <group>
-                    <field name="visiting_card_file"
-                           filename="visiting_card_filename"/>
-                </group>
-
-                <footer>
-                    <button name="action_upload"
-                            string="Upload"
-                            type="object"
-                            class="btn-primary"/>
-                    <button string="Cancel"
-                            class="btn-secondary"
-                            special="cancel"/>
-                </footer>
+            <form string="Visiting Card">
+                <header>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="visiting_card_file"
+                                   filename="visiting_card_filename"
+                                   widget="binary"/>
+                            <field name="visiting_card_filename" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Extracted Text">
+                            <field name="extracted_text"
+                                   widget="text"
+                                   placeholder="Upload a visiting card to extract text..."/>
+                        </page>
+                    </notebook>
+                </sheet>
             </form>
         </field>
     </record>
+
+    <!-- Tree View -->
+    <record id="view_cyllo_visiting_card_tree" model="ir.ui.view">
+        <field name="name">cyllo.visiting.card.tree</field>
+        <field name="model">cyllo.visiting.card</field>
+        <field name="arch" type="xml">
+            <tree string="Visiting Cards">
+                <field name="id"/>
+                <field name="visiting_card_filename"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_cyllo_visiting_card" model="ir.actions.act_window">
+        <field name="name">Visiting Cards</field>
+        <field name="res_model">cyllo.visiting.card</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu -->
+    <menuitem id="menu_cyllo_visiting_card_root"
+              name="Visiting Cards"
+              sequence="10"/>
+
+    <menuitem id="menu_cyllo_visiting_card"
+              name="Cards"
+              parent="menu_cyllo_visiting_card_root"
+              action="action_cyllo_visiting_card"
+              sequence="1"/>
 
 </odoo>
