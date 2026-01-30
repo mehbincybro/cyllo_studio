@@ -61,40 +61,56 @@ WebsiteSale.include({
             this.rootProduct.end_date = $form.find('input[name="end_date"]').val();
         }
     },
- /**
- * @override
- * Intercept the add to cart click
- */
-async _onClickAdd(ev) {
-    const $form = this.$el.find('form[action^="/shop/cart/update"]');
-    const isSubscription = $form.find('.js_subscription_plan_select').length > 0;
 
-    // Fetch current cart info from the server
-    const cartData = await this.rpc('/shop/cart/get_info_json');
+    async _onClickAdd(ev) {
+        // We must do this before any 'await' to prevent Odoo from submitting the form.
+        ev.preventDefault();
+        ev.stopImmediatePropagation();
 
-    const hasSubscriptionInCart = cartData.has_subscription;
-    const hasNormalInCart = cartData.has_normal;
+        const _super = this._super.bind(this);
+        const self = this;
+        const $form = $(ev.currentTarget).closest('form');
+        const productId = parseInt($form.find('input[name="product_id"]').val());
 
-    // Check for incompatible products
-    if ((isSubscription && hasNormalInCart) || (!isSubscription && hasSubscriptionInCart)) {
-        this.dialogService.add(ConfirmationDialog, {
-            body: _t("Your cart contains incompatible items. Subscription and non-subscription products cannot be purchased together. Do you want to clear your cart and add this item instead?"),
-            confirmLabel: _t("Clear Cart & Add"),
-            cancelLabel: _t("Cancel"),
-            confirm: async () => {
-                await this.rpc("/shop/cart/clear");
-                await super._onClickAdd(ev); // Proceed with adding the product
-            },
-            cancel: () => {
-                // Do nothing, just close the modal
-            },
-        });
-        return; // Stop normal execution
-    }
+        try {
+            // Fetch cart and product info
+            const cartData = await this.rpc('/shop/cart/get_info_json', {
+                product_id: productId
+            });
 
-    // No conflicts, proceed normally
-    return super._onClickAdd(ev);
-}
+            const hasSubscriptionInCart = cartData.has_subscription;
+            const hasNormalInCart = cartData.has_normal;
+            const isSubscription = cartData.is_subscription;
+
+            // Logic check for conflicts
+            const conflict = (isSubscription && hasNormalInCart) || (!isSubscription && hasSubscriptionInCart);
+            console.log(conflict)
+            if (conflict) {
+                // Show the Dialog
+                this.call("dialog", "add", ConfirmationDialog, {
+                    title: _t("Cart Conflict"),
+                    body:_t("Subscription and non-subscription products cannot be purchased together. Do you want to clear your cart and add this item instead?"),
+                    confirmLabel: _t("Clear Cart & Add"),
+                    cancelLabel: _t("Cancel"),
+                    confirm: async () => {
+                        // Use your custom clear cart route
+                        await this.rpc("/shop/cart/clear", {});
+                        // Call the original Odoo add-to-cart logic
+                        return _super(ev);
+                    },
+                    cancel: () => {
+                        // Do nothing: close dialog
+                    },
+                });
+                return Promise.resolve(); // Stop further execution
+            }
+        } catch (error) {
+            console.error("Cart compatibility check failed", error);
+        }
+
+        //  If no conflict, manually run the super logic
+        return _super(ev);
+    },
 
 });
 
