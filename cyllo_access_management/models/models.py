@@ -78,7 +78,9 @@ class BaseModel(models.AbstractModel):
             arch.set("create", "false")
             arch.set("delete", "false")
         if disable_chatter:
-            for node_chat in arch.xpath(f"//chatter"):
+            chatter_nodes = arch.xpath("//chatter") + arch.xpath(
+                "//div[contains(@class, 'oe_chatter')]")
+            for node_chat in chatter_nodes:
                 parent = node_chat.getparent()
                 if parent is not None:
                     parent.remove(node_chat)
