@@ -126,11 +126,19 @@ class AssetAsset(models.Model):
     warranty_period = fields.Integer()
     warranty_end_date = fields.Date(string="Warranty Upto", compute="_compute_warranty_end_date")
     under_insurance = fields.Boolean(string="Has Insurance")
-    insurance_provider = fields.Text(string="Insurance Provider")
-    insurance_type = fields.Text(string="Insurance Type")
+    insurance_name = fields.Many2one(comodel_name='asset.asset.insurance')
     insurance_number = fields.Char(string="Insurance ID")
     insurance_start_date = fields.Date()
     insurance_end_date = fields.Date()
+    has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
+    reimburse_after_invoice = fields.Boolean(string="Reimburse After Invoice",
+                                             help="Enable if insurance reimbursement happens after invoice creation.")
+    warranty_attachment_ids = fields.Many2many('ir.attachment', 'asset_warranty_attachment_rel',
+                                               'asset_id', 'attachment_id', string="Warranty Documents",
+                                               domain="[('res_model', '=', 'asset.asset')]")
+    insurance_attachment_ids = fields.Many2many('ir.attachment', 'asset_insurance_attachment_rel',
+                                                'asset_id', 'attachment_id', string="Insurance Documents",
+                                                domain="[('res_model', '=', 'asset.asset')]")
 
     @api.depends('modified_asset_ids')
     def _compute_modified_count(self):

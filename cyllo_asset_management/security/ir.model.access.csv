@@ -51,3 +51,6 @@ access_account_asset_maintenance_admin,access.account.asset.maintenance.admin,mo
 
 access_account_asset_repair_manager,access.account.asset.repair.manager,model_account_asset_repair,account.group_account_manager,1,1,1,1
 access_account_asset_repair_admin,access.account.asset.repair.admin,model_account_asset_repair,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+
+access_asset_asset_insurance_manager,access.asset.asset.insurance.manager,model_asset_asset_insurance,account.group_account_manager,1,1,1,1
+access_asset_asset_insurance_admin,access.asset.asset.insurance.admin,model_asset_asset_insurance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1

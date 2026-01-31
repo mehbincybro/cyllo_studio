@@ -50,9 +50,10 @@
         'views/asset_assign_views.xml',
         'views/asset_scrap_views.xml',
         'views/asset_sell_dispose_views.xml',
+        'views/asset_asset_insurance_views.xml',
         'wizards/asset_modify_views.xml',
         'wizards/asset_cancel_warning_views.xml',
-        'wizards/asset_lost_views.xml'
+        'wizards/asset_lost_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
