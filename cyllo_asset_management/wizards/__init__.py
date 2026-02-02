@@ -22,4 +22,5 @@
 from . import asset_cancel_warning
 from . import asset_lost
 from . import asset_modify
+from . import asset_insurance_wizard
 
