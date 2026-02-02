@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_res_partner_form_inherit_cyllo_visiting_card_digitization" model="ir.ui.view">
+        <field name="name">view.res.partner.form.inherit.cyllo.visiting.card.digitization</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='mobile']" position="after">
+                <field name="is_from_visiting_card" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

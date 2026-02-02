@@ -18,18 +18,18 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-# #############################################################################
+##############################################################################
 import logging
-
-from odoo import api, fields, models
 import base64
+import io
+import re
+
 import pytesseract
 from PIL import Image, ImageOps, UnidentifiedImageError
-import io
 from pdf2image import convert_from_bytes
+
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
-import re
-import ast
 
 _logger = logging.getLogger(__name__)
 
@@ -38,13 +38,9 @@ class CylloVisitingCard(models.Model):
     _name = 'cyllo.visiting.card'
     _description = 'AI Visiting Card Digitization'
 
-    visiting_card_file = fields.Binary(
-        string="Visiting Card (Image / PDF)",
-        required=True,
-        attachment=True
-    )
-    visiting_card_filename = fields.Char(string="File Name")
-    extracted_text = fields.Text(string="Extracted Text", readonly=True)
+    visiting_card_file = fields.Binary(required=True, attachment=True)
+    visiting_card_filename = fields.Char()
+    extracted_text = fields.Text(readonly=True)
     state = fields.Selection([
         ('draft', 'Draft'),
         ('processing', 'Processing'),
@@ -53,38 +49,58 @@ class CylloVisitingCard(models.Model):
     ], default='draft')
 
     # ----------------------------------------------------------
-    # Convert binary field to bytes (safe for any file)
+    # Helpers
     # ----------------------------------------------------------
-    def _decode_binary(self, binary_data):
+
+    def _decode_binary(self, data):
+        """
+            Attempt to decode a Base64-encoded value.
+
+            If the input is valid Base64, it returns the decoded binary data.
+            If decoding fails for any reason, the original input is returned
+            unchanged.
+
+            Args:
+                data: The input data to decode (typically bytes or a Base64 string).
+
+            Returns:
+                Decoded binary data if successful; otherwise, the original input.
+            """
         try:
-            return base64.b64decode(binary_data)
+            return base64.b64decode(data)
         except Exception:
-            return binary_data
+            return data
 
-    # ----------------------------------------------------------
-    # Try OCR as IMAGE
-    # ----------------------------------------------------------
-    def _ocr_image(self, file_bytes, filename):
-        """Trying OCR as IMAGE..."""
-        image = Image.open(io.BytesIO(file_bytes))
-        # Image opened: format={image.format}, size={image.size}, mode={image.mode}
+    def _parse_contact_text(self, text):
+        """
+            Parse free-form contact text into structured contact information.
 
-        # Fix image mode
-        if image.mode not in ('RGB', 'L'):
-            image = image.convert('RGB')
+            The function processes multiline text (e.g., OCR output from a business card)
+            and attempts to extract common contact fields such as name, designation,
+            company, phone numbers, email, website, and address. Lines are analyzed in
+            order, with earlier lines given priority for name and role-related fields.
 
-        # Preprocess for OCR
-        image = ImageOps.grayscale(image)
-        image = ImageOps.autocontrast(image)
+            Args:
+                text (str): Raw multiline text containing contact details.
 
-        text = pytesseract.image_to_string(image)
-        text = text.replace("\x0c", "").strip()
-        contact_list = [line.strip() for line in text.splitlines() if
-                        line.strip()]
-        if not contact_list:
-            raise ValidationError('No text detected.')
-        # Initialize structured dictionary
-        contact_info = {
+            Returns:
+                dict: A dictionary with the following keys:
+                    - name (str or None)
+                    - designation (str or None)
+                    - company (str or None)
+                    - phones (list[str])
+                    - email (str or None)
+                    - website (str or None)
+                    - address (str or None)
+
+            Raises:
+                ValidationError: If no non-empty text lines are detected.
+            """
+        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        if not lines:
+            raise ValidationError("No text detected.")
+
+        contact = {
             "name": None,
             "designation": None,
             "company": None,
@@ -94,97 +110,78 @@ class CylloVisitingCard(models.Model):
             "address": None
         }
 
-        # Regular expressions
-        phone_pattern = r'\+?\d[\d\-\s]+\d'
-        email_pattern = r'\S+@\S+'
-        website_pattern = r'(www\.\S+|\S+\.(com|net|org|io|co))'
+        phone_re = r'\+?\d[\d\-\s]+\d'
+        email_re = r'\S+@\S+'
+        web_re = r'(www\.\S+|\S+\.(com|net|org|io|co))'
 
-        # Simple heuristics to fill dictionary
-        for i, line in enumerate(contact_list):
-            if i == 0:
-                contact_info["name"] = line
-            elif re.search(email_pattern, line):
-                contact_info["email"] = line
-            elif re.search(phone_pattern, line):
-                phones = re.findall(phone_pattern, line)
-                contact_info["phones"].extend(phones)
-            elif re.search(website_pattern, line):
-                contact_info["website"] = line
-            elif not contact_info["designation"]:
-                # assume 2nd line is designation
-                contact_info["designation"] = line
+        for idx, line in enumerate(lines):
+            if idx == 0 and not contact["name"]:
+                contact["name"] = line
+            elif re.search(email_re, line):
+                contact["email"] = line
+            elif re.search(phone_re, line):
+                contact["phones"] += re.findall(phone_re, line)
+            elif re.search(web_re, line):
+                contact["website"] = line
+            elif not contact["designation"]:
+                contact["designation"] = line
+            elif not contact["company"]:
+                contact["company"] = line
             else:
-                # remaining lines are part of the address or company
-                if not contact_info["company"]:
-                    contact_info["company"] = line
-                else:
-                    if contact_info["address"]:
-                        contact_info["address"] += ", " + line
-                    else:
-                        contact_info["address"] = line
-        return contact_info
+                contact["address"] = (
+                    f"{contact['address']}, {line}"
+                    if contact["address"] else line
+                )
 
+        return contact
 
     # ----------------------------------------------------------
-    # Try OCR as PDF
+    # OCR IMAGE
     # ----------------------------------------------------------
-    def _ocr_pdf(self, file_bytes, filename):
-        """Trying OCR as PDF..."""
+    def _ocr_image(self, file_bytes):
+        """
+            Perform OCR on an image and extract structured contact information.
 
+            The method preprocesses the image by converting it to grayscale and
+            applying autocontrast to improve OCR accuracy. Extracted text is then
+            cleaned and passed to the contact text parser.
+
+            Args:
+                file_bytes (bytes): Raw image data to be processed via OCR.
+
+            Returns:
+                dict: Parsed contact information extracted from the image.
+            """
+        image = Image.open(io.BytesIO(file_bytes)).convert('RGB')
+        image = ImageOps.autocontrast(ImageOps.grayscale(image))
+        text = pytesseract.image_to_string(image).replace("\x0c", "").strip()
+        return self._parse_contact_text(text)
+
+    # ----------------------------------------------------------
+    # OCR PDF
+    # ----------------------------------------------------------
+    def _ocr_pdf(self, file_bytes):
+        """
+           Perform OCR on a PDF file and extract structured contact information.
+
+           Each page of the PDF is converted to an image, preprocessed using
+           grayscale conversion and autocontrast, and then passed through OCR.
+           Text from all pages is combined and parsed into contact fields.
+
+           Args:
+               file_bytes (bytes): Raw PDF data to be processed via OCR.
+
+           Returns:
+               dict: Parsed contact information extracted from the PDF.
+           """
         pages = convert_from_bytes(file_bytes)
-        texts = []
+        full_text = ""
 
-        for i, page in enumerate(pages, start=1):
-            # OCR on PDF page {i}
-            page = ImageOps.grayscale(page)
-            page = ImageOps.autocontrast(page)
-            page_text = pytesseract.image_to_string(page).replace("\x0c",
-                                                                  "").strip()
-            if page_text:
-                texts.append(f"--- Page {i} ---\n{page_text}")
-            contact_list = [line.strip() for line in page_text.splitlines() if
-                            line.strip()]
-            if not contact_list :
-                raise ValidationError('No text detected.')
-            contact_info = {
-                "name": None,
-                "designation": None,
-                "company": None,
-                "phones": [],
-                "email": None,
-                "website": None,
-                "address": None
-            }
+        for page in pages:
+            page = ImageOps.autocontrast(ImageOps.grayscale(page))
+            full_text += pytesseract.image_to_string(page)
 
-            # Regular expressions
-            phone_pattern = r'\+?\d[\d\-\s]+\d'
-            email_pattern = r'\S+@\S+'
-            website_pattern = r'(www\.\S+|\S+\.(com|net|org|io|co))'
-
-            # Simple heuristics to fill dictionary
-            for i, line in enumerate(contact_list):
-                if i == 0:
-                    contact_info["name"] = line
-                elif re.search(email_pattern, line):
-                    contact_info["email"] = line
-                elif re.search(phone_pattern, line):
-                    phones = re.findall(phone_pattern, line)
-                    contact_info["phones"].extend(phones)
-                elif re.search(website_pattern, line):
-                    contact_info["website"] = line
-                elif not contact_info["designation"]:
-                    # assume 2nd line is designation
-                    contact_info["designation"] = line
-                else:
-                    # remaining lines are part of the address or company
-                    if not contact_info["company"]:
-                        contact_info["company"] = line
-                    else:
-                        if contact_info["address"]:
-                            contact_info["address"] += ", " + line
-                        else:
-                            contact_info["address"] = line
-        return contact_info
+        return self._parse_contact_text(full_text)
 
     # ----------------------------------------------------------
     # CREATE
@@ -192,6 +189,31 @@ class CylloVisitingCard(models.Model):
 
     @api.model
     def create(self, vals):
+        """
+            Create a record and process an uploaded visiting card via OCR.
+
+            After creating the record, this method attempts to extract contact
+            information from the uploaded visiting card file (image or PDF).
+            The file is decoded, processed with OCR, and parsed into structured
+            contact data. Based on the extracted information, a partner and a
+            related CRM opportunity are automatically created.
+
+            Workflow:
+                - Create the record using the parent `create`
+                - Decode the uploaded file
+                - Attempt image OCR, fallback to PDF OCR if needed
+                - Store extracted data and update processing state
+                - Create a partner and a CRM lead from extracted contact details
+
+            Args:
+                vals (dict): Values used to create the record.
+
+            Returns:
+                recordset: The newly created record.
+
+            Raises:
+                ValidationError: If no text can be extracted from the visiting card.
+            """
         record = super().create(vals)
         if not record.visiting_card_file:
             return record
@@ -201,42 +223,38 @@ class CylloVisitingCard(models.Model):
         try:
             file_bytes = self._decode_binary(record.visiting_card_file)
 
-            # Try IMAGE first, fallback to PDF
             try:
-                extracted_text = self._ocr_image(file_bytes,
-                                                 record.visiting_card_filename)
+                contact = self._ocr_image(file_bytes)
             except (UnidentifiedImageError, ValidationError):
-                _logger.warning("Not an image or OCR failed. Trying PDF.")
-                extracted_text = self._ocr_pdf(file_bytes,
-                                               record.visiting_card_filename)
+                _logger.info("Image OCR failed, trying PDF OCR")
+                contact = self._ocr_pdf(file_bytes)
 
-            if not extracted_text:
-                raise ValidationError("No text detected.")
-
-            record.write({'extracted_text': extracted_text, 'state': 'done'})
+            record.write({
+                'extracted_text': str(contact),
+                'state': 'done'
+            })
 
         except Exception:
-            raise ValidationError("No text detected.")
+            record.state = 'failed'
+            raise ValidationError("No text detected in visiting card.")
 
-        # ----------------------
-        # Partner & Opportunity
-        # ----------------------
-        contacts = ast.literal_eval(record.extracted_text)
-        phone = contacts.get('phones')
-
-        partner_vals = {
-            'name': contacts.get('name') or False,
-            'phone': phone[0] if phone else False,
-            'email': contacts.get('email') or False,
-            'website': contacts.get('website') or False,
-            'contact_address': contacts.get('address') or False,
-        }
-
-        partner = self.env['res.partner'].sudo().create(partner_vals)
-
-        self.env['crm.lead'].sudo().create({
-            'name': f"{partner.name}'s Opportunity",
-            'partner_id': partner.id,
-        })
-
+        # --------------------------------------------------
+        # Create Partner & Opportunity
+        # --------------------------------------------------
+        # phone = contact.get('phones')
+        #
+        # partner = self.env['res.partner'].sudo().create({
+        #     'name': contact.get('name'),
+        #     'phone': phone[0] if phone else False,
+        #     'email': contact.get('email'),
+        #     'website': contact.get('website'),
+        #     'contact_address': contact.get('address'),
+        # })
+        # self.env['crm.lead'].sudo().create({
+        #     'name': f"{partner.name}'s Opportunity",
+        #     'partner_id': partner.id,
+        # })
         return record
+
+
+

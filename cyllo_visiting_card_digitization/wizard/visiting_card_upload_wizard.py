@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, fields
+from odoo import models, fields, api
+import ast
 
 
 class VisitingCardUploadWizard(models.TransientModel):
@@ -37,9 +38,26 @@ class VisitingCardUploadWizard(models.TransientModel):
 
     def action_upload(self):
         self.ensure_one()
-        self.env['cyllo.visiting.card'].create({
+        record = self.env['cyllo.visiting.card'].create({
             'visiting_card_file': self.visiting_card_file,
             'visiting_card_filename': self.visiting_card_filename,
         })
+        data = ast.literal_eval(record.extracted_text)
+        phone = data.get('phones')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Visiting Card',
+            'res_model': 'res.partner',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_name': data.get('name'),
+                'default_phone': phone[0] if phone else False,
+                'default_email': data.get('email'),
+                'default_website': data.get('website'),
+                'default_contact_address': data.get('address'),
+                'default_is_from_visiting_card': True,
+            }
+        }
 
-        return {'type': 'ir.actions.act_window_close'}
+

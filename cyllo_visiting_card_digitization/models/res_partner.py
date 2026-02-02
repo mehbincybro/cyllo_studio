@@ -18,9 +18,25 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#############################################################################
+##############################################################################
+
+from odoo import fields, models, api
 
 
-from . import crm_lead
-from . import cyllo_visiting_card
-from . import res_partner
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
+
+    is_from_visiting_card = fields.Boolean(default=False)
+
+
+
+    @api.model
+    def create(self, vals):
+        """Automatic Lead creation from partner."""
+        rec = super().create(vals)
+        if  rec.is_from_visiting_card == True:
+            self.env['crm.lead'].sudo().create({
+                'name': f"{rec.name}'s Opportunity",
+                'partner_id': rec.id,
+            })
+        return rec
