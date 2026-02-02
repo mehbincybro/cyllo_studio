@@ -59,6 +59,7 @@
                             invisible="not repair_line_ids or is_invoice == True or status != 'repaired'"/>
                     <button type="object" name="action_claim_insurance" string="Claim insurance" class="btn-secondary"
                             invisible="not repair_line_ids or is_invoice == True or status != 'repaired' or not has_insurance"/>
+                    <button type="object" name="action_reimburse_insurance" string="Reimburse insurance" class="btn-secondary"/>
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">

@@ -51,7 +51,8 @@ class AccountAssetRepair(models.Model):
     under_warranty = fields.Boolean(string="Under Warranty", related='asset_id.under_warranty')
     warranty_percentage = fields.Float(string="Warranty Deduction in %", default=100)
     has_warranty = fields.Boolean(default=False, compute="_compute_has_warranty")
-    has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
+    insurance_document_name = fields.Char(string="Insurance Document Name")
+    reimburse_after_invoice = fields.Boolean(default=False)
 
     @api.depends('asset_id')
     def _compute_has_warranty(self):
@@ -66,8 +67,11 @@ class AccountAssetRepair(models.Model):
         """Function for checking insurance period"""
         if self.asset_id.under_insurance and self.asset_id.insurance_end_date > fields.Date.today():
             self.has_insurance = True
+            if self.asset_id.reimburse_after_invoice == True:
+                self.reimburse_after_invoice = True
         else:
             self.has_insurance = False
+            self.reimburse_after_invoice = False
 
     @api.onchange('scheduled_date')
     def _onchange_scheduled_date(self):
@@ -193,7 +197,36 @@ class AccountAssetRepair(models.Model):
         """Button action for creating the invoice for the repair"""
         insurance_percentage = self.env.context.get('insurance_percentage', 0)
         from_wizard = self.env.context.get('from_insurance_wizard', False)
-        if from_wizard and insurance_percentage > 0:
+        is_reimburse = self.env.context.get('is_reimbursed', False)
+        if from_wizard and insurance_percentage > 0 and is_reimburse:
+            repair_invoice = self.env['account.move'].search(
+                [('ref', '=', self.asset_id.name), ('repair_id', '=', self.id)])
+            if repair_invoice:
+                insurance_amount = repair_invoice.amount_total * (insurance_percentage / 100)
+
+                # self.env['account.move'].create({
+                #     'move_type': 'entry',
+                #     'journal_id': self.env.ref('account.1_general').id,
+                #     'date': fields.Date.today(),
+                #     'ref': f'Insurance Reimbursement Claim - {self.asset_id.name}',
+                #     'line_ids': [
+                #         fields.Command.create({
+                #             'account_id': self.asset_id.asset_item_id.insurance_receivable_account_id.id,
+                #             'debit': insurance_amount,
+                #             'credit': 0.0,
+                #             'name': 'Insurance Receivable',
+                #         }),
+                #         fields.Command.create({
+                #             'account_id': self.asset_id.asset_item_id.repair_recovery_account_id.id,
+                #             'debit': 0.0,
+                #             'credit': insurance_amount,
+                #             'name': 'Insurance Recovery',
+                #         }),
+                #     ]
+                # })
+
+
+        elif from_wizard and insurance_percentage > 0:
             repair_invoice = self.env['account.move'].create({
                 'ref': self.asset_id.name,
                 'partner_id': self.employee_id.id,

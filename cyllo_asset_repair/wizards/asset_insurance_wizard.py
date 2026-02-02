@@ -13,29 +13,14 @@ class AssetInsurance(models.TransientModel):
                                   default=lambda self: self.env.company.currency_id)
     total_amount = fields.Monetary(string="Total Repair Cost", readonly=True)
     insurance_percentage = fields.Float(string="Insurance Deduction in %", default=100)
+    reimburse_after_invoice = fields.Boolean(default=False)
 
     def action_create_invoice(self):
         print("CREATE INV",self.repair_id.id)
         return self.repair_id.with_context(
             insurance_percentage=self.insurance_percentage,
-            from_insurance_wizard=True
+            from_insurance_wizard=True,
+            is_reimbursed=self.reimburse_after_invoice,
         ).action_create_invoice()
 
-        # repair_invoice = self.env['account.move'].create({
-            # 'ref': self.asset_id.name,
-        #     'partner_id': self.repair_id.employee_id.id,
-        #     'move_type': 'out_invoice',
-        #     'state': 'draft',
-        #     'repair_id': self.repair_id.id,
-        #     'invoice_line_ids': [fields.Command.create({
-        #         'product_id': lines.product_id.id,
-        #         'name': self.asset_id.asset_item_id.name,
-        #         'move_type': 'out_invoice',
-        #         'quantity': lines.product_qty,
-        #         'price_unit': lines.unit_price,
-        #         'price_subtotal': lines.price_subtotal
-        #     }) for lines in self.repair_id.repair_line_ids if lines.repair_action != 'remove']
-        # })
-        # print("WWWW")
-        # self.repair_id.is_invoice = True
 

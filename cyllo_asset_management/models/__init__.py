@@ -35,3 +35,4 @@ from . import asset_reservation
 from . import asset_scrap
 from . import asset_sell_dispose
 from . import asset_type
+from . import asset_asset_insurance

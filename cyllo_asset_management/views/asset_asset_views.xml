@@ -182,7 +182,7 @@
                         <page name="asset_warranty_insurance" string="Warranty and Insurance">
                             <group>
                                 <group string="Warranty">
-                                    <field name="under_warranty"/>
+                                    <field name="under_warranty" readonly="is_confirm"/>
                                     <label for="warranty_period" name="warranty_period" string="Period"
                                            invisible="not under_warranty"/>
                                     <div class="o_row" invisible="not under_warranty">
@@ -192,17 +192,23 @@
                                                required="under_warranty"/>
                                     </div>
                                     <field name="warranty_end_date" invisible="not under_warranty"/>
+                                    <field name="warranty_attachment_ids" widget="many2many_binary"
+                                           invisible="not under_warranty" readonly="is_confirm"/>
                                 </group>
                                 <group string="Insurance">
-                                    <field name="under_insurance"/>
-                                    <field name="insurance_provider" invisible="not under_insurance"/>
-                                    <field name="insurance_type" invisible="not under_insurance"/>
-                                    <field name="insurance_number" invisible="not under_insurance"
+                                    <field name="under_insurance" readonly="is_confirm"/>
+                                    <field name="reimburse_after_invoice" invisible="not under_insurance"
+                                           readonly="is_confirm"/>
+                                    <field name="insurance_name" invisible="not under_insurance"
+                                           readonly="is_confirm" options="{'no_create': True, 'no_create_edit': True}"/>
+                                    <field name="insurance_number" invisible="not under_insurance" readonly="is_confirm"
                                            required="under_insurance"/>
-                                    <field name="insurance_start_date" widget="daterange"
+                                    <field name="insurance_start_date" widget="daterange" readonly="is_confirm"
                                            options="{'end_date_field': 'insurance_end_date'}"
                                            required="under_insurance" invisible="not under_insurance"/>
-                                    <field name="insurance_end_date" invisible="1"/>
+                                    <field name="insurance_end_date" invisible="1" readonly="is_confirm"/>
+                                    <field name="insurance_attachment_ids" widget="many2many_binary"
+                                           invisible="not under_insurance" readonly="is_confirm"/>
                                 </group>
                             </group>
                         </page>
