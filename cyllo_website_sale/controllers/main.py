@@ -23,7 +23,7 @@ from odoo import http
 from odoo.http import request, route
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantController
-
+from odoo.addons.payment.controllers.portal import PaymentPortal
 
 class WebsiteSaleSubscription(WebsiteSale):
 
@@ -60,15 +60,9 @@ class WebsiteSaleSubscription(WebsiteSale):
                 if 'notification_info' in res:
                     for notify_line in res['notification_info'].get('lines', []):
                         if notify_line.get('id') == sol_line.id:
-                            if sol_line.product_template_id.trial_period >= 1:
-                                line_price_total = 0
-                            elif show_tax:
-                                line_price_total = sol_line.price_total
-                            else:
-                                line_price_total = sol_line.price_subtotal
                             notify_line.update({
                                 'price_unit': sol_line.price_unit,
-                                'line_price_total': line_price_total,
+                                'line_price_total': sol_line.price_total if show_tax else sol_line.price_subtotal,
                                 'currency_id': currency.id,
                                 'display_price': sol_line.price_unit,
                                 'name': f"{sol_line.product_id.name} ({plan.name})",
@@ -77,10 +71,10 @@ class WebsiteSaleSubscription(WebsiteSale):
                         'cart_quantity',
                         order.cart_quantity
                     )
-            # if sol_line.product_template_id.trial_period >= 1:
-            #     res.update({})
-        print(res)
+        order.sudo()._set_trial_discount_line()
         return res
+
+
 
 class CustomWebsiteSale(WebsiteSaleVariantController):
 
@@ -120,7 +114,8 @@ class WebsiteSaleCartCheck(http.Controller):
             return {'is_subscription':False,'has_subscription': False, 'has_normal': False}
 
         # Check for presence of different product types
-        lines = order.order_line.filtered(lambda l: not l.is_delivery)
+        trial_discount_product = request.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
+        lines = order.order_line.filtered(lambda l: not (l.is_delivery or l.product_id == trial_discount_product))
         has_sub = any(l.product_id.is_subscription for l in lines)
         has_normal = any(not l.product_id.is_subscription for l in lines)
         return {
@@ -128,3 +123,4 @@ class WebsiteSaleCartCheck(http.Controller):
             'has_subscription': has_sub,
             'has_normal': has_normal
         }
+

@@ -28,7 +28,8 @@
     'company': "Cyllo",
     'maintainer': 'Cyllo',
     'website': "https://www.cyllo.com",
-    'data': ['views/templates.xml',
+    'data': ['data/product_data.xml',
+             'views/templates.xml',
              'views/website_sale_templates.xml'
              ],
     'assets': {

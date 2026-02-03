@@ -47,7 +47,7 @@ class PortalControl(CustomerPortal):
         """Method used to return datas to create a tree view with orders of the current user in the portal"""
         subscription_ids = request.env['subscription.order'].sudo().search(
             [('partner_id', '=', request.env.user.partner_id.id),
-             ('state', 'in', ['posted', 'sale', 'requested'])])
+             ('state', 'in', ['posted', 'sale', 'requested'])],order='create_date desc')
         values = {
             'orders': subscription_ids,
             'active_records': subscription_ids.filtered(

@@ -77,7 +77,8 @@ class SaleOrder(models.Model):
 
     def action_confirm(self):
         sub_lines = self.order_line.filtered(lambda l: l.product_id.is_subscription)
-        non_sub_lines = self.order_line.filtered(lambda l: not l.product_id.is_subscription and not(self.website_id and l.is_delivery))
+        trial_discount_product = self.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
+        non_sub_lines = self.order_line.filtered(lambda l: not l.product_id.is_subscription and not(self.website_id and (l.is_delivery or l.product_id == trial_discount_product)))
         if sub_lines and non_sub_lines:
             raise ValidationError(_('Cannot add subscription product with non-subscription product.'))
 

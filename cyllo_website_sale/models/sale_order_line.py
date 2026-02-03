@@ -43,5 +43,19 @@ class SaleOrderLine(models.Model):
 
                 line.price_unit = price
 
+    def _show_in_cart(self):
+        """
+        Overrides the standard logic to hide the trial discount product
+        from the website cart display.
+        """
+        # Get the standard result (which already hides delivery lines)
+        res = super()._show_in_cart()
 
+        # Get the trial product reference
+        trial_product = self.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
 
+        # If this line is the trial discount, force it to hide (return False)
+        if trial_product and self.product_id == trial_product:
+            return False
+
+        return res
