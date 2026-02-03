@@ -8,8 +8,8 @@
             <tree>
                 <field name="name"/>
                 <field name="asset_item_id"/>
-                <field name="asset_type_id"/>
-                <field name="brand_id"/>
+<!--                <field name="asset_type_id"/>-->
+                <field name="brand"/>
                 <field name="status"/>
             </tree>
         </field>
@@ -22,7 +22,7 @@
             <search string="Asset">
                 <field name="name"/>
                 <field name="asset_item_id"/>
-                <field name="asset_type_id"/>
+<!--                <field name="asset_type_id"/>-->
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="draft" string="Draft" domain="[('status', '=', 'draft')]"/>
@@ -36,7 +36,7 @@
                 <filter name="sell" string="Sold" domain="[('status', '=', 'sell')]"/>
                 <group expand="0" string="Group By...">
                     <filter string="Asset Item" name="asset_item" domain="[]" context="{'group_by':'asset_item_id'}"/>
-                    <filter string="Asset Type" name="asset_type" domain="[]" context="{'group_by':'asset_type_id'}"/>
+<!--                    <filter string="Asset Type" name="asset_type" domain="[]" context="{'group_by':'asset_type_id'}"/>-->
                 </group>
             </search>
         </field>
@@ -121,10 +121,10 @@
                     <group>
                         <group>
                             <field name="asset_item_id" readonly="status == 'running'" options="{'no_create': True}"/>
-                            <field name="asset_type_id" readonly="status == 'running'" options="{'no_create': True}"/>
+<!--                            <field name="asset_type_id" readonly="status == 'running'" options="{'no_create': True}"/>-->
                         </group>
                         <group>
-                            <field name="brand_id" readonly="status == 'running'" options="{'no_create': True}"/>
+                            <field name="brand" readonly="status == 'running'" options="{'no_create': True}"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="date" readonly="is_confirm"/>
                             <field name="is_confirm" invisible="1"/>

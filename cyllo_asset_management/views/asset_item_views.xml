@@ -28,9 +28,9 @@
                     </div>
                     <group>
                         <group>
-                            <field name="asset_type_id"/>
-                            <field name="brand_ids" invisible="1"/>
-                            <field name="brand_id" domain="[('id','in', brand_ids)]"/>
+<!--                            <field name="asset_type_id"/>-->
+<!--                            <field name="brand_ids" invisible="1"/>-->
+                            <field name="brand"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="date"/>
                         </group>

@@ -33,7 +33,7 @@ class AccountMove(models.Model):
     asset_asset_count = fields.Integer(string='Assets', compute='_compute_asset_asset_count', copy=False)
     lease_id = fields.Many2one('asset.lease', copy=False)
     rent_id = fields.Many2one('asset.rental', copy=False)
-    repair_id = fields.Many2one('account.asset.repair', index=True, ondelete='cascade',
+    repair_id = fields.Many2one('maintenance.request', index=True, ondelete='cascade',
                                 copy=False, domain="[('company_id', '=', company_id)]")
     depreciation_line_id = fields.Many2one('asset.depreciation.line')
 

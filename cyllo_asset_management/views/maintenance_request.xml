@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_maintenance_request_form" model="ir.ui.view">
+        <field name="name">view.maintenance.request.form</field>
+        <field name="model">maintenance.request</field>
+        <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='request_date']" position="before">
+                <field name="asset_id"/>
+                <field name="maintenance_type" invisible="True"/>
+            </xpath>
+            <xpath expr="//field[@name='maintenance_team_id']" position="after">
+                <field name="partner_id" invisible="equipment_id or maintenance_type=='preventive'"/>
+                <field name="expense" invisible="equipment_id or maintenance_type=='preventive'"/>
+            </xpath>
+            <xpath expr="//button[@name='archive_equipment_request']" position="after">
+                <field name="has_invoiced" invisible="True"/>
+                <field name="stage_done" invisible="True"/>
+                <button type="object" name="action_create_bill" string="Create Bill" class="oe_highlight"
+                        invisible="not stage_done or has_invoiced"/>
+                <button type="object" name="action_scrap" string="Scrap" class="btn-secondary"
+                        invisible="not stage_done or equipment_id or maintenance_type=='preventive'"/>
+                <button type="object" name="action_claim_insurance" string="Claim insurance" class="btn-secondary"
+                        invisible="not stage_done or has_invoiced"/>
+            </xpath>
+            <xpath expr="//sheet" position="after">
+                <div class="oe_button_box" name="button_box" invisible="not has_invoiced">
+                    <button class="oe_stat_button" name="action_view_invoice" type="object">
+                        <i class="ri-draft-line"/>
+                        Bill
+                    </button>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='maintenance_type']" position="after">
+                <label for="has_warranty" name="warranty_period" string="Under Warranty"
+                       invisible="equipment_id or maintenance_type=='preventive'"/>
+                <div class="o_row" invisible="equipment_id or maintenance_type=='preventive'">
+                    <field name="has_warranty" style="width:25% !important;"/>
+                    <label for="warranty_percentage" name="warranty_percentage"
+                           string="Deduction %" invisible="not has_warranty"/>
+                    <field name="warranty_percentage" invisible="not has_warranty"/>
+                </div>
+                <field name="has_insurance" string="Under Insurance"
+                       invisible="equipment_id or maintenance_type=='preventive'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

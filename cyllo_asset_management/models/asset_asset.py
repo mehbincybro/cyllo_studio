@@ -35,10 +35,10 @@ class AssetAsset(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(string="Asset", required=True)
-    asset_item_id = fields.Many2one("asset.item", required=True)
-    asset_type_id = fields.Many2one("asset.type", required=True,
-                                    related='asset_item_id.asset_type_id')
-    brand_id = fields.Many2one("asset.brand", related='asset_item_id.brand_id')
+    asset_item_id = fields.Many2one("asset.item")
+    # asset_type_id = fields.Many2one("asset.type", required=True,
+    #                                 related='asset_item_id.asset_type_id')
+    brand = fields.Char(String="Brand")
     date = fields.Date(default=fields.Date.context_today, required=True)
     company_id = fields.Many2one(
         'res.company', required=True,
@@ -80,36 +80,30 @@ class AssetAsset(models.Model):
         string='Method', readonly=False, required=True)
     depreciation_date = fields.Date(default=fields.Date.context_today, tracking=True, string='Depreciation date')
     method_duration = fields.Integer(string="Duration", tracking=True, default=1, readonly=False)
-    is_auto_calculate = fields.Boolean(string='Auto Calculate', related='asset_item_id.is_auto_calculate',
-                                       readonly=False)
-    depreciating_factor = fields.Float(related='asset_item_id.depreciating_factor', readonly=False)
-    duration_period = fields.Selection([('month', 'Month'), ('year', 'Year')], tracking=True,
-                                       required=True, related='asset_item_id.duration_period', readonly=False)
+    is_auto_calculate = fields.Boolean(string='Auto Calculate')
+    depreciating_factor = fields.Float(default=30)
+    duration_period = fields.Selection([('month', 'Month'), ('year', 'Year')], tracking=True, default='year',
+                                       required=True)
     original_value = fields.Float(required=True)
     salvage_value = fields.Float(required=True, string='Depreciatable Value')
     modify_value = fields.Float()
     depreciation_line_ids = fields.One2many('asset.depreciation.line', 'depreciation_id',
                                             string='Asset Depreciation Line')
-    fixed_asset_account_id = fields.Many2one('account.account',
-                                             domain="[('account_type', 'in', ('asset_current', 'asset_fixed'))]",
-                                             related='asset_item_id.fixed_asset_account_id', readonly=False)
+    fixed_asset_account_id = fields.Many2one('account.account', required=True,
+                                             domain="[('account_type', 'in', ('asset_current', 'asset_fixed'))]")
     asset_depreciation_account_id = fields.Many2one('account.account', string='Depreciation Asset Account',
-                                                    domain="[('account_type', 'in', ('asset_current', 'asset_fixed'))]",
-                                                    related='asset_item_id.asset_depreciation_account_id',
-                                                    readonly=False)
-    asset_expense_account_id = fields.Many2one('account.account',
-                                               domain="[('account_type', '=', 'expense')]",
-                                               related='asset_item_id.asset_expense_account_id', readonly=False)
-    asset_loss_account_id = fields.Many2one('account.account', required=True,
-                                            related='asset_item_id.asset_loss_account_id', readonly=False)
-    asset_journal_id = fields.Many2one('account.journal',
-                                       related='asset_item_id.asset_journal_id', readonly=False)
+                                                    required=True,
+                                                    domain="[('account_type', 'in', ('asset_current', 'asset_fixed'))]")
+    asset_expense_account_id = fields.Many2one('account.account', required=True,
+                                               domain="[('account_type', '=', 'expense')]")
+    asset_loss_account_id = fields.Many2one('account.account', required=True)
+    asset_journal_id = fields.Many2one('account.journal', required=True)
     depreciated_entry_ids = fields.One2many('account.move', 'asset_asset_id', string='Depreciation Lines')
     modified_asset_ids = fields.Many2many('asset.asset', "asset_sub_table", 'asset_1', 'asset_2')
     computation_method = fields.Selection(
         [('no_prorata', 'No Prorata'), ('constant_period', 'Constant Period'), ('daily_compute', 'Daily Computation')],
         'Computation', tracking=True, readonly=False, required=True)
-    prorata_date = fields.Date(default=fields.Date.context_today, related='asset_item_id.prorata_date', readonly=False)
+    prorata_date = fields.Date(default=fields.Date.context_today)
     entry_count = fields.Integer(compute='_compute_entry_count')
     modified_count = fields.Integer(compute='_compute_modified_count')
     invoice_id = fields.Many2one('account.move')
@@ -1256,3 +1250,17 @@ class AssetAsset(models.Model):
                     record.warranty_end_date = record.date + relativedelta(years=record.warranty_period)
             else:
                 record.warranty_end_date = fields.Date.today()
+
+    @api.onchange('asset_item_id')
+    def _onchange_asset_item(self):
+        for record in self:
+            record.brand=record.asset_item_id.brand
+            record.is_auto_calculate=record.asset_item_id.is_auto_calculate
+            record.depreciating_factor=record.asset_item_id.depreciating_factor
+            record.duration_period=record.asset_item_id.duration_period
+            record.fixed_asset_account_id=record.asset_item_id.fixed_asset_account_id
+            record.asset_depreciation_account_id=record.asset_item_id.asset_depreciation_account_id
+            record.asset_expense_account_id=record.asset_item_id.asset_expense_account_id
+            record.asset_loss_account_id=record.asset_item_id.asset_loss_account_id
+            record.asset_journal_id=record.asset_item_id.asset_journal_id
+            record.prorata_date=record.asset_item_id.prorata_date
