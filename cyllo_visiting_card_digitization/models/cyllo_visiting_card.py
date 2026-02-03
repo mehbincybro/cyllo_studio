@@ -19,10 +19,12 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+
 import logging
 import base64
 import io
 import re
+import json
 
 import pytesseract
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -30,6 +32,10 @@ from pdf2image import convert_from_bytes
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+
+import imghdr
+from langchain_core.messages import HumanMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 
 _logger = logging.getLogger(__name__)
 
@@ -47,6 +53,12 @@ class CylloVisitingCard(models.Model):
         ('done', 'Done'),
         ('failed', 'Failed')
     ], default='draft')
+
+    type_of_digitization = fields.Selection(
+        [('manually', 'Manually'), ('use_ai', 'Use AI')],
+        required=True,
+        default='manually'
+    )
 
     # ----------------------------------------------------------
     # Helpers
@@ -96,11 +108,13 @@ class CylloVisitingCard(models.Model):
             Raises:
                 ValidationError: If no non-empty text lines are detected.
             """
-        lines = [l.strip() for l in text.splitlines() if l.strip()]
-        if not lines:
+
+        text_lines = [line.strip() for line in text.splitlines() if
+                      line.strip()]
+        if not text_lines:
             raise ValidationError("No text detected.")
 
-        contact = {
+        contact_info = {
             "name": None,
             "designation": None,
             "company": None,
@@ -110,30 +124,39 @@ class CylloVisitingCard(models.Model):
             "address": None
         }
 
-        phone_re = r'\+?\d[\d\-\s]+\d'
-        email_re = r'\S+@\S+'
-        web_re = r'(www\.\S+|\S+\.(com|net|org|io|co))'
+        phone_pattern = r'\+?\d[\d\-\s]+\d'
+        email_pattern = r'\S+@\S+'
+        website_pattern = r'(www\.\S+|\S+\.(com|net|org|io|co))'
 
-        for idx, line in enumerate(lines):
-            if idx == 0 and not contact["name"]:
-                contact["name"] = line
-            elif re.search(email_re, line):
-                contact["email"] = line
-            elif re.search(phone_re, line):
-                contact["phones"] += re.findall(phone_re, line)
-            elif re.search(web_re, line):
-                contact["website"] = line
-            elif not contact["designation"]:
-                contact["designation"] = line
-            elif not contact["company"]:
-                contact["company"] = line
-            else:
-                contact["address"] = (
-                    f"{contact['address']}, {line}"
-                    if contact["address"] else line
+        for line_index, text_line in enumerate(text_lines):
+
+            if line_index == 0 and not contact_info["name"]:
+                contact_info["name"] = text_line
+
+            elif re.search(email_pattern, text_line):
+                contact_info["email"] = text_line
+
+            elif re.search(phone_pattern, text_line):
+                contact_info["phones"].extend(
+                    re.findall(phone_pattern, text_line)
                 )
 
-        return contact
+            elif re.search(website_pattern, text_line):
+                contact_info["website"] = text_line
+
+            elif not contact_info["designation"]:
+                contact_info["designation"] = text_line
+
+            elif not contact_info["company"]:
+                contact_info["company"] = text_line
+
+            else:
+                contact_info["address"] = (
+                    f"{contact_info['address']}, {text_line}"
+                    if contact_info["address"] else text_line
+                )
+        print(contact_info)
+        return contact_info
 
     # ----------------------------------------------------------
     # OCR IMAGE
@@ -183,6 +206,118 @@ class CylloVisitingCard(models.Model):
 
         return self._parse_contact_text(full_text)
 
+
+    # ----------------------------------------------------------
+    # Process With Ai
+    # ----------------------------------------------------------
+    def _process_with_ai(self):
+        if not self.visiting_card_file:
+            raise ValidationError(
+                "No visiting card file uploaded for AI extraction."
+            )
+
+        try:
+            file_bytes = base64.b64decode(self.visiting_card_file)
+        except Exception:
+            raise ValidationError(
+                "Please upload your visiting card properly.")
+
+        mime_type = None
+        image_type = imghdr.what(None, file_bytes)
+        if image_type:
+            mime_type = f"image/{image_type}"
+        elif file_bytes[:4] == b'%PDF':
+            mime_type = "application/pdf"
+        else:
+            raise ValidationError(
+                "Unsupported file type for AI extraction. Please upload PNG, JPG, JPEG, or PDF."
+            )
+
+        _logger.info("AI Digitization Triggered | MIME type: %s", mime_type)
+
+        api_key = self.env['ir.config_parameter'].sudo().get_param(
+            'cyllo_agent.api_key'
+        )
+        if not api_key:
+            raise ValidationError(
+                "Google API key not set in system parameters."
+            )
+
+        visiting_card_media = {
+            "type": "media",
+            "data": file_bytes,
+            "mime_type": mime_type
+        }
+
+        message = HumanMessage(
+            content=[
+                {
+                    "type": "text",
+                    "text": (
+                        "Extract the contact information from this visiting card. "
+                        "Return JSON with keys: name, designation, company, phones (list), "
+                        "email, website, address."
+                    )
+                },
+                visiting_card_media
+            ]
+        )
+        llm = ChatGoogleGenerativeAI(
+            model='gemini-2.5-flash',
+            google_api_key=api_key
+        )
+
+        try:
+            response = llm.invoke([message])
+            response_text = response.content
+        except Exception as e:
+            error_message = str(e).lower()
+
+            # Check for token/API key expiration or authentication errors
+            if any(keyword in error_message for keyword in [
+                'expired', 'invalid api key', 'api key not valid',
+                'authentication', 'unauthorized', '401', 'api_key_invalid'
+            ]):
+                _logger.error("API token has expired or is invalid: %s", str(e))
+                raise ValidationError(
+                    "Your API token has expired or is invalid. "
+                    "Please update your Google API key in system parameters."
+                )
+
+            # Check for quota exceeded
+            if any(keyword in error_message for keyword in [
+                'quota', 'rate limit', 'resource exhausted', '429'
+            ]):
+                _logger.error("API quota exceeded: %s", str(e))
+                raise ValidationError(
+                    "API quota exceeded. Please try again later or check your API limits."
+                )
+
+            # Generic AI extraction error
+            _logger.error("AI extraction failed: %s", str(e))
+            raise ValidationError(
+                f"Please upload your visiting card properly."
+            )
+
+        # Parse the JSON response into a Python dictionary
+
+
+        try:
+            # Remove markdown code blocks if present
+            cleaned_text = re.sub(r'```json\s*|\s*```', '',
+                                  response_text).strip()
+
+            # Parse JSON string to dictionary
+            contact = json.loads(cleaned_text)
+
+            print(contact)  # This will print the Python dictionary
+            return contact
+
+        except json.JSONDecodeError as e:
+            _logger.error("Failed to parse AI response as JSON: %s", str(e))
+            raise ValidationError(
+                "Please upload your visiting card properly.")
+
     # ----------------------------------------------------------
     # CREATE
     # ----------------------------------------------------------
@@ -215,11 +350,28 @@ class CylloVisitingCard(models.Model):
                 ValidationError: If no text can be extracted from the visiting card.
             """
         record = super().create(vals)
+
         if not record.visiting_card_file:
             return record
 
         record.state = 'processing'
 
+        # 🔹 AI FLOW (NEW)
+        if record.type_of_digitization == 'use_ai':
+            try:
+                contact = record._process_with_ai()
+                record.write({
+                    'extracted_text': str(contact),
+                    'state': 'done'
+                })
+            except Exception as e:
+                record.state = 'failed'
+                _logger.exception(e)
+                raise ValidationError("AI extraction failed.")
+
+            return record
+
+        # 🔹 MANUAL / OCR FLOW (UNCHANGED)
         try:
             file_bytes = self._decode_binary(record.visiting_card_file)
 
@@ -238,23 +390,4 @@ class CylloVisitingCard(models.Model):
             record.state = 'failed'
             raise ValidationError("No text detected in visiting card.")
 
-        # --------------------------------------------------
-        # Create Partner & Opportunity
-        # --------------------------------------------------
-        # phone = contact.get('phones')
-        #
-        # partner = self.env['res.partner'].sudo().create({
-        #     'name': contact.get('name'),
-        #     'phone': phone[0] if phone else False,
-        #     'email': contact.get('email'),
-        #     'website': contact.get('website'),
-        #     'contact_address': contact.get('address'),
-        # })
-        # self.env['crm.lead'].sudo().create({
-        #     'name': f"{partner.name}'s Opportunity",
-        #     'partner_id': partner.id,
-        # })
         return record
-
-
-

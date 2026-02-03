@@ -30,13 +30,9 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base','crm', 'cyllo_ocr_digitization', 'cyllo_crm'],
-    'external_dependencies': {
-        'python': ['numpy', 'pandas', 'camelot-py', 'opencv-python', 'PyMuPDF']
-    },
+    'depends': ['base','crm', 'cyllo_ocr_digitization', 'cyllo_crm', 'cyllo_ai'],
     'data': [
          'security/ir.model.access.csv',
-        # 'data/crm_lead_creation_crone.xml',
         'views/cyllo_visiting_card_views.xml',
         'views/crm_visiting_card_upload.xml',
         'views/res_partner_form_view.xml',

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="crm_lead_opportunity_add_button" model="ir.ui.view">
+    <record id="crm_lead_opportunity_add_button_kanban" model="ir.ui.view">
         <field name="name">crm.lead.kanban.opportunity.upload.button</field>
         <field name="model">crm.lead</field>
 
@@ -13,7 +13,25 @@
                 <button name="action_upload_visiting_card" type="object"
                         class="btn-primary"
                         display="always"
-                        string="Upload Visiting Card"
+                        string="Business Card"
+                />
+            </xpath>
+        </field>
+    </record>
+    <record id="crm_lead_opportunity_add_button_list" model="ir.ui.view">
+        <field name="name">crm.lead.list.opportunity.upload.button</field>
+        <field name="model">crm.lead</field>
+
+        <!-- inherit the view that already added Generate Leads -->
+        <field name="inherit_id" ref="crm.crm_case_tree_view_oppor"/>
+
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@name='action_generate_leads']"
+                   position="after">
+                <button name="action_upload_visiting_card" type="object"
+                        class="btn-primary"
+                        display="always"
+                        string="Business Card"
                 />
             </xpath>
         </field>

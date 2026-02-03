@@ -5,10 +5,11 @@
         <field name="name">visiting.card.upload.wizard.form</field>
         <field name="model">visiting.card.upload.wizard</field>
         <field name="arch" type="xml">
-            <form string="Upload Visiting Card">
+            <form string="Upload Business Card">
                 <group>
                     <field name="visiting_card_file"
                            filename="visiting_card_filename"/>
+                    <field name="type_of_digitization"  widget="radio"/>
                 </group>
                 <footer>
                     <button name="action_upload"

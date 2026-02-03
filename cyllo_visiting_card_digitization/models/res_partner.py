@@ -28,8 +28,6 @@ class ResPartner(models.Model):
 
     is_from_visiting_card = fields.Boolean(default=False)
 
-
-
     @api.model
     def create(self, vals):
         """Automatic Lead creation from partner."""
