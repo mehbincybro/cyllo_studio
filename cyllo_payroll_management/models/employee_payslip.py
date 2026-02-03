@@ -94,6 +94,16 @@ class EmployeePayslip(models.Model):
     gratuity_settlement_id = fields.Many2one('gratuity.settlement')
     parent_id = fields.Many2one(comodel_name='employee.payslip')
     refund_count = fields.Integer(compute="_compute_refund_count", string="Refund Count", readonly=True)
+    expense_sheet_ids = fields.Many2many(
+        'hr.expense.sheet',
+        string='Expense Sheets',
+        help='Expense sheets included in this payslip'
+    )
+    expense_sheet_count = fields.Integer(
+        string='Expense Count',
+        compute='_compute_expense_sheet_count',
+        help='Number of expense sheets linked to this payslip'
+    )
 
     @api.depends('start_date')
     def _compute_to_date(self):
@@ -123,7 +133,23 @@ class EmployeePayslip(models.Model):
     def _compute_refund_count(self):
         """To compute the count of the refund of the particular payslip"""
         for record in self:
-            record.refund_count= self.search_count([('parent_id', '=', self.id)])
+            record.refund_count= self.search_count([('parent_id', '=', record.id)])
+
+    @api.depends('expense_sheet_ids')
+    def _compute_expense_sheet_count(self):
+        """Compute the count of expense sheets linked to this payslip"""
+        for record in self:
+            record.expense_sheet_count = len(record.expense_sheet_ids)
+
+    def action_view_expense_sheets(self):
+        """To view corresponding expense sheets linked to the payslip"""
+        return {
+            'name': 'Expense Sheets',
+            'view_mode': 'tree,form',
+            'res_model': 'hr.expense.sheet',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.expense_sheet_ids.ids)],
+        }
 
     @api.depends('employee_id', 'start_date', 'to_date', 'contract_id', 'contract_id.work_entry_source')
     def _compute_work_entry_ids(self):
@@ -272,6 +298,10 @@ class EmployeePayslip(models.Model):
 
             # Proceed with posting and payment registration
             rec.account_move_id.write({'state': 'posted'})
+            if rec.expense_sheet_ids:
+                rec.expense_sheet_ids.write({
+                    'state': 'done'
+                })
             rec._compute_is_attachment_paid()
         return self.account_move_id.action_register_payment()
 
@@ -281,11 +311,21 @@ class EmployeePayslip(models.Model):
         updated to paid"""
         for slip in self:
             slip.write({'state': 'paid'})
+            if slip.expense_sheet_ids:
+                slip.expense_sheet_ids.write({
+                    'state': 'done',
+                    'payment_state': 'paid'
+                })
+                slip.expense_sheet_ids.expense_line_ids.write({
+                    'state': 'done',
+                })
             if slip.gratuity_settlement_id:
                 if slip.credit_note:
                     slip.gratuity_settlement_id.write({'state': 'cancel'})
                 else:
                     slip.gratuity_settlement_id.write({'state': 'paid'})
+            if all(slip.state == 'paid' for slip in slip.employee_payslip_batch_id.employee_payslip_ids):
+                slip.employee_payslip_batch_id.write({'state': 'paid'})
 
     def action_cancel(self):
         """ Cancel payslip, its journal entry, and related payments """
@@ -446,6 +486,12 @@ class EmployeePayslip(models.Model):
             'domain': [('id', 'in', self.work_entry_ids.ids)],
         }
 
+    def action_link_expenses(self):
+        """Link expense sheets to this payslip after computation"""
+        for payslip in self:
+            if payslip.expense_sheet_ids:
+                payslip.expense_sheet_ids.write({'payslip_id': payslip.id})
+
     def action_compute_sheet(self):
         """Compute the salary details for the selected employee."""
         for payslip in self:
@@ -454,6 +500,7 @@ class EmployeePayslip(models.Model):
                 payslip.employee_payslip_line_ids.unlink()
                 contract_ids = payslip.contract_id.id or self.get_employee_contract(
                     payslip.employee_id, payslip.start_date, payslip.to_date)
+                payslip.action_link_expenses()
                 self.gratuity_settlement_id = False
                 if self.gratuity_settlement_ids:
                     self.gratuity_settlement_id = self.gratuity_settlement_ids[0]
@@ -499,6 +546,30 @@ class EmployeePayslip(models.Model):
                 'payslip_id': self.id,
                 'is_attachment': is_attachment
             })
+        expense_sheets = self.env['hr.expense.sheet'].sudo().search([
+            ('employee_id', '=', employee.id),
+            ('state', '=', 'approve'),
+            ('report_to_payslip', '=', True),
+            '|',
+            ('payslip_id', '=', False),  # Not yet included in any payslip
+            ('payslip_id', '=', self.id),  # Not yet included in other payslip
+        ])
+
+        if expense_sheets:
+            total_expense_amount = sum(expense_sheets.mapped('total_amount'))
+            expense_input_type = self.env.ref(
+                'cyllo_payroll_management.employee_payslip_other_input_expense_reimbursement'
+            )
+            input_line_values.append({
+                'type_id': expense_input_type.id,
+                'code': expense_input_type.code,
+                'amount': total_expense_amount,
+                'payslip_id': self.id,
+                'is_attachment': False
+            })
+            # Store expense sheets for reference
+            for expense in expense_sheets:
+                self.expense_sheet_ids = [(4,expense.id)]
         return input_line_values
 
     @api.model
