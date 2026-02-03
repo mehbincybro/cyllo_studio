@@ -29,7 +29,7 @@ from odoo import _, api, fields, models, tools
 from odoo.exceptions import UserError, ValidationError
 from odoo.tools import date_utils
 from odoo.addons import decimal_precision as decimal
-
+from collections import defaultdict
 
 class EmployeePayslip(models.Model):
     """By using this class we can create and generate the salary slip of the
@@ -133,7 +133,7 @@ class EmployeePayslip(models.Model):
     def _compute_refund_count(self):
         """To compute the count of the refund of the particular payslip"""
         for record in self:
-            record.refund_count= self.search_count([('parent_id', '=', record.id)])
+            record.refund_count= self.search_count([('parent_id', '=', self.id)])
 
     @api.depends('expense_sheet_ids')
     def _compute_expense_sheet_count(self):
@@ -324,8 +324,6 @@ class EmployeePayslip(models.Model):
                     slip.gratuity_settlement_id.write({'state': 'cancel'})
                 else:
                     slip.gratuity_settlement_id.write({'state': 'paid'})
-            if all(slip.state == 'paid' for slip in slip.employee_payslip_batch_id.employee_payslip_ids):
-                slip.employee_payslip_batch_id.write({'state': 'paid'})
 
     def action_cancel(self):
         """ Cancel payslip, its journal entry, and related payments """
@@ -550,9 +548,7 @@ class EmployeePayslip(models.Model):
             ('employee_id', '=', employee.id),
             ('state', '=', 'approve'),
             ('report_to_payslip', '=', True),
-            '|',
-            ('payslip_id', '=', False),  # Not yet included in any payslip
-            ('payslip_id', '=', self.id),  # Not yet included in other payslip
+            ('payslip_id', '=', False)  # Not yet included in any payslip
         ])
 
         if expense_sheets:
@@ -638,6 +634,184 @@ class EmployeePayslip(models.Model):
                 days = math.floor(days)
         return days
 
+    def get_employee_cost_by_period(self, period_type='month'):
+        """
+        period_type:
+            'month' -> current month
+            'year'  -> current year
+        """
+
+        today = fields.Date.today()
+
+        # Define date range
+        if period_type == 'month':
+            date_from = today.replace(day=1)
+            date_to = (date_from + relativedelta(months=1)) - relativedelta(
+                days=1)
+
+        else:  # year
+            date_from = today.replace(month=1, day=1)
+            date_to = today.replace(month=12, day=31)
+
+        # Fetch payslips inside range
+        payslips = self.search([
+            ('start_date', '>=', date_from),
+            ('to_date', '<=', date_to),
+            ('state', 'in', ['done', 'paid'])
+        ])
+
+        result = defaultdict(float)
+
+        # Sum cost per employee
+        for slip in payslips:
+            emp_name = slip.employee_id.name
+            result[emp_name] += slip.total_amount
+
+        labels = list(result.keys())
+        data = list(result.values())
+
+        return {
+            'labels': labels,
+            'data': data,
+        }
+
+    @api.model
+    def get_payroll_dashboard_data(self):
+        # ----------------- CARD VALUES -----------------
+        employees = self.env['hr.employee'].search_count([])
+        contracts = self.env['hr.contract'].search_count(
+            [('state', '=', 'open')])
+        total_generated = self.search_count([])
+        total_paid = self.search_count([('state', '=', 'paid')])
+
+        # ----------------- WARNINGS -----------------
+        warnings_list = []
+
+        draft_payslips = self.search([('state', '=', 'draft')])
+        if draft_payslips:
+            warnings_list.append({
+                'label': 'Draft Payslips',
+                'count': len(draft_payslips),
+            })
+
+        employees_without_contract = self.env['hr.employee'].search([
+            ('contract_id', '=', False)
+        ])
+        if employees_without_contract:
+            warnings_list.append({
+                'label': 'Employees Without Running Contracts',
+                'count': len(employees_without_contract),
+            })
+
+        both_contract_count = 0
+        all_employees = self.env['hr.employee'].search([])
+
+        for emp in all_employees:
+            open_contract = self.env['hr.contract'].search_count([
+                ('employee_id', '=', emp.id),
+                ('state', '=', 'open')
+            ])
+            draft_contract = self.env['hr.contract'].search_count([
+                ('employee_id', '=', emp.id),
+                ('state', '=', 'draft')
+            ])
+
+            if open_contract and draft_contract:
+                both_contract_count += 1
+
+        if both_contract_count:
+            warnings_list.append({
+                'label': 'Employees With Both New And Running Contracts',
+                'count': both_contract_count,
+            })
+        # Employees Without Bank Accounts
+        employees_without_bank = self.env['hr.employee'].search([
+            ('bank_account_id', '=', False)
+        ])
+
+        if employees_without_bank:
+            warnings_list.append({
+                'label': 'Employees Without Bank Accounts',
+                'count': len(employees_without_bank),
+            })
+
+        # Nearly Expired Contracts (Next 30 Days)
+        today = fields.Date.today()
+        next_30_days = today + timedelta(days=30)
+
+        nearly_expired_contracts = self.env['hr.contract'].search([
+            ('date_end', '!=', False),
+            ('date_end', '>=', today),
+            ('date_end', '<=', next_30_days),
+            ('state', '=', 'open')
+        ])
+        if nearly_expired_contracts:
+            warnings_list.append({
+                'label': 'Nearly Expired Contracts (Next 30 Days)',
+                'count': len(nearly_expired_contracts),
+            })
+        employees_wo_id = self.env['hr.employee'].search([
+            ('identification_id', '=', False),
+        ])
+        if employees_wo_id:
+            warnings_list.append({
+                'label': 'Employees Without Identification Number',
+                'count': len(employees_wo_id),
+            })
+
+
+        # ----------------- PAYROLL BATCHES -----------------
+        # batch_list = []  # remove if batch tracking not present
+        batches = self.env['employee.payslip.batch'].search(
+            [],
+            order="id desc",
+            limit=10
+        )
+
+        batch_list = []
+        for batch in batches:
+            batch_list.append({
+                'id': batch.id,
+                'name': batch.name,
+                'state': batch.state,
+                # ✅ CORRECT FIELD
+                'payslip_count': len(batch.employee_payslip_ids),
+            })
+
+        # ----------------- EMPLOYEE COST -----------------
+        employee_cost_year = self.get_employee_cost_by_period('year')
+        employee_cost_month = self.get_employee_cost_by_period('month')
+
+        # ----------------- PAYROLL DISTRIBUTION -----------------
+        dist = defaultdict(float)
+
+        payslips = self.search([('state', 'in', ['done', 'paid'])])
+        for slip in payslips:
+            struct = slip.structure_id.name if slip.structure_id else 'Other'
+            dist[struct] += slip.total_amount
+
+        payroll_dist_labels = list(dist.keys())
+        payroll_dist_data = list(dist.values())
+
+        # ----------------- RETURN DATA -----------------
+        return {
+            'employees': employees,
+            'contracts': contracts,
+            'generated': total_generated,
+            'paid': total_paid,
+            'warnings': warnings_list,
+            'batches': batch_list,
+            'employee_cost_year_labels': employee_cost_year['labels'],
+            'employee_cost_year_data': employee_cost_year['data'],
+
+            'employee_cost_month_labels': employee_cost_month['labels'],
+            'employee_cost_month_data': employee_cost_month['data'],
+
+            'payroll_dist_labels': payroll_dist_labels,
+            'payroll_dist_data': payroll_dist_data,
+        }
+
+
     @api.model
     def _get_payslip_lines(self, contract_ids, payslip):
         """ Method to calculate salary line when computing the sheet"""
@@ -649,6 +823,8 @@ class EmployeePayslip(models.Model):
             localdict['categories'].dict[category.code] = (category.code in localdict[
                 'categories'].dict and localdict['categories'].dict[category.code] + amount or amount)
             return localdict
+
+
 
         class BrowsableObject(object):
             """A browsable object capable of dynamically retrieving attributes. The `__getattr__} method can be
@@ -738,28 +914,44 @@ class EmployeePayslip(models.Model):
             worked_days_dict[worked_days_line.code] = worked_days_line
         for input_line in payslip.employee_payslip_input_ids:
             if input_line.code:
+                print("input_code",input_line.code)
                 inputs_dict[input_line.code] = input_line.code
         inputs_dict = {line.code: line.amount for line in self.employee_payslip_input_ids if line.code}
+        print("inputs_dict",inputs_dict)
         categories = BrowsableObject(payslip.employee_id.id, {}, self.env)
+        print("categories",categories)
         inputs = InputLine(payslip.employee_id.id, inputs_dict, self.env)
+        print("inputs",inputs)
         worked_days = WorkedDays(payslip.employee_id.id, worked_days_dict, self.env)
+        print("worked_days",worked_days)
         payslips = Payslips(payslip.employee_id.id, payslip, self.env)
+        print("payslips",payslips)
         rules = BrowsableObject(payslip.employee_id.id, rules_dict, self.env)
+        print("rules",rules)
         baselocaldict = {'categories': categories, 'rules': rules, 'payslip': payslips,
                          'worked_days': worked_days, 'inputs': inputs}
+        print("baselocaldict",baselocaldict)
         contracts = self.env['hr.contract'].sudo().browse(contract_ids)
+        print("contracts",contracts)
         if len(contracts) == 1 and payslip.structure_id:
             structure_ids = list(set(payslip.structure_id._get_parent_structure().ids))
+            print("structure_ids",structure_ids)
         else:
             structure_ids = contracts.get_all_structures()
+            print("structure_ids", structure_ids)
         rule_ids = self.env['employee.salary.structure'].sudo().browse(structure_ids)._get_all_rules()
+        print("rule_ids",rule_ids)
         sorted_rule_ids = [id for id, sequence in sorted(rule_ids, key=lambda x: x[1])]
+        print("sorted_rule_ids",sorted_rule_ids)
         sorted_rules = self.env['employee.salary.rule'].browse(sorted_rule_ids)
+        print("sorted_rules",sorted_rules)
         for contract in contracts:
             employee = contract.employee_id
             localdict = dict(baselocaldict, employee=employee, contract=contract)
             for rule in sorted_rules:
+                print("rule",rule)
                 key = rule.code + '-' + str(contract.id)
+                print("key",key)
                 localdict['result'] = None
                 localdict['result_qty'] = 1.0
                 localdict['result_rate'] = 100
