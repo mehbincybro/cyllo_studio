@@ -25,24 +25,6 @@ from odoo import models, api
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    @api.depends('time_based_price_id', 'product_uom_qty')
-    def _compute_price_unit(self):
-        super()._compute_price_unit()
-
-        for line in self:
-            if line.time_based_price_id:
-                plan = line.time_based_price_id
-                order = line.order_id
-
-                price = plan.currency_id._convert(
-                    plan.cost,
-                    order.pricelist_id.currency_id,
-                    order.company_id,
-                    order.date_order.date()
-                )
-
-                line.price_unit = price
-
     def _show_in_cart(self):
         """
         Overrides the standard logic to hide the trial discount product

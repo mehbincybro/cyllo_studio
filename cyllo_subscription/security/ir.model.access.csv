@@ -11,3 +11,4 @@ access_subscription_order_close_reason_user,access.subscription.order.close.reas
 access_subscription_order_alert_manager,access.subscription.order.alert.manager,model_subscription_order_alert,sales_team.group_sale_manager,1,1,1,1
 access_subscription_order_alert_user,access.subscription.order.alert.user,model_subscription_order_alert,sales_team.group_sale_salesman,1,1,1,0
 access_subscription_close,access.subscription.close,model_subscription_close,base.group_user,1,1,1,1
+access_subscription_pricing,access.subscription.pricing,model_subscription_pricing,base.group_user,1,1,1,1

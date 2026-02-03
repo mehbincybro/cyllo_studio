@@ -37,6 +37,35 @@ class SaleOrderLine(models.Model):
     trial_end = fields.Datetime(help='Trial end date for the subscription order created from this line.')
     end_date = fields.Datetime(string='End Date')
 
+    @api.depends('time_based_price_id', 'product_uom_qty')
+    def _compute_price_unit(self):
+        super()._compute_price_unit()
+
+        for line in self:
+            if line.product_template_id.is_subscription and line.time_based_price_id:
+                plan = line.time_based_price_id
+                time_based_price_rule = self._get_time_based_price_rule()
+                price = time_based_price_rule.fixed_price if time_based_price_rule else plan.cost
+                order = line.order_id
+                price_unit = plan.currency_id._convert(
+                    price,
+                    order.pricelist_id.currency_id,
+                    order.company_id,
+                    order.date_order.date()
+                )
+                line.price_unit = price_unit
+
+    def _get_time_based_price_rule(self):
+        for line in self:
+            time_based_price_rule = self.env['subscription.pricing'].search([
+                ('product_tmpl_id', '=', line.product_template_id.id),
+                ('subscription_unit', '=', line.time_based_price_id.subscription_unit),
+                ('duration', '=', line.time_based_price_id.duration),
+                ('date_start', '<=', line.order_id.date_order),
+                ('date_end', '>=', line.order_id.date_order),
+                ('min_quantity', '<=', line.product_uom_qty)])
+            return time_based_price_rule
+
     @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):
         """Change price when change the time-based pricing"""
@@ -73,4 +102,5 @@ class SaleOrderLine(models.Model):
         for record in self:
             if record.end_date and record.end_date < record.order_id.date_order:
                 raise ValidationError(_("Invalid End Date: The subscription end date cannot be prior to the order date."))
+
 

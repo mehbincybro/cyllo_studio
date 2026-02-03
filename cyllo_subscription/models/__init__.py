@@ -21,6 +21,8 @@
 #############################################################################
 from . import account_move
 from . import product_template
+from . import product_pricelist
+from . import subscription_pricing
 from . import sale_order
 from . import sale_order_line
 from . import sale_order_template

@@ -174,8 +174,7 @@ class SubscriptionOrder(models.Model):
                             f'{self.subscription_order_line_ids.product_id.unit}',
             'invoice_line_ids': [fields.Command.create({
                 'product_id': self.subscription_order_line_ids.product_id.id,
-                'price_unit': 0 if self.subscription_order_line_ids.product_id.trial_period > 0 else
-                self.subscription_order_line_ids.subtotal
+                'price_unit': self.subscription_order_line_ids.subtotal
             })],
         })
         self.state = 'posted'
