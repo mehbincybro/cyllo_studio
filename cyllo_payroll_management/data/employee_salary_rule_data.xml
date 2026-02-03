@@ -34,7 +34,7 @@ else:
         <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_net"/>
         <field name="condition_select">none</field>
         <field name="amount_select">code</field>
-        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.GRA</field>
+        <field name="amount_python_compute">result = categories.BASIC + categories.ALW + categories.DED + categories.GRA + categories.REIMB</field>
     </record>
     <!-- House Rent Allowance salary rule -->
     <record id="employee_salary_rule_house_rent_allowance" model="employee.salary.rule">
@@ -129,5 +129,15 @@ else:
         <field name="condition_python">result = payslip.gratuity_settlement_id</field>
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = payslip.gratuity_settlement_id.gratuity_amount</field>
+    </record>
+    <record id="employee_salary_rule_expense_reimbursement" model="employee.salary.rule">
+        <field name="name">Expense Reimbursement</field>
+        <field name="sequence" eval="1"/>
+        <field name="code">EXPENSE</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_reimbursement"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.EXPENSE</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.EXPENSE</field>
     </record>
 </odoo>

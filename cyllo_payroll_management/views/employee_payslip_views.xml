@@ -87,6 +87,15 @@
                                 </span>
                             </div>
                         </button>
+                        <button name="action_view_expense_sheets" type="object" class="oe_stat_button"
+                                invisible="expense_sheet_count == 0" string="Expenses">
+                            <i class="fa fa-money" title="Expense Sheets"/>
+                            <div class="o_stat_info" style="margin-left:2px;">
+                                <span class="o_stat_text">
+                                    Expenses(<field name="expense_sheet_count"/>)
+                                </span>
+                            </div>
+                        </button>
                         <button name="action_view_refund" type="object" class="oe_stat_button"
                                 invisible=" refund_count == 0" string="Refunds">
                             <i class="fa fa-calendar" title="Refunds"/>
@@ -113,6 +122,8 @@
                          invisible="not date_warning_message">
                         <field name="date_warning_message" readonly="1"
                                style="white-space: pre-wrap;"/>
+                        <field name="expense_sheet_ids" invisible="1"/>
+                        <field name="expense_sheet_count" invisible="1"/>
                     </div>
                     <group>
                         <group>

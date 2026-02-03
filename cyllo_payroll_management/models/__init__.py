@@ -41,3 +41,4 @@ from . import hr_payroll_structure_type
 from . import res_company
 from . import res_config_settings
 from . import resigned_reasons
+from . import hr_expense_sheet
