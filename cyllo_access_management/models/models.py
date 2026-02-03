@@ -31,7 +31,9 @@ class BaseModel(models.AbstractModel):
     def get_view(self, view_id=None, view_type='form', **options):
         res = super().get_view(view_id=view_id, view_type=view_type, **options)
         user = self.env.user
-        company_id = self.env.company.id
+        # Use allowed_company_ids from context for broader matching
+        allowed_companies = self.env.context.get('allowed_company_ids', [self.env.company.id])
+        
         try:
             with self.env.cr.savepoint():
                 profiles = user.profile_ids
@@ -39,19 +41,22 @@ class BaseModel(models.AbstractModel):
                     return res
 
                 access_mgmt = self.env['profile.management'].sudo().search([
-                    ('profile_ids', 'in', profiles.ids),('is_activated','=',True),"|",
-                    ('company_ids','in',[company_id]),('company_ids','=',False)
+                    ('profile_ids', 'in', profiles.ids),
+                    ('is_activated', '=', True),
+                    '|', ('company_ids', 'in', allowed_companies), ('company_ids', '=', False)
                 ])
         except psycopg2.errors.UndefinedTable:
             return res
+
         if not access_mgmt:
             return res
 
         model = res['model']
-        is_profile_readonly = True if True in  access_mgmt.mapped(
-            'is_readonly') else False
-        disable_chatter = True if True in access_mgmt.mapped(
-            'disable_chatter') else False
+        # Aggregate flags across all matching profile management records
+        is_profile_readonly = any(access_mgmt.mapped('is_readonly'))
+        disable_chatter = any(access_mgmt.mapped('disable_chatter'))
+
+        # Aggregate hidden elements
         buttons_to_hide = access_mgmt.hide_buttons_tabs_ids.filtered(
             lambda r: r.model_id.model == model
         ).mapped('button_ids')
@@ -64,6 +69,7 @@ class BaseModel(models.AbstractModel):
         groups_to_hide = access_mgmt.hide_filters_ids.filtered(
             lambda r: r.model_id.model == model
         ).mapped('group_ids')
+
         field_rules = access_mgmt.field_access_ids.filtered(
             lambda r: r.model_id.model == model
         )
@@ -77,6 +83,7 @@ class BaseModel(models.AbstractModel):
             arch.set("edit", "false")
             arch.set("create", "false")
             arch.set("delete", "false")
+
         if disable_chatter:
             chatter_nodes = arch.xpath("//chatter") + arch.xpath(
                 "//div[contains(@class, 'oe_chatter')]")
@@ -95,10 +102,13 @@ class BaseModel(models.AbstractModel):
                 for node_tab in arch.xpath(f"//page[@string='{tab.string}']"):
                     node_tab.set("invisible", "1")
 
+        #  Here need to remove it to prevent it coming as search default filter
         if filters_to_hide:
             for flt in filters_to_hide:
                 for node_flt in arch.xpath(f"//filter[@string='{flt.string}']"):
-                    node_flt.set("invisible", "1")
+                    parent = node_flt.getparent()
+                    if parent is not None:
+                        parent.remove(node_flt)
 
         if groups_to_hide:
             for group in groups_to_hide:
@@ -125,27 +135,26 @@ class BaseModel(models.AbstractModel):
                                        '{"no_open": True, "no_create": True}')
 
         if model_rules:
-            rule = model_rules[0]
-            if rule.is_readonly:
-                arch.set("edit","false")
-                arch.set("create","false")
-                arch.set("delete","false")
-
-            if rule.hide_create:
-                arch.set("create", "false")
-
-            if rule.hide_edit:
+            # Aggregate model rules: if ANY rule sets a restriction, apply it
+            if any(model_rules.mapped('is_readonly')):
                 arch.set("edit", "false")
-
-            if rule.hide_delete:
+                arch.set("create", "false")
                 arch.set("delete", "false")
 
-            if rule.hide_archive:
+            if any(model_rules.mapped('hide_create')):
+                arch.set("create", "false")
+
+            if any(model_rules.mapped('hide_edit')):
+                arch.set("edit", "false")
+
+            if any(model_rules.mapped('hide_delete')):
+                arch.set("delete", "false")
+
+            if any(model_rules.mapped('hide_archive')):
                 arch.set("archive", "false")
 
-            if rule.hide_duplicate:
+            if any(model_rules.mapped('hide_duplicate')):
                 arch.set("duplicate", "false")
-
 
         res['arch'] = etree.tostring(arch, encoding="unicode")
         return res
