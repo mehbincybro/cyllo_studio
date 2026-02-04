@@ -44,6 +44,7 @@
         'reports/ir_actions_report.xml',
         'views/account_move_views.xml',
         'views/product_template_views.xml',
+        'views/subscription_pricing.xml',
         'views/sale_order_views.xml',
         'views/time_based_pricing_views.xml',
         'views/sale_order_template_views.xml',
