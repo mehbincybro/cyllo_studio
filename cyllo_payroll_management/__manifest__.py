@@ -31,7 +31,8 @@
     'website': "https://www.cyllo.com",
     'depends': ['hr_contract', 'mail', 'account', 'hr_work_entry',
                 'hr_attendance', 'hr_work_entry_contract',
-                'hr_work_entry_holidays', 'contacts', 'hr_holidays', 'hr_expense'],
+                'hr_work_entry_holidays', 'contacts', 'hr_holidays',
+                'hr_expense'],
     'icon': '/cyllo_payroll_management/static/description/payroll.svg',
     'data': [
         'security/cyllo_payroll_management_groups.xml',
@@ -69,10 +70,17 @@
         'wizards/resignation_request_confirm.xml',
         'wizards/employee_payslip_batch_list.xml',
         'reports/report_employee_payslip.xml',
+        'views/hr_payroll_dashboard_views.xml',
         'views/cyllo_payroll_management_menu_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_company_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_payroll_management/static/src/js/payroll_dashboard.js',
+            'cyllo_payroll_management/static/src/xml/payroll_dashboard.xml',
+        ],
+    },
     'license': "LGPL-3",
     'installable': True,
     'application': True,
