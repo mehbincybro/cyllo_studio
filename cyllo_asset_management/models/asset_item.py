@@ -30,8 +30,6 @@ class AssetItem(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(string="Assets", required=True)
-    # asset_type_id = fields.Many2one("asset.type", required=True)
-    # brand_ids = fields.Many2many('asset.brand', compute='_compute_brand_ids')
     brand = fields.Char(string="Brand")
     date = fields.Date(default=fields.Date.context_today, required=True)
     vendor_id = fields.Many2one("res.partner", string="Purchase From", copy=False)
@@ -66,14 +64,6 @@ class AssetItem(models.Model):
         default=lambda self: self.env.company, help='Select the company')
     asset_loss_account_id = fields.Many2one('account.account', required=True)
 
-
-    # @api.depends('asset_type_id')
-    # def _compute_brand_ids(self):
-    #     """Function for accessing the brands based on the asset type"""
-    #     for rec in self:
-    #         rec.brand_ids = False
-    #         if rec.asset_type_id:
-    #             rec.brand_ids = rec.asset_type_id.brand_ids.ids
 
     @api.constrains('method_duration')
     def _onchange_method_duration(self):

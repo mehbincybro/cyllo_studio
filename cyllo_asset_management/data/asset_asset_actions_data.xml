@@ -63,4 +63,13 @@
         <field name="state">code</field>
         <field name="code">action = records.action_sell_dispose_assets()</field>
     </record>
+        <!--    Server for the asset repair or maintenance-->
+    <record id="action_asset_maintenance_request" model="ir.actions.server">
+        <field name="name">Maintenance/Repair</field>
+        <field name="model_id" ref="model_asset_asset"/>
+        <field name="binding_model_id" ref="cyllo_asset_management.model_asset_asset"/>
+        <field name="binding_view_types">form</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_maintenance_repair_assets()</field>
+    </record>
 </odoo>

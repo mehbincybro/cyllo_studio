@@ -137,7 +137,7 @@
     </record>
     <!--   Menuitem for the asset rental -->
     <menuitem id="menu_rental" name="Rental"
-              parent="cyllo_asset_management.menu_assets_categ"
+              parent="cyllo_asset_management.menu_operations"
               action="action_view_rental"
               sequence="10"/>
 </odoo>

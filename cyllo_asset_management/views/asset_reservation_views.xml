@@ -157,5 +157,5 @@
     <menuitem id="menu_reservations" name="Reservations"
               parent="cyllo_asset_management.menu_assets_categ"
               action="action_view_reservations"
-              sequence="10"/>
+              sequence="3"/>
 </odoo>

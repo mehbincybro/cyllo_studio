@@ -64,6 +64,7 @@ class AssetRental(models.Model):
 
     @api.depends('company_id')
     def _compute_asset_ids(self):
+        """Function for showing reserved assets only to user"""
         for record in self:
             if (self.env.user.has_group('account.group_account_manager') or
                     self.env.user.has_group('cyllo_asset_management.group_cyllo_asset_admin')):
@@ -122,14 +123,9 @@ class AssetRental(models.Model):
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
         elif asset_id.is_rental:
             raise UserError(_('You cannot complete this operation, The related asset is already taken for the Rent.'))
-        repair_asset = self.sudo().env['account.asset.repair'].search(
-            [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'repairing'])])
-        maintenance_asset = self.sudo().env['account.asset.maintenance'].search(
-            [('asset_id', '=', self.asset_id.id), ('status', 'in', ['new', 'confirm', 'ongoing'])])
-        if (maintenance_asset and self.start_date <= maintenance_asset.scheduled_date) or (
-                maintenance_asset and self.end_date <= maintenance_asset.scheduled_date) or (
-                repair_asset and self.start_date <= repair_asset.scheduled_date) or (
-                repair_asset and self.end_date <= repair_asset.scheduled_date):
+        open_requests = self.env['maintenance.request'].sudo().search([('asset_id', '=', self.asset_id.id),
+                                                                       ('stage_done', '=', False), ])
+        if open_requests:
             raise UserError(
                 _('You cannot complete this operation, The related asset is already taken for a another '
                   'operation'))

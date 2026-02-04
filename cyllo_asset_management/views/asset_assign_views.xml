@@ -113,5 +113,5 @@
     <menuitem id="menu_assign" name="Assign"
               parent="cyllo_asset_management.menu_assets_categ"
               action="action_view_assign"
-              sequence="10"/>
+              sequence="3"/>
 </odoo>

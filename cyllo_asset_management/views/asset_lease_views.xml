@@ -112,6 +112,13 @@
             </form>
         </field>
     </record>
+
+    <!--    parent menuitem for asset operations-->
+    <menuitem id="menu_operations" name="Operations"
+              parent="cyllo_asset_management.menu_assets_categ"
+              sequence="9"
+              groups="cyllo_asset_management.group_cyllo_asset_admin,cyllo_asset_management.group_cyllo_asset_users"/>
+
     <!--   Action for the asset lease model-->
     <record id="action_view_lease" model="ir.actions.act_window">
         <field name="name">Lease</field>
@@ -120,7 +127,7 @@
     </record>
     <!--    Menuitem for asset lease -->
     <menuitem id="menu_lease" name="Lease"
-              parent="cyllo_asset_management.menu_assets_categ"
+              parent="cyllo_asset_management.menu_operations"
               action="action_view_lease"
               sequence="10"/>
 </odoo>

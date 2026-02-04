@@ -6,25 +6,35 @@
         <field name="inherit_id" ref="maintenance.hr_equipment_request_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='request_date']" position="before">
-                <field name="asset_id"/>
+                <field name="asset_id"
+                       domain="[('is_maintenance','=', False), ('is_repair','=', False),
+                        ('status', 'not in', ('sell', 'disposed', 'cancel'))]"/>
                 <field name="maintenance_type" invisible="True"/>
             </xpath>
             <xpath expr="//field[@name='maintenance_team_id']" position="after">
-                <field name="partner_id" invisible="equipment_id or maintenance_type=='preventive'"/>
-                <field name="expense" invisible="equipment_id or maintenance_type=='preventive'"/>
+                <field name="partner_id" invisible="equipment_id or maintenance_type=='preventive'" required="True"/>
+                <field name="expense" invisible="equipment_id or maintenance_type=='preventive'" readonly="has_billed"/>
+                <field name="invoiced_amount"/>
             </xpath>
             <xpath expr="//button[@name='archive_equipment_request']" position="after">
-                <field name="has_invoiced" invisible="True"/>
+                <field name="has_billed" invisible="True"/>
                 <field name="stage_done" invisible="True"/>
+                <field name="is_reimburse" invisible="True"/>
                 <button type="object" name="action_create_bill" string="Create Bill" class="oe_highlight"
-                        invisible="not stage_done or has_invoiced"/>
+                        invisible="not stage_done or equipment_id or maintenance_type=='preventive' or has_billed"/>
+                <button type="object" name="action_claim_insurance_wizard" string="Claim insurance"
+                        class="btn-secondary"
+                        invisible="not stage_done or equipment_id or maintenance_type=='preventive' or is_reimburse
+                        or not has_insurance or invoiced_amount==expense"/>
+                <button type="object" name="action_claim_insurance_wizard" string="Reimburse insurance"
+                        class="btn-secondary"
+                        invisible="not stage_done or equipment_id or maintenance_type=='preventive' or not is_reimburse
+                        or not has_billed or not has_insurance or invoiced_amount==expense"/>
                 <button type="object" name="action_scrap" string="Scrap" class="btn-secondary"
                         invisible="not stage_done or equipment_id or maintenance_type=='preventive'"/>
-                <button type="object" name="action_claim_insurance" string="Claim insurance" class="btn-secondary"
-                        invisible="not stage_done or has_invoiced"/>
             </xpath>
             <xpath expr="//sheet" position="after">
-                <div class="oe_button_box" name="button_box" invisible="not has_invoiced">
+                <div class="oe_button_box" name="button_box" invisible="not has_billed">
                     <button class="oe_stat_button" name="action_view_invoice" type="object">
                         <i class="ri-draft-line"/>
                         Bill
@@ -32,17 +42,27 @@
                 </div>
             </xpath>
             <xpath expr="//field[@name='maintenance_type']" position="after">
-                <label for="has_warranty" name="warranty_period" string="Under Warranty"
+                <field name="has_warranty" string="Under Warranty"
                        invisible="equipment_id or maintenance_type=='preventive'"/>
-                <div class="o_row" invisible="equipment_id or maintenance_type=='preventive'">
-                    <field name="has_warranty" style="width:25% !important;"/>
-                    <label for="warranty_percentage" name="warranty_percentage"
-                           string="Deduction %" invisible="not has_warranty"/>
-                    <field name="warranty_percentage" invisible="not has_warranty"/>
-                </div>
                 <field name="has_insurance" string="Under Insurance"
                        invisible="equipment_id or maintenance_type=='preventive'"/>
             </xpath>
         </field>
     </record>
+
+    <record id="action_asset_maintenance_request_menu" model="ir.actions.act_window">
+        <field name="name">Asset Maintenance / Repair</field>
+        <field name="res_model">maintenance.request</field>
+        <field name="view_mode">kanban,tree,form,pivot,graph,calendar,activity</field>
+        <field name="domain">[('asset_id','!=',False)]</field>
+    </record>
+
+
+    <menuitem
+            id="menu_asset_maintenance_repair_request"
+            name="Maintenance/Repair"
+            groups="cyllo_asset_management.group_cyllo_asset_admin"
+            parent="cyllo_asset_management.menu_operations"
+            action="action_asset_maintenance_request_menu"
+            sequence="10"/>
 </odoo>

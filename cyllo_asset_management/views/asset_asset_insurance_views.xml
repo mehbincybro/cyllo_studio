@@ -6,7 +6,7 @@
         <field name="model">asset.asset.insurance</field>
         <field name="arch" type="xml">
             <tree editable="bottom">
-                <field name="provider"/>
+                <field name="partner_id"/>
                 <field name="type"/>
             </tree>
         </field>
@@ -19,7 +19,7 @@
     </record>
     <!--    Menuitem the asset insurance model -->
     <menuitem id="menu_asset_asset_insurance"
-              name="Asset Insurance"
+              name="Insurance"
               parent="cyllo_asset_management.menu_asset_categ"
               action="action_view_asset_insurance"
               sequence="23"/>

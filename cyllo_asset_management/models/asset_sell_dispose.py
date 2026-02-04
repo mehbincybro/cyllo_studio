@@ -262,11 +262,6 @@ class AssetSellDispose(models.Model):
                 if past_journals:
                     past_journals._post()
         if self.disposal_type in ('lost','scrap'):
-            if self.disposal_type == 'scrap':
-                self.env['asset.scrap'].sudo().create({
-                    'asset_id': self.asset_asset_id.id,
-                    'status': 'scraped'
-                })
             for depreciation in modify_vals:
                 if depreciation['depreciation_expense'] > 0:
                     if depreciation['salvage_value'] == 0:

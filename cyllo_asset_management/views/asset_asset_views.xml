@@ -8,7 +8,6 @@
             <tree>
                 <field name="name"/>
                 <field name="asset_item_id"/>
-<!--                <field name="asset_type_id"/>-->
                 <field name="brand"/>
                 <field name="status"/>
             </tree>
@@ -22,7 +21,6 @@
             <search string="Asset">
                 <field name="name"/>
                 <field name="asset_item_id"/>
-<!--                <field name="asset_type_id"/>-->
                 <filter name="archived" string="Archived" domain="[('active', '=', False)]"/>
                 <separator/>
                 <filter name="draft" string="Draft" domain="[('status', '=', 'draft')]"/>
@@ -36,7 +34,6 @@
                 <filter name="sell" string="Sold" domain="[('status', '=', 'sell')]"/>
                 <group expand="0" string="Group By...">
                     <filter string="Asset Item" name="asset_item" domain="[]" context="{'group_by':'asset_item_id'}"/>
-<!--                    <filter string="Asset Type" name="asset_type" domain="[]" context="{'group_by':'asset_type_id'}"/>-->
                 </group>
             </search>
         </field>
@@ -77,6 +74,12 @@
                             <i class="ri-align-justify"/>
                             <field name="entry_count" string="Journal Entries" widget="statinfo"/>
                         </button>
+                        <button class="oe_stat_button" name="action_view_maintenance_repairs"
+                                invisible="maintenance_count == 0"
+                                type="object">
+                            <i class="ri-align-justify"/>
+                            <field name="maintenance_count" string="Maintenance/Repair" widget="statinfo"/>
+                        </button>
                         <button class="oe_stat_button" name="action_view_reservation"
                                 invisible="is_reserve != True"
                                 type="object"><i class="ri-calendar-check-fill"/>Reservation
@@ -93,15 +96,11 @@
                                 invisible="is_assign != True"
                                 type="object"><i class="ri-user-received-line"/>Assign
                         </button>
-                        <button class="oe_stat_button" name="action_view_repair"
-                                invisible="is_repair != True"
-                                type="object"><i class="ri-tools-fill"/>Repair
-                        </button>
-                        <button class="oe_stat_button" name="action_view_maintenance"
-                                invisible="is_maintenance != True"
-                                type="object"><i class="ri-settings-4-line"/>Maintenance
-                        </button>
                     </div>
+                    <field name="maintenance_state" class="float-end fs-6" widget="badge"
+                           invisible="not maintenance_state"
+                           decoration-warning="maintenance_state == 'repair'"
+                           decoration-info="maintenance_state == 'maintenance'"/>
                     <div class="oe_title">
                         <label for="name" name="asset_name" string="Asset Name"/>
                         <h1>
@@ -121,7 +120,6 @@
                     <group>
                         <group>
                             <field name="asset_item_id" readonly="status == 'running'" options="{'no_create': True}"/>
-<!--                            <field name="asset_type_id" readonly="status == 'running'" options="{'no_create': True}"/>-->
                         </group>
                         <group>
                             <field name="brand" readonly="status == 'running'" options="{'no_create': True}"/>
@@ -182,33 +180,33 @@
                         <page name="asset_warranty_insurance" string="Warranty and Insurance">
                             <group>
                                 <group string="Warranty">
-                                    <field name="under_warranty" readonly="is_confirm"/>
+                                    <field name="under_warranty"/>
                                     <label for="warranty_period" name="warranty_period" string="Period"
                                            invisible="not under_warranty"/>
                                     <div class="o_row" invisible="not under_warranty">
-                                        <field name="warranty_period" readonly="is_confirm"
+                                        <field name="warranty_period"
                                                style="width:25% !important;" required="under_warranty"/>
-                                        <field name="warranty_period_type" nolabel="1" readonly="is_confirm"
+                                        <field name="warranty_period_type" nolabel="1"
                                                required="under_warranty"/>
                                     </div>
                                     <field name="warranty_end_date" invisible="not under_warranty"/>
                                     <field name="warranty_attachment_ids" widget="many2many_binary"
-                                           invisible="not under_warranty" readonly="is_confirm"/>
+                                           invisible="not under_warranty"/>
                                 </group>
                                 <group string="Insurance">
-                                    <field name="under_insurance" readonly="is_confirm"/>
-                                    <field name="reimburse_after_invoice" invisible="not under_insurance"
-                                           readonly="is_confirm"/>
+                                    <field name="under_insurance"/>
+                                    <field name="reimburse_after_invoice" invisible="not under_insurance"/>
                                     <field name="insurance_name" invisible="not under_insurance"
-                                           readonly="is_confirm" options="{'no_create': True, 'no_create_edit': True}"/>
-                                    <field name="insurance_number" invisible="not under_insurance" readonly="is_confirm"
+                                           options="{'no_create': True, 'no_create_edit': True}"
                                            required="under_insurance"/>
-                                    <field name="insurance_start_date" widget="daterange" readonly="is_confirm"
+                                    <field name="insurance_number" invisible="not under_insurance"
+                                           required="under_insurance"/>
+                                    <field name="insurance_start_date" widget="daterange"
                                            options="{'end_date_field': 'insurance_end_date'}"
                                            required="under_insurance" invisible="not under_insurance"/>
-                                    <field name="insurance_end_date" invisible="1" readonly="is_confirm"/>
+                                    <field name="insurance_end_date" invisible="1"/>
                                     <field name="insurance_attachment_ids" widget="many2many_binary"
-                                           invisible="not under_insurance" readonly="is_confirm"/>
+                                           invisible="not under_insurance"/>
                                 </group>
                             </group>
                         </page>
@@ -278,12 +276,14 @@
     </record>
     <!--    MenuItem of the asset-->
     <menuitem id="menu_assets_categ" name="Assets"
-              parent="account.menu_finance"
-              sequence="10"/>
+              sequence="10" web_icon="cyllo_asset_management,static/description/assets.svg"/>
+
+
+    <!--              parent="account.menu_finance"-->
     <!--   Submenu of the asset model-->
     <menuitem id="menu_assets" name="Assets"
               parent="cyllo_asset_management.menu_assets_categ"
               action="action_view_assets"
               groups="cyllo_asset_management.group_cyllo_asset_admin,account.group_account_manager"
-              sequence="10"/>
+              sequence="1"/>
 </odoo>
