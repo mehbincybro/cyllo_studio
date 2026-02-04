@@ -23,3 +23,4 @@
 
 from . import crm_lead
 from . import cyllo_visiting_card
+from . import res_partner

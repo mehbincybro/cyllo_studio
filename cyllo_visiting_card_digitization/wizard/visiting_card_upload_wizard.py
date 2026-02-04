@@ -19,7 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, fields
+from odoo import models, fields, api
+import ast
+
+from odoo.exceptions import UserError
 
 
 class VisitingCardUploadWizard(models.TransientModel):
@@ -27,19 +30,47 @@ class VisitingCardUploadWizard(models.TransientModel):
     _description = 'Upload Visiting Card Wizard'
 
     visiting_card_file = fields.Binary(
-        string="Upload Visiting Card",
+        string="Upload Card",
         required=True
     )
 
     visiting_card_filename = fields.Char(
         string="File Name"
     )
+    type_of_digitization = fields.Selection([('manually', 'Manually'), ('use_ai', 'Use Ai')], required=True)
 
     def action_upload(self):
+        """Upload Visiting Card File"""
         self.ensure_one()
-        self.env['cyllo.visiting.card'].create({
+        if self.type_of_digitization == 'use_ai':
+            TEST_GOOGLE_API_KEY = self.env[
+                'ir.config_parameter'].sudo().get_param(
+                'cyllo_agent.api_key')
+            if not TEST_GOOGLE_API_KEY:
+                raise UserError('API KEY not set')
+
+        record = self.env['cyllo.visiting.card'].create({
             'visiting_card_file': self.visiting_card_file,
             'visiting_card_filename': self.visiting_card_filename,
-        })
+            'type_of_digitization': self.type_of_digitization,
 
-        return {'type': 'ir.actions.act_window_close'}
+        })
+        data = ast.literal_eval(record.extracted_text)
+        phone = data.get('phones')
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Visiting Card',
+            'res_model': 'res.partner',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_name': data.get('name'),
+                'default_phone': phone[0] if phone else False,
+                'default_email': data.get('email'),
+                'default_website': data.get('website'),
+                'default_contact_address': data.get('address'),
+                'default_is_from_visiting_card': True,
+            }
+        }
+
+

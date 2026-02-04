@@ -18,21 +18,23 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#############################################################################
-from odoo import api, fields, models
+##############################################################################
+
+from odoo import fields, models, api
 
 
-class CrmLead(models.Model):
-    _inherit = 'crm.lead'
+class ResPartner(models.Model):
+    _inherit = 'res.partner'
 
+    is_from_visiting_card = fields.Boolean(default=False)
 
-    def action_upload_visiting_card(self):
-        """Action button for visiting card: When it clicks user can upload visiting card"""
-
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Upload Business Card',
-            'res_model': 'visiting.card.upload.wizard',
-            'view_mode': 'form',
-            'target': 'new',
-        }
+    @api.model
+    def create(self, vals):
+        """Automatic Lead creation from partner."""
+        rec = super().create(vals)
+        if  rec.is_from_visiting_card == True:
+            self.env['crm.lead'].sudo().create({
+                'name': f"{rec.name}'s Opportunity",
+                'partner_id': rec.id,
+            })
+        return rec
