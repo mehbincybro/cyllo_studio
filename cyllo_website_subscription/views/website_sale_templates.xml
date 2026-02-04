@@ -27,10 +27,6 @@
                     <span class="h6 mb-0"
                           t-out="final_price"
                           t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
-
-                    <span class="small text-muted">/
-                        <t t-out="sub_pricing.subscription_unit"/>
-                    </span>
                 </div>
             </t>
         </xpath>
@@ -41,7 +37,6 @@
                 <div class="mb-3">
                     <t t-set="curr_website_currency" t-value="website.currency_id"/>
                     <t t-set="today" t-value="datetime.date.today()"/>
-
                     <select name="time_based_price_id"
                             class="form-select form-select-sm js_subscription_plan_select" required="True">
                         <t t-foreach="product.sudo().time_based_ids" t-as="t_price">
@@ -58,6 +53,7 @@
 
                             <option t-att-value="t_price.id"
                                     t-att-data-price="display_cost"
+                                    t-att-data-duration="t_price.duration"
                                     t-att-data-unit="t_price.subscription_unit">
                                 <t t-out="t_price.name"/>
                                 (
@@ -83,6 +79,21 @@
     </template>
 
     <template id="total_trial_mask" inherit_id="website_sale.total">
+        <xpath expr="//tr[@id='order_total_untaxed']//span[@t-field='website_sale_order.amount_untaxed']"
+               position="replace">
+            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
+            <span class="monetary_field" style="white-space: nowrap;">
+                <t t-out="website_sale_order.amount_untaxed + trial_data[2]"
+                   t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+            </span>
+        </xpath>
+         <xpath expr="//tr[@id='order_total_taxes']//span[@t-field='website_sale_order.amount_tax']" position="replace">
+            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
+            <span class="monetary_field" style="white-space: nowrap;">
+                <t t-out="website_sale_order.amount_tax+trial_data[1]"
+                   t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
+            </span>
+        </xpath>
         <xpath expr="//tr[@id='order_total_taxes']" position="after">
             <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
             <tr t-if="trial_data[0] &gt; 0" id="order_total_trial_discount" class="text-success">
@@ -93,21 +104,6 @@
                           t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
                 </td>
             </tr>
-        </xpath>
-        <xpath expr="//tr[@id='order_total_taxes']//span[@t-field='website_sale_order.amount_tax']" position="replace">
-            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
-            <span class="monetary_field" style="white-space: nowrap;">
-                <t t-out="trial_data[1]"
-                   t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
-            </span>
-        </xpath>
-        <xpath expr="//tr[@id='order_total_untaxed']//span[@t-field='website_sale_order.amount_untaxed']"
-               position="replace">
-            <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
-            <span class="monetary_field" style="white-space: nowrap;">
-                <t t-out="website_sale_order.amount_untaxed + trial_data[2]"
-                   t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
-            </span>
         </xpath>
     </template>
 </odoo>

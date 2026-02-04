@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import http
+from odoo import http,fields
 from odoo.http import request, route
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantController
@@ -123,4 +123,35 @@ class WebsiteSaleCartCheck(http.Controller):
             'has_subscription': has_sub,
             'has_normal': has_normal
         }
+
+
+class SubscriptionPriceController(http.Controller):
+
+    @http.route('/shop/product/get_sub_pricelist_price', type='json', auth="public", website=True)
+    def get_sub_pricelist_price(self, product_temp_id, unit, duration, qty, **kwargs):
+        """
+        Fetches the specific subscription price rule based on the selected plan.
+        """
+        #  Get the current website's active pricelist
+        website = request.env['website'].get_current_website().with_context(request.env.context)
+        pricelist = website.pricelist_id
+
+        if not pricelist or not product_temp_id:
+            return {'price': False}
+
+        # We use sudo() to ensure public users can access the pricing rules
+        rule = pricelist.sudo()._get_time_based_price_rule(
+            product_template_id=int(product_temp_id),
+            subscription_unit=unit,
+            duration=duration,
+            date=fields.Date.today(),
+            product_uom_qty=float(qty)
+        )
+        if rule:
+            return {'price': rule.fixed_price}
+
+        return {'price': False}
+
+
+
 

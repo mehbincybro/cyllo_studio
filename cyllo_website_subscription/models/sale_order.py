@@ -42,7 +42,6 @@ class SaleOrder(models.Model):
 
     def _set_trial_discount_line(self):
         """Adds or updates a trial discount line to offset subscription costs."""
-        self.ensure_one()
         trial_product = self.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
         if not trial_product:
             return
