@@ -44,9 +44,9 @@ class SaleOrderLine(models.Model):
         for line in self:
             if line.product_template_id.is_subscription and line.time_based_price_id:
                 plan = line.time_based_price_id
-                time_based_price_rule = self._get_time_based_price_rule()
-                price = time_based_price_rule.fixed_price if time_based_price_rule else plan.cost
                 order = line.order_id
+                time_based_price_rule = order.pricelist_id._get_time_based_price_rule(line.product_template_id.id,line.time_based_price_id.subscription_unit,line.time_based_price_id.duration,order.date_order,line.product_uom_qty)
+                price = time_based_price_rule.fixed_price if time_based_price_rule else plan.cost
                 price_unit = plan.currency_id._convert(
                     price,
                     order.pricelist_id.currency_id,
@@ -55,16 +55,6 @@ class SaleOrderLine(models.Model):
                 )
                 line.price_unit = price_unit
 
-    def _get_time_based_price_rule(self):
-        for line in self:
-            time_based_price_rule = self.env['subscription.pricing'].search([
-                ('product_tmpl_id', '=', line.product_template_id.id),
-                ('subscription_unit', '=', line.time_based_price_id.subscription_unit),
-                ('duration', '=', line.time_based_price_id.duration),
-                ('date_start', '<=', line.order_id.date_order),
-                ('date_end', '>=', line.order_id.date_order),
-                ('min_quantity', '<=', line.product_uom_qty)])
-            return time_based_price_rule
 
     @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):

@@ -16,20 +16,43 @@ WebsiteSale.include({
      * selected plan's data attributes and stores the selected plan ID.
      */
 
-    _onChangeSubscriptionPlan: function (ev) {
+    _onChangeSubscriptionPlan: async function (ev) { // Added 'async' here
         const $select = $(ev.currentTarget);
         const $selectedOption = $select.find('option:selected');
+        const $form = $select.closest('form');
 
-        // Get price and unit from the data attributes
-        const price = $selectedOption.data('price');
+        // 1. Get data from form and attributes
+        const productTmplId = parseInt($form.find('input[name="product_template_id"]').val());
+        const quantity = parseFloat($form.find('input[name="add_qty"]').val() || 1.0);
+        const unit = $selectedOption.data('unit');
+        const duration = $selectedOption.data('duration');
 
-        // Locate the price display elements on the Odoo product page
+        let price;
+
+        try {
+            const result = await this.rpc('/shop/product/get_sub_pricelist_price', {
+                product_temp_id: productTmplId,
+                unit: unit,
+                duration: duration,
+                qty: quantity,
+            });
+
+            if (result && result.price) {
+                price = result.price;
+            } else {
+                price = $selectedOption.data('price');
+            }
+        } catch (error) {
+            console.error("RPC Error:", error);
+            price = $selectedOption.data('price');
+        }
+
+        //Update the UI
         const $priceElement = $('.oe_price .oe_currency_value');
-
         if (price !== undefined) {
-
             $priceElement.text(parseFloat(price).toFixed(2));
         }
+
         this.planId = $selectedOption.val();
     },
 
