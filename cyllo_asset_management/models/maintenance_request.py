@@ -1,5 +1,5 @@
 from odoo import fields, models, api, _
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError, UserError
 
 
 class MaintenanceRequest(models.Model):
@@ -11,11 +11,38 @@ class MaintenanceRequest(models.Model):
                                   default=lambda self: self.env.company.currency_id)
     expense = fields.Monetary(string="Expense")
     partner_id = fields.Many2one('res.partner', string="Repair partner")
-    has_invoiced = fields.Boolean(default=False)
+    has_billed = fields.Boolean(default=False)
     stage_done = fields.Boolean(related='stage_id.done', store=True)
-    warranty_percentage = fields.Float(string="Warranty Deduction in %", default=100)
     has_warranty = fields.Boolean(default=False, compute="_compute_has_warranty")
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
+    is_reimburse = fields.Boolean(default=False, compute="_compute_has_insurance")
+    invoiced_amount = fields.Monetary()
+
+    @api.constrains('warranty_percentage')
+    def _check_assign_date(self):
+        """Function for checking the percentage amount"""
+        if self.warranty_percentage > 100 or self.warranty_percentage < 0:
+            raise UserError(
+                _('Please enter a valid insurance percentage'))
+
+    @api.model
+    def default_get(self, fields_list):
+        res = super().default_get(fields_list)
+        asset_id = self.env.context.get('default_asset_id')
+        if asset_id:
+            asset = self.env['asset.asset'].browse(asset_id)
+            today = fields.Date.today()
+            res['has_warranty'] = bool(
+                asset.under_warranty
+                and asset.warranty_end_date
+                and asset.warranty_end_date >= today
+            )
+            res['has_insurance'] = bool(
+                asset.under_insurance
+                and asset.insurance_end_date
+                and asset.insurance_end_date >= today
+            )
+        return res
 
     @api.depends('asset_id')
     def _compute_has_warranty(self):
@@ -30,11 +57,24 @@ class MaintenanceRequest(models.Model):
         """Function for checking Warranty period"""
         if self.asset_id.under_insurance and self.asset_id.insurance_end_date >= fields.Date.today():
             self.has_insurance = True
+            if self.asset_id.reimburse_after_invoice:
+                self.is_reimburse = True
+            else:
+                self.is_reimburse = False
         else:
             self.has_insurance = False
+            self.is_reimburse = False
+
+    @api.onchange('stage_id')
+    def _onchahange_stage_id(self):
+        """Function for changing asset's state"""
+        if self.asset_id and self.stage_done == True:
+            self.asset_id.is_maintenance = False
+            self.asset_id.is_repair = False
 
     @api.onchange('equipment_id')
     def _onchange_equipment_id(self):
+        """Function for clearing asset and its related fields"""
         if self.equipment_id:
             self.asset_id = False
             self.partner_id = False
@@ -42,83 +82,86 @@ class MaintenanceRequest(models.Model):
 
     @api.onchange('asset_id')
     def _onchange_asset_id(self):
+        """Function for clearing equipment field"""
         if self.asset_id:
             self.equipment_id = False
 
     def action_create_bill(self):
         """Button action for creating the bill for the repair"""
-        if self.expense==0:
+        if self.expense == 0:
             raise ValidationError(_('The expense is 0.'))
-        if self.partner_id==False:
-            raise ValidationError(_('The Partner field is blank.'))
 
-        insurance_percentage = self.env.context.get('insurance_percentage', 0)
+        repair_bill = self.env['account.move'].create({
+            'ref': self.asset_id.name,
+            'partner_id': self.partner_id.id,
+            'move_type': 'in_invoice',
+            'state': 'draft',
+            'repair_id': self.id,
+            'asset_id': False,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [fields.Command.create({
+                'name': f"{self.asset_id.name}-Repair Bill",
+                'move_type': 'in_invoice',
+                'quantity': 1,
+                'price_unit': self.expense,
+                'price_subtotal': self.expense
+            })]
+        })
+        self.has_billed = True
+
+    def action_claim_insurance(self):
+        self.ensure_one()
+        insurance_amount = self.env.context.get('insurance_amount', 0)
         from_wizard = self.env.context.get('from_insurance_wizard', False)
         is_reimburse = self.env.context.get('is_reimbursed', False)
-        if from_wizard and insurance_percentage > 0:
-            repair_invoice = self.env['account.move'].create({
-                'ref': self.asset_id.name,
-                'partner_id': self.partner_id.id,
-                'move_type': 'in_invoice',
-                'state': 'draft',
-                'repair_id': self.id,
-                'asset_id': False,
-                'invoice_date':fields.Date.today(),
-                'invoice_line_ids': [fields.Command.create({
-                    'name': f"{self.asset_id.name}-Repair Bill",
+        if not is_reimburse:
+            if not self.has_billed:
+                repair_bill = self.env['account.move'].create({
+                    'ref': self.asset_id.name,
+                    'partner_id': self.partner_id.id,
                     'move_type': 'in_invoice',
-                    'quantity': 1,
-                    'price_unit': self.expense - (self.expense * (insurance_percentage / 100)),
-                    'price_subtotal': self.expense - (self.expense * (insurance_percentage / 100)),
-                })]
-            })
-        elif self.has_warranty and self.warranty_percentage > 0:
-            repair_invoice = self.env['account.move'].create({
-                'ref': self.asset_id.name,
-                'partner_id': self.partner_id.id,
-                'move_type': 'in_invoice',
-                'state': 'draft',
-                'repair_id': self.id,
-                'invoice_date': fields.Date.today(),
-                'invoice_line_ids': [fields.Command.create({
-                    'name': f"{self.asset_id.name}-Repair Bill",
-                    'move_type': 'in_invoice',
-                    'quantity': 1,
-                    'price_unit': self.expense - (self.expense * (self.warranty_percentage / 100)),
-                    'price_subtotal': self.expense - (self.expense * (self.warranty_percentage / 100)),
-                })]
-            })
-        else:
-            repair_bill = self.env['account.move'].create({
-                'ref': self.asset_id.name,
-                'partner_id': self.partner_id.id,
-                'move_type': 'in_invoice',
-                'state': 'draft',
-                'repair_id': self.id,
-                'invoice_date': fields.Date.today(),
-                'invoice_line_ids': [fields.Command.create({
-                    'name': f"{self.asset_id.name}-Repair Bill",
-                    'move_type': 'in_invoice',
-                    'quantity': 1,
-                    'price_unit': self.expense,
-                    'price_subtotal': self.expense
-                })]
-            })
-        self.has_invoiced = True
-
+                    'state': 'draft',
+                    'repair_id': self.id,
+                    'asset_id': False,
+                    'invoice_date': fields.Date.today(),
+                    'invoice_line_ids': [fields.Command.create({
+                        'name': f"{self.asset_id.name}-Repair Bill",
+                        'move_type': 'in_invoice',
+                        'quantity': 1,
+                        'price_unit': self.expense,
+                        'price_subtotal': self.expense,
+                    })]
+                })
+                self.has_billed = True
+        repair_invoice = self.env['account.move'].create({
+            'ref': self.asset_id.name,
+            'partner_id': self.asset_id.insurance_name.partner_id.id,
+            'move_type': 'out_invoice',
+            'state': 'draft',
+            'repair_id': self.id,
+            'asset_id': False,
+            'invoice_date': fields.Date.today(),
+            'invoice_line_ids': [fields.Command.create({
+                'name': f"{self.asset_id.name}-Insurance claim",
+                'move_type': 'out_invoice',
+                'quantity': 1,
+                'price_unit': insurance_amount,
+                'price_subtotal': insurance_amount,
+            })]
+        })
+        self.invoiced_amount += repair_invoice.invoice_line_ids.price_subtotal
 
     def action_view_invoice(self):
         """Function for viewing the invoice"""
-        repair_bill = self.env['account.move'].search(
-            [('ref', '=', self.asset_id.name), ('repair_id', '=', self.id)])
+        moves = self.env['account.move'].search(
+            [('repair_id', '=', self.id), ('move_type', 'in', ['in_invoice', 'out_invoice'])])
         return {
-            'name': 'Bill',
-            'view_mode': 'form',
-            'res_id': repair_bill.id,
-            'res_model': 'account.move',
+            'name': _('Invoices / Bills'),
             'type': 'ir.actions.act_window',
+            'res_model': 'account.move',
+            'view_mode': 'tree,form',
+            'domain': [('repair_id', '=', self.id), ('move_type', 'in', ['in_invoice', 'out_invoice'])],
         }
-
 
     def action_scrap(self):
         """Button action for scrapping the repair asset"""
@@ -143,8 +186,7 @@ class MaintenanceRequest(models.Model):
                 'disposal_type': 'scrap',
             })
 
-
-    def action_claim_insurance(self):
+    def action_claim_insurance_wizard(self):
         return {
             'name': _('Claim Insurance'),
             'view_mode': 'form',
@@ -154,7 +196,9 @@ class MaintenanceRequest(models.Model):
                 'default_asset_id': self.asset_id.id,
                 'default_total_amount': self.expense,
                 'default_repair_id': self.id,
-                'default_reimburse_after_invoice': False
+                'default_reimburse_after_invoice': self.is_reimburse,
+                'default_invoiced_amount':self.invoiced_amount,
+                'default_expense':self.expense,
             },
             'target': 'new'
         }

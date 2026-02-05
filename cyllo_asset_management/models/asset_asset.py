@@ -36,8 +36,6 @@ class AssetAsset(models.Model):
 
     name = fields.Char(string="Asset", required=True)
     asset_item_id = fields.Many2one("asset.item")
-    # asset_type_id = fields.Many2one("asset.type", required=True,
-    #                                 related='asset_item_id.asset_type_id')
     brand = fields.Char(String="Brand")
     date = fields.Date(default=fields.Date.context_today, required=True)
     company_id = fields.Many2one(
@@ -48,9 +46,8 @@ class AssetAsset(models.Model):
                                   help='Currency of company')
     status = fields.Selection(
         [('draft', 'Draft'), ('running', 'Running'), ('reserved', 'Reserved'), ('leased', 'Leased'),
-         ('assigned', 'Assigned'), ('rented', 'Rented'),
-         ('lost', 'Lost'), ('repair', 'Repairing'), ('maintenance', 'Maintenance'),
-         ('sell', 'Sell'), ('disposed', 'Dispose'), ('cancel', 'Cancelled')],
+         ('assigned', 'Assigned'), ('rented', 'Rented'),('sell', 'Sell'), ('disposed', 'Dispose'),
+         ('cancel', 'Cancelled')],
         default="draft", copy=False, tracking=True)
     is_confirm = fields.Boolean(string="Confirmed", copy=False)
     is_modify = fields.Boolean(string="Confirmed", copy=False)
@@ -74,10 +71,12 @@ class AssetAsset(models.Model):
     month_amount = fields.Float()
     year_amount = fields.Float()
     parent_id = fields.Many2one('asset.asset')
+    maintenance_state = fields.Selection([('maintenance', 'Under Maintenance'), ('repair', 'Under Repair')],
+                                            compute='_compute_maintenance_state', store=False)
     depreciation_method = fields.Selection(
         [('straight_line', 'Straight Line'), ('declining_balance', 'Declining Balance'),
          ('double_declining', 'Double Declining Balance'), ('declining_straight_line', 'Declining and Straight Line')],
-        string='Method', readonly=False, required=True)
+        string='Method', readonly=False, required=True, default='straight_line')
     depreciation_date = fields.Date(default=fields.Date.context_today, tracking=True, string='Depreciation date')
     method_duration = fields.Integer(string="Duration", tracking=True, default=1, readonly=False)
     is_auto_calculate = fields.Boolean(string='Auto Calculate')
@@ -102,9 +101,10 @@ class AssetAsset(models.Model):
     modified_asset_ids = fields.Many2many('asset.asset', "asset_sub_table", 'asset_1', 'asset_2')
     computation_method = fields.Selection(
         [('no_prorata', 'No Prorata'), ('constant_period', 'Constant Period'), ('daily_compute', 'Daily Computation')],
-        'Computation', tracking=True, readonly=False, required=True)
+        'Computation', tracking=True, readonly=False, required=True, default='no_prorata')
     prorata_date = fields.Date(default=fields.Date.context_today)
     entry_count = fields.Integer(compute='_compute_entry_count')
+    maintenance_count = fields.Integer(compute='_compute_maintenance_count')
     modified_count = fields.Integer(compute='_compute_modified_count')
     invoice_id = fields.Many2one('account.move')
     invoice_line_id = fields.Many2one('account.move.line')
@@ -120,10 +120,10 @@ class AssetAsset(models.Model):
     warranty_period = fields.Integer()
     warranty_end_date = fields.Date(string="Warranty Upto", compute="_compute_warranty_end_date")
     under_insurance = fields.Boolean(string="Has Insurance")
-    insurance_name = fields.Many2one(comodel_name='asset.asset.insurance')
-    insurance_number = fields.Char(string="Insurance ID")
-    insurance_start_date = fields.Date()
-    insurance_end_date = fields.Date()
+    insurance_name = fields.Many2one(comodel_name='asset.asset.insurance', string="Type")
+    insurance_number = fields.Char(string="ID")
+    insurance_start_date = fields.Date(string="Start date")
+    insurance_end_date = fields.Date(string="End date")
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
     reimburse_after_invoice = fields.Boolean(string="Reimburse After Invoice",
                                              help="Enable if insurance reimbursement happens after invoice creation.")
@@ -133,6 +133,16 @@ class AssetAsset(models.Model):
     insurance_attachment_ids = fields.Many2many('ir.attachment', 'asset_insurance_attachment_rel',
                                                 'asset_id', 'attachment_id', string="Insurance Documents",
                                                 domain="[('res_model', '=', 'asset.asset')]")
+
+    def _compute_maintenance_state(self):
+        """Compute maintenance states of assets"""
+        for rec in self:
+            if rec.is_repair:
+                rec.maintenance_state = 'repair'
+            elif rec.is_maintenance:
+                rec.maintenance_state = 'maintenance'
+            else:
+                rec.maintenance_state = False
 
     @api.depends('modified_asset_ids')
     def _compute_modified_count(self):
@@ -144,6 +154,19 @@ class AssetAsset(models.Model):
     def _compute_entry_count(self):
         """Compute entries count"""
         self.entry_count = len(self.depreciated_entry_ids)
+
+    @api.depends('name')
+    def _compute_maintenance_count(self):
+        """Check count of asset repair and maintenance and its current stage"""
+        for rec in self:
+            maintenance = self.env['maintenance.request'].search([('asset_id', '=', rec.id)])
+            rec.maintenance_count = len(maintenance)
+            for record in maintenance:
+                if record.stage_done == False:
+                    if record.maintenance_type == 'corrective':
+                        rec.is_repair = True
+                    elif record.maintenance_type == 'preventive':
+                        rec.is_maintenance = True
 
     @api.constrains('original_value')
     def _check_original_value(self):
@@ -198,7 +221,7 @@ class AssetAsset(models.Model):
 
     @api.onchange('insurance_start_date')
     def _onchange_insurance_start_date(self):
-        """Function for checking the invoice start date"""
+        """Function for checking the insurance start date"""
         if self.insurance_start_date and self.insurance_start_date < self.date:
             raise UserError(
                 _(f'The Asset is Purchased on {self.date}. The insurance start date should be greater than the Purchase Date'))
@@ -232,7 +255,7 @@ class AssetAsset(models.Model):
 
     def action_request_assets(self):
         """Action request assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost']
+        states = ['sell', 'disposed', 'cancel']
         if self.status in states:
             asset_state = self.status
             raise UserError(_(
@@ -248,7 +271,7 @@ class AssetAsset(models.Model):
 
     def action_reserve_assets(self):
         """Action reserve assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
+        states = ['sell', 'disposed', 'cancel', 'rented', 'reserved', 'leased']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -270,7 +293,7 @@ class AssetAsset(models.Model):
 
     def action_assign_assets(self):
         """Action assign assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
+        states = ['sell', 'disposed', 'cancel', 'rented', 'reserved', 'leased']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -295,7 +318,7 @@ class AssetAsset(models.Model):
 
     def action_lease_assets(self):
         """Action lease assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
+        states = ['sell', 'disposed', 'cancel', 'rented', 'leased']
         if not self.is_lease_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a lease asset.'))
         elif self.status in states:
@@ -322,7 +345,7 @@ class AssetAsset(models.Model):
 
     def action_rent_assets(self):
         """Action rent assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
+        states = ['sell', 'disposed', 'cancel', 'rented', 'leased']
         if not self.is_rental_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
         elif self.status in states:
@@ -347,9 +370,9 @@ class AssetAsset(models.Model):
                 'target': 'new'
             }
 
-    def action_repair_assets(self):
-        """Action repair assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
+    def action_maintenance_repair_assets(self):
+        """Action repair or maintenance assets"""
+        states = ['sell', 'disposed', 'cancel', 'rented', 'leased']
         if self.status in states:
             raise UserError(
                 _(f'You cannot complete this operation, The related asset is already {self.status}.'))
@@ -357,79 +380,28 @@ class AssetAsset(models.Model):
             raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
                               'operation'))
         else:
-            if self.is_reserve:
-                reserved_asset = self.env['asset.reservation'].search(
-                    [('asset_id', '=', self.id), ('status', '=', 'reserve')])
-                employee_id = reserved_asset.employee_id.id
-            elif self.is_lease:
-                leased_asset = self.env['asset.lease'].search([('asset_id', '=', self.id), ('status', '=', 'lease')])
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', leased_asset.customer_id.id)]).id
-            elif self.is_assign:
-                assigned_asset = self.env['asset.assign'].search(
-                    [('asset_id', '=', self.id), ('status', '=', 'assign')])
-                employee_id = assigned_asset.employee_id.id
-            elif self.is_rental:
-                rental_asset = self.env['asset.rental'].search([('asset_id', '=', self.id), ('status', '=', 'rent')])
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', rental_asset.customer_id.id)]).id
-            else:
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', self.env.user.partner_id.id)]).id
             return {
-                'name': _('Repair'),
+                'name': _('Maintenance/Repair'),
                 'view_mode': 'form',
-                'res_model': 'asset.repair',
+                'res_model': 'maintenance.request',
                 'type': 'ir.actions.act_window',
                 'context': {
                     'default_asset_id': self.id,
-                    'default_employee_id': employee_id
-                },
-                'target': 'new'
-            }
-
-    def action_maintenance_assets(self):
-        """Action maintenance assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented']
-        if self.status in states:
-            raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
-        elif self.is_repair or self.is_maintenance:
-            raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
-                              'operation'))
-        else:
-            if self.is_reserve:
-                reserved_asset = self.env['asset.reservation'].search(
-                    [('asset_id', '=', self.id), ('status', '=', 'reserve')])
-                employee_id = reserved_asset.employee_id.id
-            elif self.is_lease:
-                leased_asset = self.env['asset.lease'].search([('asset_id', '=', self.id), ('status', '=', 'lease')])
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', leased_asset.customer_id.id)]).id
-            elif self.is_assign:
-                assigned_asset = self.env['asset.assign'].search(
-                    [('asset_id', '=', self.id), ('status', '=', 'assign')])
-                employee_id = assigned_asset.employee_id.id
-            elif self.is_rental:
-                rental_asset = self.env['asset.rental'].search([('asset_id', '=', self.id), ('status', '=', 'rent')])
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', rental_asset.customer_id.id)]).id
-            else:
-                employee_id = self.env['hr.employee'].search([('work_contact_id', '=', self.env.user.partner_id.id)]).id
-            return {
-                'name': _('Maintenance'),
-                'view_mode': 'form',
-                'res_model': 'asset.maintenance',
-                'type': 'ir.actions.act_window',
-                'context': {
-                    'default_asset_id': self.id,
-                    'default_employee_id': employee_id
                 },
                 'target': 'new'
             }
 
     def action_lost_missing_assets(self):
         """Action lost missing assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved']
+        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'reserved', 'leased']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
             raise UserError(
                 _('Reverse the depreciation entries posted in the future in order to modify the depreciation.'))
+        elif self.is_repair or self.is_maintenance:
+            raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
+                              'operation'))
         elif self.is_entry:
             draft_entry = self.depreciated_entry_ids.filtered(
                 lambda e: e.state == 'draft')
@@ -454,13 +426,15 @@ class AssetAsset(models.Model):
 
     def action_sell_dispose_assets(self):
         """Action sell dispose assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'assigned', 'reserved', 'repair',
-                  'maintenance']
+        states = ['sell', 'disposed','cancel','rented', 'assigned', 'reserved', 'leased']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
             raise UserError(
                 _('Reverse the depreciation entries posted in the future in order to modify the depreciation.'))
+        elif self.is_repair or self.is_maintenance:
+            raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
+                              'operation'))
         else:
             draft_entry = self.depreciated_entry_ids.filtered(
                 lambda e: e.state == 'draft')
@@ -515,30 +489,18 @@ class AssetAsset(models.Model):
             'type': 'ir.actions.act_window',
         }
 
-    def action_view_repair(self):
-        """Action view repair"""
-        self.ensure_one()
-        repair_asset = self.env['account.asset.repair'].search(
-            [('asset_id', '=', self.id), ('status', 'in', ['new', 'confirm', 'repairing'])])
+    def action_view_maintenance_repairs(self):
+        """Action view maintenance / repair"""
         return {
-            'name': 'Repair Assets',
-            'view_mode': 'form',
-            'res_id': repair_asset.id,
-            'res_model': 'account.asset.repair',
+            'name': _('Maintenance / Repair'),
             'type': 'ir.actions.act_window',
-        }
-
-    def action_view_maintenance(self):
-        """Action view maintenance"""
-        self.ensure_one()
-        maintenance_asset = self.env['account.asset.maintenance'].search(
-            [('asset_id', '=', self.id), ('status', 'in', ['new', 'confirm', 'ongoing'])])
-        return {
-            'name': 'Maintenance assets',
-            'view_mode': 'form',
-            'res_id': maintenance_asset.id,
-            'res_model': 'account.asset.maintenance',
-            'type': 'ir.actions.act_window',
+            'res_model': 'maintenance.request',
+            'view_mode': 'tree,form',
+            'domain': [('asset_id', '=', self.id)],
+            'context': {
+                'default_asset_id': self.id,
+                'search_default_asset_id': 1,
+            }
         }
 
     def action_view_assign(self):
@@ -1040,7 +1002,7 @@ class AssetAsset(models.Model):
             'date': year_end_depreciation if self.duration_period == 'year' else month_end_depreciation,
             'accumulative_depreciation': calculate_value if depreciate_value > calculate_value or previous_amount > calculate_value and not self.is_decrease_value else previous_amount,
             'salvage_value': 0 if depreciate_value > calculate_value or previous_amount > calculate_value and not self.is_decrease_value else
-                salvage_value,
+            salvage_value,
         })]
         self.write({'depreciation_line_ids': vals})
 
@@ -1214,8 +1176,7 @@ class AssetAsset(models.Model):
             'company_id': self.company_id.id,
             'date': self.date,
             'status': 'running',
-            'asset_type_id': self.asset_type_id.id,
-            'brand_id': self.brand_id.id,
+            'brand': self.brand,
             'original_value': calculate_value,
             'salvage_value': calculate_value,
             'depreciation_method': self.depreciation_method,
@@ -1253,14 +1214,15 @@ class AssetAsset(models.Model):
 
     @api.onchange('asset_item_id')
     def _onchange_asset_item(self):
-        for record in self:
-            record.brand=record.asset_item_id.brand
-            record.is_auto_calculate=record.asset_item_id.is_auto_calculate
-            record.depreciating_factor=record.asset_item_id.depreciating_factor
-            record.duration_period=record.asset_item_id.duration_period
-            record.fixed_asset_account_id=record.asset_item_id.fixed_asset_account_id
-            record.asset_depreciation_account_id=record.asset_item_id.asset_depreciation_account_id
-            record.asset_expense_account_id=record.asset_item_id.asset_expense_account_id
-            record.asset_loss_account_id=record.asset_item_id.asset_loss_account_id
-            record.asset_journal_id=record.asset_item_id.asset_journal_id
-            record.prorata_date=record.asset_item_id.prorata_date
+        if self.asset_item_id:
+            for record in self:
+                record.brand = record.asset_item_id.brand
+                record.is_auto_calculate = record.asset_item_id.is_auto_calculate
+                record.depreciating_factor = record.asset_item_id.depreciating_factor
+                record.duration_period = record.asset_item_id.duration_period
+                record.fixed_asset_account_id = record.asset_item_id.fixed_asset_account_id
+                record.asset_depreciation_account_id = record.asset_item_id.asset_depreciation_account_id
+                record.asset_expense_account_id = record.asset_item_id.asset_expense_account_id
+                record.asset_loss_account_id = record.asset_item_id.asset_loss_account_id
+                record.asset_journal_id = record.asset_item_id.asset_journal_id
+                record.prorata_date = record.asset_item_id.prorata_date

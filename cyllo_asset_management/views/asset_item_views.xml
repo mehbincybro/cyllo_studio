@@ -28,8 +28,6 @@
                     </div>
                     <group>
                         <group>
-<!--                            <field name="asset_type_id"/>-->
-<!--                            <field name="brand_ids" invisible="1"/>-->
                             <field name="brand"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="date"/>
@@ -80,10 +78,12 @@
     </record>
     <!--    Menuitem for the asset on configuration-->
     <menuitem id="menu_asset_categ"
-              name="Asset"
-              parent="account.menu_finance_configuration"
+              name="Configuration"
+              parent="cyllo_asset_management.menu_assets_categ"
               groups="cyllo_asset_management.group_cyllo_asset_admin,account.group_account_manager"
-              sequence="20"/>
+              sequence="30"/>
+
+<!--              parent="account.menu_finance_configuration"-->
     <!--    Menuitem for the asset item-->
     <menuitem id="menu_asset_items"
               name="Asset Items"

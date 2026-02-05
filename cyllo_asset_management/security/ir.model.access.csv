@@ -1,59 +1,29 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_asset_asset_manager,access.asset.asset.manager,model_asset_asset,account.group_account_manager,1,1,1,1
 access_asset_asset_admin,access.asset.asset.admin,model_asset_asset,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 access_asset_asset_user,access.asset.asset.user,model_asset_asset,cyllo_asset_management.group_cyllo_asset_users,1,0,0,0
 
-access_asset_item_manager,access.asset.item.manager,model_asset_item,account.group_account_manager,1,1,1,1
 access_asset_item_admin,access.asset.item.manager,model_asset_item,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
-access_asset_scrap_manager,access.asset.scrap.manager,model_asset_scrap,account.group_account_manager,1,1,1,1
-access_asset_scrap_admin,access.asset.scrap.admin,model_asset_scrap,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_asset_type_manager,access.asset.type.manager,model_asset_type,account.group_account_manager,1,1,1,1
-access_asset_type_admin,access.asset.type.admin,model_asset_type,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_asset_brand_manager,access.asset.brand.manager,model_asset_brand,account.group_account_manager,1,1,1,1
-access_asset_brand_admin,access.asset.brand.admin,model_asset_brand,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_asset_lease_manager,access.asset.lease.manager,model_asset_lease,account.group_account_manager,1,1,1,1
 access_asset_lease_admin,access.asset.lease.admin,model_asset_lease,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 access_asset_lease_user,access.asset.lease.user,model_asset_lease,cyllo_asset_management.group_cyllo_asset_users,1,1,1,0
 
-access_asset_rental_manager,access.asset.rental.manager,model_asset_rental,account.group_account_manager,1,1,1,1
 access_asset_rental_admin,access.asset.rental.admin,model_asset_rental,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 access_asset_rental_user,access.asset.rental.user,model_asset_rental,cyllo_asset_management.group_cyllo_asset_users,1,1,1,0
 
-access_asset_assign_manager,access.asset.assign.manager,model_asset_assign,account.group_account_manager,1,1,1,1
 access_asset_assign_admin,access.asset.assign.admin,model_asset_assign,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 access_asset_assign_user,access.asset.assign.user,model_asset_assign,cyllo_asset_management.group_cyllo_asset_users,1,1,1,0
 
-access_asset_reservation_manager,access.asset.reservation.manager,model_asset_reservation,account.group_account_manager,1,1,1,1
 access_asset_reservation_admin,access.asset.reservation.admin,model_asset_reservation,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 access_asset_reservation_user,access.asset.reservation.user,model_asset_reservation,cyllo_asset_management.group_cyllo_asset_users,1,1,0,0
 
-access_asset_sell_dispose_manager,access.asset.sell.dispose.manager,model_asset_sell_dispose,account.group_account_manager,1,1,1,1
 access_asset_sell_dispose_admin,access.asset.sell.dispose.admin,model_asset_sell_dispose,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
-access_asset_depreciation_line_manager,access.asset.depreciation.line.manager,model_asset_depreciation_line,account.group_account_manager,1,1,1,1
 access_asset_depreciation_line_admin,access.asset.depreciation.line.admin,model_asset_depreciation_line,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+access_asset_depreciation_line_user,access.asset.depreciation.line.user,model_asset_depreciation_line,cyllo_asset_management.group_cyllo_asset_users,1,0,0,0
 
-access_asset_cancel_warning_manager,access.asset.cancel.warning.manager,model_asset_cancel_warning,account.group_account_manager,1,1,1,1
-access_asset_cancel_warning_admin,access.asset.cancel.warning.admin,model_asset_cancel_warning,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
-access_asset_lost_manager,access.asset.lost.manager,model_asset_lost,account.group_account_manager,1,1,1,1
-access_asset_lost_admin,access.asset.lost.admin,model_asset_lost,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_asset_modify_manager,access.asset.modify.manager,model_asset_modify,account.group_account_manager,1,1,1,1
 access_asset_modify_admin,access.asset.modify.admin,model_asset_modify,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
-access_account_asset_maintenance_manager,access.account.asset.maintenance.manager,model_account_asset_maintenance,account.group_account_manager,1,1,1,1
-access_account_asset_maintenance_admin,access.account.asset.maintenance.admin,model_account_asset_maintenance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_account_asset_repair_manager,access.account.asset.repair.manager,model_account_asset_repair,account.group_account_manager,1,1,1,1
-access_account_asset_repair_admin,access.account.asset.repair.admin,model_account_asset_repair,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
-
-access_asset_asset_insurance_manager,access.asset.asset.insurance.manager,model_asset_asset_insurance,account.group_account_manager,1,1,1,1
 access_asset_asset_insurance_admin,access.asset.asset.insurance.admin,model_asset_asset_insurance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
-access_asset_insurance_manager,access.asset.insurance.manager,model_asset_insurance,account.group_account_manager,1,1,1,1
 access_asset_insurance_admin,access.asset.insurance.admin,model_asset_insurance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1

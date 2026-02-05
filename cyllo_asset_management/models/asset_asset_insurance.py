@@ -8,15 +8,14 @@ class AssetAssetInsurance(models.Model):
     _rec_name = 'name'
 
     name = fields.Char(compute="_compute_name", store=True)
-    provider = fields.Char(string="Insurance Provider")
+    partner_id = fields.Many2one('res.partner',string="Insurance Provider")
     type = fields.Char(string="Insurance Type")
 
-    @api.depends('provider', 'type')
-
+    @api.depends('partner_id', 'type')
     def _compute_name(self):
         """function for assigning the name of insurance based on provider and type"""
         for record in self:
-            if record.provider and record.type:
-                record.name = f"{record.provider} ({record.type})"
+            if record.partner_id and record.type:
+                record.name = f"{record.partner_id.name} ({record.type})"
             else:
                 record.name = False
