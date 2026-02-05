@@ -1,394 +1,471 @@
 # -*- coding: utf-8 -*-
-#############################################################################
-#
-#    Cyllo Pvt. Ltd.
-#
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
-#    Author: Cyllo(<https://www.cyllo.com>)
-#
-#    You can modify it under the terms of the GNU LESSER
-#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
-#
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-#############################################################################
 from ast import literal_eval
-from lxml import etree
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
+import logging
 
-from odoo import api, Command, fields, models
-
-view_arch = """
-                    <xpath expr="//header" position="after">
-                        <div class="alert alert-warning" role="alert" invisible="not approval_request_id">
-                            <p>This Record Needs to be approved</p>
-                            <div class="d-flex align-items-center">
-                                <field name="approval_request_id" invisible="1"/>
-                                <field name="allow_comment" invisible="1"/>
-                                <field name="approval_transferred" invisible="1"/>
-                                <field name="server_trigger" invisible="1"/>
-                                <field name="can_approve" invisible="1"/>
-                            </div>
-                            <div class="mt-2">
-                                <div class="form-group">
-                                    <field name="approval_comment" invisible="not allow_comment" placeholder="Write your comment here..." class="form-control"/>
-                                </div>
-                            </div>
-                            <div class="d-flex gap-2 mt-3">
-                                <button name="action_approve" type="object" string="Accept" class="btn-icon btn-success" invisible="not can_approve"/>
-                                <button name="action_reject" type="object" string="Reject" class="btn-icon btn-danger" invisible="not can_approve"/>
-                                <button name="action_forward" type="object" string="Forward" invisible="not(approval_transferred and can_approve)" class="btn-icon btn-info"/>
-                            </div>
-                        </div>
-                    </xpath>
-                    """
-view_arch_request = f"""
-                    <xpath expr="//header" position="inside">
-                        <field name="show_request_button" invisible="1"/>
-                        <button name="action_request_approval" string="Request Approval" invisible="not (show_request_button or server_trigger)" type="object"/>
-                    </xpath>"""
-button_box_view = f"""<xpath expr="//div[@name='button_box']" position="inside">
-                    <button name="action_view_approval_request"
-                        class="oe_stat_button"
-                        icon="fa-check"
-                        invisible="approval_count == 0"
-                        type="object">
-                        <field name="approval_count" widget="statinfo" string="Approvals"/>
-                    </button>
-                </xpath>"""
-approval_view = f"""<xpath expr="//notebook" position="inside">
-                    <page name="approval_rules" string="Approvals" invisible="not approval_rule_ids">
-                        <field name="approval_rule_ids" readonly="1">
-                            <tree default_order="sequence_order asc">
-                                <field name="sequence_order" width="20px"/>
-                                <field name="name"/>
-                                <field name="state_from_id"/>
-                                <field name="state_to_id"/>
-                            </tree>
-                        </field>
-                    </page>
-                    </xpath>"""
+_logger = logging.getLogger(__name__)
 
 
 class ApprovalRule(models.Model):
-    _name = "approval.rule"
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = "Approval rules"
+    _name = 'approval.rule'
+    _description = 'Approval Rule'
 
-    name = fields.Char(string="Name", required=True)
-    model_id = fields.Many2one('ir.model', string="Model",
-                               domain=lambda self: self._get_inherited_models(),
-                               help="Select the model for which this approval rule applies.")
-    state_value = fields.Char(string="State",
-                              help="Technical name of the state field in the selected model.")
-    state_values_ids = fields.Many2many('ir.model.fields.selection')
-    state_from_id = fields.Many2one('ir.model.fields.selection',
-                                    string="State From",
-                                    help="The state from which the transition begins.")
-    state_to_id = fields.Many2one('ir.model.fields.selection',
-                                  string="State To",
-                                  help="The state to which the transition occurs.")
-    user_type = fields.Selection(
-        [('user', 'Based on User'), ('group', 'Based on Group'),
-         ('related', 'Based on Related Users')], string="User Type",
-        help="Specify how approvers are determined for this rule.")
-    user_id = fields.Many2one('res.users',
-                              help="Specific user who can approve the request.")
-    group_id = fields.Many2one('res.groups',
-                               help="Specific group whose members can approve the request.")
-    related_user_id = fields.Many2one('ir.model.fields', string="Related User",
-                                      help="Field in the selected model that determines the related users for approval.")
-    definition_type = fields.Selection(
-        [('domain', 'Domain'), ('server_action', 'Server Action')],
-        string="Definition Type", required=True,
-        help="Define whether this rule is based on a domain or a server action.")
-    model_select = fields.Char(string="Model Selected",
-                               related='model_id.model')
-    domain = fields.Char(string="Domain", required=True, default='[]',
-                         help="Domain condition that set for this rule.")
-    server_action_id = fields.Many2one('ir.actions.server',
-                                       string="Server Action",
-                                       help="Server action to execute when the rule is triggered.")
-    state = fields.Selection([('enable', 'Enable'), ('disable', 'Disable')],
-                             default='disable', store=True)
-    is_sequenced = fields.Boolean(string="Approve in Sequence order")
-    sequence_order = fields.Integer(string="Sequence")
-    transferred = fields.Boolean(string="Can be Transferred")
-    email_notification = fields.Boolean(string="Email Notification")
-    allow_comment = fields.Boolean(string="Allow Comment")
-    notify_on_request = fields.Boolean(string="Notify on Request")
-    notify_on_approve = fields.Boolean(string="Notify on Approval")
-    notify_on_reject = fields.Boolean(string="Notify on Rejection")
-    active = fields.Boolean(string="Active", default=True)
-    company_id = fields.Many2one("res.company", required=True,
-                                 default=lambda self: self.env.company,
-                                 help="Current company", tracking=True)
-    approver_ids = fields.Many2many('res.users', string='Approvers',
-                                    help="The person who approves the request", )
-    admin_users = fields.Json()
+    # ------------------------------------------------------------
+    # BASIC FIELDS
+    # ------------------------------------------------------------
+    name = fields.Char(required=True)
+    model_id = fields.Many2one('ir.model', string='Target Model')
+    model_name = fields.Char(related='model_id.model', store=True)
 
-    @api.model
-    def _get_inherited_models(self):
-        """
-            Retrieves the IDs of models that inherit from the 'check.approval' model.
-            """
-        approval_model_id = self.env['ir.model'].sudo().search(
-            [('model', '=', 'check.approval')]).id
-        models_details = self.env['ir.model.inherit'].sudo().search(
-            [('parent_id', '=', approval_model_id)]).model_id
-        return [('id', 'in', models_details.ids)]
+    request_ids = fields.One2many('approval.request', 'rule_id')
 
-    @api.onchange('user_type')
-    def _onchange_user_type(self):
-        if self.user_type == 'user':
-            self.group_id = False
-            self.related_user_id = False
-        elif self.user_type == 'group':
-            self.user_id = False
-            self.related_user_id = False
-        elif self.user_type == 'related':
-            self.user_id = False
-            self.group_id = False
+    rule_type = fields.Selection([
+        ('button', 'Button'),
+        ('state', 'State Change'),
+        ('server', 'Server Action'),
+    ], required=True, default='button')
 
-    @api.onchange('state_value', 'model_id')
-    def _onchange_state_value(self):
-        """
-            Updates 'state_values_ids' and 'model_select' based on the selected
-            'state_value' and 'model_id'. Handles both 'selection' and 'many2one'
-            field types, dynamically linking or creating related state values.
-            """
-        if not self.state_value:
-            self.sudo().write({
-                'state_values_ids': [Command.clear()],
-                'state_from_id': [Command.clear()],
-                'state_to_id': [Command.clear()]
-            })
-            return
-        if self.state_value or self.model_id:
-            status_bar = self.env['ir.model.fields'].search(
-                [('model_id', '=', self.model_id.id),
-                 ('name', '=', self.state_value)])
-            if status_bar.ttype == 'selection':
-                state_values = status_bar.selection_ids.ids
-                if self.state_value:
-                    self.sudo().write({
-                        'state_values_ids': [Command.clear()]
-                    })
-                self.sudo().write({
-                    'state_values_ids': [Command.link(rec) for rec in
-                                         state_values]
-                })
-            elif status_bar.ttype == 'many2one':
-                state_values = self.env[status_bar.relation].search([])
-                if state_values:
-                    self.sudo().write({
-                        'state_values_ids': [Command.clear()]
-                    })
-                    mapped_selection_ids = []
-                    stage_field = self.env['ir.model.fields'].search(
-                        [('model', '=', self._name),
-                         ('name', '=', 'x_stage_id')])
-                    for rec in state_values:
-                        selection_record = self.env[
-                            'ir.model.fields.selection'].sudo().search([
-                            ('value', '=', str(rec.id)),
-                            ('field_id', '=', stage_field.id)
-                        ], limit=1)
-                        if not selection_record:
-                            selection_record = self.env[
-                                'ir.model.fields.selection'].sudo().create({
-                                'value': rec.id,
-                                'name': rec.name,
-                                'field_id': stage_field.id,
-                                'sequence': rec.id,
-                            })
-                        mapped_selection_ids.append(selection_record.id)
-                    self.sudo().write({
-                        'state_values_ids': [Command.link(sel_id) for sel_id in
-                                             mapped_selection_ids]
-                    })
+    # ------------------------------------------------------------
+    # STATE FIELDS - IMPROVED APPROACH
+    # ------------------------------------------------------------
+    state_field_id = fields.Many2one(
+        'ir.model.fields',
+        string='State Field',
+        domain="[('model_id', '=', model_id), ('name', 'in', ['state', 'stage_id'])]"
+    )
+    state_field_name = fields.Char(related='state_field_id.name', store=True)
+    state_field_type = fields.Selection(
+        related='state_field_id.ttype',
+        string='Field Type'
+    )
+    state_field_relation = fields.Char(
+        related='state_field_id.relation',
+        string='Related Model',
+        help='For many2one fields, this is the comodel'
+    )
 
-    @api.onchange('model_id', 'user_type')
-    def _onchange_model_id(self):
-        if self.model_id:
-            admin_group = self.env['ir.model.access'].search([
-                ('model_id', '=', self.model_id.id),
-                ('perm_write', '=', True),
-                ('perm_create', '=', True),
-                ('perm_unlink', '=', True),
-            ]).mapped('group_id')
-            if self.user_type == 'user':
-                admin_users = admin_group.mapped('users')
-                self.admin_users = admin_users.ids if admin_users else []
-            elif self.user_type == 'group':
-                self.admin_users = admin_group.ids if admin_group else []
-        else:
-            self.admin_users = []
+    # For selection-type states
+    state_to_selection_id = fields.Many2one(
+        'ir.model.fields.selection',
+        string="Target State (Selection)",
+        domain="[('field_id', '=', state_field_id)]"
+    )
 
-    @api.model
-    def create(self, vals):
-        """
-        Overrides create to dynamically add approval-related UI elements to the
-        associated model's form view if not already present.
-        """
-        record = super(ApprovalRule, self).create(vals)
-        approvers = []
-        if record.user_type == 'user':
-            approvers.append(record.user_id.id)
-        elif record.user_type == 'group' and record.group_id:
-            group_users = record.group_id.users
-            approvers.extend(group_users.ids)
-        if record.model_id:
-            model_name = record.model_id.model
-            approval_request_form = self.env['ir.ui.view'].search(
-                [('name', '=', f'view_{record.model_id.model}_approval_form')])
-            if not approval_request_form:
-                form_view = self.env['ir.ui.view'].search([
-                    ('model', '=', model_name),
-                    ('type', '=', 'form'),
-                    ('mode', '=', 'primary')
-                ], limit=1)
-                if form_view:
-                    view = form_view.arch_db
-                    tree = etree.fromstring(view)
-                    header = tree.xpath("//header")
-                    notebook = tree.xpath("//notebook")
-                    button_box = tree.xpath("//div[@name='button_box']")
+    # For many2one states (stage_id, etc.)
+    state_values_m2o_ids = fields.Many2many(
+        'approval.state.value',
+        string='Available State Values',
+        compute='_compute_state_values_m2o',
+        store=False
+    )
+    state_to_m2o_value_id = fields.Many2one(
+        'approval.state.value',
+        string="Target State (Stage)",
+        domain="[('id', 'in', state_values_m2o_ids)]"
+    )
 
-                    if not header:
-                        header = etree.Element("header")
-                        tree.insert(0, header)
-                        updated_arch = etree.tostring(tree, encoding='unicode',
-                                                      pretty_print=True)
-                        form_view.write({'arch_db': updated_arch})
-                    self.create_view(record, model_name, form_view, view_arch,
-                                     "approval_data")
-                    self.create_view(record, model_name, form_view,
-                                     view_arch_request, "approval_data_button")
-                    if button_box:
-                        self.create_view(record, model_name, form_view,
-                                         button_box_view,
-                                         "approval_requests")
-                    if notebook:
-                        self.create_view(record, model_name, form_view,
-                                         approval_view,
-                                         "approvals")
-        return record
+    # ------------------------------------------------------------
+    # APPROVERS
+    # ------------------------------------------------------------
+    user_id = fields.Many2one('res.users', string='Approver', required=True)
+    group_id = fields.Many2one('res.groups', string='Approver Group')
 
-    @api.model
-    def write(self, vals):
-        """
-        Overrides write to handle updates to approval-related UI elements when
-        the model_id changes.
-        """
-        if 'model_id' in vals:
-            record = self
-            old_model_id = record.model_id.id
-            new_model_id = vals.get('model_id')
-            if old_model_id != new_model_id:
-                model_name = self.env['ir.model'].sudo().search(
-                    [('id', '=', new_model_id)], limit=1).model
-                approval_request_form = self.env['ir.ui.view'].search(
-                    [('name', '=', f'view_{model_name}_approval_form')])
+    # ------------------------------------------------------------
+    # TRIGGER FIELDS
+    # ------------------------------------------------------------
+    button_id = fields.Many2one('ir.buttons',
+                                domain="[('model_id','=',model_id)]")
+    server_action_id = fields.Many2one(
+        'ir.actions.server',
+        domain="[('model_id','=',model_id)]"
+    )
 
-                if not approval_request_form:
-                    form_view = self.env['ir.ui.view'].search([
-                        ('model', '=', model_name),
-                        ('type', '=', 'form'),
-                        ('mode', '=', 'primary')
-                    ], limit=1)
-                    if form_view:
-                        view = form_view.arch_db
-                        tree = etree.fromstring(view)
-                        header = tree.xpath("//header")
-                        notebook = tree.xpath("//notebook")
-                        button_box = tree.xpath("//div[@name='button_box']")
-                        if not header:
-                            header = etree.Element("header")
-                            tree.insert(0, header)
-                            updated_arch = etree.tostring(tree,
-                                                          encoding='unicode',
-                                                          pretty_print=True)
-                            form_view.write({'arch_db': updated_arch})
-                        self.create_view(record, model_name, form_view,
-                                         view_arch, "approval_data")
-                        self.create_view(record, model_name, form_view,
-                                         view_arch_request,
-                                         "approval_data_button")
-                        if button_box:
-                            self.create_view(record, model_name, form_view,
-                                             button_box_view,
-                                             "approval_requests")
-                        if notebook:
-                            self.create_view(record, model_name, form_view,
-                                             approval_view, "approvals")
-        return super(ApprovalRule, self).write(vals)
+    sequence = fields.Integer(default=1)
+    domain = fields.Char(default='[]')
 
-    def action_enable(self):
-        """
-            Sets the state of the record to 'enable'.
-            """
-        self.state = 'enable'
+    is_comment = fields.Boolean('Allow Comment')
+    is_email = fields.Boolean('Notify Email')
+    is_email_request = fields.Boolean('Notify on Request')
+    is_email_approve = fields.Boolean('Notify on Approval')
+    is_email_reject = fields.Boolean('Notify on Rejection')
 
-    def action_disable(self):
-        """
-            Sets the state of the record to 'disable'.
-            """
-        self.state = 'disable'
+    @api.constrains('model_id')
+    def _constraint_model_id(self):
+        if not self.model_id:
+            raise ValidationError('Please choose a Model.')
 
-    def refresh_dynamic_views(self):
-        """Refresh dynamic approval views to match the latest `view_arch` template.
+    # ------------------------------------------------------------
+    # COMPUTE AVAILABLE STATE VALUES FOR MANY2ONE
+    # ------------------------------------------------------------
+    @api.depends('state_field_id', 'state_field_relation')
+    def _compute_state_values_m2o(self):
+        """Dynamically fetch all records from the related model."""
+        for rec in self:
+            rec.state_values_m2o_ids = False
 
-        This updates existing dynamically created "approval_data" views for all
-        models linked to approval rules, ensuring recent template changes are applied.
-
-        Can be run manually, via a Server Action, scheduled action, or custom trigger.
-        Safe to run multiple times—only updates existing views.
-        """
-        for rule in self.sudo():
-            if not rule.model_id:
+            if not rec.state_field_relation:
                 continue
-            model_name = rule.model_id.model
-            data_xml = self.env['ir.model.data'].sudo().search([
-                ('module', '=', rule._module),
-                ('name', '=', f'view_{model_name}_approval_data'),
-                ('model', '=', 'ir.ui.view'),
-            ], limit=1)
-            if data_xml:
-                view = self.env['ir.ui.view'].sudo().browse(data_xml.res_id)
-                if view and view.exists():
-                    view.write({'arch': view_arch})
 
-    def create_view(self, record, model_name, form_view, arch, view_name):
-        """
-        Creates a dynamic UI view for approval-related elements and registers it in
-        model data for the specified model.
-        """
-        view = self.env['ir.ui.view'].create({
-            'name': f'view_{record.model_id.model}_approval_form',
-            'type': 'form',
-            'model': model_name,
-            'inherit_id': form_view.id,
-            'mode': 'extension',
-            'arch': arch
-        })
-        self.env['ir.model.data'].create({
-            'name': f'view_{record.model_id.model}_{view_name}',
-            'model': 'ir.ui.view',
-            'module': self._module,
-            'res_id': view.id,
-            'noupdate': True,
-        })
+            # Get all records from the comodel
+            try:
+                comodel = self.env[rec.state_field_relation]
+                records = comodel.search([])
+
+                # Create or update approval.state.value records
+                StateValue = self.env['approval.state.value']
+                value_ids = []
+
+                for record in records:
+                    display_name = record.display_name or record.name
+                    value = StateValue.search([
+                        ('res_model', '=', rec.state_field_relation),
+                        ('res_id', '=', record.id),
+                    ], limit=1)
+
+                    if not value:
+                        value = StateValue.create({
+                            'res_model': rec.state_field_relation,
+                            'res_id': record.id,
+                            'name': display_name,
+                        })
+                    else:
+                        # Update name in case it changed
+                        value.write({'name': display_name})
+
+                    value_ids.append(value.id)
+
+                rec.state_values_m2o_ids = value_ids
+
+            except Exception as e:
+                _logger.warning(
+                    f"Failed to load state values for {rec.state_field_relation}: {e}")
+                rec.state_values_m2o_ids = False
+
+    # ------------------------------------------------------------
+    # ONCHANGE: CLEAR STATE VALUES WHEN FIELD CHANGES
+    # ------------------------------------------------------------
+    @api.onchange('state_field_id')
+    def _onchange_state_field_id(self):
+        """Clear state values when changing the state field."""
+        self.state_to_selection_id = False
+        self.state_to_m2o_value_id = False
+
+    # ------------------------------------------------------------
+    # CLEAN EMAIL LOGIC
+    # ------------------------------------------------------------
+    @api.onchange('is_email')
+    def _onchange_is_email(self):
+        if not self.is_email:
+            self.is_email_request = False
+            self.is_email_approve = False
+            self.is_email_reject = False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Patch the target model's method when a rule is created."""
+        records = super().create(vals_list)
+        for rec in records:
+            rec._patch_method()
+            rec._create_dynamic_fields()
+        return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if any(key in vals for key in
+               ['model_id', 'rule_type', 'button_id', 'state_field_id']):
+            for rec in self:
+                rec._patch_method()
+                rec._create_dynamic_fields()
+        return res
+
+    def _create_dynamic_fields(self):
+        """Create required fields on target model if missing."""
+        IrModelFields = self.env['ir.model.fields']
+        model_fields = self.env[self.model_id.model]._fields
+        fields_to_create = [
+            {
+                'name': 'x_approval_request_ids',
+                'field_description': 'Approval Requests',
+                'ttype': 'many2many',
+                'relation': 'approval.request',
+            },
+            {
+                'name': 'x_is_state_approval',
+                'field_description': 'Is State Approval',
+                'ttype': 'boolean',
+            },
+            {
+                'name': 'x_approval_comment',
+                'field_description': 'Approval Comment',
+                'ttype': 'text',
+            },
+            {
+                'name': 'x_current_approver_id',
+                'field_description': 'Current Approver',
+                'ttype': 'many2one',
+                'relation': 'res.users',
+            },
+            {
+                'name': 'x_current_group_id',
+                'field_description': 'Current Approver Group',
+                'ttype': 'many2one',
+                'relation': 'res.groups',
+            },
+            {
+                'name': 'x_approval_request_count',
+                'field_description': 'Approval Request Count',
+                'ttype': 'integer',
+            },
+        ]
+
+        for field_data in fields_to_create:
+            if field_data['name'] not in model_fields:
+                IrModelFields.create({
+                    **field_data,
+                    'model_id': self.model_id.id,
+                })
+
+        self.env['ir.ui.view']._invalidate_cache()
 
     @api.model
-    def _domain(self):
-        """
-            Evaluates and returns the domain as a Python expression.
-            """
-        return literal_eval(self.domain)
+    def _register_hook(self):
+        """Re-apply patches for all existing rules at module load."""
+        res = super()._register_hook()
+        rules = self.sudo().search([])
+        for rule in rules:
+            try:
+                rule._patch_method()
+            except Exception as e:
+                _logger.warning("Failed to patch rule %s: %s", rule.name, e)
+        return res
+
+    def _patch_method(self):
+        model = self.env[self.model_name]
+        if self.rule_type == 'state':
+            return self._patch_state_change(model)
+        elif self.rule_type == 'button':
+            return self._patch_button_method(model)
+
+    def _get_target_state_value(self):
+        """Get the target state value regardless of field type."""
+        self.ensure_one()
+        if self.state_field_type == 'selection':
+            return self.state_to_selection_id.value
+        elif self.state_field_type == 'many2one':
+            return self.state_to_m2o_value_id.res_id if self.state_to_m2o_value_id else None
+        return None
+
+    @api.model
+    def _get_ordered_rules(self, model_name, trigger_type,
+                           state_field_name=None, trigger_value=None):
+        """Get rules matching the trigger, ordered by sequence."""
+        domain = [
+            ('model_name', '=', model_name),
+            ('rule_type', '=', trigger_type),
+        ]
+
+        if trigger_type == 'button':
+            domain.append(('button_id', '=', trigger_value))
+        else:  # state change
+            domain.append(('state_field_name', '=', state_field_name))
+
+            # Handle both selection and many2one state fields safely
+            # trigger_value can be a string (selection) or int (ID)
+            state_domain = [('state_to_selection_id.value', '=', trigger_value)]
+
+            # Only search by res_id if trigger_value is numeric (Many2one)
+            # This avoids ValueError when comparing string to integer field
+            if isinstance(trigger_value, int) or (isinstance(trigger_value, str) and trigger_value.isdigit()):
+                state_domain = ['|'] + state_domain + [('state_to_m2o_value_id.res_id', '=', int(trigger_value))]
+
+            domain += state_domain
+
+        return self.search(domain).sorted(lambda r: r.sequence)
+
+    def _patch_button_method(self, model):
+        button = self.button_id
+        button_id = button.id
+        method_name = button.name
+
+        if not hasattr(model, method_name):
+            raise ValidationError(
+                f"Method '{method_name}' not found on model '{self.model_name}'.")
+
+        if getattr(model.__class__, f"_approval_patched_{method_name}", False):
+            return
+
+        original_method = getattr(model.__class__, method_name)
+
+        def intercepted_method(record, *args, **kwargs):
+            Rule = record.env['approval.rule'].sudo()
+            rules = Rule._get_ordered_rules(
+                model_name=record._name,
+                trigger_type='button',
+                trigger_value=button_id
+            )
+
+            if rules:
+                Request = record.env['approval.request'].sudo()
+
+                for rule in rules:
+                    if not record.sudo().filtered_domain(
+                            literal_eval(rule.domain)):
+                        continue
+
+                    request = rule.request_ids.filtered(
+                        lambda x: x.res_id == record.id)
+                    if request:
+                        existing = request.sorted("id", reverse=True)[0]
+
+                        if existing.state == 'approved':
+                            continue
+
+                        if existing.state == 'pending':
+                            raise ValidationError(
+                                _("Approval '%s' (sequence %s) is pending.")
+                                % (rule.name, rule.sequence)
+                            )
+
+                        if existing.state == 'rejected' or existing.is_used:
+                            pass
+
+                    return {
+                        'type': 'ir.actions.act_window',
+                        'res_model': 'approval.request.wizard',
+                        'view_mode': 'form',
+                        'target': 'new',
+                        'context': {
+                            'default_rule_id': rule.id,
+                            'default_res_model': record._name,
+                            'default_res_id': record.id,
+                        },
+                    }
+
+                result = original_method(record, *args, **kwargs)
+                return result
+
+            return original_method(record, *args, **kwargs)
+
+        setattr(model.__class__, method_name, intercepted_method)
+        setattr(model.__class__, f"_approval_patched_{method_name}", True)
+
+    def _patch_state_change(self, model):
+        if getattr(model.__class__, "_approval_patched_write", False):
+            return
+
+        original_write = model.__class__.write
+
+        def intercepted_write(records, vals):
+            Rule = records.env['approval.rule'].sudo()
+
+            # Get the state field name dynamically from rules for this model
+            state_rules_for_model = Rule.search([
+                ('model_name', '=', records._name),
+                ('rule_type', '=', 'state'),
+            ])
+
+            if state_rules_for_model:
+                unique_state_fields = state_rules_for_model.mapped('state_field_name')
+                records_to_process = records
+                
+                for state_field_name in unique_state_fields:
+                    new_state = vals.get(state_field_name)
+                    if new_state is None:
+                        continue
+
+                    # Filter records that need to be audited for this state change
+                    for rec in records_to_process:
+                        # Get rules for this specific state field and value
+                        rules = Rule._get_ordered_rules(
+                            model_name=records._name,
+                            trigger_type='state',
+                            state_field_name=state_field_name,
+                            trigger_value=new_state
+                        )
+
+                        if not rules:
+                            continue
+
+                        Request = rec.env['approval.request'].sudo()
+                        next_rule_to_approve = None
+
+                        for rule in rules:
+                            if not rec.sudo().filtered_domain(
+                                    literal_eval(rule.domain)):
+                                continue
+
+                            existing = Request.search([
+                                ('rule_id', '=', rule.id),
+                                ('res_model', '=', rec._name),
+                                ('res_id', '=', rec.id),
+                            ], order="id desc", limit=1)
+
+                            if existing and existing.state == 'approved':
+                                continue
+
+                            if existing and existing.state == 'pending':
+                                raise ValidationError(
+                                    _("Approval '%s' (sequence %s) pending.")
+                                    % (rule.name, rule.sequence)
+                                )
+
+                            next_rule_to_approve = rule
+                            break
+
+                        if next_rule_to_approve:
+                            if not rec.x_is_state_approval:
+                                rec.sudo().write({
+                                    'x_is_state_approval': True,
+                                })
+                                # Exclude this record from the final original_write call
+                                records_to_process = records_to_process - rec
+                                continue 
+
+                            if rec.x_is_state_approval:
+                                raise ValidationError(
+                                    _("Approval required for '%s' (sequence %s). Use 'Request Approval'.")
+                                    % (next_rule_to_approve.name,
+                                       next_rule_to_approve.sequence)
+                                )
+
+                        # If all rules are approved for this record and this state field, we proceed.
+                        # However, we need to handle the 'done' state for requests.
+                        rule_ids = rules.mapped('id')
+                        if rule_ids:
+                            Request.search([
+                                ('rule_id', 'in', rule_ids),
+                                ('res_model', '=', rec._name),
+                                ('res_id', '=', rec.id),
+                                ('state', '=', 'approved'),
+                            ]).sudo().write({'state': 'done'})
+                
+                # If some records are left, update them
+                if records_to_process:
+                    return original_write(records_to_process, vals)
+                return True
+
+            return original_write(records, vals)
+
+        setattr(model.__class__, 'write', intercepted_write)
+        setattr(model.__class__, "_approval_patched_write", True)
+
+
+class ApprovalStateValue(models.Model):
+    """Helper model to represent many2one state values like ir.model.fields.selection"""
+    _name = 'approval.state.value'
+    _description = 'Approval State Value (Many2one)'
+    _rec_name = 'name'
+
+    res_model = fields.Char(string='Model', required=True, index=True)
+    res_id = fields.Integer(string='Record ID', required=True, index=True)
+    name = fields.Char(string='Display Name', required=True)
+
+    _sql_constraints = [
+        ('unique_model_id', 'UNIQUE(res_model, res_id)',
+         'Only one state value per model record allowed!')
+    ]
+
+    def name_get(self):
+        """Display the actual record name in the dropdown"""
+        return [(rec.id, rec.name) for rec in self]
