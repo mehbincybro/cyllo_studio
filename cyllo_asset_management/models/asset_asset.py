@@ -399,6 +399,9 @@ class AssetAsset(models.Model):
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
             raise UserError(
                 _('Reverse the depreciation entries posted in the future in order to modify the depreciation.'))
+        elif self.is_repair or self.is_maintenance:
+            raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
+                              'operation'))
         elif self.is_entry:
             draft_entry = self.depreciated_entry_ids.filtered(
                 lambda e: e.state == 'draft')
@@ -423,13 +426,15 @@ class AssetAsset(models.Model):
 
     def action_sell_dispose_assets(self):
         """Action sell dispose assets"""
-        states = ['sell', 'disposed', 'damaged', 'cancel', 'lost', 'rented', 'assigned', 'reserved', 'repair',
-                  'maintenance', 'leased']
+        states = ['sell', 'disposed','cancel','rented', 'assigned', 'reserved', 'leased']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
             raise UserError(
                 _('Reverse the depreciation entries posted in the future in order to modify the depreciation.'))
+        elif self.is_repair or self.is_maintenance:
+            raise UserError(_('You cannot complete this operation, The related asset is already taken for a another '
+                              'operation'))
         else:
             draft_entry = self.depreciated_entry_ids.filtered(
                 lambda e: e.state == 'draft')
