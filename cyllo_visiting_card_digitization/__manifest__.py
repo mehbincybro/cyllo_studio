@@ -30,9 +30,10 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base','crm', 'cyllo_ocr_digitization', 'cyllo_crm', 'cyllo_ai'],
+    'depends': ['base', 'crm', 'cyllo_ocr_digitization', 'cyllo_crm',
+                'cyllo_ai'],
     'data': [
-         'security/ir.model.access.csv',
+        'security/ir.model.access.csv',
         'views/cyllo_visiting_card_views.xml',
         'views/crm_visiting_card_upload.xml',
         'views/res_partner_form_view.xml',

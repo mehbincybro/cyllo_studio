@@ -19,12 +19,14 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 ##############################################################################
+# -*- coding: utf-8 -*-
 
 import logging
 import base64
 import io
 import re
 import json
+import imghdr
 
 import pytesseract
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -33,7 +35,6 @@ from pdf2image import convert_from_bytes
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
-import imghdr
 from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 
@@ -41,163 +42,144 @@ _logger = logging.getLogger(__name__)
 
 
 class CylloVisitingCard(models.Model):
+    """
+    Model for AI-based visiting card digitization.
+
+    This model allows users to upload visiting cards (image or PDF) and
+    automatically extracts contact information using either OCR or an AI model.
+
+    Fields:
+        visiting_card_file (Binary): Uploaded visiting card file (required).
+        visiting_card_filename (Char): Name of the uploaded file.
+        extracted_text (Text): Extracted contact data in JSON format (readonly).
+        state (Selection): Current state of processing ('draft', 'processing', 'done', 'failed').
+        type_of_digitization (Selection): Method of extraction ('manually' using OCR or 'use_ai').
+    """
     _name = 'cyllo.visiting.card'
     _description = 'AI Visiting Card Digitization'
 
-    visiting_card_file = fields.Binary(required=True, attachment=True)
-    visiting_card_filename = fields.Char()
-    extracted_text = fields.Text(readonly=True)
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('processing', 'Processing'),
-        ('done', 'Done'),
-        ('failed', 'Failed')
-    ], default='draft')
+    visiting_card_file = fields.Binary(
+        string="Visiting Card File",
+        required=True,
+        attachment=True
+    )
+
+    visiting_card_filename = fields.Char(string="Filename")
+
+    extracted_text = fields.Text(
+        string="Extracted Data",
+        readonly=True
+    )
+
+    state = fields.Selection(
+        [
+            ('draft', 'Draft'),
+            ('processing', 'Processing'),
+            ('done', 'Done'),
+            ('failed', 'Failed')
+        ],
+        default='draft'
+    )
 
     type_of_digitization = fields.Selection(
         [('manually', 'Manually'), ('use_ai', 'Use AI')],
-        required=True,
-        default='manually'
+        default='manually',
+        required=True
     )
 
-    # ----------------------------------------------------------
-    # Helpers
-    # ----------------------------------------------------------
-
-    def _decode_binary(self, data):
+    def _decode_binary(self, encoded_data):
         """
-            Attempt to decode a Base64-encoded value.
+        Decode a base64-encoded binary string into bytes.
 
-            If the input is valid Base64, it returns the decoded binary data.
-            If decoding fails for any reason, the original input is returned
-            unchanged.
+        Args:
+            encoded_data (str or bytes): Base64-encoded data.
 
-            Args:
-                data: The input data to decode (typically bytes or a Base64 string).
-
-            Returns:
-                Decoded binary data if successful; otherwise, the original input.
-            """
+        Returns:
+            bytes: Decoded binary data.
+        """
         try:
-            return base64.b64decode(data)
+            return base64.b64decode(encoded_data)
         except Exception:
-            return data
+            return encoded_data
 
-    def _parse_contact_text(self, text):
+    def _parse_contact_text(self, raw_text):
         """
-            Parse free-form contact text into structured contact information.
+        Parse raw text extracted from a visiting card into structured contact data.
 
-            The function processes multiline text (e.g., OCR output from a business card)
-            and attempts to extract common contact fields such as name, designation,
-            company, phone numbers, email, website, and address. Lines are analyzed in
-            order, with earlier lines given priority for name and role-related fields.
+        Args:
+            raw_text (str): Text extracted from OCR or AI processing.
 
-            Args:
-                text (str): Raw multiline text containing contact details.
+        Returns:
+            dict: Parsed contact details including name, designation, company, phones, email, website, and address.
 
-            Returns:
-                dict: A dictionary with the following keys:
-                    - name (str or None)
-                    - designation (str or None)
-                    - company (str or None)
-                    - phones (list[str])
-                    - email (str or None)
-                    - website (str or None)
-                    - address (str or None)
-
-            Raises:
-                ValidationError: If no non-empty text lines are detected.
-            """
-
-        text_lines = [line.strip() for line in text.splitlines() if
-                      line.strip()]
+        Raises:
+            ValidationError: If no text is detected in the raw input.
+        """
+        text_lines = [line.strip() for line in raw_text.splitlines() if line.strip()]
         if not text_lines:
             raise ValidationError("No text detected.")
 
-        contact_info = {
-            "name": None,
-            "designation": None,
-            "company": None,
-            "phones": [],
-            "email": None,
-            "website": None,
-            "address": None
+        parsed_contact = {
+            'name': None,
+            'designation': None,
+            'company': None,
+            'phones': [],
+            'email': None,
+            'website': None,
+            'address': None
         }
 
         phone_pattern = r'\+?\d[\d\-\s]+\d'
         email_pattern = r'\S+@\S+'
         website_pattern = r'(www\.\S+|\S+\.(com|net|org|io|co))'
 
-        for line_index, text_line in enumerate(text_lines):
-
-            if line_index == 0 and not contact_info["name"]:
-                contact_info["name"] = text_line
-
-            elif re.search(email_pattern, text_line):
-                contact_info["email"] = text_line
-
-            elif re.search(phone_pattern, text_line):
-                contact_info["phones"].extend(
-                    re.findall(phone_pattern, text_line)
-                )
-
-            elif re.search(website_pattern, text_line):
-                contact_info["website"] = text_line
-
-            elif not contact_info["designation"]:
-                contact_info["designation"] = text_line
-
-            elif not contact_info["company"]:
-                contact_info["company"] = text_line
-
+        for index, line in enumerate(text_lines):
+            if index == 0:
+                parsed_contact['name'] = line
+            elif re.search(email_pattern, line):
+                parsed_contact['email'] = line
+            elif re.search(phone_pattern, line):
+                parsed_contact['phones'].extend(re.findall(phone_pattern, line))
+            elif re.search(website_pattern, line):
+                parsed_contact['website'] = line
+            elif not parsed_contact['designation']:
+                parsed_contact['designation'] = line
+            elif not parsed_contact['company']:
+                parsed_contact['company'] = line
             else:
-                contact_info["address"] = (
-                    f"{contact_info['address']}, {text_line}"
-                    if contact_info["address"] else text_line
+                parsed_contact['address'] = (
+                    f"{parsed_contact['address']}, {line}"
+                    if parsed_contact['address'] else line
                 )
-        print(contact_info)
-        return contact_info
 
-    # ----------------------------------------------------------
-    # OCR IMAGE
-    # ----------------------------------------------------------
-    def _ocr_image(self, file_bytes):
+        return parsed_contact
+
+    def _perform_image_ocr(self, image_bytes):
         """
-            Perform OCR on an image and extract structured contact information.
+        Perform OCR on an image file and parse extracted text into contact data.
 
-            The method preprocesses the image by converting it to grayscale and
-            applying autocontrast to improve OCR accuracy. Extracted text is then
-            cleaned and passed to the contact text parser.
+        Args:
+            image_bytes (bytes): Binary content of an image.
 
-            Args:
-                file_bytes (bytes): Raw image data to be processed via OCR.
-
-            Returns:
-                dict: Parsed contact information extracted from the image.
-            """
-        image = Image.open(io.BytesIO(file_bytes)).convert('RGB')
+        Returns:
+            dict: Parsed contact information.
+        """
+        image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
         image = ImageOps.autocontrast(ImageOps.grayscale(image))
-        text = pytesseract.image_to_string(image).replace("\x0c", "").strip()
-        return self._parse_contact_text(text)
+        extracted_text = pytesseract.image_to_string(image)
+        return self._parse_contact_text(extracted_text)
 
-    # ----------------------------------------------------------
-    # OCR PDF
-    # ----------------------------------------------------------
-    def _ocr_pdf(self, file_bytes):
+    def _perform_pdf_ocr(self, pdf_bytes):
         """
-           Perform OCR on a PDF file and extract structured contact information.
+        Perform OCR on a PDF file and parse extracted text into contact data.
 
-           Each page of the PDF is converted to an image, preprocessed using
-           grayscale conversion and autocontrast, and then passed through OCR.
-           Text from all pages is combined and parsed into contact fields.
+        Args:
+            pdf_bytes (bytes): Binary content of a PDF file.
 
-           Args:
-               file_bytes (bytes): Raw PDF data to be processed via OCR.
-
-           Returns:
-               dict: Parsed contact information extracted from the PDF.
-           """
-        pages = convert_from_bytes(file_bytes)
+        Returns:
+            dict: Parsed contact information.
+        """
+        pages = convert_from_bytes(pdf_bytes)
         full_text = ""
 
         for page in pages:
@@ -206,42 +188,29 @@ class CylloVisitingCard(models.Model):
 
         return self._parse_contact_text(full_text)
 
-
-    # ----------------------------------------------------------
-    # Process With Ai
-    # ----------------------------------------------------------
     def _process_with_ai(self):
-        if not self.visiting_card_file:
-            raise ValidationError(
-                "No visiting card file uploaded for AI extraction."
-            )
+        """
+        Use an AI model to extract contact information from the visiting card file.
 
-        try:
-            file_bytes = base64.b64decode(self.visiting_card_file)
-        except Exception:
-            raise ValidationError(
-                "Please upload your visiting card properly.")
+        Returns:
+            dict: Extracted contact information from AI.
 
-        mime_type = None
+        Raises:
+            ValidationError: If the file type is unsupported.
+        """
+        file_bytes = base64.b64decode(self.visiting_card_file)
+
         image_type = imghdr.what(None, file_bytes)
         if image_type:
             mime_type = f"image/{image_type}"
         elif file_bytes[:4] == b'%PDF':
             mime_type = "application/pdf"
         else:
-            raise ValidationError(
-                "Unsupported file type for AI extraction. Please upload PNG, JPG, JPEG, or PDF."
-            )
+            raise ValidationError("Unsupported file type.")
 
-        _logger.info("AI Digitization Triggered | MIME type: %s", mime_type)
-
-        api_key = self.env['ir.config_parameter'].sudo().get_param(
-            'cyllo_agent.api_key'
-        )
-        if not api_key:
-            raise ValidationError(
-                "Google API key not set in system parameters."
-            )
+        api_key = self.env['ir.config_parameter'].sudo().get_param('cyllo_agent.api_key')
+        model_id = int(self.env['ir.config_parameter'].sudo().get_param('agent.llm_model_id'))
+        model_name = self.env['cyllo.llm'].sudo().browse(model_id).name
 
         visiting_card_media = {
             "type": "media",
@@ -249,7 +218,7 @@ class CylloVisitingCard(models.Model):
             "mime_type": mime_type
         }
 
-        message = HumanMessage(
+        prompt_message = HumanMessage(
             content=[
                 {
                     "type": "text",
@@ -262,132 +231,55 @@ class CylloVisitingCard(models.Model):
                 visiting_card_media
             ]
         )
+
         llm = ChatGoogleGenerativeAI(
-            model='gemini-2.5-flash',
+            model=model_name,
             google_api_key=api_key
         )
 
-        try:
-            response = llm.invoke([message])
-            response_text = response.content
-        except Exception as e:
-            error_message = str(e).lower()
-
-            # Check for token/API key expiration or authentication errors
-            if any(keyword in error_message for keyword in [
-                'expired', 'invalid api key', 'api key not valid',
-                'authentication', 'unauthorized', '401', 'api_key_invalid'
-            ]):
-                _logger.error("API token has expired or is invalid: %s", str(e))
-                raise ValidationError(
-                    "Your API token has expired or is invalid. "
-                    "Please update your Google API key in system parameters."
-                )
-
-            # Check for quota exceeded
-            if any(keyword in error_message for keyword in [
-                'quota', 'rate limit', 'resource exhausted', '429'
-            ]):
-                _logger.error("API quota exceeded: %s", str(e))
-                raise ValidationError(
-                    "API quota exceeded. Please try again later or check your API limits."
-                )
-
-            # Generic AI extraction error
-            _logger.error("AI extraction failed: %s", str(e))
-            raise ValidationError(
-                f"Please upload your visiting card properly."
-            )
-
-        # Parse the JSON response into a Python dictionary
-
-
-        try:
-            # Remove markdown code blocks if present
-            cleaned_text = re.sub(r'```json\s*|\s*```', '',
-                                  response_text).strip()
-
-            # Parse JSON string to dictionary
-            contact = json.loads(cleaned_text)
-
-            print(contact)  # This will print the Python dictionary
-            return contact
-
-        except json.JSONDecodeError as e:
-            _logger.error("Failed to parse AI response as JSON: %s", str(e))
-            raise ValidationError(
-                "Please upload your visiting card properly.")
-
-    # ----------------------------------------------------------
-    # CREATE
-    # ----------------------------------------------------------
+        response = llm.invoke([prompt_message])
+        cleaned_response = re.sub(r'```json\s*|\s*```', '', response.content).strip()
+        return json.loads(cleaned_response)
 
     @api.model
-    def create(self, vals):
+    def create(self, values):
         """
-            Create a record and process an uploaded visiting card via OCR.
+        Override the default create method to automatically process the visiting card
+        using OCR or AI after the record is created.
 
-            After creating the record, this method attempts to extract contact
-            information from the uploaded visiting card file (image or PDF).
-            The file is decoded, processed with OCR, and parsed into structured
-            contact data. Based on the extracted information, a partner and a
-            related CRM opportunity are automatically created.
+        Args:
+            values (dict): Values to create the record.
 
-            Workflow:
-                - Create the record using the parent `create`
-                - Decode the uploaded file
-                - Attempt image OCR, fallback to PDF OCR if needed
-                - Store extracted data and update processing state
-                - Create a partner and a CRM lead from extracted contact details
-
-            Args:
-                vals (dict): Values used to create the record.
-
-            Returns:
-                recordset: The newly created record.
-
-            Raises:
-                ValidationError: If no text can be extracted from the visiting card.
-            """
-        record = super().create(vals)
+        Returns:
+            recordset: The newly created visiting card record with extracted data.
+        """
+        record = super().create(values)
 
         if not record.visiting_card_file:
             return record
 
         record.state = 'processing'
 
-        # 🔹 AI FLOW (NEW)
-        if record.type_of_digitization == 'use_ai':
-            try:
-                contact = record._process_with_ai()
-                record.write({
-                    'extracted_text': str(contact),
-                    'state': 'done'
-                })
-            except Exception as e:
-                record.state = 'failed'
-                _logger.exception(e)
-                raise ValidationError("AI extraction failed.")
-
-            return record
-
-        # 🔹 MANUAL / OCR FLOW (UNCHANGED)
         try:
-            file_bytes = self._decode_binary(record.visiting_card_file)
-
-            try:
-                contact = self._ocr_image(file_bytes)
-            except (UnidentifiedImageError, ValidationError):
-                _logger.info("Image OCR failed, trying PDF OCR")
-                contact = self._ocr_pdf(file_bytes)
+            if record.type_of_digitization == 'use_ai':
+                extracted_contact = record._process_with_ai()
+            else:
+                binary_data = self._decode_binary(record.visiting_card_file)
+                try:
+                    extracted_contact = record._perform_image_ocr(binary_data)
+                except (UnidentifiedImageError, ValidationError):
+                    extracted_contact = record._perform_pdf_ocr(binary_data)
 
             record.write({
-                'extracted_text': str(contact),
+                'extracted_text': str(extracted_contact),
                 'state': 'done'
             })
 
         except Exception:
-            record.state = 'failed'
-            raise ValidationError("No text detected in visiting card.")
+            _logger.exception("Visiting card processing failed (ID: %s)", record.id)
+            record.write({
+                'state': 'failed',
+                'extracted_text': False
+            })
 
         return record
