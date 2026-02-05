@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -18,7 +39,7 @@ class AssetInsurance(models.TransientModel):
     expense = fields.Monetary()
 
     @api.constrains('insurance_amount')
-    def _check_assign_date(self):
+    def _check_insurance_amount(self):
         """Function for checking the percentage amount"""
         if self.insurance_amount > self.expense or self.insurance_amount < 0:
             raise UserError(
@@ -28,8 +49,8 @@ class AssetInsurance(models.TransientModel):
                 _('The Total invoiced Amount exceeds expense'))
 
     def action_claim(self):
+        """Function for calling insurance claim"""
         return self.repair_id.with_context(
             insurance_amount=self.insurance_amount,
-            from_insurance_wizard=True,
             is_reimbursed=self.reimburse_after_invoice,
         ).action_claim_insurance()

@@ -83,7 +83,7 @@
               groups="cyllo_asset_management.group_cyllo_asset_admin,account.group_account_manager"
               sequence="30"/>
 
-<!--              parent="account.menu_finance_configuration"-->
+    <!--              parent="account.menu_finance_configuration"-->
     <!--    Menuitem for the asset item-->
     <menuitem id="menu_asset_items"
               name="Asset Items"

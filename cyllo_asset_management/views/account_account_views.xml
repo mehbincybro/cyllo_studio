@@ -7,12 +7,13 @@
         <field name="inherit_id" ref="account.view_account_form"/>
         <field name="arch" type="xml">
             <xpath expr="//page[@name='accounting']" position="after">
-                <page name="automation" string="Automation"  invisible="account_type != 'asset_fixed'">
+                <page name="automation" string="Automation" invisible="account_type != 'asset_fixed'">
                     <group>
                         <group>
                             <field name="asset_creation" widget="radio"/>
                             <field name="manage_asset" invisible="asset_creation == 'no'"/>
-                            <field name="asset_model_id" invisible="asset_creation == 'no'" required="asset_creation in ('draft', 'validate')"/>
+                            <field name="asset_model_id" invisible="asset_creation == 'no'"
+                                   required="asset_creation in ('draft', 'validate')"/>
                         </group>
                     </group>
                 </page>
