@@ -20,8 +20,9 @@
 #
 #############################################################################
 from dateutil.relativedelta import relativedelta
-from odoo.exceptions import ValidationError
+
 from odoo import api, fields, models,_
+from odoo.exceptions import ValidationError
 
 
 class SaleOrderLine(models.Model):
@@ -39,6 +40,10 @@ class SaleOrderLine(models.Model):
 
     @api.depends('time_based_price_id', 'product_uom_qty')
     def _compute_price_unit(self):
+        """ Compute the unit price for subscription-based products.
+        This method overrides the default price computation to look up
+        specific time-based pricing rules from the pricelist. If no
+        rule is found, it falls back to the plan's default cost."""
         super()._compute_price_unit()
 
         for line in self:
@@ -55,6 +60,14 @@ class SaleOrderLine(models.Model):
                 )
                 line.price_unit = price_unit
 
+    @api.constrains('end_date')
+    def _check_end_date(self):
+        """Validate that the subscription end date is not in the past relative to the order date.
+        raises ValidationError: If the end date is before the order creation date."""
+        for record in self:
+            if record.end_date and record.end_date < record.order_id.date_order:
+                raise ValidationError(
+                    _("Invalid End Date: The subscription end date cannot be prior to the order date."))
 
     @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):
@@ -76,6 +89,7 @@ class SaleOrderLine(models.Model):
         if self.product_template_id.time_based_ids:
             self.time_based_price_id = self.product_template_id.time_based_ids[0]
 
+
     def check_trial_period(self):
         """Check if any trial-period is added in product template"""
         if self.product_template_id.unit == 'days':
@@ -86,11 +100,5 @@ class SaleOrderLine(models.Model):
             self.trial_end = fields.Datetime.now() + relativedelta(months=self.product_template_id.trial_period)
         else:
             self.trial_end = fields.Datetime.now()
-
-    @api.constrains('end_date')
-    def _check_end_date(self):
-        for record in self:
-            if record.end_date and record.end_date < record.order_id.date_order:
-                raise ValidationError(_("Invalid End Date: The subscription end date cannot be prior to the order date."))
 
 

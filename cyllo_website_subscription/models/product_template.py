@@ -22,10 +22,15 @@
 from odoo import models, fields
 
 class ProductTemplate(models.Model):
+    """Inherits product template to override variant information retrieval,
+    integrating time-based pricing and currency-converted
+    tax calculations into the standard website price display."""
     _inherit = 'product.template'
 
     def _get_combination_info(self, combination=False, product_id=False, add_qty=1.0,
                               parent_combination=False, **kwargs):
+        """Overrides combination info to inject time based pricing and subscription pricing rule into the frontend,
+        calculating tax-adjusted prices based on selected time based price and active pricelists."""
         # Call super to get the context, currency, and tax objects
         res = super(ProductTemplate, self)._get_combination_info(
             combination=combination, product_id=product_id, add_qty=add_qty,

@@ -360,6 +360,10 @@ class SubscriptionOrder(models.Model):
             body.sudo().send_mail(record.id, force_send=True)
 
     def check_subscription_close(self):
+        """ Cron method to identify and close expired subscriptions.
+        Searches for records where the end date has passed and the state is not
+        already 'churned'. Updates the state, sends a notification email to the
+        customer, and logs a message in the chatter."""
         records = self.search([('end_date', '<',fields.Datetime.now()),('state_subscription', '!=', 'churned')])
         if records:
             records.write({'state_subscription': 'churned'})

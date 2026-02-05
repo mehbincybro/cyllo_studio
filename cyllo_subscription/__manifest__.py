@@ -54,6 +54,7 @@
         'views/susbcription_order_alert_views.xml',
         'wizards/subscription_close_views.xml',
         'views/cyllo_subscription_menus.xml',
+        'views/res_config_settings_views.xml',
     ],
     'assets': {
         'web.assets_frontend': [

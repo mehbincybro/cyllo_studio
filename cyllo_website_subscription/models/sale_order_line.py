@@ -20,9 +20,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, api
+from odoo import models
 
 class SaleOrderLine(models.Model):
+    """Inherits sale.order.line to control visibility and behavior of
+        subscription-specific line items in the e-commerce interface."""
     _inherit = 'sale.order.line'
 
     def _show_in_cart(self):
