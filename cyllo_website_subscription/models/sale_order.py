@@ -19,10 +19,31 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, api
+from odoo import models
 
 class SaleOrder(models.Model):
+    """Extends sale orders to manage ecommerce sunscription sale."""
     _inherit = 'sale.order'
+
+    def _compute_amounts(self):
+        """Recalculate trial line before final totals."""
+        for order in self:
+            if order.website_id:
+                order._set_trial_discount_line()
+        return super()._compute_amounts()
+
+    def _get_subscription_trial_offset(self):
+        """Calculates total value of trial items for display masking."""
+        price_total =sum(self.order_line.filtered(
+            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+        ).mapped('price_total'))
+        price_subtotal = sum(self.order_line.filtered(
+            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+        ).mapped('price_subtotal'))
+        tax_total = sum(self.order_line.filtered(
+            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+        ).mapped('price_tax'))
+        return price_total,tax_total, price_subtotal
 
     def _cart_find_product_line(self, product_id, line_id=None, **kwargs):
         """ Find the cart line matching the product AND the selected plan """
@@ -72,22 +93,3 @@ class SaleOrder(models.Model):
         elif trial_line:
             trial_line.sudo().unlink()
 
-    def _compute_amounts(self):
-        """Recalculate trial line before final totals."""
-        for order in self:
-            if order.website_id:
-                order._set_trial_discount_line()
-        return super()._compute_amounts()
-
-    def _get_subscription_trial_offset(self):
-        """Calculates total value of trial items for display masking."""
-        price_total =sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
-        ).mapped('price_total'))
-        price_subtotal = sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
-        ).mapped('price_subtotal'))
-        tax_total = sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
-        ).mapped('price_tax'))
-        return price_total,tax_total, price_subtotal

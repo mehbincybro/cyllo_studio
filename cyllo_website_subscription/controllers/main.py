@@ -23,12 +23,17 @@ from odoo import http,fields
 from odoo.http import request, route
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantController
-from odoo.addons.payment.controllers.portal import PaymentPortal
 
 class WebsiteSaleSubscription(WebsiteSale):
+    """Extends the base WebsiteSale controller to handle subscription-specific
+        logic in the e-commerce shopping cart and product pages."""
 
     @route(['/shop/cart/update_json'], type='json', auth="public", methods=['POST'], website=True)
     def cart_update_json(self, product_id, line_id=None, add_qty=None, set_qty=None, **kw):
+        """Override to inject subscription plan data into the Sale Order Line
+        when updating the cart via AJAX.
+        It links the selected 'time_based_price_id' to the line and triggers
+        a recomputation of the price based on the selected duration."""
 
         res = super().cart_update_json(
             product_id, line_id, add_qty, set_qty, **kw
@@ -74,13 +79,63 @@ class WebsiteSaleSubscription(WebsiteSale):
         order.sudo()._set_trial_discount_line()
         return res
 
+    @http.route('/shop/product/get_sub_pricelist_price', type='json', auth="public", website=True)
+    def get_sub_pricelist_price(self, product_temp_id, unit, duration, qty, **kwargs):
+        """Fetches the specific subscription price rule from the pricelist for UI updates.
+        This is called by JavaScript when a user changes the subscription plan
+        dropdown on the product page to show the price before adding to cart."""
+        #  Get the current website's active pricelist
+        website = request.env['website'].get_current_website().with_context(request.env.context)
+        pricelist = website.pricelist_id
+
+        if not pricelist or not product_temp_id:
+            return {'price': False}
+
+        # We use sudo() to ensure public users can access the pricing rules
+        rule = pricelist.sudo()._get_time_based_price_rule(
+            product_template_id=int(product_temp_id),
+            subscription_unit=unit,
+            duration=duration,
+            date=fields.Date.today(),
+            product_uom_qty=float(qty)
+        )
+        if rule:
+            return {'price': rule.fixed_price}
+
+        return {'price': False}
+
+    @http.route(['/shop/cart/get_info_json'], type='json', auth="public", website=True)
+    def get_cart_info_json(self, product_id=None):
+        """Provides metadata about the current cart composition and a specific product.
+        Used by the frontend to determine if the cart contains a mix of
+        subscription and non-subscription items, which may trigger UI warnings."""
+        order = request.website.sale_get_order()
+        product = request.env['product.product'].sudo().browse(product_id)
+        is_subscription = product.is_subscription if product.exists() else False
+        if not order:
+            return {'is_subscription': False, 'has_subscription': False, 'has_normal': False}
+
+        # Check for presence of different product types
+        trial_discount_product = request.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
+        lines = order.order_line.filtered(lambda l: not (l.is_delivery or l.product_id == trial_discount_product))
+        has_sub = any(l.product_id.is_subscription for l in lines)
+        has_normal = any(not l.product_id.is_subscription for l in lines)
+        return {
+            'is_subscription': is_subscription,
+            'has_subscription': has_sub,
+            'has_normal': has_normal
+        }
 
 
 class CustomWebsiteSale(WebsiteSaleVariantController):
-
+    """Extends the variant controller to handle custom pricing context.
+    This class ensures that extra parameters passed from the frontend (time based price id) are correctly passed down to the
+    product template's price calculation methods."""
     @route('/website_sale/get_combination_info', type='json', auth='public', methods=['POST'], website=True)
     def get_combination_info_website(self, product_template_id, product_id, combination, add_qty,
                                      parent_combination=None, **kwargs):
+        """Re-evaluates product combination data to force-inject subscription kwargs,
+        ensuring the UI reflects accurate time-based pricing during variant selection."""
         # Use the class name explicitly in super if super() fails
         res = super().get_combination_info_website(
             product_template_id, product_id, combination, add_qty, parent_combination, **kwargs
@@ -103,54 +158,8 @@ class CustomWebsiteSale(WebsiteSaleVariantController):
         return res
 
 
-class WebsiteSaleCartCheck(http.Controller):
-
-    @http.route(['/shop/cart/get_info_json'], type='json', auth="public", website=True)
-    def get_cart_info_json(self, product_id=None):
-        order = request.website.sale_get_order()
-        product = request.env['product.product'].sudo().browse(product_id)
-        is_subscription = product.is_subscription if product.exists() else False
-        if not order:
-            return {'is_subscription':False,'has_subscription': False, 'has_normal': False}
-
-        # Check for presence of different product types
-        trial_discount_product = request.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
-        lines = order.order_line.filtered(lambda l: not (l.is_delivery or l.product_id == trial_discount_product))
-        has_sub = any(l.product_id.is_subscription for l in lines)
-        has_normal = any(not l.product_id.is_subscription for l in lines)
-        return {
-            'is_subscription': is_subscription,
-            'has_subscription': has_sub,
-            'has_normal': has_normal
-        }
 
 
-class SubscriptionPriceController(http.Controller):
-
-    @http.route('/shop/product/get_sub_pricelist_price', type='json', auth="public", website=True)
-    def get_sub_pricelist_price(self, product_temp_id, unit, duration, qty, **kwargs):
-        """
-        Fetches the specific subscription price rule based on the selected plan.
-        """
-        #  Get the current website's active pricelist
-        website = request.env['website'].get_current_website().with_context(request.env.context)
-        pricelist = website.pricelist_id
-
-        if not pricelist or not product_temp_id:
-            return {'price': False}
-
-        # We use sudo() to ensure public users can access the pricing rules
-        rule = pricelist.sudo()._get_time_based_price_rule(
-            product_template_id=int(product_temp_id),
-            subscription_unit=unit,
-            duration=duration,
-            date=fields.Date.today(),
-            product_uom_qty=float(qty)
-        )
-        if rule:
-            return {'price': rule.fixed_price}
-
-        return {'price': False}
 
 
 
