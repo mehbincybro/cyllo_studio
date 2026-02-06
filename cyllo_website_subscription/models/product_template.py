@@ -38,7 +38,8 @@ class ProductTemplate(models.Model):
 
         # Identify the Subscription Plan
         plan_id = kwargs.get('plan_id')
-        if not plan_id and self.is_subscription and self.time_based_ids:
+        if not plan_id and self.is_subscription and self.sudo().time_based_ids:
+
             plan_id = self.time_based_ids[:1].id
 
         if plan_id and str(plan_id).isdigit():

@@ -23,6 +23,7 @@ from odoo import http,fields
 from odoo.http import request, route
 from odoo.addons.website_sale.controllers.main import WebsiteSale
 from odoo.addons.website_sale.controllers.variant import WebsiteSaleVariantController
+from odoo.addons.payment.controllers.portal import PaymentPortal
 
 class WebsiteSaleSubscription(WebsiteSale):
     """Extends the base WebsiteSale controller to handle subscription-specific
@@ -116,7 +117,7 @@ class WebsiteSaleSubscription(WebsiteSale):
             return {'is_subscription': False, 'has_subscription': False, 'has_normal': False}
 
         # Check for presence of different product types
-        trial_discount_product = request.env.ref('cyllo_website_sale.product_trial_discount', raise_if_not_found=False)
+        trial_discount_product = request.env.ref('cyllo_website_subscription.product_trial_discount', raise_if_not_found=False)
         lines = order.order_line.filtered(lambda l: not (l.is_delivery or l.product_id == trial_discount_product))
         has_sub = any(l.product_id.is_subscription for l in lines)
         has_normal = any(not l.product_id.is_subscription for l in lines)

@@ -42,8 +42,8 @@ class Pricelist(models.Model):
                 :param float product_uom_qty: The quantity being ordered to match min_quantity rules.
                 :return: recordset of 'subscription.pricing' (limit 1) or empty recordset."""
 
-        suitable_price_rule = self.env['subscription.pricing'].search([
-            ('id', 'in', self.subscription_pricing_ids.ids),
+        suitable_price_rule = self.env['subscription.pricing'].sudo().search([
+            ('id', 'in', self.sudo().subscription_pricing_ids.ids),
             ('product_tmpl_id', '=', product_template_id),
             ('subscription_unit', '=', subscription_unit),
             ('duration', '=', duration),
