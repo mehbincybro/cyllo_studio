@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class TimeBasedPrice(models.Model):
@@ -33,7 +34,7 @@ class TimeBasedPrice(models.Model):
         selection=[('weeks', 'Weeks'), ('months', 'Months'),
                    ('years', 'Years')], required=True, string='Unit',
         help='Unit for the subscription')
-    duration = fields.Integer(help='Duration of the subscription')
+    duration = fields.Integer(help='Duration of the subscription', default=1)
     currency_id = fields.Many2one('res.currency', string='Company Currency',
                                   required=True,
                                   help="Currency of current company",
@@ -42,3 +43,12 @@ class TimeBasedPrice(models.Model):
     cost = fields.Monetary(string='Price', help='Cost of the product')
     product_template_id = fields.Many2one('product.template', string='Product',
                                           help='Product id store here')
+
+    @api.constrains('duration')
+    def _check_duration(self):
+        """Validate that the duration is 0 or not.
+        raises ValidationError: If the duration is 0 raise validation error."""
+        for record in self:
+            if record.duration < 1:
+                raise ValidationError(
+                    _("Invalid duration. Please enter a valid duration number"))
