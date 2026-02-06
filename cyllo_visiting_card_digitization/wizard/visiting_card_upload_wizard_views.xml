@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-
     <record id="view_visiting_card_upload_wizard_form" model="ir.ui.view">
         <field name="name">visiting.card.upload.wizard.form</field>
         <field name="model">visiting.card.upload.wizard</field>
         <field name="arch" type="xml">
             <form string="Upload Business Card">
                 <group>
-                    <field name="visiting_card_file"
-                           filename="visiting_card_filename"/>
-                    <field name="type_of_digitization"  widget="radio"/>
+                    <field name="attachment_ids"
+                           widget="many2many_binary"
+                           options="{'accepted_file_extensions': 'image/*,application/pdf'}"/>
+                    <field name="type_of_digitization" widget="radio"/>
                 </group>
                 <footer>
                     <button name="action_upload"
@@ -23,5 +23,4 @@
             </form>
         </field>
     </record>
-
 </odoo>

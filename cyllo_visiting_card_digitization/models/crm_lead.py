@@ -27,8 +27,16 @@ class CrmLead(models.Model):
 
 
     def action_upload_visiting_card(self):
-        """Action button for visiting card: When it clicks user can upload visiting card"""
+        """
+        Opens a wizard to upload a visiting (business) card for the CRM lead.
 
+        This method is intended to be called from a button in the CRM lead form view.
+        When triggered, it opens a new form view of the 'visiting.card.upload.wizard' model
+        in a modal window, allowing the user to upload a business card associated with this lead.
+
+        Returns:
+            dict: An Odoo action dictionary to open the visiting card upload wizard in a modal.
+        """
         return {
             'type': 'ir.actions.act_window',
             'name': 'Upload Business Card',
