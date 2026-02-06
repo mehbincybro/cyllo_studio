@@ -11,7 +11,7 @@
             </tree>
         </field>
     </record>
-        <!--    Action for the asset insurance model-->
+    <!--    Action for the asset insurance model-->
     <record id="action_view_asset_insurance" model="ir.actions.act_window">
         <field name="name">Asset Insurance</field>
         <field name="res_model">asset.asset.insurance</field>

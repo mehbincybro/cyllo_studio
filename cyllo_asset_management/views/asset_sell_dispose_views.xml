@@ -51,7 +51,7 @@
         </field>
     </record>
 
-     <!--    List view of the asset sell dispose model-->
+    <!--    List view of the asset sell dispose model-->
     <record id="view_asset_sell_list" model="ir.ui.view">
         <field name="name">view.asset.sell.list</field>
         <field name="model">asset.sell.dispose</field>
@@ -77,7 +77,6 @@
             </tree>
         </field>
     </record>
-
 
 
     <!--    Action for the asset sell dispose model-->

@@ -1,9 +1,30 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
 
 
 class MaintenanceRequest(models.Model):
-    """Inherited model for extending maintenance requests."""
+    """Inherited model for extending maintenance and repair requests."""
     _inherit = 'maintenance.request'
 
     asset_id = fields.Many2one('asset.asset')
@@ -110,29 +131,12 @@ class MaintenanceRequest(models.Model):
         self.has_billed = True
 
     def action_claim_insurance(self):
+        """Button action for claiming insurance for the repair"""
         self.ensure_one()
         insurance_amount = self.env.context.get('insurance_amount', 0)
-        from_wizard = self.env.context.get('from_insurance_wizard', False)
         is_reimburse = self.env.context.get('is_reimbursed', False)
-        if not is_reimburse:
-            if not self.has_billed:
-                repair_bill = self.env['account.move'].create({
-                    'ref': self.asset_id.name,
-                    'partner_id': self.partner_id.id,
-                    'move_type': 'in_invoice',
-                    'state': 'draft',
-                    'repair_id': self.id,
-                    'asset_id': False,
-                    'invoice_date': fields.Date.today(),
-                    'invoice_line_ids': [fields.Command.create({
-                        'name': f"{self.asset_id.name}-Repair Bill",
-                        'move_type': 'in_invoice',
-                        'quantity': 1,
-                        'price_unit': self.expense,
-                        'price_subtotal': self.expense,
-                    })]
-                })
-                self.has_billed = True
+        if not is_reimburse and not self.has_billed:
+            self.action_create_bill()
         repair_invoice = self.env['account.move'].create({
             'ref': self.asset_id.name,
             'partner_id': self.asset_id.insurance_name.partner_id.id,
@@ -197,8 +201,8 @@ class MaintenanceRequest(models.Model):
                 'default_total_amount': self.expense,
                 'default_repair_id': self.id,
                 'default_reimburse_after_invoice': self.is_reimburse,
-                'default_invoiced_amount':self.invoiced_amount,
-                'default_expense':self.expense,
+                'default_invoiced_amount': self.invoiced_amount,
+                'default_expense': self.expense,
             },
             'target': 'new'
         }

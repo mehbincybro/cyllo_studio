@@ -50,6 +50,7 @@ class AssetSellDispose(models.Model):
 
     @api.constrains('date')
     def _constrains_date(self):
+        """Function for checking the selling date"""
         for record in self:
             purchase_date = record.asset_asset_id.date
             if record.date and record.date < purchase_date:
