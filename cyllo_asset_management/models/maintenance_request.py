@@ -37,14 +37,9 @@ class MaintenanceRequest(models.Model):
     has_warranty = fields.Boolean(default=False, compute="_compute_has_warranty")
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
     is_reimburse = fields.Boolean(default=False, compute="_compute_has_insurance")
+    is_scrap = fields.Boolean(default=False)
     invoiced_amount = fields.Monetary()
 
-    @api.constrains('warranty_percentage')
-    def _check_assign_date(self):
-        """Function for checking the percentage amount"""
-        if self.warranty_percentage > 100 or self.warranty_percentage < 0:
-            raise UserError(
-                _('Please enter a valid insurance percentage'))
 
     @api.model
     def default_get(self, fields_list):
@@ -171,11 +166,12 @@ class MaintenanceRequest(models.Model):
         """Button action for scrapping the repair asset"""
         self.asset_id.status = 'disposed'
         self.asset_id.is_repair = False
+        self.is_scrap = True
         if self.asset_id.is_entry:
             action_scrap = self.env['asset.sell.dispose'].sudo().create({
                 'asset_asset_id': self.asset_id.id,
                 'asset_action': 'dispose',
-                'loss_account_id': self.asset_item_id.asset_loss_account_id.id,
+                'loss_account_id': self.asset_id.asset_loss_account_id.id,
                 'date': fields.Date.today(),
                 'note': "Scrapped after repair",
                 'disposal_type': 'scrap',

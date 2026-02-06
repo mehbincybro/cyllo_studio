@@ -31,6 +31,7 @@
                 </sheet>
                 <footer>
                     <button type="object" name="action_revaluate" string="Revaluate" class="oe_highlight"/>
+                    <button special="cancel" string="Cancel" class="btn-secondary"/>
                 </footer>
             </form>
         </field>
