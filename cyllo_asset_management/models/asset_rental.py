@@ -237,38 +237,45 @@ class AssetRental(models.Model):
     def action_return_asset(self):
         """Button action for returning the assets"""
         asset_id=self.sudo().asset_id
-        invoice = self.env['account.move'].search([('rent_id', '=', self.id), ('payment_state', '!=', 'paid')])
-        if invoice:
-            raise UserError(
-                _('You cannot complete this operation, The invoices amount is not paid'))
-        else:
-            self.is_return = True
-            asset_id.is_rental = False
-            self.status = 'return'
-            if self.reservation_id:
-                if self.reservation_id.end_date > fields.date.today():
-                    asset_id.is_reserve = True
-                    self.reservation_id.write({
-                        'status': 'reserve'})
-                else:
-                    asset_id.is_reserve = False
-                    self.reservation_id.write({
-                        'status': 'cancel'})
-            if asset_id.is_reserve == True:
-                asset_id.status = 'reserved'
-            elif asset_id.is_confirm == True:
-                asset_id.status = 'running'
+        self.is_return = True
+        asset_id.is_rental = False
+        self.status = 'return'
+        if self.reservation_id:
+            if self.reservation_id.end_date > fields.date.today():
+                asset_id.is_reserve = True
+                self.reservation_id.write({
+                    'status': 'reserve'})
             else:
-                asset_id.status = 'draft'
+                asset_id.is_reserve = False
+                self.reservation_id.write({
+                    'status': 'cancel'})
+        if asset_id.is_reserve == True:
+            asset_id.status = 'reserved'
+        elif asset_id.is_confirm == True:
+            asset_id.status = 'running'
+        else:
+            asset_id.status = 'draft'
 
     def action_cancel(self):
         """Button action for cancel the rental assets"""
         self.status = 'cancel'
         self.asset_id.is_rental = False
+        asset_id = self.sudo().asset_id
         if self.reservation_id:
-            self.asset_id.is_reserve = False
-            self.reservation_id.write({
-                'status': 'cancel'})
+            if self.reservation_id.end_date > fields.date.today():
+                asset_id.is_reserve = True
+                self.reservation_id.write({
+                    'status': 'reserve'})
+            else:
+                asset_id.is_reserve = False
+                self.reservation_id.write({
+                    'status': 'cancel'})
+        if asset_id.is_reserve == True:
+            asset_id.status = 'reserved'
+        elif asset_id.is_confirm == True:
+            asset_id.status = 'running'
+        else:
+            asset_id.status = 'draft'
 
     def action_reset_to_draft(self):
         """Button action for reset the rental assets to draft state"""

@@ -197,6 +197,7 @@ class AssetAsset(models.Model):
         if self.method_duration < 0:
             self.method_duration = abs(self.method_duration)
 
+
     @api.onchange('depreciating_factor')
     def _onchange_depreciating_factor(self):
         """Change depreciating factor"""
@@ -554,6 +555,8 @@ class AssetAsset(models.Model):
         """Button action for the depreciating the asset"""
         if self.original_value == 0:
             raise UserError(_('The Original Value should be Greater than 0.'))
+        if self.method_duration == 0:
+            raise UserError(_('The duration should be greater than zero.'))
         self.action_compute_depreciation()
         self._create_journal_entries()
         self.status = 'running'

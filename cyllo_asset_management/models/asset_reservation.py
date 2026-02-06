@@ -61,8 +61,8 @@ class AssetReservation(models.Model):
         for rec in self:
             if rec.status == 'reserve':
                 raise UserError(_('You cannot delete the record that is in Reserved state.'))
-        else:
-            self.asset_id.is_reserve = False
+            else:
+                rec.asset_id.is_reserve = False
             return super().unlink()
 
     def action_reserve(self):
