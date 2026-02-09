@@ -122,3 +122,16 @@ class AccountMove(models.Model):
                 else:
                     asset.unlink()
         return res
+
+    def action_view_maintenace_request(self):
+        """Function for viewing the maintenance request model from account move"""
+        maintenace_request_id = self.env['maintenance.request'].search(
+            [('id', '=', self.repair_id.id)])
+        return {
+            'name': _('Maintenance Request'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'maintenance.request',
+            'res_id':maintenace_request_id.id,
+            'view_mode': 'form',
+            'domain': [('id', '=', self.repair_id.id)],
+        }

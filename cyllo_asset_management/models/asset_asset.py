@@ -36,8 +36,10 @@ class AssetAsset(models.Model):
 
     name = fields.Char(string="Asset", required=True)
     asset_item_id = fields.Many2one("asset.item")
-    brand = fields.Char(String="Brand")
-    date = fields.Date(default=fields.Date.context_today, required=True)
+    brand_id = fields.Many2one(string="Brand", comodel_name='asset.brand')
+    serial_no = fields.Char(string="Serial No.")
+    vendor_id = fields.Many2one("res.partner", string="Purchase From", copy=False)
+    date = fields.Date(string="Purchase Date", default=fields.Date.context_today, required=True)
     company_id = fields.Many2one(
         'res.company', required=True,
         default=lambda self: self.env.company, help='Select the company')
@@ -46,7 +48,7 @@ class AssetAsset(models.Model):
                                   help='Currency of company')
     status = fields.Selection(
         [('draft', 'Draft'), ('running', 'Running'), ('reserved', 'Reserved'), ('leased', 'Leased'),
-         ('assigned', 'Assigned'), ('rented', 'Rented'),('sell', 'Sell'), ('disposed', 'Dispose'),
+         ('assigned', 'Assigned'), ('rented', 'Rented'), ('sell', 'Sell'), ('disposed', 'Dispose'),
          ('cancel', 'Cancelled')],
         default="draft", copy=False, tracking=True)
     is_confirm = fields.Boolean(string="Confirmed", copy=False)
@@ -72,7 +74,7 @@ class AssetAsset(models.Model):
     year_amount = fields.Float()
     parent_id = fields.Many2one('asset.asset')
     maintenance_state = fields.Selection([('maintenance', 'Under Maintenance'), ('repair', 'Under Repair')],
-                                            compute='_compute_maintenance_state', store=False)
+                                         compute='_compute_maintenance_state', store=False)
     depreciation_method = fields.Selection(
         [('straight_line', 'Straight Line'), ('declining_balance', 'Declining Balance'),
          ('double_declining', 'Double Declining Balance'), ('declining_straight_line', 'Declining and Straight Line')],
@@ -96,7 +98,8 @@ class AssetAsset(models.Model):
     asset_expense_account_id = fields.Many2one('account.account', required=True,
                                                domain="[('account_type', '=', 'expense')]")
     asset_loss_account_id = fields.Many2one('account.account', required=True)
-    asset_journal_id = fields.Many2one('account.journal', required=True)
+    asset_journal_id = fields.Many2one('account.journal', required=True,
+                                       domain="[('type', '=', 'general')]")
     depreciated_entry_ids = fields.One2many('account.move', 'asset_asset_id', string='Depreciation Lines')
     modified_asset_ids = fields.Many2many('asset.asset', "asset_sub_table", 'asset_1', 'asset_2')
     computation_method = fields.Selection(
@@ -120,7 +123,7 @@ class AssetAsset(models.Model):
     warranty_period = fields.Integer()
     warranty_end_date = fields.Date(string="Warranty Upto", compute="_compute_warranty_end_date")
     under_insurance = fields.Boolean(string="Has Insurance")
-    insurance_name = fields.Many2one(comodel_name='asset.asset.insurance', string="Type")
+    insurance_name_id = fields.Many2one(comodel_name='asset.asset.insurance', string="Type")
     insurance_number = fields.Char(string="ID")
     insurance_start_date = fields.Date(string="Start date")
     insurance_end_date = fields.Date(string="End date")
@@ -133,6 +136,8 @@ class AssetAsset(models.Model):
     insurance_attachment_ids = fields.Many2many('ir.attachment', 'asset_insurance_attachment_rel',
                                                 'asset_id', 'attachment_id', string="Insurance Documents",
                                                 domain="[('res_model', '=', 'asset.asset')]")
+    buffer_days = fields.Integer(string="Cool Down Days", default=0,
+                                 help="Number of days the asset remains unavailable after a booking ends")
 
     def _compute_maintenance_state(self):
         """Compute maintenance states of assets"""
@@ -197,7 +202,6 @@ class AssetAsset(models.Model):
         if self.method_duration < 0:
             self.method_duration = abs(self.method_duration)
 
-
     @api.onchange('depreciating_factor')
     def _onchange_depreciating_factor(self):
         """Change depreciating factor"""
@@ -242,6 +246,16 @@ class AssetAsset(models.Model):
         if (self.day_amount and self.day_amount <= 0) or (self.month_amount and self.month_amount <= 0) or (
                 self.week_amount and self.week_amount <= 0) or (self.year_amount and self.year_amount <= 0):
             raise UserError(_('The value for the rental amount should be an Integer'))
+
+    @api.onchange('fixed_asset_account_id')
+    def _onchange_fixed_asset_account_id(self):
+        """Function for setting the depreciation account based on fixed asset account"""
+        self.asset_depreciation_account_id = self.fixed_asset_account_id
+
+    @api.onchange('asset_expense_account_id')
+    def _onchange_asset_expense_account_id(self):
+        """Function for setting the loss account based on expense account"""
+        self.asset_loss_account_id = self.asset_expense_account_id
 
     def unlink(self):
         """Function for the unlink the asset"""
@@ -427,7 +441,7 @@ class AssetAsset(models.Model):
 
     def action_sell_dispose_assets(self):
         """Action sell dispose assets"""
-        states = ['sell', 'disposed','cancel','rented', 'assigned', 'reserved', 'leased']
+        states = ['sell', 'disposed', 'cancel', 'rented', 'assigned', 'reserved', 'leased']
         if self.status in states:
             raise UserError(_(f'You cannot complete this operation, The related asset is already {self.status}.'))
         elif self.depreciated_entry_ids.filtered(lambda x: x.state == 'posted' and x.date > Date.today()):
@@ -1179,7 +1193,7 @@ class AssetAsset(models.Model):
             'company_id': self.company_id.id,
             'date': self.date,
             'status': 'running',
-            'brand': self.brand,
+            'brand_id': self.brand_id,
             'original_value': calculate_value,
             'salvage_value': calculate_value,
             'depreciation_method': self.depreciation_method,
@@ -1219,7 +1233,7 @@ class AssetAsset(models.Model):
     def _onchange_asset_item(self):
         if self.asset_item_id:
             for record in self:
-                record.brand = record.asset_item_id.brand
+                record.brand_id = record.asset_item_id.brand_id
                 record.is_auto_calculate = record.asset_item_id.is_auto_calculate
                 record.depreciating_factor = record.asset_item_id.depreciating_factor
                 record.duration_period = record.asset_item_id.duration_period
@@ -1229,3 +1243,4 @@ class AssetAsset(models.Model):
                 record.asset_loss_account_id = record.asset_item_id.asset_loss_account_id
                 record.asset_journal_id = record.asset_item_id.asset_journal_id
                 record.prorata_date = record.asset_item_id.prorata_date
+                record.vendor_id = record.asset_item_id.vendor_id

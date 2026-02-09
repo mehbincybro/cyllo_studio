@@ -118,7 +118,7 @@ class AssetRental(models.Model):
 
     def action_create_rental(self):
         """Button action for create rental for the assets"""
-        asset_id=self.sudo().asset_id
+        asset_id = self.sudo().asset_id
         if not asset_id.is_rental_asset:
             raise UserError(_('You cannot complete this operation, The related asset is not a rental asset.'))
         elif asset_id.is_rental:
@@ -236,7 +236,7 @@ class AssetRental(models.Model):
 
     def action_return_asset(self):
         """Button action for returning the assets"""
-        asset_id=self.sudo().asset_id
+        asset_id = self.sudo().asset_id
         self.is_return = True
         asset_id.is_rental = False
         self.status = 'return'

@@ -38,17 +38,36 @@
             </xpath>
             <xpath expr="//sheet" position="after">
                 <div class="oe_button_box" name="button_box" invisible="not has_billed">
-                    <button class="oe_stat_button" name="action_view_invoice" type="object">
-                        <i class="ri-draft-line"/>
-                        Bill
+                    <button class="oe_stat_button" name="action_view_moves" type="object">
+                        <i class="o_button_icon fa fa-fw fa-pencil-square-o"/>
+                        Transactions (<field name="transaction_count"/>)
                     </button>
                 </div>
+                <div class="alert alert-success"
+                     invisible="not has_warranty">
+                    <i class="fa fa-shield"/>
+                    Asset is under warranty
+                </div>
+
+                <div class="alert alert-info"
+                     invisible="not has_insurance">
+                    <i class="fa fa-umbrella"/>
+                    Asset is under insurance
+                </div>
             </xpath>
-            <xpath expr="//field[@name='maintenance_type']" position="after">
-                <field name="has_warranty" string="Under Warranty"
-                       invisible="equipment_id or maintenance_type=='preventive'"/>
-                <field name="has_insurance" string="Under Insurance"
-                       invisible="equipment_id or maintenance_type=='preventive'"/>
+            <xpath expr="//field[@name='kanban_state']" position="before">
+                <field name="has_warranty" invisible="True"/>
+                <field name="has_insurance" invisible="True"/>
+                <div class="alert alert-success"
+                     invisible="not has_warranty">
+                    <i class="fa fa-shield"/>
+                    Asset has warranty
+                </div>
+                <div class="alert alert-info"
+                     invisible="not has_insurance">
+                    <i class="fa fa-shield"/>
+                    Asset has insurance
+                </div>
             </xpath>
         </field>
     </record>
