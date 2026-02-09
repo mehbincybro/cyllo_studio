@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="website_advance_salary_menu" model="website.menu">
+        <field name="name">Advance Salary Request</field>
+        <field name="url">/my/advance-salary/new</field>
+        <field name="parent_id" ref="website.main_menu"/>
+        <field name="sequence" type="int">90</field>
+    </record>
+
+
+    <!-- =====================================================
+         ADVANCE SALARY FORM PAGE
+    ====================================================== -->
+
+    <template id="portal_new_advance_salary" name="Advance Salary Request">
+        <t t-call="portal.portal_layout">
+            <div id="wrap" class="o_portal_wrap">
+                <div class="container my-5">
+
+                    <!-- Card -->
+                    <div class="row justify-content-center">
+                        <div class="col-md-7 col-lg-6">
+                            <div class="card shadow-sm border-0">
+
+                                <!-- Header -->
+                                <div class="card-header bg-primary text-white">
+                                    <h4 class="mb-0">
+                                        <i class="fa fa-money-bill-wave me-2"/>
+                                        Request Advance Salary
+                                    </h4>
+                                </div>
+
+                                <!-- Body -->
+                                <div class="card-body">
+
+                                    <div t-if="error" class="alert alert-danger"
+                                         role="alert">
+                                        <t t-esc="error"/>
+                                    </div>
+
+                                    <form action="/my/advance-salary/create"
+                                          method="post">
+                                        <input type="hidden" name="csrf_token"
+                                               t-att-value="request.csrf_token()"/>
+
+                                        <!-- Employee -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                Employee Name
+                                            </label>
+                                            <input t-if="employee_name"
+                                                   type="text"
+                                                   class="form-control"
+                                                   t-att-value="employee_name"
+                                                   readonly="1"/>
+                                            <input t-else="" type="text"
+                                                   class="form-control"
+                                                   value="No employee profile found"
+                                                   readonly="1"
+                                                   style="border-color: #dc3545;"/>
+                                            <small t-if="not employee_name"
+                                                   class="text-danger">
+                                                Please contact HR to link your
+                                                user account to an employee
+                                                profile.
+                                            </small>
+                                        </div>
+
+                                        <!-- Advance Amount -->
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">
+                                                Advance Amount
+                                            </label>
+                                            <input type="number"
+                                                   name="amount"
+                                                   class="form-control"
+                                                   placeholder="Enter amount"
+                                                   required="required"/>
+                                        </div>
+
+                                        <!-- Reason -->
+                                        <div class="mb-4">
+                                            <label class="form-label fw-semibold">
+                                                Reason
+                                            </label>
+                                            <textarea name="reason"
+                                                      class="form-control"
+                                                      rows="3"
+                                                      placeholder="Enter reason for advance"/>
+                                        </div>
+
+                                        <!-- Submit -->
+                                        <div class="d-grid">
+                                            <button type="submit"
+                                                    class="btn btn-primary btn-lg"
+                                                    t-att-disabled="'disabled' if not employee_name else None">
+                                                <i class="fa fa-paper-plane me-1"/>
+                                                Submit Request
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </t>
+    </template>
+
+
+</odoo>

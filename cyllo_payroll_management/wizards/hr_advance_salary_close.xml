@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_hr_advance_salary_close_wizard_form" model="ir.ui.view">
+        <field name="name">hr.advance.salary.close.wizard.form</field>
+        <field name="model">hr.advance.salary.close.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirm Close">
+                <p>Are you sure you want to close this advance salary request? This action cannot be undone.</p>
+                <field name="advance_id" invisible="1"/>
+                <footer>
+                    <button name="action_close" string="Confirm" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_hr_advance_salary_close_wizard" model="ir.actions.act_window">
+        <field name="name">Confirm Close</field>
+        <field name="res_model">hr.advance.salary.close.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

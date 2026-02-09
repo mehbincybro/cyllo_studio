@@ -1,0 +1,232 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <t t-name="cyllo_payroll_management.PayrollDashboard">
+
+        <div style="padding:20px; background:#f3f5ef; min-height:100vh; font-family: 'Roboto', sans-serif; width: 100%; height:100%; overflow-y: scroll; border: 1px solid #ccc;">
+            <!-- ================= TOP CARDS ================= -->
+            <div class="row mb-4"
+                 style="gap:20px; display:flex; flex-wrap:wrap;">
+
+                <!-- Employees Card -->
+                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); cursor:pointer;"
+                     t-on-click="openEmployees">
+                    <h6 style="color:#7a7a7a; font-weight:500;">Employees</h6>
+                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                        <t t-esc="state.employees"/>
+                    </h2>
+                </div>
+
+                <!-- Active Contracts Card -->
+                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                     t-on-click="openContracts">
+                    <h6 style="color:#7a7a7a; font-weight:500;">Active
+                        Contracts
+                    </h6>
+                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                        <t t-esc="state.contracts"/>
+                    </h2>
+                </div>
+
+                <!-- Payslip Generated Card -->
+                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                     t-on-click="openPayslips">
+                    <h6 style="color:#7a7a7a; font-weight:500;">Payslip
+                        Generated
+                    </h6>
+                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                        <t t-esc="state.generated"/>
+                    </h2>
+                </div>
+
+                <!-- Paid Card -->
+                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                     t-on-click="openPaidPayslips">
+                    <h6 style="color:#7a7a7a; font-weight:500;">Paid</h6>
+                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                        <t t-esc="state.paid"/>
+                    </h2>
+                </div>
+            </div>
+
+            <!-- ================= WARNINGS & BATCHES ================= -->
+            <div class="row mb-4"
+                 style="display:flex; gap:20px; flex-wrap:wrap;">
+
+                <!-- ================= WARNINGS CARD ================= -->
+                <div style="
+                        flex:1 1 48%;
+                        background:#fff;
+                        border-radius:12px;
+                        padding:20px;
+                        box-shadow:0 4px 12px rgba(0,0,0,0.08);
+                        max-height:360px;
+                        overflow-y:auto;
+                    ">
+                    <h3 style="margin-bottom:15px; color:black;">Warnings</h3>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <t t-foreach="state.warnings" t-as="warn"
+                           t-key="warn.label">
+                            <div t-on-click="onWarningClick"
+                                 t-att-data-id="warn.label"
+                                 style="
+                                    display:flex;
+                                    justify-content:space-between;
+                                    align-items:center;
+                                    gap:12px;
+                                    border-bottom:1px solid #eee;
+                                    padding-bottom:8px;
+                                    cursor:pointer;
+                                    "
+                                 onmouseover="this.style.background='#f8f9fa'"
+                                 onmouseout="this.style.background='transparent'">
+
+                                <span style="color:#2c3e50;">
+                                    <t t-esc="warn.label"/>
+                                </span>
+                                <span style="
+                                        font-weight:600;
+                                        color:#2c3e50;">
+                                    <t t-esc="warn.count"/>
+                                </span>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- ================= BATCHES CARD ================= -->
+                <div style="
+                    flex:1 1 48%;
+                    background:#fff;
+                    border-radius:12px;
+                    padding:20px;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08);
+                    max-height:300px;
+                    overflow-y:auto;
+                ">
+
+                    <!-- Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                        <h3 style="margin:0; color:black;">Batches</h3>
+                        <span style="color:#00a09d; font-size:14px; cursor:pointer;"
+                              t-on-click="openBatchList">
+                            All
+                        </span>
+                    </div>
+
+                    <!-- Batch List -->
+                    <div style="display:flex; flex-direction:column; gap:12px;">
+                        <t t-foreach="state.batches" t-as="batch"
+                           t-key="batch.id">
+
+                            <div
+                                    t-att-data-id="batch.id"
+                                    t-on-click="openBatch"
+                                    t-on-mouseover="(ev)=>ev.currentTarget.style.background='#f8f9fa'"
+                                    t-on-mouseout="(ev)=>ev.currentTarget.style.background='transparent'"
+                                    style="
+                                            display:flex;
+                                            align-items:center;
+                                            justify-content:space-between;
+                                            padding:10px;
+                                            border-bottom:1px solid #eee;
+                                            cursor:pointer;
+                                            transition:background 0.2s;
+                                        ">
+
+                                <!-- Status -->
+                                <span t-att-style="
+                                        'min-width:90px;' +
+                                        'text-align:center;' +
+                                        'display:inline-block;' +
+                                        'padding:4px 0;' +
+                                        'border-radius:12px;' +
+                                        'color:#fff;' +
+                                        'font-size:12px;' +
+                                        (batch.state === 'draft' ? 'background:#D8DADD;' :
+                                        batch.state === 'confirm' ? 'background:#714B67;' :
+                                        batch.state === 'done' ? 'background:#28A745;' :
+                                        batch.state === 'paid' ? 'background:#E99D00;' :
+                                        'background:#6c757d;')
+                                        ">
+
+                                    <t t-esc="batch.state.toUpperCase()"/>
+                                </span>
+                                <!-- Name -->
+                                <div style="flex:1; padding-left:12px; color:#2c3e50;">
+                                    <t t-esc="batch.name"/>
+                                </div>
+                                <!-- Count -->
+                                <div style="font-size:13px; color:#6c757d;">
+                                    (
+                                    <t t-esc="batch.payslip_count"/>
+                                    Payslips)
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ================= CHARTS ================= -->
+            <div class="row" style="display:flex; gap:20px; flex-wrap:wrap;">
+
+                <!-- ================= EMPLOYER COST ================= -->
+                <div style="flex:1 1 49%;
+                    background:#fff;
+                    border-radius:12px;
+                    padding:20px;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+
+                    <!-- Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <h4 style="margin:0;">Employer Cost</h4>
+
+                        <div style="
+                            display:flex;
+                            justify-content:flex-end;
+                            align-items:center;
+                            margin-bottom:12px;">
+                            <span style="
+                                        font-size:13px;
+                                        color:#6c757d;
+                                        font-weight:500;">
+                            </span>
+                            <select class="form-select"
+                                    t-on-change="onEmployeeCostFilterChange">
+                                <option value="year">This Year</option>
+                                <option value="month">This Month</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Chart -->
+                    <div style="height:360px;">
+                        <canvas id="employeeCostChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- ================= EMPLOYEE TRENDS ================= -->
+                <div style="flex:1 1 49%;
+                    background:#fff;
+                    border-radius:12px;
+                    padding:20px;
+                    box-shadow:0 4px 12px rgba(0,0,0,0.08);">
+
+                    <!-- Header -->
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <h4 style="margin:0;">Employee Trends</h4>
+                    </div>
+
+                    <!-- Sub Title -->
+
+                    <center>
+                        <!-- Chart -->
+                        <div style="height:360px;">
+                            <canvas id="payrollPieChart"></canvas>
+                        </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -9,6 +9,10 @@
     <menuitem id="menu_hr_payroll_dashboard_root" name="Dashboard"
               parent="menu_cyllo_payroll_management_root" sequence="0" action="hr_payroll_dashboard_open"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager,cyllo_payroll_management.group_cyllo_payroll_management_employee"/>
+     <menuitem id="menu_hr_advance_salary"
+              name="Advance Salary"
+              parent="menu_cyllo_payroll_management_root"
+              action="action_hr_advance_salary"/>
     <menuitem id="menu_contracts_categ" name="Contracts"
               parent="menu_cyllo_payroll_management_root" sequence="1"
               groups="cyllo_payroll_management.group_cyllo_payroll_management_manager,cyllo_payroll_management.group_cyllo_payroll_management_employee"/>
