@@ -23,8 +23,11 @@ import logging
 from datetime import date, datetime, timedelta
 
 from dateutil.relativedelta import relativedelta
+from markupsafe import Markup
+
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
+import datetime
 from odoo.http import request
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import HumanMessage
@@ -97,8 +100,6 @@ class CrmLead(models.Model):
         store=True
     )
 
-
-
     @api.model
     def create(self, vals):
         """Override the Create function to create exit criteria activity if the stage have one"""
@@ -139,11 +140,26 @@ class CrmLead(models.Model):
                     record.exit_criteria_activity_name = exit_criteria.activity_id.name if exit_criteria else False
                     self.env[
                         'crm.stage.activity']._create_exit_criteria_if_needed(
-                        record.id, new_stage_id)
-                    # Optional print/debug
-                    _logger.info(
-                        f"Exit Criteria for Lead {record.id}: {record.exit_criteria_activity_name}")
-        return super(CrmLead, self).write(values)
+                        record.id, new_stage_id
+                    )
+
+        # Partner working details - Pin message when partner_work_status is computed
+        result = super(CrmLead, self).write(values)
+
+        # Post pinned message after write completes successfully
+        for record in self:
+            if (
+                    record.partner_id
+                    and record.partner_id.partner_working_details
+                    and not record.is_pinned
+            ):
+                msg = record.message_post(
+                    body=Markup(record.partner_id.partner_working_details)
+                )
+                msg.write({'is_pinned': True})
+                record.is_pinned = True
+
+        return result
 
     # crm functions
     @api.model
@@ -727,42 +743,62 @@ class CrmLead(models.Model):
         ])
         return exit_criteria_activities > 0
 
+
     def action_get_customer_local_time(self):
         """
-        Function for getting partner time and current time using the
-        NEW 'google_search' tool name.
+        Function for getting partner time and current time using Google Gemini API.
+        Automatically pins the working hours table in the chatter.
         """
+        # Check if already fetched
         if self.partner_work_status:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
                     'title': "Customer Current Time",
-                    'message': "Success! Action completed.",
-                    'type': 'success',
+                    'message': "Working hours already fetched!",
+                    'type': 'info',
                     'sticky': False,
                 }
             }
 
-        TEST_GOOGLE_API_KEY = request.env[
+        API_KEY = request.env[
             'ir.config_parameter'
         ].sudo().get_param('cyllo_agent.api_key')
+        model_id = self.env['ir.config_parameter'].sudo().get_param(
+            'agent.llm_model_id'
+        )
 
-        if not TEST_GOOGLE_API_KEY:
+        if not model_id:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': "Missing Google API Key",
-                    'message': "Google API Key is missing. Please configure it before proceeding.",
+                    'title': "Configuration Error",
+                    'message': "LLM Model ID is not configured. Please set it in settings.",
+                    'type': 'danger',
+                    'sticky': False,
+                }
+            }
+
+        llm_model = self.env['cyllo.llm'].sudo().browse(int(model_id))
+        model_name = llm_model.name
+
+        if not API_KEY:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': "Missing API Key",
+                    'message': "API Key is missing. Please configure it before proceeding.",
                     'type': 'danger',
                     'sticky': False,
                 }
             }
 
         llm = ChatGoogleGenerativeAI(
-            model='gemini-2.5-flash',
-            google_api_key=TEST_GOOGLE_API_KEY
+            model=model_name,
+            google_api_key=API_KEY
         )
 
         message = HumanMessage(
@@ -773,9 +809,15 @@ class CrmLead(models.Model):
                         f"Search Google and provide the official working hours of "
                         f"{self.partner_id.name} ({self.state_id.name}, {self.country_id.name}). "
                         f"First, show today's working shift in HH:MM to HH:MM format. "
-                        f"Then show the time zone of the location (for example: America/Los_Angeles). "
+                        f"Then show the IANA timezone (e.g., Asia/Kolkata, America/Los_Angeles, Europe/London). "
+                        f"IMPORTANT: Only provide the IANA timezone name without any prefix or additional text. "
                         f"Then list the working hours for each weekday in HH:MM to HH:MM format. "
                         f"Do not add extra text, explanations, headings, or formatting. "
+                        f"Format example:\n"
+                        f"09:00 to 17:00\n"
+                        f"Asia/Kolkata\n"
+                        f"Monday: 09:00 to 17:00\n"
+                        f"Tuesday: 09:00 to 17:00\n"
                         f"If the company cannot be found or no official working hours are available, "
                         f"output exactly: 'Sorry, company is not found'."
                     )
@@ -787,10 +829,40 @@ class CrmLead(models.Model):
             response = llm.invoke([message])
             data = response.content.split('\n')
 
-            if len(data) > 1:
+            if len(data) > 1 and 'Sorry, company is not found' not in response.content:
                 # Save values
                 self.partner_id.partner_working_hours = data[0]
-                self.partner_id.partner_time_zone = data[1]
+
+                # Clean timezone string
+                timezone_str = data[1].strip()
+
+                # Remove common prefixes if present
+                if timezone_str.lower().startswith('time zone:'):
+                    timezone_str = timezone_str.split(':', 1)[1].strip()
+                elif timezone_str.lower().startswith('timezone:'):
+                    timezone_str = timezone_str.split(':', 1)[1].strip()
+
+                # Map common abbreviations to IANA format
+                timezone_mapping = {
+                    'IST': 'Asia/Kolkata',
+                    'IST (UTC+5:30)': 'Asia/Kolkata',
+                    'PST': 'America/Los_Angeles',
+                    'EST': 'America/New_York',
+                    'CST': 'America/Chicago',
+                    'MST': 'America/Denver',
+                    'GMT': 'Europe/London',
+                    'CET': 'Europe/Paris',
+                    'JST': 'Asia/Tokyo',
+                    'AEST': 'Australia/Sydney',
+                }
+
+                # Check if we need to map the timezone
+                for abbr, iana_tz in timezone_mapping.items():
+                    if timezone_str.upper().startswith(abbr):
+                        timezone_str = iana_tz
+                        break
+
+                self.partner_id.partner_time_zone = timezone_str
 
                 # Days of week
                 days = [
@@ -817,11 +889,12 @@ class CrmLead(models.Model):
                             <strong>Time Zone</strong>
                         </td>
                         <td style="border: 1px solid #ddd; padding: 8px;">
-                            {data[1]}
+                            {timezone_str}
                         </td>
                     </tr>
                 """
 
+                # ---- Working Hours Rows ----
                 for i, day in enumerate(days):
                     if i + 2 >= len(data):
                         break
@@ -830,7 +903,7 @@ class CrmLead(models.Model):
 
                     # Remove "Monday:" from "Monday: 09:00 to 17:00"
                     if ':' in value:
-                        _, value = value.split(':', 1)
+                        day_label, value = value.split(':', 1)
                         value = value.strip()
 
                     # Alternating row background
@@ -856,17 +929,20 @@ class CrmLead(models.Model):
                 </table>
                 """
 
-                # Save table to partner
+                # Save to partner
                 self.partner_id.write({
                     'partner_working_details': table_html
                 })
+
+                # Trigger the write method which will create and pin the message
+                self.write({})
 
                 return {
                     'type': 'ir.actions.client',
                     'tag': 'display_notification',
                     'params': {
-                        'title': "Customer Current Time",
-                        'message': "Success! Action completed.",
+                        'title': "Success!",
+                        'message': "Working hours fetched and pinned to chatter successfully!",
                         'type': 'success',
                         'sticky': False,
                         'next': {
@@ -880,25 +956,26 @@ class CrmLead(models.Model):
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': "Customer Current Time",
+                    'title': "Not Found",
                     'message': "Company not found while fetching working hours",
-                    'type': 'info',
+                    'type': 'warning',
                     'sticky': False,
                 }
             }
 
         except Exception as e:
-            _logger.warning(f"Error during Gemini invocation: {e}")
+            _logger.error(f"Error during Gemini invocation: {e}")
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': "Customer Current Time",
-                    'message': "Company not found while fetching working hours",
-                    'type': 'info',
+                    'title': "Error",
+                    'message': f"An error occurred: {str(e)}",
+                    'type': 'danger',
                     'sticky': False,
                 }
             }
+
 
     def _compute_partner_work_status(self):
         """Compute Partner Work Status using day-wise working hours"""
@@ -908,9 +985,47 @@ class CrmLead(models.Model):
                 record.partner_work_status = False
                 continue
 
-            partner_time = datetime.now(
-                ZoneInfo(record.partner_id.partner_time_zone)
-            )
+            try:
+                # Clean and normalize timezone string
+                timezone_str = record.partner_id.partner_time_zone.strip()
+
+                # Remove common prefixes like "Time zone: " or "Timezone: "
+                if timezone_str.lower().startswith('time zone:'):
+                    timezone_str = timezone_str.split(':', 1)[1].strip()
+                elif timezone_str.lower().startswith('timezone:'):
+                    timezone_str = timezone_str.split(':', 1)[1].strip()
+
+                # Map common timezone abbreviations to proper IANA timezone names
+                timezone_mapping = {
+                    'IST': 'Asia/Kolkata',
+                    'IST (UTC+5:30)': 'Asia/Kolkata',
+                    'PST': 'America/Los_Angeles',
+                    'EST': 'America/New_York',
+                    'CST': 'America/Chicago',
+                    'MST': 'America/Denver',
+                    'GMT': 'Europe/London',
+                    'CET': 'Europe/Paris',
+                    'JST': 'Asia/Tokyo',
+                    'AEST': 'Australia/Sydney',
+                    'NZST': 'Pacific/Auckland',
+                }
+
+                # Check if it's a known abbreviation
+                for abbr, iana_tz in timezone_mapping.items():
+                    if timezone_str.upper().startswith(abbr):
+                        timezone_str = iana_tz
+                        break
+
+                # Try to create ZoneInfo object
+                partner_time = datetime.now(ZoneInfo(timezone_str))
+
+            except Exception as e:
+                _logger.warning(
+                    f"Invalid timezone '{record.partner_id.partner_time_zone}' for partner {record.partner_id.name}. "
+                    f"Error: {e}. Using UTC as fallback."
+                )
+                # Fallback to UTC if timezone is invalid
+                partner_time = datetime.now(ZoneInfo('UTC'))
 
             record.partner_local_time = partner_time.astimezone(
                 pytz.UTC
@@ -927,7 +1042,6 @@ class CrmLead(models.Model):
             if today not in parsed_data:
                 status = "Closed"
                 color = "gray"
-
             else:
                 today_hours = parsed_data[today]
 
@@ -1061,7 +1175,6 @@ class CrmLead(models.Model):
         else:
             self.count = 0
 
-
     def action_open_activity_graph(self):
         """Open activity graph for the current lead"""
         self.ensure_one()
@@ -1086,4 +1199,3 @@ class CrmLead(models.Model):
         """compute activity ids for setting the visibility of button"""
         for lead in self:
             lead.has_activities = bool(lead.activity_ids)
-
