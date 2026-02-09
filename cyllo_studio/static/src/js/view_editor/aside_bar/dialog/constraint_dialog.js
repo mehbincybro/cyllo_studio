@@ -10,6 +10,9 @@ import {
     useOwnedDialogs,
 } from "@web/core/utils/hooks";
 import {
+ CodeEditor
+ } from "@web/core/code_editor/code_editor";
+import {
     DomainSelectorDialog
 } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import {
@@ -18,7 +21,12 @@ import {
 import {
  Dialog
  } from "@web/core/dialog/dialog";
-
+import {
+ usePopover
+  } from "@web/core/popover/popover_hook";
+  import {
+ ModelFieldSelectorPopover
+ } from "@web/core/model_field_selector/model_field_selector_popover";
 
 export class ConstraintDialog extends Component {
     static template = "cyllo_studio.ConstraintDialog";
@@ -51,9 +59,12 @@ export class ConstraintDialog extends Component {
         this.rpc = useService("rpc");
 
         this.state = useState({
+            activeTab: 'sql_constraints',
+            deps: this.props.dependencies || "",
+            code: this.props.code || "",
             fieldName: this.props.fieldName,
             fieldLabel: this.props.fieldLabel || this.props.fieldName,
-            constraintType: "unique",
+            constraintType: "",
             condition: "",
             errorMessage: "",
             constraintKey: "",
@@ -66,9 +77,13 @@ export class ConstraintDialog extends Component {
                 affectedPercentage: 0,
             },
             isLoadingDataCheck: false,
+            isLoadingConstraints: false,
         });
-
+        this.popover = usePopover(ModelFieldSelectorPopover, {
+            popoverClass: "o_model_field_selector_popover",
+        });
         this.constraintTypes = [
+            {value: "",label:""},
             { value: "unique", label: "Unique (No Duplicates)" },
             { value: "not_null", label: "Not Null (Required)" },
             { value: "check", label: "Check (Condition)" },
@@ -76,8 +91,78 @@ export class ConstraintDialog extends Component {
 
         onMounted(() => {
             this.generateConstraintKey();
+            this.loadExistingConstraints();
+
         });
     }
+
+    async loadExistingConstraints() {
+    if (!this.props.model || !this.props.fieldName) {
+        return;
+    }
+
+    this.state.isLoadingConstraints = true;
+
+    try {
+        // Load Python constraint
+        const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+            model: this.props.model,
+            field_name: this.props.fieldName,
+        });
+
+        if (pythonConstraintInfo && pythonConstraintInfo.deps && pythonConstraintInfo.code) {
+            this.state.deps = pythonConstraintInfo.deps;
+            this.state.code = pythonConstraintInfo.code;
+            this.state.activeTab = 'python_constraints'; // Switch to Python tab if constraint exists
+            console.log("✓ Loaded Python constraint:", pythonConstraintInfo);
+        }
+
+        // Load SQL constraints (if you want to display them too)
+        if (this.props.existingConstraints && this.props.existingConstraints.length > 0) {
+            const firstConstraint = this.props.existingConstraints[0];
+            this.state.constraintType = firstConstraint.type || "unique";
+            this.state.errorMessage = firstConstraint.message || "";
+            this.state.condition = firstConstraint.definition || "";
+            this.state.constraintKey = firstConstraint.key || "";
+            this.state.activeTab = 'sql_constraints'; // Switch to SQL tab if constraints exist
+            console.log("✓ Loaded SQL constraints:", this.props.existingConstraints);
+        }
+
+    } catch (error) {
+        console.error("Error loading constraints:", error);
+    } finally {
+        this.state.isLoadingConstraints = false;
+    }
+}
+
+    // ⭐ SIMPLIFIED: Load existing constraints for the field
+async loadExistingConstraints() {
+    if (!this.props.model || !this.props.fieldName) {
+        return;
+    }
+
+    this.state.isLoadingConstraints = true;
+
+    try {
+        // Load Python constraint from RPC
+        const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+            model: this.props.model,
+            field_name: this.props.fieldName,
+        });
+
+        // ⭐ If Python constraint exists, populate the fields
+        if (pythonConstraintInfo && pythonConstraintInfo.deps && pythonConstraintInfo.code) {
+            this.state.deps = pythonConstraintInfo.deps;
+            this.state.code = pythonConstraintInfo.code;
+            console.log("✓ Loaded Python constraint:", pythonConstraintInfo);
+        }
+
+    } catch (error) {
+        console.error("Error loading constraints:", error);
+    } finally {
+        this.state.isLoadingConstraints = false;
+    }
+}
 
     generateConstraintKey() {
         const fieldLower = this.state.fieldName.toLowerCase().replace(/\s+/g, '_');
@@ -87,7 +172,6 @@ export class ConstraintDialog extends Component {
 
     // ⭐ NEW METHOD: Check for NULL/empty values in the field
     async checkFieldData() {
-        // Only check for NOT NULL constraint
         if (this.state.constraintType !== "not_null") {
             this.state.nullWarning.show = false;
             return;
@@ -229,15 +313,130 @@ export class ConstraintDialog extends Component {
         };
     }
 
+//    confirm() {
+//        if (!this.validateConstraint()) {
+//            return;
+//        }
+//        const constraint = this.buildSQLConstraint();
+//        this.props.onConfirm(constraint);
+//          const deps = (this.state.deps || "").trim();
+//        const code = (this.state.code || "").trim();
+//        if (!deps && !code) {
+//            this.props.onConfirm({
+//                deps: "",
+//                code: "",
+//            });
+//            this.props.close();
+//            return;
+//        }
+//        if ((deps && !code) || (!deps && code)) {
+//            this.notification.add({
+//                title: _t("Validation Error"),
+//                message: "Both fields required",
+//                description: "Please provide both Dependencies and Constraint Code.",
+//                type: "notification_panel",
+//                notificationType: "warning",
+//            });
+//            return;
+//        }
+//        this.props.onConfirm({
+//            deps,
+//            code,
+//        });
+//        this.props.close();        // Case 4: Both empty → No SQL constraint (OK, continue)
+        // else: sqlConstraint remains null
+//    }
+
     confirm() {
-        if (!this.validateConstraint()) {
+    const isSqlTab = this.state.activeTab === 'sql_constraints';
+    const isPythonTab = this.state.activeTab === 'python_constraints';
+
+    const deps = (this.state.deps || "").trim();
+    const code = (this.state.code || "").trim();
+    const constraintType = (this.state.constraintType || "").trim();
+    const errorMessage = (this.state.errorMessage || "").trim();
+
+
+    let sqlConstraint = null;
+    let pythonConstraint = null;
+
+    if (isSqlTab) {
+        const hasSqlType = !!constraintType;
+        const hasSqlMessage = !!errorMessage;
+
+        // Case 1: Both provided → Valid SQL constraint
+        if (hasSqlType && hasSqlMessage) {
+            if (!this.validateConstraint()) {
+                return; // validateConstraint() already shows notifications
+            }
+            sqlConstraint = this.buildSQLConstraint();
+        }
+        // Case 2: Only Type provided (no message)
+        else if (hasSqlType && !hasSqlMessage) {
+            this.notification.add({
+                title: _t("Validation Error"),
+                message: "Missing Error Message",
+                description: "Please provide an Error Message for the SQL constraint.",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
             return;
         }
-
-        const constraint = this.buildSQLConstraint();
-        this.props.onConfirm(constraint);
-        this.props.close();
+        // Case 3: Only Message provided (no type)
+        else if (!hasSqlType && hasSqlMessage) {
+            this.notification.add({
+                title: _t("Validation Error"),
+                message: "Missing Constraint Type",
+                description: "Please select a Constraint Type for the SQL constraint.",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return;
+        }
     }
+    if (isPythonTab) {
+        const hasDeps = !!deps;
+        const hasCode = !!code;
+
+        if (hasDeps && hasCode) {
+            pythonConstraint = { deps, code };
+        }
+        // Case 2: Only Dependencies provided (no code)
+        else if (hasDeps && !hasCode) {
+            this.notification.add({
+                title: _t("Validation Error"),
+                message: "Missing Constraint Code",
+                description: "Please provide Constraint Code for the Python constraint.",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return;
+        }
+        else if (!hasDeps && hasCode) {
+            this.notification.add({
+                title: _t("Validation Error"),
+                message: "Missing Constraint Fields",
+                description: "Please provide Constraint Fields for the Python constraint.",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return;
+        }
+    }
+    const result = {};
+
+    if (sqlConstraint) {
+        result.sql_constraint = sqlConstraint;
+        console.log("tte",sqlConstraint)
+    }
+
+    if (pythonConstraint) {
+        result.python_constraint = pythonConstraint;
+    }
+
+    this.props.onConfirm(result);
+    this.props.close();
+}
 
     cancel() {
         if (this.props.onCancel) {
@@ -246,7 +445,6 @@ export class ConstraintDialog extends Component {
         this.props.close();
     }
 
-    // ⭐ Helper method to get warning severity level
     getWarningSeverity() {
         if (!this.state.nullWarning.show) return null;
         const percentage = this.state.nullWarning.affectedPercentage;
@@ -254,6 +452,36 @@ export class ConstraintDialog extends Component {
         if (percentage > 25) return "warning";
         return "info";
     }
+    switchTab(tabName) {
+    this.state.activeTab = tabName;
+    this.render();
+}
+    onConstraintCodeChange(value) {
+        this.state.code = value;
+        this.state.edited=true
+
+    }
+        openConstraintsPopover(ev) {
+        const target = ev.currentTarget;
+
+        this.popover.open(target, {
+            resModel: this.props.model,
+            path: "",
+            showSearchInput: true,
+            followRelations: false,
+            filter: () => true,
+
+            update: (path) => {
+                const arr = this.state.deps
+                    .split(",")
+                    .map((x) => x.trim())
+                    .filter((x) => x);
+
+                if (!arr.includes(path)) arr.push(path);
+                this.state.deps = arr.join(", ");
+            },
+        });
+    }
 }
 
-ConstraintDialog.components = {Dialog};
+ConstraintDialog.components = {Dialog, CodeEditor};

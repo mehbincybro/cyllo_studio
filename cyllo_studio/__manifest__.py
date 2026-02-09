@@ -33,6 +33,7 @@
         'views/ir_actions_report_views.xml',
         'views/ir_model_access_views.xml',
         'views/ir_rule_views.xml',
+        'views/ir_model_fields.xml',
     ],
     'assets': {
         'web.assets_backend': [

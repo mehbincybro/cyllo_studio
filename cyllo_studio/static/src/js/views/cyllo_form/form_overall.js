@@ -112,6 +112,47 @@ export class FormOverall extends Component {
         })
  		useEffect(() => {
 			const self = this
+			  const globalRibbonInterceptor = (e) => {
+        const target = e.target;
+        const ribbon = target.closest('div.ribbon[cy-xpath]');
+
+        if (ribbon) {
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            e.preventDefault();
+
+            // Manually trigger the ribbon dialog
+            const ribbonPath = ribbon.getAttribute('cy-xpath');
+            if (ribbonPath) {
+                const allRibbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+                const viewId = self.props.viewId;
+                const model = self.props.model || self.action.currentController.props.resModel;
+
+                const fields = [];
+                if (self.props.allFields) {
+                    for (const [fieldName, field] of Object.entries(self.props.allFields)) {
+                        fields.push({ value: fieldName, label: field.string });
+                    }
+                }
+
+                self.dialogService.add(RibbonDialog, {
+                    fields: fields,
+                    ribbonElement: Array.from(allRibbons),
+                    viewDetails: {
+                        viewId: viewId,
+                        viewType: self.props.viewType || 'form',
+                        model: model,
+                        active_fields: self.props.allFields,
+                        ribbonPath: ribbonPath,
+                    },
+                });
+            }
+            return false;
+        }
+    };
+
+    // Add to document in CAPTURE phase (highest priority)
+    document.addEventListener('click', globalRibbonInterceptor, true);
 			const forms = document.getElementsByClassName('o_form_sheet')
 			const form_tabs = document.getElementsByClassName('tab-pane')
 			const innerGroup = document.getElementsByClassName('o_inner_group')
@@ -511,54 +552,132 @@ export class FormOverall extends Component {
 					}
 				});
 
-            const setupRibbonClickHandlers = () => {
-                const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
-                ribbons.forEach((ribbon, index) => {
-                    ribbon.style.cursor = 'pointer';
-                    ribbon.style.pointerEvents = 'auto';
-                    ribbon.removeEventListener('click', handleRibbonClick);
-                    ribbon.addEventListener('click', handleRibbonClick, false);
-                });
-            };
-
-            const handleRibbonClick = function(e) {
-                e.stopPropagation();
+//            const setupRibbonClickHandlers = () => {
+//                const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+//                ribbons.forEach((ribbon, index) => {
+//                    ribbon.style.cursor = 'pointer';
+//                    ribbon.style.pointerEvents = 'auto';
+//                    ribbon.removeEventListener('click', handleRibbonClick);
+//                    ribbon.addEventListener('click', handleRibbonClick, false);
+//                });
+//            };
+//
+//            const handleRibbonClick = function(e) {
+//                e.stopPropagation();
+//                e.stopImmediatePropagation();
 //                e.preventDefault();
-                const ribbonElement = e.currentTarget;
-                const ribbonPath = ribbonElement.getAttribute('cy-xpath');
-                if (!ribbonPath) {
-                    console.warn("No cy-xpath found on ribbon");
-                    return;
-                }
-                const allRibbons = document.querySelectorAll('div.ribbon[cy-xpath]');
-                const span = ribbonElement.querySelector('span');
-                const ribbonLabel = span ? span.textContent : 'New';
-                const ribbonColor = span ? span.className : 'text-bg-danger';
-                const ribbonInvisible = ribbonElement.getAttribute('invisible') || 'False';
-                const viewId = self.props.viewId;
-                const model = self.props.model || self.action.currentController.props.resModel;
+//                const ribbonElement = e.currentTarget;
+//                const ribbonPath = ribbonElement.getAttribute('cy-xpath');
+//                console.log("ribbon path",ribbonPath)
+//                if (!ribbonPath) {
+//                    console.warn("No cy-xpath found on ribbon");
+//                    return;
+//                }
+//                const allRibbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+//                const span = ribbonElement.querySelector('span');
+//                const ribbonLabel = span ? span.textContent : 'New';
+//                const ribbonColor = span ? span.className : 'text-bg-danger';
+//                const ribbonInvisible = ribbonElement.getAttribute('invisible') || 'False';
+//                const viewId = self.props.viewId;
+//                const model = self.props.model || self.action.currentController.props.resModel;
+//
+//                // Build kanban fields list for the dialog
+//                const fields = [];
+//                if (self.props.allFields) {
+//                    for (const [fieldName, field] of Object.entries(self.props.allFields)) {
+//                        fields.push({ value: fieldName, label: field.string });
+//                    }
+//                }
+//
+//                // Open the RibbonDialog just like in Kanban
+//                self.dialogService.add(RibbonDialog, {
+//                    fields: fields,
+//                    ribbonElement: Array.from(allRibbons),
+//                    viewDetails: {
+//                        viewId: viewId,
+//                        viewType: self.props.viewType,
+//                        model: model,
+//                        active_fields: self.props.allFields,
+//                        ribbonPath: ribbonPath,
+//                    },
+//                });
+//            };
+const setupRibbonClickHandlers = () => {
+    const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+    ribbons.forEach((ribbon) => {
+        ribbon.style.cursor = 'pointer';
+        ribbon.style.pointerEvents = 'auto';
 
-                // Build kanban fields list for the dialog
-                const fields = [];
-                if (self.props.allFields) {
-                    for (const [fieldName, field] of Object.entries(self.props.allFields)) {
-                        fields.push({ value: fieldName, label: field.string });
-                    }
-                }
+        // Remove any existing listeners
+        const oldHandler = ribbon._ribbonClickHandler;
+        if (oldHandler) {
+            ribbon.removeEventListener('click', oldHandler, true);
+        }
 
-                // Open the RibbonDialog just like in Kanban
-                self.dialogService.add(RibbonDialog, {
-                    fields: fields,
-                    ribbonElement: Array.from(allRibbons),
-                    viewDetails: {
-                        viewId: viewId,
-                        viewType: self.props.viewType,
-                        model: model,
-                        active_fields: self.props.allFields,
-                        ribbonPath: ribbonPath,
-                    },
-                });
+        // Create new handler
+        const newHandler = handleRibbonClick.bind(null, ribbon);
+        ribbon._ribbonClickHandler = newHandler;
+
+        // Add listener in CAPTURE phase with high priority
+        ribbon.addEventListener('click', newHandler, true);
+
+        // Also add listeners to child elements to prevent them from triggering other handlers
+        const children = ribbon.querySelectorAll('*');
+        children.forEach(child => {
+            const childHandler = (e) => {
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                e.preventDefault();
+                // Trigger parent ribbon click
+                newHandler(e);
             };
+            child._ribbonChildClickHandler = childHandler;
+            child.addEventListener('click', childHandler, true);
+        });
+    });
+};
+
+const handleRibbonClick = function(ribbonElement, e) {
+    // Stop ALL propagation immediately
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    e.preventDefault();
+
+    console.log('Ribbon clicked:', ribbonElement);
+
+    const ribbonPath = ribbonElement.getAttribute('cy-xpath');
+    if (!ribbonPath) {
+        console.warn("No cy-xpath found on ribbon");
+        return;
+    }
+
+    const allRibbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+    const viewId = self.props.viewId;
+    const model = self.props.model || self.action.currentController.props.resModel;
+
+    // Build fields list for the dialog
+    const fields = [];
+    if (self.props.allFields) {
+        for (const [fieldName, field] of Object.entries(self.props.allFields)) {
+            fields.push({ value: fieldName, label: field.string });
+        }
+    }
+
+    // Open the RibbonDialog
+    self.dialogService.add(RibbonDialog, {
+        fields: fields,
+        ribbonElement: Array.from(allRibbons),
+        viewDetails: {
+            viewId: viewId,
+            viewType: self.props.viewType || 'form',
+            model: model,
+            active_fields: self.props.allFields,
+            ribbonPath: ribbonPath,
+        },
+    });
+
+    return false; // Extra safety
+};
 
             // Initial setup
             setupRibbonClickHandlers();
@@ -584,7 +703,6 @@ export class FormOverall extends Component {
             const formElement = document.querySelector('div[role="main"]') || document.querySelector('.o_form_sheet');
             if (formElement) {
                 const observer = new MutationObserver((mutations) => {
-                    // Check if new ribbons were added
                     const hasNewRibbon = mutations.some(mutation =>
                         Array.from(mutation.addedNodes).some(node =>
                             node.nodeType === 1 && (
@@ -610,12 +728,29 @@ export class FormOverall extends Component {
             }
 
             // Cleanup function will be called when component unmounts
-            return () => {
-                if (window._ribbonObserver) {
-                    window._ribbonObserver.disconnect();
-                }
-                drake.destroy();
-            };
+         return () => {
+    // Remove global interceptor
+    document.removeEventListener('click', globalRibbonInterceptor, true);
+
+    // Clean up ribbon-specific handlers
+    const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
+    ribbons.forEach((ribbon) => {
+        if (ribbon._ribbonClickHandler) {
+            ribbon.removeEventListener('click', ribbon._ribbonClickHandler, true);
+        }
+        const children = ribbon.querySelectorAll('*');
+        children.forEach(child => {
+            if (child._ribbonChildClickHandler) {
+                child.removeEventListener('click', child._ribbonChildClickHandler, true);
+            }
+        });
+    });
+
+    if (window._ribbonObserver) {
+        window._ribbonObserver.disconnect();
+    }
+    drake.destroy();
+};
 
 				return () => drake.destroy()
 			}
