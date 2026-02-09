@@ -19,8 +19,4 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import batch_payslip_mark_paid
-from . import employee_payslip_batch_list
-from . import resignation_request_confirm
-from . import account_payment_register
-from . import hr_advance_salary_close
+from . import main

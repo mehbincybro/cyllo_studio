@@ -140,4 +140,17 @@ else:
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = inputs.EXPENSE</field>
     </record>
+
+    <!-- Advance Salary rules -->
+
+    <record id="employee_salary_rule_advance_salary_deduction" model="employee.salary.rule">
+        <field name="name">Advance Salary Deduction</field>
+        <field name="sequence" eval="300"/>
+        <field name="code">ADVSAL_DED</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_deduction"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.DED and inputs.DED &lt; 0</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.DED</field>
+    </record>
 </odoo>

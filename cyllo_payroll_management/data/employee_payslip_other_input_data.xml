@@ -17,4 +17,9 @@
         <field name="name">Expense Reimbursement</field>
         <field name="code">EXPENSE</field>
     </record>
+
+    <record id="employee_payslip_other_input_deduction" model="employee.payslip.other.input">
+        <field name="name">Deduction</field>
+        <field name="code">DED</field>
+    </record>
 </odoo>

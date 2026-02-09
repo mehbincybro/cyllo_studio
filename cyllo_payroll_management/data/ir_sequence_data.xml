@@ -30,4 +30,15 @@
         <field name="number_next">1</field>
         <field name="number_increment">1</field>
     </record>
+
+<!--    advance salary payment-->
+
+    <record id="seq_advance_salary_request" model="ir.sequence">
+        <field name="name">Advance Salary Request</field>
+        <field name="code">advance.salary.request</field>
+        <field name="prefix">ASR/</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
 </odoo>
