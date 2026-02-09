@@ -28,3 +28,4 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     module_cyllo_website_subscription = fields.Boolean('Advanced subscription Websale')
+    renewal_request = fields.Boolean('Subscription renewal request',config_parameter='cyllo_subscription.renewal_request')

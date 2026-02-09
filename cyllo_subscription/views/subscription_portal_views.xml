@@ -429,7 +429,7 @@
                                        href="#">Close Subscription
                                     </a>
                                 </t>
-                                <t t-if="each_order.sale_order_template_id.renewal_request and each_order.state_subscription in ('churned', 'renew')"
+                                <t t-if="each_order.renewal_request and each_order.state_subscription in ('churned', 'renew')"
                                    class="list-group-item flex-grow-1">
                                     <a class="btn btn-primary o_print_btn d-block"
                                        role="button"

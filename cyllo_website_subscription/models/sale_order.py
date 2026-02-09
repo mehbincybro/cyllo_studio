@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models
+from odoo import models,fields
 
 class SaleOrder(models.Model):
     """Extends sale orders to manage ecommerce sunscription sale."""
@@ -35,13 +35,13 @@ class SaleOrder(models.Model):
     def _get_subscription_trial_offset(self):
         """Calculates total value of trial items for display masking."""
         price_total =sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+            lambda l: l.product_id.is_subscription and l.trial_end and l.trial_end > fields.Datetime.now()
         ).mapped('price_total'))
         price_subtotal = sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+            lambda l: l.product_id.is_subscription and l.trial_end and l.trial_end > fields.Datetime.now()
         ).mapped('price_subtotal'))
         tax_total = sum(self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+            lambda l: l.product_id.is_subscription and l.trial_end and l.trial_end > fields.Datetime.now()
         ).mapped('price_tax'))
         return price_total,tax_total, price_subtotal
 
@@ -69,7 +69,7 @@ class SaleOrder(models.Model):
 
         # Sum subtotals of subscription products with a trial period
         trial_sub_lines = self.order_line.filtered(
-            lambda l: l.product_id.is_subscription and l.product_template_id.trial_period > 0
+            lambda l: l.product_id.is_subscription and l.trial_end and l.trial_end > fields.Datetime.now()
         )
         total_to_offset = sum(trial_sub_lines.mapped('price_subtotal'))
 

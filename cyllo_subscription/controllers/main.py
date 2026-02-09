@@ -23,8 +23,23 @@ from odoo import _, fields, http
 from odoo.http import request
 
 from odoo.addons.portal.controllers.portal import CustomerPortal
+from odoo.addons.sale.controllers.portal import CustomerPortal
 
+class MyCustomerPortal(CustomerPortal):
 
+    def _prepare_quotations_domain(self, partner):
+        # Get the original domain you shared
+        domain = super()._prepare_quotations_domain(partner)
+        # Add the filter to exclude subscription orders
+        domain.append(('is_subscription', '=', False))
+        return domain
+
+    def _prepare_orders_domain(self, partner):
+        # Get the original domain you shared
+        domain = super()._prepare_orders_domain(partner)
+        # Add the filter to exclude subscription orders
+        domain.append(('is_subscription', '=', False))
+        return domain
 
 class SubscriptionPortal(CustomerPortal):
     """ Class to define the portal views """

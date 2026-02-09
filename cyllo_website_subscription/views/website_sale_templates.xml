@@ -35,6 +35,20 @@
         <xpath expr="//form[@action='/shop/cart/update']" position="inside">
             <t t-if="product.is_subscription">
                 <div class="mb-3">
+                    <t t-set="trial_history" t-value="website.env['subscription.trial.history'].sudo().search([
+                                    ('partner_id', '=', website.partner_id.id),
+                                    ('product_id', '=', product.id)
+                                ], limit=1)"/>
+                    <t t-log="trial_history"/>
+                    <div t-if="not trial_history and product.trial_period>0" class="alert alert-info py-2 mb-2" role="alert">
+                        <i class="fa fa-clock-o me-1"/>
+                        Includes
+                        <strong>
+                            <t t-out="product.trial_period"/>
+                            <t t-out="product.unit"/>
+                        </strong>
+                        free trial!
+                    </div>
                     <t t-set="curr_website_currency" t-value="website.currency_id"/>
                     <t t-set="today" t-value="datetime.date.today()"/>
                     <select name="time_based_price_id"
@@ -87,7 +101,7 @@
                    t-options="{'widget': 'monetary', 'display_currency': website_sale_order.currency_id}"/>
             </span>
         </xpath>
-         <xpath expr="//tr[@id='order_total_taxes']//span[@t-field='website_sale_order.amount_tax']" position="replace">
+        <xpath expr="//tr[@id='order_total_taxes']//span[@t-field='website_sale_order.amount_tax']" position="replace">
             <t t-set="trial_data" t-value="website_sale_order._get_subscription_trial_offset()"/>
             <span class="monetary_field" style="white-space: nowrap;">
                 <t t-out="website_sale_order.amount_tax+trial_data[1]"
