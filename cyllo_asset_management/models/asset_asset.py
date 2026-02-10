@@ -136,8 +136,10 @@ class AssetAsset(models.Model):
     insurance_attachment_ids = fields.Many2many('ir.attachment', 'asset_insurance_attachment_rel',
                                                 'asset_id', 'attachment_id', string="Insurance Documents",
                                                 domain="[('res_model', '=', 'asset.asset')]")
-    buffer_days = fields.Integer(string="Cool Down Days", default=0,
-                                 help="Number of days the asset remains unavailable after a booking ends")
+    buffer_duration = fields.Integer(string="Cool Down Duration", default=0,
+                                     help="Number of days the asset remains unavailable after a booking ends")
+    buffer_period = fields.Selection([('hour', 'Hour'), ('day', 'Day'), ('week', 'Week')], tracking=True,
+                                     default='hour', required=True)
 
     def _compute_maintenance_state(self):
         """Compute maintenance states of assets"""
@@ -538,6 +540,16 @@ class AssetAsset(models.Model):
             'res_model': 'account.move',
             'type': 'ir.actions.act_window',
             'domain': [('asset_asset_id', '=', self.id)]
+        }
+
+    def action_view_asset_booking(self):
+        """Action view asset bookings"""
+        return {
+            'name': 'Bookings',
+            'view_mode': 'tree,form',
+            'res_model': 'asset.booking',
+            'type': 'ir.actions.act_window',
+            'domain': [('asset_id', '=', self.id), ('state', '=', 'draft')]
         }
 
     def action_compute_depreciation(self):

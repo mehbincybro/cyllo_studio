@@ -45,8 +45,14 @@
         <field name="arch" type="xml">
             <form string="Asset">
                 <header>
-                    <field name="status" widget="statusbar"
-                           statusbar_visible="draft,running"/>
+
+                    <field name="status" class="float-end fs-6" widget="badge"
+                           decoration-success="status in ('draft','running')"
+                           decoration-warning="status == 'leased'"
+                           decoration-info="status == 'rented'"
+                           decoration-danger="status in ('sell','disposed','cancel')"/>
+                    <!--                    <field name="status" widget="statusbar"-->
+                    <!--                           statusbar_visible="draft,running"/>-->
                     <button type="object" name="action_confirm_deprecation" string="Confirm" class="oe_highlight"
                             invisible="is_confirm or status in ('cancel', 'sell', 'disposed', 'lost', 'running')"/>
                     <button type="object" name="action_compute_depreciation" string="Depreciate" class="oe_highlight"
@@ -68,6 +74,11 @@
                             <i class="ri-align-justify"/>
                             <field name="modified_count" string="Modified Assets" widget="statinfo"/>
                         </button>
+                        <button class="oe_stat_button" name="action_view_asset_booking"
+                                type="object">
+                            <i class="ri-calendar-event-line"/>
+                            Bookings
+                        </button>
                         <button class="oe_stat_button" name="action_view_journal_entries"
                                 invisible="entry_count == 0"
                                 type="object">
@@ -76,7 +87,8 @@
                         </button>
                         <button class="oe_stat_button" name="action_view_maintenance_repairs"
                                 invisible="maintenance_count == 0"
-                                type="object" icon="fa-wrench">
+                                type="object">
+                            <i class="fa fa-wrench"/>
                             Maintenance/Repair (<field name="maintenance_count"/>)
                         </button>
                         <button class="oe_stat_button" name="action_view_reservation"
@@ -125,7 +137,12 @@
                         <group>
                             <field name="serial_no" readonly="is_confirm"/>
                             <field name="date" readonly="is_confirm"/>
-                            <field name="buffer_days" readonly="is_confirm"/>
+                            <label for="buffer_duration" name="buffer_duration" string="Cool down duation"/>
+                            <div class="o_row">
+                                <field name="buffer_duration" readonly="is_confirm"
+                                       style="width:25% !important;"/>
+                                <field name="buffer_period" nolabel="1" readonly="is_confirm"/>
+                            </div>
                             <field name="currency_id" invisible="1"/>
                             <field name="is_confirm" invisible="1"/>
                             <field name="is_modify" invisible="1"/>

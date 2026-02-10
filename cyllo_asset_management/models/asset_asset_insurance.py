@@ -33,6 +33,8 @@ class AssetAssetInsurance(models.Model):
     type_id = fields.Many2one(string="Type", comodel_name='asset.insurance.type')
     account_move_count = fields.Integer(string='Invoice', copy=False, compute='_compute_transaction_count')
     asset_count = fields.Integer(string='Invoice', copy=False, compute='_compute_asset_count')
+    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company,
+                                 help='Select the company')
 
     @api.depends('partner_id', 'type_id')
     def _compute_name(self):

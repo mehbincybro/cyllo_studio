@@ -21,6 +21,8 @@
 #############################################################################
 from odoo import fields, models, api, _
 from odoo.exceptions import ValidationError, UserError
+from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 
 class MaintenanceRequest(models.Model):
@@ -40,6 +42,7 @@ class MaintenanceRequest(models.Model):
     is_scrap = fields.Boolean(default=False)
     invoiced_amount = fields.Monetary(string="Insurance Amount")
     transaction_count = fields.Integer(string='Invoice', copy=False, compute='_compute_transaction_count')
+    booking_id = fields.Many2one(string="Booking ID", comodel_name='asset.booking', copy=False)
 
     @api.model
     def default_get(self, fields_list):
@@ -58,6 +61,48 @@ class MaintenanceRequest(models.Model):
                 and asset.insurance_end_date
                 and asset.insurance_end_date >= today
             )
+        return res
+
+    @api.model
+    def create(self, vals):
+        # If schedule_date is not provided → set to now
+        schedule_date = vals.get('schedule_date') or fields.Datetime.now()
+        vals['schedule_date'] = schedule_date
+
+        record = super().create(vals)
+
+        booking = self.env['asset.booking'].create_or_update_booking(
+            asset=record.asset_id,
+            date_from=schedule_date,
+            date_to=schedule_date + timedelta(hours=record.duration),
+            booking_type='maintenance',
+            partner=record.partner_id,
+            res_model=record._name,
+            res_id=record.id
+        )
+
+        record.booking_id = booking.id
+        return record
+
+    def write(self, vals):
+        res = super().write(vals)
+        trigger_fields = {'asset_id', 'schedule_date', 'duration', 'partner_id'}
+
+        if trigger_fields & set(vals):
+            for rec in self:
+                schedule_date = rec.schedule_date or fields.Datetime.now()
+
+                booking = self.env['asset.booking'].create_or_update_booking(
+                    asset=rec.asset_id,
+                    date_from=schedule_date,
+                    date_to=schedule_date + timedelta(hours=rec.duration or 0),
+                    booking_type='maintenance',
+                    partner=rec.partner_id,
+                    res_model=rec._name,
+                    res_id=rec.id
+                )
+                rec.booking_id = booking.id
+
         return res
 
     def _compute_transaction_count(self):
@@ -100,6 +145,7 @@ class MaintenanceRequest(models.Model):
                 )
             self.asset_id.is_maintenance = False
             self.asset_id.is_repair = False
+            self.booking_id.state = 'done'
 
     @api.onchange('equipment_id')
     def _onchange_equipment_id(self):

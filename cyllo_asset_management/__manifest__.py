@@ -49,6 +49,7 @@
         'views/asset_sell_dispose_views.xml',
         'views/asset_asset_insurance_views.xml',
         'views/maintenance_request.xml',
+        'views/asset_booking.xml',
         'wizards/asset_modify_views.xml',
         'wizards/assset_insurance_wizard_views.xml',
     ],
