@@ -46,16 +46,23 @@ class ProductTemplate(models.Model):
             plan = self.env['time.based.price'].sudo().browse(int(plan_id))
             if plan.exists():
                 # Handle Currency Conversion
-                # Convert plan cost to the currency currently used by the website
-                website_currency = res.get('currency') or self.env.company.currency_id
-                website = self.env['website'].get_current_website().with_context(self.env.context)
+                website = self.env['website'].get_current_website()
                 pricelist = website.pricelist_id
-                if pricelist and pricelist.currency_id == website_currency:
-                    time_based_price_rule = pricelist._get_time_based_price_rule(self.id,plan.subscription_unit,plan.duration,fields.Datetime.now(),add_qty)
-                if time_based_price_rule:
-                       price = time_based_price_rule.fixed_price
-                else:
-                     price = plan.currency_id._convert(plan.cost,website_currency,self.env.company,self.env.context.get('date') or fields.Date.today())
+                website_currency = pricelist.currency_id or website.currency_id
+
+                time_based_price_rule = pricelist._get_time_based_price_rule(
+                        self.id, plan.subscription_unit, plan.duration,
+                        fields.Datetime.now(), add_qty
+                    )
+                
+                # Use unified method for price calculation
+                price = pricelist._get_subscription_price(
+                    self.id,
+                    plan,
+                    add_qty,
+                    fields.Date.today()
+                )
+
                 # Apply Taxes manually
                 # We use the taxes already calculated by super() in res['product_taxes']
                 # and res['taxes'] (which handles fiscal positions).
@@ -73,6 +80,9 @@ class ProductTemplate(models.Model):
                 res.update({
                     'price': price,
                     'list_price': price,
+                    'currency': website_currency,
+                    'is_subscription': True,
+                    'sub_pricing_id': plan.id,
                 })
 
         return res

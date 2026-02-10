@@ -36,10 +36,9 @@
             <t t-if="product.is_subscription">
                 <div class="mb-3">
                     <t t-set="trial_history" t-value="website.env['subscription.trial.history'].sudo().search([
-                                    ('partner_id', '=', website.partner_id.id),
-                                    ('product_id', '=', product.id)
+                                    ('partner_id', '=', website.env.user.partner_id.id),
+                                    ('product_id', '=', product.product_variant_id.id)
                                 ], limit=1)"/>
-                    <t t-log="trial_history"/>
                     <div t-if="not trial_history and product.trial_period>0" class="alert alert-info py-2 mb-2" role="alert">
                         <i class="fa fa-clock-o me-1"/>
                         Includes

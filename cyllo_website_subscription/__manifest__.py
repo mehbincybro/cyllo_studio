@@ -8,7 +8,7 @@
     'maintainer': 'Cyllo',
     'website': "https://www.cyllo.com",
     'data': ['data/product_data.xml',
-             'views/website_sale_templates.xml'
+             'views/website_sale_templates.xml',
              ],
     'assets': {
         'web.assets_frontend': [

@@ -52,5 +52,37 @@ class Pricelist(models.Model):
             ('min_quantity', '<=', product_uom_qty)], order='min_quantity desc', limit=1)
         return suitable_price_rule
 
+    def _get_subscription_price(self, product_template_id, plan, quantity=1.0, date=None):
+        """
+        Compute the subscription price for a given product and plan.
+        1. Checks for a specific Time-Based Pricing Rule in this pricelist.
+        2. If no rule, falls back to the plan's cost converted to pricelist currency.
+        :param product_template_id: int
+        :param plan: time.based.price record
+        :param quantity: float
+        :param date: datetime or date
+        :return: float (price)
+        """
+        if not date:
+            date = fields.Date.today()
+        
+        rule = self._get_time_based_price_rule(
+            product_template_id, 
+            plan.subscription_unit, 
+            plan.duration, 
+            date, 
+            quantity
+        )
+        
+        if rule:
+            return rule.fixed_price
+            
+        return plan.currency_id._convert(
+            plan.cost,
+            self.currency_id,
+            self.company_id or self.env.company,
+            date
+        )
+
 
 

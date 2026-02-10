@@ -37,6 +37,7 @@ class SaleOrderLine(models.Model):
     renewal_date = fields.Datetime(help='Renewal date for the subscription order created from this line')
     trial_end = fields.Datetime(help='Trial end date for the subscription order created from this line.')
     end_date = fields.Datetime(string='End Date')
+    skip_trial = fields.Boolean(default=False, string="Skip Trial", help="If set, trial period will be skipped for this line.")
 
     @api.depends('time_based_price_id', 'product_uom_qty')
     def _compute_price_unit(self):
@@ -50,13 +51,11 @@ class SaleOrderLine(models.Model):
             if line.product_template_id.is_subscription and line.time_based_price_id:
                 plan = line.time_based_price_id
                 order = line.order_id
-                time_based_price_rule = order.pricelist_id._get_time_based_price_rule(line.product_template_id.id,line.time_based_price_id.subscription_unit,line.time_based_price_id.duration,order.date_order,line.product_uom_qty)
-                price = time_based_price_rule.fixed_price if time_based_price_rule else plan.cost
-                price_unit = plan.currency_id._convert(
-                    price,
-                    order.pricelist_id.currency_id,
-                    order.company_id,
-                    order.date_order.date()
+                price_unit = order.pricelist_id._get_subscription_price(
+                    line.product_template_id.id,
+                    plan,
+                    line.product_uom_qty,
+                    order.date_order
                 )
                 line.price_unit = price_unit
 
@@ -72,7 +71,25 @@ class SaleOrderLine(models.Model):
     @api.onchange('time_based_price_id', 'product_uom_qty')
     def _onchange_time_based_price_id(self):
         """Change price when change the time-based pricing"""
-        self.price_unit = self.time_based_price_id.cost
+        if self.time_based_price_id:
+            plan = self.time_based_price_id
+            order = self.order_id
+            # Need to handle NewId in onchange
+            if order.id:
+                date_order = order.date_order
+            else:
+                date_order = fields.Datetime.now()
+
+            self.price_unit = order.pricelist_id._get_subscription_price(
+                self.product_template_id.id._origin if hasattr(self.product_template_id.id,
+                                                               '_origin') else self.product_template_id.id,
+                plan,
+                self.product_uom_qty,
+                date_order
+            )
+        else:
+             # Fallback to standard price if no time based id (though it's required for sub products?)
+             pass
         self.check_trial_period()
         if self.time_based_price_id:
             if self.time_based_price_id.subscription_unit == 'weeks':
@@ -92,6 +109,10 @@ class SaleOrderLine(models.Model):
 
     def check_trial_period(self):
         """Check if any trial-period is added in product template"""
+        if self.skip_trial:
+            self.trial_end = False
+            return
+
         if self.product_template_id.trial_period > 0:
             history_exists = self.env['subscription.trial.history'].search([
                 ('partner_id', '=', self.order_id.partner_id.id),

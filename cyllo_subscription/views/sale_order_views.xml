@@ -60,6 +60,8 @@
                        column_invisible="not parent.is_subscription"/>
                 <field name="trial_end"
                        column_invisible="not parent.is_subscription"/>
+                <field name="skip_trial"
+                       column_invisible="not parent.is_subscription"/>
                 <field name="end_date" invisible="not product_id.is_subscription"/>
             </xpath>
         </field>

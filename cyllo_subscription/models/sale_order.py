@@ -94,7 +94,7 @@ class SaleOrder(models.Model):
                 'sale_order_template_id': self.sale_order_template_id.id,
                 'time_based_price_id': line.time_based_price_id.id,
                 'end_date': line.end_date,
-                'renewal_date': line.trial_end if line.trial_end > fields.Datetime.now() else fields.Datetime.now(),
+                'renewal_date': line.trial_end if line.trial_end and line.trial_end > fields.Datetime.now() else fields.Datetime.now(),
                 'trial_end': line.trial_end,
                 'state': 'posted' if self.sale_order_template_id.invoice_creation else 'sale',
                 'subscription_order_line_ids': [
@@ -113,7 +113,7 @@ class SaleOrder(models.Model):
             self.is_subscription = True
             self.state_subscription = 'sub_order'
 
-            if sub_order.trial_end and sub_order.trial_end > fields.Datetime.now():
+            if sub_order.trial_end and sub_order.trial_end > fields.Datetime.now() and not line.skip_trial:
                 sub_order.state_subscription = 'trial'
             else:
                 sub_order.state_subscription = 'active'
@@ -121,11 +121,13 @@ class SaleOrder(models.Model):
             if self.sale_order_template_id.invoice_creation in ['draft', 'confirmed', 'sent']:
                 sub_order.action_post()
 
-            if line.trial_end > fields.Datetime.now():
+            if line.trial_end and line.trial_end > fields.Datetime.now() and not line.skip_trial:
                 self.env['subscription.trial.history'].create({
                     'partner_id': self.partner_id.id,
                     'product_id': line.product_id.id,
                     'subscription_order_id': sub_order.id,
+                    'date_started':fields.Datetime.now(),
+                    'date_trial_end':line.trial_end,
                 })
 
         return super(SaleOrder, self).action_confirm()

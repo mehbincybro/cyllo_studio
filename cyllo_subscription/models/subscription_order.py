@@ -95,22 +95,23 @@ class SubscriptionOrder(models.Model):
                                      help='If need to make customer to give request to renew the subscription enable '
                                           'this field')
 
+
     def _compute_invoice_count(self):
-        """Compute invoice count"""
+        """Compute the number of invoices associated with this subscription order."""
         for rec in self:
             rec.invoice_count = self.env['account.move'].search_count(
                 [('invoice_origin', '=', rec.name)])
 
     @api.depends('state_subscription', 'state')
     def _compute_recurring_revenue(self):
-        """Methode to compute recurring revenue"""
+        """Compute the Monthly Recurring Revenue (MRR) based on active subscription lines."""
         for revenue in self:
             revenue.recurring_revenue = revenue.subscription_order_line_ids.subtotal
 
     def _compute_partner_street(self):
         """
-        Compute the complete street address for each record.
-        :return: None
+        Compute the complete street address string for the partner.
+        Concatenates street and street2.
         """
         for rec in self:
             street = rec.partner_id.street if rec.partner_id.street else ''
@@ -119,7 +120,10 @@ class SubscriptionOrder(models.Model):
 
     @api.depends('sale_order_template_id')
     def _compute_renewal_request(self):
-
+        """
+        Determine if the customer is allowed to request a renewal.
+        Checks the Subscription Template setting first, then falls back to the Global Setting.
+        """
         global_setting = self.env['ir.config_parameter'].sudo().get_param('cyllo_subscription.renewal_request')
 
         for record in self:
@@ -132,7 +136,7 @@ class SubscriptionOrder(models.Model):
     @api.depends('subscription_order_line_ids.subtotal',
                  'subscription_order_line_ids.total_price')
     def _compute_amounts(self):
-        """function for amount computation"""
+        """Compute the untaxed, tax, and total amounts for the subscription order."""
         for order in self:
             amount_untaxed = sum(
                 line.subtotal for line in order.subscription_order_line_ids)
@@ -146,14 +150,17 @@ class SubscriptionOrder(models.Model):
             })
 
     def _compute_access_url(self):
-        """Access url computation"""
+        """Compute the portal access URL for the subscription order."""
         super()._compute_access_url()
         for request in self:
             request.access_url = f'/details/{request.id}'
 
     @api.model_create_multi
     def create(self, vals):
-        """Sequence number for subscription order"""
+        """
+        Create new subscription order records.
+        Assigns a unique sequence number if the name is 'New'.
+        """
         for rec in vals:
             if rec.get('name', _('New')) == _('New'):
                 rec['name'] = self.env['ir.sequence'].next_by_code(
@@ -161,15 +168,21 @@ class SubscriptionOrder(models.Model):
         return super().create(vals)
 
     def unlink(self):
-        """If the state of subscription order is in sale or posted state then it cannot be unlinked"""
+        """
+        Delete subscription orders.
+        Raises ValidationError if the order is in 'sale' or 'posted' state.
+        """
         if self.state in ['sale', 'posted']:
             raise ValidationError(
                 _("You cannot delete order in Sale or Posted state"))
         return super().unlink()
 
     def action_post(self):
-        """Create invoice for subscription"""
-        print(self.renewal_request)
+        """
+        Confirm the subscription order and generate the initial invoice.
+        Validates the billing period and checks for existing draft invoices.
+        :return: Action dictionary to view the created invoice.
+        """
         if self.end_date and self.renewal_date and self.end_date < self.renewal_date:
             raise ValidationError(_("The requested billing period exceeds the current subscription duration."))
         if self.env['account.move'].search_count(
@@ -218,7 +231,10 @@ class SubscriptionOrder(models.Model):
         }
 
     def action_show_invoices(self):
-        """Display the invoices created from a particular order"""
+        """
+        Open a view to show all invoices related to this subscription order.
+        :return: Action dictionary for account.move
+        """
         return {
             'type': 'ir.actions.act_window',
             'name': _('Invoices'),
@@ -230,12 +246,15 @@ class SubscriptionOrder(models.Model):
         }
 
     def action_view_report(self):
-        """View reporting"""
+        """Open the subscription analysis report."""
         return self.env["ir.actions.actions"]._for_xml_id(
             "cyllo_subscription.action_view_reporting")
 
     def action_renew_order(self):
-        """Renew the contract"""
+        """
+        Initiate the renewal process for the subscription.
+        Checks for existing active subscriptions before proceeding.
+        """
         if self.state == "posted":
             subscription_ids = self.env['subscription.order'].search(
                 [('parent_id','=',self.id)])
@@ -248,12 +267,16 @@ class SubscriptionOrder(models.Model):
             raise ValidationError("Order must be in 'posted' state to renew.")
 
     def action_upsell(self):
-        """Upsell the contract"""
+        """Initiate the upsell process for the subscription."""
         self.check_upsell_renewal = False
         return self.action_sub_renew_upsell()
 
     def action_sub_renew_upsell(self):
-        """Method is used when creation of upsell or renewal"""
+        """
+        Handle the logic for both Renewal and Upsell actions.
+        Creates a new subscription order based on the current one and posts it if configured.
+        :return: Action dictionary to view the new subscription order.
+        """
         if self.invoice_count <= 0:
             raise ValidationError(
                 _("Upsell or renewal isn’t allowed for subscriptions without an invoice. "
@@ -308,7 +331,7 @@ class SubscriptionOrder(models.Model):
         }
 
     def action_close_subscription(self):
-        """Calling wizard to close the subscription"""
+        """Open the wizard to close the subscription."""
         return {
             'name': 'Close Reason',
             'type': 'ir.actions.act_window',
@@ -319,7 +342,11 @@ class SubscriptionOrder(models.Model):
         }
 
     def consolidated_invoice(self):
-        """Create consolidated invoice from multiple subscription orders"""
+        """
+        Create a consolidated invoice from multiple subscription orders.
+        Groups orders by partner and creates a single invoice for each partner.
+        :return: Action dictionary to view the created invoices.
+        """
         inv_id = []
         records = self.browse(self.env.context.get('active_ids')).filtered(
             lambda o: o.state_subscription != 'churned').ids
@@ -357,19 +384,25 @@ class SubscriptionOrder(models.Model):
         }
 
     def _get_report_base_filename(self):
-        """providing name for report in the portal"""
+        """Return the filename for the report in the portal."""
         self.ensure_one()
         return 'Subscription Report- %s' % self.name
 
     def _creation_message(self):
-        """Creation message"""
+        """
+        Generate the chatter message when a subscription is created.
+        Links to the origin sale order if available.
+        """
         if self.sale_order_id:
             return _("Subscription order is Created from %s",
                      self.sale_order_id._get_html_link())
         return super()._creation_message()
 
     def check_subscription_renewal(self):
-        """Check the orders that going to renew and sent mail to the partner"""
+        """
+        Cron Job: Identify subscriptions due for renewal within 1 day.
+        Updates state to 'renew' and sends a reminder email.
+        """
         records = self.search([('renewal_date', '<=',
                                 fields.Datetime.now() + relativedelta(days=1)),
                                ('state_subscription', '!=', 'churned')])
@@ -381,10 +414,11 @@ class SubscriptionOrder(models.Model):
             body.sudo().send_mail(record.id, force_send=True)
 
     def check_subscription_close(self):
-        """ Cron method to identify and close expired subscriptions.
-        Searches for records where the end date has passed and the state is not
-        already 'churned'. Updates the state, sends a notification email to the
-        customer, and logs a message in the chatter."""
+        """
+        Cron Job: Identify and close expired subscriptions.
+        Searches for records where the end date has passed.
+        Updates state to 'churned' and sends a closure notification email.
+        """
         records = self.search([('end_date', '<',fields.Datetime.now()),('state_subscription', '!=', 'churned')])
         if records:
             records.write({'state_subscription': 'churned'})
