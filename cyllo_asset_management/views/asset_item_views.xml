@@ -28,14 +28,12 @@
                     </div>
                     <group>
                         <group>
-                            <field name="brand"/>
+                            <field name="brand_id"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="date"/>
                         </group>
                         <group>
                             <field name="vendor_id"/>
-                            <field name="purchase_date"/>
-                            <field name="serial_no"/>
                         </group>
                         <group string="DEPRECIATION">
                             <field name="depreciation_method"/>

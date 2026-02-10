@@ -38,8 +38,8 @@ class MaintenanceRequest(models.Model):
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
     is_reimburse = fields.Boolean(default=False, compute="_compute_has_insurance")
     is_scrap = fields.Boolean(default=False)
-    invoiced_amount = fields.Monetary()
-
+    invoiced_amount = fields.Monetary(string="Insurance Amount")
+    transaction_count = fields.Integer(string='Invoice', copy=False, compute='_compute_transaction_count')
 
     @api.model
     def default_get(self, fields_list):
@@ -59,6 +59,11 @@ class MaintenanceRequest(models.Model):
                 and asset.insurance_end_date >= today
             )
         return res
+
+    def _compute_transaction_count(self):
+        """Function for computing the invoice count"""
+        self.transaction_count = self.env['account.move'].search_count(
+            [('repair_id', '=', self.id), ('move_type', 'in', ['in_invoice', 'out_invoice'])])
 
     @api.depends('asset_id')
     def _compute_has_warranty(self):
@@ -83,8 +88,16 @@ class MaintenanceRequest(models.Model):
 
     @api.onchange('stage_id')
     def _onchahange_stage_id(self):
-        """Function for changing asset's state"""
+        """Function for changing maintenance state"""
         if self.asset_id and self.stage_done == True:
+            if self.maintenance_type == 'preventive':
+                self.asset_id.message_post(
+                    body=_(f"Maintenance completed for {self.asset_id.name}.")
+                )
+            if self.maintenance_type == 'corrective':
+                self.asset_id.message_post(
+                    body=_(f"Repair completed for {self.asset_id.name}.")
+                )
             self.asset_id.is_maintenance = False
             self.asset_id.is_repair = False
 
@@ -123,6 +136,9 @@ class MaintenanceRequest(models.Model):
                 'price_subtotal': self.expense
             })]
         })
+        self.asset_id.message_post(
+            body=_(f"Bill created for {self.asset_id.name}. Amount: {self.expense}.")
+        )
         self.has_billed = True
 
     def action_claim_insurance(self):
@@ -150,10 +166,8 @@ class MaintenanceRequest(models.Model):
         })
         self.invoiced_amount += repair_invoice.invoice_line_ids.price_subtotal
 
-    def action_view_invoice(self):
+    def action_view_moves(self):
         """Function for viewing the invoice"""
-        moves = self.env['account.move'].search(
-            [('repair_id', '=', self.id), ('move_type', 'in', ['in_invoice', 'out_invoice'])])
         return {
             'name': _('Invoices / Bills'),
             'type': 'ir.actions.act_window',
@@ -167,26 +181,19 @@ class MaintenanceRequest(models.Model):
         self.asset_id.status = 'disposed'
         self.asset_id.is_repair = False
         self.is_scrap = True
+        action_scrap = self.env['asset.sell.dispose'].sudo().create({
+            'asset_asset_id': self.asset_id.id,
+            'asset_action': 'dispose',
+            'loss_account_id': self.asset_id.asset_loss_account_id.id,
+            'date': fields.Date.today(),
+            'note': "Scrapped after repair",
+            'disposal_type': 'scrap',
+        })
         if self.asset_id.is_entry:
-            action_scrap = self.env['asset.sell.dispose'].sudo().create({
-                'asset_asset_id': self.asset_id.id,
-                'asset_action': 'dispose',
-                'loss_account_id': self.asset_id.asset_loss_account_id.id,
-                'date': fields.Date.today(),
-                'note': "Scrapped after repair",
-                'disposal_type': 'scrap',
-            })
             action_scrap.action_dispose()
-        else:
-            self.env['asset.sell.dispose'].sudo().create({
-                'asset_asset_id': self.asset_id.id,
-                'asset_action': 'dispose',
-                'date': fields.Date.today(),
-                'note': "Scrapped after repair",
-                'disposal_type': 'scrap',
-            })
 
     def action_claim_insurance_wizard(self):
+        balance = self.expense - self.invoiced_amount
         return {
             'name': _('Claim Insurance'),
             'view_mode': 'form',
@@ -197,6 +204,7 @@ class MaintenanceRequest(models.Model):
                 'default_total_amount': self.expense,
                 'default_repair_id': self.id,
                 'default_reimburse_after_invoice': self.is_reimburse,
+                'default_insurance_amount': balance,
                 'default_invoiced_amount': self.invoiced_amount,
                 'default_expense': self.expense,
             },

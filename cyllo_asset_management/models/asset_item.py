@@ -30,11 +30,9 @@ class AssetItem(models.Model):
     _inherit = ['mail.thread']
 
     name = fields.Char(string="Assets", required=True)
-    brand = fields.Char(string="Brand")
+    brand_id = fields.Many2one(string="Brand", comodel_name='asset.brand')
     date = fields.Date(default=fields.Date.context_today, required=True)
     vendor_id = fields.Many2one("res.partner", string="Purchase From", copy=False)
-    serial_no = fields.Char(string="Serial No.")
-    purchase_date = fields.Date(default=fields.Date.context_today, required=True)
     depreciation_method = fields.Selection(
         [('straight_line', 'Straight Line'), ('declining_balance', 'Declining Balance'),
          ('double_declining', 'Double Declining Balance'), ('declining_straight_line', 'Declining and Straight Line')],
@@ -55,7 +53,8 @@ class AssetItem(models.Model):
                                                     domain="[('account_type', 'in', ('asset_current', 'asset_fixed'))]")
     asset_expense_account_id = fields.Many2one('account.account', required=True,
                                                domain="[('account_type', '=', 'expense')]")
-    asset_journal_id = fields.Many2one('account.journal', required=True)
+    asset_journal_id = fields.Many2one('account.journal', required=True,
+                                       domain="[('type', '=', 'general')]")
     currency_id = fields.Many2one('res.currency',
                                   related='company_id.currency_id',
                                   help='Currency of company')
@@ -64,9 +63,19 @@ class AssetItem(models.Model):
         default=lambda self: self.env.company, help='Select the company')
     asset_loss_account_id = fields.Many2one('account.account', required=True)
 
-
     @api.constrains('method_duration')
     def _onchange_method_duration(self):
         """Function for checking method duration"""
         if self.method_duration <= 0:
             raise UserError(_('The Duration period should be greater than 0'))
+
+    @api.onchange('fixed_asset_account_id')
+    def _onchange_fixed_asset_account_id(self):
+        """Function for setting the depreciation account based on fixed asset account"""
+        self.asset_depreciation_account_id=self.fixed_asset_account_id
+
+    @api.onchange('asset_expense_account_id')
+    def _onchange_asset_expense_account_id(self):
+        """Function for setting the loss account based on expense account"""
+        self.asset_loss_account_id=self.asset_expense_account_id
+

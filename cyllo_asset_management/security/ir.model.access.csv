@@ -27,3 +27,8 @@ access_asset_modify_admin,access.asset.modify.admin,model_asset_modify,cyllo_ass
 access_asset_asset_insurance_admin,access.asset.asset.insurance.admin,model_asset_asset_insurance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
 access_asset_insurance_admin,access.asset.insurance.admin,model_asset_insurance,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+
+access_asset_insurance_type_admin,access.asset.insurance.type.admin,model_asset_insurance_type,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+
+access_asset_brand_manager,access.asset.brand.manager,model_asset_brand,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+

@@ -8,7 +8,7 @@
             <tree>
                 <field name="name"/>
                 <field name="asset_item_id"/>
-                <field name="brand"/>
+                <field name="brand_id"/>
                 <field name="status"/>
             </tree>
         </field>
@@ -72,13 +72,12 @@
                                 invisible="entry_count == 0"
                                 type="object">
                             <i class="ri-align-justify"/>
-                            <field name="entry_count" string="Journal Entries" widget="statinfo"/>
+                            Journal Entries (<field name="entry_count"/>)
                         </button>
                         <button class="oe_stat_button" name="action_view_maintenance_repairs"
                                 invisible="maintenance_count == 0"
-                                type="object">
-                            <i class="ri-align-justify"/>
-                            <field name="maintenance_count" string="Maintenance/Repair" widget="statinfo"/>
+                                type="object" icon="fa-wrench">
+                            Maintenance/Repair (<field name="maintenance_count"/>)
                         </button>
                         <button class="oe_stat_button" name="action_view_reservation"
                                 invisible="is_reserve != True"
@@ -120,11 +119,14 @@
                     <group>
                         <group>
                             <field name="asset_item_id" readonly="status == 'running'" options="{'no_create': True}"/>
+                            <field name="brand_id" readonly="status == 'running'"/>
+                            <field name="vendor_id"/>
                         </group>
                         <group>
-                            <field name="brand" readonly="status == 'running'" options="{'no_create': True}"/>
-                            <field name="currency_id" invisible="1"/>
+                            <field name="serial_no" readonly="is_confirm"/>
                             <field name="date" readonly="is_confirm"/>
+                            <field name="buffer_days" readonly="is_confirm"/>
+                            <field name="currency_id" invisible="1"/>
                             <field name="is_confirm" invisible="1"/>
                             <field name="is_modify" invisible="1"/>
                             <field name="is_reserve" invisible="1"/>
@@ -196,7 +198,7 @@
                                 <group string="Insurance">
                                     <field name="under_insurance"/>
                                     <field name="reimburse_after_invoice" invisible="not under_insurance"/>
-                                    <field name="insurance_name" invisible="not under_insurance"
+                                    <field name="insurance_name_id" invisible="not under_insurance"
                                            options="{'no_create': True, 'no_create_edit': True}"
                                            required="under_insurance"/>
                                     <field name="insurance_number" invisible="not under_insurance"

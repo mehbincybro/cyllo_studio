@@ -19,18 +19,16 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import account_account
-from . import account_move
-from . import account_move_reversal
-from . import asset_asset
-from . import asset_assign
-from . import asset_depreciation_line
-from . import asset_item
-from . import asset_lease
-from . import asset_rental
-from . import asset_reservation
-from . import asset_sell_dispose
-from . import asset_asset_insurance
-from . import maintenance_request
-from . import asset_brand
-from . import asset_insurance_type
+from odoo import fields, models
+
+
+class AssetBrand(models.Model):
+    """Model for the asset brands"""
+    _name = 'asset.brand'
+    _description = 'Account Asset Brands'
+    _rec_name = 'name'
+
+    name = fields.Char(string="Brand", required=True, copy=False)
+    company_id = fields.Many2one(
+        'res.company', required=True,
+        default=lambda self: self.env.company, help='Select the company')

@@ -33,7 +33,7 @@ class AssetInsurance(models.TransientModel):
     currency_id = fields.Many2one('res.currency', string='Currency', readonly=True,
                                   default=lambda self: self.env.company.currency_id)
     total_amount = fields.Monetary(string="Total Repair Cost", readonly=True)
-    insurance_amount = fields.Monetary(string="Claiming amount", default=100)
+    insurance_amount = fields.Monetary(string="Claiming amount")
     reimburse_after_invoice = fields.Boolean(default=False)
     invoiced_amount = fields.Monetary()
     expense = fields.Monetary()
@@ -50,6 +50,9 @@ class AssetInsurance(models.TransientModel):
 
     def action_claim(self):
         """Function for calling insurance claim"""
+        self.asset_id.message_post(
+        body = _(f"Insurance claimed for {self.asset_id.name}. Amount: {self.insurance_amount}.")
+        )
         return self.repair_id.with_context(
             insurance_amount=self.insurance_amount,
             is_reimbursed=self.reimburse_after_invoice,
