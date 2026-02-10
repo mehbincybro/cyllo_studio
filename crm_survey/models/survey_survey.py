@@ -26,10 +26,10 @@ class SurveyTemplate(models.Model):
     _inherit = 'survey.survey'
 
     lead_id = fields.Many2one('crm.lead', 'Lead')
+    create_lead = fields.Boolean('Create Lead', help="If checked, a CRM Lead will be created upon survey submission.")
 
     def action_send_survey(self):
         rec = super().action_send_survey()
-        print(rec)
         context = dict(rec.get('context', {}))
 
         lead_id = self.env.context.get('default_lead_id')

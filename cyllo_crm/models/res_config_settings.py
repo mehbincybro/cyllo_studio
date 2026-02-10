@@ -49,24 +49,56 @@ class ResConfigSettings(models.TransientModel):
     module_cyllo_crm_advance_lead = fields.Boolean(string="Advance Lead")
 
     module_cyllo_crm_project = fields.Boolean(string="Cyllo CRM Project", help="Allows creating a project from a won CRM lead.", config_parameter='Cyllo_Crm.module_cyllo_crm_project')
-
+    module_cyllo_visiting_card_digitization = fields.Boolean(
+        string="Cyllo Visiting Card Digitization",
+        help="Enable digitization of visiting cards to automatically extract contact details and create CRM leads.",
+        config_parameter="cyllo_crm.module_cyllo_visiting_card_digitization"
+    )
+    module_crm_survey = fields.Boolean(
+        string="CRM Survey",
+        help="Enable CRM Survey to create, manage, and analyze customer surveys directly within the CRM.",
+        config_parameter="cyllo_crm.module_crm_survey"
+    )
     @api.onchange('module_cyllo_crm_advance_lead')
     def _onchange_module_cyllo_crm_advance_lead(self):
         if self.module_cyllo_crm_advance_lead:
             self.group_use_lead = True
 
     def set_values(self):
-        """Override set_values to handle module uninstallation properly"""
+        """Override set_values to handle module installation properly"""
         super().set_values()
-        # Install Project module if option enabled
+
+        Module = self.env['ir.module.module'].sudo()
+
+        # Install Cyllo CRM Project module
         if self.module_cyllo_crm_project:
-            module_cyllo_crm_project = self.env['ir.module.module'].sudo().search(
-                [('name', '=', 'cyllo_crm_project'), ('state', '!=', 'installed')],
+            crm_project_module = Module.search(
+                [('name', '=', 'cyllo_crm_project'),
+                 ('state', '!=', 'installed')],
                 limit=1
             )
-            if module_cyllo_crm_project:
-                module_cyllo_crm_project.button_immediate_install()
+            if crm_project_module:
+                crm_project_module.button_immediate_install()
 
+        # Install Cyllo Visiting Card Digitization module
+        if self.module_cyllo_visiting_card_digitization:
+            visiting_card_module = Module.search(
+                [('name', '=', 'cyllo_visiting_card_digitization'),
+                 ('state', '!=', 'installed')],
+                limit=1
+            )
+            if visiting_card_module:
+                visiting_card_module.button_immediate_install()
+
+        # Install CRM Survey module
+        if self.module_crm_survey:
+            crm_survey_module = Module.search(
+                        [('name', '=', 'crm_survey'),
+                         ('state', '!=', 'installed')],
+                        limit=1
+                    )
+            if crm_survey_module:
+                crm_survey_module.button_immediate_install()
 
     def action_configure_exit_criteria(self):
         """trigger a popup in crm settings and load previously created exit criterias"""

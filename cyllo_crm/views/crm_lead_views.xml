@@ -5,24 +5,29 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//button[@name='action_set_won_rainbowman']"
-                   position="after">
-                <button string="Automation" name="action_create_automation" type="object" invisible="not is_installed" class="btn btn-secondary"
-                        title="Create new Automation"
-                />
-
-            </xpath>
             <xpath expr="//button[@name='action_schedule_meeting']"
                    position="after">
                 <button name="action_get_automation" type="object"
-                        class="oe_stat_button" invisible="not is_installed or count == 0" icon="fa-cogs"
+                        class="oe_stat_button"
+                        invisible="not is_installed or count == 0"
+                        icon="fa-cogs"
                         string="Automation">
-                        <field name="count" string="Automation" widget="statinfo"/>
+                    <field name="count" string="Automation" widget="statinfo"/>
                 </button>
                 <button name="action_open_activity_graph" type="object"
                         class="oe_stat_button" icon="fa-tasks"
-                        string="Activities"  invisible="not has_activities"/>
+                        string="Activities" invisible="not has_activities"/>
 
+            </xpath>
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <div style="
+                    display:inline-flex;
+                    align-items:baseline;
+                    gap:6px;
+                    white-space:nowrap;
+                    vertical-align:baseline;
+                ">
+                </div>
             </xpath>
             <xpath expr="//field[@name='name']" position="after">
                 <div style="
@@ -36,25 +41,6 @@
                     <field name="is_pinned" invisible="1"/>
                     <field name="is_installed" invisible="1"/>
                     <field name="has_activities" invisible="1"/>
-                    <button
-                            type="object"
-                            name="action_get_customer_local_time"
-                            string="Current Work Status"
-                            icon="fa-clock-o"
-                            invisible="not partner_id or is_pinned"
-                            class="btn btn-secondary btn-sm"
-                            title="Get Customer Status"
-                            style="
-                                padding:0;
-                                width:26px;
-                                height:26px;
-                                border-radius:50%;
-                                display:inline-flex;
-                                align-items:center;
-                                justify-content:center;
-                                transform: translateY(3px);
-                            "
-                    />
                 </div>
             </xpath>
             <xpath expr="//header/field[@name='stage_id']" position="replace">
@@ -80,7 +66,8 @@
                         <i class="fa fa-exclamation-triangle"/>
                         Stage requires completion of activity:
                     </span>
-                    <field name="exit_criteria_activity_name" readonly="1" class="text-warning"/>
+                    <field name="exit_criteria_activity_name" readonly="1"
+                           class="text-warning"/>
                 </div>
             </xpath>
         </field>

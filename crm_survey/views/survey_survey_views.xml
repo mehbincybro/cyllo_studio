@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="survey_survey_view_form_inherit_crm_survey" model="ir.ui.view">
+        <field name="name">survey.survey.view.form.inherit.crm.survey</field>
+        <field name="model">survey.survey</field>
+        <field name="inherit_id" ref="survey.survey_survey_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add the field inside the main form sheet -->
+            <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="create_lead"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

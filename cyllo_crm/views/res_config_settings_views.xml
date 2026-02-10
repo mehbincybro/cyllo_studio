@@ -40,16 +40,46 @@
                         </div>
                     </setting>
                     <setting id="module_cyllo_crm_project_setting"
-                         help="Enable creating a project from a won CRM lead.">
-                    <field name="module_cyllo_crm_project"/>
-                    <div class="content-group"
-                         invisible="not module_cyllo_crm_project">
-                        <span>
-                            When enabled, users can create a project directly
-                            from a won CRM lead.
-                        </span>
-                    </div>
-                </setting>
+                             help="Enable creating a project from a won CRM lead.">
+                        <field name="module_cyllo_crm_project"/>
+                        <div class="content-group"
+                             invisible="not module_cyllo_crm_project">
+                            <span>
+                                When enabled, users can create a project
+                                directly
+                                from a won CRM lead.
+                            </span>
+                        </div>
+                    </setting>
+                    <setting
+                            id="module_cyllo_visiting_card_digitization_setting"
+                            help="Enable digitization of visiting cards to automatically extract contact details and create CRM leads.">
+                        <field name="module_cyllo_visiting_card_digitization"/>
+                        <div class="content-group"
+                             invisible="not module_cyllo_visiting_card_digitization">
+                            <span>
+                                When enabled, users can upload visiting cards
+                                directly from the Kanban view
+                                and automatically create a CRM lead.
+                            </span>
+                        </div>
+                    </setting>
+                    <setting
+                            id="module_crm_survey_setting"
+                            help="Enable CRM Survey to create, manage, and analyze customer surveys directly within the CRM.">
+                        <field name="module_crm_survey"/>
+                        <div class="content-group"
+                             invisible="not module_crm_survey">
+                            <span>
+                                When enabled, users can create and manage
+                                customer surveys,
+                                link survey responses to CRM leads and
+                                opportunities,
+                                and gain insights to improve customer
+                                engagement.
+                            </span>
+                        </div>
+                    </setting>
                 </block>
 
             </xpath>
