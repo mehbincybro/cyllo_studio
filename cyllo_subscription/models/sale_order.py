@@ -40,7 +40,6 @@ class SaleOrder(models.Model):
     subscription_orders = fields.Integer(string='Subscriptions',
                                          help='Subscription orders',
                                          compute='_compute_subscription_orders')
-
     @api.depends('order_line')
     def _compute_is_subscription(self):
         """Check if subscription product is added or not"""
@@ -95,7 +94,7 @@ class SaleOrder(models.Model):
                 'sale_order_template_id': self.sale_order_template_id.id,
                 'time_based_price_id': line.time_based_price_id.id,
                 'end_date': line.end_date,
-                'renewal_date': line.trial_end if line.product_template_id.trial_period >= 1 else fields.Datetime.now(),
+                'renewal_date': line.trial_end if line.trial_end > fields.Datetime.now() else fields.Datetime.now(),
                 'trial_end': line.trial_end,
                 'state': 'posted' if self.sale_order_template_id.invoice_creation else 'sale',
                 'subscription_order_line_ids': [
@@ -121,6 +120,13 @@ class SaleOrder(models.Model):
 
             if self.sale_order_template_id.invoice_creation in ['draft', 'confirmed', 'sent']:
                 sub_order.action_post()
+
+            if line.trial_end > fields.Datetime.now():
+                self.env['subscription.trial.history'].create({
+                    'partner_id': self.partner_id.id,
+                    'product_id': line.product_id.id,
+                    'subscription_order_id': sub_order.id,
+                })
 
         return super(SaleOrder, self).action_confirm()
 

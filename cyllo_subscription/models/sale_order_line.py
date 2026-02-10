@@ -92,12 +92,22 @@ class SaleOrderLine(models.Model):
 
     def check_trial_period(self):
         """Check if any trial-period is added in product template"""
-        if self.product_template_id.unit == 'days':
-            self.trial_end = fields.Datetime.now() + relativedelta(days=self.product_template_id.trial_period)
-        elif self.product_template_id.unit == 'weeks':
-            self.trial_end = fields.Datetime.now() + relativedelta(weeks=self.product_template_id.trial_period)
-        elif self.product_template_id.unit == 'months':
-            self.trial_end = fields.Datetime.now() + relativedelta(months=self.product_template_id.trial_period)
+        if self.product_template_id.trial_period > 0:
+            history_exists = self.env['subscription.trial.history'].search([
+                ('partner_id', '=', self.order_id.partner_id.id),
+                ('product_id', '=', self.product_id.id)
+            ], limit=1)
+            if history_exists:
+                self.trial_end = fields.Datetime.now()
+            else:
+                if self.product_template_id.unit == 'days':
+                    self.trial_end = fields.Datetime.now() + relativedelta(days=self.product_template_id.trial_period)
+                elif self.product_template_id.unit == 'weeks':
+                    self.trial_end = fields.Datetime.now() + relativedelta(weeks=self.product_template_id.trial_period)
+                elif self.product_template_id.unit == 'months':
+                    self.trial_end = fields.Datetime.now() + relativedelta(months=self.product_template_id.trial_period)
+                else:
+                    self.trial_end = fields.Datetime.now()
         else:
             self.trial_end = fields.Datetime.now()
 

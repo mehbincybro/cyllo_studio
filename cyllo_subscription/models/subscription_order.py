@@ -89,6 +89,11 @@ class SubscriptionOrder(models.Model):
     parent_id = fields.Many2one(string='Parent Subscription Order',
                                 comodel_name='subscription.order')
     end_date = fields.Datetime(string='End Date')
+    renewal_request = fields.Boolean(string='Customer Can Renew',
+                                     compute='_compute_renewal_request',
+                                     store=True,
+                                     help='If need to make customer to give request to renew the subscription enable '
+                                          'this field')
 
     def _compute_invoice_count(self):
         """Compute invoice count"""
@@ -111,6 +116,18 @@ class SubscriptionOrder(models.Model):
             street = rec.partner_id.street if rec.partner_id.street else ''
             street2 = rec.partner_id.street2 if rec.partner_id.street2 else ''
             rec.partner_street = f'{street} {street2}'
+
+    @api.depends('sale_order_template_id')
+    def _compute_renewal_request(self):
+
+        global_setting = self.env['ir.config_parameter'].sudo().get_param('cyllo_subscription.renewal_request')
+
+        for record in self:
+            # Hierarchy: 1. Template (if set) -> 2. Global Setting
+            if record.sale_order_template_id:
+                record.renewal_request = record.sale_order_template_id.renewal_request
+            else:
+                record.renewal_request = global_setting
 
     @api.depends('subscription_order_line_ids.subtotal',
                  'subscription_order_line_ids.total_price')
@@ -152,6 +169,7 @@ class SubscriptionOrder(models.Model):
 
     def action_post(self):
         """Create invoice for subscription"""
+        print(self.renewal_request)
         if self.end_date and self.renewal_date and self.end_date < self.renewal_date:
             raise ValidationError(_("The requested billing period exceeds the current subscription duration."))
         if self.env['account.move'].search_count(
@@ -174,7 +192,10 @@ class SubscriptionOrder(models.Model):
                             f'{self.subscription_order_line_ids.product_id.unit}',
             'invoice_line_ids': [fields.Command.create({
                 'product_id': self.subscription_order_line_ids.product_id.id,
-                'price_unit': self.subscription_order_line_ids.subtotal
+                'price_unit': self.subscription_order_line_ids.subtotal,
+                'sale_line_ids': [fields.Command.link(line.id) for line in self.sale_order_id.order_line.filtered(
+                              lambda l: l.product_id == self.subscription_order_line_ids.product_id and
+                              l.time_based_price_id ==self.time_based_price_id)],
             })],
         })
         self.state = 'posted'

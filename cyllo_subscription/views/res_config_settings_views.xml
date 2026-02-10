@@ -13,6 +13,10 @@
                              help="Install the Cyllo website Subscription module to sell products with time based  payment plans.">
                         <field name="module_cyllo_website_subscription"/>
                     </setting>
+                    <setting id="subscription_renewal_setting"
+                             help="If enabled, the customer can request a renewal from the portal.">
+                        <field name="renewal_request"/>
+                    </setting>
                 </block>
             </xpath>
         </field>
