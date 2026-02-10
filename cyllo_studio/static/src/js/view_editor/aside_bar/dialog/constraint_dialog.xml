@@ -1,8 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates>
     <t t-name="cyllo_studio.ConstraintDialog">
-        <Dialog title="'Add SQL Constraint'" size="'lg'">
+        <Dialog title="'Add Constraints'" size="'lg'">
+                  <div class="modal-header" style="border-bottom: 1px solid #e9ecef; padding: 1rem;">
+                <div class="btn-group w-100" role="group" aria-label="View toggle">
+                    <button type="button"
+                            class="btn btn-outline-primary flex-grow-1"
+                            t-att-class="state.activeTab === 'sql_constraints' ? 'btn-primary' : 'btn-outline-primary'"
+                            style="font-weight: 500; border-radius: 4px 4px 4px 4px; transition: all 0.3s ease;"
+                            t-on-click="()=>this.switchTab('sql_constraints')">
+                        <i class="fa fa-lock me-2"></i>
+                        SQL Constraints
+                    </button>
+                    <button type="button"
+                            class="btn btn-outline-primary flex-grow-1"
+                            t-att-class="state.activeTab === 'python_constraints' ? 'btn-primary' : 'btn-outline-primary'"
+                            style="font-weight: 500; border-radius: 4px 4px 4px 4px; border-left: none; transition: all 0.3s ease;"
+                            t-on-click="()=>this.switchTab('python_constraints')">
+                        <i class="fa fa-cog me-2"></i>
+                        Python Constraints
+                    </button>
+                </div>
+            </div>
             <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div t-if="state.activeTab === 'sql_constraints'">
                 <div class="mb-3">
                     <label class="form-label">Field Name</label>
                     <input type="text"
@@ -126,19 +147,102 @@
                         )
                     </code>
                 </div>
+                </div>
+                <div t-if="state.activeTab === 'python_constraints'">
+                <div class="mb-3">
+                    <label class="form-label">Field Name</label>
+                    <input type="text"
+                           class="form-control"
+                           t-model="state.fieldLabel"
+                           readonly="1"
+                           style="background-color:#f5f5f5;"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Technical Name</label>
+                    <input type="text"
+                           class="form-control"
+                           t-model="state.fieldName"
+                           readonly="1"
+                           style="background-color:#f5f5f5;"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Constraint Fields</label>
+                <input class="cy-input w-100"
+                       t-model="state.deps"
+                       placeholder=""
+                       t-on-click="openConstraintsPopover"/>
+                </div>
+                    <label class="cy-navbar_label text-dark">Constraint Code</label>
+            <div class="cy-compute-editor" >
+    <CodeEditor
+            value="state.code"
+            theme="'monokai'"
+            lang="'python'"
+            height="220"
+            onChange="(val) => this.onConstraintCodeChange(val)"/>
+            </div>
+
+            <div class="cy-compute-help mt-3">
+                <h3 class="cy-help-title">How to Define a Python Constraint</h3>
+
+<p>
+    Python constraints are used to validate records and prevent invalid data
+    from being saved in the database.
+    They are defined using <strong>@api.constrains</strong>.
+</p>
+
+<p>
+    The <strong>Fields</strong> section specifies the simple fields from the model itself that will trigger
+    the constraint when their values change (comma-separated).
+    Example: <code>name, amount_total</code>
+</p>
+
+<p>
+    The <strong>Python Code</strong> field contains validation logic that is
+    executed for each record:
+</p>
+
+<pre class="cy-code-example">
+    for record in self:
+        if record.amount_total == 0:
+            raise ValidationError("Amount must be greater than zero.")
+</pre>
+
+<p>Available predefined variables:</p>
+<ul>
+    <li><code>self</code> (the current recordset)</li>
+    <li><code>ValidationError</code> (for raising validation messages)</li>
+    <li><code>UserError</code> (for raising User Error messages)</li>
+    <li><code>datetime</code> (Python module)</li>
+    <li><code>date</code> (Python module)</li>
+    <li><code>time</code> (Python module)</li>
+</ul>
+
+<p>
+    You can access environment features using
+    <code>self.env</code> to query other models and records.
+</p>
+
+<p class="text-warning mt-2">
+    <strong>Note:</strong> If a constraint raises a <code>ValidationError</code>,
+    the record will not be saved.
+</p>
+</div>
+
+            </div>
             </div>
 
             <t t-set-slot="footer">
                 <button type="button"
-                        class="btn btn-secondary"
-                        t-on-click="cancel">Cancel
-                </button>
-                <button type="button"
                         class="btn btn-primary"
                         t-on-click="confirm">Save
                 </button>
-            </t>
+                <button type="button"
+                        class="btn btn-secondary"
+                        t-on-click="cancel">Cancel
+                </button>
 
+            </t>
         </Dialog>
 
     </t>

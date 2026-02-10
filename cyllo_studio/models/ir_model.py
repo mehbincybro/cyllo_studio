@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, Command, models
+from odoo import api, Command, models, fields
 
 
 class IrModel(models.Model):

@@ -23,6 +23,8 @@ import inspect
 import uuid
 from html import unescape, escape
 import xml.etree.ElementTree as ET
+from xxlimited_35 import Null
+
 from odoo import http, api, _, tools
 import json
 import ast
@@ -1624,6 +1626,53 @@ class StudioMode(Controller):
                     if field_name:
                         self._remove_sql_constraints(model_rec, field_name)
                     attributes += '<attribute name="constrains">false</attribute>'
+
+            if args[0].get("value", {}).get("python_constraint") is not None:
+                python_constraint = args[0]["value"]["python_constraint"]
+                print("heelooaa")
+                field_name = args[0].get("field_name")
+
+                if python_constraint:  # Not empty
+                    deps = python_constraint.get("deps", "").strip()
+                    code = python_constraint.get("code", "").strip()
+
+                    if deps and code:
+                        # Save to ir.model.fields
+                        model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+                        if model_rec:
+                            field_rec = request.env['ir.model.fields'].search([
+                                ('model_id', '=', model_rec.id),
+                                ('name', '=', field_name),
+                            ], limit=1)
+
+                            if field_rec:
+                                # ✅ SAVE PYTHON CONSTRAINT TO DATABASE
+                                field_rec.write({
+                                    'constraint_code': code,
+                                    'constraint_fields': deps,
+                                })
+
+                                _logger.info(
+                                    f"✓ Saved Python constraint for field {field_name}: "
+                                    f"deps={deps}, code_length={len(code)}"
+                                )
+            if args[0].get("value", {}).get("python_constraint") is None:
+                    print("get inside")
+                    # Empty constraint - remove it
+                    model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+                    if model_rec and field_name:
+                        field_rec = request.env['ir.model.fields'].search([
+                            ('model_id', '=', model_rec.id),
+                            ('name', '=', field_name),
+                        ], limit=1)
+                        print("tt22")
+                        if field_rec:
+                            field_rec.write({
+                                'constraint_code': False,
+                                'constraint_fields': False,
+                            })
+                            print("field_rec",field_rec)
+                            _logger.info(f"✓ Removed Python constraint from field {field_name}")
 
             # if args[0].get("value", {}).get("dynamic_placeholder"):
             #     dynamic_placeholder_field = args[0]["value"]["dynamic_placeholder"]
@@ -5399,10 +5448,12 @@ class StudioMode(Controller):
                     if constraint_name in request.env.registry._sql_constraints:
                         request.env.registry._sql_constraints.discard(constraint_name)
                     removed_count += 1
+                    _logger.warning("sucesssssssss")
             cr.commit()
         except Exception as e:
             request.env.cr.rollback()
             raise UserError(f"Failed to remove constraints: {str(e)}")
+
 
     @route('/cyllo_studio/get_sql_constraints', type="json", auth="user", csrf=False)
     def get_sql_constraints(self, model, field_name):
@@ -5434,6 +5485,31 @@ class StudioMode(Controller):
         except Exception as e:
             _logger.error(f"Error fetching constraints: {e}", exc_info=True)
             return []
+
+    @route('/cyllo_studio/get_python_constraint', type="json", auth="user", csrf=False)
+    def get_python_constraint(self, model, field_name):
+        """
+        Get Python constraint for a specific field
+        """
+        try:
+            model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+            if not model_rec:
+                return None
+            field_rec = request.env['ir.model.fields'].search([
+                ('model_id', '=', model_rec.id),
+                ('name', '=', field_name),
+            ], limit=1)
+            
+            if not field_rec:
+                return None
+            if field_rec.constraint_code and field_rec.constraint_fields:
+                return {
+                    'deps': field_rec.constraint_fields,
+                    'code': field_rec.constraint_code,
+                }
+            return None
+        except Exception as e:
+            return None
 
     @route('/cyllo_studio/check_field_data', type="json", auth="user", csrf=False)
     def check_field_data(self, model, field_name):

@@ -352,6 +352,7 @@
                     compute_code: "",
                     default_value: "",
                     constraintEnabled:false,
+                    pythonConstraint: null,
                 });
                 if (!this.props.edit) {
                 this.state.field = "new";
@@ -475,6 +476,7 @@
         const loadConstraintsForField = async () => {
             if (this.props.edit && this.props.name && this.props.model) {
                 try {
+                    // Load SQL constraints
                     const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
                         model: this.props.model,
                         field_name: this.props.name,
@@ -483,23 +485,59 @@
                     // Clear existing constraints
                     this.sqlConstraints.splice(0, this.sqlConstraints.length);
 
-                    // Load new constraints
+                    // Load new SQL constraints
+                    let hasSqlConstraints = false;
                     if (constraints && constraints.length > 0) {
                         this.sqlConstraints.push(...constraints);
-                        this.state.constraintEnabled = true;
-                        console.log(`✓ Loaded ${constraints.length} constraints for ${this.props.name}`);
+                        hasSqlConstraints = true;
+                        console.log(`✓ Loaded ${constraints.length} SQL constraints for ${this.props.name}`);
+                    }
+
+                    // Load Python constraints
+                    let hasPythonConstraint = false;
+                    try {
+                        const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                            model: this.props.model,
+                            field_name: this.props.name,
+                        });
+                        
+                        if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
+                            this.state.pythonConstraint = {
+                                deps: pythonConstraintInfo.deps,
+                                code: pythonConstraintInfo.code
+                            };
+                            hasPythonConstraint = true;
+                            console.log(`✓ Loaded Python constraint for ${this.props.name}`);
+                        } else {
+                            this.state.pythonConstraint = null;
+                        }
+                    } catch (error) {
+                        console.log("No Python constraint found or error loading:", error);
+                        this.state.pythonConstraint = null;
+                    }
+
+                    // Enable checkbox if either SQL or Python constraints exist
+                    this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
+                    
+                    const constraintTypes = [];
+                    if (hasSqlConstraints) constraintTypes.push("SQL");
+                    if (hasPythonConstraint) constraintTypes.push("Python");
+                    
+                    if (constraintTypes.length > 0) {
+                        console.log(`✓ Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
                     } else {
-                        this.state.constraintEnabled = false;
                         console.log(`No constraints found for ${this.props.name}`);
                     }
                 } catch (error) {
                     console.error('Error loading constraints:', error);
                     this.sqlConstraints.splice(0, this.sqlConstraints.length);
+                    this.state.pythonConstraint = null;
                     this.state.constraintEnabled = false;
                 }
             } else {
                 // Not in edit mode - clear constraints
                 this.sqlConstraints.splice(0, this.sqlConstraints.length);
+                this.state.pythonConstraint = null;
                 this.state.constraintEnabled = false;
             }
         };
@@ -517,6 +555,7 @@
                         });
                         this.state.default_value = result || "";
 
+               // Load SQL constraints
                const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
                 model: this.props.model,
                 field_name: this.props.name,
@@ -525,12 +564,44 @@
             // Clear existing constraints
             this.sqlConstraints.splice(0, this.sqlConstraints.length);
 
-    //         Set constraint state based on loaded data
+            // Load SQL constraints and check for Python constraints
+            let hasSqlConstraints = false;
             if (constraints && constraints.length > 0) {
                 this.sqlConstraints.push(...constraints);
-                this.state.constraintEnabled = true; // Enable if constraints exist
-            } else {
-                this.state.constraintEnabled = false; // Disable if no constraints
+                hasSqlConstraints = true;
+            }
+
+            // Load Python constraints
+            let hasPythonConstraint = false;
+            try {
+                const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                    model: this.props.model,
+                    field_name: this.props.name,
+                });
+                
+                if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
+                    this.state.pythonConstraint = {
+                        deps: pythonConstraintInfo.deps,
+                        code: pythonConstraintInfo.code
+                    };
+                    hasPythonConstraint = true;
+                } else {
+                    this.state.pythonConstraint = null;
+                }
+            } catch (error) {
+                console.log("No Python constraint found or error loading:", error);
+                this.state.pythonConstraint = null;
+            }
+
+            // Set constraint state based on loaded data
+            this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
+            
+            const constraintTypes = [];
+            if (hasSqlConstraints) constraintTypes.push(`${constraints.length} SQL`);
+            if (hasPythonConstraint) constraintTypes.push("Python");
+            
+            if (constraintTypes.length > 0) {
+                console.log(`✓ Initial load: Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
             }
                     }
                 });
@@ -883,6 +954,21 @@
                 if (this.state.default_value && !this.validateDefaultValueForType()) {
                 return;
             }
+              if (this.props.edit && !this.state.constraintEnabled) {
+        try {
+            // Remove Python constraint if it exists
+            if (this.state.pythonConstraint) {
+                await this.rpc("/cyllo_studio/get_python_constraint", {
+                    model: this.props.model,
+                    field_name: this.props.name,
+                });
+                // Mark for removal by setting to null
+                this.state.pythonConstraint = null;
+            }
+        } catch (error) {
+            console.error('Error preparing constraint removal:', error);
+        }
+    }
             if (this.props.edit) {
                 const defaultResult = await this.rpc("/cyllo_studio/set_default", {
                     model: this.props.model,
@@ -986,17 +1072,32 @@
                 changedValues.depends = "";
                 }
 
-         if (this.state.constraintEnabled && this.sqlConstraints && this.sqlConstraints.length > 0) {
+         if (this.state.constraintEnabled) {
                 console.log("=== EDIT MODE: Adding constraints to changedValues ===");
-                changedValues.sql_constraints = this.sqlConstraints.map(c => [
-                    c.key,
-                    c.definition,
-                    c.message
-                ]);
-                console.log("changedValues.sql_constraints:", changedValues.sql_constraints);
-            } else if (!this.state.constraintEnabled) {
-                console.log("=== EDIT MODE: Constraints disabled, sending empty array ===");
+                
+                // Add SQL constraints if any exist
+                if (this.sqlConstraints && this.sqlConstraints.length > 0) {
+                    changedValues.sql_constraints = this.sqlConstraints.map(c => [
+                        c.key,
+                        c.definition,
+                        c.message
+                    ]);
+                    console.log("changedValues.sql_constraints:", changedValues.sql_constraints);
+                } else {
+                    changedValues.sql_constraints = [];
+                }
+
+                // Add Python constraint if it exists
+                if (this.state.pythonConstraint) {
+                    changedValues.python_constraint = this.state.pythonConstraint;
+                    console.log("changedValues.python_constraint:", changedValues.python_constraint);
+                } else {
+                    changedValues.python_constraint = null;
+                }
+            } else {
+                console.log("=== EDIT MODE: Constraints disabled, sending empty values ===");
                 changedValues.sql_constraints = [];
+                changedValues.python_constraint = null;
             }
 
                 args = {
@@ -1179,7 +1280,7 @@
             const changed = {};
             const excludedKeys = ['fieldType', 'widget_types'];
             const forceKeys = ["is_computed", "compute_code", "compute_dependencies","compute", "depends","default_value","min_precision",
-            "max_precision","sql_constraints","dynamic_placeholder"];
+            "max_precision","sql_constraints","python_constraint","dynamic_placeholder"];
 
             for (const key in current) {
                 if (forceKeys.includes(key)) {
@@ -1783,74 +1884,176 @@
         }
     }
 
+//    handleConstrainsChange(event) {
+//        const isChecked = event.target.checked;
+//
+//        if (!isChecked) {
+//            // If unchecking and constraints exist, warn user
+//            const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
+//            const hasPythonConstraint = !!this.state.pythonConstraint;
+//            const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
+//
+//            if (hasAnyConstraints) {
+//                const constraintTypes = [];
+//                if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
+//                if (hasPythonConstraint) constraintTypes.push("Python");
+//
+//                // Show confirmation dialog
+//                if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
+//                    // User cancelled, re-check the box
+//                    event.target.checked = true;
+//                    this.state.constraintEnabled = true;
+//                    return;
+//                }
+//
+//                // Clear all constraints using the new method
+//                this.clearAllConstraints();
+//
+//                this.notification.add({
+//                    title: _t("Constraints Cleared"),
+//                    message: "All constraints have been removed from this field.",
+//                    type: "notification_panel",
+//                    notificationType: "success",
+//                });
+//            } else {
+//                this.state.constraintEnabled = false;
+//            }
+//        } else {
+//            this.state.constraintEnabled = true;
+//        }
+//
+//        this.state.edited = true;
+//    }
+
     handleConstrainsChange(event) {
-        const isChecked = event.target.checked;
+    const isChecked = event.target.checked;
 
-        if (!isChecked) {
-            // If unchecking and constraints exist, warn user
-            if (this.sqlConstraints && this.sqlConstraints.length > 0) {
-                // Show confirmation dialog
-                if (!confirm("This will remove all constraints from this field. Continue?")) {
-                    // User cancelled, re-check the box
-                    event.target.checked = true;
-                    this.state.constraintEnabled = true;
-                    return;
-                }
+    if (!isChecked) {
+        // If unchecking and constraints exist, warn user
+        const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
+        const hasPythonConstraint = !!this.state.pythonConstraint;
+        const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
 
-                // Clear all constraints
-                this.sqlConstraints.splice(0, this.sqlConstraints.length);
-                this.notification.add({
-                    title: _t("Constraints Cleared"),
-                    message: "All constraints have been removed from this field.",
-                    type: "notification_panel",
-                    notificationType: "success",
-                });
+        if (hasAnyConstraints) {
+            const constraintTypes = [];
+            if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
+            if (hasPythonConstraint) constraintTypes.push("Python");
+
+            // Show confirmation dialog
+            if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
+                // User cancelled, re-check the box
+                event.target.checked = true;
+                this.state.constraintEnabled = true;
+                return;
             }
-            this.state.constraintEnabled = false;
-        } else {
-            this.state.constraintEnabled = true;
-        }
 
-        this.state.edited = true;
+            // ⭐ Clear all constraints in frontend state
+            this.clearAllConstraints();
+
+            // ⭐ IMPORTANT: Mark as edited so backend saves the cleared state
+            this.state.edited = true;
+
+            this.notification.add({
+                title: _t("Constraints Cleared"),
+                message: "All constraints will be removed when you save the field.",
+                type: "notification_panel",
+                notificationType: "success",
+            });
+        } else {
+            this.state.constraintEnabled = false;
+        }
+    } else {
+        this.state.constraintEnabled = true;
     }
 
-    addConstraint(constraint) {
-        if (!this.sqlConstraints) {
-            this.sqlConstraints = [];
-        }
+    this.state.edited = true;
+}
 
-        // Validate constraint data
-        if (!constraint.key || !constraint.definition || !constraint.message) {
+    addConstraint(constraint) {
+        console.log("=== ADD CONSTRAINT CALLED ===");
+        console.log("Constraint received:", constraint);
+        
+        // Handle both SQL and Python constraints
+        const hasSqlConstraint = constraint.sql_constraint;
+        const hasPythonConstraint = constraint.python_constraint;
+        
+        if (!hasSqlConstraint && !hasPythonConstraint) {
             this.notification.add({
                 title: _t("Invalid Constraint"),
-                message: "Constraint data is incomplete.",
+                message: "No valid constraint data provided.",
                 type: "notification_panel",
                 notificationType: "warning",
             });
-            // Disable checkbox if constraint is invalid
             this.state.constraintEnabled = false;
             return;
         }
 
-        const exists = this.sqlConstraints.some(c => c.key === constraint.key);
-        if (exists) {
-            this.notification.add({
-                title: _t("Duplicate Constraint"),
-                message: `Constraint '${constraint.key}' already exists`,
-                type: "notification_panel",
-                notificationType: "warning",
-            });
-            return;
+        // Handle SQL constraint
+        if (hasSqlConstraint) {
+            const sqlConstraint = constraint.sql_constraint;
+            
+            // Validate SQL constraint data
+            if (!sqlConstraint.key || !sqlConstraint.definition || !sqlConstraint.message) {
+                this.notification.add({
+                    title: _t("Invalid SQL Constraint"),
+                    message: "SQL constraint data is incomplete.",
+                    type: "notification_panel",
+                    notificationType: "warning",
+                });
+                return;
+            }
+
+            if (!this.sqlConstraints) {
+                this.sqlConstraints = [];
+            }
+
+            const exists = this.sqlConstraints.some(c => c.key === sqlConstraint.key);
+            if (exists) {
+                this.notification.add({
+                    title: _t("Duplicate Constraint"),
+                    message: `SQL constraint '${sqlConstraint.key}' already exists`,
+                    type: "notification_panel",
+                    notificationType: "warning",
+                });
+                return;
+            }
+
+            // Add SQL constraint
+            this.sqlConstraints.push(sqlConstraint);
+            console.log("✓ Added SQL constraint:", sqlConstraint);
         }
 
-        // Add constraint successfully
-        this.sqlConstraints.push(constraint);
-        this.state.edited = true;
-        this.state.constraintEnabled = true; // Keep checkbox enabled after successful add
+        // Handle Python constraint
+        if (hasPythonConstraint) {
+            const pythonConstraint = constraint.python_constraint;
+            
+            // Validate Python constraint data
+            if (!pythonConstraint.deps || !pythonConstraint.code) {
+                this.notification.add({
+                    title: _t("Invalid Python Constraint"),
+                    message: "Python constraint data is incomplete.",
+                    type: "notification_panel",
+                    notificationType: "warning",
+                });
+                return;
+            }
 
+            // Store Python constraint in state for saving
+            this.state.pythonConstraint = pythonConstraint;
+            console.log("✓ Added Python constraint:", pythonConstraint);
+        }
+
+        // Enable checkbox since we have at least one valid constraint
+        this.state.constraintEnabled = true;
+        this.state.edited = true;
+
+        const messages = [];
+        if (hasSqlConstraint) messages.push("SQL");
+        if (hasPythonConstraint) messages.push("Python");
+        
         this.notification.add({
             title: _t("Success"),
-            message: "Constraint added successfully. Don't forget to save the field!",
+            message: `${messages.join(" and ")} constraint(s) added successfully. Don't forget to save the field!`,
             type: "notification_panel",
             notificationType: "success",
         });
@@ -1861,11 +2064,52 @@
             const removed = this.sqlConstraints.splice(index, 1);
             this.state.edited = true;
 
+            // Check if we still have any constraints (SQL or Python)
+            const hasSqlConstraints = this.sqlConstraints.length > 0;
+            const hasPythonConstraint = !!this.state.pythonConstraint;
+            
             // Auto-disable checkbox if no constraints left
-            if (this.sqlConstraints.length === 0) {
+            if (!hasSqlConstraints && !hasPythonConstraint) {
                 this.state.constraintEnabled = false;
+                console.log("All constraints removed, checkbox disabled");
             }
         }
+    }
+
+    // New method to remove Python constraint
+    removePythonConstraint() {
+        if (this.state.pythonConstraint) {
+            this.state.pythonConstraint = null;
+            this.state.edited = true;
+
+            // Check if we still have any SQL constraints
+            const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
+            
+            // Auto-disable checkbox if no constraints left
+            if (!hasSqlConstraints) {
+                this.state.constraintEnabled = false;
+                console.log("Python constraint removed, no constraints left, checkbox disabled");
+            }
+        }
+    }
+
+    // New method to clear all constraints
+    clearAllConstraints() {
+        console.log("=== CLEARING ALL CONSTRAINTS ===");
+        
+        // Clear SQL constraints
+        if (this.sqlConstraints) {
+            this.sqlConstraints.splice(0, this.sqlConstraints.length);
+        }
+        
+        // Clear Python constraint
+        this.state.pythonConstraint = null;
+        
+        // Disable checkbox
+        this.state.constraintEnabled = false;
+        this.state.edited = true;
+        
+        console.log("✓ All constraints cleared, checkbox disabled");
     }
 
     getSQLConstraintsTuples() {
