@@ -41,8 +41,8 @@ class SubscriptionOrderLine(models.Model):
                                  default=lambda self: self.env.company,
                                  help='Current company')
     currency_id = fields.Many2one('res.currency',
-                                  related='company_id.currency_id',
-                                  help='Current company currency')
+                                  related='subscription_order_id.currency_id',
+                                  help='Currency of the order')
     tax_ids = fields.Many2many(comodel_name='account.tax', string="Taxes",
                                help="Choose a tax",
                                context={'active_test': False},

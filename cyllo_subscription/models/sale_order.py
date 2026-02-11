@@ -91,6 +91,7 @@ class SaleOrder(models.Model):
             sub_order = self.env['subscription.order'].create({
                 'partner_id': self.partner_id.id,
                 'sale_order_id': self.id,
+                'currency_id': self.currency_id.id,
                 'sale_order_template_id': self.sale_order_template_id.id,
                 'time_based_price_id': line.time_based_price_id.id,
                 'end_date': line.end_date,
