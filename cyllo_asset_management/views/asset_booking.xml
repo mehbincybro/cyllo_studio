@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+
+    <record id="view_asset_booking_search_default_filter" model="ir.ui.view">
+        <field name="name">asset.booking.search.default.filter</field>
+        <field name="model">asset.booking</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter name="draft_bookings"
+                        string="Bookings in draft"
+                        domain="[('state','=','draft')]"/>
+            </search>
+        </field>
+    </record>
+
     <!--    Tree view of the asset insurance model-->
     <record id="view_asset_booking_tree" model="ir.ui.view">
         <field name="name">view.asset.booking.tree</field>
@@ -14,6 +27,8 @@
             </tree>
         </field>
     </record>
+
+    <!--    Form view of the asset insurance model-->
     <record id="view_asset_booking_form" model="ir.ui.view">
         <field name="name">view.asset.booking.form</field>
         <field name="model">asset.booking</field>

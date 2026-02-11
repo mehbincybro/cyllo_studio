@@ -45,7 +45,6 @@
         <field name="arch" type="xml">
             <form string="Asset">
                 <header>
-
                     <field name="status" class="float-end fs-6" widget="badge"
                            decoration-success="status in ('draft','running')"
                            decoration-warning="status == 'leased'"

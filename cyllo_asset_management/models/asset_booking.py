@@ -8,21 +8,15 @@ class AssetBooking(models.Model):
     _order = 'date_from'
 
     asset_id = fields.Many2one('asset.asset', required=True)
-    booking_type = fields.Selection([
-        ('maintenance', 'Maintenance'),
-        ('lease', 'Lease'),
-        ('rental', 'Rental'),
-    ], required=True)
+    booking_type = fields.Selection([('maintenance', 'Maintenance'), ('lease', 'Lease'), ('rental', 'Rental'), ],
+                                    required=True)
 
     date_from = fields.Datetime(required=True)
     date_to = fields.Datetime(required=True)
 
-    state = fields.Selection([
-        ('draft', 'Draft'),
-        ('confirmed', 'Confirmed'),
-        ('done', 'Done'),
-        ('cancelled', 'Cancelled'),
-    ], default='draft')
+    state = fields.Selection(
+        [('draft', 'Draft'), ('confirmed', 'Confirmed'), ('done', 'Done'), ('cancelled', 'Cancelled'), ],
+        default='draft')
     company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company,
                                  help='Select the company')
     partner_id = fields.Many2one('res.partner')

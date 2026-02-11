@@ -29,6 +29,5 @@ class AssetBrand(models.Model):
     _rec_name = 'name'
 
     name = fields.Char(string="Brand", required=True, copy=False)
-    company_id = fields.Many2one(
-        'res.company', required=True,
+    company_id = fields.Many2one('res.company', required=True,
         default=lambda self: self.env.company, help='Select the company')

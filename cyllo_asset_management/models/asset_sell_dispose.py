@@ -47,6 +47,9 @@ class AssetSellDispose(models.Model):
     is_posted = fields.Boolean()
     disposal_type = fields.Selection([('dispose', 'Dispose'), ('lost', 'Lost'), ('scrap', 'Scrap')],
                                      default='dispose', string="Dispose Type", required=True)
+    company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company,
+                                 help='Select the company')
+
 
     @api.constrains('date')
     def _constrains_date(self):
@@ -56,6 +59,7 @@ class AssetSellDispose(models.Model):
             if record.date and record.date < purchase_date:
                 raise UserError(
                     _(f'The Asset is Purchased on {purchase_date}. The Date should be greater or equal to the Purchase Date'))
+
 
     @api.onchange('loss_account_id')
     def _onchange_loss_account_id(self):
@@ -262,7 +266,7 @@ class AssetSellDispose(models.Model):
                 past_journals = journal_items.filtered(lambda x: x.invoice_date_due <= self.date)
                 if past_journals:
                     past_journals._post()
-        if self.disposal_type in ('lost','scrap'):
+        if self.disposal_type in ('lost', 'scrap'):
             for depreciation in modify_vals:
                 if depreciation['depreciation_expense'] > 0:
                     if depreciation['salvage_value'] == 0:
