@@ -131,7 +131,7 @@ class AccountMove(models.Model):
             'name': _('Maintenance Request'),
             'type': 'ir.actions.act_window',
             'res_model': 'maintenance.request',
-            'res_id':maintenace_request_id.id,
+            'res_id': maintenace_request_id.id,
             'view_mode': 'form',
             'domain': [('id', '=', self.repair_id.id)],
         }

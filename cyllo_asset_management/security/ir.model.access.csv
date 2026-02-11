@@ -32,3 +32,5 @@ access_asset_insurance_type_admin,access.asset.insurance.type.admin,model_asset_
 
 access_asset_brand_manager,access.asset.brand.manager,model_asset_brand,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
 
+access_asset_booking_manager,access.asset.booking.manager,model_asset_booking,cyllo_asset_management.group_cyllo_asset_admin,1,1,1,1
+access_asset_booking_user,access.asset.booking.user,model_asset_booking,cyllo_asset_management.group_cyllo_asset_users,1,1,1,0

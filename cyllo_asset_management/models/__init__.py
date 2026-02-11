@@ -34,3 +34,4 @@ from . import asset_asset_insurance
 from . import maintenance_request
 from . import asset_brand
 from . import asset_insurance_type
+from . import asset_booking
