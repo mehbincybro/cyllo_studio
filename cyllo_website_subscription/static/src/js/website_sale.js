@@ -1,8 +1,9 @@
 /** @odoo-module **/
 
-import {WebsiteSale} from "@website_sale/js/website_sale";
+import { WebsiteSale } from "@website_sale/js/website_sale";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { session } from "@web/session";
 
 WebsiteSale.include({
     selector: '.oe_website_sale',
@@ -79,9 +80,14 @@ WebsiteSale.include({
     _updateRootProduct: function ($form, productId) {
         this._super(...arguments);
         const $planSelect = $form.find('.js_subscription_plan_select');
-        if ($planSelect.length) {
+        if ($planSelect.length && this.rootProduct) {
             this.rootProduct.time_based_price_id = parseInt($planSelect.val());
             this.rootProduct.end_date = $form.find('input[name="end_date"]').val();
+        }
+        // Check for skip_trial flag
+        const $skipTrial = $form.find('input[name="skip_trial"]');
+        if ($skipTrial.length && $skipTrial.val() === 'true' && this.rootProduct) {
+            this.rootProduct.skip_trial = true;
         }
     },
 
@@ -104,15 +110,42 @@ WebsiteSale.include({
             const hasSubscriptionInCart = cartData.has_subscription;
             const hasNormalInCart = cartData.has_normal;
             const isSubscription = cartData.is_subscription;
+            const productHasTrial = cartData.product_has_trial;
+            const isPublicUser = !session.user_id;
 
-            // Logic check for conflicts
+            // 1. Trial Restriction for Public Users
+            if (isPublicUser && productHasTrial) {
+                this.call("dialog", "add", ConfirmationDialog, {
+                    title: _t("Trial Restriction"),
+                    body: _t("You need to be logged in to claim the subscription trial. Do you want to login now?"),
+                    confirmLabel: _t("Login & Claim Trial"),
+                    cancelLabel: _t("Buy without Trial"),
+                    confirm: () => {
+                        window.location.href = '/web/login?redirect=' + encodeURIComponent(window.location.href);
+                    },
+                    cancel: () => {
+                        // proceed to add to cart BUT skip trial
+                        const $form = $(ev.currentTarget).closest('form');
+                        if (!$form.find('input[name="skip_trial"]').length) {
+                            $form.append('<input type="hidden" name="skip_trial" value="true"/>');
+                        } else {
+                            $form.find('input[name="skip_trial"]').val('true');
+                        }
+
+                        // We call the original Odoo add-to-cart logic
+                        return _super(ev);
+                    },
+                });
+                return Promise.resolve();
+            }
+
+            // 2. Logic check for conflicts
             const conflict = (isSubscription && hasNormalInCart) || (!isSubscription && hasSubscriptionInCart);
-            console.log(conflict)
             if (conflict) {
                 // Show the Dialog
                 this.call("dialog", "add", ConfirmationDialog, {
                     title: _t("Cart Conflict"),
-                    body:_t("Subscription and non-subscription products cannot be purchased together. Do you want to clear your cart and add this item instead?"),
+                    body: _t("Subscription and non-subscription products cannot be purchased together. Do you want to clear your cart and add this item instead?"),
                     confirmLabel: _t("Clear Cart & Add"),
                     cancelLabel: _t("Cancel"),
                     confirm: async () => {

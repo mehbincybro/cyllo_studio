@@ -62,13 +62,18 @@ class SubscriptionOrderLine(models.Model):
 
     @api.ondelete(at_uninstall=False)
     def _unlink_except_confirmed(self):
-        """Generates user error while removing the lines of the confirmed subscription order"""
+        """
+        Prevent deletion of lines if the subscription order is confirmed.
+        Raises UserError if the order is in 'sale' or 'posted' state.
+        """
         if self._check_line_unlink():
             raise UserError(
                 _("Once a subscription order is confirmed, you can't remove one of its lines"))
 
     def _check_line_unlink(self):
-        """ Check whether given lines can be deleted or not.
+        """
+        Check whether the given lines can be deleted.
+        :return: Records that cannot be deleted (in 'sale' or 'posted' state).
         """
         return self.filtered(
             lambda line:

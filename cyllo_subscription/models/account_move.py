@@ -39,21 +39,43 @@ class AccountMove(models.Model):
 
     def action_post(self):
         """
-        Post the accounting move and update subscription renewal dates if
-        applicable.
-        :return: Result of the super method `action_post`
-        :rtype: boolean
+        Post the accounting move and update subscription renewal dates if applicable.
+        It iterates through each invoice, checks if it's linked to a subscription order,
+        and updates the order's renewal date based on the subscription plan's duration.
         """
         res = super().action_post()
-        order = self.env['subscription.order'].search(
-            [('name', '=', self.invoice_origin)], limit=1)
-        if order and order.subscription_order_line_ids and order.subscription_order_line_ids.time_based_price_id:
-            time_based_price = order.subscription_order_line_ids.time_based_price_id
-            subscription_unit = time_based_price.subscription_unit
-            duration = time_based_price.duration
-            if subscription_unit in ('weeks', 'months', 'years'):
-                delta = relativedelta(**{subscription_unit: duration})
-                order.renewal_date = order.renewal_date + delta
+        for move in self:
+            if not move.subscription_order_id:
+                # Try to find by origin if not directly linked (redundant but safe fallback)
+                order = self.env['subscription.order'].search(
+                    [('name', '=', move.invoice_origin)], limit=1)
+                if order:
+                    move.subscription_order_id = order.id
+            
+            order = move.subscription_order_id
+            if order and order.time_based_price_id:
+                # Check for idempotency: Only update if the order's renewal date matches the invoice's due/renewal date
+                # This assumes the invoice was generated with the *current* renewal date.
+                # If order.renewal_date is already ahead, we shouldn't increment it again for the same invoice.
+                if move.renewal_date and order.renewal_date and move.renewal_date != order.renewal_date:
+                     continue
+
+                time_based_price = order.time_based_price_id
+                subscription_unit = time_based_price.subscription_unit
+                duration = time_based_price.duration
+                
+                delta = relativedelta()
+                if subscription_unit == 'weeks':
+                    delta = relativedelta(weeks=duration)
+                elif subscription_unit == 'months':
+                    delta = relativedelta(months=duration)
+                elif subscription_unit == 'years':
+                    delta = relativedelta(years=duration)
+                elif subscription_unit == 'days': # Added missing unit support
+                    delta = relativedelta(days=duration)
+                
+                if delta:
+                    order.renewal_date = order.renewal_date + delta
         return res
 
     def ir_cron_action_post(self):

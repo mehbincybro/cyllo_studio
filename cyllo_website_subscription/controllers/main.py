@@ -49,10 +49,14 @@ class WebsiteSaleSubscription(WebsiteSale):
             if plan_id and sol_line.exists():
                 plan = request.env['time.based.price'].sudo().browse(int(plan_id))
 
-                sol_line.write({
+                values = {
                     'time_based_price_id': plan.id,
                     'end_date': kw.get('end_date'),
-                })
+                }
+                
+                if kw.get('skip_trial') in [True, 'true', 'True']:
+                    values['skip_trial'] = True
+                sol_line.write(values)
 
                 sol_line._onchange_time_based_price_id()
                 sol_line._compute_price_unit()
@@ -92,16 +96,21 @@ class WebsiteSaleSubscription(WebsiteSale):
         if not pricelist or not product_temp_id:
             return {'price': False}
 
-        # We use sudo() to ensure public users can access the pricing rules
-        rule = pricelist.sudo()._get_time_based_price_rule(
-            product_template_id=int(product_temp_id),
-            subscription_unit=unit,
-            duration=duration,
-            date=fields.Date.today(),
-            product_uom_qty=float(qty)
-        )
-        if rule:
-            return {'price': rule.fixed_price}
+        # Fallback to plan cost if no rule found, converting currency
+        plan = request.env['time.based.price'].sudo().search([
+            ('product_template_id', '=', int(product_temp_id)),
+            ('subscription_unit', '=', unit),
+            ('duration', '=', int(duration))
+        ], limit=1)
+        
+        if plan:
+             price = pricelist.sudo()._get_subscription_price(
+                 int(product_temp_id),
+                 plan,
+                 float(qty),
+                 fields.Date.today()
+             )
+             return {'price': price}
 
         return {'price': False}
 
@@ -113,8 +122,15 @@ class WebsiteSaleSubscription(WebsiteSale):
         order = request.website.sale_get_order()
         product = request.env['product.product'].sudo().browse(product_id)
         is_subscription = product.is_subscription if product.exists() else False
+        product_has_trial = product.product_tmpl_id.trial_period > 0 if product.exists() else False
+
         if not order:
-            return {'is_subscription': False, 'has_subscription': False, 'has_normal': False}
+            return {
+                'is_subscription': False, 
+                'has_subscription': False, 
+                'has_normal': False,
+                'product_has_trial': product_has_trial
+            }
 
         # Check for presence of different product types
         trial_discount_product = request.env.ref('cyllo_website_subscription.product_trial_discount', raise_if_not_found=False)
@@ -124,7 +140,8 @@ class WebsiteSaleSubscription(WebsiteSale):
         return {
             'is_subscription': is_subscription,
             'has_subscription': has_sub,
-            'has_normal': has_normal
+            'has_normal': has_normal,
+            'product_has_trial': product_has_trial
         }
 
 
@@ -142,11 +159,8 @@ class CustomWebsiteSale(WebsiteSaleVariantController):
             product_template_id, product_id, combination, add_qty, parent_combination, **kwargs
         )
 
-        # Now perform your logic to inject **kwargs into the model call
         product_template = request.env['product.template'].sudo().browse(int(product_template_id))
 
-        # We re-run the model method because the base controller
-        # ignores the **kwargs you sent from JS
         combination_info = product_template._get_combination_info(
             combination=request.env['product.template.attribute.value'].sudo().browse(combination),
             product_id=product_id and int(product_id),
