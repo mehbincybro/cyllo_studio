@@ -31,7 +31,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    "depends": ["base","mail"],
+    "depends": ["base", "mail", "web"],
     'data' : [
             'security/ir.model.access.csv',
             'views/user_profile_views.xml',
@@ -46,11 +46,13 @@
             'views/domain_access_views.xml',
             'views/res_users_views.xml',
             'views/access_manager_menus.xml',
+            'views/login_templates.xml',
         ],
     'assets': {
-       'web.assets_backend': [
+        'web.assets_backend': [
             'cyllo_access_management/static/src/js/action_list.js',
-       ],
+            'cyllo_access_management/static/src/js/debug_notification.js',
+        ],
     },
     'license': 'LGPL-3',
     'installable': True,

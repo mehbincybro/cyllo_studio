@@ -20,6 +20,7 @@
 #
 #############################################################################
 from . import models
+from . import controllers
 from lxml import etree
 
 def post_init_hook(env):

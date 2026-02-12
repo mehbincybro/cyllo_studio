@@ -19,7 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import api,fields,models
+from odoo.exceptions import ValidationError
+
 
 class HideButtonsTabs(models.Model):
     _name = 'hide.buttons.tabs'
@@ -28,8 +30,16 @@ class HideButtonsTabs(models.Model):
 
     profile_management_id = fields.Many2one('profile.management',
                                             string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model')
+    model_id = fields.Many2one('ir.model', string='Model',
+                               required=True, ondelete='cascade',
+                               )
     button_ids = fields.Many2many('ir.model.buttons',
                                  string='Hide Buttons')
     tab_ids = fields.Many2many('ir.model.tabs',
                                  string='Hide Tabs')
+
+    @api.constrains('button_ids','tab_ids')
+    def _constraint_button_ids_tab_ids(self):
+        for record in self:
+            if not(record.button_ids or record.tab_ids):
+                raise ValidationError('Provide at least one button or tab')

@@ -33,6 +33,7 @@ class ProfileManagement(models.Model):
     is_readonly = fields.Boolean('Profile System Readonly')
     disable_chatter = fields.Boolean('Disable Chatter')
     disable_debug_mode = fields.Boolean('Disable Debug Mode')
+    disable_login = fields.Boolean('Disable Login')
     menu_ids = fields.Many2many('ir.ui.menu',string='Menus')
     hide_buttons_tabs_ids = fields.One2many('hide.buttons.tabs',
                                             'profile_management_id',
@@ -135,13 +136,13 @@ class ProfileManagement(models.Model):
                 model_rules = access_mgmt.model_access_ids.filtered(
                     lambda r: r.model_id.model == model
                 )
-                if model_rules.hide_archive:
+                if any(model_rules.mapped('hide_archive')):
                     actions += ["archive","unarchive"]
-                if model_rules.hide_export:
+                if any(model_rules.mapped('hide_export')):
                     actions += ["export"]
-                if model_rules.hide_reports:
+                if any(model_rules.mapped('hide_reports')):
                     hide_print = True
-                if model_rules.hide_actions:
+                if any(model_rules.mapped('hide_actions')):
                     hide_action = True
 
         return {

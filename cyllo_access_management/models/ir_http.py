@@ -19,40 +19,82 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import re
 import odoo
 from odoo import models
+from odoo.exceptions import AccessDenied
 from odoo.http import request
 
 class IrHttp(models.AbstractModel):
     _inherit = 'ir.http'
 
     @classmethod
+    def _authenticate(cls, endpoint):
+        """
+        Force immediate logout if the user's login is blocked.
+        This occurs on every request that requires authentication.
+        """
+        super()._authenticate(endpoint)
+
+        if request.session.uid and endpoint.routing.get('auth') != 'none':
+            try:
+                user = request.env.user.sudo()
+                if hasattr(user, '_check_profile_management'):
+                    user._check_profile_management()
+            except AccessDenied:
+                request.session.logout(keep_db=True)
+
+    @classmethod
     def _handle_debug(cls):
+        super()._handle_debug()
+
+        if not getattr(request.session, 'debug', False):
+            return
+
+        if not request.db or not getattr(request.session, 'uid', False):
+            return
+
         try:
+            cids_raw = request.httprequest.args.get('cids') or request.httprequest.cookies.get('cids')
+            active_company_ids = []
+            if cids_raw:
+                try:
+                    for part in re.split(r'[,-]', str(cids_raw)):
+                        if part.strip().isdigit():
+                            active_company_ids.append(int(part.strip()))
+                except Exception:
+                    pass
+
             with request.env.registry.cursor() as cr:
-                env = odoo.api.Environment(cr,
-                                           request.session.uid or
-                                           odoo.SUPERUSER_ID,
-                                           request.session.context)
+                env = odoo.api.Environment(cr, request.session.uid, request.session.context)
                 user = env.user
-                company_id = env.company.id
-                profiles = user.profile_ids
 
-                if profiles:
-                    access_mgmt = request.env[
-                        'profile.management'].sudo().search([
-                        ('profile_ids', 'in', profiles.ids),
-                        ('is_activated', '=', True), "|",
-                        ('company_ids', 'in', [company_id]),
-                        ('company_ids', '=', False)
-                    ])
+                if not active_company_ids:
+                    active_company_ids = [env.company.id]
+
+                if user.profile_ids:
+                    access_mgmt = env['profile.management'].sudo().search([
+                        ('profile_ids', 'in', user.profile_ids.ids),
+                        ('is_activated', '=', True),
+                        ('disable_debug_mode', '=', True),
+                        "|",
+                        ('company_ids', '=', False),
+                        ('company_ids', 'in', active_company_ids)
+                    ], limit=1)
+
                     if access_mgmt:
-                        if company_id in access_mgmt.company_ids.ids:
-                            if any(access_mgmt.mapped("disable_debug_mode")):
-                                request.session.debug = ""
-                                return
-
+                        request.session.debug = ""
+                        # Flag to notify the user that debug mode was disabled by policy
+                        request.session.debug_denied = True
         except Exception:
-            request.session.debug = request.session.debug or ""
+            pass
 
-        return super()._handle_debug()
+    def session_info(self):
+        """ Add debug_denied flag to session_info so the web client can show a notification. """
+        res = super(IrHttp, self).session_info()
+        if hasattr(request, 'session'):
+            res['debug_denied'] = getattr(request.session, 'debug_denied', False)
+            # Reset the flag after it's been consumed by the client
+            if res.get('debug_denied'):
+                request.session.debug_denied = False
+        return res

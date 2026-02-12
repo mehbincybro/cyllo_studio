@@ -1,5 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_manager.access_user_profile,access_user_profile,cyllo_access_management.model_user_profile,base.group_system,1,1,1,1
+access_manager.access_user_profile_user,access_user_profile_user,cyllo_access_management.model_user_profile,base.group_user,1,0,0,0
 access_manager.access_profile_management,access_profile_management,cyllo_access_management.model_profile_management,base.group_system,1,1,1,1
 access_manager.access_hide_buttons_tabs,access_hide_buttons_tabs,cyllo_access_management.model_hide_buttons_tabs,base.group_system,1,1,1,1
 access_manager.access_hide_filters,access_hide_filters,cyllo_access_management.model_hide_filters,base.group_system,1,1,1,1
