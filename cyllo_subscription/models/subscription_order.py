@@ -79,9 +79,9 @@ class SubscriptionOrder(models.Model):
                                           help='Check if the button clicked is renewal or upsell')
     account_move_ids = fields.Many2many('account.move', string='Invoices',
                                         help='Invoice records store here')
-    currency_id = fields.Many2one('res.currency',
-                                  related='company_id.currency_id',
-                                  help='Current company currency')
+    currency_id = fields.Many2one('res.currency', string='Currency',
+                                  help='Currency of the order',
+                                  default=lambda self: self.env.company.currency_id)
     amount_untaxed = fields.Monetary(string='Untaxed Amount',
                                      compute='_compute_amounts')
     amount_tax = fields.Monetary(string='Taxes', compute='_compute_amounts')
@@ -198,6 +198,7 @@ class SubscriptionOrder(models.Model):
             'invoice_origin': self.name,
             'invoice_date_due': self.renewal_date,
             'renewal_date': self.renewal_date,
+            'currency_id': self.currency_id.id,
             'date': fields.Datetime.now(),
             'is_subscription': True,
             'subscription_order_id': self.id,
@@ -285,6 +286,7 @@ class SubscriptionOrder(models.Model):
         order = self.create({
             'partner_id': self.partner_id.id,
             'company_id': self.company_id.id,
+            'currency_id': self.currency_id.id,
             'renewal_date': self.renewal_date,
             'parent_id':self.id,
             'sale_order_template_id': self.sale_order_template_id.id,
@@ -292,15 +294,15 @@ class SubscriptionOrder(models.Model):
             'sale_order_id': self.sale_order_id.id,
             'trial_end': False,
             'subscription_order_line_ids': [
-                (fields.Command.create({
-                    'product_id': self.subscription_order_line_ids.product_id.id,
-                    'product_tmpl_id': self.subscription_order_line_ids.product_tmpl_id,
-                    'quantity': self.subscription_order_line_ids.quantity,
-                    'time_based_price_id': self.time_based_price_id.id,
-                    'subtotal': self.subscription_order_line_ids.subtotal,
-                    'tax_ids': self.subscription_order_line_ids.tax_ids.ids,
-                    'total_price' : self.subscription_order_line_ids.total_price
-                }))
+                fields.Command.create({
+                    'product_id': line.product_id.id,
+                    'product_tmpl_id': line.product_tmpl_id.id,
+                    'quantity': line.quantity,
+                    'time_based_price_id': line.time_based_price_id.id,
+                    'subtotal': line.subtotal,
+                    'tax_ids': line.tax_ids.ids,
+                    'total_price' : line.total_price
+                }) for line in self.subscription_order_line_ids
             ],
         })
         if self.sale_order_template_id.invoice_creation in ['draft',
@@ -365,6 +367,7 @@ class SubscriptionOrder(models.Model):
             inv = self.env['account.move'].create({
                 'partner_id': partner[0],
                 'move_type': 'out_invoice',
+                'currency_id': order.currency_id.id,
                 'payment_reference': self.ids,
                 'invoice_line_ids': [
                     (fields.Command.create({

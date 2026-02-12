@@ -77,13 +77,14 @@ class ProductTemplate(models.Model):
             :return: Result of the super().write() method.
             """
         res = super().write(vals)
-        if self.is_subscription and not self.time_based_ids:
-            raise ValidationError(
-                _('Please add Time Based Pricing, because the product is a subscription product'))
-        if self.unit and self.trial_period == 0:
-            raise ValidationError(
-                _('Trial period should be greater than zero if there is trial unit'))
-        elif self.trial_period > 0 and not self.unit:
-            raise ValidationError(
-                _('If Trial Period is added then Unit should be added'))
+        for rec in self:
+            if rec.is_subscription and not rec.time_based_ids:
+                raise ValidationError(
+                    _('Please add Time Based Pricing, because the product is a subscription product'))
+            if rec.unit and rec.trial_period == 0:
+                raise ValidationError(
+                    _('Trial period should be greater than zero if there is trial unit'))
+            elif rec.trial_period > 0 and not rec.unit:
+                raise ValidationError(
+                    _('If Trial Period is added then Unit should be added'))
         return res
