@@ -52,6 +52,7 @@
         'views/asset_booking.xml',
         'wizards/asset_modify_views.xml',
         'wizards/assset_insurance_wizard_views.xml',
+        'report/asset_report_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

@@ -12,11 +12,11 @@
                 <field name="maintenance_type" invisible="True"/>
             </xpath>
             <xpath expr="//field[@name='maintenance_team_id']" position="after">
+                <field name="currency_id" invisible="1"/>
                 <field name="partner_id" invisible="equipment_id or maintenance_type=='preventive'"
                        required="asset_id"/>
                 <field name="expense" invisible="equipment_id or maintenance_type=='preventive'" readonly="has_billed"/>
-                <field name="invoiced_amount" invisible="equipment_id or maintenance_type=='preventive'"
-                       readonly="True"/>
+                <field name="invoiced_amount" invisible="equipment_id or maintenance_type=='preventive'" readonly="True"/>
             </xpath>
             <xpath expr="//button[@name='archive_equipment_request']" position="after">
                 <field name="has_billed" invisible="True"/>

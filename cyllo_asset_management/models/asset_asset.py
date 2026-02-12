@@ -185,18 +185,10 @@ class AssetAsset(models.Model):
             raise UserError(_('The Salvage Value should not be Greater than the Original Value.'))
 
     @api.constrains('warranty_period')
-    def _check_original_value(self):
+    def _check_warranty_period(self):
         """Check warranty period positive number"""
         if self.warranty_period < 0:
             raise UserError(_('The Warranty period should not be a negative Value.'))
-
-    @api.onchange('asset_item_id')
-    def _onchange_asset_item_id(self):
-        """for getting asset model value of computation method"""
-        for record in self:
-            record.computation_method = record.asset_item_id.computation_method
-            record.depreciation_method = record.asset_item_id.depreciation_method
-            record.method_duration = record.asset_item_id.method_duration
 
     @api.onchange('method_duration')
     def _onchange_method_duration(self):
@@ -439,7 +431,7 @@ class AssetAsset(models.Model):
                 'target': 'new'
             }
         else:
-            self.status = 'lost'
+            self.status = 'disposed'
 
     def action_sell_dispose_assets(self):
         """Action sell dispose assets"""
@@ -549,12 +541,19 @@ class AssetAsset(models.Model):
             'view_mode': 'tree,form',
             'res_model': 'asset.booking',
             'type': 'ir.actions.act_window',
-            'domain': [('asset_id', '=', self.id), ('state', '=', 'draft')]
+            'domain': [('asset_id', '=', self.id)],
+            'search_view_id': self.env.ref('cyllo_asset_management.view_asset_booking_search_default_filter').id,
+            'context': {
+                'search_default_draft_bookings': 1
+            },
         }
 
     def action_compute_depreciation(self):
         """Action compute depreciation"""
         self.depreciation_line_ids = [fields.Command.clear()]
+        if self.salvage_value <= 0:
+            self.is_depreciate = False
+            return
         if self.original_value == 0:
             self.is_depreciate = False
             self.salvage_value = self.original_value
@@ -562,8 +561,8 @@ class AssetAsset(models.Model):
         self.pre_salvage_value = self.salvage_value
         if not self.depreciating_factor:
             self.is_auto_calculate = True
-        if self.salvage_value == 0:
-            self.salvage_value = self.original_value
+        # if self.salvage_value == 0:
+        #     self.salvage_value = self.original_value
         start_fiscal_year = self.company_id.compute_fiscalyear_dates(self.depreciation_date).get('date_from')
         depreciation_date = start_fiscal_year if self.computation_method == 'no_prorata' else self.prorata_date
         calculate_value = abs(self.salvage_value)
@@ -581,8 +580,8 @@ class AssetAsset(models.Model):
         """Button action for the depreciating the asset"""
         if self.original_value == 0:
             raise UserError(_('The Original Value should be Greater than 0.'))
-        if self.method_duration == 0:
-            raise UserError(_('The duration should be greater than zero.'))
+        if self.salvage_value > 0 and self.method_duration <= 0:
+            raise UserError(_('Duration must be greater than zero when Salvage Value is greater than zero.'))
         self.action_compute_depreciation()
         self._create_journal_entries()
         self.status = 'running'
@@ -1085,7 +1084,7 @@ class AssetAsset(models.Model):
         else:
             depreciation_days = (year_end_depreciation - depreciation_date).days + 1
         balance_month = year_end_depreciation.month - depreciation_date.month
-        straight_line_value = calculate_value / self.method_duration
+        straight_line_value = calculate_value / self.method_duration if self.method_duration else 0
         salvage_value = calculate_value
         previous_amount = 0
         balancing_value = 0 if self.computation_method == 'no_prorata' else 1
@@ -1245,14 +1244,18 @@ class AssetAsset(models.Model):
     def _onchange_asset_item(self):
         if self.asset_item_id:
             for record in self:
-                record.brand_id = record.asset_item_id.brand_id
-                record.is_auto_calculate = record.asset_item_id.is_auto_calculate
-                record.depreciating_factor = record.asset_item_id.depreciating_factor
-                record.duration_period = record.asset_item_id.duration_period
-                record.fixed_asset_account_id = record.asset_item_id.fixed_asset_account_id
-                record.asset_depreciation_account_id = record.asset_item_id.asset_depreciation_account_id
-                record.asset_expense_account_id = record.asset_item_id.asset_expense_account_id
-                record.asset_loss_account_id = record.asset_item_id.asset_loss_account_id
-                record.asset_journal_id = record.asset_item_id.asset_journal_id
-                record.prorata_date = record.asset_item_id.prorata_date
-                record.vendor_id = record.asset_item_id.vendor_id
+                if record.asset_item_id:
+                    record.computation_method = record.asset_item_id.computation_method or record.computation_method
+                    record.depreciation_method = record.asset_item_id.depreciation_method or record.depreciation_method
+                    record.method_duration = record.asset_item_id.method_duration
+                    record.brand_id = record.asset_item_id.brand_id
+                    record.is_auto_calculate = record.asset_item_id.is_auto_calculate
+                    record.depreciating_factor = record.asset_item_id.depreciating_factor
+                    record.duration_period = record.asset_item_id.duration_period
+                    record.fixed_asset_account_id = record.asset_item_id.fixed_asset_account_id
+                    record.asset_depreciation_account_id = record.asset_item_id.asset_depreciation_account_id
+                    record.asset_expense_account_id = record.asset_item_id.asset_expense_account_id
+                    record.asset_loss_account_id = record.asset_item_id.asset_loss_account_id
+                    record.asset_journal_id = record.asset_item_id.asset_journal_id
+                    record.prorata_date = record.asset_item_id.prorata_date
+                    record.vendor_id = record.asset_item_id.vendor_id

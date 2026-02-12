@@ -88,7 +88,7 @@
         <field name="domain">[('asset_action', '=', 'sell')]</field>
     </record>
     <record id="action_view_asset_dispose" model="ir.actions.act_window">
-        <field name="name">Sell</field>
+        <field name="name">Dispose</field>
         <field name="res_model">asset.sell.dispose</field>
         <field name="view_id" ref="view_asset_dispose_list"/>
         <field name="view_mode">tree</field>

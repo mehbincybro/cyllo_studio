@@ -40,7 +40,7 @@ class MaintenanceRequest(models.Model):
     has_insurance = fields.Boolean(default=False, compute="_compute_has_insurance")
     is_reimburse = fields.Boolean(default=False, compute="_compute_has_insurance")
     is_scrap = fields.Boolean(default=False)
-    invoiced_amount = fields.Monetary(string="Insurance Amount")
+    invoiced_amount = fields.Monetary(string="Insurance Amount", compute="_compute_invoiced_amount")
     transaction_count = fields.Integer(string='Invoice', copy=False, compute='_compute_transaction_count')
     booking_id = fields.Many2one(string="Booking ID", comodel_name='asset.booking', copy=False)
 
@@ -65,12 +65,14 @@ class MaintenanceRequest(models.Model):
 
     @api.model
     def create(self, vals):
-        # If schedule_date is not provided → set to now
-        schedule_date = vals.get('schedule_date') or fields.Datetime.now()
+        """If schedule_date is not provided → set to now"""
+        schedule_date = vals.get('schedule_date')
+        if schedule_date:
+            schedule_date = fields.Datetime.to_datetime(schedule_date)
+        else:
+            schedule_date = fields.Datetime.now()
         vals['schedule_date'] = schedule_date
-
         record = super().create(vals)
-
         booking = self.env['asset.booking'].create_or_update_booking(
             asset=record.asset_id,
             date_from=schedule_date,
@@ -80,7 +82,6 @@ class MaintenanceRequest(models.Model):
             res_model=record._name,
             res_id=record.id
         )
-
         record.booking_id = booking.id
         return record
 
@@ -90,7 +91,11 @@ class MaintenanceRequest(models.Model):
 
         if trigger_fields & set(vals):
             for rec in self:
-                schedule_date = rec.schedule_date or fields.Datetime.now()
+                schedule_date = rec.schedule_date
+                if schedule_date:
+                    schedule_date = fields.Datetime.to_datetime(schedule_date)
+                else:
+                    schedule_date = fields.Datetime.now()
 
                 booking = self.env['asset.booking'].create_or_update_booking(
                     asset=rec.asset_id,
@@ -109,6 +114,13 @@ class MaintenanceRequest(models.Model):
         """Function for computing the invoice count"""
         self.transaction_count = self.env['account.move'].search_count(
             [('repair_id', '=', self.id), ('move_type', 'in', ['in_invoice', 'out_invoice'])])
+
+
+    def _compute_invoiced_amount(self):
+        for rec in self:
+            invoices = self.env['account.move'].search([('repair_id', '=', rec.id),('move_type', '=', 'out_invoice'),
+                                                        ('state', '=', 'posted')])
+            rec.invoiced_amount = sum(invoices.mapped('amount_total_signed'))
 
     @api.depends('asset_id')
     def _compute_has_warranty(self):
@@ -192,15 +204,17 @@ class MaintenanceRequest(models.Model):
         self.ensure_one()
         insurance_amount = self.env.context.get('insurance_amount', 0)
         is_reimburse = self.env.context.get('is_reimbursed', False)
+        currency_id = self.env.context.get('currency_id', self.currency_id)
         if not is_reimburse and not self.has_billed:
             self.action_create_bill()
         repair_invoice = self.env['account.move'].create({
             'ref': self.asset_id.name,
-            'partner_id': self.asset_id.insurance_name.partner_id.id,
+            'partner_id': self.asset_id.insurance_name_id.partner_id.id,
             'move_type': 'out_invoice',
             'state': 'draft',
             'repair_id': self.id,
             'asset_id': False,
+            'currency_id': currency_id,
             'invoice_date': fields.Date.today(),
             'invoice_line_ids': [fields.Command.create({
                 'name': f"{self.asset_id.name}-Insurance claim",
@@ -210,7 +224,7 @@ class MaintenanceRequest(models.Model):
                 'price_subtotal': insurance_amount,
             })]
         })
-        self.invoiced_amount += repair_invoice.invoice_line_ids.price_subtotal
+        # self.invoiced_amount += repair_invoice.invoice_line_ids.price_subtotal
 
     def action_view_moves(self):
         """Function for viewing the invoice"""

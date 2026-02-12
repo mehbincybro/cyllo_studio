@@ -18,6 +18,8 @@
         <field name="implied_ids"
                eval="[Command.link(ref('account.group_account_user')),
                Command.link(ref('cyllo_asset_management.group_cyllo_asset_users')),
+               Command.link(ref('base.group_multi_currency')),
+               Command.link(ref('base.group_multi_company')),
                Command.link(ref('maintenance.group_equipment_manager')),]"/>
         <field name="users" eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
     </record>
@@ -57,6 +59,25 @@
         <field name="model_id" ref="model_asset_assign"/>
         <field name="domain_force">[('company_id', 'in', company_ids)]</field>
     </record>
+    <!--    Record Rules for Multi Company on insurance-->
+    <record id="rule_asset_insurance_company" model="ir.rule">
+        <field name="name">Asset Insurance multi-company</field>
+        <field name="model_id" ref="model_asset_asset_insurance"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on sell/dispose-->
+    <record id="rule_asset_sell_dispose_company" model="ir.rule">
+        <field name="name">Asset Sell Dispose multi-company</field>
+        <field name="model_id" ref="model_asset_sell_dispose"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!--    Record Rules for Multi Company on booking-->
+    <record id="rule_asset_booking_company" model="ir.rule">
+        <field name="name">Asset Booking multi-company</field>
+        <field name="model_id" ref="model_asset_booking"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+
     <!--Record Rule  for Admin on Asset Reservation-->
     <record id="rule_asset_reservation" model="ir.rule">
         <field name="name">View All Asset Reservation</field>
