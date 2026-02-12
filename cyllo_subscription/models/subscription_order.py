@@ -88,7 +88,7 @@ class SubscriptionOrder(models.Model):
     amount_total = fields.Monetary(string='Total', compute='_compute_amounts')
     parent_id = fields.Many2one(string='Parent Subscription Order',
                                 comodel_name='subscription.order')
-    end_date = fields.Datetime(string='End Date')
+    end_date = fields.Datetime(string='End Date',help='Subscription ending date')
     renewal_request = fields.Boolean(string='Customer Can Renew',
                                      compute='_compute_renewal_request',
                                      store=True,
@@ -132,6 +132,12 @@ class SubscriptionOrder(models.Model):
                 record.renewal_request = record.sale_order_template_id.renewal_request
             else:
                 record.renewal_request = global_setting
+
+    @api.onchange('trial_end')
+    def _onchange_trial_end(self):
+        """Update renewal date when trial end date changes."""
+        if self.trial_end:
+            self.renewal_date = self.trial_end
 
     @api.depends('subscription_order_line_ids.subtotal',
                  'subscription_order_line_ids.total_price')

@@ -83,12 +83,12 @@
                             <field name="partner_street" invisible="not partner_street"/>
                             <field name="partner_city" invisible="not partner_city"/>
                             <field name="partner_state" invisible="not partner_state"/>
-                            <field name="sale_order_template_id" domain="[('is_subscription', '=', True)]"/>
-                            <field name="time_based_price_id"/>
+                            <field name="sale_order_template_id" domain="[('is_subscription', '=', True)]" readonly="state != 'draft'"/>
+                            <field name="time_based_price_id" readonly="state != 'draft'"/>
                             <field name="end_date"/>
                         </group>
                         <group>
-                            <field name="trial_end"/>
+                            <field name="trial_end" readonly="state == 'posted'"/>
                             <field name="renewal_date"/>
                         </group>
                     </group>

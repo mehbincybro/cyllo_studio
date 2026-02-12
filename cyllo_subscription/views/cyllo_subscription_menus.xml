@@ -35,6 +35,12 @@
               action="action_view_products"
               parent="menu_products_categ"/>
 
+    <!-- Menu: Products -> Pricelists -->
+    <menuitem id="menu_subscription_pricelist" name="Pricelists"
+              action="product.product_pricelist_action2"
+              parent="menu_products_categ"
+              sequence="10"/>
+
     <!-- Menu: Reporting -> Reporting -->
     <menuitem id="menu_reporting" name="Reporting"
               parent="menu_reporting_categ"
