@@ -28,6 +28,7 @@ class HrEmployee(models.Model):
 
     is_resigned = fields.Boolean(string='Resigned', help='To check if the employee has resigned or not')
     payslip_count = fields.Integer(compute='_compute_payslip_count', help='Total number of payslip for the employee')
+    payslip_ids = fields.One2many('employee.payslip', 'employee_id', string='Payslips', help='Payslips related to this employee')
 
     def _compute_payslip_count(self):
         """Compute the number of payslips generated for each employee"""

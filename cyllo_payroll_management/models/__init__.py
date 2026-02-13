@@ -43,4 +43,6 @@ from . import res_config_settings
 from . import resigned_reasons
 from . import hr_expense_sheet
 from . import hr_advance_salary
+from . import commission_report
+from . import salary_calculator
 

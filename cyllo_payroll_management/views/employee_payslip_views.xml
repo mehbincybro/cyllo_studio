@@ -105,6 +105,15 @@
                                 </span>
                             </div>
                         </button>
+                        <button name="action_view_commission_reports" type="object" class="oe_stat_button"
+                                invisible="commission_report_count == 0" string="Commissions">
+                            <i class="fa fa-percent" title="Commissions"/>
+                            <div class="o_stat_info" style="margin-left:2px;">
+                                <span class="o_stat_text">
+                                    Commissions(<field name="commission_report_count"/>)
+                                </span>
+                            </div>
+                        </button>
                     </div>
                     <div>
                         <h1>

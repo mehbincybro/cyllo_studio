@@ -32,7 +32,7 @@
     'depends': ['hr_contract', 'mail', 'account', 'hr_work_entry',
                 'hr_attendance', 'hr_work_entry_contract',
                 'hr_work_entry_holidays', 'contacts', 'hr_holidays',
-                'hr_expense', 'portal', 'website'],
+                'hr_expense', 'portal', 'website', 'cyllo_commission'],
     'icon': '/cyllo_payroll_management/static/description/payroll.svg',
     'data': [
         'security/cyllo_payroll_management_groups.xml',
@@ -74,9 +74,13 @@
         'views/hr_payroll_dashboard_views.xml',
         'views/hr_advance_salary_views.xml',
         'views/portal_advance_salary_templates.xml',
+        'views/salary_calculator_views.xml',
+        'views/hr_employee_payroll_view.xml',
         'views/cyllo_payroll_management_menu_views.xml',
         'views/res_config_settings_views.xml',
         'views/res_company_views.xml',
+        'views/commission_report_views.xml',
+
     ],
     'assets': {
         'web.assets_backend': [

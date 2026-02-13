@@ -90,6 +90,15 @@ else:
         <field name="amount_select">code</field>
         <field name="amount_python_compute">result = contract.other_allowance</field>
     </record>
+    <record id="employee_salary_rule_commission" model="employee.salary.rule">
+        <field name="name">Commission</field>
+        <field name="code">COMMISSION</field>
+        <field name="category_id" ref="cyllo_payroll_management.employee_salary_rule_category_allowance"/>
+        <field name="condition_select">python</field>
+        <field name="condition_python">result = inputs.COMMISSION</field>
+        <field name="amount_select">code</field>
+        <field name="amount_python_compute">result = inputs.COMMISSION</field>
+    </record>
     <record id="employee_salary_rule_attachment_of_salary" model="employee.salary.rule">
         <field name="name">Attachment of Salary</field>
         <field name="sequence" eval="1"/>

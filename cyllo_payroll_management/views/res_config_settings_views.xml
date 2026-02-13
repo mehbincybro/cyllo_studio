@@ -17,6 +17,14 @@
                                      help="To combine all of the accounting entries for a given time into a single account move line, enable this option. In addition to disabling single payment generations, this will anonymize the accounting entries.">
                                 <field name="batch_move_line"/>
                             </setting>
+                            <setting id="advance_salary_account_id" title="Advance Salary Account"
+                                     help="Account to be used for Advance Salary bill creation (Debit Account)">
+                                <field name="advance_salary_account_id"/>
+                            </setting>
+                            <setting id="advance_salary_payment_account_id" title="Advance Salary Payment Account"
+                                     help="Account to be used for Advance Salary payment (Credit Account)">
+                                <field name="advance_salary_payment_account_id"/>
+                            </setting>
                         </block>
                     </div>
                 </app>

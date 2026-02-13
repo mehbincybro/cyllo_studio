@@ -22,4 +22,9 @@
         <field name="name">Deduction</field>
         <field name="code">DED</field>
     </record>
+
+    <record id="employee_payslip_other_input_commission" model="employee.payslip.other.input">
+        <field name="name">Commission</field>
+        <field name="code">COMMISSION</field>
+    </record>
 </odoo>
