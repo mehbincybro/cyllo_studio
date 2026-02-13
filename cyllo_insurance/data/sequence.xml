@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!--    <record id="seq_insurance_policy" model="ir.sequence">-->
+<!--        <field name="name">Insurance Policy</field>-->
+<!--        <field name="code">insurance.policy</field>-->
+<!--        <field name="prefix">POL/</field>-->
+<!--        <field name="padding">4</field>-->
+<!--    </record>-->
+
+    <record id="seq_insurance_claim" model="ir.sequence">
+        <field name="name">Insurance Claim</field>
+        <field name="code">insurance.claim</field>
+        <field name="prefix">CLM/</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>

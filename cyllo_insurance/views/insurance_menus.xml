@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_policy_type" model="ir.actions.act_window">
+        <field name="name">Policy Types</field>
+        <field name="res_model">insurance.policy.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_coverage" model="ir.actions.act_window">
+        <field name="name">Coverages</field>
+        <field name="res_model">insurance.coverage</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_plan" model="ir.actions.act_window">
+        <field name="name">Insurance Plans</field>
+        <field name="res_model">insurance.plan</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_policy" model="ir.actions.act_window">
+        <field name="name">Insurance Policies</field>
+        <field name="res_model">insurance.policy</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <record id="action_claim" model="ir.actions.act_window">
+        <field name="name">Insurance Claims</field>
+        <field name="res_model">insurance.claim</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Root Menu -->
+    <menuitem id="menu_insurance_root"
+              name="Insurance"
+              sequence="10"/>
+
+    <menuitem id="menu_policy_type"
+              parent="menu_insurance_root"
+              name="Policy Types"
+              action="action_policy_type"/>
+
+    <menuitem id="menu_coverage"
+              parent="menu_insurance_root"
+              name="Coverages"
+              action="action_coverage"/>
+
+    <menuitem id="menu_plan"
+              parent="menu_insurance_root"
+              name="Insurance Plans"
+              action="action_plan"/>
+
+    <menuitem id="menu_policy"
+              parent="menu_insurance_root"
+              name="Policies"
+              action="action_policy"/>
+
+    <menuitem id="menu_claim"
+              parent="menu_insurance_root"
+              name="Claims"
+              action="action_claim"/>
+</odoo>
