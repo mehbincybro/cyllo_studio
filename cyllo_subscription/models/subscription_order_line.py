@@ -36,7 +36,7 @@ class SubscriptionOrderLine(models.Model):
     sale_order_line_id = fields.Many2one('sale.order.line', string='Order Line',
                                          help='Sale order line')
     sale_order_id = fields.Many2one('sale.order', help='Sale order reference')
-    quantity = fields.Integer(help='Quantity of the products')
+    quantity = fields.Integer(help='Quantity of the products',readonly=True)
     company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company,
                                  help='Current company')
