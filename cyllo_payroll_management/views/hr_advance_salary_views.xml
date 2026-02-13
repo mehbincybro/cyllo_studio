@@ -61,7 +61,7 @@
                             invisible="state != 'submitted'"/>
 
                     <button name="action_create_bill"
-                            string="Create Bill"
+                            string="Create Payment"
                             type="object"
                             class="btn-primary"
                             invisible="state != 'approved' or bill_id != False"/>
@@ -84,7 +84,7 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="get_bill_action"
-                                string="Vendor Bill"
+                                string="Payments"
                                 type="object"
                                 class="oe_stat_button"
                                 icon="fa-pencil-square-o"
@@ -97,10 +97,11 @@
                             <field name="bill_id" invisible="bill_id == False"/>
                             <field name="request_date"/>
                             <field name="approval_date"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
 
                         <group>
-                            <field name="amount"/>
+                            <field name="amount" widget="monetary"/>
                             <field name="deduction_type" widget="radio"/>
                             <field name="deduction_amount" invisible="deduction_type != 'fixed'"/>
                             <field name="deduction_percentage" invisible="deduction_type != 'percentage'"/>
@@ -111,11 +112,11 @@
                     <notebook>
                         <page string="Deduction Schedule">
                             <field name="line_ids" readonly="1">
-                                <tree decoration-info="state == 'planned'" decoration-warning="state == 'pending'" decoration-success="state == 'paid'">
+                                <tree decoration-info="state == 'planned'" decoration-warning="state == 'pending'" decoration-success="state == 'paid'" decoration-muted="state == 'canceled'">
                                     <field name="date"/>
                                     <field name="amount" sum="Total"/>
                                     <field name="payslip_id"/>
-                                    <field name="state" widget="badge" decoration-info="state == 'planned'" decoration-warning="state == 'pending'" decoration-success="state == 'paid'"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'planned'" decoration-warning="state == 'pending'" decoration-success="state == 'paid'" decoration-muted="state == 'canceled'"/>
                                 </tree>
                             </field>
                         </page>

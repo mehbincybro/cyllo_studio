@@ -79,7 +79,7 @@ class EmployeePayslip(models.Model):
                                  help='Count of work entries for payslip employee')
     employee_worked_days_ids = fields.One2many('employee.worked.days',
                                                'employee_payslip_id',
-                                               compute='_compute_employee_id',
+                                               # compute='_compute_employee_id',
                                                store=True, copy=True,
                                                help='Work days of payslip employee')
     date_warning_message = fields.Char(string='Warning Message',
@@ -136,6 +136,16 @@ class EmployeePayslip(models.Model):
         compute='_compute_expense_sheet_count',
         help='Number of expense sheets linked to this payslip'
     )
+    commission_report_ids = fields.Many2many(
+        'commission.report',
+        string='Commissions',
+        help='Commissions included in this payslip'
+    )
+    commission_report_count = fields.Integer(
+        string='Commission Count',
+        compute='_compute_commission_report_count',
+        help='Number of commission reports linked to this payslip'
+    )
 
     @api.depends('start_date')
     def _compute_to_date(self):
@@ -177,6 +187,12 @@ class EmployeePayslip(models.Model):
         for record in self:
             record.expense_sheet_count = len(record.expense_sheet_ids)
 
+    @api.depends('commission_report_ids')
+    def _compute_commission_report_count(self):
+        """Compute the count of commission reports linked to this payslip"""
+        for record in self:
+            record.commission_report_count = len(record.commission_report_ids)
+
     def action_view_expense_sheets(self):
         """To view corresponding expense sheets linked to the payslip"""
         return {
@@ -185,6 +201,16 @@ class EmployeePayslip(models.Model):
             'res_model': 'hr.expense.sheet',
             'type': 'ir.actions.act_window',
             'domain': [('id', 'in', self.expense_sheet_ids.ids)],
+        }
+
+    def action_view_commission_reports(self):
+        """To view corresponding commission reports linked to the payslip"""
+        return {
+            'name': 'Commissions',
+            'view_mode': 'tree,form',
+            'res_model': 'commission.report',
+            'type': 'ir.actions.act_window',
+            'domain': [('id', 'in', self.commission_report_ids.ids)],
         }
 
     @api.depends('employee_id', 'start_date', 'to_date', 'contract_id',
@@ -317,7 +343,8 @@ class EmployeePayslip(models.Model):
         self.employee_worked_days_ids = [fields.Command.clear()]
         self.employee_worked_days_ids = [fields.Command.create(rec) for rec in
                                          worked_days_line_ids]
-        input_line_values = self.get_input_line_ids(employee_id, start_date)
+        self.commission_report_ids = [fields.Command.clear()]
+        input_line_values = self.get_input_line_ids(employee_id, start_date, to_date)
         self.employee_payslip_input_ids = [fields.Command.clear()]
         self.employee_payslip_input_ids = [fields.Command.create(record) for
                                            record in input_line_values]
@@ -519,6 +546,10 @@ class EmployeePayslip(models.Model):
                         line_vals['batch_id'] = self.batch
                     line_ids.append(fields.Command.create(line_vals))
             payslip.account_move_id.line_ids = line_ids
+            # Reset report flag for commissions
+            if payslip.commission_report_ids:
+                payslip.commission_report_ids.write({'report_to_payslip': False})
+                
             payslip.write({'state': 'done'})
 
             # Validating work entries within payslip dates
@@ -566,6 +597,12 @@ class EmployeePayslip(models.Model):
             if payslip.expense_sheet_ids:
                 payslip.expense_sheet_ids.write({'payslip_id': payslip.id})
 
+    def action_link_commissions(self):
+        """Link commission reports to this payslip after computation"""
+        for payslip in self:
+            if payslip.commission_report_ids:
+                payslip.commission_report_ids.write({'payslip_id': payslip.id})
+
 
 
     def action_compute_sheet(self):
@@ -581,6 +618,7 @@ class EmployeePayslip(models.Model):
                 if self.gratuity_settlement_ids:
                     self.gratuity_settlement_id = self.gratuity_settlement_ids[
                         0]
+                payslip.action_link_commissions()
                 lines = [fields.Command.create(line) for line in
                          self._get_payslip_lines(contract_ids, payslip)]
                 payslip.sudo().write(
@@ -609,7 +647,7 @@ class EmployeePayslip(models.Model):
             '&', ('date_end', '>=', start_date), ('date_start', '<=', to_date)])
         return contracts.ids
 
-    def get_input_line_ids(self, employee, date_from):
+    def get_input_line_ids(self, employee, date_from, date_to):
         """To get the other input values"""
         input_line_values = []
         attachment = self.env['employee.salary.attachment'].sudo().search([
@@ -652,6 +690,38 @@ class EmployeePayslip(models.Model):
             for expense in expense_sheets:
                 self.expense_sheet_ids = [(4, expense.id)]
 
+        if employee.user_id:
+            # Search for commissions manually marked for the next payslip
+            commission_reports = self.env['commission.report'].sudo().search([
+                ('user_id', '=', employee.user_id.id),
+                ('plan_id.state', '=', 'approved'),
+                ('report_to_payslip', '=', True),
+                ('remaining_amount', '>', 0)
+            ])
+
+            if commission_reports:
+                commission_input_type = self.env.ref(
+                    'cyllo_payroll_management.employee_payslip_other_input_commission',
+                    raise_if_not_found=False
+                )
+                if commission_input_type:
+                    report_links = []
+                    for commission in commission_reports:
+                        delta = commission.remaining_amount
+                        if delta > 0:
+                            input_line_values.append({
+                                'type_id': commission_input_type.id,
+                                'code': commission_input_type.code,
+                                'amount': delta,
+                                'payslip_id': self.id,
+                                'is_attachment': False,
+                                'commission_report_id': commission.id
+                            })
+                            report_links.append(fields.Command.link(commission.id))
+                    
+                    if report_links:
+                        self.commission_report_ids = report_links
+
         # Add advance salary deductions
         advances = self.env['hr.advance.salary'].get_active_advances_for_employee(
             employee.id, date_from
@@ -669,7 +739,7 @@ class EmployeePayslip(models.Model):
                     # Deduction starts from the NEXT month after approval
                     approval_start_of_month = advance.approval_date.replace(day=1)
                     payslip_start_of_month = date_from.replace(day=1)
-
+                    
                     if advance.approval_date and payslip_start_of_month >= approval_start_of_month:
                         # Calculate deduction using the helper method from the model
                         deduction = min(advance._get_monthly_deduction_amount(contract=self.contract_id), advance.remaining_amount)
@@ -682,7 +752,7 @@ class EmployeePayslip(models.Model):
                                 ('date', '=', payslip_month),
                                 ('payslip_id', 'in', [False, self.id])
                             ], limit=1)
-
+                            
                             if not schedule_line:
                                 schedule_line = self.env['hr.advance.salary.line'].sudo().create({
                                     'advance_id': advance.id,
@@ -1203,7 +1273,7 @@ class EmployeePayslip(models.Model):
                                                                   date_from,
                                                                   date_to,
                                                                   contract_id)
-        employee_input_line_ids = self.get_input_line_ids(employee, date_from)
+        employee_input_line_ids = self.get_input_line_ids(employee, date_from, date_to)
         res['value'].update({'structure_id': structure.id,
                              'employee_worked_days_ids': employee_worked_days_line_ids,
                              'employee_payslip_input_ids': employee_input_line_ids})
@@ -1374,5 +1444,11 @@ class EmployeePayslipInput(models.Model):
         'hr.advance.salary',
         string='Advance Salary',
         help='Link to the advance salary record this deduction is for',
+        ondelete='set null'
+    )
+    commission_report_id = fields.Many2one(
+        'commission.report',
+        string='Commission Report',
+        help='Link to the commission report this input is for',
         ondelete='set null'
     )

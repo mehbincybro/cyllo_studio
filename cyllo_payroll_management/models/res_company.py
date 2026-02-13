@@ -27,3 +27,7 @@ class ResCompany(models.Model):
     _inherit = 'res.company'
 
     batch_move_line = fields.Boolean(string='Batch Move', help='To get the value from the settings')
+    advance_salary_account_id = fields.Many2one('account.account', string='Advance Salary Account',
+                                               help='Account to be used for Advance Salary bill creation (Debit Account)')
+    advance_salary_payment_account_id = fields.Many2one('account.account', string='Advance Salary Payment Account',
+                                                       help='Account to be used for Advance Salary payment (Credit Account)')

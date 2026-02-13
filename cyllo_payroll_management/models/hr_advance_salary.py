@@ -21,6 +21,8 @@
 #############################################################################
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
+from dateutil.relativedelta import relativedelta
+
 
 class HrAdvanceSalary(models.Model):
     _name = 'hr.advance.salary'
@@ -34,6 +36,14 @@ class HrAdvanceSalary(models.Model):
         default="New",
         copy=False,
         readonly=True
+    )
+
+    company_id = fields.Many2one(
+        'res.company',
+        string="Company",
+        required=True,
+        default=lambda self: self.env.company,
+        index=True
     )
 
     employee_id = fields.Many2one(
@@ -53,18 +63,18 @@ class HrAdvanceSalary(models.Model):
         required=True,
         tracking=True
     )
-    
+
     deduction_type = fields.Selection([
         ('fixed', 'Fixed Amount'),
         ('percentage', 'Percentage of Monthly Wage')
     ], string="Deduction Type", default='fixed', required=True,
         help="Choose how to calculate monthly deductions")
-    
+
     deduction_amount = fields.Float(
         string="Fixed Deduction Amount",
         help="Fixed amount to deduct from each payslip"
     )
-    
+
     deduction_percentage = fields.Float(
         string="Deduction Percentage",
         help="Percentage to deduct from each payslip (0-100)"
@@ -111,7 +121,12 @@ class HrAdvanceSalary(models.Model):
         tracking=True,
         help="Vendor bill created for this advance salary"
     )
-
+    payment_move_ids = fields.Many2many(
+        'account.move',
+        string="Payment Entries",
+        readonly=True,
+        help="Journal entries created for manual repayments or closing"
+    )
 
     state = fields.Selection([
         ('draft', 'Draft'),
@@ -129,7 +144,7 @@ class HrAdvanceSalary(models.Model):
             self.deduction_percentage = 0.0
         elif self.deduction_type == 'percentage':
             self.deduction_amount = 0.0
-    
+
     @api.onchange('deduction_percentage')
     def _onchange_deduction_percentage(self):
         """Validate percentage is within valid range (0-100)"""
@@ -138,7 +153,8 @@ class HrAdvanceSalary(models.Model):
         elif self.deduction_percentage > 100:
             self.deduction_percentage = 100.0
 
-    @api.depends('deduction_type', 'deduction_amount', 'deduction_percentage', 'employee_id')
+    @api.depends('deduction_type', 'deduction_amount', 'deduction_percentage',
+                 'employee_id')
     def _compute_monthly_deduction_amount(self):
         """Compute the monthly deduction amount based on the deduction type"""
         for rec in self:
@@ -149,22 +165,22 @@ class HrAdvanceSalary(models.Model):
         self.ensure_one()
         if self.deduction_type == 'fixed':
             return self.deduction_amount
-        
+
         if not contract:
             contract = self.env['hr.contract'].sudo().search([
                 ('employee_id', '=', self.employee_id.id),
                 ('state', '=', 'open')
             ], limit=1)
-        
+
         if not contract:
             return 0.0
 
         if self.deduction_type == 'percentage':
             # Use contract.wage which is the monthly wage
             return (contract.wage or 0.0) * (self.deduction_percentage / 100.0)
-        
+
         return 0.0
-    
+
     @api.model
     def create(self, vals):
         if vals.get('name', 'New') == 'New':
@@ -186,7 +202,7 @@ class HrAdvanceSalary(models.Model):
                 rec.deduction_percentage = 100.0
             rec.approval_date = fields.Date.today()
             rec.state = 'approved'
-            
+
             # Generate schedule
             rec._generate_deduction_schedule()
 
@@ -199,31 +215,51 @@ class HrAdvanceSalary(models.Model):
         for rec in self:
             if rec.bill_id:
                 continue
-                
+
             # Find the partner for the employee
             partner = rec.employee_id.work_contact_id or rec.employee_id.user_id.partner_id
             if not partner:
-                partner = self.env['res.partner'].search([('name', '=', rec.employee_id.name)], limit=1)
-                
-            if not partner:
-                raise UserError(_("Cannot find a related partner for this employee. Please set a work contact or user."))
+                partner = self.env['res.partner'].search(
+                    [('name', '=', rec.employee_id.name)], limit=1)
 
-            # Create Vendor Bill
+            if not partner:
+                raise UserError(
+                    _("Cannot find a related partner for this employee. Please set a work contact or user."))
+
+            # Retrieve configuration
+            company = rec.employee_id.company_id or self.env.user.company_id
+            debit_account = company.advance_salary_account_id
+            credit_account = company.advance_salary_payment_account_id
+
+            if not debit_account or not credit_account:
+                raise UserError(
+                    _("Please configure both 'Advance Salary Account' and 'Payment Account' in Payroll Settings."))
+
+            # Create Journal Entry
             move_vals = {
-                'move_type': 'in_invoice',
-                'partner_id': partner.id,
+                'move_type': 'entry',
                 'date': fields.Date.today(),
                 'invoice_date': fields.Date.today(),
                 'ref': rec.name,
-                'invoice_line_ids': [(0, 0, {
-                    'name': f"Advance Salary for {rec.employee_id.name} ({rec.name})",
-                    'quantity': 1,
-                    'price_unit': rec.amount,
-                    # You might need an account here depending on config
-                    # 'account_id': ... 
-                })],
+                'line_ids': [
+                    (0, 0, {
+                        'name': f"Advance Salary for {rec.employee_id.name} ({rec.name})",
+                        'partner_id': partner.id,
+                        'account_id': debit_account.id,
+                        'debit': rec.amount,
+                        'credit': 0.0,
+                    }),
+                    (0, 0, {
+                        'name': f"Advance Salary for {rec.employee_id.name} ({rec.name})",
+                        'partner_id': partner.id,
+                        'account_id': credit_account.id,
+                        'debit': 0.0,
+                        'credit': rec.amount,
+                    }),
+                ],
             }
             bill = self.env['account.move'].sudo().create(move_vals)
+            bill.action_post()  # Post the entry as it's a journal entry
             rec.bill_id = bill.id
             rec.state = 'paid'
             return {
@@ -249,12 +285,17 @@ class HrAdvanceSalary(models.Model):
         for rec in self:
             rec.state = 'paid'
 
-    @api.depends('payslip_input_ids', 'payslip_input_ids.amount')
+    @api.depends('payslip_input_ids', 'payslip_input_ids.amount',
+                 'payment_move_ids', 'payment_move_ids.amount_total')
     def _compute_deducted_amount(self):
-        """Calculate total amount deducted from payslips"""
+        """Calculate total amount deducted from payslips and manual payments"""
         for rec in self:
             # Sum absolute values since amounts are stored as negative
-            rec.deducted_amount = abs(sum(rec.payslip_input_ids.mapped('amount')))
+            payslip_deductions = abs(
+                sum(rec.payslip_input_ids.mapped('amount')))
+            # Add manual payments (assuming credit entries to advance account in payment moves)
+            manual_payments = sum(rec.payment_move_ids.mapped('amount_total'))
+            rec.deducted_amount = payslip_deductions + manual_payments
 
     @api.depends('amount', 'deducted_amount')
     def _compute_remaining_amount(self):
@@ -300,49 +341,93 @@ class HrAdvanceSalary(models.Model):
         """Generate predicted deduction lines"""
         self.ensure_one()
         self.line_ids.unlink()
-        
+
         remaining = self.amount
         monthly = self.monthly_deduction_amount
         if monthly <= 0:
             return  # Or raise error?
 
-        current_date = (self.approval_date or fields.Date.today()).replace(day=1)
-        
+        current_date = (self.approval_date or fields.Date.today()).replace(
+            day=1)
+        # Start deduction from next month? Usually advance is deducted from next month or current?
+        # Let's assume next month for consistency with reschedule_balance, 
+        # or keeping current month if that was the intent. 
+        # The previous code started from approval_date. Let's stick to that but use relativedelta.
+
         lines = []
-        while remaining > 0:
+        while remaining > 0.01:
             deduction = min(monthly, remaining)
             lines.append((0, 0, {
                 'date': current_date,
                 'amount': deduction,
+                'state': 'planned'
             }))
             remaining -= deduction
-            # Increment month
-            if current_date.month == 12:
-                current_date = current_date.replace(year=current_date.year + 1, month=1)
-            else:
-                current_date = current_date.replace(month=current_date.month + 1)
-        
+            current_date += relativedelta(months=1)
+
         self.write({'line_ids': lines})
+
+    def reschedule_balance(self):
+        """Reschedule the remaining balance"""
+        self.ensure_one()
+        # Remove only planned lines
+        self.line_ids.filtered(lambda l: l.state == 'planned').unlink()
+
+        # Recalculate remaining amount (will be updated by _compute_remaining_amount)
+        # But we need it now for scheduling
+        remaining = self.amount - self.deducted_amount
+
+        if remaining <= 0:
+            return
+
+        monthly = self.monthly_deduction_amount
+        if monthly <= 0:
+            # Prevent infinite loop if monthly is 0, defaults to full remaining
+            monthly = remaining
+
+        # Start from next month relative to today
+        current_date = (fields.Date.today() + relativedelta(months=1)).replace(
+            day=1)
+
+        lines = []
+        while remaining > 0.01:  # Float epsilon
+            deduction = min(monthly, remaining)
+            lines.append((0, 0, {
+                'date': current_date,
+                'amount': deduction,
+                'state': 'planned'
+            }))
+            remaining -= deduction
+            current_date += relativedelta(months=1)
+
+        self.write({'line_ids': lines})
+
 
 class HrAdvanceSalaryLine(models.Model):
     _name = 'hr.advance.salary.line'
     _description = 'Advance Salary Deduction Line'
     _order = 'date asc'
 
-    advance_id = fields.Many2one('hr.advance.salary', string="Advance Request", ondelete='cascade')
+    advance_id = fields.Many2one('hr.advance.salary', string="Advance Request",
+                                 ondelete='cascade')
     date = fields.Date(string="Deduction Month")
     amount = fields.Float(string="Amount")
-    payslip_id = fields.Many2one('employee.payslip', string="Payslip", readonly=True)
+    payslip_id = fields.Many2one('employee.payslip', string="Payslip",
+                                 readonly=True)
     state = fields.Selection([
         ('planned', 'Planned'),
         ('pending', 'Pending'),
-        ('paid', 'Paid')
+        ('paid', 'Paid'),
+        ('canceled', 'Canceled')
     ], string="Status", compute="_compute_state", store=True)
+    is_canceled = fields.Boolean(string="Is Canceled", default=False)
 
-    @api.depends('payslip_id', 'payslip_id.state')
+    @api.depends('payslip_id', 'payslip_id.state', 'is_canceled')
     def _compute_state(self):
         for rec in self:
-            if not rec.payslip_id:
+            if rec.is_canceled:
+                rec.state = 'canceled'
+            elif not rec.payslip_id:
                 rec.state = 'planned'
             else:
                 rec.state = 'paid'

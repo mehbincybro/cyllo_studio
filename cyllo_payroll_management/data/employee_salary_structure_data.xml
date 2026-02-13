@@ -22,7 +22,8 @@
             ref('employee_salary_rule_assignment_of_salary'),
             ref('employee_salary_rule_gratuity_settlement'),
             ref('employee_salary_rule_expense_reimbursement'),
-            ref('employee_salary_rule_advance_salary_deduction')
+            ref('employee_salary_rule_advance_salary_deduction'),
+            ref('employee_salary_rule_commission')
        ])]"/>
 
 
@@ -33,7 +34,8 @@
                     ref('employee_payslip_other_input_assignment_of_salary'),
                     ref('employee_payslip_other_input_child_support'),
                     ref('employee_payslip_other_input_expense_reimbursement'),
-                    ref('employee_payslip_other_input_deduction')
+                    ref('employee_payslip_other_input_deduction'),
+                    ref('employee_payslip_other_input_commission')
                ])]"/>
 
         <!-- Company -->
