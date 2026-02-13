@@ -39,3 +39,10 @@ class IrModelButtons(models.Model):
             if button.string and button.name:
                 name = f"{button.string}({name})"
             button.display_name = name
+
+    @api.model
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name:
+            domain = ['|', ('name', operator, name), ('string', operator, name)] + domain
+        return self._search(domain, limit=limit, order=order)

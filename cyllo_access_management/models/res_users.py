@@ -19,7 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import fields, models, api
+from odoo.exceptions import AccessDenied
+
 class ResUsers(models.Model):
     _inherit = "res.users"
 
@@ -51,3 +53,25 @@ class ResUsers(models.Model):
                 self.write({"groups_id": commands})
 
         return res
+
+    def _check_profile_management(self):
+        access_count = self.env['profile.management'].sudo().search_count([
+            ('profile_ids', 'in', self.profile_ids.ids),
+            ('is_activated', '=', True),
+            ('disable_login', '=', True)
+        ])
+        if access_count > 0:
+            raise AccessDenied("Your login is blocked by the administrator. "
+                               "Please contact the administrator.")
+
+    @classmethod
+    def authenticate(cls, db, login, password, user_agent_env):
+        uid = super().authenticate(db, login, password, user_agent_env)
+
+        if uid:
+            with cls.pool.cursor() as cr:
+                env = api.Environment(cr, uid, {})
+                user = env.user
+                user._check_profile_management()
+
+        return uid

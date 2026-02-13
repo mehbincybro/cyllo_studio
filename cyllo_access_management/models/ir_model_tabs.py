@@ -37,3 +37,10 @@ class IrModelTabs(models.Model):
             if tab.string and tab.name:
                 name = f"{tab.string}({name})"
             tab.display_name = name
+
+    @api.model
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name:
+            domain = ['|', ('name', operator, name), ('string', operator, name)] + domain
+        return self._search(domain, limit=limit, order=order)

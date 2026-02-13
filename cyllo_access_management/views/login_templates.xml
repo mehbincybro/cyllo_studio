@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="login_inherit" inherit_id="web.login">
+        <xpath expr="//input[@id='password']/.." position="after">
+            <p class="alert alert-danger" t-if="profile_error" role="alert">
+                <t t-esc="profile_error"/>
+            </p>
+        </xpath>
+    </template>
+</odoo>

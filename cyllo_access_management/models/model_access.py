@@ -19,7 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import api,fields,models
+from odoo.exceptions import ValidationError
+
 
 class ModelAccess(models.Model):
     _name = 'model.access'
@@ -28,7 +30,8 @@ class ModelAccess(models.Model):
 
     profile_management_id = fields.Many2one('profile.management',
                                             string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model')
+    model_id = fields.Many2one('ir.model', string='Model',
+                               required=True, ondelete='cascade')
     is_readonly = fields.Boolean('Read-only')
     hide_create = fields.Boolean('Hide Create')
     hide_edit = fields.Boolean('Hide Edit')
@@ -38,3 +41,20 @@ class ModelAccess(models.Model):
     hide_export = fields.Boolean('Hide Export')
     hide_reports = fields.Boolean('Hide Reports')
     hide_actions = fields.Boolean('Hide Actions')
+
+    @api.constrains('is_readonly','hide_create','hide_edit','hide_delete',
+                    'hide_archive','hide_duplicate','hide_export','hide_reports','hide_actions')
+    def _constraint_attribute(self):
+        for record in self:
+            if not any([
+                record.is_readonly,
+                record.hide_create,
+                record.hide_edit,
+                record.hide_delete,
+                record.hide_archive,
+                record.hide_duplicate,
+                record.hide_export,
+                record.hide_reports,
+                record.hide_actions,
+            ]):
+                raise ValidationError('Provide at least one attribute')

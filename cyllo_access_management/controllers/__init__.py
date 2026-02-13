@@ -19,24 +19,4 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api,fields,models
-from odoo.exceptions import ValidationError
-
-
-class DomainAccess(models.Model):
-    _name = 'domain.access'
-    _description = 'Domain Access'
-    _rec_name = 'model_id'
-
-    profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model',
-                               required=True, ondelete='cascade')
-    model_name = fields.Char(related='model_id.model',string='Model Name')
-    domain = fields.Text(default='[]', string='Domain',)
-
-    @api.constrains('domain')
-    def _constraint_domain(self):
-        for record in self:
-            if record.domain == '[]':
-                raise ValidationError('Domain cannot be empty')
+from . import main

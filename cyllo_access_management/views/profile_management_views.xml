@@ -36,6 +36,7 @@
                                 <field name="is_readonly" invisible="not profile_ids"/>
                                 <field name="disable_chatter" invisible="not profile_ids"/>
                                 <field name="disable_debug_mode" invisible="not profile_ids"/>
+                                <field name="disable_login" invisible="not profile_ids"/>
                             </group>
                         </group>
                     </div>
@@ -71,13 +72,13 @@
                         </page>
                         <page string="Edit Field Access">
                                 <field name="field_access_ids">
-                                    <tree editable="bottom">
+                                    <tree>
                                         <field name="model_id"  context="{'model': True}"/>
+                                        <field name="model_name"  invisible="1" column_invisible="1"/>
                                         <field name="field_id" domain="[('model_id','=',model_id)]"/>
-                                        <field name="is_readonly"/>
-                                        <field name="is_invisible"/>
-                                        <field name="is_required"/>
-                                        <field name="remove_link"/>
+                                        <field name="field_attribute"/>
+                                        <field name="domain"
+                                               invisible="field_attribute == 'remove_link'"/>
                                     </tree>
                                 </field>
                         </page>
@@ -102,7 +103,7 @@
                                     <tree>
                                         <field name="model_id"  context="{'model': True}"/>
                                         <field name="model_name" invisible="1" column_invisible="1"/>
-                                        <field name="domain" widget="domain" options="{'model': 'model_name'}"/>
+                                        <field name="domain"/>
                                     </tree>
                                 </field>
                         </page>

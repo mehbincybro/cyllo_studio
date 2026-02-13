@@ -28,9 +28,19 @@ class FieldAccess(models.Model):
 
     profile_management_id = fields.Many2one('profile.management',
                                             string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model')
-    field_id = fields.Many2one('ir.model.fields',string='Field')
-    is_readonly = fields.Boolean('Readonly')
-    is_invisible = fields.Boolean('Invisible')
-    is_required = fields.Boolean('Required')
-    remove_link = fields.Boolean('Remove External Link')
+    model_id = fields.Many2one('ir.model',string='Model',
+                               required=True,ondelete='cascade',
+                               )
+    model_name = fields.Char(related='model_id.model', string='Model Name')
+    field_id = fields.Many2one('ir.model.fields',string='Field',
+                               required=True,ondelete='cascade',)
+    field_attribute = fields.Selection(string="Field Attribute",
+                                       selection=[('readonly','Readonly'),
+                                                  ('invisible','Invisible'),
+                                                  ('required', 'Required'),
+                                                  ('remove_link', 'Remove External Link'),
+                                                  ],
+                                       default='readonly',
+                                       required=True,
+                                       )
+    domain = fields.Text(default='[]', string='Domain')

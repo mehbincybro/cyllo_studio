@@ -38,3 +38,10 @@ class IrModelFilters(models.Model):
             if filter.string and filter.name:
                 name = f"{filter.string}({name})"
             filter.display_name = name
+
+    @api.model
+    def _name_search(self, name, domain=None, operator='ilike', limit=None, order=None):
+        domain = domain or []
+        if name:
+            domain = ['|', ('name', operator, name), ('string', operator, name)] + domain
+        return self._search(domain, limit=limit, order=order)

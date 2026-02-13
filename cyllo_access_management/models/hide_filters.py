@@ -19,7 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import api,fields, models
+from odoo.exceptions import ValidationError
+
 
 class HideFiltersTabs(models.Model):
     _name = 'hide.filters'
@@ -28,7 +30,9 @@ class HideFiltersTabs(models.Model):
 
     profile_management_id = fields.Many2one('profile.management',
                                             string='Profile Management ID')
-    model_id = fields.Many2one('ir.model', string='Model')
+    model_id = fields.Many2one('ir.model', string='Model',
+                               required=True, ondelete='cascade',
+                               )
     filter_ids = fields.Many2many('ir.model.filters',
                                   'hide_filters_rel','hide_id',
                                   'filter_id',string='Hide Filters')
@@ -36,3 +40,9 @@ class HideFiltersTabs(models.Model):
     group_ids = fields.Many2many('ir.model.filters',
                                  'hide_groups_rel','hide_id',
                                  'filter_id',string='Hide Groups')
+
+    @api.constrains('filter_ids', 'group_ids')
+    def _constraint_filter_ids_group_ids(self):
+        for record in self:
+            if not (record.filter_ids or record.group_ids):
+                raise ValidationError('Provide at least one filter or group')

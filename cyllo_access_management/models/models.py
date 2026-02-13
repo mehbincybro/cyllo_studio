@@ -33,9 +33,12 @@ class BaseModel(models.AbstractModel):
         user = self.env.user
         # Use allowed_company_ids from context for broader matching
         allowed_companies = self.env.context.get('allowed_company_ids', [self.env.company.id])
-        
+        # During module installation/upgrade
+        if not self.env.registry.ready:
+            return res
+
         try:
-            with self.env.cr.savepoint():
+            with self.env.cr.savepoint(flush=False):
                 profiles = user.profile_ids
                 if not profiles:
                     return res
@@ -45,6 +48,7 @@ class BaseModel(models.AbstractModel):
                     ('is_activated', '=', True),
                     '|', ('company_ids', 'in', allowed_companies), ('company_ids', '=', False)
                 ])
+        # Catch error if tables don't exist yet (during module installation)
         except psycopg2.errors.UndefinedTable:
             return res
 
@@ -52,7 +56,7 @@ class BaseModel(models.AbstractModel):
             return res
 
         model = res['model']
-        # Aggregate flags across all matching profile management records
+
         is_profile_readonly = any(access_mgmt.mapped('is_readonly'))
         disable_chatter = any(access_mgmt.mapped('disable_chatter'))
 
@@ -121,21 +125,72 @@ class BaseModel(models.AbstractModel):
                 for node_field in arch.xpath(
                         f"//field[@name='{rule.field_id.name}']"):
 
-                    if rule.is_readonly:
-                        node_field.set("readonly", "1")
+                    if rule.field_attribute in ['readonly', 'invisible', 'required']:
+                        existing_attr = node_field.get(rule.field_attribute)
+                        rule_domain = eval(rule.domain) if rule.domain else []
+                        new_expr = self._domain_to_string(rule_domain)
+                        
+                        final_expr = new_expr
+                        
+                        if existing_attr:
+                            # If existing attribute looks like a domain list, convert it first
+                            if existing_attr.strip().startswith('['):
+                                try:
+                                    existing_list = eval(existing_attr)
+                                    existing_expr = self._domain_to_string(existing_list)
+                                except Exception:
+                                    existing_expr = existing_attr
+                            else:
+                                existing_expr = existing_attr
+                            
+                            if existing_expr in ["1", "True"]:
+                                final_expr = "1"
+                            elif existing_expr in ["0", "False"]:
+                                final_expr = new_expr
+                            elif new_expr in ["True", "1"]:
+                                final_expr = "1"
+                            elif new_expr in ["False", "0"]:
+                                final_expr = existing_expr
+                            else:
+                                final_expr = f"({existing_expr}) or ({new_expr})"
+                        
+                        if final_expr == "True": final_expr = "1"
+                        if final_expr == "False": final_expr = "0"
 
-                    if rule.is_invisible:
-                        node_field.set("invisible", "1")
-
-                    if rule.is_required:
-                        node_field.set("required", "1")
-
-                    if rule.remove_link:
+                        node_field.set(rule.field_attribute, final_expr)
+                    if rule.field_attribute == 'remove_link':
                         node_field.set("options",
                                        '{"no_open": True, "no_create": True}')
 
+        if field_rules:
+            domain_fields = set()
+            for rule in field_rules:
+                if rule.domain:
+                    try:
+                        dom = eval(rule.domain)
+                        for item in dom:
+                            if isinstance(item, (list, tuple)) and len(item) == 3:
+                                field_name = item[0].split('.')[0]
+                                domain_fields.add(field_name)
+                    except Exception:
+                        pass
+            
+            existing_fields = set(res.get('fields', {}).keys())
+            missing_fields = domain_fields - existing_fields
+            
+            if missing_fields:
+                if model in self.env:
+                    new_fields_defs = self.env[model].fields_get(allfields=list(missing_fields))
+                    
+                    if 'fields' not in res:
+                        res['fields'] = {}
+                    res['fields'].update(new_fields_defs)
+
+                    for field_name in missing_fields:
+                        node = etree.Element('field', {'name': field_name, 'invisible': '1'})
+                        arch.append(node)
+
         if model_rules:
-            # Aggregate model rules: if ANY rule sets a restriction, apply it
             if any(model_rules.mapped('is_readonly')):
                 arch.set("edit", "false")
                 arch.set("create", "false")
@@ -159,13 +214,152 @@ class BaseModel(models.AbstractModel):
         res['arch'] = etree.tostring(arch, encoding="unicode")
         return res
 
+    def _domain_to_string(self, domain):
+        """
+        Converts a domain list to a Python boolean expression string.
+
+        Domains use prefix notation with operators:
+        - '&' = AND operator (binary - takes 2 operands)
+        - '|' = OR operator (binary - takes 2 operands)
+        - '!' = NOT operator (unary - takes 1 operand)
+        - Tuples = leaf conditions in format (field, operator, value)
+
+        Examples:
+            Input:  [('state', '=', 'draft')]
+            Output: "state == 'draft'"
+
+            Input:  ['|', ('active', '=', True), ('archived', '=', False)]
+            Output: "(active == True or archived == False)"
+
+            Input:  ['&', ('age', '>', 18), ('country', '=', 'US')]
+            Output: "(age > 18 and country == 'US')"
+
+        Args:
+            domain (list): Domain in prefix notation
+
+        Returns:
+            str: Python boolean expression that can be used in view attributes
+        """
+        if not domain:
+            return "True"
+
+        # Index-based parsing for prefix notation
+        domain_length = len(domain)
+        current_position = 0  # Tracks current position in domain list during parsing
+
+        def parse_next_expression():
+            """
+            Recursively parses the next expression from the domain.
+
+            This uses nonlocal to maintain parsing position across recursive calls.
+            Each call consumes one token and advances current_position.
+
+            Returns:
+                str: Parsed expression as a Python boolean string
+            """
+            nonlocal current_position
+
+            # Base case: reached end of domain
+            if current_position >= domain_length:
+                return "True"
+
+            current_token = domain[current_position]
+            current_position += 1  # Consume this token
+
+            # Handle logical operators (prefix notation)
+            if isinstance(current_token, str):
+                if current_token == '&':
+                    # AND operator: needs 2 operands
+                    left_operand = parse_next_expression()
+                    right_operand = parse_next_expression()
+                    return f"({left_operand} and {right_operand})"
+
+                elif current_token == '|':
+                    # OR operator: needs 2 operands
+                    left_operand = parse_next_expression()
+                    right_operand = parse_next_expression()
+                    return f"({left_operand} or {right_operand})"
+
+                elif current_token == '!':
+                    # NOT operator: needs 1 operand
+                    negated_expression = parse_next_expression()
+                    return f"(not {negated_expression})"
+
+                # Unknown string operator, treat as no-op
+                return "True"
+
+            # Handle leaf conditions (field comparisons)
+            elif isinstance(current_token, (list, tuple)):
+                # Valid leaf must be a 3-tuple: (field_name, operator, value)
+                if len(current_token) != 3:
+                    return "True"
+
+                field_name, comparison_operator, comparison_value = current_token
+
+                # Convert Python values to their string representations
+                if comparison_value is True:
+                    value_as_string = "True"
+                elif comparison_value is False:
+                    value_as_string = "False"
+                elif comparison_value is None:
+                    # None evaluates to False
+                    value_as_string = "False"
+                elif isinstance(comparison_value, str):
+                    # String values need quotes
+                    value_as_string = f"'{comparison_value}'"
+                elif isinstance(comparison_value, list):
+                    # Lists (for 'in' operator) rendered as-is
+                    value_as_string = f"{comparison_value}"
+                else:
+                    # Numbers, dates, etc.
+                    value_as_string = str(comparison_value)
+
+                # Map operators to Python operators
+                if comparison_operator == '=':
+                    return f"{field_name} == {value_as_string}"
+                if comparison_operator == '!=':
+                    return f"{field_name} != {value_as_string}"
+                if comparison_operator == 'in':
+                    return f"{field_name} in {value_as_string}"
+                if comparison_operator == 'not in':
+                    return f"{field_name} not in {value_as_string}"
+                if comparison_operator == '>':
+                    return f"{field_name} > {value_as_string}"
+                if comparison_operator == '>=':
+                    return f"{field_name} >= {value_as_string}"
+                if comparison_operator == '<':
+                    return f"{field_name} < {value_as_string}"
+                if comparison_operator == '<=':
+                    return f"{field_name} <= {value_as_string}"
+
+                # Unknown operator, return as-is
+                return f"{field_name} {comparison_operator} {value_as_string}"
+
+            # Unknown token type
+            return "True"
+
+        # Parse all top-level expressions
+        # Multiple conditions at root level have implicit AND
+        parsed_expressions = []
+        while current_position < domain_length:
+            parsed_expressions.append(parse_next_expression())
+
+        # Edge case: empty domain
+        if not parsed_expressions:
+            return "True"
+
+        # Join multiple expressions with AND
+        return " and ".join(parsed_expressions)
+
     @api.model
     def _search(self, domain, *args, **kwargs):
         if self.env.context.get("skip_profile_domain"):
             return super()._search(domain, *args, **kwargs)
+        if not self.env.registry.ready:
+            return super()._search(domain, *args, **kwargs)
         user = self.env.user
         try:
-            with self.env.cr.savepoint():
+            with self.env.cr.savepoint(flush=False):
                 profiles = user.profile_ids
                 company_id = self.env.context.get('allowed_company_ids')
                 if profiles:
