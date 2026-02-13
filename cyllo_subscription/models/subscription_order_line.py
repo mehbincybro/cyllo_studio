@@ -36,7 +36,7 @@ class SubscriptionOrderLine(models.Model):
     sale_order_line_id = fields.Many2one('sale.order.line', string='Order Line',
                                          help='Sale order line')
     sale_order_id = fields.Many2one('sale.order', help='Sale order reference')
-    quantity = fields.Integer(help='Quantity of the products', readonly=True)
+    quantity = fields.Integer(help='Quantity of the products')
     company_id = fields.Many2one('res.company',
                                  default=lambda self: self.env.company,
                                  help='Current company')
@@ -53,8 +53,7 @@ class SubscriptionOrderLine(models.Model):
     subscription_order_id = fields.Many2one('subscription.order',
                                             help='Subscription order reference')
     time_based_price_id = fields.Many2one('time.based.price',
-                                          help='Time Based Price',
-                                          readonly=True)
+                                          help='Time Based Price', domain="[('product_template_id', 'in', [product_tmpl_id])]",)
     state = fields.Selection(
         related='subscription_order_id.state',
         string="Order Status",
