@@ -27,11 +27,12 @@ class SurveyUserInput(models.Model):
 
     def _mark_done(self):
         res = super()._mark_done()
-        for user_input in self:
+        for user_input in    self:
             if user_input.survey_id.create_lead:
                 lead_vals = {
                     'name': f"{user_input.survey_id.title} - {user_input.partner_id.name if user_input.partner_id else 'Anonymous'}",
-                    'type': 'lead',
+                    'type': 'opportunity',
+                    'user_id': False,
                 }
                 for line in user_input.user_input_line_ids:
                     if line.question_id.lead_field_id:
@@ -55,5 +56,4 @@ class SurveyUserInput(models.Model):
 
                 if lead_vals:
                     self.env['crm.lead'].create(lead_vals)
-
         return res

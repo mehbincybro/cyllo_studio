@@ -48,7 +48,9 @@ class ResConfigSettings(models.TransientModel):
 
     module_cyllo_crm_advance_lead = fields.Boolean(string="Advance Lead")
 
-    module_cyllo_crm_project = fields.Boolean(string="Cyllo CRM Project", help="Allows creating a project from a won CRM lead.", config_parameter='Cyllo_Crm.module_cyllo_crm_project')
+    module_cyllo_crm_project = fields.Boolean(string="Cyllo CRM Project",
+                                              help="Allows creating a project from a won CRM lead.",
+                                              config_parameter='Cyllo_Crm.module_cyllo_crm_project')
     module_cyllo_visiting_card_digitization = fields.Boolean(
         string="Cyllo Visiting Card Digitization",
         help="Enable digitization of visiting cards to automatically extract contact details and create CRM leads.",
@@ -59,6 +61,13 @@ class ResConfigSettings(models.TransientModel):
         help="Enable CRM Survey to create, manage, and analyze customer surveys directly within the CRM.",
         config_parameter="cyllo_crm.module_crm_survey"
     )
+
+    module_cyllo_crm_google_form = fields.Boolean(
+        string="CRM Google Forms Integration",
+        help="Enable CRM Google Forms to create, manage, and link Google Forms directly from CRM leads.",
+        config_parameter="cyllo_crm.module_crm_google_form"
+    )
+
     @api.onchange('module_cyllo_crm_advance_lead')
     def _onchange_module_cyllo_crm_advance_lead(self):
         if self.module_cyllo_crm_advance_lead:
@@ -93,12 +102,22 @@ class ResConfigSettings(models.TransientModel):
         # Install CRM Survey module
         if self.module_crm_survey:
             crm_survey_module = Module.search(
-                        [('name', '=', 'crm_survey'),
-                         ('state', '!=', 'installed')],
-                        limit=1
-                    )
+                [('name', '=', 'crm_survey'),
+                 ('state', '!=', 'installed')],
+                limit=1
+            )
             if crm_survey_module:
                 crm_survey_module.button_immediate_install()
+
+        # Install CRM Google Forms module
+        if self.module_cyllo_crm_google_form:
+            crm_google_form_module = Module.search(
+                [('name', '=', 'cyllo_crm_google_form'),
+                 ('state', '!=', 'installed')],
+                limit=1
+            )
+            if crm_google_form_module:
+                crm_google_form_module.button_immediate_install()
 
     def action_configure_exit_criteria(self):
         """trigger a popup in crm settings and load previously created exit criterias"""

@@ -18,27 +18,24 @@
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-##############################################################################
-
+#############################################################################
 {
-    'name': 'CRM Survey',
-    'version': '1.0.0',
-    'category': 'CRM',
-    'summary': "Manage and Analyze Customer Surveys in CRM",
-    'description': """This module enables creating, managing, and analyzing customer 
-    survey data directly within the CRM to improve customer insights and engagement.""",
+    'name': "CRM Google Form",
+    'description': 'This module used to creates CRM Leads in Odoo from Google Form submission results.',
+    'summary': 'Create CRM Leads from Google Form Submission',
+    'version': "1.0",
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base', 'crm', 'cyllo_crm', 'survey'],
+    'depends': ['cyllo_base', 'crm'],
     'data': [
-        'data/crm_lead_survey_server_action.xml',
-        'views/survey_question_views.xml',
-        'views/survey_survey_views.xml',
+        'security/ir.model.access.csv',
+        'views/res_config_settings_views.xml',
+        'views/google_form_views.xml',
     ],
-    'license': "LGPL-3",
+    'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,
     'application': False,
 }
