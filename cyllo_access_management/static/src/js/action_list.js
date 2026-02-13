@@ -6,6 +6,17 @@ import { FormController } from "@web/views/form/form_controller"
 import { onWillStart } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
+import { session } from "@web/session";
+import { ViewButton } from "@web/views/view_button/view_button";
+
+patch(ViewButton.prototype, {
+    get disabled() {
+        if (session.is_profile_readonly) {
+            return true;
+        }
+        return super.disabled;
+    },
+});
 
 patch(ListController.prototype, {
     setup() {
