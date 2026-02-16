@@ -37,7 +37,7 @@ class WebsiteSaleSubscription(WebsiteSale):
         a recomputation of the price based on the selected duration."""
 
         res = super().cart_update_json(
-            product_id, line_id, add_qty, set_qty, **kw
+            product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kw
         )
 
         order = request.website.sale_get_order()

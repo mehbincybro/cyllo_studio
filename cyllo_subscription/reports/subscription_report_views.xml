@@ -6,11 +6,20 @@
         <field name="model">subscription.report</field>
         <field name="arch" type="xml">
             <pivot string="Sales Analysis" sample="1">
-                <field name="recurring_revenue"/>
-                <field name="weekly_price_sum"/>
-                <field name="monthly_price_sum"/>
-                <field name="yearly_price_sum"/>
                 <field name="partner_id" type="row"/>
+                <field name="recurring_revenue" type="measure"/>
+                <field name="arr" type="measure"/>
+                <field name="weekly_price_sum" type="measure"/>
+                <field name="monthly_price_sum" type="measure"/>
+                <field name="yearly_price_sum" type="measure"/>
+                <field name="subscription_count" type="measure"/>
+                <field name="active_subscription_count" type="measure"/>
+                <field name="trial_subscription_count" type="measure"/>
+                <field name="churned_subscription_count" type="measure"/>
+                <field name="new_subscription_count" type="measure"/>
+                <field name="customer_count" type="measure"/>
+                <field name="churn_rate" type="measure"/>
+                <field name="retention_rate" type="measure"/>
             </pivot>
         </field>
     </record>
@@ -20,11 +29,13 @@
         <field name="model">subscription.report</field>
         <field name="arch" type="xml">
             <graph string="Sales Analysis" type="line" sample="1">
-                <field name="recurring_revenue"/>
-                <field name="weekly_price_sum"/>
-                <field name="monthly_price_sum"/>
-                <field name="yearly_price_sum"/>
-                <field name="partner_id"/>
+                <field name="start_date" interval="month"/>
+                <field name="recurring_revenue" type="measure"/>
+                <field name="arr" type="measure"/>
+                <field name="subscription_count" type="measure"/>
+                <field name="active_subscription_count" type="measure"/>
+                <field name="churn_rate" type="measure"/>
+                <field name="retention_rate" type="measure"/>
             </graph>
         </field>
     </record>
@@ -60,8 +71,19 @@
         <field name="arch" type="xml">
             <tree create="false" string="Subscription Analysis">
                 <field name="partner_id"/>
+                <field name="product_name"/>
+                <field name="plan_name"/>
                 <field name="state_subscription"/>
-                <field name="time_based_price_id"/>
+                <field name="recurrence_name"/>
+                <field name="start_date"/>
+                <field name="next_invoice_date"/>
+                <field name="end_date" optional="hide"/>
+                <field name="trial_end_date" optional="hide"/>
+                <field name="subscription_count"/>
+                <field name="recurring_revenue" sum="Total MRR"/>
+                <field name="arr" sum="Total ARR"/>
+                <field name="churn_rate" optional="hide"/>
+                <field name="retention_rate" optional="hide"/>
             </tree>
         </field>
     </record>
@@ -71,8 +93,96 @@
         <field name="model">subscription.report</field>
         <field name="arch" type="xml">
             <search string="Subscription Analysis">
+                <!-- Search Fields -->
                 <field name="state_subscription"/>
                 <field name="partner_id"/>
+                <field name="product_name"/>
+                <field name="plan_name"/>
+                <field name="recurrence_name"/>
+                
+                <!-- Date Filters -->
+                <filter string="This Month" name="this_month" 
+                    domain="[('start_date', '&gt;=', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d')),
+                            ('start_date', '&lt;', (context_today() + relativedelta(months=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Month" name="last_month" 
+                    domain="[('start_date', '&gt;=', (context_today() - relativedelta(months=1, day=1)).strftime('%Y-%m-%d')),
+                            ('start_date', '&lt;', (context_today() - relativedelta(day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Quarter" name="this_quarter" 
+                    domain="[('start_date', '&gt;=', (context_today() - relativedelta(day=1, month=((context_today().month-1)//3)*3+1)).strftime('%Y-%m-%d')),
+                            ('start_date', '&lt;', (context_today() + relativedelta(months=3 - ((context_today().month-1) % 3), day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Quarter" name="last_quarter" 
+                    domain="[('start_date', '&gt;=', (context_today() - relativedelta(months=3 + ((context_today().month-1) % 3), day=1)).strftime('%Y-%m-%d')),
+                            ('start_date', '&lt;', (context_today() - relativedelta(day=1, month=((context_today().month-1)//3)*3+1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="This Year" name="this_year" 
+                    domain="[('start_date', '&gt;=', context_today().strftime('%Y-01-01')),
+                            ('start_date', '&lt;', (context_today() + relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last Year" name="last_year" 
+                    domain="[('start_date', '&gt;=', (context_today() - relativedelta(years=1, month=1, day=1)).strftime('%Y-%m-%d')),
+                            ('start_date', '&lt;', context_today().strftime('%Y-01-01'))]"/>
+                
+                <separator/>
+                
+                <!-- State Filters -->
+                <filter string="Active Subscriptions" name="active" 
+                    domain="[('state_subscription', '=', 'active')]"/>
+                <filter string="Trial Subscriptions" name="trial" 
+                    domain="[('state_subscription', '=', 'trial')]"/>
+                <filter string="Churned Subscriptions" name="churned" 
+                    domain="[('state_subscription', '=', 'churned')]"/>
+                <filter string="Renewing Subscriptions" name="renew" 
+                    domain="[('state_subscription', '=', 'renew')]"/>
+                <filter string="Quotations" name="quotation" 
+                    domain="[('state_subscription', '=', 'quotation')]"/>
+                
+                <separator/>
+                
+                <!-- Revenue Filters -->
+                <filter string="High Value (MRR &gt; 1000)" name="high_value" 
+                    domain="[('recurring_revenue', '&gt;', 1000)]"/>
+                <filter string="Medium Value (MRR 100-1000)" name="medium_value" 
+                    domain="[('recurring_revenue', '&gt;=', 100), ('recurring_revenue', '&lt;=', 1000)]"/>
+                <filter string="Low Value (MRR &lt; 100)" name="low_value" 
+                    domain="[('recurring_revenue', '&lt;', 100)]"/>
+                
+                <separator/>
+                
+                <!-- Group By Options -->
+                <group expand="0" string="Group By">
+                    <!-- Date Groupings -->
+                    <filter string="Start Date: Day" name="group_start_date_day" 
+                        context="{'group_by': 'start_date:day'}"/>
+                    <filter string="Start Date: Week" name="group_start_date_week" 
+                        context="{'group_by': 'start_date:week'}"/>
+                    <filter string="Start Date: Month" name="group_start_date_month" 
+                        context="{'group_by': 'start_date:month'}"/>
+                    <filter string="Start Date: Quarter" name="group_start_date_quarter" 
+                        context="{'group_by': 'start_date:quarter'}"/>
+                    <filter string="Start Date: Year" name="group_start_date_year" 
+                        context="{'group_by': 'start_date:year'}"/>
+                    
+                    <separator/>
+                    
+                    <filter string="Next Invoice Date: Day" name="group_invoice_date_day" 
+                        context="{'group_by': 'next_invoice_date:day'}"/>
+                    <filter string="Next Invoice Date: Week" name="group_invoice_date_week" 
+                        context="{'group_by': 'next_invoice_date:week'}"/>
+                    <filter string="Next Invoice Date: Month" name="group_invoice_date_month" 
+                        context="{'group_by': 'next_invoice_date:month'}"/>
+                    
+                    <separator/>
+                    
+                    <!-- Other Groupings -->
+                    <filter string="Product" name="group_product" 
+                        context="{'group_by': 'product_name'}"/>
+                    <filter string="Plan" name="group_plan" 
+                        context="{'group_by': 'plan_name'}"/>
+                    <filter string="Customer" name="group_customer" 
+                        context="{'group_by': 'partner_id'}"/>
+                    <filter string="State" name="group_state" 
+                        context="{'group_by': 'state_subscription'}"/>
+                    <filter string="Recurrence" name="group_recurrence" 
+                        context="{'group_by': 'recurrence_name'}"/>
+                </group>
             </search>
         </field>
     </record>
