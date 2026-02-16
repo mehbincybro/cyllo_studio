@@ -116,6 +116,8 @@ patch(FormController.prototype, {
         let mode = this.props.mode || "edit";
         if (this.canEdit) {
             mode = this.env.inDialog ? "edit" : "readonly";
+        } else {
+            mode = "readonly"
         }
         res.config.mode = mode
         return res
@@ -132,7 +134,7 @@ patch(FormController.prototype, {
     },
 
     checkAutoEdit() {
-        if (this.is_auto_edit) {
+        if (this.is_auto_edit && this.canEdit) {
             this.model.root.switchMode("edit")
         }
     },

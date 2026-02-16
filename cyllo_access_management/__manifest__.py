@@ -50,6 +50,7 @@
         ],
     'assets': {
         'web.assets_backend': [
+            'cyllo_access_management/static/src/css/profile_management.css',
             'cyllo_access_management/static/src/js/action_list.js',
             'cyllo_access_management/static/src/js/debug_notification.js',
         ],

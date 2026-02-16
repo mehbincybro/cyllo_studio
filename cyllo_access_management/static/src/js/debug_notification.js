@@ -13,6 +13,9 @@ export const debugNotificationService = {
                 sticky: false,
             });
         }
+        if (session.is_profile_readonly) {
+            document.body.classList.add("o_profile_readonly");
+        }
     },
 };
 

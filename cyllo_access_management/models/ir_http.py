@@ -97,4 +97,22 @@ class IrHttp(models.AbstractModel):
             # Reset the flag after it's been consumed by the client
             if res.get('debug_denied'):
                 request.session.debug_denied = False
+
+            # Check if user has a readonly profile
+            user = request.env.user
+            profiles = user.profile_ids
+            company_id = request.env.company.id
+            is_readonly = False
+            if profiles:
+                access_mgmt = request.env['profile.management'].sudo().search([
+                    ('profile_ids', 'in', profiles.ids),
+                    ('is_activated', '=', True),
+                    ('is_readonly', '=', True),
+                    "|",
+                    ('company_ids', 'in', [company_id]),
+                    ('company_ids', '=', False)
+                ], limit=1)
+                if access_mgmt:
+                    is_readonly = True
+            res['is_profile_readonly'] = is_readonly
         return res
