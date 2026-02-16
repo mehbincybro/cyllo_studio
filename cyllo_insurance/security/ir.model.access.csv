@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+cyllo_insurance.access_insurance_policy_type,access_insurance_policy_type,cyllo_insurance.model_insurance_policy_type,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_coverage,access_insurance_coverage,cyllo_insurance.model_insurance_coverage,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_plan_coverage,access_insurance_plan_coverage,cyllo_insurance.model_insurance_plan_coverage,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_plan,access_insurance_plan,cyllo_insurance.model_insurance_plan,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_policy,access_insurance_policy,cyllo_insurance.model_insurance_policy,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_claim,access_insurance_claim,cyllo_insurance.model_insurance_claim,base.group_user,1,1,1,1
+cyllo_insurance.access_insurance_policy_coverage,access_insurance_policy_coverage,cyllo_insurance.model_insurance_policy_coverage,base.group_user,1,1,1,1

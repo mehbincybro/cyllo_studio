@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_claim_tree" model="ir.ui.view">
+        <field name="name">insurance.claim.tree</field>
+        <field name="model">insurance.claim</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="claim_no"/>
+                <field name="policy_id"/>
+                <field name="claimed_amount"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_claim_form" model="ir.ui.view">
+        <field name="name">insurance.claim.form</field>
+        <field name="model">insurance.claim</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_submit"
+                            string="Submit"
+                            type="object"
+                            class="btn-primary"/>
+<!--                            states="draft"-->
+
+                    <button name="action_approve"
+                            string="Approve"
+                            type="object"
+                            class="btn btn-success"/>
+<!--                            states="submitted"-->
+
+                    <button name="action_reject"
+                            string="Reject"
+                            type="object"
+                            class="btn-danger"/>
+
+                    <button name="action_mark_paid"
+                            string="Mark Paid"
+                            type="object"
+                            class="btn-success"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+
+                <sheet>
+                    <group>
+                        <field name="currency_id" invisible="True"/>
+                        <field name="claim_no" readonly="1"/>
+                        <field name="policy_id"/>
+                        <field name="state"/>
+                    </group>
+
+                    <group>
+                        <field name="incident_date"/>
+                        <field name="filing_date"/>
+                        <field name="approved_date"/>
+                    </group>
+
+                    <group>
+                        <field name="claimed_amount"/>
+                        <field name="approved_amount"/>
+                        <field name="deductible_applied" readonly="1"/>
+                        <field name="payout_amount" readonly="1"/>
+                    </group>
+
+                    <field name="description"/>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+</odoo>
