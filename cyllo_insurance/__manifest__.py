@@ -33,6 +33,7 @@
         'mail',],
     # 'icon': '/cyllo_asset_management/static/description/assets.svg',
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/sequence.xml',
         'views/insurance_claim_views.xml',
