@@ -9,20 +9,17 @@
     </record>
 
     <!-- TREE VIEW -->
-    <record id="view_google_form_tree" model="ir.ui.view">
-        <field name="name">google.form.tree</field>
-        <field name="model">google.form</field>
-        <field name="arch" type="xml">
-            <tree string="Google Forms"
-                  decoration-success="google_form_id != False"
-                  decoration-warning="google_form_id == False">
-                <field name="name" string="Form Title"/>
-                <field name="google_form_id" string="Google Form ID"/>
-                <field name="form_url" widget="url" string="Public URL"/>
-                <field name="active" widget="boolean_toggle"/>
-            </tree>
-        </field>
-    </record>
+        <record id="view_google_form_tree" model="ir.ui.view">
+            <field name="name">google.form.tree</field>
+            <field name="model">google.form</field>
+            <field name="arch" type="xml">
+                <tree string="Google Forms">
+                    <field name="name" string="Form Title"/>
+                    <field name="form_url" widget="url" string="Public URL"/>
+                    <field name="active" widget="boolean_toggle"/>
+                </tree>
+            </field>
+        </record>
 
     <!-- FORM VIEW -->
     <record id="view_google_form_form" model="ir.ui.view">
@@ -33,14 +30,16 @@
                 <header>
                     <button name="create_google_form"
                             type="object"
-                            string="Create / Sync Google Form"
+                            string="Create Google Form"
                             class="btn-primary"
-                            confirm="Push all questions to Google Forms?"/>
+                            confirm="Push all questions to Google Forms?"
+                            invisible="not active"
+                    />
                     <button name="fetch_responses_create_leads"
                             type="object"
                             string="Fetch Responses to CRM"
                             class="btn-secondary"
-                            invisible="not google_form_id"/>
+                            invisible="not google_form_id or not active"/>
                 </header>
 
                 <sheet>
@@ -53,12 +52,14 @@
 
                     <group string="Google Form Info">
                         <group>
-                            <field name="google_form_id" readonly="1"/>
-                            <field name="form_url" readonly="1" widget="url"/>
+                            <field name="google_form_id" readonly="1"
+                                   invisible="1"/>
+                            <field name="form_url" readonly="1" widget="url"
+                                   invisible="not active"/>
                         </group>
                         <group>
                             <field name="active"/>
-                            <field name="lead_id"/>
+                            <field name="lead_id" invisible="1"/>
                         </group>
                     </group>
 
@@ -72,6 +73,10 @@
                                            string="Question"
                                            placeholder="Type your question here..."/>
                                     <field name="question_type" string="Type"/>
+
+
+                                    <field name="lead_field_id"
+                                           string="CRM Field"/>
                                     <field name="choices"
                                            string="Choices (comma-separated)"
                                            placeholder="e.g. Yes, No, Maybe"
@@ -86,6 +91,41 @@
             </form>
         </field>
     </record>
+
+    <!-- SEARCH VIEW -->
+    <record id="view_google_form_search" model="ir.ui.view">
+        <field name="name">google.form.search</field>
+        <field name="model">google.form</field>
+        <field name="arch" type="xml">
+            <search string="Search Google Forms">
+
+                <!-- Search Fields -->
+                <field name="name"/>
+                <field name="google_form_id"/>
+                <field name="active"/>
+
+                <!-- Filters -->
+                <filter name="filter_active"
+                        string="Active"
+                        domain="[('active','=',True)]"
+                        help="Show only active forms"/>
+
+                <filter name="filter_inactive"
+                        string="Inactive"
+                        domain="[('active','=',False)]"
+                        help="Show only inactive forms"/>
+
+                <!-- Group By -->
+                <group expand="0" string="Group By">
+                    <filter name="group_active"
+                            string="Active Status"
+                            context="{'group_by':'active'}"/>
+                </group>
+
+            </search>
+        </field>
+    </record>
+
 
     <!-- MENUS — always after the action they reference -->
     <menuitem id="menu_google_form_root"
