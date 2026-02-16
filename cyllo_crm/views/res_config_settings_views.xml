@@ -80,6 +80,21 @@
                             </span>
                         </div>
                     </setting>
+                    <setting
+                            id="module_crm_google_form_setting"
+                            help="Enable CRM Google Forms to create, manage, and link Google Forms directly from CRM leads.">
+                        <field name="module_cyllo_crm_google_form"/>
+                        <div class="content-group"
+                             invisible="not module_cyllo_crm_google_form">
+                            <span>
+                                When enabled, users can create Google Forms
+                                directly from CRM leads,
+                                store form IDs and URLs in the lead, and
+                                optionally automate lead creation
+                                from form responses.
+                            </span>
+                        </div>
+                    </setting>
                 </block>
 
             </xpath>
