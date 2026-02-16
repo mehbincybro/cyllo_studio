@@ -42,7 +42,7 @@
     ],
     'external_dependencies':
         {
-        'python': ['mechanize', 'linkedin'],
+        'python': ['mechanize', 'python-linkedin'],
         },
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',

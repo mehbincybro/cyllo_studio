@@ -46,12 +46,9 @@ class LinkedinSocial(http.Controller):
     def social_linkedin_callbacks(self):
         """shares post on linkedin"""
         url = request.httprequest.url
-        print('url', url)
         parsed_url = urlparse(url)
-        print('parsed_url',parsed_url)
         code = parse_qs(parsed_url.query)['code'][0]
         state = parse_qs(parsed_url.query)['state'][0]
-        print('state', state)
 
         linkedin_auth_provider = request.env.ref(
             'cyllo_hr_linkedin_recruitment.provider_linkedin')
