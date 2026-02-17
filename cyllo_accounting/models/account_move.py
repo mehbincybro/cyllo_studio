@@ -22,6 +22,8 @@
 from odoo import _, api, fields, models
 from odoo.exceptions import RedirectWarning, UserError, ValidationError
 from odoo.tools import float_compare
+from datetime import timedelta
+from dateutil.relativedelta import relativedelta
 
 
 class AccountMove(models.Model):
@@ -51,6 +53,13 @@ class AccountMove(models.Model):
     fiscal_year_id = fields.Many2one('account.fiscal.year', tracking=True,
                                      compute='_compute_fiscal_year_id',
                                      help='The invoice date within the fiscal year')
+    deferred_move_ids = fields.Many2many('account.move', 'account_move_deferred_rel', 'invoice_id',
+                                         'deferred_move_id', string="Deferred Entries", copy=False)
+    deferred_move_count = fields.Integer(compute='_compute_deferred_move_count')
+
+    def _compute_deferred_move_count(self):
+        for move in self:
+            move.deferred_move_count = len(move.deferred_move_ids)
 
     @api.depends('asset_id', 'asset_id.residual_value', 'asset_id.cum_residual_amount')
     def _compute_total_residual(self):
@@ -93,6 +102,262 @@ class AccountMove(models.Model):
         """Assign amount_residual to residual_amount for multi invoice payments"""
         for rec in self.filtered(lambda x: x.amount_residual):
             rec.residual_amount = rec.amount_residual
+
+    def _generate_deferred_schedule(self, line):
+        start = line.deferred_start_date
+        end = line.deferred_end_date
+        amount = line.price_subtotal
+
+        if not start or not end or start >= end:
+            return
+
+        config = self.env['ir.config_parameter'].sudo()
+
+        if self.move_type == 'out_invoice':
+            mode = config.get_param('cyllo_accounting.deferred_revenue_based_on', 'days')
+            journal_id = config.get_param('cyllo_accounting.deferred_revenue_journal_id')
+            account_id = config.get_param('cyllo_accounting.deferred_revenue_account_id')
+        else:
+            mode = config.get_param('cyllo_accounting.deferred_expense_based_on', 'days')
+            journal_id = config.get_param('cyllo_accounting.deferred_expense_journal_id')
+            account_id = config.get_param('cyllo_accounting.deferred_expense_account_id')
+
+        journal = self.env['account.journal'].browse(int(journal_id)) if journal_id else False
+        deferred_account = self.env['account.account'].browse(int(account_id)) if account_id else False
+
+        if not journal or not deferred_account:
+            raise UserError(_("Please configure Deferred Journal and Account in Settings."))
+
+        self._create_initial_deferral(line, amount, journal, deferred_account)
+
+        if mode == 'days':
+            self._schedule_days(line, start, end, amount, journal, deferred_account)
+        elif mode == 'months':
+            self._schedule_months(line, start, end, amount, journal, deferred_account)
+        elif mode == 'full_months':
+            self._schedule_full_months(line, start, end, amount, journal, deferred_account)
+
+    def _schedule_days(self, line, start, end, total_amount, journal, deferred_account):
+
+        total_days = (end - start).days + 1
+        daily_rate = total_amount / total_days
+        remaining_amount = total_amount
+        current = start.replace(day=1)
+
+        while current <= end:
+            month_start = max(start, current)
+            month_end = min(end, (current + relativedelta(months=1)) - timedelta(days=1))
+            if month_start <= month_end:
+                days = (month_end - month_start).days + 1
+                amount = round(days * daily_rate, 2)
+                if month_end == end:
+                    amount = remaining_amount
+                self._create_recognition_entry(line, month_end, amount, journal, deferred_account)
+                remaining_amount -= amount
+            current += relativedelta(months=1)
+
+    def _schedule_months(self, line, start, end, total_amount, journal, deferred_account):
+
+        start_day = min(start.day, 30)
+        end_day = min(end.day, 30)
+        total_month_units = ((end.year - start.year) * 12 + (end.month - start.month) + (end_day - start_day) / 30)
+        if total_month_units <= 0:
+            return
+        unit_value = total_amount / total_month_units
+        remaining_amount = total_amount
+
+        # Start from first financial segment
+        current_year = start.year
+        current_month = start.month
+        current_day = start_day
+        while True:
+            # Financial month end = 30th in 30/360 logic
+            segment_end_day = 30
+            # If final month
+            if (current_year == end.year and current_month == end.month):
+                segment_end_day = end_day
+            used_days = segment_end_day - current_day + 1
+            if used_days <= 0:
+                break
+            fraction = used_days / 30
+            amount = round(unit_value * fraction, 2)
+            # Last segment adjusts rounding
+            if (current_year == end.year and current_month == end.month):
+                amount = remaining_amount
+
+            if amount > 0:
+                # Real calendar date for posting = last day of that real month
+                real_month_end = (fields.Date.from_string(f"{current_year}-{current_month:02d}-01")
+                                  + relativedelta(months=1) - timedelta(days=1))
+                self._create_recognition_entry(line, real_month_end, amount, journal, deferred_account)
+            remaining_amount -= amount
+            # Move to next financial month
+            if current_year == end.year and current_month == end.month:
+                break
+
+            current_day = 1
+            if current_month == 12:
+                current_month = 1
+                current_year += 1
+            else:
+                current_month += 1
+
+    def _schedule_full_months(self, line, start, end, total_amount, journal, deferred_account):
+
+        # Count calendar months (inclusive)
+        months = ((end.year - start.year) * 12 + (end.month - start.month) + 1)
+        if months <= 0:
+            return
+
+        amount_per_month = round(total_amount / months, 2)
+        remaining_amount = total_amount
+        # Start from first month of start date
+        current = start.replace(day=1)
+        for i in range(months):
+            # Last day of current month
+            month_end = (current + relativedelta(months=1)) - timedelta(days=1)
+            # Last entry adjusts rounding difference
+            if i == months - 1:
+                amount = remaining_amount
+            else:
+                amount = amount_per_month
+
+            self._create_recognition_entry(line, month_end, amount, journal, deferred_account)
+            remaining_amount -= amount
+            current += relativedelta(months=1)
+
+    # def _create_deferred_move(self, line, date, amount, journal, deferred_account):
+    #     company_currency = self.company_id.currency_id
+    #     invoice_currency = line.currency_id
+    #     amount_company = invoice_currency._convert(amount,company_currency,self.company_id,date)
+    #     move_vals = {
+    #         'move_type': 'entry',
+    #         'journal_id': journal.id,
+    #         'date': date,
+    #         'ref': f'Deferred entry for {self.name}',
+    #         'auto_post': 'at_date',
+    #         'line_ids': [
+    #             (0, 0, {
+    #                 'name': line.name,
+    #                 'account_id': line.account_id.id,
+    #                 'credit': amount_company if self.move_type == 'out_invoice' else 0.0,
+    #                 'debit': amount_company if self.move_type == 'in_invoice' else 0.0,
+    #                 'currency_id': invoice_currency.id,
+    #                 'amount_currency': amount,
+    #             }),
+    #             (0, 0, {
+    #                 'name': line.name,
+    #                 'account_id': deferred_account.id,
+    #                 'debit': amount_company if self.move_type == 'out_invoice' else 0.0,
+    #                 'credit': amount_company if self.move_type == 'in_invoice' else 0.0,
+    #                 'currency_id': invoice_currency.id,
+    #                 'amount_currency': -amount,
+    #             }),
+    #         ]
+    #     }
+    #     new_move = self.env['account.move'].create(move_vals)
+    #     today = fields.Date.context_today(self)
+    #
+    #     # ✅ If date is past or today, post immediately
+    #     if date <= today:
+    #         new_move._check_fiscalyear_lock_date()
+    #         new_move.action_post()
+    #     # Link to invoice
+    #     self.deferred_move_ids = [(4, new_move.id)]
+    def _create_initial_deferral(self, line, total_amount, journal, deferred_account):
+
+        company_currency = self.company_id.currency_id
+        invoice_currency = line.currency_id
+        date = self.date  # Bill accounting date
+
+        amount_company = invoice_currency._convert(total_amount, company_currency, self.company_id, date)
+        move_vals = {
+            'move_type': 'entry',
+            'journal_id': journal.id,
+            'date': date,
+            'ref': f'Initial Deferral of {self.name}',
+            'line_ids': [
+                # Dr Prepaid
+                (0, 0, {
+                    'name': line.name,
+                    'account_id': deferred_account.id,
+                    'debit': amount_company,
+                    'credit': 0.0,
+                }),
+                # Cr Expense
+                (0, 0, {
+                    'name': line.name,
+                    'account_id': line.account_id.id,
+                    'credit': amount_company,
+                    'debit': 0.0,
+                }),
+            ]
+        }
+
+        move = self.env['account.move'].create(move_vals)
+        today = fields.Date.context_today(self)
+        if date <= today:
+            move._check_fiscalyear_lock_date()
+            move.action_post()
+        else:
+            move.auto_post = 'at_date'
+        self.deferred_move_ids = [(4, move.id)]
+
+    def _create_recognition_entry(self, line, date, amount, journal, deferred_account):
+
+        company_currency = self.company_id.currency_id
+        invoice_currency = line.currency_id
+
+        amount_company = invoice_currency._convert(amount, company_currency, self.company_id, date)
+
+        move_vals = {
+            'move_type': 'entry',
+            'journal_id': journal.id,
+            'date': date,
+            'ref': f'Monthly Recognition of {self.name}',
+            'line_ids': [
+                # Dr Expense
+                (0, 0, {
+                    'name': line.name,
+                    'account_id': line.account_id.id,
+                    'debit': amount_company,
+                    'credit': 0.0,
+                }),
+                # Cr Prepaid
+                (0, 0, {
+                    'name': line.name,
+                    'account_id': deferred_account.id,
+                    'credit': amount_company,
+                    'debit': 0.0,
+                }),
+            ]
+        }
+
+        move = self.env['account.move'].create(move_vals)
+
+        today = fields.Date.context_today(self)
+
+        if date <= today:
+            move._check_fiscalyear_lock_date()
+            move.action_post()
+        else:
+            move.auto_post = 'at_date'
+
+        self.deferred_move_ids = [(4, move.id)]
+
+    def action_post(self):
+        res = super().action_post()
+
+        for move in self:
+            if move.move_type not in ('out_invoice', 'in_invoice'):
+                continue
+
+            for line in move.invoice_line_ids:
+                if (line.deferred_start_date and line.deferred_end_date and not move.deferred_move_ids.filtered(
+                        lambda m: m.ref and move.name in m.ref)):
+                    move._generate_deferred_schedule(line)
+
+        return res
 
     def action_get_asset_moves(self):
         """Smart button for the asset revenues/expenses"""
@@ -336,3 +601,16 @@ class AccountMove(models.Model):
                               self.line_ids.mapped('matched_credit_ids.credit_move_id.statement_line_id')
 
         return reconciled_st_lines.ids
+
+    def action_view_deferred_moves(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Deferred Entries'),
+            'res_model': 'account.move.line',
+            'view_mode': 'tree,form',
+            'domain': [('move_id', 'in', self.deferred_move_ids.ids)],
+            'context': {
+                'create': False,
+                'search_default_group_by_move': 1,
+            },
+        }
