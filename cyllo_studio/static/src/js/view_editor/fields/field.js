@@ -300,8 +300,8 @@ export class CylloField extends Field {
         const notification = this.notification || useService("notification");
 
         if (
-            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button") ||
-            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
+            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button")
+//            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
         ) {
             return;
         }

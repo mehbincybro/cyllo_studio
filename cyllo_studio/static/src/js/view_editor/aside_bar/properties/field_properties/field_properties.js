@@ -1935,22 +1935,7 @@
         const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
 
         if (hasAnyConstraints) {
-            const constraintTypes = [];
-            if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
-            if (hasPythonConstraint) constraintTypes.push("Python");
-
-            // Show confirmation dialog
-            if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
-                // User cancelled, re-check the box
-                event.target.checked = true;
-                this.state.constraintEnabled = true;
-                return;
-            }
-
-            // ⭐ Clear all constraints in frontend state
             this.clearAllConstraints();
-
-            // ⭐ IMPORTANT: Mark as edited so backend saves the cleared state
             this.state.edited = true;
 
             this.notification.add({
@@ -1987,12 +1972,8 @@
             this.state.constraintEnabled = false;
             return;
         }
-
-        // Handle SQL constraint
         if (hasSqlConstraint) {
             const sqlConstraint = constraint.sql_constraint;
-            
-            // Validate SQL constraint data
             if (!sqlConstraint.key || !sqlConstraint.definition || !sqlConstraint.message) {
                 this.notification.add({
                     title: _t("Invalid SQL Constraint"),
@@ -2037,13 +2018,9 @@
                 });
                 return;
             }
-
-            // Store Python constraint in state for saving
             this.state.pythonConstraint = pythonConstraint;
             console.log("✓ Added Python constraint:", pythonConstraint);
         }
-
-        // Enable checkbox since we have at least one valid constraint
         this.state.constraintEnabled = true;
         this.state.edited = true;
 
@@ -2059,22 +2036,75 @@
         });
     }
 
-    removeConstraint(index) {
-        if (this.sqlConstraints && this.sqlConstraints[index]) {
-            const removed = this.sqlConstraints.splice(index, 1);
-            this.state.edited = true;
+//    removeConstraint(index) {
+//        if (this.sqlConstraints && this.sqlConstraints[index]) {
+//            const removed = this.sqlConstraints.splice(index, 1);
+//            this.state.edited = true;
+//
+//            // Check if we still have any constraints (SQL or Python)
+//            const hasSqlConstraints = this.sqlConstraints.length > 0;
+//            const hasPythonConstraint = !!this.state.pythonConstraint;
+//
+//            // Auto-disable checkbox if no constraints left
+//            if (!hasSqlConstraints && !hasPythonConstraint) {
+//                this.state.constraintEnabled = false;
+//                console.log("All constraints removed, checkbox disabled");
+//            }
+//        }
+//    }
 
-            // Check if we still have any constraints (SQL or Python)
-            const hasSqlConstraints = this.sqlConstraints.length > 0;
-            const hasPythonConstraint = !!this.state.pythonConstraint;
-            
-            // Auto-disable checkbox if no constraints left
-            if (!hasSqlConstraints && !hasPythonConstraint) {
-                this.state.constraintEnabled = false;
-                console.log("All constraints removed, checkbox disabled");
+    async removeConstraint(index) {
+    if (this.sqlConstraints && this.sqlConstraints[index]) {
+        const constraintToRemove = this.sqlConstraints[index];
+
+        // Remove from database immediately
+        try {
+            const result = await this.rpc('/cyllo_studio/remove_single_constraint', {
+                model: this.props.model,
+                field_name: this.props.name,
+                constraint_key: constraintToRemove.key
+            });
+
+            if (result.success) {
+                // Remove from frontend array
+                this.sqlConstraints.splice(index, 1);
+                this.state.edited = true;
+
+                // Check if we still have any constraints
+                const hasSqlConstraints = this.sqlConstraints.length > 0;
+                const hasPythonConstraint = !!this.state.pythonConstraint;
+
+                // Auto-disable checkbox if no constraints left
+                if (!hasSqlConstraints && !hasPythonConstraint) {
+                    this.state.constraintEnabled = false;
+                    console.log("All constraints removed, checkbox disabled");
+                }
+
+                this.notification.add({
+                    title: _t("Success"),
+                    message: "Constraint removed successfully",
+                    type: "notification_panel",
+                    notificationType: "success",
+                });
+            } else {
+                this.notification.add({
+                    title: _t("Error"),
+                    message: result.error || "Failed to remove constraint",
+                    type: "notification_panel",
+                    notificationType: "danger",
+                });
             }
+        } catch (error) {
+            console.error('Error removing constraint:', error);
+            this.notification.add({
+                title: _t("Error"),
+                message: "Failed to remove constraint",
+                type: "notification_panel",
+                notificationType: "danger",
+            });
         }
     }
+}
 
     // New method to remove Python constraint
     removePythonConstraint() {
@@ -2118,8 +2148,6 @@
         }
         return this.sqlConstraints.map(c => [c.key, c.definition, c.message]);
     }
-
-            //Selection value functions start -->
            checkSelectionValues() {
                 const lowerCaseArray = this.state.selectionValues.map(element => element.toLowerCase());
                 let setValues = new Set(lowerCaseArray);

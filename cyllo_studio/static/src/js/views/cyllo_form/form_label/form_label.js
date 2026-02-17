@@ -57,8 +57,8 @@ export class CylloFormLabel extends FormLabel {
 
         if (
             !validateEdit(this.state, notification, "isEditingButton", "Button") ||
-            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button")
-//            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
+            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button") ||
+            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
         ) {
             return;
         }

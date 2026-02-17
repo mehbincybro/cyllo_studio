@@ -1,5 +1,5 @@
 /** @odoo-module **/
-import { Component, useState, onWillStart } from "@odoo/owl";
+import { Component, useState, onWillStart, onMounted } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { ListOverall } from "@cyllo_studio/js/views/cyllo_list/list_overall";
 import { FormOverall } from "@cyllo_studio/js/views/cyllo_form/form_overall";
@@ -23,7 +23,7 @@ export class OverallView extends Component {
     viewType: { type: String, optional: true },
     model: { type: String, optional: true },
     calendar_info: { type: Object, optional: true },
-    viewId: { type: [Number,String], optional: true },
+    viewId: { type: [Number, String], optional: true },
     edit: { type: Boolean, optional: true },
     isMenu: { type: Boolean, optional: true },
     hasColorPicker: { type: Boolean, optional: true },
@@ -33,12 +33,12 @@ export class OverallView extends Component {
     envModel: { type: Object, optional: true },
     type: { type: String, optional: true },
     colorPickerPath: { type: String, optional: true },
-    MetaData:{ type: Object, optional: true },
+    MetaData: { type: Object, optional: true },
     isFieldTag: { type: Boolean, optional: true },
-    relational_model: {type: [String, Object],optional: true },
-    fieldNodes: {type: Object,optional: true },
-    widget: {type: String,optional: true },
-    invisible: { type:String, optional:true}
+    relational_model: { type: [String, Object], optional: true },
+    fieldNodes: { type: Object, optional: true },
+    widget: { type: String, optional: true },
+    invisible: { type: String, optional: true }
   };
   setup() {
     this.rpc = useService("rpc");
@@ -47,76 +47,125 @@ export class OverallView extends Component {
     this.state = useState({
       showInvisible: ""
     });
-      onWillStart(() => {
-      const checked = !!sessionStorage.getItem("invisible") === "1";;
-      console.log("cheka",checked)
-      this.state.showInvisible = checked;
-      console.log("this.sa",this.state.showInvisible)
-      document.body.classList.toggle("cy-hide-invisible", !checked);
-      this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+//    onWillStart(() => {
+//      const checked = sessionStorage.getItem("invisible") === "1";
+//      console.log("cheka", checked)
+//      this.state.showInvisible = checked;
+//      console.log("this.sa", this.state.showInvisible)
+//      document.body.classList.toggle("cy-show-invisible", checked);
+//      // this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+//    });
+
+    onWillStart(() => {
+        const checked = sessionStorage.getItem("invisible") === "1";
+        this.state.showInvisible = checked;
+        document.body.classList.toggle("cy-show-invisible", checked);
+    });
+        onMounted(() => {
+        const checked = sessionStorage.getItem("invisible") === "1";
+        if (checked) {
+            this._applyInvisibleOverride(true);
+        }
     });
   }
-
-   /**
-   * Toggle display of invisible fields and reload the view.
-   * @param {Event} ev - The checkbox change event.
-   */
-//  showInvisibleFields(ev) {
-//    const want = !!ev.target.checked;
-//    if (this.state.showInvisible === want){
-//     return;
-//    }
-//    this.state.showInvisible = want;
-//    if (want){
-//     sessionStorage.setItem("invisible", "1");
-//    }
-//    else{
-//     sessionStorage.removeItem("invisible");
-//    }
-//    document.body.classList.toggle("cy-hide-invisible", !want);
-//    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", want);
-//    this.actionService.doAction("studio_reload");
-//  }
-
-//showInvisibleFields(ev) {
-//    const checked = !!ev.target.checked;
-//this.state.showInvisible = checked;
-//
-//    if (checked) {
-//        sessionStorage.setItem("invisible", "1");
-//    } else {
-//        sessionStorage.removeItem("invisible");
-//    }
-//    document.body.classList.toggle("cy-hide-invisible", !checked);
-//
-//    try {
-//        this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-//    } catch (e) {
-//        // ignore
-//    }
-//}
-showInvisibleFields(ev) {
-    var checked = !!ev.target.checked;
-    this.state.showInvisible = checked;
-    if (checked) {
-
-//        this.actionService.doAction("studio_reload");
+  _applyInvisibleOverride(show) {
+    if (show) {
         document.body.classList.add("cy-show-invisible");
+        // Force-show elements that Odoo hid with inline styles
+        document.querySelectorAll('[invisible="1"], [invisible="True"], [invisible="true"]').forEach(el => {
+            el.style.setProperty('display', '', 'important');
+            el.setAttribute('data-cy-was-invisible', '1');
+        });
     } else {
-//        this.actionService.doAction("studio_reload");
-        sessionStorage.removeItem("invisible");
         document.body.classList.remove("cy-show-invisible");
+        // Restore Odoo's inline hide
+        document.querySelectorAll('[data-cy-was-invisible="1"]').forEach(el => {
+            el.style.display = 'none';
+            el.removeAttribute('data-cy-was-invisible');
+        });
     }
-    this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
 }
 
+  /**
+  * Toggle display of invisible fields and reload the view.
+  * @param {Event} ev - The checkbox change event.
+  */
+  //  showInvisibleFields(ev) {
+  //    const want = !!ev.target.checked;
+  //    if (this.state.showInvisible === want){
+  //     return;
+  //    }
+  //    this.state.showInvisible = want;
+  //    if (want){
+  //     sessionStorage.setItem("invisible", "1");
+  //    }
+  //    else{
+  //     sessionStorage.removeItem("invisible");
+  //    }
+  //    document.body.classList.toggle("cy-hide-invisible", !want);
+  //    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", want);
+  //    this.actionService.doAction("studio_reload");
+  //  }
+
+  //showInvisibleFields(ev) {
+  //    const checked = !!ev.target.checked;
+  //this.state.showInvisible = checked;
+  //
+  //    if (checked) {
+  //        sessionStorage.setItem("invisible", "1");
+  //    } else {
+  //        sessionStorage.removeItem("invisible");
+  //    }
+  //    document.body.classList.toggle("cy-hide-invisible", !checked);
+  //
+  //    try {
+  //        this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+  //    } catch (e) {
+  //        // ignore
+  //    }
+  //}
+//  showInvisibleFields(ev) {
+//    var checked = !!ev.target.checked;
+//    console.log("chektest1",checked)
+//    this.state.showInvisible = checked;
+//    console.log("chektest2",this.state.showInvisible)
+//    if (checked) {
+//    console.log("chektest33")
+//      sessionStorage.setItem("invisible", "1");
+////      this.actionService.doAction("studio_reload");
+//      document.body.classList.add("cy-show-invisible");
+//    } else {
+//    console.log("chektest44")
+////      this.actionService.doAction("studio_reload");
+//      sessionStorage.removeItem("invisible");
+//      document.body.classList.remove("cy-show-invisible");
+//    }
+//    document.body.classList.toggle("cy-hide-invisible", !checked);
+//    this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+////    this.actionService.doAction("studio_reload");
+//  }
+
+showInvisibleFields(ev) {
+    const checked = !!ev.target.checked;
+    this.state.showInvisible = checked;
+
+    if (checked) {
+        sessionStorage.setItem("invisible", "1");
+    } else {
+        sessionStorage.removeItem("invisible");
+    }
+
+    this._applyInvisibleOverride(checked);
+    document.body.classList.toggle("cy-hide-invisible", !checked);
+    this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+}
 
   /**
    * Common properties passed to all overall view components.
    */
   get commonProps() {
     return {
-      envModel:this.props.envModel,
+      envModel: this.props.envModel,
       mode: this.props.mode,
       viewType: this.props.viewType,
       model: this.props.model,
@@ -126,7 +175,7 @@ showInvisibleFields(ev) {
     };
   }
 
-   // Props for specific view components
+  // Props for specific view components
   get overallListProps() {
     return {
       ...this.commonProps,
@@ -144,8 +193,8 @@ showInvisibleFields(ev) {
     return {
       ...this.commonProps,
       activeFields: this.props.activeFields,
-      model :this.props.calendar_info,
-         };
+      model: this.props.calendar_info,
+    };
   }
   get overallFormProps() {
     return {
@@ -158,7 +207,7 @@ showInvisibleFields(ev) {
     return {
       ...this.commonProps,
       allFields: this.props.allFields,
-      MetaData:this.props.MetaData,
+      MetaData: this.props.MetaData,
 
     };
   }
@@ -173,12 +222,12 @@ showInvisibleFields(ev) {
       ribbonElement: this.props.ribbonElement || document.querySelectorAll('nonexistent-selector'),
     };
   }
-   /**
-   * Handles updating overall view attributes via RPC.
-   * @param {string} name - The attribute name to update.
-   * @param {*} value - The new value.
-   * @param {*} order - Optional order parameter for fields.
-   */
+  /**
+  * Handles updating overall view attributes via RPC.
+  * @param {string} name - The attribute name to update.
+  * @param {*} value - The new value.
+  * @param {*} order - Optional order parameter for fields.
+  */
   async handleView(name, value = null, order = null) {
     if (name) {
       try {
