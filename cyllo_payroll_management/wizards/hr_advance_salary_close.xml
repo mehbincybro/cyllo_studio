@@ -30,6 +30,8 @@
                     <field name="balance_action"
                            invisible="remaining_after_closing == 0 or close_type != 'partial'"
                            required="remaining_after_closing > 0"/>
+                    <field name="deduction_amount"
+                           invisible="balance_action != 'schedule'"/>
 
                     <!-- Payment account -->
                     <field name="account_id"

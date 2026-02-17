@@ -860,6 +860,26 @@ class EmployeePayslip(models.Model):
             date_from = today.replace(day=1)
             date_to = (date_from + relativedelta(months=1)) - relativedelta(
                 days=1)
+        
+        elif period_type == 'day':
+            # date_from = today
+            # date_to = today
+            # For 'day', we want to see what was PROCESSED/CREATED today.
+            # Using create_date to filter.
+            payslips = self.search([
+                ('create_date', '>=', today),
+                ('state', 'in', ['done', 'paid'])
+            ])
+            
+            # Skip the date_from/date_to search block below
+            result = defaultdict(float)
+            for slip in payslips:
+                emp_name = slip.employee_id.name
+                result[emp_name] += slip.total_amount
+
+            labels = list(result.keys())
+            data = list(result.values())
+            return {'labels': labels, 'data': data}
 
         else:  # year
             date_from = today.replace(month=1, day=1)
@@ -887,14 +907,119 @@ class EmployeePayslip(models.Model):
             'data': data,
         }
 
+    def get_payroll_distribution_by_period(self, period_type='month'):
+        """
+        Calculates payroll distribution (Pie Chart) for a specific period.
+        period_type: 'month' or 'year'
+        """
+        today = fields.Date.today()
+        if period_type == 'month':
+            date_from = today.replace(day=1)
+            date_to = (date_from + relativedelta(months=1)) - relativedelta(days=1)
+        elif period_type == 'day':
+             # For 'day', we want to see what was PROCESSED/CREATED today.
+            payslips = self.search([
+                ('create_date', '>=', today),
+                ('state', 'in', ['done', 'paid'])
+            ])
+            # Skip the date_from/date_to search block below.
+            # We need to explicitly return here or restructure to avoid the second search.
+            dist = defaultdict(float)
+            type_map = {}
+            for slip in payslips:
+                struct = slip.structure_id
+                key = struct.name if struct else 'Other'
+                dist[key] += slip.total_amount
+                if struct and struct.type_id:
+                     type_map[key] = struct.type_id.id
+            
+            labels = list(dist.keys())
+            data = list(dist.values())
+            type_ids = [type_map.get(label, False) for label in labels]
+            return {'labels': labels, 'data': data, 'type_ids': type_ids}
+
+        else:  # year
+            date_from = today.replace(month=1, day=1)
+            date_to = today.replace(month=12, day=31)
+
+        payslips = self.search([
+            ('start_date', '>=', date_from),
+            ('to_date', '<=', date_to),
+            ('state', 'in', ['done', 'paid'])
+        ])
+
+        dist = defaultdict(float)
+        type_map = {}
+
+        for slip in payslips:
+            struct = slip.structure_id
+            key = struct.name if struct else 'Other'
+            dist[key] += slip.total_amount
+            
+            # For the click action (openStructureType), we ideally want the structure TYPE id.
+            if struct and struct.type_id:
+                 type_map[key] = struct.type_id.id
+
+        labels = list(dist.keys())
+        data = list(dist.values())
+        
+        # Prepare type_ids aligned with labels
+        type_ids = [type_map.get(label, False) for label in labels]
+
+        return {
+            'labels': labels,
+            'data': data,
+            'type_ids': type_ids
+        }
+
     @api.model
     def get_payroll_dashboard_data(self):
-        # ----------------- CARD VALUES -----------------
+        # ----------------- CARD VALUES (GLOBAL / CURRENT) -----------------
         employees = self.env['hr.employee'].search_count([])
-        contracts = self.env['hr.contract'].search_count(
-            [('state', '=', 'open')])
-        total_generated = self.search_count([])
-        total_paid = self.search_count([('state', '=', 'paid')])
+        contracts = self.env['hr.contract'].search_count([('state', '=', 'open')])
+        
+        # ----------------- PERIOD STATS (YEAR vs MONTH) -----------------
+        def get_stats_by_range(date_from, date_to):
+            domain_generated = [
+                ('start_date', '>=', date_from),
+                ('to_date', '<=', date_to)
+            ]
+            domain_paid = domain_generated + [('state', '=', 'paid')]
+            
+            return {
+                'generated': self.search_count(domain_generated),
+                'paid': self.search_count(domain_paid)
+            }
+
+        today = fields.Date.today()
+        
+        # Year Range
+        year_start = today.replace(month=1, day=1)
+        year_end = today.replace(month=12, day=31)
+        stats_year = get_stats_by_range(year_start, year_end)
+        
+        # Month Range
+        month_start = today.replace(day=1)
+        month_end = (month_start + relativedelta(months=1)) - relativedelta(days=1)
+        stats_month = get_stats_by_range(month_start, month_end)
+
+        # Day Range (Today - Activity Based)
+        # Generated: Created Today
+        generated_today = self.search_count([
+            ('create_date', '>=', today)
+        ])
+        
+        # Paid: Paid Today (Approximate using write_date + state check, or just Paid state + Write Date match)
+        # Since we don't have a specific 'payment_date', we check if it's currently paid and was updated today.
+        paid_today = self.search_count([
+            ('state', '=', 'paid'),
+            ('write_date', '>=', today)
+        ])
+        
+        stats_today = {
+            'generated': generated_today,
+            'paid': paid_today
+        }
 
         # ----------------- WARNINGS -----------------
         warnings_list = []
@@ -948,7 +1073,6 @@ class EmployeePayslip(models.Model):
             })
 
         # Nearly Expired Contracts (Next 30 Days)
-        today = fields.Date.today()
         next_30_days = today + timedelta(days=30)
 
         nearly_expired_contracts = self.env['hr.contract'].search([
@@ -971,7 +1095,6 @@ class EmployeePayslip(models.Model):
                 'count': len(employees_wo_id),
             })
 
-
         # ----------------- PAYROLL BATCHES -----------------
         # batch_list = []  # remove if batch tracking not present
         batches = self.env['employee.payslip.batch'].search(
@@ -993,24 +1116,26 @@ class EmployeePayslip(models.Model):
         # ----------------- EMPLOYEE COST -----------------
         employee_cost_year = self.get_employee_cost_by_period('year')
         employee_cost_month = self.get_employee_cost_by_period('month')
+        employee_cost_day = self.get_employee_cost_by_period('day')
 
         # ----------------- PAYROLL DISTRIBUTION -----------------
-        dist = defaultdict(float)
-
-        payslips = self.search([('state', 'in', ['done', 'paid'])])
-        for slip in payslips:
-            struct = slip.structure_id.name if slip.structure_id else 'Other'
-            dist[struct] += slip.total_amount
-
-        payroll_dist_labels = list(dist.keys())
-        payroll_dist_data = list(dist.values())
+        payroll_dist_year = self.get_payroll_distribution_by_period('year')
+        payroll_dist_month = self.get_payroll_distribution_by_period('month')
+        payroll_dist_day = self.get_payroll_distribution_by_period('day')
 
         # ----------------- RETURN DATA -----------------
         return {
             'employees': employees,
             'contracts': contracts,
-            'generated': total_generated,
-            'paid': total_paid,
+            # Init with Year values as default
+            'generated': stats_year['generated'],
+            'paid': stats_year['paid'],
+            
+            # Pass full stats for checking in frontend
+            'stats_year': stats_year,
+            'stats_month': stats_month,
+            'stats_day': stats_today,
+
             'warnings': warnings_list,
             'batches': batch_list,
             'employee_cost_year_labels': employee_cost_year['labels'],
@@ -1018,11 +1143,22 @@ class EmployeePayslip(models.Model):
 
             'employee_cost_month_labels': employee_cost_month['labels'],
             'employee_cost_month_data': employee_cost_month['data'],
+            
+            'employee_cost_day_labels': employee_cost_day['labels'],
+            'employee_cost_day_data': employee_cost_day['data'],
 
-            'payroll_dist_labels': payroll_dist_labels,
-            'payroll_dist_data': payroll_dist_data,
+            'payroll_dist_year_labels': payroll_dist_year['labels'],
+            'payroll_dist_year_data': payroll_dist_year['data'],
+            'payroll_dist_year_type_ids': payroll_dist_year['type_ids'],
+
+            'payroll_dist_month_labels': payroll_dist_month['labels'],
+            'payroll_dist_month_data': payroll_dist_month['data'],
+            'payroll_dist_month_type_ids': payroll_dist_month['type_ids'],
+            
+            'payroll_dist_day_labels': payroll_dist_day['labels'],
+            'payroll_dist_day_data': payroll_dist_day['data'],
+            'payroll_dist_day_type_ids': payroll_dist_day['type_ids'],
         }
-
 
     @api.model
     def _get_payslip_lines(self, contract_ids, payslip):
@@ -1039,8 +1175,6 @@ class EmployeePayslip(models.Model):
                     'categories'].dict and localdict['categories'].dict[
                             category.code] + amount or amount)
             return localdict
-
-
 
         class BrowsableObject(object):
             """A browsable object capable of dynamically retrieving attributes. The `__getattr__} method can be

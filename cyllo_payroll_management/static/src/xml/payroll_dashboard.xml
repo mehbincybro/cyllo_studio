@@ -2,47 +2,111 @@
 <templates>
     <t t-name="cyllo_payroll_management.PayrollDashboard">
 
-        <div style="padding:20px; background:#f3f5ef; min-height:100vh; font-family: 'Roboto', sans-serif; width: 100%; height:100%; overflow-y: scroll; border: 1px solid #ccc;">
+        <div style="
+    padding:20px;
+    background:#f4f6f8;
+    font-family:Arial, sans-serif; width: 100%;height:100%;overflow-y: scroll;border: 1px solid #ccc;
+">
+
+            <!-- ================= HEADER & FILTER ================= -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+                <div>
+                    <h1 style="margin: 0; color: #1e293b; font-weight: 800; font-size: 28px; letter-spacing: -0.5px;">
+                        Payroll Dashboard
+                    </h1>
+                    <p style="margin: 5px 0 0 0; color: #64748b; font-size: 14px;">
+                        Overview of your company's payroll status
+                    </p>
+                </div>
+
+                <div style="background: #ffffff; border-radius: 12px; padding: 8px 16px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); display: flex; align-items: center; gap: 15px; border: 1px solid #e2e8f0;">
+
+                    <!-- Filter Label -->
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <i class="fa fa-filter"
+                           style="color: #64748b; font-size: 14px;"></i>
+                        <span style="font-size: 14px; font-weight: 600; color: #475569;">
+                            Period:
+                        </span>
+                    </div>
+
+                    <!-- Filter Dropdown -->
+                    <select class="form-select" t-model="state.dashboard_period"
+                            t-on-change="onGlobalFilterChange"
+                            style="border-radius:10px; border:1px solid #cbd5e1; padding:8px 12px; font-weight:500; color:#334155; cursor:pointer;">
+                        <option value="year">This Year</option>
+                        <option value="month">This Month</option>
+                        <option value="day">Today</option>
+                    </select>
+                </div>
+            </div>
+
+
             <!-- ================= TOP CARDS ================= -->
             <div class="row mb-4"
                  style="gap:20px; display:flex; flex-wrap:wrap;">
 
                 <!-- Employees Card -->
-                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08); cursor:pointer;"
+                <div style="flex:1 1 240px; background:#edf2ff; border-radius:16px; padding:24px; position:relative; box-shadow:0 10px 15px -3px rgba(0,0,0,0.05); cursor:pointer; border: 1px solid #d0dbff;"
                      t-on-click="openEmployees">
-                    <h6 style="color:#7a7a7a; font-weight:500;">Employees</h6>
-                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="background:#3b82f6; color:#fff; padding:12px; border-radius:12px;">
+                            <i class="fa fa-users" style="font-size:20px;"></i>
+                        </div>
+                        <h6 style="color:#4a5568; font-weight:600; margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">
+                            Employees
+                        </h6>
+                    </div>
+                    <h2 style="margin-top:15px; margin-bottom:0; color:#1e293b; font-weight:800; font-size:2rem;">
                         <t t-esc="state.employees"/>
                     </h2>
                 </div>
 
                 <!-- Active Contracts Card -->
-                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                <div style="flex:1 1 240px; background:#ecfdf5; border-radius:16px; padding:24px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.05); cursor:pointer; border: 1px solid #bbf7d0;"
                      t-on-click="openContracts">
-                    <h6 style="color:#7a7a7a; font-weight:500;">Active
-                        Contracts
-                    </h6>
-                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="background:#10b981; color:#fff; padding:12px; border-radius:12px;">
+                            <i class="fa fa-file-text"
+                               style="font-size:20px;"></i>
+                        </div>
+                        <h6 style="color:#4a5568; font-weight:600; margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">
+                            Active Contracts
+                        </h6>
+                    </div>
+                    <h2 style="margin-top:15px; margin-bottom:0; color:#1e293b; font-weight:800; font-size:2rem;">
                         <t t-esc="state.contracts"/>
                     </h2>
                 </div>
 
                 <!-- Payslip Generated Card -->
-                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                <div style="flex:1 1 240px; background:#fffbeb; border-radius:16px; padding:24px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.05); cursor:pointer; border: 1px solid #fef3c7;"
                      t-on-click="openPayslips">
-                    <h6 style="color:#7a7a7a; font-weight:500;">Payslip
-                        Generated
-                    </h6>
-                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="background:#f59e0b; color:#fff; padding:12px; border-radius:12px;">
+                            <i class="fa fa-vcard" style="font-size:20px;"></i>
+                        </div>
+                        <h6 style="color:#4a5568; font-weight:600; margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">
+                            Payslips
+                        </h6>
+                    </div>
+                    <h2 style="margin-top:15px; margin-bottom:0; color:#1e293b; font-weight:800; font-size:2rem;">
                         <t t-esc="state.generated"/>
                     </h2>
                 </div>
 
                 <!-- Paid Card -->
-                <div style="flex:1 1 260px; background:#fff; border-radius:12px; padding:26px; text-align:center; box-shadow:0 4px 12px rgba(0,0,0,0.08);cursor:pointer;"
+                <div style="flex:1 1 240px; background:#f1f5f9; border-radius:16px; padding:24px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.05); cursor:pointer; border: 1px solid #e2e8f0;"
                      t-on-click="openPaidPayslips">
-                    <h6 style="color:#7a7a7a; font-weight:500;">Paid</h6>
-                    <h2 style="margin:0; color:#2c3e50; font-weight:700;">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <div style="background:#64748b; color:#fff; padding:12px; border-radius:12px;">
+                            <i class="fa fa-bank" style="font-size:20px;"></i>
+                        </div>
+                        <h6 style="color:#4a5568; font-weight:600; margin:0; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">
+                            Total Paid
+                        </h6>
+                    </div>
+                    <h2 style="margin-top:15px; margin-bottom:0; color:#1e293b; font-weight:800; font-size:2rem;">
                         <t t-esc="state.paid"/>
                     </h2>
                 </div>
@@ -62,30 +126,43 @@
                         max-height:360px;
                         overflow-y:auto;
                     ">
-                    <h3 style="margin-bottom:15px; color:black;">Warnings</h3>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="background: #fff7ed; padding: 8px; border-radius: 8px;">
+                            <i class="fa fa-exclamation-triangle"
+                               style="color: #f97316; font-size: 18px;"></i>
+                        </div>
+                        <h3 style="margin: 0; color: #1e293b; font-weight: 700; font-size: 18px;">
+                            Action Required
+                        </h3>
+                    </div>
                     <div style="display:flex; flex-direction:column; gap:10px;">
                         <t t-foreach="state.warnings" t-as="warn"
                            t-key="warn.label">
                             <div t-on-click="onWarningClick"
                                  t-att-data-id="warn.label"
                                  style="
-                                    display:flex;
-                                    justify-content:space-between;
-                                    align-items:center;
-                                    gap:12px;
-                                    border-bottom:1px solid #eee;
-                                    padding-bottom:8px;
-                                    cursor:pointer;
-                                    "
-                                 onmouseover="this.style.background='#f8f9fa'"
+                                        display:flex;
+                                        justify-content:space-between;
+                                        align-items:center;
+                                        padding:10px 12px;
+                                        border-radius:10px;
+                                        cursor:pointer;
+                                        transition:all 0.2s;
+                                        "
+                                 onmouseover="this.style.background='#f8fafc'"
                                  onmouseout="this.style.background='transparent'">
 
-                                <span style="color:#2c3e50;">
+
+                                <span style="color:#334155; font-weight:500;">
                                     <t t-esc="warn.label"/>
                                 </span>
                                 <span style="
-                                        font-weight:600;
-                                        color:#2c3e50;">
+                            background:#eef2ff;
+                            color:#4f46e5;
+                            padding:4px 10px;
+                            border-radius:12px;
+                            font-weight:600;
+                            font-size:13px;">
                                     <t t-esc="warn.count"/>
                                 </span>
                             </div>
@@ -100,38 +177,50 @@
                     border-radius:12px;
                     padding:20px;
                     box-shadow:0 4px 12px rgba(0,0,0,0.08);
-                    max-height:300px;
+                    max-height:360px;
                     overflow-y:auto;
                 ">
 
                     <!-- Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                        <h3 style="margin:0; color:black;">Batches</h3>
-                        <span style="color:#00a09d; font-size:14px; cursor:pointer;"
-                              t-on-click="openBatchList">
-                            All
-                        </span>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <div style="background: #eef2ff; padding: 8px; border-radius: 8px;">
+                                <i class="fa fa-id-badge"
+                                   style="color: #6366f1; font-size: 18px;"></i>
+                            </div>
+                            <h3 style="margin: 0; color: #1e293b; font-weight: 700; font-size: 18px;">
+                                Recent Batches
+                            </h3>
+                        </div>
+
+                        <button t-on-click="openBatchList"
+                                style="background: transparent; border: none; color: #3b82f6; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                            View All
+                            <i class="fa fa-arrow-right"
+                               style="font-size: 12px;"></i>
+                        </button>
                     </div>
+
 
                     <!-- Batch List -->
                     <div style="display:flex; flex-direction:column; gap:12px;">
                         <t t-foreach="state.batches" t-as="batch"
                            t-key="batch.id">
 
-                            <div
-                                    t-att-data-id="batch.id"
-                                    t-on-click="openBatch"
-                                    t-on-mouseover="(ev)=>ev.currentTarget.style.background='#f8f9fa'"
-                                    t-on-mouseout="(ev)=>ev.currentTarget.style.background='transparent'"
-                                    style="
-                                            display:flex;
-                                            align-items:center;
-                                            justify-content:space-between;
-                                            padding:10px;
-                                            border-bottom:1px solid #eee;
-                                            cursor:pointer;
-                                            transition:background 0.2s;
-                                        ">
+                            <div t-att-data-id="batch.id"
+                                 t-on-click="openBatch"
+                                 style="
+                            display:flex;
+                            align-items:center;
+                            justify-content:space-between;
+                            padding:12px;
+                            border-radius:10px;
+                            cursor:pointer;
+                            transition:all 0.2s;
+                        "
+                                 onmouseover="this.style.background='#f8fafc'"
+                                 onmouseout="this.style.background='transparent'">
+
 
                                 <!-- Status -->
                                 <span t-att-style="
@@ -152,11 +241,14 @@
                                     <t t-esc="batch.state.toUpperCase()"/>
                                 </span>
                                 <!-- Name -->
-                                <div style="flex:1; padding-left:12px; color:#2c3e50;">
+                                <div style="flex:1; padding-left:12px; color:#334155; font-weight:500;">
                                     <t t-esc="batch.name"/>
                                 </div>
                                 <!-- Count -->
-                                <div style="font-size:13px; color:#6c757d;">
+                                <div style="
+                            font-size:13px;
+                            color:#64748b;
+                            font-weight:500;">
                                     (
                                     <t t-esc="batch.payslip_count"/>
                                     Payslips)
@@ -178,24 +270,41 @@
                     box-shadow:0 4px 12px rgba(0,0,0,0.08);">
 
                     <!-- Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                        <h4 style="margin:0;">Employer Cost</h4>
-
-                        <div style="
-                            display:flex;
-                            justify-content:flex-end;
-                            align-items:center;
-                            margin-bottom:12px;">
-                            <span style="
-                                        font-size:13px;
-                                        color:#6c757d;
-                                        font-weight:500;">
-                            </span>
-                            <select class="form-select"
-                                    t-on-change="onEmployeeCostFilterChange">
-                                <option value="year">This Year</option>
-                                <option value="month">This Month</option>
-                            </select>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="background: #f0f9ff; padding: 8px; border-radius: 8px;">
+                                <i class="fa fa-bar-chart"
+                                   style="color: #0ea5e9; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b;">
+                                Employer Cost
+                            </h4>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setChartType('bar')"
+                                    t-att-class="state.employee_cost_chart_type === 'bar' ? 'active' : ''"
+                                    title="Bar Chart">
+                                <i class="fa fa-bar-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setChartType('line')"
+                                    t-att-class="state.employee_cost_chart_type === 'line' ? 'active' : ''"
+                                    title="Line Chart">
+                                <i class="fa fa-line-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setChartType('pie')"
+                                    t-att-class="state.employee_cost_chart_type === 'pie' ? 'active' : ''"
+                                    title="Pie Chart">
+                                <i class="fa fa-pie-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setChartType('doughnut')"
+                                    t-att-class="state.employee_cost_chart_type === 'doughnut' ? 'active' : ''"
+                                    title="Doughnut Chart">
+                                <i class="fa fa-dot-circle-o"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -213,8 +322,42 @@
                     box-shadow:0 4px 12px rgba(0,0,0,0.08);">
 
                     <!-- Header -->
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <h4 style="margin:0;">Employee Trends</h4>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <div style="background: #f5f3ff; padding: 8px; border-radius: 8px;">
+                                <i class="fa fa-pie-chart"
+                                   style="color: #8b5cf6; font-size: 18px;"></i>
+                            </div>
+                            <h4 style="margin: 0; font-size: 18px; font-weight: 700; color: #1e293b;">
+                                Salary Distribution
+                            </h4>
+                        </div>
+                        <div style="display: flex; gap: 5px;">
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setPayrollDistChartType('bar')"
+                                    t-att-class="state.payroll_dist_chart_type === 'bar' ? 'active' : ''"
+                                    title="Bar Chart">
+                                <i class="fa fa-bar-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setPayrollDistChartType('line')"
+                                    t-att-class="state.payroll_dist_chart_type === 'line' ? 'active' : ''"
+                                    title="Line Chart">
+                                <i class="fa fa-line-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setPayrollDistChartType('pie')"
+                                    t-att-class="state.payroll_dist_chart_type === 'pie' ? 'active' : ''"
+                                    title="Pie Chart">
+                                <i class="fa fa-pie-chart"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm"
+                                    t-on-click="() => this.setPayrollDistChartType('doughnut')"
+                                    t-att-class="state.payroll_dist_chart_type === 'doughnut' ? 'active' : ''"
+                                    title="Doughnut Chart">
+                                <i class="fa fa-dot-circle-o"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Sub Title -->

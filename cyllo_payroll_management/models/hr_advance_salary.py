@@ -30,7 +30,6 @@ class HrAdvanceSalary(models.Model):
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _rec_name = 'name'
 
-
     name = fields.Char(
         string="Reference",
         default="New",
@@ -137,6 +136,13 @@ class HrAdvanceSalary(models.Model):
         ('closed', 'Closed')
     ], default='draft', tracking=True)
 
+    @api.depends('deduction_type', 'deduction_amount', 'deduction_percentage',
+                 'employee_id')
+    def _compute_monthly_deduction_amount(self):
+        """Compute the monthly deduction amount based on the deduction type"""
+        for rec in self:
+            rec.monthly_deduction_amount = rec._get_monthly_deduction_amount()
+
     @api.onchange('deduction_type')
     def _onchange_deduction_type(self):
         """Clear the opposite field when switching deduction type"""
@@ -153,12 +159,27 @@ class HrAdvanceSalary(models.Model):
         elif self.deduction_percentage > 100:
             self.deduction_percentage = 100.0
 
-    @api.depends('deduction_type', 'deduction_amount', 'deduction_percentage',
-                 'employee_id')
-    def _compute_monthly_deduction_amount(self):
-        """Compute the monthly deduction amount based on the deduction type"""
-        for rec in self:
-            rec.monthly_deduction_amount = rec._get_monthly_deduction_amount()
+    @api.onchange('employee_id')
+    def _onchange_employee_id(self):
+        """Warn if employee has no active contract"""
+        if not self.employee_id:
+            return
+
+        contract = self.env['hr.contract'].search([
+            ('employee_id', '=', self.employee_id.id),
+            ('state', '=', 'open')
+        ], limit=1)
+
+        if not contract:
+            return {
+                'warning': {
+                    'title': _('No Active Contract'),
+                    'message': _(
+                        'The selected employee does not have an active contract. '
+                        'Monthly deduction amount may not be calculated correctly.'
+                    )
+                }
+            }
 
     def _get_monthly_deduction_amount(self, contract=None):
         """Helper to calculate monthly deduction amount"""
@@ -239,7 +260,6 @@ class HrAdvanceSalary(models.Model):
             move_vals = {
                 'move_type': 'entry',
                 'date': fields.Date.today(),
-                'invoice_date': fields.Date.today(),
                 'ref': rec.name,
                 'line_ids': [
                     (0, 0, {
@@ -336,7 +356,6 @@ class HrAdvanceSalary(models.Model):
         string="Deduction Schedule"
     )
 
-
     def _generate_deduction_schedule(self):
         """Generate predicted deduction lines"""
         self.ensure_one()
@@ -431,4 +450,3 @@ class HrAdvanceSalaryLine(models.Model):
                 rec.state = 'planned'
             else:
                 rec.state = 'paid'
-

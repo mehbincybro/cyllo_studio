@@ -72,6 +72,12 @@ class CommissionReport(models.Model):
                 raise UserError(_('No remaining balance to report.'))
             if report.report_to_payslip:
                 raise UserError(_('This commission is already queued for the next payslip.'))
+            contract = self.env['hr.contract'].search([
+                ('employee_id', '=', self.user_id.id),
+                ('state', '=', 'open')
+            ], limit=1)
+            if not contract:
+                raise UserError(_('This user has no active contracts.'))
             report.write({'report_to_payslip': True})
         return True
 

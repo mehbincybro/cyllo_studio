@@ -49,6 +49,16 @@ class HrAdvanceSalaryCloseWizard(models.TransientModel):
     ], string="Balance Action",
         help="What to do with the remaining amount after partial payment")
 
+    deduction_amount = fields.Float(
+        string="Fixed Deduction Amount",
+        help="Fixed amount to deduct from each payslip"
+    )
+
+    deduction_percentage = fields.Float(
+        string="Deduction Percentage",related='advance_id.deduction_percentage',
+        help="Percentage to deduct from each payslip (0-100)"
+    )
+
     loss_account_id = fields.Many2one('account.account', string="Loss Account")
     account_id = fields.Many2one('account.account', string="Payment Account")
 
@@ -59,6 +69,8 @@ class HrAdvanceSalaryCloseWizard(models.TransientModel):
         for rec in self:
             rec.remaining_after_closing = max(0,
                                               rec.advance_remaining_amount - rec.closing_amount)
+
+
 
     def action_close(self):
         self.ensure_one()
@@ -137,6 +149,9 @@ class HrAdvanceSalaryCloseWizard(models.TransientModel):
                     advance.write({'state': 'closed'})
 
                 elif self.balance_action == 'schedule':
+                    self.advance_id.write(
+                        {'deduction_amount': self.deduction_amount})
+
                     # Reschedule uses the live remaining amount (which now reflects the payment)
                     advance.reschedule_balance()
 

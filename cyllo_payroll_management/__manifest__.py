@@ -73,7 +73,6 @@
         'reports/report_employee_payslip.xml',
         'views/hr_payroll_dashboard_views.xml',
         'views/hr_advance_salary_views.xml',
-        'views/portal_advance_salary_templates.xml',
         'views/salary_calculator_views.xml',
         'views/hr_employee_payroll_view.xml',
         'views/cyllo_payroll_management_menu_views.xml',
