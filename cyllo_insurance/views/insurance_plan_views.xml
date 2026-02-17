@@ -59,7 +59,7 @@
                                     <field name="coverage_id"/>
                                     <field name="coverage_type"/>
                                     <field name="coverage_amount"/>
-                                    <field name="deductible"/>
+<!--                                    <field name="deductible"/>-->
                                 </tree>
                             </field>
 <!--                            <group class="oe_subtotal_footer fs-1">-->
