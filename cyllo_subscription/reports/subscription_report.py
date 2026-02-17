@@ -38,8 +38,6 @@ class SubscriptionReport(models.Model):
     state = fields.Selection(
         selection=[('draft', 'Draft'), ('posted', 'Posted')], string='Status')
     company_id = fields.Many2one('res.company', string='Company')
-
-    # Revenue Metrics
     recurring_revenue = fields.Float(string='Monthly Recurring Revenue')
     weekly_price_sum = fields.Float(string='Weekly Revenue')
     monthly_price_sum = fields.Float(string='Monthly Revenue')
@@ -48,29 +46,23 @@ class SubscriptionReport(models.Model):
     nrr = fields.Float(string='NRR')
     mrr_change = fields.Float(string='MRR Change')
     arr_change = fields.Float(string='ARR Change')
-
-    # Subscription Metrics
     subscription_count = fields.Integer(string='Subscription Count')
     active_subscription_count = fields.Integer(string='Active')
     trial_subscription_count = fields.Integer(string='Trial')
     churned_subscription_count = fields.Integer(string='Churned')
     renewal_count = fields.Integer(string='Renewals', help="Subscriptions in Renew state")
     number_of_product_sold = fields.Integer(string='Products Sold')
-
-    # Date Fields
     start_date = fields.Datetime(string='Start Date')
     next_invoice_date = fields.Datetime(string='Next Invoice Date')
     end_date = fields.Datetime(string='End Date')
     trial_end_date = fields.Datetime(string='Trial End Date')
-
-    # Product/Plan Metrics
     product_name = fields.Char(string='Product')
     plan_name = fields.Char(string='Plan')
     recurrence_name = fields.Char(string='Recurrence Type')
     id = fields.Integer()
 
     def init(self):
-        """Cleaned SQL View logic"""
+        """Function fetch data to show on the report"""
         tools.drop_view_if_exists(self._cr, 'subscription_report')
         self._cr.execute("""
             CREATE OR REPLACE VIEW subscription_report AS (
