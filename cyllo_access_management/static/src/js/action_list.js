@@ -18,6 +18,94 @@ patch(ViewButton.prototype, {
     },
 });
 
+(async () => {
+    try {
+        const { Activity } = await import("@mail/core/web/activity");
+        patch(Activity.prototype, {
+            onClickMarkAsDone() {
+                if (session.is_profile_readonly && this.props.data.user_id[0] !== session.uid) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.onClickMarkAsDone(...arguments);
+            },
+
+            unlink() {
+                if (session.is_profile_readonly && this.props.data.user_id[0] !== session.uid) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.unlink(...arguments);
+            },
+        });
+    } catch (e) {
+        // mail module not installed, skip Activity patches
+    }
+
+    try {
+        const { FollowerList } = await import("@mail/core/web/follower_list");
+        patch(FollowerList.prototype, {
+            onClickAddFollowers() {
+                if (session.is_profile_readonly) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.onClickAddFollowers(...arguments);
+            },
+            async onClickEdit(ev, follower) {
+                if (session.is_profile_readonly && follower !== this.props.thread.selfFollower) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.onClickEdit(...arguments);
+            },
+            async onClickRemove(ev, follower) {
+                if (session.is_profile_readonly && follower !== this.props.thread.selfFollower) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.onClickRemove(...arguments);
+            },
+        });
+    } catch (e) {
+        // mail module not installed, skip FollowerList patches
+    }
+})();
+
+(async () => {
+    try {
+        const { AccountPaymentField } = await import("@account/components/account_payment_field/account_payment_field");
+        patch(AccountPaymentField.prototype, {
+            async assignOutstandingCredit() {
+                if (session.is_profile_readonly) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.assignOutstandingCredit(...arguments);
+            },
+        });
+    } catch (e) {
+        // account module not installed, skip AccountPaymentField patches
+    }
+})();
+
+(async () => {
+    try {
+        const { AttendeeCalendarController } = await import("@calendar/views/attendee_calendar/attendee_calendar_controller");
+        patch(AttendeeCalendarController.prototype, {
+            onClickAddButton() {
+                if (session.is_profile_readonly) {
+                    this.env.services.notification.add(_t("Access Denied: Readonly Profile"), { type: "danger" });
+                    return;
+                }
+                return super.onClickAddButton(...arguments);
+            },
+        });
+    } catch (e) {
+        // calendar module not installed, skip AttendeeCalendarController patches
+    }
+})();
+
 patch(ListController.prototype, {
     setup() {
         super.setup(...arguments);
