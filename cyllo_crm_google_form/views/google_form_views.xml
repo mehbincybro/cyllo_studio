@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- ACTION — defined BEFORE menuitem that references it -->
+    <!-- ACTION -->
     <record id="action_google_form" model="ir.actions.act_window">
         <field name="name">Google Forms</field>
         <field name="res_model">google.form</field>
@@ -9,17 +9,22 @@
     </record>
 
     <!-- TREE VIEW -->
-        <record id="view_google_form_tree" model="ir.ui.view">
-            <field name="name">google.form.tree</field>
-            <field name="model">google.form</field>
-            <field name="arch" type="xml">
-                <tree string="Google Forms">
-                    <field name="name" string="Form Title"/>
-                    <field name="form_url" widget="url" string="Public URL"/>
-                    <field name="active" widget="boolean_toggle"/>
-                </tree>
-            </field>
-        </record>
+    <record id="view_google_form_tree" model="ir.ui.view">
+        <field name="name">google.form.tree</field>
+        <field name="model">google.form</field>
+        <field name="arch" type="xml">
+            <tree string="Google Forms">
+                <field name="name" string="Form Title"/>
+                <field name="form_url" widget="url" string="Public URL"/>
+                <button name="action_open_share_wizard"
+                        type="object"
+                        string="Share"
+                        class="btn btn-primary"
+                        invisible="not form_url or not active"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
 
     <!-- FORM VIEW -->
     <record id="view_google_form_form" model="ir.ui.view">
@@ -27,14 +32,15 @@
         <field name="model">google.form</field>
         <field name="arch" type="xml">
             <form string="Google Form">
+
                 <header>
                     <button name="create_google_form"
                             type="object"
                             string="Create Google Form"
                             class="btn-primary"
                             confirm="Push all questions to Google Forms?"
-                            invisible="not active"
-                    />
+                            invisible="not active"/>
+
                     <button name="fetch_responses_create_leads"
                             type="object"
                             string="Fetch Responses to CRM"
@@ -50,19 +56,32 @@
                         </h1>
                     </div>
 
+                    <!-- GOOGLE FORM INFO -->
                     <group string="Google Form Info">
                         <group>
-                            <field name="google_form_id" readonly="1"
+                            <field name="google_form_id"
+                                   readonly="1"
                                    invisible="1"/>
-                            <field name="form_url" readonly="1" widget="url"
+                            <field name="form_url"
+                                   readonly="1"
+                                   widget="url"
                                    invisible="not active"/>
+
+                            <button name="action_open_share_wizard"
+                                    type="object"
+                                    string="Share"
+                                    class="btn btn-primary"
+                                    invisible="not form_url or not active"/>
                         </group>
+
                         <group>
                             <field name="active"/>
+                            <field name="need_automatic_fetching"/>
                             <field name="lead_id" invisible="1"/>
                         </group>
                     </group>
 
+                    <!-- QUESTIONS -->
                     <notebook>
                         <page string="Questions" name="page_questions">
                             <field name="question_ids"
@@ -72,9 +91,8 @@
                                     <field name="name"
                                            string="Question"
                                            placeholder="Type your question here..."/>
-                                    <field name="question_type" string="Type"/>
-
-
+                                    <field name="question_type"
+                                           string="Type"/>
                                     <field name="lead_field_id"
                                            string="CRM Field"/>
                                     <field name="choices"
@@ -86,6 +104,7 @@
                             </field>
                         </page>
                     </notebook>
+
                 </sheet>
 
             </form>
@@ -98,13 +117,10 @@
         <field name="model">google.form</field>
         <field name="arch" type="xml">
             <search string="Search Google Forms">
-
-                <!-- Search Fields -->
                 <field name="name"/>
                 <field name="google_form_id"/>
                 <field name="active"/>
 
-                <!-- Filters -->
                 <filter name="filter_active"
                         string="Active"
                         domain="[('active','=',True)]"
@@ -115,19 +131,16 @@
                         domain="[('active','=',False)]"
                         help="Show only inactive forms"/>
 
-                <!-- Group By -->
                 <group expand="0" string="Group By">
                     <filter name="group_active"
                             string="Active Status"
                             context="{'group_by':'active'}"/>
                 </group>
-
             </search>
         </field>
     </record>
 
-
-    <!-- MENUS — always after the action they reference -->
+    <!-- MENUS -->
     <menuitem id="menu_google_form_root"
               name="Google Forms"
               parent="crm.crm_menu_root"
