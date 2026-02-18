@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import api, fields, models,_
 
 
 class PlanAllocation(models.Model):
@@ -56,6 +56,28 @@ class PlanAllocation(models.Model):
         """Compute duration from start date and end date."""
         for allocation in self:
             allocation.duration = self._get_duration(allocation.start_datetime, allocation.end_datetime)
+
+    @api.onchange('start_datetime', 'end_datetime', 'employee_id')
+    def _onchange_check_overlap(self):
+        """Warn user if the new allocation overlaps with existing ones."""
+        if not self.start_datetime or not self.end_datetime or not self.employee_id:
+            return
+
+        domain = [
+            ('employee_id', '=', self.employee_id.id),
+            ('start_datetime', '<', self.end_datetime),
+            ('end_datetime', '>', self.start_datetime),
+            ('id', '!=', self.id or self._origin.id),
+        ]
+
+        if self.search_count(domain):
+            return {
+                'warning': {
+                    'title': _("Conflict Detected"),
+                    'message': _("This employee has another plan scheduled during this time period."),
+                }
+            }
+
 
     def _get_duration(self, start_datetime, end_datetime):
         """Calculate duration between two datetimes using company hours/day logic."""
