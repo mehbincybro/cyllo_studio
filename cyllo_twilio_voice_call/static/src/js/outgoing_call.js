@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState, useRef, onMounted,onWillUnmount } from "@odoo/owl";
+import { Component, useState, useRef, onMounted, onWillUnmount, onWillUpdateProps } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
 import { jsonrpc } from "@web/core/network/rpc_service";
 import { RecentTab } from '@cyllo_twilio_voice_call/js/recent_tab'
@@ -17,24 +17,41 @@ export class DialPad extends Component {
         this.clearDelete = useRef("clear-delete");
         this.outgoing = useRef("keypad")
         this.notification = useService("notification");
+        this.countrySelect = useRef("countrySelect");
         this.sid = null;
         this.number = null;
         this.PhoneNumber = null,
             this.callAction = null,
             this.timer = null,
-        this.orm = useService("orm");
-        onMounted(() => this.fetch_data());
+            this.orm = useService("orm");
+        onMounted(() => {
+            this.fetch_data();
+            if (this.props?.number) {
+                this.callFormNumber(this.props?.number)
+            }
+        });
+        onWillUpdateProps((nextProps) => {
+
+            if (nextProps?.number) {
+                this.callFormNumber(nextProps?.number)
+            }
+
+
+        });
+
         this.state = useState({
             value: false,
-            selectedCountryCode: '+1',
+            selectedCountryCode: '+91',
             selectedPartner: null,
             duration: 0,
             wasRejected: false,
             recent: false,
             contacts: false,
             isPartner: false,
-            isRejected:false,
-            cancel:false
+            isRejected: false,
+            cancel: false,
+            number: null,
+            countryCode: '+1'
         })
         this.isTimerPaused = false;
     }
@@ -45,7 +62,7 @@ export class DialPad extends Component {
         var self = this;
         // Call the server to get a new token
         return jsonrpc('/access/token', {})
-            .then(function(response) {
+            .then(function (response) {
                 if (response && response.status === "configured" && response.token) {
                     device = new Twilio.Device(response.token, {
                         codecPreferences: ["opus", "pcmu"],
@@ -56,9 +73,39 @@ export class DialPad extends Component {
                     device.register();
                 }
             })
-            .catch(function(error) {
+            .catch(function (error) {
                 self.displayNotification(_t("Error fetching Twilio token."), 'danger');
             });
+    }
+    /* The function 'callFormNumber' is used to add the number into twilio dialpad
+    */
+    callFormNumber(fullNumber) {
+        var minimiseIcon = this.outgoing.el.querySelector('.minimise');
+        if (!minimiseIcon) {
+            this._onClickMinimise()
+        }
+        const number = fullNumber?.trim() || "";
+        setTimeout(() => {
+            const countrySelect = this.countrySelect.el;
+
+            const countryOptions = Array.from(countrySelect.options).map(o => o.value);
+
+            if (!number.startsWith("+")) {
+                this.state.countryCode = '+1'
+                this.state.number = number;
+                return;
+            }
+            const countryMatch = countryOptions.find(code => number.startsWith(code));
+
+            if (countryMatch) {
+
+                this.state.countryCode = countryMatch;
+                this.state.number = number.slice(countryMatch.length);
+            } else {
+                this.state.countryCode = '+1'
+                this.state.number = number;
+            }
+        }, 0);
     }
     /*
        This functions are used to get the time counter or the duration of the calls,
@@ -120,124 +167,123 @@ export class DialPad extends Component {
         return phoneRegex.test(number);
     }
 
-     updatePhoneNumber(event) {
-        this.state.selectedCountryCode = event.target.value;
+    updatePhoneNumber(event) {
+        this.state.countryCode = event.target.value;
     }
 
     /*
         For making outgoing calls
     */
-     async _onClickCall() {
-    var self = this;
-    const callButton = this.outgoing.el.querySelector('.cy-call-btn');
-    const callClear = this.outgoing.el.querySelector('.cy-dial_clearbtn');
-    this.PhoneNumber = this.state.selectedCountryCode+this.keys.el.value;
+    async _onClickCall() {
+        var self = this;
+        const callButton = this.outgoing.el.querySelector('.cy-call-btn');
+        const callClear = this.outgoing.el.querySelector('.cy-dial_clearbtn');
+        this.PhoneNumber = this.state.countryCode + this.keys.el.value;
+        try {
+            const PartnerId = await this.orm.searchRead("res.partner", [
+                "|",
+                ["phone", "=", this.PhoneNumber],
+                ["mobile", "=", this.PhoneNumber]
+            ], ['image_1920', 'name']);
 
-    try {
-         const PartnerId = await this.orm.searchRead("res.partner", [
-          "|",
-          ["phone", "=", this.PhoneNumber],
-          ["mobile", "=", this.PhoneNumber]
-         ], ['image_1920', 'name']);
-
-        if (PartnerId && PartnerId.length > 0) {
-            this.state.selectedPartner = PartnerId;
-            this.state.isPartner = true;
-            this.state.selectedPartner.image_1920 = PartnerId[0].image_1920;
-            this.state.selectedPartner.partner_name = PartnerId[0].name;
-        }
-        var id = (PartnerId && PartnerId.length > 0) ? PartnerId[0].id : null;
-        if (this.PhoneNumber) {
-            if (!this._isValidPhoneNumber(this.PhoneNumber)) {
-                this.displayNotification(_t("Please enter the correct phone number with the country code"), 'danger');
-            } else {
-                var params = { To: this.PhoneNumber };
-                event.stopPropagation();
-                if (self.device) {
-                    try {
-                        // Listening to the error event on the device object
-                        self.device.on('error', (error) => {
-                            this.displayNotification(_t("Cannot connect due to incorrect credentials, please test your connection in the settings"), 'danger');
-                        });
-                        const call = await self.device.connect({ params });
-                        this.callAction = call;
-                        this.state.value = true;
-                        this.state.cancel = true;
-                        callButton.style.display = 'none';
-                        callClear.style.display = 'none';
-                        call.on('ringing', (event) => {
-                            const callSid = call.parameters.CallSid;
-                            this.sid = callSid;
-                        });
-                        call.on('accept', (event) => {
-                            const callSid = call.parameters.CallSid;
-                            this.sid = callSid;
-                            this.isTimerPaused = false;
-                            this._runTimer();
-                            if (id) {
-                                this.orm.call('out.going.call.list', 'action_call', [, this.PhoneNumber, callSid, id]);
-                            } else {
-                                this.orm.call('out.going.call.list', 'action_making_call', [, this.PhoneNumber, callSid]);
-                            }
-                        });
-                        call.on('cancel', async (event) => {
-                            this.state.value = false;
-                            this.state.cancel = false;
-                            callButton.style.display = 'block';
-                            callClear.style.display = 'block';
-                            const callSid = call.parameters.CallSid;
-                            await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
-                            this.action.doAction('soft_reload');
-                            this.resetTimer();
-                        });
-
-                        call.on('disconnect', async (event) => {
-                            this.state.value = false;
-                            this.state.cancel = false;
-                            callButton.style.display = 'block';
-                            callClear.style.display = 'block';
-                            this.resetTimer();
-                            const callSid = call.parameters.CallSid;
-
-                            if (!this.state.wasRejected && !this.state.isRejected) {
-                                try {
-                                    await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
-                                    this.action.doAction('soft_reload');
-                                } catch (error) {
-                                    console.error("Failed to perform action_cancel:", error);
-                                }
-                            }
-                        });
-
-                        call.on('reject', async (event) => {
-                            this.state.value = false;
-                            this.state.cancel = false;
-                            const callSid = call.parameters.CallSid;
-
-                            await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
-                            this.action.doAction('soft_reload');
-                            this.resetTimer();
-                            callButton.style.display = 'block';
-                            callClear.style.display = 'block';
-                        });
-
-                    } catch (error) {
-                        this.displayNotification(_t("Connection Error. Please try again."), 'danger');
-                        callButton.style.display = 'block';
-                        callClear.style.display = 'block';
-                    }
-                } else {
-                    this.displayNotification(_t("Twilio Configuration is incomplete, Please set the Account SID, Auth Token, and the Phone Number"), 'danger');
-                }
+            if (PartnerId && PartnerId.length > 0) {
+                this.state.selectedPartner = PartnerId;
+                this.state.isPartner = true;
+                this.state.selectedPartner.image_1920 = PartnerId[0].image_1920;
+                this.state.selectedPartner.partner_name = PartnerId[0].name;
             }
-        } else {
-            this.displayNotification(_t("Please enter a phone number to call"), 'danger');
+            var id = (PartnerId && PartnerId.length > 0) ? PartnerId[0].id : null;
+            if (this.PhoneNumber) {
+                if (!this._isValidPhoneNumber(this.PhoneNumber)) {
+                    this.displayNotification(_t("Please enter the correct phone number with the country code"), 'danger');
+                } else {
+                    var params = { To: this.PhoneNumber };
+                    event.stopPropagation();
+                    if (self.device) {
+                        try {
+                            // Listening to the error event on the device object
+                            self.device.on('error', (error) => {
+                                this.displayNotification(_t("Cannot connect due to incorrect credentials, please test your connection in the settings"), 'danger');
+                            });
+                            const call = await self.device.connect({ params });
+                            this.callAction = call;
+                            this.state.value = true;
+                            this.state.cancel = true;
+                            callButton.style.display = 'none';
+                            callClear.style.display = 'none';
+                            call.on('ringing', (event) => {
+                                const callSid = call.parameters.CallSid;
+                                this.sid = callSid;
+                            });
+                            call.on('accept', (event) => {
+                                const callSid = call.parameters.CallSid;
+                                this.sid = callSid;
+                                this.isTimerPaused = false;
+                                this._runTimer();
+                                if (id) {
+                                    this.orm.call('out.going.call.list', 'action_call', [, this.PhoneNumber, callSid, id]);
+                                } else {
+                                    this.orm.call('out.going.call.list', 'action_making_call', [, this.PhoneNumber, callSid]);
+                                }
+                            });
+                            call.on('cancel', async (event) => {
+                                this.state.value = false;
+                                this.state.cancel = false;
+                                callButton.style.display = 'block';
+                                callClear.style.display = 'block';
+                                const callSid = call.parameters.CallSid;
+                                await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
+                                this.action.doAction('soft_reload');
+                                this.resetTimer();
+                            });
+
+                            call.on('disconnect', async (event) => {
+                                this.state.value = false;
+                                this.state.cancel = false;
+                                callButton.style.display = 'block';
+                                callClear.style.display = 'block';
+                                this.resetTimer();
+                                const callSid = call.parameters.CallSid;
+
+                                if (!this.state.wasRejected && !this.state.isRejected) {
+                                    try {
+                                        await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
+                                        this.action.doAction('soft_reload');
+                                    } catch (error) {
+                                        console.error("Failed to perform action_cancel:", error);
+                                    }
+                                }
+                            });
+
+                            call.on('reject', async (event) => {
+                                this.state.value = false;
+                                this.state.cancel = false;
+                                const callSid = call.parameters.CallSid;
+
+                                await this.orm.call('out.going.call.list', 'action_cancel', [, this.PhoneNumber, callSid]);
+                                this.action.doAction('soft_reload');
+                                this.resetTimer();
+                                callButton.style.display = 'block';
+                                callClear.style.display = 'block';
+                            });
+
+                        } catch (error) {
+                            this.displayNotification(_t("Connection Error. Please try again."), 'danger');
+                            callButton.style.display = 'block';
+                            callClear.style.display = 'block';
+                        }
+                    } else {
+                        this.displayNotification(_t("Twilio Configuration is incomplete, Please set the Account SID, Auth Token, and the Phone Number"), 'danger');
+                    }
+                }
+            } else {
+                this.displayNotification(_t("Please enter a phone number to call"), 'danger');
+            }
+        } catch (generalError) {
+            this.displayNotification(_t("An unexpected error occurred. Please try again."), 'danger');
+            callButton.style.display = 'block';
+            callClear.style.display = 'block';
         }
-    } catch (generalError) {
-        this.displayNotification(_t("An unexpected error occurred. Please try again."), 'danger');
-        callButton.style.display = 'block';
-        callClear.style.display = 'block';
-    }
 
 }
     /*

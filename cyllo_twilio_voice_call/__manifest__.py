@@ -60,6 +60,11 @@
             'cyllo_twilio_voice_call/static/src/css/remixicon.css',
             'cyllo_twilio_voice_call/static/src/js/navbar.js',
             'cyllo_twilio_voice_call/static/src/xml/navbar.xml',
+            'cyllo_twilio_voice_call/static/src/xml/call_form_fields.xml',
+            'cyllo_twilio_voice_call/static/src/js/form_phone_field.js',
+            'cyllo_twilio_voice_call/static/src/xml/call_option_modal.xml',
+            'cyllo_twilio_voice_call/static/src/js/call_option_modal.js',
+
         ],
     },
     'license': "LGPL-3",
