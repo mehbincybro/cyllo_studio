@@ -23,29 +23,32 @@
         <field name="arch" type="xml">
             <form string="Planning Allocation">
                 <sheet>
-                    <div class="oe_title oe_inline">
-                        <h1>
-                            <group>
-                                <field name="start_datetime"/>
-                                <field name="end_datetime"/>
-                            </group>
-                        </h1>
+                    <div class="oe_title">
+                        <label for="employee_id" class="oe_edit_only"/>
+                        <h1><field name="employee_id" placeholder="Employee's Name"/></h1>
                     </div>
                     <group>
-                        <group name="allocation_info" string="Allocation Information">
-                            <field name="name" invisible="1"/>
-                            <field name="employee_id"/>
+                        <group name="allocation_info" string="Time Period">
+                            <field name="start_datetime"/>
+                            <field name="end_datetime"/>
                             <field name="duration" widget="float_time"/>
-                            <field name="user_id"/>
-                            <field name="company_id"/>
-                            <field name="allocation_type_id"/>
+                        </group>
+                        <group name="other_info" string="Allocation Details">
+                            <field name="allocation_type_id" options="{'no_create': True, 'no_open': True}"/>
+                            <field name="user_id" readonly="1" options="{'no_open': True}"/>
+                            <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page name="description" string="Description">
+                            <field name="description" placeholder="Add a description..."/>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
         </field>
     </record>
-    <!--    Calendar view for plan allocation-->>
+    <!--    Calendar view for plan allocation-->
     <record id="view_plan_allocation_calendar" model="ir.ui.view">
         <field name="name">view.plan.allocation.calendar</field>
         <field name="model">plan.allocation</field>
@@ -55,13 +58,13 @@
                       event_open_popup="true"
                       date_start="start_datetime"
                       date_stop="end_datetime"
-                      quick_create="0"
+                      quick_create="1"
                       color="color"
                       mode="week">
-                <field name="name"/>
-                <field name="employee_id" filters="1"/>
-                <field name="user_id" filters="1"/>
-                <field name="allocation_type_id" filters="1"/>
+                <field name="employee_id" filters="1" avatar_field="avatar_128"/>
+                <field name="allocation_type_id" filters="1" color="color"/>
+                <field name="duration" widget="float_time"/>
+                <field name="is_conflict" invisible="1"/>
             </calendar>
         </field>
     </record>

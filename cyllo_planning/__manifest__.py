@@ -46,6 +46,12 @@
         'views/plan_allocation_views.xml',
         'views/allocation_type_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_planning/static/src/scss/planning_calendar.scss',
+            'cyllo_planning/static/src/js/planning_calendar.js',
+        ],
+    },
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,

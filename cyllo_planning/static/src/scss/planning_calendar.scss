@@ -1,0 +1,14 @@
+.o_calendar_view {
+    .fc-event {
+        &.o_event_striked {
+            border-left: 5px solid #dc3545 !important; // Red left border for conflicts
+        }
+    }
+
+    .o_calendar_filter_item {
+        img {
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+    }
+}
