@@ -39,18 +39,6 @@ class ResConfigSettings(models.TransientModel):
     enable_saltedge = fields.Boolean(string='Salt Edge Provider',
                                      config_parameter='saltedge.enable_saltedge',
                                      help='To enable Salt Edge Provider')
-    deferred_expense_journal_id = fields.Many2one('account.journal', string="journal",
-                                                  domain="[('type', '=', 'general')]")
-    deferred_expense_account_id = fields.Many2one('account.account', string="Deferred account")
-    deferred_expense_based_on = fields.Selection([('days', 'Days'), ('months', 'Months'),
-                                                  ('full_months', 'Full Months')], string='Based on', default='days',
-                                                 required=True)
-    deferred_revenue_journal_id = fields.Many2one('account.journal', string="journal",
-                                                  domain="[('type', '=', 'general')]")
-    deferred_revenue_account_id = fields.Many2one('account.account', string="Deferred account")
-    deferred_revenue_based_on = fields.Selection([('days', 'Days'), ('months', 'Months'),
-                                                  ('full_months', 'Full Months')], string='Based on', default='days',
-                                                 required=True)
 
     saltedge_app_id = fields.Char(
         string='App ID',

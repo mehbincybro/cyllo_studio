@@ -95,48 +95,6 @@
 
                 </block>
             </xpath>
-
-            <xpath expr="//block[@id='default_accounts']" position="inside">
-                <setting string="Deferred expense entries:">
-                    <div class="content-group">
-                        <div class="row mt8">
-                            <label for="deferred_expense_journal_id"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_expense_journal_id"/>
-                        </div>
-                        <div class="row mt8">
-                            <label for="deferred_expense_account_id"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_expense_account_id"/>
-                        </div>
-                        <div class="row mt8">
-                            <label for="deferred_expense_based_on"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_expense_based_on"/>
-                        </div>
-                    </div>
-                </setting>
-
-                <setting string="Deferred revenue entries:">
-                    <div class="content-group">
-                        <div class="row mt8">
-                            <label for="deferred_revenue_journal_id"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_revenue_journal_id"/>
-                        </div>
-                        <div class="row mt8">
-                            <label for="deferred_revenue_account_id"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_revenue_account_id"/>
-                        </div>
-                        <div class="row mt8">
-                            <label for="deferred_revenue_based_on"
-                                   class="col-lg-5 o_light_label"/>
-                            <field name="deferred_revenue_based_on"/>
-                        </div>
-                    </div>
-                </setting>
-            </xpath>
         </field>
     </record>
 </odoo>
