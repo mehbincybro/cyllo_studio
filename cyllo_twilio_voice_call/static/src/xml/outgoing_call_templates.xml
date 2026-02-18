@@ -17,8 +17,9 @@
 				<t t-if="!this.state.value">
 					<t t-if="!this.state.recent">
 						<t t-if="!this.state.contacts">
-							<div class="cy-dial_input--container">
-								<select id="country-code" name="country-code"
+							<div  class="cy-dial_input--container">
+								<select id="country-code" t-ref="countrySelect" name="country-code"
+                                        t-att-value="this.state.countryCode"
                                         t-on-change="updatePhoneNumber">
 									<option value="+1">🇺🇸 +1 (United States)</option>
                                     <option value="+44">🇬🇧 +44 (United Kingdom)</option>
@@ -33,7 +34,9 @@
 							    </select>
                                 <input type="tel" class="cy-dial-input"
                                        placeholder="Enter the number"
-                                       t-ref="keys"/>
+                                       t-att-value="this.state.number"
+                                       t-ref="keys"
+                                       />
 							</div>
 						</t>
 					</t>

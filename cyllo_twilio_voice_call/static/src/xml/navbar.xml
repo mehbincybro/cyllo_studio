@@ -3,7 +3,7 @@
     <t t-inherit="web.NavBar" t-inherit-mode="extension">
         <xpath expr="//header[hasclass('o_navbar')]" position="inside">
             <t t-if="this.state.showKeypad and (this.isAdmin || this.isUser)">
-                <DialPad/>
+                <DialPad number="state.number"/>
             </t>
             <FetchIncomingCall parent_this="this"/>
         </xpath>
