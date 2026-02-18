@@ -31,8 +31,8 @@
         <field name="groups"
                eval="[Command.link(ref('group_cyllo_payroll_management_employee'))]"/>
     </record>
-    <record id="rule_salary_attachment_employee" model="ir.rule">
-        <field name="name">Current Employee Attachment</field>
+    <record id="rule_advance_salary_employee" model="ir.rule">
+        <field name="name">Current Employee Advance Salary</field>
         <field name="model_id" ref="model_hr_advance_salary"/>
         <field name="domain_force">[('employee_id.id', '=',
             user.employee_id.id)]

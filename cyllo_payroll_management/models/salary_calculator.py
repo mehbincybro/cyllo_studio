@@ -108,7 +108,8 @@ class SalaryCalculator(models.TransientModel):
                     if rec.wage_type == 'hourly':
                         start_date = fields.Date.today().replace(day=1)
                         end_date = fields.Date.today()
-                        start_dt = datetime.combine(start_date, datetime.min.time())
+                        start_dt = datetime.combine(start_date,
+                                                    datetime.min.time())
                         end_dt = datetime.combine(end_date, datetime.max.time())
                         work_hours = contract.resource_calendar_id.get_work_hours_count(
                             start_dt, end_dt)
@@ -136,7 +137,7 @@ class SalaryCalculator(models.TransientModel):
                     payslip._onchange_employee_id()
                     line_values = payslip._get_payslip_lines([contract.id],
                                                              payslip)
-                    
+
                     gross = 0.0
                     total_allowance = 0.0
                     net = 0.0
@@ -197,12 +198,13 @@ class SalaryCalculator(models.TransientModel):
                     emp_contract = employee.contract_id
                     if not emp_contract:
                         continue
-                    
+
                     # Logic for Hourly Wage Calculation (Department)
                     if rec.wage_type == 'hourly':
                         start_date = fields.Date.today().replace(day=1)
                         end_date = fields.Date.today()
-                        start_dt = datetime.combine(start_date, datetime.min.time())
+                        start_dt = datetime.combine(start_date,
+                                                    datetime.min.time())
                         end_dt = datetime.combine(end_date, datetime.max.time())
                         work_hours = emp_contract.resource_calendar_id.get_work_hours_count(
                             start_dt, end_dt)
@@ -286,16 +288,21 @@ class SalaryCalculator(models.TransientModel):
                 # So for manual, we might keep it simple or assume monthly equivalent is entered.
                 # Or, if hourly, we need working schedule.
                 # The manual mode requires 'work_schedule_id' as input field (line 39-40).
-                
+
                 wage_val = rec.salary
                 if rec.wage_type == 'hourly' and rec.work_schedule_id:
-                     start_date = fields.Date.today().replace(day=1)
-                     end_date = fields.Date.today()
-                     start_dt = datetime.combine(start_date, datetime.min.time())
-                     end_dt = datetime.combine(end_date, datetime.max.time())
-                     work_hours = rec.work_schedule_id.get_work_hours_count(
+                    start_date = fields.Date.today().replace(day=1)
+
+                    end_date = fields.Date.today()
+
+                    start_dt = datetime.combine(start_date, datetime.min.time())
+
+                    end_dt = datetime.combine(end_date, datetime.max.time())
+
+                    work_hours = rec.work_schedule_id.get_work_hours_count(
                         start_dt, end_dt)
-                     wage_val = rec.salary * work_hours
+
+                    wage_val = rec.salary * work_hours
 
                 temp_contract = self.env['hr.contract'].sudo().new({
                     'name': 'Simulation Contract',
@@ -306,6 +313,7 @@ class SalaryCalculator(models.TransientModel):
                     'company_id': rec.company_id.id,
                     'state': 'open',
                 })
+
                 temp_employee.contract_id = temp_contract
 
                 payslip = self.env['employee.payslip'].new({
