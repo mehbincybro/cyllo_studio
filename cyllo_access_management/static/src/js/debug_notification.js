@@ -14,7 +14,10 @@ export const debugNotificationService = {
             });
         }
         if (session.is_profile_readonly) {
-            document.body.classList.add("o_profile_readonly");
+            notification.add(_t("This profile is in Read-Only mode. Some actions are restricted."), {
+                type: "warning",
+                sticky: true,
+            });
         }
     },
 };
