@@ -40,9 +40,7 @@ class AccountMoveLine(models.Model):
                                  'asset_id', string='Assets', copy=False)
     move_asset_type = fields.Selection([('revenue', 'Deferred Revenue'), ('expense', 'Deferred Expense')],
                                        compute='_compute_move_asset_type', store=True, index=True, copy=True)
-    deferred_start_date = fields.Date(string="Deferred Start Date")
-    deferred_end_date = fields.Date(string="Deferred End Date")
- 
+
     @api.depends('move_type')
     def _compute_move_asset_type(self):
         """Find the value of the field move_asset_type"""

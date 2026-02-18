@@ -15,19 +15,10 @@
                         class="oe_stat_button" icon="fa-book" invisible="asset_count == 0 or asset_type != 'expense'">
                     <field name="asset_count" string="Deferred Expenses" widget="statinfo"/>
                 </button>
-                <button type="object" name="action_view_deferred_moves" class="oe_stat_button" icon="fa-calendar"
-                        invisible="deferred_move_count == 0">
-                    <field name="deferred_move_count" widget="statinfo" string="Deferred Entries"/>
-                </button>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']" position="before">
                 <field name='create_from_payment' invisible="1"/>
             </xpath>
-            <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='quantity']" position="before">
-                <field name="deferred_start_date" optional="show"/>
-                <field name="deferred_end_date" optional="show"/>
-            </xpath>
-
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='account_id']"
                    position="before">
                 <field name='move_type' column_invisible="1"/>

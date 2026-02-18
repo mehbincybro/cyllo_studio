@@ -16,7 +16,6 @@
               action="action_view_deferred_expenses"
               parent="account.menu_finance_entries_management"/>
 
-
     <menuitem id="menu_accounting_reports_categ" groups="account.group_account_user" sequence="19"
               name="Accounting Reports"
               parent="account.menu_finance_reports"/>
@@ -77,25 +76,4 @@
               action="action_view_account_move_lock_wizard"/>
     <menuitem id="menu_fiscal_years" name="Fiscal Years" action="action_view_fiscal_years"
               parent="menu_fiscal_years_and_periods_categ"/>
-
-    <!-- Deferred Entries under Reporting -->
-
-    <!-- Parent Menu under Reporting -->
-    <menuitem id="menu_deferred_entries_reporting"
-              name="Deferred Entries"
-              parent="account.menu_finance_reports"
-              sequence="50"/>
-
-    <!-- Deferred Expenses -->
-    <menuitem id="menu_reporting_deferred_expenses"
-              name="Deferred Expenses"
-              parent="menu_deferred_entries_reporting"
-              action="action_report_deferred_expense_custom"
-              sequence="1"/>
-
-    <menuitem id="menu_reporting_deferred_revenues"
-              name="Deferred Revenues"
-              parent="menu_deferred_entries_reporting"
-              action="action_report_deferred_revenue_custom"
-              sequence="2"/>
 </odoo>
