@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="action_report_cyllo_check" model="ir.actions.report">
+        <field name="name">Cyllo Check</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_accounting.report_custom_check</field>
+        <field name="report_file">cyllo_accounting.report_custom_check</field>
+    </record>
+
+
+    <template id="report_custom_check">
+
+        <t t-foreach="docs" t-as="payment">
+
+            <t t-set="pages" t-value="payment._check_get_pages()"/>
+
+            <t t-foreach="pages" t-as="page">
+
+                <main>
+
+                    <div class="page" style="position:relative; height:270mm; width:210mm;">
+
+                        <style>
+                            @page { margin: 0mm; }
+                        </style>
+
+                        <!-- DATE -->
+                        <div style="position:absolute; top:20mm; right:20mm;">
+                            <span t-esc="page['date']"/>
+                        </div>
+
+                        <!-- PAY TO -->
+                        <div style="position:absolute; top:35mm; left:25mm;">
+                            <strong t-esc="page['partner_name']"/>
+                        </div>
+
+                        <!-- AMOUNT NUMBER -->
+                        <div style="position:absolute; top:35mm; right:25mm;">
+                            <strong t-esc="page['amount']"/>
+                        </div>
+
+                        <!-- AMOUNT WORDS -->
+                        <div style="position:absolute; top:45mm; left:25mm; width:150mm;">
+                            <span t-esc="page['amount_in_word']"/>
+                        </div>
+
+                        <!-- MEMO -->
+                        <div style="position:absolute; bottom:40mm; left:25mm;">
+                            <span t-esc="page['memo']"/>
+                        </div>
+
+                        <!-- SIGNATURE -->
+                        <div style="position:absolute; bottom:40mm; right:25mm;">
+                            AUTHORIZED SIGNATURE
+                        </div>
+
+                        <!-- MICR LINE -->
+                        <div style="position:absolute; bottom:20mm; left:25mm; font-family: monospace;">
+                            <span>"5"</span>
+                            <span t-esc="page['sequence_number']"/>
+                            <span>"000000000"</span>
+                        </div>
+
+                    </div>
+
+                </main>
+
+            </t>
+        </t>
+
+    </template>
+
+</odoo>

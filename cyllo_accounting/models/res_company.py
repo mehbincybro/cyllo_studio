@@ -32,6 +32,8 @@ class ResCompany(models.Model):
     sale_lock_date = fields.Date(string='Lock Sales')
     purchase_lock_date = fields.Date(string='Lock Purchase')
     all_lock_date = fields.Date(string='Lock All Journal Entries')
+    account_check_printing_layout = fields.Selection(selection_add=[('cyllo_accounting.action_report_cyllo_check',
+                                                                     'Cyllo Check Layout'),])
 
     def compute_fiscalyear_dates(self, current_date):
         """This method returns the calendar year.
