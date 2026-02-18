@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <record id="email_template_google_form_share" model="mail.template">
+            <field name="name">Google Form Share</field>
+            <field name="model_id" ref="model_google_form"/>
+            <field name="subject">Please Fill This Form: {{ object.name }}</field>
+            <field name="body_html">
+&lt;p&gt;Dear Recipient,&lt;/p&gt;
+&lt;p&gt;Please fill the following form:&lt;/p&gt;
+&lt;p&gt;
+    &lt;a href="{{ object.form_url }}" target="_blank" style="background-color:#875A7B;color:#fff;padding:8px 16px;border-radius:4px;text-decoration:none;display:inline-block;"&gt;
+        Click here to open the form
+    &lt;/a&gt;
+&lt;/p&gt;
+&lt;p&gt;Or copy this link into your browser:&lt;br/&gt;{{ object.form_url }}&lt;/p&gt;
+            </field>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
+
+
+
+        <!--<?xml version="1.0" encoding="UTF-8"?>-->
+        <!--<odoo noupdate="1">-->
+
+        <!--    <record id="email_template_google_form_share" model="mail.template">-->
+        <!--        <field name="name">Google Form Share</field>-->
+        <!--        <field name="model_id" ref="model_google_form"/>-->
+        <!--        <field name="subject">Please Fill This Form: {{ object.name }}</field>-->
+        <!--        <field name="body_html"><![CDATA[-->
+        <!--<p>Please fill the following form:</p>-->
+        <!--<p>-->
+        <!--    <a href="{{ object.form_url }}" target="_blank">-->
+        <!--        Click here to open the form-->
+        <!--    </a>-->
+        <!--</p>-->
+        <!--        ]]></field>-->
+        <!--        <field name="auto_delete" eval="True"/>-->
+        <!--    </record>-->
+
+        <!--</odoo>-->

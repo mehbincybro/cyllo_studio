@@ -31,8 +31,11 @@
     'depends': ['cyllo_base', 'crm'],
     'data': [
         'security/ir.model.access.csv',
+        'data/email_template_google_form_share.xml',
+        'data/ir_cron_google_form.xml',
         'views/res_config_settings_views.xml',
         'views/google_form_views.xml',
+        # 'wizard/google_form_share_wizard_view.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

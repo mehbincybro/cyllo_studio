@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
 
-    <!-- ACTION — defined BEFORE menuitem that references it -->
+    <!-- ACTION -->
     <record id="action_google_form" model="ir.actions.act_window">
         <field name="name">Google Forms</field>
         <field name="res_model">google.form</field>
@@ -13,12 +13,14 @@
         <field name="name">google.form.tree</field>
         <field name="model">google.form</field>
         <field name="arch" type="xml">
-            <tree string="Google Forms"
-                  decoration-success="google_form_id != False"
-                  decoration-warning="google_form_id == False">
+            <tree string="Google Forms">
                 <field name="name" string="Form Title"/>
-                <field name="google_form_id" string="Google Form ID"/>
                 <field name="form_url" widget="url" string="Public URL"/>
+                <button name="action_open_share_wizard"
+                        type="object"
+                        string="Share"
+                        class="btn btn-primary"
+                        invisible="not form_url or not active"/>
                 <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
@@ -30,17 +32,20 @@
         <field name="model">google.form</field>
         <field name="arch" type="xml">
             <form string="Google Form">
+
                 <header>
                     <button name="create_google_form"
                             type="object"
-                            string="Create / Sync Google Form"
+                            string="Create Google Form"
                             class="btn-primary"
-                            confirm="Push all questions to Google Forms?"/>
+                            confirm="Push all questions to Google Forms?"
+                            invisible="not active"/>
+
                     <button name="fetch_responses_create_leads"
                             type="object"
                             string="Fetch Responses to CRM"
                             class="btn-secondary"
-                            invisible="not google_form_id"/>
+                            invisible="not google_form_id or not active"/>
                 </header>
 
                 <sheet>
@@ -51,17 +56,32 @@
                         </h1>
                     </div>
 
+                    <!-- GOOGLE FORM INFO -->
                     <group string="Google Form Info">
                         <group>
-                            <field name="google_form_id" readonly="1"/>
-                            <field name="form_url" readonly="1" widget="url"/>
+                            <field name="google_form_id"
+                                   readonly="1"
+                                   invisible="1"/>
+                            <field name="form_url"
+                                   readonly="1"
+                                   widget="url"
+                                   invisible="not active"/>
+
+                            <button name="action_open_share_wizard"
+                                    type="object"
+                                    string="Share"
+                                    class="btn btn-primary"
+                                    invisible="not form_url or not active"/>
                         </group>
+
                         <group>
                             <field name="active"/>
-                            <field name="lead_id"/>
+                            <field name="need_automatic_fetching"/>
+                            <field name="lead_id" invisible="1"/>
                         </group>
                     </group>
 
+                    <!-- QUESTIONS -->
                     <notebook>
                         <page string="Questions" name="page_questions">
                             <field name="question_ids"
@@ -71,7 +91,10 @@
                                     <field name="name"
                                            string="Question"
                                            placeholder="Type your question here..."/>
-                                    <field name="question_type" string="Type"/>
+                                    <field name="question_type"
+                                           string="Type"/>
+                                    <field name="lead_field_id"
+                                           string="CRM Field"/>
                                     <field name="choices"
                                            string="Choices (comma-separated)"
                                            placeholder="e.g. Yes, No, Maybe"
@@ -81,13 +104,43 @@
                             </field>
                         </page>
                     </notebook>
+
                 </sheet>
 
             </form>
         </field>
     </record>
 
-    <!-- MENUS — always after the action they reference -->
+    <!-- SEARCH VIEW -->
+    <record id="view_google_form_search" model="ir.ui.view">
+        <field name="name">google.form.search</field>
+        <field name="model">google.form</field>
+        <field name="arch" type="xml">
+            <search string="Search Google Forms">
+                <field name="name"/>
+                <field name="google_form_id"/>
+                <field name="active"/>
+
+                <filter name="filter_active"
+                        string="Active"
+                        domain="[('active','=',True)]"
+                        help="Show only active forms"/>
+
+                <filter name="filter_inactive"
+                        string="Inactive"
+                        domain="[('active','=',False)]"
+                        help="Show only inactive forms"/>
+
+                <group expand="0" string="Group By">
+                    <filter name="group_active"
+                            string="Active Status"
+                            context="{'group_by':'active'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- MENUS -->
     <menuitem id="menu_google_form_root"
               name="Google Forms"
               parent="crm.crm_menu_root"
