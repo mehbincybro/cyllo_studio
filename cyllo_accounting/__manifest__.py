@@ -35,6 +35,7 @@
     'data': [
         'data/ir_actions_server_data.xml',
         'data/account_fiscal_year_data.xml',
+        'data/check_layout.xml',
         'data/ir_cron_data.xml',
         'data/ir_sequence.xml',
         'security/security.xml',
