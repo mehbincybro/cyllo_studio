@@ -58,7 +58,7 @@
                       event_open_popup="true"
                       date_start="start_datetime"
                       date_stop="end_datetime"
-                      quick_create="1"
+                      quick_create="0"
                       color="color"
                       mode="week">
                 <field name="employee_id" filters="1" avatar_field="avatar_128"/>

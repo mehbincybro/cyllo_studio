@@ -10,8 +10,7 @@ patch(CalendarModel.prototype, {
     normalizeRecord(rawRecord) {
         const result = super.normalizeRecord(...arguments);
         if (rawRecord.is_conflict) {
-            result.isStriked = true;
-            result.classNames = [...(result.classNames || []), "o_event_striked"];
+            result.title = "⚠️ " + (result.title || "");
         }
         return result;
     }
