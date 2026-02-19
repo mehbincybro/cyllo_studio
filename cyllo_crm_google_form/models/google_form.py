@@ -121,7 +121,7 @@ class GoogleForm(models.Model):
         return access_token
 
     # ======================================================================
-    # CREATE / SYNC FORM
+    # CREATE FORM
     # ======================================================================
 
     def create_google_form(self):
@@ -229,6 +229,7 @@ class GoogleForm(models.Model):
     # ======================================================================
 
     def _resolve_relational_value(self, field, raw_value):
+        """Relational fields resolve here"""
         if not raw_value or not raw_value.strip():
             return False
 
@@ -327,12 +328,11 @@ class GoogleForm(models.Model):
         )
         if form_resp.status_code != 200:
             _logger.warning(
-                "google.form [%s] — could not fetch form structure: %s",
-                self.id, form_resp.text
+                f"google.form [{self.id}] — could not fetch form structure: {form_resp.text}"
             )
             return 0
 
-        title_map = {}   # questionId → question title string
+        title_map = {}  # questionId → question title string
         record_map = {}  # questionId → google.form.questions record
 
         for item in form_resp.json().get("items", []):
@@ -353,7 +353,8 @@ class GoogleForm(models.Model):
                     continue
                 title_map[gqid] = title
                 matched = self.question_ids.filtered(
-                    lambda q, t=title: q.name.strip().lower() == t.strip().lower()
+                    lambda q,
+                           t=title: q.name.strip().lower() == t.strip().lower()
                 )
                 if matched:
                     record_map[gqid] = matched[0]
@@ -366,8 +367,7 @@ class GoogleForm(models.Model):
         )
         if resp.status_code != 200:
             _logger.warning(
-                "google.form [%s] — could not fetch responses: %s",
-                self.id, resp.text
+                f"google.form [{self.id}] — could not fetch responses: {resp.text}"
             )
             return 0
 
@@ -377,10 +377,11 @@ class GoogleForm(models.Model):
             response_id = submission.get("responseId", "")
 
             # ── DUPLICATE GUARD ──────────────────────────────────────────
+            # processed_response_ids is the main source of truth.
+            # Each unique Google responseId only ever creates one lead.
             if response_id and response_id in already_processed:
                 _logger.debug(
-                    "google.form [%s] — skipping already-processed responseId %s",
-                    self.id, response_id
+                    f"google.form [{self.id}] — skipping already-processed responseId {response_id}"
                 )
                 continue
 
@@ -399,7 +400,8 @@ class GoogleForm(models.Model):
                     field_name = field.name
 
                     if field.ttype == 'one2many':
-                        description_lines.append(f"{q_title}: {raw_value}  [one2many — skipped]")
+                        description_lines.append(
+                            f"{q_title}: {raw_value}  [one2many — skipped]")
                         continue
 
                     resolved = self._resolve_relational_value(field, raw_value)
@@ -409,28 +411,36 @@ class GoogleForm(models.Model):
                         continue
 
                     if field.ttype == 'many2many':
-                        lead_vals[field_name] = lead_vals.get(field_name, []) + resolved
+                        lead_vals[field_name] = lead_vals.get(field_name,
+                                                              []) + resolved
                     else:
                         lead_vals[field_name] = resolved
                 else:
                     lower_title = q_title.lower().strip()
-                    if lower_title in ('name', 'full name', 'your name', 'contact name'):
+                    if lower_title in ('name', 'full name', 'your name',
+                                       'contact name'):
                         lead_vals.setdefault('name', raw_value)
-                    elif lower_title in ('email', 'email address', 'e-mail', 'your email'):
+                    elif lower_title in ('email', 'email address', 'e-mail',
+                                         'your email'):
                         lead_vals.setdefault('email_from', raw_value)
-                    elif lower_title in ('phone', 'phone number', 'contact number', 'telephone'):
+                    elif lower_title in ('phone', 'phone number',
+                                         'contact number', 'telephone'):
                         lead_vals.setdefault('phone', raw_value)
-                    elif lower_title in ('mobile', 'mobile number', 'cell', 'cell phone'):
+                    elif lower_title in ('mobile', 'mobile number', 'cell',
+                                         'cell phone'):
                         lead_vals.setdefault('mobile', raw_value)
-                    elif lower_title in ('company', 'company name', 'organisation', 'organization'):
+                    elif lower_title in ('company', 'company name',
+                                         'organisation', 'organization'):
                         lead_vals.setdefault('partner_name', raw_value)
                     elif lower_title in ('website', 'website url', 'web'):
                         lead_vals.setdefault('website', raw_value)
-                    elif lower_title in ('address', 'street address', 'your address'):
+                    elif lower_title in ('address', 'street address',
+                                         'your address'):
                         lead_vals.setdefault('street', raw_value)
                     elif lower_title in ('city',):
                         lead_vals.setdefault('city', raw_value)
-                    elif lower_title in ('zip', 'zip code', 'postal code', 'postcode'):
+                    elif lower_title in ('zip', 'zip code', 'postal code',
+                                         'postcode'):
                         lead_vals.setdefault('zip', raw_value)
                     else:
                         if raw_value:
@@ -440,24 +450,68 @@ class GoogleForm(models.Model):
             if not lead_vals.get('name'):
                 partner_id = lead_vals.get('partner_id')
                 if partner_id:
-                    partner_rec = self.env['res.partner'].sudo().browse(partner_id)
-                    lead_vals['name'] = f"{partner_rec.name or self.name}'s Opportunity"
+                    partner_rec = self.env['res.partner'].sudo().browse(
+                        partner_id)
+                    lead_vals[
+                        'name'] = f"{partner_rec.name or self.name}'s Opportunity"
                 elif lead_vals.get('partner_name'):
-                    lead_vals['name'] = f"{lead_vals['partner_name']}'s Opportunity"
+                    lead_vals[
+                        'name'] = f"{lead_vals['partner_name']}'s Opportunity"
                 elif lead_vals.get('email_from'):
-                    lead_vals['name'] = f"{lead_vals['email_from']}'s Opportunity"
+                    lead_vals[
+                        'name'] = f"{lead_vals['email_from']}'s Opportunity"
                 else:
                     lead_vals['name'] = f"{self.name}'s Opportunity"
 
             if self.lead_id:
                 lead_vals.setdefault('parent_id', self.lead_id.id)
 
+            # ── Stamp responseId into description for traceability ────────
+            # This makes it easy to trace which Google Form submission
+            # created which lead, directly from the lead's Notes tab.
+            response_tag = (
+                f"[Google Form Response ID: {response_id}]"
+                if response_id else ""
+            )
+            extra_lines = "\n".join(description_lines)
+
+            if response_tag and extra_lines:
+                lead_vals['description'] = f"{response_tag}\n\n{extra_lines}"
+            elif response_tag:
+                lead_vals['description'] = response_tag
+            elif extra_lines:
+                lead_vals['description'] = extra_lines
+
             # ── Create the lead ───────────────────────────────────────────
-            self.env['crm.lead'].sudo().create(lead_vals)
+            #
+            # WHY mail_create_nosubscribe=True and tracking_disable=True?
+            #
+            # Odoo's mail thread (mail.thread) runs email normalization
+            # and partner-matching logic when a lead is created. If a lead
+            # with the same email_from already exists, Odoo can silently
+            # skip creation or merge the new lead into the existing one.
+            #
+            # mail_create_nosubscribe=True
+            #   → Skips auto-subscribing followers. Prevents the mail
+            #     thread from doing its partner-lookup/dedup during create.
+            #
+            # tracking_disable=True
+            #   → Disables field change tracking entirely during create.
+            #     This stops the mail.tracking.value logic that triggers
+            #     email normalization checks on email_from, which is the
+            #     root cause of the second lead not being created when the
+            #     same email address appears in a different submission.
+            #
+            # Result: every Google Form submission always becomes its own
+            # independent CRM lead, regardless of email address.
+            self.env['crm.lead'].sudo().with_context(
+                mail_create_nosubscribe=True,
+                tracking_disable=True,
+            ).create(lead_vals)
+
             leads_created += 1
             _logger.info(
-                "google.form [%s] — created lead for responseId %s",
-                self.id, response_id or '(no id)'
+                f"google.form [{self.id}] — created lead for responseId {response_id or '(no id)'}"
             )
 
             # ── Mark processed immediately after successful creation ───────
@@ -481,7 +535,8 @@ class GoogleForm(models.Model):
         if not self.active:
             raise ValidationError("This form is currently not active.")
         if not self.google_form_id:
-            raise ValidationError("This form has not been pushed to Google yet.")
+            raise ValidationError(
+                "This form has not been pushed to Google yet.")
 
         access_token = self.refresh_access_token()
         count = self._process_form_responses(access_token)
@@ -547,12 +602,12 @@ class GoogleForm(models.Model):
         ])
 
         if not forms:
-            _logger.info("google.form cron — no forms with automatic fetching enabled.")
+            _logger.info(
+                "google.form cron — no forms with automatic fetching enabled.")
             return
 
         _logger.info(
-            "google.form cron — processing %d form(s) with automatic fetching.",
-            len(forms)
+            f"google.form cron — processing {len(forms)} form(s) with automatic fetching."
         )
 
         for form in forms:
@@ -561,14 +616,12 @@ class GoogleForm(models.Model):
                 access_token = form.refresh_access_token()
                 count = form._process_form_responses(access_token)
                 _logger.info(
-                    "google.form cron — form '%s' (ID %d): %d new lead(s) created.",
-                    form.name, form.id, count
+                    f"google.form cron — form '{form.name}' (ID {form.id}): {count} new lead(s) created."
                 )
             except Exception:
                 _logger.exception(
-                    "google.form cron — ERROR processing form '%s' (ID %d). "
-                    "Continuing with remaining forms.",
-                    form.name, form.id
+                    f"google.form cron — ERROR processing form '{form.name}' (ID {form.id}). "
+                    f"Continuing with remaining forms."
                 )
 
     # ======================================================================
