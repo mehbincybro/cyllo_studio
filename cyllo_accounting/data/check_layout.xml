@@ -1,20 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- ================= REPORT ACTION ================= -->
-    <record id="action_report_cyllo_check" model="ir.actions.report">
-        <field name="name">Cyllo Check</field>
-        <field name="model">account.payment</field>
-        <field name="report_type">qweb-pdf</field>
-        <field name="report_name">cyllo_accounting.report_custom_check</field>
-        <field name="report_file">cyllo_accounting.report_custom_check</field>
-        <field name="binding_model_id" ref="account.model_account_payment"/>
-        <field name="binding_type">report</field>
-        <field name="paperformat_id" ref="cyllo_accounting.paperformat_check"/>
-        <!-- This makes filename dynamically assign the payment code -->
-        <field name="print_report_name">(object.name or 'Check')</field>
-    </record>
-
     <!-- ================= PAPER FORMAT ================= -->
     <record id="paperformat_check" model="report.paperformat">
         <field name="name">Check Paper Format</field>
@@ -146,4 +131,17 @@
             </main>
         </t>
     </template>
+    <!-- ================= REPORT ACTION ================= -->
+    <record id="action_report_cyllo_check" model="ir.actions.report">
+        <field name="name">Cyllo Check</field>
+        <field name="model">account.payment</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_accounting.report_custom_check</field>
+        <field name="report_file">cyllo_accounting.report_custom_check</field>
+        <field name="binding_model_id" ref="account.model_account_payment"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_check"/>
+        <!-- This makes filename dynamically assign the payment code -->
+        <field name="print_report_name">(object.name or 'Check')</field>
+    </record>
 </odoo>
