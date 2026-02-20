@@ -992,7 +992,7 @@ class StudioMode(Controller):
         # Loop through the deleted ribbons and modify the view
         deleted_ribbons = sorted(
             deleted_ribbons,
-            key=lambda r: int(''.join([c for c in r['path'] if c.isdigit()]) or 0),
+            key=lambda ribbon: int(''.join([character for character in ribbon['path'] if character.isdigit()]) or 0),
             reverse=True
         )
         for ribbon in deleted_ribbons:
@@ -4937,13 +4937,10 @@ class StudioMode(Controller):
         for ribbon in ribbons:
             if ribbon.get("selected"):
                 selected_ribbon_path = ribbon.get("path")
-                print("ssse",selected_ribbon_path)
                 break
         # Process edited ribbons first
         for ribbon in edited_ribbons:
-            print('hemme')
             xpath_expr = ribbon["path"]
-            print("hee",xpath_expr)
 
             # Ensure invisible expression is properly formatted
             invisible_expr = ribbon.get("invisible", "False")
@@ -4982,7 +4979,7 @@ class StudioMode(Controller):
         # Process deleted ribbons (sorted by index to avoid conflicts)
         deleted_ribbons_sorted = sorted(
             deleted_ribbons,
-            key=lambda r: self.extract_index(r.get('path', '')),
+            key=lambda ribbon: self.extract_index(ribbon.get('path', '')),
             reverse=True
         )
 
@@ -4995,109 +4992,6 @@ class StudioMode(Controller):
         # Save the updated architecture
         view_rec.arch_base = etree.tostring(view_node, pretty_print=True, encoding="unicode")
         return view_rec.arch_base
-
-    # @route('/cyllo_studio/form/update/ribbons', type="json", auth="user", csrf=False)
-    # def update_form_ribbon(self, **kwargs):
-    #     """
-    #     Update ribbon elements inside FORM view.
-    #     """
-    #     view_id = kwargs.get("viewId")
-    #     view_type = kwargs.get("viewType")
-    #     model = kwargs.get("model")
-    #     ribbons = kwargs.get("ribbons")
-    #     active_fields = kwargs.get("active_fields")
-    #
-    #     view_rec = self.get_studio_view(view_id, model, view_type)
-    #     view_node = etree.fromstring(view_rec.arch_base)
-    #
-    #     # Get the base view to check its structure
-    #     base_view = request.env['ir.ui.view'].browse(view_id)
-    #     base_arch = etree.fromstring(base_view.arch_base)
-    #     base_ribbons = base_arch.xpath('//div[@class="ribbon ribbon-top-right" or contains(@class, "ribbon")]')
-    #
-    #     # Separate deleted and edited ribbons
-    #     deleted_ribbons = [r for r in ribbons if r.get("hasDelete")]
-    #     edited_ribbons = [r for r in ribbons if not r.get("hasDelete") and r.get("hasEdit")]
-    #
-    #     # Find which ribbon should be visible (the selected one)
-    #     selected_ribbon_path = None
-    #     for ribbon in ribbons:
-    #         if ribbon.get("selected"):
-    #             selected_ribbon_path = ribbon.get("path")
-    #             break
-    #
-    #     # Process edited ribbons
-    #     for ribbon in edited_ribbons:
-    #         xpath_expr = ribbon["path"]
-    #         invisible_expr = ribbon.get("invisible", "False")
-    #         if not invisible_expr or invisible_expr in ["", "null", "undefined"]:
-    #             invisible_expr = "False"
-    #
-    #         # Replace the ribbon with updated content
-    #         view_arch = f"""
-    #             <xpath expr="{xpath_expr}" position="replace">
-    #                 <div class="ribbon ribbon-top-right" invisible="{escape(invisible_expr)}">
-    #                     <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
-    #                 </div>
-    #             </xpath>
-    #         """
-    #         view_node.append(etree.fromstring(view_arch))
-    #
-    #         # Add invisible fields for domain conditions
-    #         not_present_field = self.create_invisible([{
-    #             "invisible": invisible_expr,
-    #             "active_fields": active_fields or {},
-    #             "model": model,
-    #             "viewType": view_type,
-    #             "path": "form",
-    #             "position": "inside"
-    #         }])
-    #
-    #         if not_present_field:
-    #             not_present_field_arch = f"""
-    #                 <xpath expr="//form" position="inside">
-    #                     {not_present_field}
-    #                 </xpath>
-    #             """
-    #             view_node.append(etree.fromstring(not_present_field_arch))
-    #
-    #     # Process deleted ribbons
-    #     deleted_ribbons_sorted = sorted(
-    #         deleted_ribbons,
-    #         key=lambda r: self.extract_index(r.get('path', '')),
-    #         reverse=True
-    #     )
-    #     # deleted_ribbons_sorted = sorted(
-    #     #     deleted_ribbons,
-    #     #     key=lambda r: int(''.join([c for c in r['path'] if c.isdigit()]) or 0),
-    #     #     reverse=True
-    #     # )
-    #
-    #     for ribbon in deleted_ribbons_sorted:
-    #         xpath_expr = ribbon.get("path")
-    #         if xpath_expr:
-    #             view_arch = f"""<xpath expr="{xpath_expr}" position="replace"/>"""
-    #             view_node.append(etree.fromstring(view_arch))
-    #
-    #     # CRITICAL: Hide all non-selected ribbons when outside Studio
-    #     # This ensures only the selected ribbon shows in normal view
-    #     all_ribbon_paths = [r.get("path") for r in ribbons if not r.get("hasDelete")]
-    #     for ribbon_path in all_ribbon_paths:
-    #         if ribbon_path and ribbon_path != selected_ribbon_path:
-    #             # Find the ribbon and check if it needs to be hidden
-    #             ribbon_data = next((r for r in ribbons if r.get("path") == ribbon_path), None)
-    #             if ribbon_data:
-    #                 # If this ribbon has no domain condition and is not selected, hide it with '1'
-    #                 if ribbon_data.get("invisible") in ["False", "0", "", None, "false"]:
-    #                     hide_arch = f"""
-    #                         <xpath expr="{ribbon_path}" position="attributes">
-    #                             <attribute name="invisible">1</attribute>
-    #                         </xpath>
-    #                     """
-    #                     view_node.append(etree.fromstring(hide_arch))
-    #
-    #     view_rec.arch_base = etree.tostring(view_node, pretty_print=True, encoding="unicode")
-    #     return view_rec.arch_base
 
     def _save_sql_constraints(self, model_rec, constraints):
         """
@@ -5180,7 +5074,7 @@ class StudioMode(Controller):
                     try:
                         ModelClass = type(request.env[model_rec.model])
                         sql_constraints = list(getattr(ModelClass, '_sql_constraints', []))
-                        sql_constraints = [c for c in sql_constraints if c[0] != base_name]
+                        sql_constraints = [constraint_tuple for constraint_tuple in sql_constraints if constraint_tuple[0] != base_name]
                         sql_constraints.append((base_name, definition, msg_str))
                         ModelClass._sql_constraints = sql_constraints
 
@@ -5223,9 +5117,9 @@ class StudioMode(Controller):
                 request.env.registry._sql_constraints.discard(name)
         ModelClass = type(request.env[model_rec.model])
         ModelClass._sql_constraints = [
-            c for c in getattr(ModelClass, '_sql_constraints', [])
-            if field_name.lower() not in c[0].lower()
-               and field_name.lower() not in c[1].lower()
+            constraint_tuple for constraint_tuple in getattr(ModelClass, '_sql_constraints', [])
+            if field_name.lower() not in constraint_tuple[0].lower()
+               and field_name.lower() not in constraint_tuple[1].lower()
         ]
         cr.commit()
 
@@ -5356,8 +5250,8 @@ class StudioMode(Controller):
             request.env.registry._sql_constraints.discard(name)
         ModelClass = type(request.env[model])
         ModelClass._sql_constraints = [
-            c for c in getattr(ModelClass, '_sql_constraints', [])
-            if c[0] not in name_variations
+            constraint_tuple for constraint_tuple in getattr(ModelClass, '_sql_constraints', [])
+            if constraint_tuple[0] not in name_variations
         ]
         cr.commit()
         return {'success': True, 'message': f'Constraint {constraint_key} removed'}

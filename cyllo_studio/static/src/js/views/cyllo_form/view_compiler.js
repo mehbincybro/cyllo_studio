@@ -171,7 +171,6 @@ function compileChatter(node, params) {
 
 export class CylloFormCompiler extends FormCompiler {
     setup() {
-        console.log("1")
         super.setup();
         this.rpc = useService("rpc");
     }
@@ -220,18 +219,14 @@ export class CylloFormCompiler extends FormCompiler {
      */
     compileNode(node, params = {}, evalInvisible = false) {
         const invisible_session = sessionStorage.getItem('invisible');
-        console.log("aa",invisible_session)
 //        if (invisible_session) {
             evalInvisible = false;
 //        }
         let compiledNode = super.compileNode(node, params, evalInvisible);
-        console.log("aa",compiledNode)
         if (!compiledNode) {
-            console.log("dsa")
             return compiledNode;
         }
         if (node.nodeType === 1) {
-            console.log("aaaw",)
             const invisible = getModifier(node, "invisible");
 
             if (invisible && invisible !== "False" && invisible !== "0") {

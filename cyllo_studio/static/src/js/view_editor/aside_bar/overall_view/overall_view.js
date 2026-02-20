@@ -94,18 +94,12 @@ export class OverallView extends Component {
 
 showInvisibleFields(ev) {
     const checked = !!ev.target.checked;
-    console.log("ads1",ev)
-    console.log("ads2",ev.target)
-    console.log("ads3",ev.target.checked)
     this.state.showInvisible = checked;
-    console.log
     if (checked) {
         sessionStorage.setItem("invisible", "1");
-        console.log("session storageee",sessionStorage)
     } else {
         sessionStorage.removeItem("invisible");
     }
-
     this._applyInvisibleOverride(checked);
     document.body.classList.toggle("cy-hide-invisible", !checked);
     this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
