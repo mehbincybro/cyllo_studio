@@ -30,7 +30,7 @@
     'website': "https://www.cyllo.com",
     'company': "Cyllo",
     'maintainer': "Cyllo",
-    'depends': ['web', 'account', 'mail'],
+    'depends': ['web', 'account', 'mail', 'account_check_printing'],
     'icon': '/cyllo_base/static/src/icons/invoicing.svg',
     'data': [
         'data/ir_actions_server_data.xml',
