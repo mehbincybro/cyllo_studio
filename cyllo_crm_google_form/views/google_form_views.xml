@@ -15,7 +15,7 @@
         <field name="arch" type="xml">
             <tree string="Google Forms">
                 <field name="name" string="Form Title"/>
-                <field name="form_url" widget="url" string="Public URL"/>
+                <field name="form_url" widget="CopyClipboardChar" string="Public URL"/>
                 <button name="action_open_share_wizard"
                         type="object"
                         string="Share"
@@ -64,7 +64,7 @@
                                    invisible="1"/>
                             <field name="form_url"
                                    readonly="1"
-                                   widget="url"
+                                   widget="CopyClipboardChar"
                                    invisible="not active"/>
 
                             <button name="action_open_share_wizard"
