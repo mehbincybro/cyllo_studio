@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/record";
 import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { CharField } from "@web/views/fields/char/char_field";
+import { IntegerField } from "@web/views/fields/integer/integer_field";
 
 
 export class MenuDialog extends Component {
@@ -30,21 +31,25 @@ export class MenuDialog extends Component {
      * @returns {Object} - Record properties.
      */
     get recordProps() {
-         var name = {
-             type: "char",
-             string: "Name",
-         }
-         var menu_id = {
-             type: "many2one",
-             relation: "ir.ui.menu",
-             string: "Menus",
-             relatedFields: ["id", "name"],
-         }
-         var fields = { name, menu_id }
-         return {
-             mode: "edit",
-             onRecordChanged: (record, changes) => {
-                for (var key in changes){
+        var name = {
+            type: "char",
+            string: "Name",
+        }
+        var menu_id = {
+            type: "many2one",
+            relation: "ir.ui.menu",
+            string: "Menus",
+            relatedFields: ["id", "name"],
+        }
+        var sequence = {
+            type: "integer",
+            string: "Sequence",
+        }
+        var fields = { name, menu_id, sequence }
+        return {
+            mode: "edit",
+            onRecordChanged: (record, changes) => {
+                for (var key in changes) {
                     this.data[key] = changes[key]
                 }
              },
@@ -52,7 +57,7 @@ export class MenuDialog extends Component {
              resId: this.id,
              fieldNames: fields,
              activeFields: fields,
-         };
+        };
     }
     /**
      * Handle confirmation of menu creation.
@@ -72,6 +77,7 @@ export class MenuDialog extends Component {
             parent_id: this.data.menu_id,
             action: `ir.actions.client,${action}`,
             is_cyllo_analytic_menu: true,
+            sequence: this.data.sequence || 0,
         }]
         const menu = await this.orm.create('ir.ui.menu', menuData)
         await this.orm.call("dashboard.config", "append_menu",[this.props.rec_id, menu[0]])
@@ -112,4 +118,4 @@ export class MenuDialog extends Component {
 }
 // Define the template for the MenuDialog component
 MenuDialog.template = "cyllo_analytics.MenuDialog"
-MenuDialog.components = { Dialog, Record, Many2OneField, CharField };
+MenuDialog.components = { Dialog, Record, Many2OneField, CharField, IntegerField };
