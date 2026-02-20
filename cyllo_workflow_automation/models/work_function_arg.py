@@ -27,6 +27,8 @@ import logging
 
 from lxml import etree
 
+from dateutil.relativedelta import relativedelta
+
 from odoo import api, exceptions, fields, models, tools
 from odoo.exceptions import AccessError
 from odoo.tools import file_open
@@ -485,7 +487,8 @@ class WorkAuto(models.Model):
                 Model._onchange_methods[auto.field_id.name].append(
                     on_change_func(auto))
             elif auto.trigger_type == 'time':
-                pass
+                # Time-based triggers are driven by ir.cron, not method patching.
+                continue
             else:
                 if not function_id.c_make_function:
                     continue
@@ -627,7 +630,9 @@ class WorkAuto(models.Model):
         """
         Override the write method to update records and trigger a registry update.
 
-        This method updates existing records with new values and ensures the registry is updated afterward.
+        Also re-syncs the linked ir.cron whenever any time-trigger field or the
+        `active` flag changes, so the scheduled job always reflects the latest
+        configuration.
 
         Args:
             vals (dict): A dictionary of values used to update the record.
@@ -636,8 +641,25 @@ class WorkAuto(models.Model):
             bool: True if the write operation was successful.
         """
         res = super().write(vals)
+        time_fields = {
+            'time_trigger_mode', 'time_trigger_time',
+            'time_trigger_day', 'time_trigger_month', 'active',
+        }
+        if time_fields & vals.keys():
+            self.create_cron()
         self._update_registry()
         return res
+
+    def unlink(self):
+        """
+        Override unlink to remove any linked ir.cron jobs before deleting the
+        automation record, preventing orphaned scheduled actions.
+
+        Returns:
+            bool: True if the unlink operation was successful.
+        """
+        self.mapped('schedule_id').sudo().unlink()
+        return super().unlink()
 
     def _unregister_hook(self):
         """
@@ -673,7 +695,106 @@ class WorkAuto(models.Model):
             self.env.registry.registry_invalidated = True
 
     def create_cron(self):
-        pass
+        """
+        Create or update an ir.cron scheduled action for time-based workflow
+        automations.
+
+        Called automatically on record creation and whenever time-trigger fields
+        are modified. Only acts on automations whose linked trigger has
+        `trigger_type == 'time'` and whose `time_trigger_mode` is set.
+
+        Interval mapping:
+            - 'hour'  → every 1 hour
+            - 'day'   → every 1 day
+            - 'month' → every 1 month
+            - 'year'  → every 12 months
+
+        The `nextcall` datetime is computed from `time_trigger_time` (a float
+        representing hours, e.g. 14.5 = 14:30). For monthly/yearly modes,
+        `time_trigger_day` and `time_trigger_month` are also applied. If the
+        computed nextcall is in the past it is advanced by one interval.
+        """
+        interval_map = {
+            'hour':  (1,  'hours'),
+            'day':   (1,  'days'),
+            'month': (1,  'months'),
+            'year':  (12, 'months'),
+        }
+        for rec in self:
+            if rec.trigger_type != 'time' or not rec.time_trigger_mode:
+                continue
+
+            interval_number, interval_type = interval_map[rec.time_trigger_mode]
+
+            # Build nextcall from time_trigger_time (float hours, e.g. 14.5 → 14:30)
+            now = fields.Datetime.now()
+            hour = int(rec.time_trigger_time or 0)
+            minute = round(((rec.time_trigger_time or 0) - hour) * 60)
+            nextcall = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+
+            if rec.time_trigger_mode in ('month', 'year'):
+                day = max(1, rec.time_trigger_day or 1)
+                try:
+                    nextcall = nextcall.replace(day=day)
+                except ValueError:
+                    # Day out of range for the current month — clamp to last day
+                    import calendar
+                    last_day = calendar.monthrange(nextcall.year, nextcall.month)[1]
+                    nextcall = nextcall.replace(day=last_day)
+
+            if rec.time_trigger_mode == 'year':
+                month = max(1, min(12, rec.time_trigger_month or 1))
+                try:
+                    nextcall = nextcall.replace(month=month)
+                except ValueError:
+                    nextcall = nextcall.replace(month=month, day=1)
+
+            # If nextcall is already in the past, advance by one interval
+            if nextcall <= now:
+                if interval_type == 'hours':
+                    nextcall += relativedelta(hours=interval_number)
+                elif interval_type == 'days':
+                    nextcall += relativedelta(days=interval_number)
+                elif interval_type == 'months':
+                    nextcall += relativedelta(months=interval_number)
+
+            cron_vals = {
+                'name': f'Workflow Automation: {rec.name}',
+                'model_id': self.env['ir.model']._get('work.auto').id,
+                'state': 'code',
+                'code': f"env['work.auto'].browse({rec.id})._run_time_trigger()",
+                'interval_number': interval_number,
+                'interval_type': interval_type,
+                'nextcall': nextcall,
+                'numbercall': -1,
+                'active': rec.active,
+                'user_id': self.env.ref('base.user_root').id,
+            }
+
+            if rec.schedule_id:
+                rec.schedule_id.sudo().write(cron_vals)
+            else:
+                cron = self.env['ir.cron'].sudo().create(cron_vals)
+                rec.sudo().write({'schedule_id': cron.id})
+
+    def _run_time_trigger(self):
+        """
+        Entry point called by the ir.cron scheduled action for time-based
+        workflow automations.
+
+        Executes the automation's generated Python code via `_process`. Errors
+        are caught and logged so that a single failure does not prevent future
+        cron runs.
+        """
+        if not self.active:
+            return
+        try:
+            self._process({})
+        except Exception as e:
+            _logger.error(
+                "Workflow Automation '%s' (id=%s) time trigger failed: %s",
+                self.name, self.id, e,
+            )
 
     def copy(self, default=None):
         """

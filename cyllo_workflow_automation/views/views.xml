@@ -14,8 +14,8 @@
                             <field name="func_name" widget="charSelection"/>
                             <field name="decorator" invisible="1"/>
                             <field name="has_return" invisible="1"/>
-                            <field name="mode" invisible="1"/>
-                            <field name="trigger_type" invisible="1"/>
+                            <field name="mode" readonly="1"/>
+                            <field name="trigger_type"/>
                             <field name="company_id"/>
                             <field name="icon"/>
                         </group>
@@ -100,10 +100,14 @@
                                 <field name="field_id"/>
                             </page>
                             <page string="Time" invisible="trigger_type != 'time'">
-                                <field name="time_trigger_mode"/>
-                                <field name="time_trigger_month" invisible="time_trigger_mode != 'year'"/>
-                                <field name="time_trigger_day" invisible="time_trigger_mode in ['day', 'hour']"/>
-                                <field name="time_trigger_time"/>
+                                <group>
+                                    <field name="time_trigger_mode"/>
+                                    <field name="time_trigger_month" invisible="time_trigger_mode != 'year'"/>
+                                    <field name="time_trigger_day" invisible="time_trigger_mode in ['day', 'hour']"/>
+                                    <field name="time_trigger_time" help="Enter time as decimal hours (e.g. 14.5 = 14:30)"/>
+                                    <field name="schedule_id" readonly="1"
+                                           help="Linked scheduled action. Created automatically on save."/>
+                                </group>
                             </page>
                         </notebook>
                     </sheet>
