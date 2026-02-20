@@ -31,6 +31,7 @@ import { CylloFormLabel } from "@cyllo_studio/js/views/cyllo_form/form_label/for
 export class CylloFormRenderer extends FormRenderer {
   setup() {
     super.setup();
+     this.showInvisible = this.props.showInvisible === true;
 
     onMounted(() => {
       this.env.bus.trigger("FORM_DETAILS", {

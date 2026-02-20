@@ -200,7 +200,7 @@
                     </div>
                     <div class="checkbox-item">
                         <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showInvisibleElements"
-                               name="checkbox4" t-att-checked="state.showInvisible"
+                               name="checkbox4" t-att-checked="props.showInvisible"
                                t-on-click="(ev)=>this.props.showInvisibleFields(ev)"/>
                         <label class="checkbox-label" for="showInvisibleElements">
                             <span class="checkbox-indicator">

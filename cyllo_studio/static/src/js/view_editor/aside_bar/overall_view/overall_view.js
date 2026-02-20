@@ -38,14 +38,16 @@ export class OverallView extends Component {
     relational_model: { type: [String, Object], optional: true },
     fieldNodes: { type: Object, optional: true },
     widget: { type: String, optional: true },
-    invisible: { type: String, optional: true }
+    invisible: { type: String, optional: true },
+    showInvisible: { type: Boolean, optional: true },
+    showInvisibleFields: { type: Function, optional: true },
   };
   setup() {
     this.rpc = useService("rpc");
     this.notification = useService("effect");
     this.actionService = useService("action");
     this.state = useState({
-      showInvisible: ""
+     showInvisible: sessionStorage.getItem("invisible") === "1"
     });
 //    onWillStart(() => {
 //      const checked = sessionStorage.getItem("invisible") === "1";
@@ -61,17 +63,16 @@ export class OverallView extends Component {
         this.state.showInvisible = checked;
         document.body.classList.toggle("cy-show-invisible", checked);
     });
-        onMounted(() => {
-        const checked = sessionStorage.getItem("invisible") === "1";
-        if (checked) {
-            this._applyInvisibleOverride(true);
-        }
-    });
+//        onMounted(() => {
+//        const checked = sessionStorage.getItem("invisible") === "1";
+//        if (checked) {
+//            this._applyInvisibleOverride(true);
+//        }
+//    });
   }
   _applyInvisibleOverride(show) {
     if (show) {
         document.body.classList.add("cy-show-invisible");
-        // Force-show elements that Odoo hid with inline styles
         document.querySelectorAll('[invisible="1"], [invisible="True"], [invisible="true"]').forEach(el => {
             el.style.setProperty('display', '', 'important');
             el.setAttribute('data-cy-was-invisible', '1');
@@ -90,67 +91,17 @@ export class OverallView extends Component {
   * Toggle display of invisible fields and reload the view.
   * @param {Event} ev - The checkbox change event.
   */
-  //  showInvisibleFields(ev) {
-  //    const want = !!ev.target.checked;
-  //    if (this.state.showInvisible === want){
-  //     return;
-  //    }
-  //    this.state.showInvisible = want;
-  //    if (want){
-  //     sessionStorage.setItem("invisible", "1");
-  //    }
-  //    else{
-  //     sessionStorage.removeItem("invisible");
-  //    }
-  //    document.body.classList.toggle("cy-hide-invisible", !want);
-  //    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", want);
-  //    this.actionService.doAction("studio_reload");
-  //  }
-
-  //showInvisibleFields(ev) {
-  //    const checked = !!ev.target.checked;
-  //this.state.showInvisible = checked;
-  //
-  //    if (checked) {
-  //        sessionStorage.setItem("invisible", "1");
-  //    } else {
-  //        sessionStorage.removeItem("invisible");
-  //    }
-  //    document.body.classList.toggle("cy-hide-invisible", !checked);
-  //
-  //    try {
-  //        this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-  //    } catch (e) {
-  //        // ignore
-  //    }
-  //}
-//  showInvisibleFields(ev) {
-//    var checked = !!ev.target.checked;
-//    console.log("chektest1",checked)
-//    this.state.showInvisible = checked;
-//    console.log("chektest2",this.state.showInvisible)
-//    if (checked) {
-//    console.log("chektest33")
-//      sessionStorage.setItem("invisible", "1");
-////      this.actionService.doAction("studio_reload");
-//      document.body.classList.add("cy-show-invisible");
-//    } else {
-//    console.log("chektest44")
-////      this.actionService.doAction("studio_reload");
-//      sessionStorage.removeItem("invisible");
-//      document.body.classList.remove("cy-show-invisible");
-//    }
-//    document.body.classList.toggle("cy-hide-invisible", !checked);
-//    this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-////    this.actionService.doAction("studio_reload");
-//  }
 
 showInvisibleFields(ev) {
     const checked = !!ev.target.checked;
+    console.log("ads1",ev)
+    console.log("ads2",ev.target)
+    console.log("ads3",ev.target.checked)
     this.state.showInvisible = checked;
-
+    console.log
     if (checked) {
         sessionStorage.setItem("invisible", "1");
+        console.log("session storageee",sessionStorage)
     } else {
         sessionStorage.removeItem("invisible");
     }
@@ -158,6 +109,8 @@ showInvisibleFields(ev) {
     this._applyInvisibleOverride(checked);
     document.body.classList.toggle("cy-hide-invisible", !checked);
     this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+    this.actionService.doAction("studio_reload");
+
 }
 
   /**
@@ -172,6 +125,7 @@ showInvisibleFields(ev) {
       viewId: this.props.viewId,
       handleView: this.handleView.bind(this),
       showInvisibleFields: this.showInvisibleFields.bind(this),
+      showInvisible: this.state.showInvisible,
     };
   }
 

@@ -80,11 +80,6 @@ body.cy-show-invisible .cy-studio-striped {
     opacity: 1 !important;
 }
 
-/* For table cells (td), add a subtle left border instead of striped background */
-body.cy-show-invisible td.cy-studio-striped {
-    border-left: 3px solid #7c7c7c69 !important;
-    background-color: transparent !important;
-}
 /* Search View */
 .cy-content-header-icon {
     margin-bottom: 0.5rem;
@@ -622,6 +617,7 @@ div[data-drag="1"]:empty {
     transform: scale(.98);
     filter: drop-shadow(0 0 10px rgba(0,0,0,0.15));
 }
+
 
 
 
