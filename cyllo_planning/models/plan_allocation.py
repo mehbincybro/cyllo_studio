@@ -37,6 +37,7 @@ class PlanAllocation(models.Model):
     company_id = fields.Many2one('res.company', required=True, default=lambda self: self.env.company)
     allocation_type_id = fields.Many2one('allocation.type', required=True)
     color = fields.Char(related='allocation_type_id.color')
+    is_conflict = fields.Boolean(compute='_compute_conflict_data', store=True)
 
     _sql_constraints = [
         ('check_period_validation', 'CHECK(end_datetime >= start_datetime)',
@@ -56,6 +57,44 @@ class PlanAllocation(models.Model):
         """Compute duration from start date and end date."""
         for allocation in self:
             allocation.duration = self._get_duration(allocation.start_datetime, allocation.end_datetime)
+
+    def _get_duration(self, start_datetime, end_datetime):
+        """Calculate duration between two datetimes using company hours/day logic."""
+        if not start_datetime or not end_datetime or end_datetime < start_datetime:
+            return 0
+
+        calendar = self.env.company.resource_calendar_id
+
+        hours_per_day = calendar.hours_per_day if calendar else 12
+
+        # Case 1: Same day → actual hours, but max hours_per_day
+        if start_datetime.date() == end_datetime.date():
+            duration = (end_datetime - start_datetime).total_seconds() / 3600
+            return round(min(duration, hours_per_day), 2)
+
+        # Case 2: Multi-day → use calendar hours_per_day × days
+        days = (end_datetime.date() - start_datetime.date()).days + 1
+        return round(days * hours_per_day, 2)
+
+    @api.depends('start_datetime', 'end_datetime', 'employee_id')
+    def _compute_conflict_data(self):
+        """Compute if the allocation conflicts with other allocations."""
+        for allocation in self:
+            allocation.is_conflict = allocation._check_overlap()
+
+    def _check_overlap(self):
+        """Check if the current allocation overlaps with existing allocations for the same employee."""
+        self.ensure_one()
+        if not self.start_datetime or not self.end_datetime or not self.employee_id:
+            return False
+
+        domain = [
+            ('employee_id', '=', self.employee_id.id),
+            ('start_datetime', '<', self.end_datetime),
+            ('end_datetime', '>', self.start_datetime),
+            ('id', '!=', self.id),
+        ]
+        return bool(self.search_count(domain))
 
     @api.onchange('start_datetime', 'end_datetime', 'employee_id')
     def _onchange_check_overlap(self):
@@ -77,22 +116,3 @@ class PlanAllocation(models.Model):
                     'message': _("This employee has another plan scheduled during this time period."),
                 }
             }
-
-
-    def _get_duration(self, start_datetime, end_datetime):
-        """Calculate duration between two datetimes using company hours/day logic."""
-        if not start_datetime or not end_datetime or end_datetime < start_datetime:
-            return 0
-
-        calendar = self.env.company.resource_calendar_id
-
-        hours_per_day = calendar.hours_per_day if calendar else 12
-
-        # Case 1: Same day → actual hours, but max hours_per_day
-        if start_datetime.date() == end_datetime.date():
-            duration = (end_datetime - start_datetime).total_seconds() / 3600
-            return round(min(duration, hours_per_day), 2)
-
-        # Case 2: Multi-day → use calendar hours_per_day × days
-        days = (end_datetime.date() - start_datetime.date()).days + 1
-        return round(days * hours_per_day, 2)
