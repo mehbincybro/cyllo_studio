@@ -47,13 +47,14 @@
  * dynamically in Odoo Studio, ensuring user-friendly interactions and seamless integration
  * with the backend.
  */
-import { Component, onWillStart, useRef, useState, onMounted, useEffect } from "@odoo/owl";
+import { Component, onWillStart, useRef, useState, onMounted, useEffect, onWillUpdateProps } from "@odoo/owl";
 import { useOwnedDialogs, useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { FormTreeDialog } from "@cyllo_studio/js/view_editor/dialog/form_tree_dialog";
 import { CylloStudioDropdown } from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
 import { RibbonProperties } from "@cyllo_studio/js/view_editor/kanban/ribbon_properties"; // ADD THIS
 import { RibbonDialog } from "@cyllo_studio/js/view_editor/kanban/ribbon_dialog";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 export class FormOverall extends Component {
 	static template = "cyllo_studio.FormOverall";
@@ -80,7 +81,12 @@ export class FormOverall extends Component {
 			isNotebookPageChange: true,
 			fieldDropped: false,
 			invisible:'',
+			hasStudioChanges: false,
+			isPreviewMode:false
 		});
+		this.state.deactivatedViews = [];
+        this.state.selectedDeactivatedViewId = null;
+        this.loadDeactivatedViews();
 		this.state.recordNameOptions = [];
         this.state.currentRecName = null;
         this.loadRecordNameData();
@@ -172,6 +178,14 @@ export class FormOverall extends Component {
 			const chatter_add = document.querySelector('.cy-mail-chatter') ||
 			                    document.querySelector('.o-mail-ChatterContainer') ||
 			                    document.querySelector('.o-mail-Form-chatter');
+			const view_id = this.props.viewDetails?.viewId || this.props.viewId;
+            if (view_id) {
+                this.rpc("/cyllo_studio/check_view_customized", {
+                    view_id: view_id,
+                }).then((result) => {
+                    this.state.hasStudioChanges = result;
+                });
+            }
 			if (chatter_add) {
 				this.state.isChatterAvailable = false
 			}
@@ -795,6 +809,106 @@ const handleRibbonClick = function(ribbonElement, e) {
     this.state.currentRecName = newValue;
     window.location.reload();
     };
+    async resetView() {
+    this.dialogService.add(ConfirmationDialog, {
+        title: "Reset View",
+        body: "Are you sure you want to reset this view to the default version? All studio changes will be lost.",
+        confirmLabel: "Reset",
+        cancelLabel: "Cancel",
+        confirm: async () => {
+            try {
+                let view_type = this.props.viewType;
+                let view_id = this.props.viewId;
+
+                const searchViewId = sessionStorage.getItem("searchViewId");
+                if (searchViewId) {
+                    view_type = "search";
+                    view_id = searchViewId;
+                }
+
+                await this.rpc("/cyllo_studio/reset_view", {
+                    model: this.props.model,
+                    view_type: view_type,
+                    view_id: view_id,
+                });
+
+                sessionStorage.removeItem("UndoRedo");
+                sessionStorage.removeItem("ReDO");
+
+            } finally {
+                this.action.doAction("studio_reload");
+                window.location.reload();
+            }
+        },
+    });
+}
+async loadDeactivatedViews() {
+    const view_id = this.props.viewId;
+    if (!view_id) return;
+    const views = await this.rpc("/cyllo_studio/get_deactivated_views", { view_id });
+    this.state.deactivatedViews = (views || []).map(v => ({
+        ...v,
+        displayName: `Created: ${v.create_date} [ID: ${v.id}] ${v.name} `
+    }));
+    this.state.selectedDeactivatedViewId = views?.[0]?.id || null;
+}
+
+//onDeactivatedViewSelect = async (viewId) => {
+//    this.state.selectedDeactivatedViewId = viewId;
+//}
+onDeactivatedViewSelect = async (viewId) => {
+    const baseViewId = this.props.viewDetails?.viewId || this.props.viewId;
+    if (!viewId || !baseViewId) return;
+
+    this.state.selectedDeactivatedViewId = viewId;
+    this.state.isPreviewMode = true;
+
+    // Temporarily activate for preview
+    await this.rpc("/cyllo_studio/preview_view", {
+        view_id: viewId,
+        base_view_id: baseViewId,
+    });
+
+    this.action.doAction("studio_reload");
+}
+
+async cancelPreview() {
+    await this.rpc("/cyllo_studio/cancel_preview", {});
+    this.state.isPreviewMode = false;
+    this.state.selectedDeactivatedViewId = null;
+    this.action.doAction("studio_reload");
+}
+
+async activateSelectedView() {
+    const viewId = this.state.selectedDeactivatedViewId;
+    const baseViewId = this.props.viewDetails?.viewId || this.props.viewId;
+    if (!viewId || !baseViewId) return;
+
+    this.dialogService.add(ConfirmationDialog, {
+        title: "Activate Studio View",
+        body: "This will permanently activate the previewed view. Continue?",
+        confirmLabel: "Activate",
+        cancelLabel: "Cancel",
+        confirm: async () => {
+            try {
+                // Already active from preview, just clear session + undo history
+                await this.rpc("/cyllo_studio/cancel_preview", {}); // clear session only
+                // Re-activate cleanly via the proper route
+                await this.rpc("/cyllo_studio/activate_single_view", {
+                    view_id: viewId,
+                    base_view_id: baseViewId,
+                });
+                this.state.isPreviewMode = false;
+                sessionStorage.removeItem("UndoRedo");
+                sessionStorage.removeItem("ReDO");
+            } finally {
+                this.action.doAction("studio_reload");
+            }
+        },
+    });
+}
+
+
 
 }
 FormOverall.components = {

@@ -23,8 +23,6 @@ import inspect
 import uuid
 from html import unescape, escape
 import xml.etree.ElementTree as ET
-from xxlimited_35 import Null
-
 from odoo import http, api, _, tools
 import json
 import ast
@@ -94,6 +92,11 @@ class StudioMode(Controller):
                 matches2 = re.findall(pattern2, condition)
                 matches3 = re.findall(pattern3, condition)
                 left_hand_names.extend([*matches1, *matches2, *matches3])
+
+        # Handle dynamic_placeholder
+        dynamic_placeholder = attrs.get('dynamic_placeholder') or value.get('dynamic_placeholder')
+        if dynamic_placeholder and isinstance(dynamic_placeholder, str):
+            left_hand_names.append(dynamic_placeholder)
 
         # Remove 'not' and duplicates
         left_hand_names = [name for name in left_hand_names if name != 'not']
@@ -1027,18 +1030,12 @@ class StudioMode(Controller):
               str: XML snippets representing updated field and any added placeholders.
           """
         view_rec = self.get_studio_view(args['view_id'], args['model'], args['view_type'])
-        remove_widget = args.get('remove_widget', False)
-        if remove_widget:
-            # Remove the widget attribute entirely
-            view_arch = f'<xpath expr="{args["path"]}" position="attributes">'
-            view_arch += '<attribute name="widget"></attribute>'  # Set to empty
-            view_arch += '</xpath>'
-        else:
-            view_arch = f'''
-                            <xpath expr="{args['path']}" position="attributes">
-                             <attribute name="widget">{args['widget']}</attribute>
-                               <attribute name="invisible">{args['invisible']}</attribute>
-                            </xpath>'''
+        view_arch = f'''
+                                        <xpath expr="{args['path']}" position="attributes">
+                                           <attribute name="invisible">{args['invisible']}</attribute>
+                                            <attribute name="widget">{args['widget']}</attribute>
+
+                                        </xpath>'''
 
         not_present_field = self.create_invisible(
             [{'invisible': args['invisible'], 'active_fields': args['active_fields'], 'model': args['model'], }])
@@ -1556,6 +1553,137 @@ class StudioMode(Controller):
 
         return tree_arch_base
 
+    @http.route('/cyllo_studio/reset_view', type='json', auth='user')
+    def reset_view(self, model, view_type, view_id):
+
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+
+        studio_view = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio')
+        ])
+
+        if studio_view:
+            # studio_view.unlink()
+            studio_view.write({'active': False})
+
+        return True
+
+    @http.route('/cyllo_studio/get_deactivated_views', type='json', auth='user')
+    def get_deactivated_views(self, view_id):
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+        studio_views = request.env['ir.ui.view'].with_context(active_test=False).search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', False),
+        ])
+        return [{'id': v.id, 'name': v.name,'write_date': v.write_date.strftime('%Y-%m-%d %H:%M') if v.write_date else '',
+        'create_date': v.create_date.strftime('%Y-%m-%d %H:%M') if v.create_date else ''} for v in studio_views]
+
+
+    @http.route('/cyllo_studio/activate_single_view', type='json', auth='user')
+    def activate_single_view(self, view_id, base_view_id):
+        # First, deactivate ALL currently active studio views for this base view
+        base_view = request.env['ir.ui.view'].browse(int(base_view_id))
+
+        active_studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', True),
+        ])
+        if active_studio_views:
+            active_studio_views.write({'active': False})
+
+        # Now activate only the selected one
+        target_view = request.env['ir.ui.view'].with_context(active_test=False).browse(int(view_id))
+        if target_view:
+            target_view.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return True
+
+    @http.route('/cyllo_studio/preview_view', type='json', auth='user')
+    def preview_view(self, view_id, base_view_id):
+        """Temporarily swap active studio view for preview - stores previous state in session"""
+        base_view = request.env['ir.ui.view'].browse(int(base_view_id))
+
+        # Store currently active studio view IDs in session for revert
+        active_studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', True),
+        ])
+        request.session['cy_preview_previous_active'] = active_studio_views.ids
+        request.session['cy_preview_base_view_id'] = int(base_view_id)
+
+        # Deactivate all active studio views
+        if active_studio_views:
+            active_studio_views.write({'active': False})
+
+        # Activate only the selected preview view
+        target_view = request.env['ir.ui.view'].with_context(active_test=False).browse(int(view_id))
+        if target_view:
+            target_view.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return {'success': True, 'previewing_id': int(view_id)}
+
+    @http.route('/cyllo_studio/cancel_preview', type='json', auth='user')
+    def cancel_preview(self):
+        """Revert to previously active studio views before preview"""
+        previous_ids = request.session.get('cy_preview_previous_active', [])
+        base_view_id = request.session.get('cy_preview_base_view_id')
+
+        if base_view_id:
+            base_view = request.env['ir.ui.view'].browse(base_view_id)
+
+            # Deactivate current preview view
+            current_active = request.env['ir.ui.view'].search([
+                ('inherit_id', '=', base_view.id),
+                ('name', 'ilike', 'Cyllo Studio'),
+                ('active', '=', True),
+            ])
+            if current_active:
+                current_active.write({'active': False})
+
+            # Restore previous active views
+            if previous_ids:
+                prev_views = request.env['ir.ui.view'].with_context(active_test=False).browse(previous_ids)
+                prev_views.write({'active': True})
+
+            request.env['ir.ui.view'].clear_caches()
+
+        # Clear session
+        request.session.pop('cy_preview_previous_active', None)
+        request.session.pop('cy_preview_base_view_id', None)
+
+        return True
+    @http.route('/cyllo_studio/reactivate_view', type='json', auth='user')
+    def reactivate_view(self, view_id):
+
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+
+        studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', False),
+        ])
+
+        if studio_views:
+            studio_views.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return True
+
+    @http.route('/cyllo_studio/check_view_customized', type='json', auth='user')
+    def check_view_customized(self, view_id):
+        studio_view = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', int(view_id)),
+            ('name', 'ilike', 'Cyllo Studio')
+        ], limit=1)
+
+        return bool(studio_view)
+
     @route('/cyllo_studio/create/new_fields', type="json", auth="user",
            csrf=False)
     def create_new_fields(self, args, view_id, model, view_type):
@@ -1753,7 +1881,7 @@ class StudioMode(Controller):
 
             for key, value in args[0]['value'].items():
                 if key and value is not None:
-                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible'):
+                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible', 'dynamic_placeholder'):
                         attributes += f'''<attribute name="{key}">{escape(str(value))}</attribute>'''
                     # elif key == 'field_info':
                     elif key in ('field_info', 'compute_dependencies', 'is_computed', 'compute', 'depends',
@@ -1865,7 +1993,7 @@ class StudioMode(Controller):
                     inside_field = f"""<field name="{new_field.name}" """
                     for key, value in args[0]['attrs'].items():
                         if key and value:
-                            if key == 'dynamic_placeholder':
+                            if key == 'some_other_key_to_skip':  # Placeholder if needed, otherwise just remove the skip
                                 continue
                             if key in keys_to_escape:
                                 inside_field += f'''{key}="{escape(str(value))}" '''
@@ -1882,31 +2010,12 @@ class StudioMode(Controller):
                         ''')
             else:
                 new_field_tag = f"""<field name='{new_field.name}' """
-                # HANDLE DYNAMIC PLACEHOLDER FOR NEW FIELDS
-                dynamic_placeholder_field = args[0].get('attrs', {}).get('dynamic_placeholder')
-                placeholder_text = None
-
-                if dynamic_placeholder_field:
-                    # Get the field's string/label as placeholder
-                    try:
-                        model_rec_obj = request.env[args[0].get('model') or model]
-
-                        if hasattr(model_rec_obj, dynamic_placeholder_field):
-                            field_obj = model_rec_obj._fields.get(dynamic_placeholder_field)
-                            if field_obj:
-                                placeholder_text = getattr(field_obj, 'string', dynamic_placeholder_field)
-                            else:
-                                placeholder_text = dynamic_placeholder_field
-                        else:
-                            placeholder_text = dynamic_placeholder_field
-                    except Exception as e:
-                        placeholder_text = dynamic_placeholder_field
-
-
                 for key, value in args[0]['attrs'].items():
                     if key and value is not None:
-                        # Skip dynamic_placeholder in attrs, handle separately
-                        if key in ('dynamic_placeholder','placeholder'):
+                        # Skip dynamic_placeholder and placeholder in attrs, handle separately
+                        if key == 'some_other_key_to_skip':  # Placeholder if needed
+                            continue
+                        if key == 'placeholder':
                             continue
                         if key in ('domain', 'context'):
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
@@ -1914,13 +2023,10 @@ class StudioMode(Controller):
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
                         else:
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
-                            # Handle dynamic placeholder for new field
-                if placeholder_text:
-                    # Dynamic placeholder has priority
-                    new_field_tag += f'''placeholder="{escape(str(placeholder_text))}" '''
-                elif args[0]['attrs'].get('placeholder'):
-                    # Fall back to static placeholder
-                    new_field_tag += f'''placeholder="{escape(str(args[0]['attrs']['placeholder']))}" '''
+
+                if args[0]['attrs'].get('placeholder'):
+                    placeholder_value = args[0]['attrs']['placeholder']
+                    new_field_tag += f'''placeholder="{escape(str(placeholder_value))}" '''
                 if args[0]["optional_fields"]:
                     new_field_tag += f'''options="{escape(str(args[0]["optional_fields"]))}"'''
                 new_field_tag += "/>"

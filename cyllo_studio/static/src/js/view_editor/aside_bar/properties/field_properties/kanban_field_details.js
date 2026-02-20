@@ -27,7 +27,7 @@ export class KanbanFieldProperties extends Component {
 		this.orm = useService("orm");
 		this.addDialog = useOwnedDialogs();
 		this.state = useState({
-			widget: this.props.widget,
+			widget: this.props.widget || '',
 			path: this.props.path,
 			fieldInvisible: this.props.invisible || false,
 			widget_value: this.props.widget ? this.props.widget : false,

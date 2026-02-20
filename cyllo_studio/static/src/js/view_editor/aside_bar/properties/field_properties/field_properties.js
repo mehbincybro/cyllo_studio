@@ -141,6 +141,10 @@
                     type: String,
                     optional: true
                 },
+            dynamic_placeholder: {
+            type: String,
+            optional: true
+        },
                 column_invisible: {
                     type: String,
                     optional: true
@@ -318,6 +322,8 @@
                     field_path: this.props.field_path,
                     label_path: this.props.label_path,
                     edited: false,
+                    recordData: this.props.recordData || {},
+                    isPlaceholderFocused: false,
                     existedField: false,
                     fieldType: [
                         "Char",
@@ -357,6 +363,25 @@
                 if (!this.props.edit) {
                 this.state.field = "new";
                 }
+                        // Initialize dynamic_placeholder_field and resolve value if dynamic_placeholder is set
+        if (this.state.dynamic_placeholder && this.props.allFields) {
+            const fieldInfo = this.props.allFields[this.state.dynamic_placeholder];
+
+            if (fieldInfo) {
+                let fieldValue = this.state.recordData?.[this.state.dynamic_placeholder];
+
+                if (fieldValue && typeof fieldValue === 'object' && 'display_name' in fieldValue) {
+                    fieldValue = fieldValue.display_name;
+                }
+
+                this.state.dynamic_placeholder_field = {
+                    name: this.state.dynamic_placeholder,
+                    string: fieldInfo.string || this.state.dynamic_placeholder,
+                    type: fieldInfo.type,
+                    value: fieldValue
+                };
+            }
+        }
                 this.state.show_compute_section =
                 this.props.edit === true &&
                 (this.props.name || "").startsWith("x_studio_");
@@ -411,21 +436,25 @@
 //            }
 //        }
 
-            if (nextProps.dynamic_placeholder && nextProps.allFields) {
-        const fieldInfo = nextProps.allFields[nextProps.dynamic_placeholder];
-        if (fieldInfo) {
-            this.state.dynamic_placeholder_field = {
-                name: nextProps.dynamic_placeholder,
-                string: fieldInfo.string || nextProps.dynamic_placeholder,
-                type: fieldInfo.type
-            };
-        }
-    } else {
-        this.state.dynamic_placeholder_field = null;
-    }
+   if (nextProps.dynamic_placeholder) {
+                this.state.dynamic_placeholder = nextProps.dynamic_placeholder;
+
+                const fieldInfo = nextProps.allFields?.[nextProps.dynamic_placeholder];
+                if (fieldInfo) {
+                    this.state.dynamic_placeholder_field = {
+                        name: nextProps.dynamic_placeholder,
+                        string: fieldInfo.string || nextProps.dynamic_placeholder,
+                        type: fieldInfo.type
+                    };
+                }
+            } else {
+                this.state.dynamic_placeholder = '';
+                this.state.dynamic_placeholder_field = null;
+            }
 
 
                     this.state.related_model = relatedModel;
+                    this.state.recordData = nextProps.recordData || {};
                     this.state.widget = nextProps.widget
                     if (nextProps.widget && nextProps.widget !== this.props.widget) {
                     this.widgetOptionalFields(nextProps.widget, nextProps.options);
@@ -795,14 +824,59 @@
 
         if (value) {
             const fieldInfo = this.props.allFields[value];
+
+            // Get the actual value from recordData
+            let fieldValue = this.state.recordData?.[value];
+            if (fieldValue && typeof fieldValue === 'object' && 'display_name' in fieldValue) {
+                fieldValue = fieldValue.display_name;
+            }
+            console.log('Selected field value:', fieldValue);
+
             this.state.dynamic_placeholder_field = {
                 name: value,
                 string: fieldInfo?.string || value,
-                type: fieldInfo?.type
+                type: fieldInfo?.type,
+                value: fieldValue // Store the value as well
             };
+                        this.state.placeholder = `${fieldValue}`;
+//            this.state.placeholder = `{{${value}}}`;
         } else {
             this.state.dynamic_placeholder_field = "";
+            this.state.dynamic_placeholder = '';
+            if (this.state.placeholder && this.state.placeholder.startsWith('{{') && this.state.placeholder.endsWith('}}')) {
+                this.state.placeholder = "";
+            }
         }
+    }
+    getPlaceholderDisplay() {
+        const val = this.state.placeholder || '';
+        console.log('hiii', val)
+        if (this.state.isPlaceholderFocused) {
+            return val;
+        }
+        if (val.includes('{{')) {
+            return val.replace(/{{(.*?)}}/g, (match, fieldName) => {
+                const field = fieldName.trim();
+                const value = this.state.recordData?.[field];
+                //                this.state.placeholder = value
+                if (value === undefined || value === null) {
+                    return match;
+                }
+                return (value && typeof value === 'object' && 'display_name' in value)
+                    ? value.display_name
+                    : value;
+            });
+        }
+        console.log('vall', val)
+        return val;
+    }
+
+    handlePlaceholderInput(ev) {
+        this.state.placeholder = ev.target.value;
+        console.log('kol', this.state.placeholder)
+        this.state.edited = true;
+        const match = ev.target.value.match(/^{{(.*?)}}$/);
+        this.state.dynamic_placeholder = match ? match[1].trim() : '';
     }
 
 
@@ -1048,7 +1122,7 @@
                 const changedValues = this.getCurrentChanges(this.prevState, this.state);
                 changedValues.default_value = this.state.default_value;
 
-                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
+//                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
 
                 // Ensure field_info is included for selection fields
                 if (this.state.selectedFieldType === 'selection') {
@@ -1063,6 +1137,7 @@
                 if (this.state.widget === 'statusbar' && this.state.SelectedOptions.length > 0) {
                     optionalFields['statusbar_visible'] = this.state.SelectedOptions.join(', ');
                 }
+                changedValues.dynamic_placeholder = this.state.dynamic_placeholder || '';
                 changedValues.is_computed = this.state.is_computed;
                 if (this.state.is_computed) {
                 changedValues.compute = this.state.compute_code || "";
