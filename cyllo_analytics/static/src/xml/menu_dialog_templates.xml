@@ -43,6 +43,13 @@
                                                        domain.bind="domain"
                                                        t-props="defaultProps"/>
                                     </div>
+                                    <div class="col-12  mb-3 px-2">
+                                        <label for="sequence"
+                                               class="form-label cy-modal-form_label">Sequence</label>
+                                        <IntegerField name="'sequence'"
+                                                      record="data.record"
+                                                      id="'sequence'"/>
+                                    </div>
                                 </div>
                             </form>
                         </div>

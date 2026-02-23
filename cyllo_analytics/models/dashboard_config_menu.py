@@ -33,3 +33,8 @@ class DashboardConfigMenu(models.TransientModel):
         string='Parent Menu',
         help='Choose the parent menu'
     )
+    sequence = fields.Integer(
+        string='Sequence',
+        default=0,
+        help='Set the sequence number to control the menu order'
+    )
