@@ -55,14 +55,27 @@ class HrAdvanceSalaryCloseWizard(models.TransientModel):
     )
 
     deduction_percentage = fields.Float(
-        string="Deduction Percentage",related='advance_id.deduction_percentage',
+        string="Deduction Percentage",
         help="Percentage to deduct from each payslip (0-100)"
     )
-
+    is_percentage = fields.Boolean(
+        string="Is Percentage Based",
+        compute="_compute_is_percentage",
+        store=True
+    )
     loss_account_id = fields.Many2one('account.account', string="Loss Account")
     account_id = fields.Many2one('account.account', string="Payment Account")
 
     reason = fields.Text(string="Reason")
+
+    @api.depends('advance_id', 'advance_id.deduction_type')
+    def _compute_is_percentage(self):
+        """Determine if deduction is percentage-based from the advance request"""
+        for rec in self:
+            rec.is_percentage = (
+                    rec.advance_id and
+                    rec.advance_id.deduction_type == 'percentage'
+            )
 
     @api.depends('advance_remaining_amount', 'closing_amount')
     def _compute_remaining_after_closing(self):
@@ -149,8 +162,22 @@ class HrAdvanceSalaryCloseWizard(models.TransientModel):
                     advance.write({'state': 'closed'})
 
                 elif self.balance_action == 'schedule':
-                    self.advance_id.write(
-                        {'deduction_amount': self.deduction_amount})
+                    if self.is_percentage:
+                        if self.deduction_percentage>0:
+                            self.advance_id.write({
+                                'deduction_percentage':self.deduction_percentage
+                            })
+                        else:
+                            self.advance_id.write({
+                                'deduction_percentage': self.advance_id.deduction_percentage
+                            })
+                    else:
+                        if self.deduction_amount>0:
+                            self.advance_id.write(
+                                {'deduction_amount': self.deduction_amount})
+                        else:
+                            self.advance_id.write(
+                                {'deduction_amount': self.advance_id.deduction_amount})
 
                     # Reschedule uses the live remaining amount (which now reflects the payment)
                     advance.reschedule_balance()

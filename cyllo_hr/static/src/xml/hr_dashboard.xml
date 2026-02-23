@@ -1,0 +1,645 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_hr.HrDashboard">
+       <div class="o_hr_dashboard bg-dark text-white p-4 overflow-auto" style="
+                    background-color: #e9f0e6 !important;
+                     font-family: 'Inter', sans-serif; width: 100%;height:100%;overflow-y: scroll;border: 1px solid #ccc;
+                ">
+            <div class="container-fluid">
+                <!-- Header Section -->
+                <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-primary border-opacity-10">
+                    <div class="d-flex align-items-center">
+                        <h1 class="mb-0 fw-bold">HR Dashboard Overview</h1>
+                    </div>
+                    <div class="d-flex gap-2 align-items-center">
+                         <div class="btn-group bg-white bg-opacity-10 p-1 rounded-pill shadow-sm border border-white border-opacity-10"
+                              style="backdrop-filter: blur(8px);">
+                            <button class="btn btn-sm px-4 rounded-pill border-0 transition-all fw-medium"
+                                    t-att-class="state.date_filter === 'today' ? 'btn-secondary text-white' : 'text-secondary'"
+                                    t-on-click="() => this.onFilterChange('today')"
+                                    t-att-style="state.date_filter === 'today' ? 'background-color: #71717a !important; color: white !important; border: none !important;' : 'letter-spacing: 0.5px;'">Today</button>
+                             <button class="btn btn-sm px-4 rounded-pill border-0 transition-all fw-medium"
+                                     t-att-class="state.date_filter === 'month' ? 'btn-secondary text-white' : 'text-secondary'"
+                                     t-on-click="() => this.onFilterChange('month')"
+                                     t-att-style="state.date_filter === 'month' ? 'background-color: #71717a !important; color: white !important; border: none !important;' : 'letter-spacing: 0.5px;'">Month</button>
+                             <button class="btn btn-sm px-4 rounded-pill border-0 transition-all fw-medium"
+                                     t-att-class="state.date_filter === 'year' ? 'btn-secondary text-white' : 'text-secondary'"
+                                     t-on-click="() => this.onFilterChange('year')"
+                                     t-att-style="state.date_filter === 'year' ? 'background-color: #71717a !important; color: white !important; border: none !important;' : 'letter-spacing: 0.5px;'">Year</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content Row (KPIs + Charts + Leaderboard) -->
+                <div class="row g-4 mb-4 align-items-stretch">
+                    <div class="">
+                        <!-- KPI Cards Section -->
+                        <div class="row g-4 mb-4">
+                    <!-- Total Employees -->
+                            <div class="col-md-6 col-lg-3">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 kpi-card"
+                             t-on-click="openEmployees"
+                             style="border-radius:16px; padding:24px; position:relative; box-shadow:0 10px 15px -3px rgba(0,0,0,0.05);cursor: pointer; transition: all 0.3s ease;">
+                            <div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="icon-box-premium violet p-2 rounded-3">
+                                        <i class="fa fa-id-badge fs-5"></i>
+                                    </div>
+                                </div>
+                                <h6 class="text-secondary opacity-50 mb-1 fw-bold text-uppercase small">Total Employees</h6>
+                                <h2 class="mb-0 fw-bold"><t t-esc="state.total_employees.toLocaleString()"/></h2>
+                            </div>
+                        </div>
+                    </div>
+                            <!-- Total Job Applied -->
+                            <div class="col-md-6 col-lg-3">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 kpi-card"
+                             t-on-click="openRecruitment"
+                             style="border-radius:16px; padding:24px; position:relative; box-shadow:0 10px 15px -3px;cursor: pointer; transition: all 0.3s ease;">
+                            <div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <div class="icon-box-premium green  p-2 rounded-3">
+                                        <i class="fa fa-user-plus fs-5"></i>
+                                    </div>
+                                </div>
+                                <h6 class="text-secondary opacity-50 mb-1 fw-bold text-uppercase small">Total Job Applied</h6>
+                                <h2 class="mb-0 fw-bold"><t t-esc="state.job_applied_count.toLocaleString()"/></h2>
+                            </div>
+                        </div>
+                    </div>
+                            <!-- Attendance Rate -->
+                            <div class="col-md-6 col-lg-3">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 kpi-card"
+                             t-on-click="openAttendance"
+                             style="border-radius:16px; padding:24px; position:relative; box-shadow:0 10px 15px -3px;cursor: pointer; transition: all 0.3s ease;">
+                            <div>
+                            <div class="d-flex align-items-center">
+                                <div class="icon-box-premium yellow p-2 rounded-3">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                            </div>
+                            </div>
+                            <br/>
+                            <h6 class="text-secondary opacity-50 mb-1 fw-bold text-uppercase small">Attendance Rate</h6>
+                            <h2 class="mb-0 fw-bold"><t t-esc="state.attendance_rate"/>
+                                %</h2>
+
+                        </div>
+                    </div>
+                            <div class="col-md-6 col-lg-3">
+                            <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 kpi-card"
+                                 style="border-radius:16px; padding:24px; transition: all 0.3s ease;">
+                            <h6 class="text-secondary  mb-3 fw-bold text-uppercase small">Upcoming Time Off</h6>
+                                <div class="d-flex align-items-start h-100">
+                                <div class="icon-box-premium red rounded-3 me-3 flex-shrink-0"
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fa fa-calendar fs-4"></i>
+                                </div>
+                                    <div class="flex-grow-1 overflow-hidden"
+                                         style="max-height: 80px;">
+                                    <t t-if="state.upcoming_leaves.length == 0">
+                                        <div class="opacity-50 small mt-2">No upcoming leaves</div>
+                                    </t>
+                                        <t t-foreach="state.upcoming_leaves"
+                                           t-as="leave"
+                                           t-key="leave.employee_name + leave.date_range">
+                                        <div class="mb-1 small text-truncate">
+                                            <span class="fw-bold"><t t-esc="leave.employee_name"/></span>
+                                            <span class="text-secondary opacity-75 ms-1"><t t-esc="leave.date_range"/></span>
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                            </div>
+                </div>
+
+                        <!-- Charts Section -->
+                        <div class="row g-4">
+                    <!-- Employee Status Bar Chart -->
+                            <div class="col-lg-4">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 chart-card"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold">Employee Status</h5>
+                                <div class="btn-group btn-group-sm bg-white bg-opacity-10 rounded-pill p-1">
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.employeeStatusChartType == 'bar' ? 'btn-primary shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('bar')"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.employeeStatusChartType == 'pie' ? 'btn-primary shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('pie')"
+                                            title="Pie Chart">
+                                        <i class="fa fa-pie-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.employeeStatusChartType == 'doughnut' ? 'btn-primary shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeEmployeeStatusChartType('doughnut')"
+                                            title="Doughnut Chart">
+                                        <i class="fa fa-circle-o-notch"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 pt-2 d-flex justify-content-center">
+                                <div style="height:360px; width:100%;">
+                                    <canvas id="employeeStatusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                            <!-- Monthly Attendance Trend Line Chart -->
+                            <div class="col-lg-5">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 chart-card"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                <h5 class="mb-0 fw-bold">Monthly Attendance Trend</h5>
+                                </div>
+                                <div class="btn-group btn-group-sm bg-white bg-opacity-10 rounded-pill p-1">
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.attendanceTrendChartType == 'line' ? 'btn-primary shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeAttendanceTrendChartType('line')"
+                                            title="Line Chart">
+                                        <i class="fa fa-line-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.attendanceTrendChartType == 'bar' ? 'btn-primary shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeAttendanceTrendChartType('bar')"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div style="height: 300px;">
+                                    <canvas id="attendanceTrendChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                            <div class="col-lg-3">
+                        <!-- Commission Leaderboard -->
+                                <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm h-100 chart-card"
+                                     style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-4 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-line-chart me-2 text-primary"></i>
+                                    <h5 class="mb-0 fw-bold">Commission Earned</h5>
+                                </div>
+                            </div>
+                                    <div class="card-body p-0 flex-grow-1 d-flex flex-column">
+                                <div class="table-responsive flex-grow-1"
+                                     style="overflow-y: auto;">
+                                    <table class="table table-dark table-hover mb-0 align-middle bg-transparent">
+                                        <thead class="bg-white bg-opacity-5">
+                                            <tr>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold"
+                                                    style="width: 80px;">Rank</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Sales Rep</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Commission</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.leaderboard_data.length == 0">
+                                                <tr>
+                                                    <td colspan="3"
+                                                        class="text-center py-5 opacity-50">No commission data found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.leaderboard_data"
+                                               t-as="entry" t-key="entry.rank">
+                                                <tr class="border-bottom border-white border-opacity-5"
+                                                    style="cursor: pointer;"
+                                                    t-on-click="() => this.openCommission(entry)">
+                                                    <td class="px-4 py-3">
+                                                        <div t-attf-class="rank-badge rank-#{entry.rank}">
+                                                            <t t-esc="entry.rank"/>
+                                                        </div>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <div class="fw-bold"><t t-esc="entry.name"/></div>
+                                                    </td>
+                                                    <td class="px-4 py-3 fw-bold text-emerald">
+                                                        $<t t-esc="entry.commission.toLocaleString()"/>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                </div>
+
+
+                <div class="row g-4 mb-4">
+                    <!-- Pending Payslips Table -->
+                    <div class="col-lg-6">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm table-card h-100"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-4 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold">Pending Payslips</h5>
+                                <button class="btn btn-link text-primary text-decoration-none p-0 small fw-bold">View All</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive"
+                                     style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-dark table-hover mb-0 align-middle bg-transparent">
+                                        <thead class="bg-white bg-opacity-5">
+                                            <tr>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Employee</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Department</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Period</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.pending_payslips.length == 0">
+                                                <tr>
+                                                    <td colspan="4"
+                                                        class="text-center py-5 opacity-50">No pending payslips found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.pending_payslips"
+                                               t-as="payslip"
+                                               t-key="payslip.id">
+                                                <tr class="border-bottom border-white border-opacity-5">
+                                                    <td class="px-4 py-3">
+                                                        <div class="fw-bold"><t t-esc="payslip.employee_name"/></div>
+                                                    </td>
+                                                    <td class="px-4 py-3 opacity-75 small"><t t-esc="payslip.department"/></td>
+                                                    <td class="px-4 py-3 opacity-75 small"><t t-esc="payslip.date_start"/>
+                                                        to
+                                                        <t t-esc="payslip.date_end"/></td>
+                                                    <td class="px-4 py-3 text-end">
+                                                        <button class="btn btn-primary btn-sm rounded-pill px-3"
+                                                                t-on-click="() => this.openPayslip(payslip.id)">Review</button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Contract Endings Detail Table -->
+                    <div class="col-lg-6">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm table-card h-100"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-4 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold">Contract Endings Detail</h5>
+                                <button class="btn btn-link text-primary text-decoration-none p-0 small fw-bold">View All</button>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive"
+                                     style="max-height: 300px; overflow-y: auto;">
+                                    <table class="table table-dark table-hover mb-0 align-middle bg-transparent">
+                                        <thead class="bg-white bg-opacity-5">
+                                            <tr>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Employee</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Role</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Expires</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold text-end">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.ending_contracts.length == 0">
+                                                <tr>
+                                                    <td colspan="4"
+                                                        class="text-center py-5 opacity-50">No contracts ending soon</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.ending_contracts"
+                                               t-as="contract"
+                                               t-key="contract.id">
+                                                <tr class="border-bottom border-white border-opacity-5">
+                                                    <td class="px-4 py-3">
+                                                        <div class="fw-bold"><t t-esc="contract.employee_name"/></div>
+                                                    </td>
+                                                    <td class="px-4 py-3 opacity-75 small"><t t-esc="contract.job_title"/></td>
+                                                    <td class="px-4 py-3">
+                                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-2 py-1"><t t-esc="contract.date_end"/></span>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-end">
+                                                        <button class="btn btn-success btn-sm rounded-pill px-3"
+                                                                t-on-click="() => this.openContract(contract.id)">Open</button>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Expanded Analytics Section (Full Width) -->
+                <div class="row g-4 mb-4">
+                    <!-- Contract Types Chart -->
+                    <div class="col-lg-4">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm table-card h-100"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-briefcase me-2 text-primary"></i>
+                                    <h4 class="mb-0 fw-bold small">Contract Types</h4>
+                                </div>
+                                <div class="btn-group btn-group-sm bg-white bg-opacity-10 rounded-pill p-1">
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractTypeChartType == 'bar' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractTypeChartType('bar')"
+                                            t-att-style="state.contractTypeChartType === 'bar' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractTypeChartType == 'pie' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractTypeChartType('pie')"
+                                            t-att-style="state.contractTypeChartType === 'pie' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Pie Chart">
+                                        <i class="fa fa-pie-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractTypeChartType == 'doughnut' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractTypeChartType('doughnut')"
+                                            t-att-style="state.contractTypeChartType === 'doughnut' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Doughnut Chart">
+                                        <i class="fa fa-circle-o-notch"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div style="height:280px; width:100%;">
+                                    <canvas id="contractTypeChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Contract Status Chart -->
+                    <div class="col-lg-4">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm table-card h-100"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-check-circle me-2 text-primary"></i>
+                                    <h4 class="mb-0 fw-bold small">Contract Status</h4>
+                                </div>
+                                <div class="btn-group btn-group-sm bg-white bg-opacity-10 rounded-pill p-1">
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractStatusChartType == 'bar' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractStatusChartType('bar')"
+                                            t-att-style="state.contractStatusChartType === 'bar' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractStatusChartType == 'pie' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractStatusChartType('pie')"
+                                            t-att-style="state.contractStatusChartType === 'pie' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Pie Chart">
+                                        <i class="fa fa-pie-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.contractStatusChartType == 'doughnut' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeContractStatusChartType('doughnut')"
+                                            t-att-style="state.contractStatusChartType === 'doughnut' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Doughnut Chart">
+                                        <i class="fa fa-circle-o-notch"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div style="height:280px; width:100%;">
+                                    <canvas id="contractStatusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Recruitment Stages Chart -->
+                    <div class="col-lg-4">
+                        <div class="card bg-white bg-opacity-5 border-0 rounded-4 shadow-sm table-card h-100"
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-users me-2 text-primary"></i>
+                                    <h4 class="mb-0 fw-bold small">Recruitment Pipeline</h4>
+                                </div>
+                                <div class="btn-group btn-group-sm bg-white bg-opacity-10 rounded-pill p-1">
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.recruitmentChartType == 'bar' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeRecruitmentChartType('bar')"
+                                            t-att-style="state.recruitmentChartType === 'bar' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Bar Chart">
+                                        <i class="fa fa-bar-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.recruitmentChartType == 'pie' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeRecruitmentChartType('pie')"
+                                            t-att-style="state.recruitmentChartType === 'pie' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Pie Chart">
+                                        <i class="fa fa-pie-chart"></i>
+                                    </button>
+                                    <button t-attf-class="btn btn-sm rounded-pill border-0 #{state.recruitmentChartType == 'doughnut' ? 'shadow-sm' : 'text-secondary'}"
+                                            t-on-click="() => this.changeRecruitmentChartType('doughnut')"
+                                            t-att-style="state.recruitmentChartType === 'doughnut' ? 'background-color: #71717a !important; color: white !important;' : ''"
+                                            title="Doughnut Chart">
+                                        <i class="fa fa-circle-o-notch"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div style="height:280px; width:100%;">
+                                    <canvas id="recruitmentChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Time Off & Allocations Section -->
+                <div class="row g-4 mb-4">
+                    <div class="col-12">
+                        <div class="card bg-white bg_opacity-5 border-0 rounded-4 shadow-sm table-card "
+                             style="border-radius:16px;">
+                            <div class="card-header bg-transparent border-0 p-3 d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="fa fa-calendar me-2 text-primary"></i>
+                                    <h5 class="mb-0 fw-bold">Time Off &amp; Allocations</h5>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive"
+                                     style="max-height: 400px; overflow-y: auto;">
+                                    <table class="table table-dark table-hover mb-0 align-middle bg-transparent">
+                                        <thead class="bg-white bg-opacity-5">
+                                            <tr>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Employee</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Leave Type</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">Request Type</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">From</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold">To</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold text-center">Days</th>
+                                                <th class="border-0 px-4 py-3 opacity-50 small text-uppercase fw-bold text-center">Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <t t-if="state.timeoff_records.length == 0">
+                                                <tr>
+                                                    <td colspan="7"
+                                                        class="text-center py-5 opacity-50">No time off or allocation requests found</td>
+                                                </tr>
+                                            </t>
+                                            <t t-foreach="state.timeoff_records"
+                                               t-as="record"
+                                               t-key="record.id + record.request_type">
+                                                <tr class="border-bottom border-white border-opacity-5"
+                                                    style="cursor: pointer;"
+                                                    t-on-click="() => this.openTimeOff(record)">
+                                                    <td class="px-4 py-3">
+                                                        <div class="fw-bold"><t t-esc="record.employee_name"/></div>
+                                                    </td>
+                                                    <td class="px-4 py-3 opacity-75">
+                                                        <t t-esc="record.leave_type"/>
+                                                    </td>
+                                                    <td class="px-4 py-3">
+                                                        <span t-attf-class="badge premium-badge rounded-pill px-3 py-1 #{record.request_type == 'leave' ? 'indigo' : 'emerald'}">
+                                                            <t t-esc="record.request_type"/>
+                                                        </span>
+                                                    </td>
+                                                    <td class="px-4 py-3 opacity-75">
+                                                        <t t-esc="record.date_from"/>
+                                                    </td>
+                                                    <td class="px-4 py-3 opacity-75">
+                                                        <t t-esc="record.date_to"/>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center fw-bold">
+                                                        <t t-esc="record.days"/>
+                                                    </td>
+                                                    <td class="px-4 py-3 text-center">
+                                                        <span t-attf-class="badge premium-badge rounded-pill px-3 py-1 #{record.state == 'validate' ? 'emerald' : record.state == 'refuse' ? 'rose' : 'amber'}">
+                                                            <t t-esc="record.state"/>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </t>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <style>
+                .o_hr_dashboard {
+                    background-attachment: fixed;
+                }
+                .kpi-card, .chart-card, .table-card {
+                    background: rgba(255, 255, 255, 0.45) !important;
+                    backdrop-filter: blur(16px) !important;
+                    -webkit-backdrop-filter: blur(16px) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.7) !important;
+                    box-shadow: 0 10px 40px -10px rgba(99, 102, 241, 0.12) !important;
+                }
+                .kpi-card:hover { 
+                    transform: translateY(-8px); 
+                    background: rgba(255, 255, 255, 0.65) !important; 
+                    box-shadow: 0 20px 50px -15px rgba(99, 102, 241, 0.2) !important;
+                }
+                .chart-card:hover, .table-card:hover { 
+                    transform: translateY(-3px);
+                    background: rgba(255, 255, 255, 0.55) !important; 
+                }
+                .icon-box-premium {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 42px;
+                    height: 42px;
+                    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+                }
+                .icon-box-premium.violet { background: linear-gradient(135deg, #a78bfa, #8e44ad); color: white; }
+                .icon-box-premium.green {background: linear-gradient(135deg, #22c55e, #16a34a);color: white;}
+               .icon-box-premium.red {background: linear-gradient(135deg, #ef4444, #dc2626);color: white;}
+
+               .icon-box-premium.yellow {background: linear-gradient(135deg, #facc15, #eab308);color: white;}
+               .icon-box-premium.amber { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: white; }
+                .icon-box-premium.rose { background: linear-gradient(135deg, #fb7185, #f43f5e); color: white; }
+                
+                .circular-chart { display: block; margin: 0 auto; width: 100%; height: 100%; max-width: 60px; max-height: 60px; }
+                .circle { animation: progress 1s ease-out forwards; }
+                @keyframes progress { 0% { stroke-dasharray: 0 100; } }
+                
+                .table-dark { --bs-table-bg: transparent !important; color: #334155 !important; }
+                .table thead th { border-bottom: 2px solid rgba(99, 102, 241, 0.1) !important; font-size: 0.75rem; letter-spacing: 0.05em; }
+                .btn-primary { background: #6366f1 !important; border-color: #6366f1 !important; color: white !important; font-weight: 600; }
+                .btn-primary:hover { background: #4f46e5 !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3) !important; }
+                
+                .text-emerald { color: #10b981 !important; }
+                .text-rose { color: #f43f5e !important; }
+                .text-amber { color: #f59e0b !important; }
+                .text-indigo { color: #6366f1 !important; }
+                
+                .opacity-50 { opacity: 0.6 !important; }
+                .opacity-75 { opacity: 0.8 !important; }
+                .fw-bold { font-weight: 700 !important; }
+                .text-white { color: #1e293b !important; }
+                .kpi-card h2, .kpi-card h6, .chart-card h5, .table-card h5 { color: #0f172a !important; }
+                .text-secondary { color: #64748b !important; }
+
+                .rank-badge {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 800;
+                    font-size: 0.75rem;
+                    background: rgba(99, 102, 241, 0.1);
+                    color: #6366f1;
+                    border: 2px solid rgba(99, 102, 241, 0.2);
+                }
+                .rank-badge.rank-1 {
+                    background: #fbbf24;
+                    color: #92400e;
+                    border-color: #f59e0b;
+                    box-shadow: 0 0 10px rgba(251, 191, 36, 0.4);
+                }
+                .rank-badge.rank-2 {
+                    background: #cbd5e1;
+                    color: #475569;
+                    border-color: #94a3b8;
+                }
+                .rank-badge.rank-3 {
+                    background: #fb923c;
+                    color: #9a3412;
+                    border-color: #ea580c;
+                }
+
+                .premium-badge {
+                    border: 1px solid rgba(255, 255, 255, 0.4);
+                    font-weight: 600;
+                    letter-spacing: 0.02em;
+                    text-transform: capitalize;
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                }
+                .premium-badge.violet { background: linear-gradient(135deg, #a78bfa, #8b5cf6) !important; color: white !important; }
+                .premium-badge.indigo { background: linear-gradient(135deg, #818cf8, #6366f1) !important; color: white !important; }
+                .premium-badge.emerald { background: linear-gradient(135deg, #34d399, #10b981) !important; color: white !important; }
+                .premium-badge.rose { background: linear-gradient(135deg, #fb7185, #f43f5e) !important; color: white !important; }
+                .premium-badge.amber { background: linear-gradient(135deg, #fbbf24, #f59e0b) !important; color: white !important; }
+                .premium-badge.slate { background: linear-gradient(135deg, #94a3b8, #64748b) !important; color: white !important; }
+
+                form-select-sm {
+                   font-size: 0.75rem;
+                   background-color: rgba(255, 255, 255, 0.6) !important;
+                }
+
+                ::-webkit-scrollbar { width: 6px; height: 6px; }
+                ::-webkit-scrollbar-track { background: transparent; }
+                ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.2); border-radius: 10px; }
+                ::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.4); }
+            </style>
+        </div>
+            </div>
+
+    </t>
+</templates>

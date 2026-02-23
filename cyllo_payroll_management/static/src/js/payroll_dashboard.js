@@ -147,10 +147,9 @@ export class PayrollDashboard extends Component {
                                 if (label) {
                                     label += ': ';
                                 }
-                                if (context.parsed.y !== null) {
-                                    label += context.parsed.y.toLocaleString();
-                                } else if (context.parsed !== null) {
-                                    label += context.parsed.toLocaleString();
+                                const value = (context.parsed && context.parsed.y !== undefined) ? context.parsed.y : context.parsed;
+                                if (value !== null && value !== undefined) {
+                                    label += value.toLocaleString();
                                 }
                                 return label;
                             }
@@ -394,13 +393,16 @@ export class PayrollDashboard extends Component {
                         callbacks: {
                             label: function (context) {
                                 let label = context.dataset.label || '';
-                                if (context.parsed.y !== null && (type === 'bar' || type === 'line')) {
-                                    if (label) label += ': ';
-                                    label += context.parsed.y.toLocaleString();
-                                } else if (context.parsed !== null) {
-                                    // Pie/Doughnut usually just show the value or we can format it
-                                    if (context.label) label = context.label + ': ';
-                                    label += context.parsed.toLocaleString();
+                                const value = (context.parsed && context.parsed.y !== undefined) ? context.parsed.y : context.parsed;
+                                if (value !== null && value !== undefined) {
+                                    if (type === 'bar' || type === 'line') {
+                                        if (label) label += ': ';
+                                        label += value.toLocaleString();
+                                    } else {
+                                        // Pie/Doughnut
+                                        if (context.label) label = context.label + ': ';
+                                        label += value.toLocaleString();
+                                    }
                                 }
                                 return label;
                             }

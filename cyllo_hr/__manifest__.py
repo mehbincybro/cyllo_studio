@@ -30,9 +30,16 @@
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_base', 'hr'],
     'data': [
+        'views/hr_dashboard_views.xml',
         'views/cyllo_hr_menus.xml',
         'views/hr_employee_views.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_hr/static/src/js/hr_dashboard.js',
+            'cyllo_hr/static/src/xml/hr_dashboard.xml',
+        ],
+    },
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': True,
