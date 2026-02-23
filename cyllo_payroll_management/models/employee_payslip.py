@@ -179,7 +179,7 @@ class EmployeePayslip(models.Model):
         """To compute the count of the refund of the particular payslip"""
         for record in self:
             record.refund_count = self.search_count(
-                [('parent_id', '=', self.id)])
+                [('parent_id', '=', record.id)])
 
     @api.depends('expense_sheet_ids')
     def _compute_expense_sheet_count(self):
@@ -414,6 +414,8 @@ class EmployeePayslip(models.Model):
                     slip.gratuity_settlement_id.write({'state': 'cancel'})
                 else:
                     slip.gratuity_settlement_id.write({'state': 'paid'})
+            if all(slip.state == 'paid' for slip in slip.employee_payslip_batch_id.employee_payslip_ids):
+                slip.employee_payslip_batch_id.write({'state': 'paid'})
 
     def action_cancel(self):
         """ Cancel payslip, its journal entry, and related payments """
@@ -671,7 +673,9 @@ class EmployeePayslip(models.Model):
             ('employee_id', '=', employee.id),
             ('state', '=', 'approve'),
             ('report_to_payslip', '=', True),
-            ('payslip_id', '=', False)  # Not yet included in any payslip
+            '|',
+            ('payslip_id', '=', False),  # Not yet included in any payslip
+            ('payslip_id', '=', self.id),  # Not yet included in other payslip
         ])
 
         if expense_sheets:

@@ -31,7 +31,10 @@
                            invisible="remaining_after_closing == 0 or close_type != 'partial'"
                            required="remaining_after_closing > 0"/>
                     <field name="deduction_amount"
-                           invisible="balance_action != 'schedule'"/>
+                           invisible="balance_action != 'schedule' or is_percentage"/>
+                    <field name="is_percentage" invisible="1"/>
+                    <field name="deduction_percentage"
+                           invisible="balance_action != 'schedule' or not is_percentage"/>
 
                     <!-- Payment account -->
                     <field name="account_id"
