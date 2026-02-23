@@ -1,0 +1,382 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+        <record id="dashboard_sheet_cash_bank_journal_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Journal &gt; Journal Name</field>
+            <field name="alias">account_journal_name</field>
+            <field name="query">account_journal.name -&gt;&gt; 'en_US' AS account_journal_name</field>
+            <field name="column">account_journal.name</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_cash_bank_journal_axis_1" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; ID</field>
+            <field name="alias">account_account_id</field>
+            <field name="query">account_account.id AS account_account_id</field>
+            <field name="column">account_account.id</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_cash_bank_journal_axis_2" model="dashboard.sheet.axis">
+            <field name="value">Journal &gt; ID</field>
+            <field name="alias">account_journal_id</field>
+            <field name="query">account_journal.id AS account_journal_id</field>
+            <field name="column">account_journal.id</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_cash_bank_journal_axis_3" model="dashboard.sheet.axis">
+            <field name="value">Journal &gt; Sequence</field>
+            <field name="alias">account_journal_sequence</field>
+            <field name="query">account_journal.sequence AS account_journal_sequence</field>
+
+            <field name="column">account_journal.sequence</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_journals_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Journal &gt; Journal Name</field>
+            <field name="alias">account_journal_name</field>
+            <field name="query">account_journal.name -&gt;&gt; 'en_US' AS account_journal_name</field>
+            <field name="column">account_journal.name</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_journals" />
+        </record>
+        <record id="dashboard_sheet_journals_axis_1" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; ID</field>
+            <field name="alias">account_account_id</field>
+            <field name="query">account_account.id AS account_account_id</field>
+            <field name="column">account_account.id</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_journals" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; Account Name</field>
+            <field name="alias">account_account_name</field>
+            <field name="query">account_account.name -&gt;&gt; 'en_US' AS account_account_name</field>
+            <field name="column">account_account.name</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_axis_1" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_move_line_debit)</field>
+            <field name="alias">account_move_line_debit_sum</field>
+            <field name="query">SUM(account_move_line.debit) AS account_move_line_debit_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.debit / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.debit</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_axis_2" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_move_line_credit)</field>
+            <field name="alias">account_move_line_credit_sum</field>
+            <field name="query">SUM(account_move_line.credit) AS account_move_line_credit_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.credit / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.credit</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_axis_3" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; Type</field>
+            <field name="alias">account_account_account_type</field>
+            <field name="query">account_account.account_type AS account_account_account_type</field>
+            <field name="column">account_account.account_type</field>
+            <field name="type">group</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_axis_4" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; Type</field>
+            <field name="alias">account_account_account_type</field>
+            <field name="query">account_account.account_type AS account_account_account_type</field>
+            <field name="column">account_account.account_type</field>
+            <field name="type">group</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_payable_receivable_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Payments &gt; Partner Type</field>
+            <field name="alias">account_payment_partner_type</field>
+            <field name="query">account_payment.partner_type AS account_payment_partner_type</field>
+            <field name="column">account_payment.partner_type</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_payable_receivable" />
+        </record>
+        <record id="dashboard_sheet_payable_receivable_axis_1" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_payment_amount)</field>
+            <field name="alias">account_payment_amount_sum</field>
+            <field name="query">SUM(account_payment.amount) AS account_payment_amount_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_payment.amount / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_payment.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_payment.amount</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_payable_receivable" />
+        </record>
+        <record id="dashboard_sheet_payable_receivable_axis_2" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_payment_amount)</field>
+            <field name="alias">account_payment_amount_sum</field>
+            <field name="query">SUM(account_payment.amount) AS account_payment_amount_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_payment.amount / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_payment.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_payment.amount</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_payable_receivable" />
+        </record>
+        <record id="dashboard_sheet_income_statement_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Account &gt; Type</field>
+            <field name="alias">account_account_account_type</field>
+            <field name="query">account_account.account_type AS account_account_account_type</field>
+            <field name="column">account_account.account_type</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_income_statement_axis_1" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_move_line_debit)</field>
+            <field name="alias">account_move_line_debit_sum</field>
+            <field name="query">SUM(account_move_line.debit) AS account_move_line_debit_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.debit / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.debit</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_income_statement_axis_2" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_move_line_credit)</field>
+            <field name="alias">account_move_line_credit_sum</field>
+            <field name="query">SUM(account_move_line.credit) AS account_move_line_credit_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.credit / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.credit</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_income_statement_axis_3" model="dashboard.sheet.axis">
+            <field name="value">SUM(account_move_line_balance)</field>
+            <field name="alias">account_move_line_balance_sum</field>
+            <field name="query">SUM(account_move_line.balance) AS account_move_line_balance_sum</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.balance / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.balance</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_balance_sheet_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Account Move Line &gt; Credit</field>
+            <field name="alias">account_move_line_credit</field>
+            <field name="query">SUM(account_move_line.credit) AS account_move_line_credit</field>
+<!--            <field name="monetaryInBase">ROUND(account_move_line.credit / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move_line.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move_line.credit</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_balance_sheet" />
+        </record>
+        <record id="dashboard_sheet_cash_flow_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Amount Due</field>
+            <field name="alias">account_move_amount_residual</field>
+            <field name="query">SUM(account_move.amount_residual) AS account_move_amount_residual</field>
+<!--            <field name="monetaryInBase">ROUND(account_move.amount_residual / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move.amount_residual</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_flow" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_0" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Reference</field>
+            <field name="alias">account_move_ref</field>
+            <field name="query">account_move.ref AS account_move_ref</field>
+            <field name="column">account_move.ref</field>
+            <field name="type">dimension</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_1" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Untaxed Amount</field>
+            <field name="alias">account_move_amount_untaxed</field>
+            <field name="query">SUM(account_move.amount_untaxed) AS account_move_amount_untaxed</field>
+<!--            <field name="monetaryInBase">ROUND(account_move.amount_untaxed / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move.amount_untaxed</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_2" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Amount Due</field>
+            <field name="alias">account_move_amount_residual</field>
+            <field name="query">SUM(account_move.amount_residual) AS account_move_amount_residual</field>
+<!--            <field name="monetaryInBase">ROUND(account_move.amount_residual / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move.amount_residual</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_3" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; ID</field>
+            <field name="alias">account_move_id</field>
+            <field name="query">account_move.id AS account_move_id</field>
+            <field name="column">account_move.id</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_4" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Total Residual</field>
+            <field name="alias">account_move_total_residual</field>
+            <field name="query">account_move.total_residual AS account_move_total_residual</field>
+            <field name="column">account_move.total_residual</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_equity_axis_5" model="dashboard.sheet.axis">
+            <field name="value">Journal Entry &gt; Total (Tax inc.)</field>
+            <field name="alias">account_move_quick_edit_total_amount</field>
+            <field name="query">SUM(account_move.quick_edit_total_amount) AS account_move_quick_edit_total_amount</field>
+<!--            <field name="monetaryInBase">ROUND(account_move.quick_edit_total_amount / COALESCE((-->
+<!--                            SELECT rate FROM res_currency_rate-->
+<!--                            WHERE currency_id = account_move.currency_id-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1) * COALESCE((-->
+<!--                            SELECT rate-->
+<!--                            FROM res_currency_rate-->
+<!--                            WHERE currency_id = {selectedCurrency}-->
+<!--                            AND company_id = 1-->
+<!--                            ORDER BY name DESC-->
+<!--                            LIMIT 1-->
+<!--                        ), 1), 2)</field>-->
+            <field name="column">account_move.quick_edit_total_amount</field>
+            <field name="type">measure</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+    </data>
+</odoo>

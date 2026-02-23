@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="0">
+
+        <!-- Row 0: KPI Overview & COA -->
+        <record id="dashboard_sheet_option_balance_sheet" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_balance_sheet"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 0, 'y': 0, 'graph_width': 3, 'graph_height': 1}"/>
+        </record>
+
+        <record id="dashboard_sheet_option_cash_flow" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_cash_flow"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 3, 'y': 0, 'graph_width': 3, 'graph_height': 1}"/>
+        </record>
+
+        <record id="dashboard_sheet_option_chart_of_accounts" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_chart_of_accounts"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 6, 'y': 0, 'graph_width': 6, 'graph_height': 4}"/>
+        </record>
+
+        <!-- Row 1: Cash vs Bank -->
+        <record id="dashboard_sheet_option_cash_bank_journal" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_cash_bank_journal"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 0, 'y': 1, 'graph_width': 6, 'graph_height': 3}"/>
+        </record>
+
+        <!-- Row 4: Performance & Journals -->
+        <record id="dashboard_sheet_option_income_statement" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_income_statement"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 0, 'y': 4, 'graph_width': 4, 'graph_height': 3}"/>
+        </record>
+
+        <record id="dashboard_sheet_option_payment" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_payable_receivable"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 4, 'y': 4, 'graph_width': 4, 'graph_height': 3}"/>
+        </record>
+
+        <record id="dashboard_sheet_option_journals" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_journals"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 8, 'y': 4, 'graph_width': 4, 'graph_height': 3}"/>
+        </record>
+
+        <!-- Row 7: Details Table -->
+        <record id="dashboard_sheet_option_draft_entries" model="dashboard.sheet.option">
+            <field name="dashboard_sheet_id" ref="dashboard_sheet_equity"/>
+            <field name="dashboard_config_id" ref="dashboard_config_accounting"/>
+            <field name="attributes" eval="{'x': 0, 'y': 7, 'graph_width': 12, 'graph_height': 4}"/>
+        </record>
+
+    </data>
+</odoo>

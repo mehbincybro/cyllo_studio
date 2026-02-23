@@ -1,0 +1,85 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <data noupdate="1">
+        <record id="dashboard_sheet_cash_bank_journal_table_0" model="dashboard.sheet.table">
+            <field name="name">Account</field>
+            <field name="model">account.account</field>
+            <field name="join">account_account</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_cash_bank_journal_table_1" model="dashboard.sheet.table">
+            <field name="name">Journal</field>
+            <field name="model">account.journal</field>
+            <field name="linked"> Linked by Account.id on Journal.profit_account_id</field>
+            <field name="field">id</field>
+            <field name="join">JOIN account_journal ON account_account.id = profit_account_id</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
+        </record>
+        <record id="dashboard_sheet_journals_table_0" model="dashboard.sheet.table">
+            <field name="name">Journal</field>
+            <field name="model">account.journal</field>
+            <field name="join">account_journal</field>
+            <field name="sheet_id" ref="dashboard_sheet_journals" />
+        </record>
+        <record id="dashboard_sheet_journals_table_1" model="dashboard.sheet.table">
+            <field name="name">Account</field>
+            <field name="model">account.account</field>
+            <field name="linked"> Linked by Journal.default_account_id on Account.id</field>
+            <field name="field">default_account_id</field>
+            <field name="join">JOIN account_account ON account_account.id = account_journal.default_account_id</field>
+            <field name="sheet_id" ref="dashboard_sheet_journals" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_table_0" model="dashboard.sheet.table">
+            <field name="name">Account</field>
+            <field name="model">account.account</field>
+            <field name="join">account_account</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_chart_of_accounts_table_1" model="dashboard.sheet.table">
+            <field name="name">Account Move Line</field>
+            <field name="model">account.move.line</field>
+            <field name="linked"> Linked by Account.id on Account Move Line.account_id</field>
+            <field name="field">account_id</field>
+            <field name="join">JOIN account_move_line ON account_account.id = account_move_line.account_id</field>
+            <field name="sheet_id" ref="dashboard_sheet_chart_of_accounts" />
+        </record>
+        <record id="dashboard_sheet_payable_receivable_table_0" model="dashboard.sheet.table">
+            <field name="name">Payments</field>
+            <field name="model">account.payment</field>
+            <field name="join">account_payment</field>
+            <field name="sheet_id" ref="dashboard_sheet_payable_receivable" />
+        </record>
+        <record id="dashboard_sheet_income_statement_table_0" model="dashboard.sheet.table">
+            <field name="name">Account</field>
+            <field name="model">account.account</field>
+            <field name="join">account_account</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_income_statement_table_1" model="dashboard.sheet.table">
+            <field name="name">Account Move Line</field>
+            <field name="model">account.move.line</field>
+            <field name="linked"> Linked by Account.id on Account Move Line.account_id</field>
+            <field name="field">account_id</field>
+            <field name="join">JOIN account_move_line ON account_account.id = account_move_line.account_id</field>
+            <field name="sheet_id" ref="dashboard_sheet_income_statement" />
+        </record>
+        <record id="dashboard_sheet_balance_sheet_table_0" model="dashboard.sheet.table">
+            <field name="name">Account Move Line</field>
+            <field name="model">account.move.line</field>
+            <field name="join">account_move_line</field>
+            <field name="sheet_id" ref="dashboard_sheet_balance_sheet" />
+        </record>
+        <record id="dashboard_sheet_cash_flow_table_0" model="dashboard.sheet.table">
+            <field name="name">Journal Entry</field>
+            <field name="model">account.move</field>
+            <field name="join">account_move</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_flow" />
+        </record>
+        <record id="dashboard_sheet_equity_table_0" model="dashboard.sheet.table">
+            <field name="name">Journal Entry</field>
+            <field name="model">account.move</field>
+            <field name="join">account_move</field>
+            <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+    </data>
+</odoo>
