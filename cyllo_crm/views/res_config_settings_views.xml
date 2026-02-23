@@ -95,6 +95,23 @@
                             </span>
                         </div>
                     </setting>
+
+
+                    <setting
+                            id="module_crm_google_meet_setting"
+                            help="Enable CRM Google Meet to create, manage, and link Google Meets directly from CRM leads.">
+                        <field name="module_cyllo_google_meet"/>
+                        <div class="content-group"
+                             invisible="not module_cyllo_google_meet">
+                            <span>
+                                When enabled, users can create Google Meets
+                                directly Meet CRM leads,
+                                store form IDs and URLs in the lead, and
+                                optionally automate lead creation
+                                from form responses.
+                            </span>
+                        </div>
+                    </setting>
                 </block>
 
             </xpath>
