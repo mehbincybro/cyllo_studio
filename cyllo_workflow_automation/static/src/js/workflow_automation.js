@@ -149,7 +149,13 @@ export class WorkFlowAuto extends Component {
             selectedVariable: undefined,
             customTrigger: false,
             recordList: [],
-            saveLoading:false,
+            saveLoading: false,
+            // Cron schedule fields (used when trigger is time-based)
+            cronMode: '',
+            cronTime: 0,
+            cronDay: 1,
+            cronMonth: 1,
+            triggerType: "",
         })
 
         this.initialLoad = true;
@@ -196,10 +202,10 @@ export class WorkFlowAuto extends Component {
 
         onWillStart(async () => {
             this.state.recordList = await this.orm.search("work.auto", [])
-            this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name'])
-            const data = await this.orm.read('work.auto', [this.id], ['name', 'variables', 'imports', 'code']);
+            this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
+            const data = await this.orm.read('work.auto', [this.id], ['name', 'variables', 'imports', 'code', 'trigger_type']);
             if (data.length > 0) {
-                let [{name, variables, imports, code}] = data
+                let [{ name, variables, imports, code, trigger_type }] = data
 
                 imports = imports || GLOBAL_IMPORTS
 
@@ -207,7 +213,8 @@ export class WorkFlowAuto extends Component {
                 this.state.name = name;
                 this.state.imports = [...imports];
                 this.state.code = code;
-                this.env.variables.setContext({variables: [...this.state.variables]});
+                this.state.triggerType = trigger_type || "";
+                this.env.variables.setContext({ variables: [...this.state.variables] });
             }
             await this.loadData();
             await this.setModelState();
@@ -217,8 +224,23 @@ export class WorkFlowAuto extends Component {
                 if (value.data.ttype) {
                     this.state.trigger = value.data.ttype
                 }
+                if (value.data.trigger_type) {
+                    this.state.triggerType = value.data.trigger_type;
+                }
             });
-            this.env.bus.trigger("onclickMenuBar", {isCollapse: true})
+
+            // Load cron schedule fields so the inline panel shows existing values
+            const cronData = await this.orm.read('work.auto', [this.id],
+                ['time_trigger_mode', 'time_trigger_time', 'time_trigger_day', 'time_trigger_month']);
+            if (cronData.length) {
+                const { time_trigger_mode, time_trigger_time, time_trigger_day, time_trigger_month } = cronData[0];
+                this.state.cronMode = time_trigger_mode || '';
+                this.state.cronTime = time_trigger_time || 0;
+                this.state.cronDay = time_trigger_day || 1;
+                this.state.cronMonth = time_trigger_month || 1;
+            }
+
+            this.env.bus.trigger("onclickMenuBar", { isCollapse: true })
         });
 
         onMounted(async () => {
@@ -394,6 +416,34 @@ export class WorkFlowAuto extends Component {
 
     get currentRecord() {
         return this.id
+    }
+
+    /**
+     * True when the active trigger is time-based.
+     * Used by the XML template to hide Create/Write blocks and show the
+     * inline Cron Schedule configuration panel.
+     */
+    get isTimeTrigger() {
+        return this.state.triggerType === 'time';
+    }
+
+    /**
+     * Write a single cron schedule field to work.auto and keep the local
+     * state in sync.  The backend write() override calls create_cron()
+     * automatically, so no extra RPC is needed.
+     *
+     * @param {string} field  – one of: time_trigger_mode/time/day/month
+     * @param {*}      value  – the new value
+     */
+    async setCronField(field, value) {
+        const stateKey = {
+            time_trigger_mode: 'cronMode',
+            time_trigger_time: 'cronTime',
+            time_trigger_day: 'cronDay',
+            time_trigger_month: 'cronMonth',
+        }[field];
+        if (stateKey) this.state[stateKey] = value;
+        await this.orm.write('work.auto', [this.id], { [field]: value });
     }
 
     deleteNode(node) {
@@ -1015,6 +1065,7 @@ export class WorkFlowAuto extends Component {
             event.dataTransfer.setData("action", event.target.getAttribute('data-action'));
             event.dataTransfer.setData("node", event.target.getAttribute('data-node'));
             event.dataTransfer.setData("type", event.target.getAttribute('data-type'));
+            event.dataTransfer.setData("trigger_type", event.target.getAttribute('data-trigger_type'));
         }
     }
 
@@ -1060,7 +1111,14 @@ export class WorkFlowAuto extends Component {
     }
 
     async updateActions() {
-        this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name'])
+        this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
+    }
+
+    onCronFieldChange(field, ev, type = 'string') {
+        let value = ev.target.value;
+        if (type === 'float') value = parseFloat(value) || 0;
+        if (type === 'int') value = parseInt(value) || 0;
+        this.setCronField(field, value);
     }
 
     get variableDetailProps() {
@@ -1256,6 +1314,7 @@ export class WorkFlowAuto extends Component {
             default:
                 specificProps.type = "action";
                 specificProps.ttype = name;
+                specificProps.trigger_type = trigger_type;
                 specificProps.model = [parseInt(action), "work.function"];
                 label = action;
                 break;
@@ -1290,14 +1349,18 @@ export class WorkFlowAuto extends Component {
             let record = ev.dataTransfer.getData("record");
             let action = ev.dataTransfer.getData("action");
             const type = ev.dataTransfer.getData("type");
+            const trigger_type = ev.dataTransfer.getData("trigger_type");
             if (data && data !== 'null') {
                 this.state.trigger_blk = (data === 'model' && !(action === true || data !== 'model')) ? true : false;
                 this.state.other_blk = (action == true || data !== 'model') ? true : false
                 this.state.model_blk = record ? false : true
-                type === 'trigger' ? this.state.trigger = data : false
+                if (type === 'trigger') {
+                    this.state.trigger = data;
+                    this.state.triggerType = trigger_type;
+                }
                 this.mainBlk.el.querySelector("#trigger_blocks").classList.remove('show')
                 const selectedValue = this.state.model;
-                this.addNodeToDrawFlow(data, ev.clientX, ev.clientY, selectedValue, record, action, type);
+                this.addNodeToDrawFlow(data, ev.clientX, ev.clientY, selectedValue, record, action, type, trigger_type);
             }
         }
     }
