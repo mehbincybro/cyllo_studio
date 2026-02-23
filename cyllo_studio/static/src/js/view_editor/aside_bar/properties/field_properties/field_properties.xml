@@ -192,9 +192,12 @@
                             <label for="" class="cy-navbar_label">Placeholder
                             </label>
                             <input class="cy-input" type="text"
-                                   id="placeholder" name="placeholder"
-                                   t-model="state.placeholder"
-                                   autocomplete="off"/>
+                                    id="placeholder" name="placeholder"
+                                    t-att-value="getPlaceholderDisplay()"
+                                    t-on-input="handlePlaceholderInput"
+                                    t-on-focus="() => this.state.isPlaceholderFocused = true"
+                                    t-on-blur="() => this.state.isPlaceholderFocused = false"
+                                    autocomplete="off"/>
                         </div>
                         <div class="mb-2">
                             <label for="" class="cy-navbar_label">Dynamic Placeholder

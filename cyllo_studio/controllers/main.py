@@ -23,8 +23,6 @@ import inspect
 import uuid
 from html import unescape, escape
 import xml.etree.ElementTree as ET
-from xxlimited_35 import Null
-
 from odoo import http, api, _, tools
 import json
 import ast
@@ -94,6 +92,11 @@ class StudioMode(Controller):
                 matches2 = re.findall(pattern2, condition)
                 matches3 = re.findall(pattern3, condition)
                 left_hand_names.extend([*matches1, *matches2, *matches3])
+
+        # Handle dynamic_placeholder
+        dynamic_placeholder = attrs.get('dynamic_placeholder') or value.get('dynamic_placeholder')
+        if dynamic_placeholder and isinstance(dynamic_placeholder, str):
+            left_hand_names.append(dynamic_placeholder)
 
         # Remove 'not' and duplicates
         left_hand_names = [name for name in left_hand_names if name != 'not']
@@ -992,7 +995,7 @@ class StudioMode(Controller):
         # Loop through the deleted ribbons and modify the view
         deleted_ribbons = sorted(
             deleted_ribbons,
-            key=lambda r: int(''.join([c for c in r['path'] if c.isdigit()]) or 0),
+            key=lambda ribbon: int(''.join([character for character in ribbon['path'] if character.isdigit()]) or 0),
             reverse=True
         )
         for ribbon in deleted_ribbons:
@@ -1027,18 +1030,12 @@ class StudioMode(Controller):
               str: XML snippets representing updated field and any added placeholders.
           """
         view_rec = self.get_studio_view(args['view_id'], args['model'], args['view_type'])
-        remove_widget = args.get('remove_widget', False)
-        if remove_widget:
-            # Remove the widget attribute entirely
-            view_arch = f'<xpath expr="{args["path"]}" position="attributes">'
-            view_arch += '<attribute name="widget"></attribute>'  # Set to empty
-            view_arch += '</xpath>'
-        else:
-            view_arch = f'''
-                            <xpath expr="{args['path']}" position="attributes">
-                             <attribute name="widget">{args['widget']}</attribute>
-                               <attribute name="invisible">{args['invisible']}</attribute>
-                            </xpath>'''
+        view_arch = f'''
+                                        <xpath expr="{args['path']}" position="attributes">
+                                           <attribute name="invisible">{args['invisible']}</attribute>
+                                            <attribute name="widget">{args['widget']}</attribute>
+
+                                        </xpath>'''
 
         not_present_field = self.create_invisible(
             [{'invisible': args['invisible'], 'active_fields': args['active_fields'], 'model': args['model'], }])
@@ -1556,6 +1553,137 @@ class StudioMode(Controller):
 
         return tree_arch_base
 
+    @http.route('/cyllo_studio/reset_view', type='json', auth='user')
+    def reset_view(self, model, view_type, view_id):
+
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+
+        studio_view = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio')
+        ])
+
+        if studio_view:
+            # studio_view.unlink()
+            studio_view.write({'active': False})
+
+        return True
+
+    @http.route('/cyllo_studio/get_deactivated_views', type='json', auth='user')
+    def get_deactivated_views(self, view_id):
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+        studio_views = request.env['ir.ui.view'].with_context(active_test=False).search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', False),
+        ])
+        return [{'id': v.id, 'name': v.name,'write_date': v.write_date.strftime('%Y-%m-%d %H:%M') if v.write_date else '',
+        'create_date': v.create_date.strftime('%Y-%m-%d %H:%M') if v.create_date else ''} for v in studio_views]
+
+
+    @http.route('/cyllo_studio/activate_single_view', type='json', auth='user')
+    def activate_single_view(self, view_id, base_view_id):
+        # First, deactivate ALL currently active studio views for this base view
+        base_view = request.env['ir.ui.view'].browse(int(base_view_id))
+
+        active_studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', True),
+        ])
+        if active_studio_views:
+            active_studio_views.write({'active': False})
+
+        # Now activate only the selected one
+        target_view = request.env['ir.ui.view'].with_context(active_test=False).browse(int(view_id))
+        if target_view:
+            target_view.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return True
+
+    @http.route('/cyllo_studio/preview_view', type='json', auth='user')
+    def preview_view(self, view_id, base_view_id):
+        """Temporarily swap active studio view for preview - stores previous state in session"""
+        base_view = request.env['ir.ui.view'].browse(int(base_view_id))
+
+        # Store currently active studio view IDs in session for revert
+        active_studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', True),
+        ])
+        request.session['cy_preview_previous_active'] = active_studio_views.ids
+        request.session['cy_preview_base_view_id'] = int(base_view_id)
+
+        # Deactivate all active studio views
+        if active_studio_views:
+            active_studio_views.write({'active': False})
+
+        # Activate only the selected preview view
+        target_view = request.env['ir.ui.view'].with_context(active_test=False).browse(int(view_id))
+        if target_view:
+            target_view.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return {'success': True, 'previewing_id': int(view_id)}
+
+    @http.route('/cyllo_studio/cancel_preview', type='json', auth='user')
+    def cancel_preview(self):
+        """Revert to previously active studio views before preview"""
+        previous_ids = request.session.get('cy_preview_previous_active', [])
+        base_view_id = request.session.get('cy_preview_base_view_id')
+
+        if base_view_id:
+            base_view = request.env['ir.ui.view'].browse(base_view_id)
+
+            # Deactivate current preview view
+            current_active = request.env['ir.ui.view'].search([
+                ('inherit_id', '=', base_view.id),
+                ('name', 'ilike', 'Cyllo Studio'),
+                ('active', '=', True),
+            ])
+            if current_active:
+                current_active.write({'active': False})
+
+            # Restore previous active views
+            if previous_ids:
+                prev_views = request.env['ir.ui.view'].with_context(active_test=False).browse(previous_ids)
+                prev_views.write({'active': True})
+
+            request.env['ir.ui.view'].clear_caches()
+
+        # Clear session
+        request.session.pop('cy_preview_previous_active', None)
+        request.session.pop('cy_preview_base_view_id', None)
+
+        return True
+    @http.route('/cyllo_studio/reactivate_view', type='json', auth='user')
+    def reactivate_view(self, view_id):
+
+        base_view = request.env['ir.ui.view'].browse(int(view_id))
+
+        studio_views = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', base_view.id),
+            ('name', 'ilike', 'Cyllo Studio'),
+            ('active', '=', False),
+        ])
+
+        if studio_views:
+            studio_views.write({'active': True})
+            request.env['ir.ui.view'].clear_caches()
+
+        return True
+
+    @http.route('/cyllo_studio/check_view_customized', type='json', auth='user')
+    def check_view_customized(self, view_id):
+        studio_view = request.env['ir.ui.view'].search([
+            ('inherit_id', '=', int(view_id)),
+            ('name', 'ilike', 'Cyllo Studio')
+        ], limit=1)
+
+        return bool(studio_view)
+
     @route('/cyllo_studio/create/new_fields', type="json", auth="user",
            csrf=False)
     def create_new_fields(self, args, view_id, model, view_type):
@@ -1622,7 +1750,6 @@ class StudioMode(Controller):
 
                     attributes += '<attribute name="constrains">true</attribute>'
                 else:
-                    # Remove all constraints for this field
                     if field_name:
                         self._remove_sql_constraints(model_rec, field_name)
                     attributes += '<attribute name="constrains">false</attribute>'
@@ -1631,13 +1758,10 @@ class StudioMode(Controller):
                 python_constraint = args[0]["value"]["python_constraint"]
                 print("heelooaa")
                 field_name = args[0].get("field_name")
-
-                if python_constraint:  # Not empty
+                if python_constraint:
                     deps = python_constraint.get("deps", "").strip()
                     code = python_constraint.get("code", "").strip()
-
                     if deps and code:
-                        # Save to ir.model.fields
                         model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
                         if model_rec:
                             field_rec = request.env['ir.model.fields'].search([
@@ -1646,7 +1770,6 @@ class StudioMode(Controller):
                             ], limit=1)
 
                             if field_rec:
-                                # ✅ SAVE PYTHON CONSTRAINT TO DATABASE
                                 field_rec.write({
                                     'constraint_code': code,
                                     'constraint_fields': deps,
@@ -1658,7 +1781,6 @@ class StudioMode(Controller):
                                 )
             if args[0].get("value", {}).get("python_constraint") is None:
                     print("get inside")
-                    # Empty constraint - remove it
                     model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
                     if model_rec and field_name:
                         field_rec = request.env['ir.model.fields'].search([
@@ -1674,28 +1796,9 @@ class StudioMode(Controller):
                             print("field_rec",field_rec)
                             _logger.info(f"✓ Removed Python constraint from field {field_name}")
 
-            # if args[0].get("value", {}).get("dynamic_placeholder"):
-            #     dynamic_placeholder_field = args[0]["value"]["dynamic_placeholder"]
-            #
-            #     # Set the placeholder attribute to use the dynamic field
-            #     if dynamic_placeholder_field:
-            #         # Use t-attf-placeholder for dynamic binding
-            #         attributes += f'''<attribute name="t-attf-placeholder">{{{{ record.{dynamic_placeholder_field}.value }}}}</attribute>'''
-            #         # Clear static placeholder if dynamic is set
-            #         attributes += f'''<attribute name="placeholder"></attribute>'''
-            # elif "dynamic_placeholder" in args[0].get("value", {}):
-            #     # If dynamic_placeholder is explicitly empty, clear it
-            #     attributes += f'''<attribute name="t-attf-placeholder"></attribute>'''
-            #
-            #     # Handle static placeholder (only if no dynamic placeholder)
-            # if 'placeholder' in args[0].get('value', {}) and not args[0].get("value", {}).get("dynamic_placeholder"):
-            #     placeholder_value = args[0]['value']['placeholder']
-            #     attributes += f'''<attribute name="placeholder">{escape(str(placeholder_value))}</attribute>'''
-
             dynamic_placeholder_field = args[0].get("value", {}).get("dynamic_placeholder")
             print("testt",dynamic_placeholder_field)
             if dynamic_placeholder_field:
-                # Get the field's string/label as placeholder text
                 try:
                     related_model_name = args[0].get("model") or model
                     model_rec_obj = request.env[related_model_name]
@@ -1714,7 +1817,6 @@ class StudioMode(Controller):
                     attributes += f'''<attribute name="placeholder">{escape(str(dynamic_placeholder_field))}</attribute>'''
 
             elif 'placeholder' in args[0].get('value', {}):
-                # Only use static placeholder if dynamic_placeholder is NOT set
                 placeholder_value = args[0]['value']['placeholder']
                 attributes += f'''<attribute name="placeholder">{escape(str(placeholder_value))}</attribute>'''
 
@@ -1779,7 +1881,7 @@ class StudioMode(Controller):
 
             for key, value in args[0]['value'].items():
                 if key and value is not None:
-                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible'):
+                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible', 'dynamic_placeholder'):
                         attributes += f'''<attribute name="{key}">{escape(str(value))}</attribute>'''
                     # elif key == 'field_info':
                     elif key in ('field_info', 'compute_dependencies', 'is_computed', 'compute', 'depends',
@@ -1891,7 +1993,7 @@ class StudioMode(Controller):
                     inside_field = f"""<field name="{new_field.name}" """
                     for key, value in args[0]['attrs'].items():
                         if key and value:
-                            if key == 'dynamic_placeholder':
+                            if key == 'some_other_key_to_skip':  # Placeholder if needed, otherwise just remove the skip
                                 continue
                             if key in keys_to_escape:
                                 inside_field += f'''{key}="{escape(str(value))}" '''
@@ -1908,31 +2010,12 @@ class StudioMode(Controller):
                         ''')
             else:
                 new_field_tag = f"""<field name='{new_field.name}' """
-                # HANDLE DYNAMIC PLACEHOLDER FOR NEW FIELDS
-                dynamic_placeholder_field = args[0].get('attrs', {}).get('dynamic_placeholder')
-                placeholder_text = None
-
-                if dynamic_placeholder_field:
-                    # Get the field's string/label as placeholder
-                    try:
-                        model_rec_obj = request.env[args[0].get('model') or model]
-
-                        if hasattr(model_rec_obj, dynamic_placeholder_field):
-                            field_obj = model_rec_obj._fields.get(dynamic_placeholder_field)
-                            if field_obj:
-                                placeholder_text = getattr(field_obj, 'string', dynamic_placeholder_field)
-                            else:
-                                placeholder_text = dynamic_placeholder_field
-                        else:
-                            placeholder_text = dynamic_placeholder_field
-                    except Exception as e:
-                        placeholder_text = dynamic_placeholder_field
-
-
                 for key, value in args[0]['attrs'].items():
                     if key and value is not None:
-                        # Skip dynamic_placeholder in attrs, handle separately
-                        if key in ('dynamic_placeholder','placeholder'):
+                        # Skip dynamic_placeholder and placeholder in attrs, handle separately
+                        if key == 'some_other_key_to_skip':  # Placeholder if needed
+                            continue
+                        if key == 'placeholder':
                             continue
                         if key in ('domain', 'context'):
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
@@ -1940,13 +2023,10 @@ class StudioMode(Controller):
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
                         else:
                             new_field_tag += f'''{key}="{escape(str(value))}" '''
-                            # Handle dynamic placeholder for new field
-                if placeholder_text:
-                    # Dynamic placeholder has priority
-                    new_field_tag += f'''placeholder="{escape(str(placeholder_text))}" '''
-                elif args[0]['attrs'].get('placeholder'):
-                    # Fall back to static placeholder
-                    new_field_tag += f'''placeholder="{escape(str(args[0]['attrs']['placeholder']))}" '''
+
+                if args[0]['attrs'].get('placeholder'):
+                    placeholder_value = args[0]['attrs']['placeholder']
+                    new_field_tag += f'''placeholder="{escape(str(placeholder_value))}" '''
                 if args[0]["optional_fields"]:
                     new_field_tag += f'''options="{escape(str(args[0]["optional_fields"]))}"'''
                 new_field_tag += "/>"
@@ -4937,71 +5017,6 @@ class StudioMode(Controller):
         view_rec.arch_base = etree.tostring(xml, pretty_print=True, encoding='unicode')
         return arch
 
-    # @route('/cyllo_studio/form/update/ribbons', type="json", auth="user", csrf=False)
-    # def update_form_ribbon(self, **kwargs):
-    #     """
-    #     Update ribbon elements inside FORM view.
-    #     """
-    #     view_id = kwargs.get("viewId")
-    #     view_type = kwargs.get("viewType")
-    #     model = kwargs.get("model")
-    #     ribbons = kwargs.get("ribbons")
-    #     active_fields = kwargs.get("active_fields")
-    #     view_rec = self.get_studio_view(view_id, model,view_type)
-    #
-    #     view_node = etree.fromstring(view_rec.arch_base)
-    #
-    #     deleted_ribbons = [r for r in ribbons if r.get("hasDelete")]
-    #     edited_ribbons = [r for r in ribbons if not r.get("hasDelete") and r.get("hasEdit")]
-    #
-    #     for ribbon in edited_ribbons:
-    #         xpath_expr = ribbon["path"]
-    #
-    #         view_arch = f"""
-    #             <xpath expr="{xpath_expr}" position="replace">
-    #                 <div class="ribbon ribbon-top-right"
-    #                      invisible="{escape(ribbon['invisible'])}">
-    #                     <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
-    #                 </div>
-    #             </xpath>
-    #         """
-    #         view_node.append(etree.fromstring(view_arch))
-    #
-    #         # Add invisible placeholder fields for domain-based ribbons
-    #         not_present_field = self.create_invisible([{
-    #             "invisible": ribbon["invisible"],
-    #             "active_fields": active_fields,
-    #             "model": model,
-    #         }])
-    #         not_present_field1 = ''
-    #         not_present_field2 = ''
-    #
-    #         if not_present_field:
-    #             not_present_field1 = f"""
-    #                 <xpath expr="/form" position="inside">
-    #                     {not_present_field}
-    #                 </xpath>
-    #             """
-    #             not_present_field2=f''' <xpath expr="{ribbon['path']}" position="after">{not_present_field}</xpath>'''
-    #             view_node.append(etree.fromstring(not_present_field1))
-    #             view_node.append(etree.fromstring(not_present_field2))
-    #             # print(view_node)
-    #     deleted_ribbons = sorted(
-    #         deleted_ribbons,
-    #         key=lambda r: self.extract_index(r['path']),
-    #         reverse=True
-    #     )
-    #     for ribbon in deleted_ribbons:
-    #         xpath_expr = ribbon["path"]
-    #
-    #         view_arch = f"""
-    #             <xpath expr="{xpath_expr}" position="replace"/>
-    #         """
-    #         view_node.append(etree.fromstring(view_arch))
-    #     view_rec.arch_base = etree.tostring(view_node, pretty_print=True, encoding="unicode")
-    #     # print(view_rec.arch_base)
-    #     return view_rec.arch_base
-
     @route('/cyllo_studio/form/update/ribbons', type="json", auth="user", csrf=False)
     def update_form_ribbon(self, **kwargs):
         """
@@ -5028,13 +5043,10 @@ class StudioMode(Controller):
         for ribbon in ribbons:
             if ribbon.get("selected"):
                 selected_ribbon_path = ribbon.get("path")
-                print("ssse",selected_ribbon_path)
                 break
         # Process edited ribbons first
         for ribbon in edited_ribbons:
-            print('hemme')
             xpath_expr = ribbon["path"]
-            print("hee",xpath_expr)
 
             # Ensure invisible expression is properly formatted
             invisible_expr = ribbon.get("invisible", "False")
@@ -5073,7 +5085,7 @@ class StudioMode(Controller):
         # Process deleted ribbons (sorted by index to avoid conflicts)
         deleted_ribbons_sorted = sorted(
             deleted_ribbons,
-            key=lambda r: self.extract_index(r.get('path', '')),
+            key=lambda ribbon: self.extract_index(ribbon.get('path', '')),
             reverse=True
         )
 
@@ -5087,281 +5099,39 @@ class StudioMode(Controller):
         view_rec.arch_base = etree.tostring(view_node, pretty_print=True, encoding="unicode")
         return view_rec.arch_base
 
-    # @route('/cyllo_studio/form/update/ribbons', type="json", auth="user", csrf=False)
-    # def update_form_ribbon(self, **kwargs):
-    #     """
-    #     Update ribbon elements inside FORM view.
-    #     """
-    #     view_id = kwargs.get("viewId")
-    #     view_type = kwargs.get("viewType")
-    #     model = kwargs.get("model")
-    #     ribbons = kwargs.get("ribbons")
-    #     active_fields = kwargs.get("active_fields")
-    #
-    #     view_rec = self.get_studio_view(view_id, model, view_type)
-    #     view_node = etree.fromstring(view_rec.arch_base)
-    #
-    #     # Get the base view to check its structure
-    #     base_view = request.env['ir.ui.view'].browse(view_id)
-    #     base_arch = etree.fromstring(base_view.arch_base)
-    #     base_ribbons = base_arch.xpath('//div[@class="ribbon ribbon-top-right" or contains(@class, "ribbon")]')
-    #
-    #     # Separate deleted and edited ribbons
-    #     deleted_ribbons = [r for r in ribbons if r.get("hasDelete")]
-    #     edited_ribbons = [r for r in ribbons if not r.get("hasDelete") and r.get("hasEdit")]
-    #
-    #     # Find which ribbon should be visible (the selected one)
-    #     selected_ribbon_path = None
-    #     for ribbon in ribbons:
-    #         if ribbon.get("selected"):
-    #             selected_ribbon_path = ribbon.get("path")
-    #             break
-    #
-    #     # Process edited ribbons
-    #     for ribbon in edited_ribbons:
-    #         xpath_expr = ribbon["path"]
-    #         invisible_expr = ribbon.get("invisible", "False")
-    #         if not invisible_expr or invisible_expr in ["", "null", "undefined"]:
-    #             invisible_expr = "False"
-    #
-    #         # Replace the ribbon with updated content
-    #         view_arch = f"""
-    #             <xpath expr="{xpath_expr}" position="replace">
-    #                 <div class="ribbon ribbon-top-right" invisible="{escape(invisible_expr)}">
-    #                     <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
-    #                 </div>
-    #             </xpath>
-    #         """
-    #         view_node.append(etree.fromstring(view_arch))
-    #
-    #         # Add invisible fields for domain conditions
-    #         not_present_field = self.create_invisible([{
-    #             "invisible": invisible_expr,
-    #             "active_fields": active_fields or {},
-    #             "model": model,
-    #             "viewType": view_type,
-    #             "path": "form",
-    #             "position": "inside"
-    #         }])
-    #
-    #         if not_present_field:
-    #             not_present_field_arch = f"""
-    #                 <xpath expr="//form" position="inside">
-    #                     {not_present_field}
-    #                 </xpath>
-    #             """
-    #             view_node.append(etree.fromstring(not_present_field_arch))
-    #
-    #     # Process deleted ribbons
-    #     deleted_ribbons_sorted = sorted(
-    #         deleted_ribbons,
-    #         key=lambda r: self.extract_index(r.get('path', '')),
-    #         reverse=True
-    #     )
-    #     # deleted_ribbons_sorted = sorted(
-    #     #     deleted_ribbons,
-    #     #     key=lambda r: int(''.join([c for c in r['path'] if c.isdigit()]) or 0),
-    #     #     reverse=True
-    #     # )
-    #
-    #     for ribbon in deleted_ribbons_sorted:
-    #         xpath_expr = ribbon.get("path")
-    #         if xpath_expr:
-    #             view_arch = f"""<xpath expr="{xpath_expr}" position="replace"/>"""
-    #             view_node.append(etree.fromstring(view_arch))
-    #
-    #     # CRITICAL: Hide all non-selected ribbons when outside Studio
-    #     # This ensures only the selected ribbon shows in normal view
-    #     all_ribbon_paths = [r.get("path") for r in ribbons if not r.get("hasDelete")]
-    #     for ribbon_path in all_ribbon_paths:
-    #         if ribbon_path and ribbon_path != selected_ribbon_path:
-    #             # Find the ribbon and check if it needs to be hidden
-    #             ribbon_data = next((r for r in ribbons if r.get("path") == ribbon_path), None)
-    #             if ribbon_data:
-    #                 # If this ribbon has no domain condition and is not selected, hide it with '1'
-    #                 if ribbon_data.get("invisible") in ["False", "0", "", None, "false"]:
-    #                     hide_arch = f"""
-    #                         <xpath expr="{ribbon_path}" position="attributes">
-    #                             <attribute name="invisible">1</attribute>
-    #                         </xpath>
-    #                     """
-    #                     view_node.append(etree.fromstring(hide_arch))
-    #
-    #     view_rec.arch_base = etree.tostring(view_node, pretty_print=True, encoding="unicode")
-    #     return view_rec.arch_base
-
-    # def _save_sql_constraints(self, model_rec, constraints):
-    #     """
-    #     Save SQL constraints and apply them to the PostgreSQL database.
-    #     Registers them in env.registry._sql_constraints so Odoo can find custom messages.
-    #     """
-    #     try:
-    #         _logger.info(f"=== SAVING AND APPLYING {len(constraints)} SQL CONSTRAINTS ===")
-    #
-    #         table_name = model_rec.model.replace('.', '_')
-    #         module_name = model_rec.modules.split(',')[0] if model_rec.modules else 'base'
-    #         module = request.env['ir.module.module'].search([('name', '=', module_name)], limit=1)
-    #
-    #         if not module:
-    #             module = request.env['ir.module.module'].search([('name', '=', 'base')], limit=1)
-    #
-    #         cr = request.env.cr
-    #
-    #         for constraint_data in constraints:
-    #             if isinstance(constraint_data, (list, tuple)) and len(constraint_data) >= 3:
-    #                 key, definition, message = constraint_data[0], constraint_data[1], constraint_data[2]
-    #                 print(table_name)
-    #                 constraint_name = f"{table_name}_{key}"
-    #                 if constraint_name.startswith("x_cyllo"):
-    #                     constraint_db_name = f"{table_name}_{key}"
-    #                 else:
-    #                     constraint_db_name = key
-    #
-    #                 _logger.info(f"Processing constraint: {constraint_name}")
-    #                 _logger.info(f"Definition: {definition}")
-    #                 _logger.info(f"Custom Message: {message}")
-    #
-    #                 # Drop existing constraint
-    #                 try:
-    #                     tools.drop_constraint(cr, table_name, constraint_name)
-    #                     _logger.info(f"✓ Dropped existing constraint: {constraint_name}")
-    #                 except Exception as e:
-    #                     _logger.warning(f"Could not drop constraint: {e}")
-    #
-    #                 # Create constraint in PostgreSQL
-    #                 try:
-    #                     tools.add_constraint(cr, table_name, constraint_name, definition)
-    #                     _logger.info(f"✓ Applied constraint in PostgreSQL: {constraint_name}")
-    #                 except Exception as db_error:
-    #                     error_msg = str(db_error)
-    #                     _logger.error(f"Failed to apply constraint: {error_msg}")
-    #
-    #                     if "violates" in error_msg.lower() or "duplicate" in error_msg.lower():
-    #                         cr.rollback()
-    #                         raise UserError(
-    #                             f"Cannot apply constraint '{key}': \n"
-    #                             f"Existing data violates this constraint.\n\n"
-    #                             f"Please clean up your data and try again."
-    #                         )
-    #                     else:
-    #                         cr.rollback()
-    #                         raise UserError(f"Failed to create constraint '{key}': {error_msg}")
-    #
-    #                 # Prepare message - ensure it's a string
-    #                 msg_str = message if isinstance(message, str) else (
-    #                     message.get('en_US', list(message.values())[0]) if isinstance(message, dict) else str(message)
-    #                 )
-    #
-    #                 # ⭐ STEP 1: Save to ir.model.constraint table
-    #                 existing = request.env['ir.model.constraint'].search([
-    #                     ('model', '=', model_rec.id),
-    #                     ('name', '=', constraint_name),
-    #                 ], limit=1)
-    #
-    #                 constraint_vals = {
-    #                     'name': constraint_name,
-    #                     'definition': definition,
-    #                     'message': msg_str,
-    #                     'model': model_rec.id,
-    #                     'module': module.id,
-    #                     'type': 'u',
-    #                 }
-    #
-    #                 if existing:
-    #                     existing.write(constraint_vals)
-    #                 else:
-    #                     request.env['ir.model.constraint'].create(constraint_vals)
-    #
-    #                 cr.commit()
-    #                 _logger.info(f"✓ Saved to ir.model.constraint")
-    #
-    #                 # ⭐ STEP 2: Register in ir_translation table
-    #                 translation_registered = self._register_constraint_in_translation_table(constraint_db_name, msg_str)
-    #
-    #                 if not translation_registered:
-    #                     _logger.warning(f"⚠ Could not register translation for {constraint_db_name}")
-    #                 else:
-    #                     _logger.info(f"✓ Registered in ir_translation")
-    #
-    #                 # ⭐ STEP 3: ADD TO REGISTRY._SQL_CONSTRAINTS
-    #                 # THIS IS CRITICAL - Odoo checks this to find your custom message
-    #                 # BUT: Only add if not already present to avoid duplicates!
-    #                 try:
-    #                     if constraint_name not in request.env.registry._sql_constraints:
-    #                         request.env.registry._sql_constraints.add(constraint_db_name)
-    #                         cr.commit()
-    #                         _logger.info(f"✓ Added to registry._sql_constraints: {constraint_db_name}")
-    #                     else:
-    #                         _logger.info(f"⚠ Constraint already in registry (skipped duplicate): {constraint_db_name}")
-    #
-    #                     # Debug: Print what we have
-    #                     _logger.info(
-    #                         f"  Registry contains {len(request.env.registry._sql_constraints)} constraints total")
-    #                 except Exception as e:
-    #                     _logger.warning(f"Could not add to registry: {e}")
-    #
-    #                 # ⭐ STEP 4: Update Python model's _sql_constraints
-    #                 # This is important for Odoo's constraint validation
-    #                 try:
-    #                     ModelClass = type(request.env[model_rec.model])
-    #                     sql_constraints = list(getattr(ModelClass, '_sql_constraints', []))
-    #
-    #                     # Remove old version to avoid duplicates
-    #                     sql_constraints = [c for c in sql_constraints if c[0] != constraint_db_name]
-    #
-    #                     # Add new constraint: (name, definition, message)
-    #                     sql_constraints.append((constraint_db_name, definition, msg_str))
-    #
-    #                     # Update the model
-    #                     ModelClass._sql_constraints = sql_constraints
-    #                     _logger.info(f"✓ Updated {model_rec.model}._sql_constraints")
-    #                     _logger.info(f"  Model now has {len(sql_constraints)} constraints")
-    #
-    #                 except Exception as e:
-    #                     _logger.warning(f"Could not update model class: {e}")
-    #
-    #         cr.commit()
-    #         _logger.info(f"=== ALL CONSTRAINTS SAVED SUCCESSFULLY ===")
-    #
-    #     except UserError:
-    #         raise
-    #     except Exception as e:
-    #         _logger.error(f"Failed to save constraints: {e}", exc_info=True)
-    #         request.env.cr.rollback()
-    #         raise UserError(f"Failed to save SQL constraints: {str(e)}")
-
     def _save_sql_constraints(self, model_rec, constraints):
         """
-        Save SQL constraints and apply them to the PostgreSQL database.
+        Save SQL constraints and apply them to the database.
         Registers them in env.registry._sql_constraints so Odoo can find custom messages.
         """
         try:
             table_name = model_rec.model.replace('.', '_')
             module_name = model_rec.modules.split(',')[0] if model_rec.modules else 'base'
             module = request.env['ir.module.module'].search([('name', '=', module_name)], limit=1)
-
             if not module:
                 module = request.env['ir.module.module'].search([('name', '=', 'base')], limit=1)
-
             cr = request.env.cr
-
             for constraint_data in constraints:
                 if isinstance(constraint_data, (list, tuple)) and len(constraint_data) >= 3:
                     key, definition, message = constraint_data[0], constraint_data[1], constraint_data[2]
                     if key.startswith(f"{table_name}_"):
-                        constraint_name = key
-                        constraint_db_name = key
+                        base_name = key[len(f"{table_name}_"):]
                     else:
-                        constraint_name = f"{table_name}_{key}"
-                        constraint_db_name = constraint_name
-                    for old_name in [constraint_name, f"{table_name}_{key}",
-                                     f"{table_name}_{table_name}_{key.replace(table_name + '_', '')}"]:
-                        try:
-                            tools.drop_constraint(cr, table_name, old_name)
-                        except Exception as e:
-                            pass
+                        base_name = key
+                    constraint_name = f"{table_name}_{base_name}"
+                    constraint_db_name = constraint_name
+
                     try:
-                        tools.add_constraint(cr, table_name, constraint_name, definition)
+                        current_definition = tools.constraint_definition(cr, table_name, constraint_name)
+                        if current_definition == definition:
+                            pass
+                        else:
+                            if current_definition:
+                                try:
+                                    tools.drop_constraint(cr, table_name, constraint_name)
+                                except Exception as e:
+                                    _logger.warning(f"Failed to drop constraint {constraint_name}: {e}")
+                            tools.add_constraint(cr, table_name, constraint_name, definition)
                     except Exception as db_error:
                         error_msg = str(db_error)
 
@@ -5376,17 +5146,15 @@ class StudioMode(Controller):
                             cr.rollback()
                             raise UserError(f"Failed to create constraint '{constraint_name}': {error_msg}")
 
-                    # Prepare message - ensure it's a string
                     msg_str = message if isinstance(message, str) else (
                         message.get('en_US', list(message.values())[0]) if isinstance(message, dict) else str(message)
                     )
                     existing = request.env['ir.model.constraint'].search([
                         ('model', '=', model_rec.id),
-                        ('name', '=', constraint_db_name),
+                        ('name', '=', constraint_name),
                     ], limit=1)
-
                     constraint_vals = {
-                        'name': constraint_db_name,
+                        'name': constraint_name,
                         'definition': definition,
                         'message': msg_str,
                         'model': model_rec.id,
@@ -5399,19 +5167,21 @@ class StudioMode(Controller):
                         request.env['ir.model.constraint'].create(constraint_vals)
 
                     cr.commit()
+
                     try:
                         if constraint_db_name not in request.env.registry._sql_constraints:
                             request.env.registry._sql_constraints.add(constraint_db_name)
                             cr.commit()
                         else:
-                            _logger.info(f"⚠ Constraint already in registry: {constraint_db_name}")
+                            _logger.info(f"Constraint already in registry: {constraint_db_name}")
                     except Exception as e:
                         _logger.warning(f"Could not add to registry: {e}")
+
                     try:
                         ModelClass = type(request.env[model_rec.model])
                         sql_constraints = list(getattr(ModelClass, '_sql_constraints', []))
-                        sql_constraints = [c for c in sql_constraints if c[0] != constraint_db_name]
-                        sql_constraints.append((constraint_db_name, definition, msg_str))
+                        sql_constraints = [constraint_tuple for constraint_tuple in sql_constraints if constraint_tuple[0] != base_name]
+                        sql_constraints.append((base_name, definition, msg_str))
                         ModelClass._sql_constraints = sql_constraints
 
                     except Exception as e:
@@ -5426,34 +5196,38 @@ class StudioMode(Controller):
 
     def _remove_sql_constraints(self, model_rec, field_name):
         """
-        Remove all SQL constraints for a specific field
+        Remove all SQL constraints for a specific field from DB, ir.model.constraint, registry, and model class.
         """
-        try:
-            table_name = model_rec.model.replace('.', '_')
-            cr = request.env.cr
-            constraints = request.env['ir.model.constraint'].search([
-                ('model', '=', model_rec.id),
-                ('type', '=', 'u'),
-            ])
-            removed_count = 0
-            for constraint in constraints:
-                if field_name.lower() in constraint.definition.lower():
-                    constraint_name = constraint.name
-                    try:
-                        drop_query = f'ALTER TABLE "{table_name}" DROP CONSTRAINT IF EXISTS "{constraint_name}"'
-                        cr.execute(drop_query)
-                    except Exception as e:
-                        _logger.warning(f"Could not drop constraint {constraint_name}: {e}")
-                    constraint.unlink()
-                    if constraint_name in request.env.registry._sql_constraints:
-                        request.env.registry._sql_constraints.discard(constraint_name)
-                    removed_count += 1
-                    _logger.warning("sucesssssssss")
-            cr.commit()
-        except Exception as e:
-            request.env.cr.rollback()
-            raise UserError(f"Failed to remove constraints: {str(e)}")
+        print("hellooo")
+        table_name = model_rec.model.replace('.', '_')
+        cr = request.env.cr
+        constraints = request.env['ir.model.constraint'].search([
+            ('model', '=', model_rec.id),
+            ('type', '=', 'u'),
+            '|',
+            ('definition', 'ilike', field_name),
+            ('name', 'ilike', field_name),
+        ])
 
+        for constraint in constraints:
+            constraint_name = constraint.name
+            name_variations = set([
+                constraint_name,
+                f"{table_name}_{constraint_name}",
+                constraint_name.replace(f"{table_name}_", ""),
+            ])
+            for name in name_variations:
+                cr.execute(f'ALTER TABLE "{table_name}" DROP CONSTRAINT IF EXISTS "{name}"')
+            constraint.unlink()
+            for name in name_variations:
+                request.env.registry._sql_constraints.discard(name)
+        ModelClass = type(request.env[model_rec.model])
+        ModelClass._sql_constraints = [
+            constraint_tuple for constraint_tuple in getattr(ModelClass, '_sql_constraints', [])
+            if field_name.lower() not in constraint_tuple[0].lower()
+               and field_name.lower() not in constraint_tuple[1].lower()
+        ]
+        cr.commit()
 
     @route('/cyllo_studio/get_sql_constraints', type="json", auth="user", csrf=False)
     def get_sql_constraints(self, model, field_name):
@@ -5463,7 +5237,6 @@ class StudioMode(Controller):
         try:
             result = []
             table_name = model.replace('.', '_')
-            # Get from ir.model.constraint
             model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
             if model_rec:
                 constraints = request.env['ir.model.constraint'].search([
@@ -5547,6 +5320,47 @@ class StudioMode(Controller):
                 'has_issues': False,
                 'error': str(e),
             }
+
+    @route('/cyllo_studio/remove_single_constraint', type='json', auth='user', csrf=False)
+    def remove_single_constraint(self, model, field_name, constraint_key):
+        """
+        Remove a single SQL constraint by key from DB, ir.model.constraint, registry, and model class.
+        """
+        model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+        if not model_rec:
+            return {'success': False, 'error': 'Model not found'}
+
+        table_name = model.replace('.', '_')
+        cr = request.env.cr
+        base_key = constraint_key.replace(f"{table_name}_", "")
+        name_variations = set([
+            constraint_key,
+            f"{table_name}_{base_key}",
+            base_key,
+        ])
+        constraint = request.env['ir.model.constraint'].search([
+            ('model', '=', model_rec.id),
+            ('type', '=', 'u'),
+            '|',
+            ('name', 'in', list(name_variations)),
+            ('definition', 'ilike', field_name),
+        ], limit=1)
+
+        if not constraint:
+            return {'success': False, 'error': 'Constraint not found'}
+        for name in name_variations:
+            cr.execute(f'ALTER TABLE "{table_name}" DROP CONSTRAINT IF EXISTS "{name}"')
+        constraint.unlink()
+
+        for name in name_variations:
+            request.env.registry._sql_constraints.discard(name)
+        ModelClass = type(request.env[model])
+        ModelClass._sql_constraints = [
+            constraint_tuple for constraint_tuple in getattr(ModelClass, '_sql_constraints', [])
+            if constraint_tuple[0] not in name_variations
+        ]
+        cr.commit()
+        return {'success': True, 'message': f'Constraint {constraint_key} removed'}
 
 
 

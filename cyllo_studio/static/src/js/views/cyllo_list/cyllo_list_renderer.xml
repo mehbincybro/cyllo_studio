@@ -13,7 +13,7 @@
                     <tr class="list-tr" t-ref="list-tr">
                         <t t-foreach="state.columns" t-as="column" t-key="column.id">
                             <th t-if="column.type === 'field'" t-att-data-name="column.name"
-                                t-att-class="getColumnClass(column) + ((column.optional == 'hide' or column.column_invisible == 'true') and state.invisible_session ? ' opacity-trigger-hover cy-studio-striped' : ' opacity-trigger-hover')"
+                                t-att-class="getColumnClass(column) + ' opacity-trigger-hover' + ((column.optional == 'hide' or (column.column_invisible and column.column_invisible != 'false')) ? ' cy-studio-striped' : '')"
                                 t-on-pointerup="onColumnTitleMouseUp"
                                 t-on-click="(ev) => this.listFieldDetails(ev,column)"
                                 t-on-mouseenter="(e)=>this.onMouseHover(e)"
@@ -124,7 +124,7 @@
                     <t t-set="isInvisible"
                        t-value="evalInvisible(column.invisible, record) or !(column.name in record.data)"/>
                     <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
-                        t-att-class="getCellClass(column, record) + ((column.optional === 'hide' or isInvisible) or (column.column_invisible ==='true') and state.invisible_session ? ' cy-studio-striped' : '')"
+                         t-att-class="getCellClass(column, record) + ((column.optional === 'hide' or isInvisible or (column.column_invisible and column.column_invisible !== 'false')) ? ' cy-studio-striped' : '')"
                         class="o_data_cell cursor-pointer" t-on-click="(ev) => this.listFieldDetails(ev,column)"
                         t-att-name="column.name" t-att-colspan="column.colspan"
                         t-att-data-tooltip="!isInvisible ? getCellTitle(column, record) : false"

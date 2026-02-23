@@ -47,6 +47,30 @@ import {
     validateEdit
 } from "@cyllo_studio/js/root/studio_wrapper";
 
+/**
+ * Helper to evaluate dynamic placeholders like {{field_name}} in a string.
+ */
+function evaluatePlaceholder(placeholder, record) {
+    if (placeholder && typeof placeholder === 'string' && placeholder.includes('{{') && placeholder.includes('}}')) {
+        if (record && record.data) {
+            return placeholder.replace(/{{(.*?)}}/g, (match, fieldName) => {
+                const field = fieldName.trim();
+                if (field in record.data) {
+                    const value = record.data[field];
+                    // If the value is an object (relational), try to find a display name
+                    return (value && typeof value === 'object' && 'display_name' in value)
+                        ? value.display_name
+                        : (value === false || value === undefined) ? '' : value;
+                } else {
+                    console.warn(`[Cyllo] Dynamic placeholder resolution failed: field "${field}" not found in record data. Available fields:`, Object.keys(record.data));
+                }
+                return match;
+            });
+        }
+    }
+    return placeholder;
+}
+
 
 patch(Field, {
      /**
@@ -59,6 +83,18 @@ patch(Field, {
         data.MainPath = MainPath;
         data.striped = arguments[0].getAttribute("striped") ? "cy-studio-striped" : "";
         return data;
+    }
+});
+
+patch(Field.prototype, {
+    /**
+     * Patch fieldComponentProps to evaluate dynamic placeholders in the format {{field_name}}.
+     * This allows dynamic placeholders to work in standard views.
+     */
+    get fieldComponentProps() {
+        const props = super.fieldComponentProps;
+        props.placeholder = evaluatePlaceholder(props.placeholder, this.props.record);
+        return props;
     }
 });
 
@@ -149,6 +185,7 @@ export class CylloField extends Field {
                     readonly: readonly,
                 };
                 propsFromNode = this.field.extractProps(fieldInfo, dynamicInfo);
+                propsFromNode.placeholder = evaluatePlaceholder(propsFromNode.placeholder, record);
                 this.FieldPlaceholder = propsFromNode;
             }
         }
@@ -300,8 +337,8 @@ export class CylloField extends Field {
         const notification = this.notification || useService("notification");
 
         if (
-            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button") ||
-            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
+            !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button")
+//            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
         ) {
             return;
         }
@@ -346,12 +383,14 @@ export class CylloField extends Field {
                 cy_path: this.props.fieldInfo.attrs["cy-xpath"] || "",
                 label_path: label_xpath || "",
                 placeholder: this.props.fieldInfo.attrs["placeholder"] || "",
+                dynamic_placeholder: this.props.fieldInfo.attrs["dynamic_placeholder"] || "",
                 help: this.props.fieldInfo.help || "",
                 invisible: this.props.fieldInfo.attrs["invisible"] || "",
                 required: this.props.fieldInfo.required || "",
                 readonly: this.props.fieldInfo.readonly || "",
                 edit: true,
-                options: this.props.fieldInfo.options
+                options: this.props.fieldInfo.options,
+                recordData: this.props.record.data
             });
         } else if (this.props.fieldInfo.viewType === 'kanban') {
             const name = e.target.getAttribute("name") || e.srcElement.parentElement.getAttribute('name');
@@ -373,11 +412,13 @@ export class CylloField extends Field {
                 name: name,
                 path: e.target.getAttribute("cy-xpath") || e.target.parentElement.getAttribute('cy-xpath'),
                 invisible: this.props.fieldInfo.attrs?.invisible || 'False',
+                dynamic_placeholder: this.props.fieldInfo.attrs?.dynamic_placeholder || "",
                 isRestricted: getRestrictAttribute(e.target),
                 isFieldTag: !!e.target.getAttribute("field-tag"),
                 type: "KanbanFieldProperties",
                 allfields: this.props.record.fields,
                 widget: this.props.fieldInfo.widget || this.props.fieldInfo.attrs?.widget || "",
+                recordData: this.props.record.data
             });
         }
     }

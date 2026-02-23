@@ -61,7 +61,7 @@
                         <div class="checkbox-item">
                             <input class="checkbox-input d-none ViewCheck"
                                    type="checkbox" id="showInvisibleElements"
-                                   t-att-checked="state.showInvisible"
+                                   t-att-checked="props.showInvisible"
                                    t-on-click="(ev)=> this.props.showInvisibleFields(ev)"
                                    name="checkbox4"/>
                             <label class="checkbox-label"

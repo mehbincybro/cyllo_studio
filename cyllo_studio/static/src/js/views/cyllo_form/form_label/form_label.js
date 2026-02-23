@@ -58,7 +58,7 @@ export class CylloFormLabel extends FormLabel {
         if (
             !validateEdit(this.state, notification, "isEditingButton", "Button") ||
             !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button")
-//            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
+            //            !validateEdit(this.state, notification, "isStudioEdit", "Editing")
         ) {
             return;
         }
@@ -69,8 +69,9 @@ export class CylloFormLabel extends FormLabel {
             name:this.props.fieldInfo.name || "",
             label: this.props.string || "",
             fieldType: this.props.fieldInfo.type || "",
-            placeholder:this.props.fieldInfo.attrs.placeholder||"",
-            help:this.props.fieldInfo.help || "",
+            placeholder: this.props.fieldInfo.attrs.placeholder || "",
+            dynamic_placeholder: this.props.fieldInfo.attrs.dynamic_placeholder || "",
+            help: this.props.fieldInfo.help || "",
             domain: this.props.fieldInfo.domain || "",
             edit:true,
             widget: this.props.fieldInfo.widget || "",

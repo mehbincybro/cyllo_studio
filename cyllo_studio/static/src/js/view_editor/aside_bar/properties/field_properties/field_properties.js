@@ -141,6 +141,10 @@
                     type: String,
                     optional: true
                 },
+            dynamic_placeholder: {
+            type: String,
+            optional: true
+        },
                 column_invisible: {
                     type: String,
                     optional: true
@@ -318,6 +322,8 @@
                     field_path: this.props.field_path,
                     label_path: this.props.label_path,
                     edited: false,
+                    recordData: this.props.recordData || {},
+                    isPlaceholderFocused: false,
                     existedField: false,
                     fieldType: [
                         "Char",
@@ -357,6 +363,25 @@
                 if (!this.props.edit) {
                 this.state.field = "new";
                 }
+                        // Initialize dynamic_placeholder_field and resolve value if dynamic_placeholder is set
+        if (this.state.dynamic_placeholder && this.props.allFields) {
+            const fieldInfo = this.props.allFields[this.state.dynamic_placeholder];
+
+            if (fieldInfo) {
+                let fieldValue = this.state.recordData?.[this.state.dynamic_placeholder];
+
+                if (fieldValue && typeof fieldValue === 'object' && 'display_name' in fieldValue) {
+                    fieldValue = fieldValue.display_name;
+                }
+
+                this.state.dynamic_placeholder_field = {
+                    name: this.state.dynamic_placeholder,
+                    string: fieldInfo.string || this.state.dynamic_placeholder,
+                    type: fieldInfo.type,
+                    value: fieldValue
+                };
+            }
+        }
                 this.state.show_compute_section =
                 this.props.edit === true &&
                 (this.props.name || "").startsWith("x_studio_");
@@ -411,21 +436,25 @@
 //            }
 //        }
 
-            if (nextProps.dynamic_placeholder && nextProps.allFields) {
-        const fieldInfo = nextProps.allFields[nextProps.dynamic_placeholder];
-        if (fieldInfo) {
-            this.state.dynamic_placeholder_field = {
-                name: nextProps.dynamic_placeholder,
-                string: fieldInfo.string || nextProps.dynamic_placeholder,
-                type: fieldInfo.type
-            };
-        }
-    } else {
-        this.state.dynamic_placeholder_field = null;
-    }
+   if (nextProps.dynamic_placeholder) {
+                this.state.dynamic_placeholder = nextProps.dynamic_placeholder;
+
+                const fieldInfo = nextProps.allFields?.[nextProps.dynamic_placeholder];
+                if (fieldInfo) {
+                    this.state.dynamic_placeholder_field = {
+                        name: nextProps.dynamic_placeholder,
+                        string: fieldInfo.string || nextProps.dynamic_placeholder,
+                        type: fieldInfo.type
+                    };
+                }
+            } else {
+                this.state.dynamic_placeholder = '';
+                this.state.dynamic_placeholder_field = null;
+            }
 
 
                     this.state.related_model = relatedModel;
+                    this.state.recordData = nextProps.recordData || {};
                     this.state.widget = nextProps.widget
                     if (nextProps.widget && nextProps.widget !== this.props.widget) {
                     this.widgetOptionalFields(nextProps.widget, nextProps.options);
@@ -795,14 +824,59 @@
 
         if (value) {
             const fieldInfo = this.props.allFields[value];
+
+            // Get the actual value from recordData
+            let fieldValue = this.state.recordData?.[value];
+            if (fieldValue && typeof fieldValue === 'object' && 'display_name' in fieldValue) {
+                fieldValue = fieldValue.display_name;
+            }
+            console.log('Selected field value:', fieldValue);
+
             this.state.dynamic_placeholder_field = {
                 name: value,
                 string: fieldInfo?.string || value,
-                type: fieldInfo?.type
+                type: fieldInfo?.type,
+                value: fieldValue // Store the value as well
             };
+                        this.state.placeholder = `${fieldValue}`;
+//            this.state.placeholder = `{{${value}}}`;
         } else {
             this.state.dynamic_placeholder_field = "";
+            this.state.dynamic_placeholder = '';
+            if (this.state.placeholder && this.state.placeholder.startsWith('{{') && this.state.placeholder.endsWith('}}')) {
+                this.state.placeholder = "";
+            }
         }
+    }
+    getPlaceholderDisplay() {
+        const val = this.state.placeholder || '';
+        console.log('hiii', val)
+        if (this.state.isPlaceholderFocused) {
+            return val;
+        }
+        if (val.includes('{{')) {
+            return val.replace(/{{(.*?)}}/g, (match, fieldName) => {
+                const field = fieldName.trim();
+                const value = this.state.recordData?.[field];
+                //                this.state.placeholder = value
+                if (value === undefined || value === null) {
+                    return match;
+                }
+                return (value && typeof value === 'object' && 'display_name' in value)
+                    ? value.display_name
+                    : value;
+            });
+        }
+        console.log('vall', val)
+        return val;
+    }
+
+    handlePlaceholderInput(ev) {
+        this.state.placeholder = ev.target.value;
+        console.log('kol', this.state.placeholder)
+        this.state.edited = true;
+        const match = ev.target.value.match(/^{{(.*?)}}$/);
+        this.state.dynamic_placeholder = match ? match[1].trim() : '';
     }
 
 
@@ -1048,7 +1122,7 @@
                 const changedValues = this.getCurrentChanges(this.prevState, this.state);
                 changedValues.default_value = this.state.default_value;
 
-                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
+//                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
 
                 // Ensure field_info is included for selection fields
                 if (this.state.selectedFieldType === 'selection') {
@@ -1063,6 +1137,7 @@
                 if (this.state.widget === 'statusbar' && this.state.SelectedOptions.length > 0) {
                     optionalFields['statusbar_visible'] = this.state.SelectedOptions.join(', ');
                 }
+                changedValues.dynamic_placeholder = this.state.dynamic_placeholder || '';
                 changedValues.is_computed = this.state.is_computed;
                 if (this.state.is_computed) {
                 changedValues.compute = this.state.compute_code || "";
@@ -1935,22 +2010,7 @@
         const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
 
         if (hasAnyConstraints) {
-            const constraintTypes = [];
-            if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
-            if (hasPythonConstraint) constraintTypes.push("Python");
-
-            // Show confirmation dialog
-            if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
-                // User cancelled, re-check the box
-                event.target.checked = true;
-                this.state.constraintEnabled = true;
-                return;
-            }
-
-            // ⭐ Clear all constraints in frontend state
             this.clearAllConstraints();
-
-            // ⭐ IMPORTANT: Mark as edited so backend saves the cleared state
             this.state.edited = true;
 
             this.notification.add({
@@ -1987,12 +2047,8 @@
             this.state.constraintEnabled = false;
             return;
         }
-
-        // Handle SQL constraint
         if (hasSqlConstraint) {
             const sqlConstraint = constraint.sql_constraint;
-            
-            // Validate SQL constraint data
             if (!sqlConstraint.key || !sqlConstraint.definition || !sqlConstraint.message) {
                 this.notification.add({
                     title: _t("Invalid SQL Constraint"),
@@ -2037,13 +2093,9 @@
                 });
                 return;
             }
-
-            // Store Python constraint in state for saving
             this.state.pythonConstraint = pythonConstraint;
             console.log("✓ Added Python constraint:", pythonConstraint);
         }
-
-        // Enable checkbox since we have at least one valid constraint
         this.state.constraintEnabled = true;
         this.state.edited = true;
 
@@ -2059,22 +2111,75 @@
         });
     }
 
-    removeConstraint(index) {
-        if (this.sqlConstraints && this.sqlConstraints[index]) {
-            const removed = this.sqlConstraints.splice(index, 1);
-            this.state.edited = true;
+//    removeConstraint(index) {
+//        if (this.sqlConstraints && this.sqlConstraints[index]) {
+//            const removed = this.sqlConstraints.splice(index, 1);
+//            this.state.edited = true;
+//
+//            // Check if we still have any constraints (SQL or Python)
+//            const hasSqlConstraints = this.sqlConstraints.length > 0;
+//            const hasPythonConstraint = !!this.state.pythonConstraint;
+//
+//            // Auto-disable checkbox if no constraints left
+//            if (!hasSqlConstraints && !hasPythonConstraint) {
+//                this.state.constraintEnabled = false;
+//                console.log("All constraints removed, checkbox disabled");
+//            }
+//        }
+//    }
 
-            // Check if we still have any constraints (SQL or Python)
-            const hasSqlConstraints = this.sqlConstraints.length > 0;
-            const hasPythonConstraint = !!this.state.pythonConstraint;
-            
-            // Auto-disable checkbox if no constraints left
-            if (!hasSqlConstraints && !hasPythonConstraint) {
-                this.state.constraintEnabled = false;
-                console.log("All constraints removed, checkbox disabled");
+    async removeConstraint(index) {
+    if (this.sqlConstraints && this.sqlConstraints[index]) {
+        const constraintToRemove = this.sqlConstraints[index];
+
+        // Remove from database immediately
+        try {
+            const result = await this.rpc('/cyllo_studio/remove_single_constraint', {
+                model: this.props.model,
+                field_name: this.props.name,
+                constraint_key: constraintToRemove.key
+            });
+
+            if (result.success) {
+                // Remove from frontend array
+                this.sqlConstraints.splice(index, 1);
+                this.state.edited = true;
+
+                // Check if we still have any constraints
+                const hasSqlConstraints = this.sqlConstraints.length > 0;
+                const hasPythonConstraint = !!this.state.pythonConstraint;
+
+                // Auto-disable checkbox if no constraints left
+                if (!hasSqlConstraints && !hasPythonConstraint) {
+                    this.state.constraintEnabled = false;
+                    console.log("All constraints removed, checkbox disabled");
+                }
+
+                this.notification.add({
+                    title: _t("Success"),
+                    message: "Constraint removed successfully",
+                    type: "notification_panel",
+                    notificationType: "success",
+                });
+            } else {
+                this.notification.add({
+                    title: _t("Error"),
+                    message: result.error || "Failed to remove constraint",
+                    type: "notification_panel",
+                    notificationType: "danger",
+                });
             }
+        } catch (error) {
+            console.error('Error removing constraint:', error);
+            this.notification.add({
+                title: _t("Error"),
+                message: "Failed to remove constraint",
+                type: "notification_panel",
+                notificationType: "danger",
+            });
         }
     }
+}
 
     // New method to remove Python constraint
     removePythonConstraint() {
@@ -2118,8 +2223,6 @@
         }
         return this.sqlConstraints.map(c => [c.key, c.definition, c.message]);
     }
-
-            //Selection value functions start -->
            checkSelectionValues() {
                 const lowerCaseArray = this.state.selectionValues.map(element => element.toLowerCase());
                 let setValues = new Set(lowerCaseArray);

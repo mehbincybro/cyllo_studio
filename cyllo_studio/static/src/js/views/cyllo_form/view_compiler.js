@@ -217,7 +217,7 @@ export class CylloFormCompiler extends FormCompiler {
      * @param {boolean} evalInvisible - Whether to evaluate invisible nodes.
      * @returns {Element} - Compiled node.
      */
-    compileNode(node, params = {}, evalInvisible = true) {
+    compileNode(node, params = {}, evalInvisible = false) {
         const invisible_session = sessionStorage.getItem('invisible');
 //        if (invisible_session) {
             evalInvisible = false;
@@ -463,12 +463,12 @@ export class CylloFormCompiler extends FormCompiler {
                 }
 
                 const invisible = getModifier(child, "invisible");
-                const invisible_session =  sessionStorage.getItem('invisible');
-                if(!invisible_session){
-                    if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
-                        continue;
-                    }
-                }
+//                const invisible_session =  sessionStorage.getItem('invisible');
+//                if(!invisible_session){
+//                    if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
+//                        continue;
+//                    }
+//                }
 
                 const mainSlot = createElement("t", {
                     "t-set-slot": `item_${slotId++}`,
@@ -559,13 +559,14 @@ export class CylloFormCompiler extends FormCompiler {
                             invisible
                         )},__comp__.props.record.evalContextWithVirtualIds)`;
                     }
-                    const invisible_session =  sessionStorage.getItem('invisible');
-                    if(invisible_session){
+//                    const invisible_session =  sessionStorage.getItem('invisible');
+//                    if(invisible_session){
                         mainSlot.setAttribute("invisibleStriped", `!${isVisibleExpr}`)
                         mainSlot.setAttribute("isVisible", true);
-                    }else{
-                        mainSlot.setAttribute("isVisible", isVisibleExpr);
-                    }
+//                    }else{
+//                        mainSlot.setAttribute("isVisible", isVisibleExpr);
+//                    }
+
                     if (itemSpan > 0) {
                         mainSlot.setAttribute("itemSpan", `${itemSpan}`);
                     }
@@ -727,11 +728,11 @@ export class CylloFormCompiler extends FormCompiler {
                 continue;
             }
             const invisible = getModifier(child, "invisible");
-            if(!invisible_session){
-                if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
-                    continue;
-                }
-            }
+//            if(!invisible_session){
+//                if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
+//                    continue;
+//                }
+//            }
 
 
             const pageSlot = createElement("t");
@@ -787,13 +788,16 @@ export class CylloFormCompiler extends FormCompiler {
                     invisible
                 )},__comp__.props.record.evalContextWithVirtualIds)`;
             }
-            if(invisible_session){
+//            if(invisible_session){
                 pageSlot.setAttribute("isVisible", true);
                 pageSlot.setAttribute("invisibleStriped", `!${isVisibleExpr}`)
-            }else{
-            pageSlot.setAttribute("isVisible", isVisibleExpr);
-            }
-
+//            }else{
+//            pageSlot.setAttribute("isVisible", isVisibleExpr);
+//            }
+//            pageSlot.setAttribute("isVisible", "true");
+//if (invisible === "True" || invisible === "1") {
+//    pageSlot.setAttribute("striped", "'cy-studio-striped'");
+//}
             for (const contents of child.children) {
                 append(pageSlot, this.compileNode(contents, { ...params, currentSlot: pageSlot }));
             }
@@ -838,9 +842,9 @@ export class CylloFormCompiler extends FormCompiler {
         let hasContent = false;
         for (const child of el.children) {
             const invisible = getModifier(child, "invisible");
-            if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
-                continue;
-            }
+//            if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
+//                continue;
+//            }
             hasContent = true;
             let isVisibleExpr;
             if (!invisible || invisible === "False" || invisible === "0") {
@@ -852,11 +856,15 @@ export class CylloFormCompiler extends FormCompiler {
                     invisible
                 )},__comp__.props.record.evalContextWithVirtualIds)`;
             }
-            let mainSlot = ""
-            const invisible_session =  sessionStorage.getItem('invisible');
-              mainSlot = createElement("t", {
-            "t-set-slot": `slot_${slotId++}`,isVisible: invisible_session ? true : isVisibleExpr,
-            });
+//            let mainSlot = ""
+//            const invisible_session =  sessionStorage.getItem('invisible');
+//              mainSlot = createElement("t", {
+//            "t-set-slot": `slot_${slotId++}`,isVisible: invisible_session ? true : isVisibleExpr,
+//            });
+let mainSlot = createElement("t", {
+    "t-set-slot": `slot_${slotId++}`,
+    isVisible: "true",
+});
             if (child.getAttribute('string')) {
                 child.setAttribute('string', child.getAttribute('string') || "")
                 child.setAttribute('stringPath', child.querySelector('.o_stat_text')?.getAttribute('cy-xpath') || child.getAttribute('cy-xpath') || "")
@@ -868,6 +876,7 @@ export class CylloFormCompiler extends FormCompiler {
                 child.setAttribute('string', child.querySelector('.o_stat_text')?.textContent.trim() || "")
                 child.setAttribute('stringPath', child.querySelector('.o_stat_text')?.getAttribute('cy-xpath') || "")
             }
+
 
             if (child.tagName === "button" || child.children.tagName === "button") {
                 child.classList.add(
@@ -881,13 +890,18 @@ export class CylloFormCompiler extends FormCompiler {
             if (child.tagName === "field") {
                 child.classList.add("d-inline-block", "mb-0", "z-index-0");
             }
-            if (invisible_session ){
-                const compileNode = this.compileNode(child, params, false)
-                compileNode.setAttribute('striped', `!${isVisibleExpr}`)
-                append(mainSlot, compileNode);
-            } else {
-                append(mainSlot, this.compileNode(child, params, false));
-            }
+//            if (invisible_session ){
+//                const compileNode = this.compileNode(child, params, false)
+//                compileNode.setAttribute('striped', `!${isVisibleExpr}`)
+//                append(mainSlot, compileNode);
+//            } else {
+//                append(mainSlot, this.compileNode(child, params, false));
+//            }
+const compiledButton = this.compileNode(child, params, true);
+if (invisible === "True" || invisible === "1") {
+    compiledButton.setAttribute("striped", "true");
+}
+append(mainSlot, compiledButton);
             append(buttonBox, mainSlot);
         }
 

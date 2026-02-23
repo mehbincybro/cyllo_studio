@@ -77,6 +77,9 @@ export function RemoveSessions() {
  */
 
 export function validateEdit(state, notification, field, type = "Editing") {
+    console.log("this tested",state)
+    console.log("fields",field)
+    console.log("this tested11",!state?.[field])
     if (!state?.[field]) return true;
 
     notification.add({
@@ -426,6 +429,7 @@ export class StudioWrapper extends Component {
                 path: detail.cy_path || "",
                 help: detail.help,
                 placeholder: detail.placeholder || "",
+                dynamic_placeholder: detail.dynamic_placeholder || "",
                 invisible: detail.invisible || "",
                 readonly: detail.readonly,
                 required: detail.required,
@@ -591,7 +595,8 @@ export class StudioWrapper extends Component {
                 path: detail.cy_path || "",
                 help: detail.help,
                 placeholder: detail.placeholder || "",
-                optional:detail?.mode?.optional || "",
+                dynamic_placeholder: detail.dynamic_placeholder || "",
+                optional: detail?.mode?.optional || "",
                 column_invisible: detail.column_invisible || "",
                 invisible: detail.invisible || "",
                 readonly: detail.readonly,
@@ -602,6 +607,7 @@ export class StudioWrapper extends Component {
                 domain: detail.domain || "",
                 label_path: detail.label_path || "",
                 position: detail.position || "",
+                recordData: detail.recordData || {},
             });
             this.updateViewDetails(detail);
         }
@@ -666,12 +672,14 @@ export class StudioWrapper extends Component {
                 path: detail.path || "",
                 help: detail.help,
                 placeholder: detail.placeholder || "",
+                dynamic_placeholder: detail.dynamic_placeholder || "",
                 invisible: detail.invisible || "",
                 readonly: detail.readonly,
                 required: detail.required,
                 create: detail.create,
                 field_path: detail.field_path || "",
-                domain: detail.domain || ""
+                domain: detail.domain || "",
+                recordData: detail.recordData || {}
             });
             this.updateViewDetails(detail);
         }

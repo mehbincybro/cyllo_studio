@@ -293,11 +293,12 @@ export class CylloListRenderer extends listView.Renderer {
       edit:true,
       cy_path:column.attrs["cy-xpath"],
       help: column.help || "",
-      placeholder:column.attrs["placeholder"]||"",
-      column_invisible:column.column_invisible || 'false',
-      invisible:column.invisible || 'false' ,
-      readonly:column.readonly || 'false',
-      required:column.required ||'false',
+      placeholder: column.attrs["placeholder"] || "",
+      dynamic_placeholder: column.attrs["dynamic_placeholder"] || "",
+      column_invisible: column.column_invisible || 'false',
+      invisible: column.invisible || 'false',
+      readonly: column.readonly || 'false',
+      required: column.required || 'false',
     });
   }
 
