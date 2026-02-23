@@ -947,7 +947,11 @@ export class WorkFlowAuto extends Component {
         let indentationLevel = "";
         let parentArray = [];
         for (const variable of globalVariables) {
-            codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
+            if (variable.variable_name === 'current_record') {
+                codeLines.push(`${variable.variable_name} = records if 'records' in globals() else env['${this.state.model_name}'].browse()`);
+            } else {
+                codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
+            }
         }
         while (node) {
             const variablesInScope = variables.filter(item => item.scopeId === node.nodeId);
