@@ -722,6 +722,8 @@ class WorkAuto(models.Model):
         }
         for rec in self:
             if rec.trigger_type != 'time' or not rec.time_trigger_mode:
+                if rec.schedule_id:
+                    rec.schedule_id.sudo().unlink()
                 continue
 
             interval_number, interval_type = interval_map[rec.time_trigger_mode]
