@@ -19,15 +19,30 @@ export class DragItem extends Component {
         this.options = []
         this.mode = false
         this.setOptions()
+        onWillUpdateProps((nextProps) => {
+            this.setOptionsFromProps(nextProps)
+        })
     }
 
     /**
-     * Set options based on the item's type.
+     * Set options based on the item's type and field_type.
+     * @param {Object} p - Props to evaluate (defaults to current props).
      */
-    setOptions() {
-        if (this.props.type == "measure") {
+    setOptions(p) {
+        this.setOptionsFromProps(p || this.props)
+    }
+
+    setOptionsFromProps(p) {
+        if (p.type == "measure") {
             this.options = ["MIN", "MAX", "AVG", "SUM", "COUNT"]
             this.mode = "AGG"
+        } else if (p.type == "dimension" &&
+            ["date", "datetime"].includes(p.field_type)) {
+            this.options = ["Day", "Month", "Year"]
+            this.mode = "DATE_GROUP"
+        } else {
+            this.options = []
+            this.mode = false
         }
     }
 
@@ -38,7 +53,7 @@ export class DragItem extends Component {
      */
     setDragging(e, val) {
         this.state.isDragging = val
-        var {type, is_json, field_type} = this.props
+        var { type, is_json, field_type } = this.props
         if (val) {
             e.dataTransfer.setData("type", type)
             e.dataTransfer.setData("is_json", is_json)
@@ -46,13 +61,13 @@ export class DragItem extends Component {
         }
         var highlight = val ? 'highlight' : ''
         var avoidTypes = val ? [this.types[type]] : []
-        this.env.bus.trigger("CY:DROPZONE_HIGHLIGHT", {highlight, avoidTypes})
+        this.env.bus.trigger("CY:DROPZONE_HIGHLIGHT", { highlight, avoidTypes })
     }
 }
 
 // Define the template and components for the DragItem component
 DragItem.template = "DragItem"
-DragItem.components = {Dropdown, DropdownItem}
+DragItem.components = { Dropdown, DropdownItem }
 
 export class DropZone extends Component {
     /** Class for drop zone */
@@ -72,33 +87,39 @@ export class DropZone extends Component {
         })
         this.ref = useRef('drop')
         this.env.bus.addEventListener("CY:DROPZONE_CHANGE_TYPE", (ev) => {
-            var {category, type} = ev.detail
+            var { category, type } = ev.detail
             this.changeType(category, type)
         });
         this.env.bus.addEventListener("CY:DROPZONE_IS_EMPTY", (ev) => {
-            var {category, type} = ev.detail
+            var { category, type } = ev.detail
             if (!this.state.children.length && this.props.category == category && this.state.type == type) {
                 this.state.type = 'both';
-                this.env.bus.trigger("CY:DROPZONE_IS_EMPTY_CONFIRM", {category, type: this.types[type]})
+                this.env.bus.trigger("CY:DROPZONE_IS_EMPTY_CONFIRM", { category, type: this.types[type] })
             }
         });
         this.env.bus.addEventListener("CY:DROPZONE_IS_EMPTY_CONFIRM", (ev) => {
-            var {category, type} = ev.detail
+            var { category, type } = ev.detail
             if (this.props.category == category && this.state.type == type) {
                 this.state.type = 'both';
             }
         })
         this.env.bus.addEventListener("CY:DROPZONE_HIGHLIGHT", (ev) => {
-            var {highlight, avoidTypes} = ev.detail
+            var { highlight, avoidTypes } = ev.detail
             if (avoidTypes && avoidTypes.includes(this.state.type)) return
             this.state.highlight = highlight
+        })
+        // Force-sync children by type (used when reverting date groupings)
+        this.env.bus.addEventListener("CY:SYNC_CHILDREN", (ev) => {
+            var { targetType, children } = ev.detail
+            if (this.state.type === targetType) {
+                this.state.children = children
+            }
         })
         onWillUpdateProps(nextProps => {
             this.state.type = nextProps.type
             this.state.limit = nextProps.limit
-            if (nextProps.children.length) {
-                this.state.children = nextProps.children
-            }
+            // Always sync children — parent (query_data reactivity) is the source of truth
+            this.state.children = nextProps.children
         })
     }
 
@@ -123,7 +144,6 @@ export class DropZone extends Component {
         var is_json = e.dataTransfer.getData("is_json")
         var field_type = e.dataTransfer.getData("field_type");
 
-        // 1. Handle axis/dimension logic (keep same)
         if (is_json && type) {
             if (this.state.type == "both" && this.props.axis) {
                 var axis = {
@@ -131,18 +151,16 @@ export class DropZone extends Component {
                     "measure": this.props.axis == 'x' ? 'y' : 'x',
                 }
                 var data = axis[type]
-                this.env.bus.trigger("CY:UPDATE_QUERY", {type: 'dimension_axis', data})
+                this.env.bus.trigger("CY:UPDATE_QUERY", { type: 'dimension_axis', data })
             }
 
-        // 2. Change type logic (keep same)
             var is_core = Object.keys(this.types).includes(this.state.type) || this.state.type == "both"
             if (is_core) {
                 var category = this.props.category
                 this.changeType(category, type)
-                this.env.bus.trigger("CY:DROPZONE_CHANGE_TYPE", {category, type: this.types[type]})
+                this.env.bus.trigger("CY:DROPZONE_CHANGE_TYPE", { category, type: this.types[type] })
             }
 
-        // 3. Build final SQL
             const item = document.querySelector('.dragging');
             if ((type == this.state.type || !is_core) && this.state.children.length < this.state.limit) {
                 var column = item.dataset.column
@@ -152,13 +170,11 @@ export class DropZone extends Component {
                 let query;
                 let monetaryInBase = false;
 
-            // JSON field
                 if (is_json == 'true') {
                     query = `${column} ->> 'en_US' AS ${alias}`;
                 }
-            // Monetary field → row-level conversion (NO SUM)
                 else if (field_type === "monetary") {
-                    const currency_rate =`COALESCE((
+                    const currency_rate = `COALESCE((
                             SELECT rate FROM res_currency_rate
                             WHERE currency_id = ${modelName}.currency_id
                             AND company_id = ${companyId}
@@ -175,7 +191,6 @@ export class DropZone extends Component {
                     monetaryInBase = `ROUND(${column} / ${currency_rate}, 2)`
                     query = monetaryInBase + ' AS ' + alias
                 }
-                // Normal field
                 else {
                     query = `${column} AS ${alias}`;
                 }
@@ -186,11 +201,12 @@ export class DropZone extends Component {
                     alias,
                     query,
                     column,
+                    field_type,
                     monetaryInBase: monetaryInBase,
                 });
                 var data = this.state.children
                 var new_type = this.state.type == "both" ? type : this.state.type
-                this.env.bus.trigger("CY:UPDATE_QUERY", {type: new_type, data})
+                this.env.bus.trigger("CY:UPDATE_QUERY", { type: new_type, data })
             }
             this.ref.el.classList.remove('can-drop');
         }
@@ -198,8 +214,6 @@ export class DropZone extends Component {
 
     /**
      * Change the category and type.
-     * @param {string} category - The category to change to.
-     * @param {string} type - The type to change to.
      */
     changeType(category, type) {
         if (this.state.type == "both" && category == this.props.category) {
@@ -221,13 +235,13 @@ export class DropZone extends Component {
     onItemRemove(index, type) {
         let elem = this.state.children[index]
         this.state.children.splice(index, 1)
-        this.env.bus.trigger("CY:UPDATE_QUERY", {type, data: this.state.children})
+        this.env.bus.trigger("CY:UPDATE_QUERY", { type, data: this.state.children })
         if (elem.id) {
-            this.env.bus.trigger("CY:UPDATE_UNLINKS", {type: 'axis', id: elem.id})
+            this.env.bus.trigger("CY:UPDATE_UNLINKS", { type: 'axis', id: elem.id })
         }
         if (!this.state.children.length) {
             var category = this.props.category
-            this.env.bus.trigger("CY:DROPZONE_IS_EMPTY", {category, type: this.types[type]})
+            this.env.bus.trigger("CY:DROPZONE_IS_EMPTY", { category, type: this.types[type] })
         }
     }
 

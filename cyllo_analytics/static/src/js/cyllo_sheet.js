@@ -164,11 +164,91 @@ export class CylloSheet extends Component {
         this.env.bus.addEventListener("CY:UPDATE_QUERY", (ev) => {
             this.state.false_linking = false
             var {type, data} = ev.detail
-            this.query_data[type] = data
-            if (["measure", "dimension"].includes(type)) {
-                this.query_data.measure = this.query_data.measure.filter(item => item.type == "measure")
-                this.query_data.dimension = this.query_data.dimension.filter(item => item.type == "dimension")
+
+            if (type === 'groupBy') {
+                // Detect which date groupBy items were just removed
+                const oldGroupBy = this.query_data.groupBy || []
+                const removedDateItems = oldGroupBy.filter(
+                    g => g.source_column && !data.some(n => n.source_column === g.source_column)
+                )
+                this.query_data[type] = data
+                // Revert removed date dimensions back to their plain column query
+                if (removedDateItems.length > 0) {
+                    this.query_data.dimension = this.query_data.dimension.map(dim => {
+                        const removed = removedDateItems.find(r => r.source_column === dim.column)
+                        if (removed) {
+                            const baseAlias = dim.column.replace('.', '_')
+                            const cleanLabel = (dim.original_value || dim.value)
+                                .replace(/^(Day|Month|Year)\s+of\s+/i, '').trim()
+                            return {
+                                ...dim,
+                                alias: baseAlias,
+                                query: `${dim.column} AS ${baseAlias}`,
+                                value: cleanLabel,
+                                original_value: cleanLabel,
+                                DATE_GROUP: null,
+                            }
+                        }
+                        return dim
+                    })
+                    // onWillUpdateProps always-sync will pick this up; CY:SYNC_CHILDREN as backup
+                    this.env.bus.trigger("CY:SYNC_CHILDREN", {
+                        targetType: 'dimension',
+                        children: this.query_data.dimension,
+                    })
+                }
+            } else {
+                this.query_data[type] = data
+                if (["measure", "dimension"].includes(type)) {
+                    this.query_data.measure = this.query_data.measure.filter(item => item.type == "measure")
+                    this.query_data.dimension = this.query_data.dimension.filter(item => item.type == "dimension")
+                    // When dimension is removed, clean up any date groupBy tags for it
+                    if (type === 'dimension') {
+                        const activeColumns = new Set(this.query_data.dimension.map(d => d.column))
+                        this.query_data.groupBy = this.query_data.groupBy.filter(
+                            item => {
+                                if (item.source_column && !activeColumns.has(item.source_column)) {
+                                    if (item.id) {
+                                        this.unlinkList.axis.push(item.id)
+                                    }
+                                    return false
+                                }
+                                return true
+                            }
+                        )
+                    }
+                }
             }
+            this.genQuery()
+        })
+        // Add / replace a date group-by tag in the Group By zone
+        this.env.bus.addEventListener("CY:ADD_DATE_GROUPBY", (ev) => {
+            const { groupByItem } = ev.detail
+            let existingId = null
+            // Remove any existing date_group entry for the same source column
+            this.query_data.groupBy = this.query_data.groupBy.filter(
+                item => {
+                    const hasSameSource = item.source_column === groupByItem.source_column;
+                    // Fallback for duplicates or older records missing source_column
+                    const hasSameColumnSubstring = !item.source_column && item.column && typeof item.column === 'string' && item.column.includes(groupByItem.source_column) && /^TO_CHAR/i.test(item.column);
+
+                    if (hasSameSource || hasSameColumnSubstring) {
+                        if (item.id) {
+                            if (!existingId) {
+                                existingId = item.id; // Reuse the first matched ID to avoid creating a new DB record
+                            } else {
+                                this.unlinkList.axis.push(item.id); // If there are multiple, unlink the rest to clean up the DB
+                            }
+                        }
+                        return false;
+                    }
+                    return true;
+                }
+            )
+            if (existingId) {
+                groupByItem.id = existingId;
+            }
+            this.query_data.groupBy.push(groupByItem)
             this.genQuery()
         })
         useEffect(() => {
@@ -248,6 +328,19 @@ export class CylloSheet extends Component {
             }
         });
         var columns = [...query_data.dimension, ...query_data.measure]
+        // Defensive: if a dimension still has a TO_CHAR query but its Group By tag was removed,
+        // revert it to the plain column reference for this query (source of truth: query_data.groupBy)
+        const activeGroupCols = new Set(
+            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
+        )
+        columns = columns.map(col => {
+            if (col.type === 'dimension' && /^TO_CHAR\s*\(/i.test(col.query) &&
+                !activeGroupCols.has(col.column)) {
+                // Keep the stored alias so the chart data lookup still matches its key
+                return { ...col, query: `${col.column} AS ${col.alias}` }
+            }
+            return col
+        })
         var tableNames = columns.map(col => col.column.split('.')[0]);
         var uniqueTableNames = new Set(tableNames);
         if (this.state.models.length > uniqueTableNames.size) {
@@ -255,16 +348,38 @@ export class CylloSheet extends Component {
         } else {
             this.state.false_linking = false
         }
-        var columnStr = columns.length ? columns.map(item => item.query).join(', ') : ''
         var join = query_data.join.join(' \n')
+        // ── GROUP BY construction ─────────────────────────────────────────────
+        // Only dimension-type items belong in GROUP BY.
+        // Measures (including monetary ROUND) must never appear there.
+        const dateGroupedCols = new Set(
+            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
+        )
         var groupColumn = columns
-            .filter(item => !/(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
-            .map(item => item.alias);
+            .filter(item => item.type === 'dimension')            // only dimensions
+            .filter(item => !dateGroupedCols.has(item.column))    // skip date-grouped ones
+            .map(item => item.alias)
         var groupByQuery = query_data.groupBy.length ? query_data.groupBy.map(item => item.column) : []
-        var totalGroupBy = groupByQuery.length || columns
-            .filter(item => /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
-            .length ? [...groupByQuery, ...groupColumn] : []
+        var hasAggregates = columns.some(item => /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
+        var totalGroupBy = groupByQuery.length || hasAggregates
+            ? [...groupByQuery, ...groupColumn] : []
         totalGroupBy = [...new Set(totalGroupBy)]
+        // When GROUP BY is active, auto-wrap non-aggregate measure queries in SUM()
+        // so PostgreSQL doesn't error with "column must appear in GROUP BY or aggregate"
+        if (totalGroupBy.length > 0) {
+            columns = columns.map(item => {
+                if (item.type === 'measure' && !/(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query)) {
+                    const alias = item.alias
+                    // monetaryInBase retains '{selectedCurrency}' placeholder — resolve it
+                    const rawExpr = item.monetaryInBase
+                        ? item.monetaryInBase.trim().replaceAll('{selectedCurrency}', `${this.state.currency?.id}`)
+                        : item.column
+                    return { ...item, query: `SUM(${rawExpr}) AS ${alias}` }
+                }
+                return item
+            })
+        }
+        var columnStr = columns.length ? columns.map(item => item.query).join(', ') : ''
         var groupBy = totalGroupBy.length ? '\n GROUP BY ' + totalGroupBy.join(', ') : ''
         var orderBy = query_data.orderBy.length ? '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ') : ''
         var whereData = query_data.where.filter(item => item.active).map(item => item.domain)
@@ -578,7 +693,7 @@ export class CylloSheet extends Component {
                 this.saveManually(this.id)
                 this.showMessage("Saved", "success")
                 this.state.need_save = false
-                const {show_position_warning} = data
+                const { show_position_warning } = data
                 if (show_position_warning) {
                     this.showMessage(`As the chart shifted from being a KPI to ${this.state.selectedType[1]}, it required removing the previous positions.`, "warning")
                 }
@@ -601,13 +716,13 @@ export class CylloSheet extends Component {
         const globalFilters = await this.orm.searchRead('dashboard.global.filter', [['dashboard_config_id', 'in', ids]], [])
         const filteredDict = {};
         globalFilters.forEach((filter) => {
-            const {dashboard_config_id, id, name, code, type, relation, operator} = filter;
+            const { dashboard_config_id, id, name, code, type, relation, operator } = filter;
 
             if (dashboard_config_id) {
                 if (!filteredDict[dashboard_config_id[1]]) {
                     filteredDict[dashboard_config_id[1]] = [];
                 }
-                filteredDict[dashboard_config_id[1]].push({name, id, code, type, relation, operator});
+                filteredDict[dashboard_config_id[1]].push({ name, id, code, type, relation, operator });
             }
         });
         this.state.globalFilters = filteredDict
@@ -626,7 +741,7 @@ export class CylloSheet extends Component {
         const data = await this.orm.call(this.model, 'get_sheet_data', [this.state.id])
         if (data.has_error.error) {
             const model = data.has_error.value.length > 1 ? "models" : "model"
-            this.notification.add(_t(`The sheet cannot display the graph because it is missing some information. It cannot access the ${model}: ${data.has_error.value.join(", ")}.`), {type: "warning"});
+            this.notification.add(_t(`The sheet cannot display the graph because it is missing some information. It cannot access the ${model}: ${data.has_error.value.join(", ")}.`), { type: "warning" });
         }
         this.state.name = data.name
         this.state.currency = data.currency[0]
@@ -641,7 +756,25 @@ export class CylloSheet extends Component {
         this.setModel(data.models)
         this.query_data.join = data.join
         this.query_data.joinData = data.joinData
-        this.query_data.dimension = data.dimension
+        // Restore field_type and date grouping state so options and tags persist
+        this.query_data.dimension = data.dimension.map(dim => {
+            if (!dim.field_type && dim.column) {
+                const [tableName, fieldName] = dim.column.split('.')
+                for (const model of data.models) {
+                    if (model.table === tableName && model.fields && model.fields[fieldName]) {
+                        dim.field_type = model.fields[fieldName].type
+                        break
+                    }
+                }
+            }
+            // If there's a matching date groupBy, restore the markers
+            const dateGroup = data.groupBy.find(g => g.source_column === dim.column && g.date_group)
+            if (dateGroup) {
+                dim.DATE_GROUP = dateGroup.date_group
+                dim.original_value = dim.value
+            }
+            return dim
+        })
         this.query_data.measure = data.measure
         this.query_data.groupBy = data.groupBy
         this.query_data.orderBy = data.orderBy
@@ -652,7 +785,7 @@ export class CylloSheet extends Component {
     }
 
     showMessage(message, type) {
-        this.notification.add(message, {type})
+        this.notification.add(message, { type })
     }
 
     onFilterClick() {
@@ -731,7 +864,7 @@ export class CylloSheet extends Component {
 
     async _nameGet(recordId) {
         const result = await this.orm.read("dashboard.config", [recordId], ["display_name"]);
-        return {id: result[0].id, display_name: result[0].display_name};
+        return { id: result[0].id, display_name: result[0].display_name };
     }
 
     dashboardDomain() {
@@ -794,7 +927,7 @@ export class CylloSheet extends Component {
             return options.find(item => item.label === selectedOption.name)
         }
         ;
-        const {code} = filter
+        const { code } = filter
         const getOptions = () => {
             switch (code) {
                 case "start-date":
