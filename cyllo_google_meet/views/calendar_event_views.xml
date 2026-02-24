@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_calendar_event_form_google_meet" model="ir.ui.view">
+        <field name="name">
+            calendar.event.view.form.inherit.cyllo.google.meet.integration
+        </field>
+        <field name="model">calendar.event</field>
+        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='start']" position="after">
+                <field name="is_google_meet" widget="boolean_toggle"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+
+

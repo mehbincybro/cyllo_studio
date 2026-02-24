@@ -20,24 +20,24 @@
 #
 #############################################################################
 {
-    'name': "CRM Google Form",
-    'description': 'This module used to creates CRM Leads in Odoo from Google Form submission results.',
-    'summary': 'Create CRM Leads from Google Form Submission',
+    'name': "Cyllo Google",
+    'description': """
+            This module centralizes Google OAuth authentication,
+            API configuration, and shared services for all
+            Cyllo Google-based submodules.
+        """,
+    'summary': "Centralized Google Integration Framework",
     'version': "1.0",
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm','cyllo_google'],
+    'depends': ['cyllo_base'],
     'data': [
-        'security/ir.model.access.csv',
-        'data/email_template_google_form_share.xml',
-        'data/ir_cron_google_form.xml',
-        # 'views/res_config_settings_views.xml',
-        'views/google_form_views.xml',
+        'views/res_config_settings_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
-    'application': False,
+    'application': True,
 }

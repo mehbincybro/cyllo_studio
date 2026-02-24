@@ -20,24 +20,27 @@
 #
 #############################################################################
 {
-    'name': "CRM Google Form",
-    'description': 'This module used to creates CRM Leads in Odoo from Google Form submission results.',
-    'summary': 'Create CRM Leads from Google Form Submission',
+    'name': "Cyllo Google Meet",
+    'description': """
+        This module provides centralized Google Meet integration.
+        You can configure OAuth credentials, API access, and manage
+        Google Meet meetings directly from Odoo.
+    """,
+    'summary': "Google Meet Integration for Odoo",
     'version': "1.0",
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm','cyllo_google'],
+    'depends': ['cyllo_base', 'calendar', 'crm', 'cyllo_google'],
     'data': [
-        'security/ir.model.access.csv',
-        'data/email_template_google_form_share.xml',
-        'data/ir_cron_google_form.xml',
+        'views/calendar_event_views.xml',
+        'views/calender_event_quick_form_view.xml',
         # 'views/res_config_settings_views.xml',
-        'views/google_form_views.xml',
+        # add other views like meeting templates if needed
     ],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
-    'application': False,
+    'application': True,
 }
