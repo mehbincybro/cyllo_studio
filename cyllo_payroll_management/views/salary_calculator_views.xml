@@ -25,7 +25,6 @@
                                      invisible="calculation_type != 'manual'">
                                     <field name="salary" widget="monetary"
                                            options="{'currency_field': 'currency_id'}"/>
-                                    <span class="text-muted">/ month</span>
                                 </div>
                                 <field name="employee_id"
                                        invisible="calculation_type != 'employee'"
@@ -38,7 +37,10 @@
                                 <field name="struct_id"
                                        options="{'no_create': True}"/>
                                 <field name="work_schedule_id"
-                                       options="{'no_create': True}"/>
+                                       options="{'no_create': True}" invisible="calculation_type == 'manual'"/>
+                                <field name="house_rent" invisible="calculation_type != 'manual'"/>
+                                <field name="travel_allowance" invisible="calculation_type != 'manual'"/>
+                                <field name="meal_allowance" invisible="calculation_type != 'manual'"/>
                             </group>
                         </div>
 

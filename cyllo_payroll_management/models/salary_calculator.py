@@ -62,6 +62,10 @@ class SalaryCalculator(models.TransientModel):
         ('hourly', 'Hourly Wage')
     ], string="Wage Type", default='monthly')
 
+    house_rent=fields.Monetary(string="HRA")
+    travel_allowance=fields.Monetary(string="Travel Allowance")
+    meal_allowance=fields.Monetary(string="Meal Allowance")
+
     @api.onchange('employee_id', 'calculation_type', 'wage_type')
     def _onchange_employee_id(self):
         if self.calculation_type == 'employee' and self.employee_id:
@@ -87,7 +91,7 @@ class SalaryCalculator(models.TransientModel):
             self.department_id = False
 
     @api.depends('salary', 'struct_id', 'employee_id', 'department_id',
-                 'calculation_type')
+                 'calculation_type','meal_allowance','travel_allowance','house_rent')
     def _compute_results(self):
         for rec in self:
             rec.gross_month = 0.0
@@ -186,7 +190,6 @@ class SalaryCalculator(models.TransientModel):
             elif rec.calculation_type == 'department' and rec.department_id:
                 employees = self.env['hr.employee'].search(
                     [('department_id', '=', rec.department_id.id)])
-                print('employees:', employees)
                 total_gross = 0.0
                 total_alw = 0.0
                 total_ded = 0.0
@@ -254,7 +257,6 @@ class SalaryCalculator(models.TransientModel):
                             total_comp += total
 
                         if code not in aggregated_lines:
-                            print('code:', code)
                             aggregated_lines[code] = {
                                 'name': line.get('name'),
                                 'code': code,
@@ -265,7 +267,6 @@ class SalaryCalculator(models.TransientModel):
                                 'total': 0.0,
                             }
                         aggregated_lines[code]['total'] += total
-                print('aggregated_lines:', aggregated_lines.values())
                 rec.gross_month = total_gross
                 rec.total_allowance = total_alw
                 rec.deduction = total_ded
@@ -310,6 +311,9 @@ class SalaryCalculator(models.TransientModel):
                     'wage': wage_val,
                     'employee_salary_structure_id': rec.struct_id.id,
                     'resource_calendar_id': rec.work_schedule_id.id,
+                    'house_rent':rec.house_rent,
+                    'travel_allowance':rec.travel_allowance,
+                    'meal_allowance':rec.meal_allowance,
                     'company_id': rec.company_id.id,
                     'state': 'open',
                 })
