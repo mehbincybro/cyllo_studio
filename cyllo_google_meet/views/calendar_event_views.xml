@@ -7,11 +7,51 @@
         <field name="model">calendar.event</field>
         <field name="inherit_id" ref="calendar.view_calendar_event_form"/>
         <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='videocall_location']" position="replace">
+                <field name="videocall_location" invisible="is_google_meet"/>
+
+                <group string="Google Meet" class="mt-2 mb-2" invisible="not is_google_meet">
+                    <field name="google_meet_url"
+                           placeholder="https://meet.google.com/..."
+                           widget="CopyClipboardChar"
+                           class="mb-2"/>
+
+                    <div class="mb-2">
+                        <button name="action_google_meet_url"
+                                string="Join Meeting"
+                                type="object"
+                                class="btn-primary"/>
+                    </div>
+
+                    <field name="google_meet_event_id" invisible="1"/>
+                </group>
+            </xpath>
+
             <xpath expr="//field[@name='start']" position="after">
                 <field name="is_google_meet" widget="boolean_toggle"/>
             </xpath>
+
         </field>
     </record>
 </odoo>
+
+
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<odoo>-->
+<!--    <record id="view_calendar_event_form_google_meet" model="ir.ui.view">-->
+<!--        <field name="name">-->
+<!--            calendar.event.view.form.inherit.cyllo.google.meet.integration-->
+<!--        </field>-->
+<!--        <field name="model">calendar.event</field>-->
+<!--        <field name="inherit_id" ref="calendar.view_calendar_event_form"/>-->
+<!--        <field name="arch" type="xml">-->
+<!--            <xpath expr="//field[@name='start']" position="after">-->
+<!--                <field name="is_google_meet" widget="boolean_toggle"/>-->
+<!--            </xpath>-->
+<!--        </field>-->
+<!--    </record>-->
+<!--</odoo>-->
 
 
