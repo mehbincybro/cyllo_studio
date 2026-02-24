@@ -898,8 +898,7 @@ export class WorkFlowAuto extends Component {
             const errorMessage =
                 errors.length === 1
                     ? `${errors[0]} is not configured`
-                    : `${errors.slice(0, -1).join(", ")} and ${
-                          errors[errors.length - 1]
+                    : `${errors.slice(0, -1).join(", ")} and ${errors[errors.length - 1]
                       } are not configured`;
 
             return { isValid: false, nodeIds, error: errorMessage };
@@ -1035,9 +1034,19 @@ export class WorkFlowAuto extends Component {
                     pNode.child2.completed = true;
                     parentArray.push(pNode);
                     indentationLevel = indentationLevel.slice(0, -4);
+                    if (pNode.else_setup_code) {
+                        // Cron-mode condition: emit the complement recordset search and open
+                        // a new independent `if` block so both branches always execute.
+                        codeLines.push(`${indentationLevel}${pNode.else_setup_code}`);
+                        const complementVar = pNode.else_setup_code.split('=')[0].trim();
+                        codeLines.push(`${indentationLevel}if ${complementVar}:`);
+                    } else {
+                        // Standard condition: only one branch executes.
                     codeLines.push(`${indentationLevel}else:`);
+                    }
                     indentationLevel += "    ";
                 }
+
                 continue;
             }
             node = node.right;
@@ -1081,7 +1090,10 @@ export class WorkFlowAuto extends Component {
         return {
             modelName:this.state.model_name,
             modelState: this.state.modelState,
-            trigger: this.state.trigger
+            trigger: this.state.trigger,
+            // Exposes trigger type (e.g. 'time') so child components such as
+            // the Condition node can adapt their UI for cron-mode workflows.
+            triggerType: this.state.triggerType,
         }
     }
 
@@ -1255,7 +1267,7 @@ export class WorkFlowAuto extends Component {
         this.env.variables.setContext({variables: [...variables]})
     }
 
-    async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type) {
+    async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type, trigger_type) {
         if (this.editor.editor_mode === 'fixed') return false;
         // Calculate position
         pos_x = pos_x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)));

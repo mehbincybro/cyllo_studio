@@ -43,6 +43,8 @@ class NodeStruct(models.Model):
     model_id = fields.Many2one('ir.model')
     used_variables = fields.Json("Used Variables")
     condition_tree_value = fields.Json("condition_tree_value")
+    else_setup_code = fields.Char(string="Else Setup Code")
+
 
     # warning block fields
     warning = fields.Selection(

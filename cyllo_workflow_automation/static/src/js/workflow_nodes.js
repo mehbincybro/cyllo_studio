@@ -197,10 +197,73 @@ export class ModelComponent extends Component {
         const identifiers = allVariables.map(item => item.variable_name)
         return { pythonKeywords: [...PYTHON_KEYWORDS], variableNames: [...identifiers] };
     }
+    /**
+     * Determines whether the current node is inside an IF or ELSE branch
+     * of a cron-mode Condition node. Returns the branch label and the
+     * corresponding recordset variable objects so the caller can filter
+     * the variable list shown in action modals.
+     *
+     * @returns {{ isCronBranch: boolean, branch?: 'if'|'else',
+     *             cronVariable?: object, complementVariable?: object }}
+     */
+    getCronBranchInfo() {
+        const currentContext = this.context;
+        const currentNode = currentContext.nodes.find(n => n.nodeId === this.props.nodeId);
+        if (!currentNode) return { isCronBranch: false };
+
+        // Checks whether `target` is reachable from `root` by following .right links.
+        const isInBranch = (root, target, visited = new Set()) => {
+            if (!root || visited.has(root.nodeId)) return false;
+            if (root === target) return true;
+            visited.add(root.nodeId);
+            return isInBranch(root.right, target, visited);
+        };
+
+        // Walk up ancestor chain to find the nearest cron-mode Condition parent.
+        let walker = currentNode;
+        while (walker && walker.left) {
+            const parent = walker.left;
+            if (parent.isParent && parent.else_setup_code) {
+                // Derive variable names: else_setup_code = "<complement> = env[...].search(...)"
+                const complementVarName = parent.else_setup_code.split('=')[0].trim();
+                const cronVarName = complementVarName.replace(/_complement$/, '');
+                const allVars = this.variableContext.variables;
+                const cronVariable = allVars.find(v => v.variable_name === cronVarName) || null;
+                const complementVariable = allVars.find(v => v.variable_name === complementVarName) || null;
+
+                if (isInBranch(parent.child1, currentNode)) {
+                    return { isCronBranch: true, branch: 'if', cronVariable, complementVariable };
+                }
+                if (isInBranch(parent.child2, currentNode)) {
+                    return { isCronBranch: true, branch: 'else', cronVariable, complementVariable };
+                }
+            }
+            walker = walker.left;
+        }
+        return { isCronBranch: false };
+    }
+
     async openConfigModal() {
         const modalConfig = MODAL_CONFIGS[this.props.name];
         if (modalConfig) {
             const { component, fields } = modalConfig;
+
+            const cronInfo = this.getCronBranchInfo();
+            let filteredVariables = this.getVariables;
+            if (cronInfo.isCronBranch) {
+                // In cron branches, only expose the relevant recordset variable:
+                // IF → the search result var; ELSE → the complement var.
+                // Date/scalar variables (e.g. current_date) are always preserved.
+                const nonRecordsetVars = filteredVariables.filter(
+                    v => v.variable_type !== 'recordset' && v.variable_type !== 'record'
+                );
+                const branchVar = cronInfo.branch === 'if' ? cronInfo.cronVariable : cronInfo.complementVariable;
+                filteredVariables = branchVar ? [...nonRecordsetVars, branchVar] : filteredVariables;
+            } else {
+                // Outside cron branches, hide internally-generated _complement variables.
+                filteredVariables = filteredVariables.filter(v => !v.variable_name?.endsWith('_complement'));
+            }
+
             const props = {
                 title: this.props.name,
                 name: this.props.name,
@@ -212,7 +275,7 @@ export class ModelComponent extends Component {
                 width: "65%",
                 backdrop: true,
                 identifiers: this.automationIdentifiers,
-                variables: this.getVariables
+                variables: filteredVariables
             };
             if (this.props.name === 'Create') {
                 props.primaryModelId = this.props.primary_model_id;
@@ -254,6 +317,7 @@ export class ModelComponent extends Component {
             } else if (this.props.name === "Condition") {
                 const [{model: modelName}] = await this.orm.read('ir.model', [this.props.primary_model_id], ['model'])
                 props.resModel = modelName ? modelName : res_model[0].model;
+                props.triggerType = this.env.globalContext().triggerType;
                 props.display_name = "The Condition Modal lets users add and apply different conditions to customize and control functionality"
             } else if (this.props.name === "Mail") {
                 props.primaryModelId = this.props.primary_model_id;
@@ -332,9 +396,52 @@ export class ModelComponent extends Component {
     }
 
     async onConfirm (fieldState, code, usedVariables) {
-        this.updateContext(code)
+        this.updateContext(code);
+
+        // Sync else_setup_code onto the in-memory context node so updateCode()
+        // can inject the complement search line at the start of the else block.
+        if (fieldState.else_setup_code !== undefined) {
+            const ctx = this.context;
+            const ctxNode = ctx.nodes.find(n => n.nodeId === this.props.nodeId);
+            if (ctxNode) ctxNode.else_setup_code = fieldState.else_setup_code || null;
+        }
+
+        // Register the complement variable in the frontend variable context so
+        // nodes in the ELSE branch can select it as their record source.
+        if (fieldState.condition_tree_value?.cronMode) {
+            const { variableName, modelName } = fieldState.condition_tree_value;
+            if (variableName && modelName) {
+                const complementName = `${variableName}_complement`;
+                const complementId = `${this.props.nodeId}_complement`;
+                const existingVars = this.variableContext.variables;
+                const alreadyRegistered = existingVars.find(v => v.id === complementId);
+                if (!alreadyRegistered) {
+                    this.env.variables.setContext({
+                        variables: [
+                            ...existingVars,
+                            owl.reactive({
+                                id: complementId,
+                                variable_name: complementName,
+                                variable_type: 'recordset',
+                                modelName: modelName,
+                                modelId: modelName,
+                                scopeId: this.props.nodeId,
+                                usedIn: [],
+                                class: this.buttonClass,
+                            })
+                        ]
+                    });
+                } else {
+                    // Update variable name/model if the user changed the selection.
+                    alreadyRegistered.variable_name = complementName;
+                    alreadyRegistered.modelName = modelName;
+                }
+                this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+            }
+        }
+
         await this.updateNode(fieldState, code);
-        this.updateVariableUsage(usedVariables)
+        this.updateVariableUsage(usedVariables);
         this.raiseNotification("Record Saved...!", "success");
     }
 

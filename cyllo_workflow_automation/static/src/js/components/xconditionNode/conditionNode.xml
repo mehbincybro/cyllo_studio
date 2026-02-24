@@ -9,6 +9,62 @@
                            placeholder="Enter a descriptive label" t-on-focusout="(ev) => this.setLabel(ev.target.value)"
                            t-att-value="getLabel"/>
                 </div>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     CRON MODE: Simplified UI — just pick the search variable.
+                     The IF branch runs on those records; the ELSE branch
+                     automatically gets the complement recordset injected.
+                ════════════════════════════════════════════════════════════════ -->
+                <t t-if="isCronMode">
+                    <div class="mb-3">
+                        <h6 class="mb-2">Select Search Variable</h6>
+                        <p class="text-muted small mb-2">
+                            Choose the recordset variable produced by a <strong>Search</strong> node.
+                            The <em>If</em> branch will execute for those records;
+                            the <em>Else</em> branch will execute for the <strong>complement</strong>
+                            (records <em>not</em> in the search result).
+                        </p>
+                        <select class="form-select form-select-sm"
+                                t-on-change="(ev) => this.selectCronVariable(ev.target.value || null)">
+                            <option value="">— select a variable —</option>
+                            <t t-foreach="recordsetVariables" t-as="rv" t-key="rv.id">
+                                <option t-att-value="rv.id"
+                                        t-att-selected="state.cronVariableId === rv.id">
+                                    <t t-esc="rv.variable_name"/>
+                                    <t t-if="rv.modelName"> (<t t-esc="rv.modelName"/>)</t>
+                                </option>
+                            </t>
+                        </select>
+
+                        <!-- Preview the generated if / else-complement lines -->
+                        <t t-if="state.cronVariableId and selectedCronVariable">
+                            <div class="mt-2 p-2 bg-light border rounded small font-monospace">
+                                <div class="text-success fw-semibold">if branch:</div>
+                                <div class="ms-2 text-dark">if <t t-esc="selectedCronVariable.variable_name"/>:</div>
+                                <div class="text-danger fw-semibold mt-1">else branch (complement):</div>
+                                <div class="ms-2 text-dark">
+                                    <t t-esc="selectedCronVariable.variable_name"/>_complement
+                                    = env['<t t-esc="selectedCronVariable.modelName || selectedCronVariable.modelId"/>'].search(
+                                        [('id', 'not in', <t t-esc="selectedCronVariable.variable_name"/>.ids)]
+                                    )
+                                </div>
+                            </div>
+                        </t>
+
+
+                        <t t-if="recordsetVariables.length === 0">
+                            <div class="alert alert-warning small mt-2">
+                                No recordset variables found. Add a <strong>Search</strong> node before this
+                                Condition and configure it first.
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- ═══════════════════════════════════════════════════════════════
+                     NORMAL MODE: Full condition-builder (unchanged)
+                ════════════════════════════════════════════════════════════════ -->
+                <t t-else="">
                 <h6 class="mb-2">Build Your Condition</h6>
                 <div class="condition-groups mb-3">
                     <t t-foreach="state.groups" t-as="group" t-key="group_index">
@@ -33,6 +89,8 @@
                 <button class="btn btn-primary btn-sm mb-3" t-on-click="addGroup">
                     <i class="ri-add-line"/> Add New Group
                 </button>
+                </t>
+
                 <div t-if="debug">
                     <h6 class="mb-2 text-info fw-bold">Generated Python Code:</h6>
                     <pre class="bg-dark text-light p-2 rounded"><code><t t-esc="pythonCode"/></code></pre>
