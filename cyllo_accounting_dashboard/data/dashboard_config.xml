@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Accounting Dashboard Configuration -->
+        <record id="dashboard_config_accounting" model="dashboard.config">
+            <field name="name">Accounting Dashboard</field>
+<!--            <field name="image_1920" type="base64"></field>-->
+            <field name="theme_id" ref="cyllo_analytics.dashboard_theme_purple_passion"/>
+            <field name="sheet_ids" eval="[
+                (4, ref('dashboard_sheet_cash_bank_journal')),
+                (4, ref('dashboard_sheet_journals')),
+                (4, ref('dashboard_sheet_chart_of_accounts')),
+                (4, ref('dashboard_sheet_payable_receivable')),
+                (4, ref('dashboard_sheet_balance_sheet')),
+                (4, ref('dashboard_sheet_cash_flow')),
+                (4, ref('dashboard_sheet_equity')),
+                (4, ref('dashboard_sheet_income_statement'))
+            ]"/>
+        </record>
+    </data>
+</odoo>
