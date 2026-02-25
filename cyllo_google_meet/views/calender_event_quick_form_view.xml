@@ -10,25 +10,30 @@
                ref="calendar.view_calendar_event_form_quick_create"/>
         <field name="arch" type="xml">
 
-            <xpath expr="//field[@name='videocall_location']" position="replace">
-                <field name="videocall_location" invisible="is_google_meet"/>
+            <!-- Hide original videocall_location when google meet is ON -->
+            <xpath expr="//field[@name='videocall_location']" position="attributes">
+                <attribute name="invisible">is_google_meet</attribute>
+            </xpath>
 
-                <group invisible="not is_google_meet"
-                       string="Google Meet"
-                       class="mt-2 mb-2">
-
-                    <field name="google_meet_url"
-                           placeholder="https://meet.google.com/..."
-                           widget="CopyClipboardChar"
-                           class="mb-2"/>
-
-                    <button name="action_google_meet_url"
-                            string="Join Meeting"
-                            type="object"
-                            class="btn-primary mb-3"/>
-
+            <!-- Add Google Meet section after videocall_location -->
+            <xpath expr="//field[@name='videocall_location']" position="after">
+                <div invisible="not is_google_meet" class="mt-2 mb-2">
+                    <group string="Google Meet">
+                        <field name="google_meet_url"
+                               placeholder="https://meet.google.com/..."
+                               widget="CopyClipboardChar"
+                               readonly="1"/>
+                        <div class="mt-2">
+                            <button name="action_google_meet_url"
+                                    string="Join Meeting"
+                                    type="object"
+                                    icon="fa-video-camera"
+                                    class="btn-primary"
+                                    invisible="not google_meet_url"/>
+                        </div>
+                    </group>
                     <field name="google_meet_event_id" invisible="1"/>
-                </group>
+                </div>
             </xpath>
 
             <xpath expr="//field[@name='start']" position="after">
@@ -38,7 +43,6 @@
         </field>
     </record>
 </odoo>
-
 
 
 
