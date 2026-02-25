@@ -30,7 +30,6 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_analytics', 'account'],
-    # 'icon': '',
     'data': [
         'data/dashboard_sheets.xml',
         'data/dashboard_tables.xml',
@@ -42,6 +41,6 @@
     ],
     'license': 'LGPL-3',
     'installable': True,
-    'application': True,
+    'application': False,
     'auto_install': True,
 }

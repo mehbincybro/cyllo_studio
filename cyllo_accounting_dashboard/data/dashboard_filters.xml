@@ -1,8 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <data noupdate="1">
+    <data>
         <record id="dashboard_sheet_income_statement_filter_0" model="dashboard.sheet.filter">
-            <field name="name">Pro and loss</field>
+            <field name="name">Profit and loss</field>
             <field name="domain">account_account.account_type IN ('income', 'income_other', 'expense', 'expense_depreciation', 'expense_direct_cost')</field>
             <field name="is_active">True</field>
             <field name="sheet_id" ref="dashboard_sheet_income_statement" />
@@ -24,6 +24,18 @@
             <field name="domain">account_move.state = 'draft'</field>
             <field name="is_active">True</field>
             <field name="sheet_id" ref="dashboard_sheet_equity" />
+        </record>
+        <record id="dashboard_sheet_journals_0" model="dashboard.sheet.filter">
+            <field name="name">Posted</field>
+            <field name="domain">account_move_line.parent_state = 'posted'</field>
+            <field name="is_active">True</field>
+            <field name="sheet_id" ref="dashboard_sheet_journals" />
+        </record>
+        <record id="dashboard_sheet_cash_bank_journal_0" model="dashboard.sheet.filter">
+            <field name="name">cash and bank</field>
+            <field name="domain">account_journal.type IN ('cash', 'bank')</field>
+            <field name="is_active">True</field>
+            <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
         </record>
     </data>
 </odoo>

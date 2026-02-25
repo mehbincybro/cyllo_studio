@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='utf-8'?>
 <odoo>
-    <data noupdate="1">
+    <data>
         <record id="dashboard_sheet_cash_bank_journal_table_0" model="dashboard.sheet.table">
-            <field name="name">Account</field>
-            <field name="model">account.account</field>
-            <field name="join">account_account</field>
+            <field name="name">Journal</field>
+            <field name="model">account.journal</field>
+            <field name="join">account_journal</field>
             <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
         </record>
         <record id="dashboard_sheet_cash_bank_journal_table_1" model="dashboard.sheet.table">
-            <field name="name">Journal</field>
-            <field name="model">account.journal</field>
-            <field name="linked"> Linked by Account.id on Journal.profit_account_id</field>
-            <field name="field">id</field>
-            <field name="join">JOIN account_journal ON account_account.id = profit_account_id</field>
+            <field name="name">Journal Entry</field>
+            <field name="model">account.move</field>
+            <field name="linked"> Linked by Journal.id on Journal Entry.journal_id</field>
+            <field name="field">journal_id</field>
+            <field name="join">JOIN account_move ON account_journal.id = account_move.journal_id</field>
             <field name="sheet_id" ref="dashboard_sheet_cash_bank_journal" />
         </record>
         <record id="dashboard_sheet_journals_table_0" model="dashboard.sheet.table">
@@ -22,11 +22,11 @@
             <field name="sheet_id" ref="dashboard_sheet_journals" />
         </record>
         <record id="dashboard_sheet_journals_table_1" model="dashboard.sheet.table">
-            <field name="name">Account</field>
-            <field name="model">account.account</field>
-            <field name="linked"> Linked by Journal.default_account_id on Account.id</field>
-            <field name="field">default_account_id</field>
-            <field name="join">JOIN account_account ON account_account.id = account_journal.default_account_id</field>
+            <field name="name">Account Move Line</field>
+            <field name="model">account.move.line</field>
+            <field name="linked"> Linked by Journal.id on Account Move Line.journal_id</field>
+            <field name="field">journal_id</field>
+            <field name="join">JOIN account_move_line ON account_journal.id = account_move_line.journal_id</field>
             <field name="sheet_id" ref="dashboard_sheet_journals" />
         </record>
         <record id="dashboard_sheet_chart_of_accounts_table_0" model="dashboard.sheet.table">
