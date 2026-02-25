@@ -45,6 +45,9 @@ export class CylloNavBar extends NavBar {
             this.state.studioEditableList = res.detail;
             this.props.updateState("edit", false);
         });
+                useBus(this.env.bus, 'PREVIEW_MODE_CHANGED', ({detail}) => {
+    this.state.isPreviewMode = detail.isPreviewMode;
+    });
         useBus(this.env.bus, "STUDIO_EDIT_BUTTON_HIDE", () => {
             this.props.updateState("editButton", false);
         });

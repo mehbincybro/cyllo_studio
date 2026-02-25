@@ -285,6 +285,7 @@ export class StudioWrapper extends Component {
         useBus(this.env.bus, "FIELDS_DETAILS", this.handleFieldDetails);
         useBus(this.env.bus, "BUTTON_DETAILS", this.handleButtonDetails);
         useBus(this.env.bus, "LIST_EXISTING_FIELDS", this.handleExistingField);
+
         this.env.bus.addEventListener('X2ManyDetails', ({ detail }) => {
             this.state.isX2Many = !!sessionStorage.getItem('CyX2ManyPath');
             this.state.x2Manylist = detail?.x2Manylist || [];

@@ -63,6 +63,7 @@ export class FormOverall extends Component {
 		this.dialogService = useService("dialog");
 		this.action = useService("action");
 		this.notification = useService('effect')
+		this.isPreviewModeActive=false
 		this.state = useState({
 			can_create: this.props.mode.activeActions?.create || this.props.mode.create,
 			can_edit: this.props.mode.activeActions?.edit || this.props.mode.edit,
@@ -110,6 +111,25 @@ export class FormOverall extends Component {
                 this.state.isChatterAvailable = false;
             }
         });
+
+const self = this;
+document.addEventListener('click', async (event) => {
+    if (!self.state.isPreviewMode || !self.isPreviewModeActive) {
+        return;
+    }
+    const clickText = (event.target.textContent || '').toLowerCase();
+    if (clickText.includes('activate') ||
+        clickText.includes('cancel') ||
+        event.target.closest('select')) {
+        return;
+    }
+    event.preventDefault();
+    event.stopPropagation();
+    await self.cancelPreview();
+    this.action.doAction("studio_reload");
+
+}, false);
+
         this.env.bus.addEventListener('Studio:NotebookChanged', (ev) => {
             setTimeout(() => {
                 this.state.isNotebookPageChange = !this.state.isNotebookPageChange
@@ -690,7 +710,7 @@ const handleRibbonClick = function(ribbonElement, e) {
         },
     });
 
-    return false; // Extra safety
+    return false;
 };
 
             // Initial setup
@@ -842,6 +862,9 @@ const handleRibbonClick = function(ribbonElement, e) {
         },
     });
 }
+
+
+
 async loadDeactivatedViews() {
     const view_id = this.props.viewId;
     if (!view_id) return;
@@ -853,6 +876,13 @@ async loadDeactivatedViews() {
     this.state.selectedDeactivatedViewId = views?.[0]?.id || null;
 }
 
+   broadcastPreviewMode = () => {
+        console.log("this.state.isPreviewMode",this.state.isPreviewMode)// ✅ ADD THIS
+       this.env.bus.trigger('PREVIEW_MODE_CHANGED', {
+           isPreviewMode: this.state.isPreviewMode
+       });
+   }
+
 //onDeactivatedViewSelect = async (viewId) => {
 //    this.state.selectedDeactivatedViewId = viewId;
 //}
@@ -862,8 +892,8 @@ onDeactivatedViewSelect = async (viewId) => {
 
     this.state.selectedDeactivatedViewId = viewId;
     this.state.isPreviewMode = true;
-
-    // Temporarily activate for preview
+    this.isPreviewModeActive = true;
+    this.broadcastPreviewMode();
     await this.rpc("/cyllo_studio/preview_view", {
         view_id: viewId,
         base_view_id: baseViewId,
@@ -872,10 +902,12 @@ onDeactivatedViewSelect = async (viewId) => {
     this.action.doAction("studio_reload");
 }
 
+
 async cancelPreview() {
     await this.rpc("/cyllo_studio/cancel_preview", {});
     this.state.isPreviewMode = false;
     this.state.selectedDeactivatedViewId = null;
+    this.broadcastPreviewMode();
     this.action.doAction("studio_reload");
 }
 
@@ -899,10 +931,12 @@ async activateSelectedView() {
                     base_view_id: baseViewId,
                 });
                 this.state.isPreviewMode = false;
+                this.isPreviewModeActive = false;
+
                 sessionStorage.removeItem("UndoRedo");
                 sessionStorage.removeItem("ReDO");
             } finally {
-                this.action.doAction("studio_reload");
+                window.location.reload()
             }
         },
     });
