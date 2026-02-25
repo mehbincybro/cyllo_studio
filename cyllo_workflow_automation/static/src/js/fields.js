@@ -1,6 +1,6 @@
 /** @odoo-module */
 
-export const conditionFields = [{ name: 'model_id', type: "many2One" }, {name: "condition_tree_value", type: "json"},{name:'label', type: "char"} ];
+export const conditionFields = [{ name: 'model_id', type: "many2One" }, { name: "condition_tree_value", type: "json" }, { name: 'label', type: "char" }, { name: 'else_setup_code', type: "char" }];
 
 export const warningFields = [{ name: 'model_id', type: "many2One" }, { name: 'warning', type: 'selection' }, { name: 'warning_text', type: 'text' }, {name: 'used_variables', type: 'json'}, {name:'label', type: "char"}, { name:'warning_type', type: "char" }, { name:'notification_type', type: "char" }, { name:'notification_title', type: "char" } ];
 

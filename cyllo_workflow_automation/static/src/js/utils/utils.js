@@ -12,12 +12,17 @@ export function removeNodeIdFromVariables(contextVariables, nodeId) {
 }
 
 export async function settingInitialContext() {
-    const codeArray = await this.orm.searchRead("node.struct", [["work_auto_id", "=", this.id]], ["code"])
+    // else_setup_code is only set on cron-mode Condition nodes; it carries
+    // the complement recordset search line that the code engine injects at
+    // the start of the ELSE block so both branches execute independently.
+    const codeArray = await this.orm.searchRead("node.struct", [["work_auto_id", "=", this.id]], ["code", "else_setup_code"])
     const {data} = this.editorValue[0]?.flow_data ? this.editorValue[0]?.flow_data?.drawflow?.Home : false
     const nodes = data ? Object.values(data) : []
     const contextNodes = nodes.map(node => {
         const isParent = node.name === "Condition";
-        const code = codeArray.find(item => item.id === node.data.nodeId)?.code || ""
+        const nodeStruct = codeArray.find(item => item.id === node.data.nodeId);
+        const code = nodeStruct?.code || ""
+        const else_setup_code = nodeStruct?.else_setup_code || null;
         return {
             nodeId: node.data.nodeId,
             parent: null,
@@ -26,9 +31,11 @@ export async function settingInitialContext() {
             child1: isParent ? {left: null, right: null, code: "pass"} : null,
             child2: null,
             isParent,
-            code
+            code,
+            else_setup_code,
         }
     })
+
 
     contextNodes.forEach(node => {
         const dNode = nodes.find(item => item.data.nodeId === node.nodeId);

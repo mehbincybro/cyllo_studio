@@ -177,6 +177,8 @@ export class ConditionNode extends ConfigurationBase {
                 }],
                 groupOperator: 'and'
             }],
+            // For cron mode: the ID of the chosen search-variable (recordset)
+            cronVariableId: null,
         });
 
         onMounted(() => {
@@ -184,10 +186,50 @@ export class ConditionNode extends ConfigurationBase {
         })
     }
 
+    /** Returns true when the workflow is driven by a time/cron trigger. */
+    get isCronMode() {
+        return this.props.triggerType === 'time';
+    }
+
+    /**
+     * Returns recordset/record variables available for cron-mode conditioning.
+     * Excludes internally generated `_complement` variables, which are managed
+     * automatically and should not be user-selectable in the condition picker.
+     */
+    get recordsetVariables() {
+        return (this.props.variables || []).filter(
+            v => (v.variable_type === 'recordset' || v.variable_type === 'record')
+                && !v.variable_name?.endsWith('_complement')
+        );
+    }
+
+    /** Returns the full variable object for the currently selected cron variable. */
+    get selectedCronVariable() {
+        if (!this.state.cronVariableId) return null;
+        return (this.props.variables || []).find(v => v.id === this.state.cronVariableId) || null;
+    }
+
+    selectCronVariable(variableId) {
+        this.state.cronVariableId = variableId || null;
+    }
+
     async fetchData() {
         await super.fetchData();
         if (this.fieldState.condition_tree_value) {
-            this.state.groups = this.fieldState.condition_tree_value;
+            const saved = this.fieldState.condition_tree_value;
+            if (saved && saved.cronMode) {
+                // Restore the previously saved cron variable selection.
+                this.state.cronVariableId = saved.variableId || null;
+            } else if (!saved?.cronMode) {
+                // Normal mode: restore condition groups.
+                this.state.groups = saved;
+            }
+        }
+        // Auto-select the first available recordset variable when opening a
+        // fresh cron-mode condition that has no prior selection.
+        if (this.isCronMode && !this.state.cronVariableId) {
+            const first = this.recordsetVariables[0];
+            if (first) this.state.cronVariableId = first.id;
         }
     }
 
@@ -265,6 +307,15 @@ export class ConditionNode extends ConfigurationBase {
     }
 
     generatePythonCode(onConfirm = false) {
+        // Cron mode: the condition is simply "if <recordset>:" — the complement
+        // block is appended separately by the code-generation engine.
+        if (this.isCronMode) {
+            const variable = this.selectedCronVariable;
+            if (!variable) return '';
+            return `if ${variable.variable_name}:`;
+        }
+
+        // Normal mode: build the full condition expression from the group tree.
         const generateCondition = (cond) => {
             if (cond.type === 'complex') {
                 return cond.expression || '';
@@ -487,6 +538,23 @@ export class ConditionNode extends ConfigurationBase {
         return pythonCode;
     }
 
+    /**
+     * Builds the Python line that searches for the complement recordset
+     * (records NOT in the original search result). This line is stored on
+     * the node and injected by the code-generation engine at the start of
+     * the ELSE block, making both branches independently executable.
+     *
+     * @returns {string|null} Python assignment string, or null if unavailable.
+     */
+    _buildElseSetupCode() {
+        if (!this.isCronMode) return null;
+        const variable = this.selectedCronVariable;
+        if (!variable) return null;
+        const modelName = variable.modelName || variable.modelId;
+        if (!modelName) return null;
+        return `${variable.variable_name}_complement = env['${modelName}'].search([('id', 'not in', ${variable.variable_name}.ids)])`;
+    }
+
     get debug() {
         return !!odoo.debug
     }
@@ -513,22 +581,29 @@ export class ConditionNode extends ConfigurationBase {
     }
 
     validateForm() {
-        // If no errors, form is valid
         const inValidLabel = this.fieldState.label === "" || this.fieldState.label.trim() === ""
-        const inValidConditions = this.hasInvalidCondition(this.fieldState.condition_tree_value)
         const errors = {}
         if (inValidLabel) {
             this.labelInput.el.focus();
             this.labelInput.el.classList.add('invalid');
             errors["label"] = "invalid label";
         }
+
+        // Cron mode only requires a search variable to be selected.
+        if (this.isCronMode) {
+            if (!this.state.cronVariableId) {
+                errors["cronVariable"] = "Please select a search variable for the condition.";
+            }
+            let isValid = Object.entries(errors).length === 0;
+            return { isValid, errors };
+        }
+
+        // Normal mode validates the full condition group tree.
+        const inValidConditions = this.hasInvalidCondition(this.fieldState.condition_tree_value)
         if (inValidConditions) {
             errors["condition"] = "All condition must be valid!";
         }
-        let isValid = true;
-        if (Object.entries(errors).length > 0) {
-            isValid = false;
-        }
+        let isValid = Object.entries(errors).length === 0;
         return {isValid, errors};
     }
 
@@ -544,7 +619,25 @@ export class ConditionNode extends ConfigurationBase {
     }
 
     onConfirm() {
+        if (this.isCronMode) {
+            const variable = this.selectedCronVariable;
+            // Persist the cron selection as a tagged object in condition_tree_value.
+            // variableId restores the dropdown on re-open; variableName and modelName
+            // are used by the parent node handler to register the complement variable.
+            this.fieldState.condition_tree_value = {
+                cronMode: true,
+                variableId: this.state.cronVariableId,
+                variableName: variable?.variable_name || null,
+                modelName: variable?.modelName || variable?.modelId || null,
+            };
+            // Build and store the complement search line so the code-generation
+            // engine can inject it at the boundary of the ELSE block.
+            this.fieldState.else_setup_code = this._buildElseSetupCode();
+        } else {
         this.fieldState.condition_tree_value = this.state.groups;
+            // Clear any else_setup_code left from a previous cron-mode save.
+            this.fieldState.else_setup_code = null;
+        }
         this.env.bus.trigger("VALIDATE-CONDITION")
         super.onConfirm();
     }
