@@ -54,6 +54,16 @@ import {SelectionField} from "@web/views/fields/selection/selection_field";
 import {
     Many2ManyTagsFieldColorEditable
 } from "@web/views/fields/many2many_tags/many2many_tags_field";
+import { X2ManyField, x2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { statusBarField, StatusBarField } from "@web/views/fields/statusbar/statusbar_field";
+import { StatInfoField } from "@web/views/fields/stat_info/stat_info_field";
+import { DateTimeField } from "@web/views/fields/datetime/datetime_field";
+import { CharField, charField} from '@web/views/fields/char/char_field';
+import { LabelSelectionField } from '@web/views/fields/label_selection/label_selection_field';
+import { ListActivity } from '@mail/views/web/fields/list_activity/list_activity';
+import { BadgeField } from "@web/views/fields/badge/badge_field";
+import { HandleField } from "@web/views/fields/handle/handle_field";
+import { ListSectionAndNoteText } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 
 OuterGroup.props = [
     ...OuterGroup.props,
@@ -224,7 +234,7 @@ export class CylloInnerGroup extends InnerGroup {
 }
 var value = window.location.href
 var searchParams = new URLSearchParams(value.split("?")[1]);
-CylloInnerGroup.props = [...InnerGroup.props, "cy-xpath?","striped?"];
+CylloInnerGroup.props = [...InnerGroup.props, "cy-xpath?","striped?","cy-studio-striped?"];
 patch(SelectionField, {
     props: {
         ...SelectionField.props,
@@ -247,5 +257,68 @@ patch(Many2ManyTagsFieldColorEditable,{
     props: {
         ...Many2ManyTagsFieldColorEditable.props,
         striped: { type: Boolean, optional: true }
+    }
+});
+patch(X2ManyField,{
+    props: {
+        ...X2ManyField.props,
+        striped: { type: [Boolean,Number], optional: true },
+        placeholder:{ type: [Boolean,String], optional: true}
+    }
+});
+patch(StatusBarField,{
+    props: {
+        ...StatusBarField.props,
+        striped: { type: [Boolean,Number], optional: true },
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(StatInfoField,{
+    props: {
+        ...StatInfoField.props,
+        striped: { type: [Boolean,Number], optional: true },
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(DateTimeField,{
+    props: {
+        ...DateTimeField.props,
+        striped: { type: [Boolean,Number], optional: true }
+    }
+});
+patch(CharField,{
+    props: {
+        ...CharField.props,
+        striped: { type: [Boolean,Number], optional: true }
+    }
+});
+patch(LabelSelectionField,{
+    props: {
+        ...LabelSelectionField.props,
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(ListActivity,{
+    props: {
+        ...ListActivity.props,
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(BadgeField,{
+    props: {
+        ...BadgeField.props,
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(HandleField,{
+    props: {
+        ...HandleField.props,
+        placeholder: { type: String, optional: true}
+    }
+});
+patch(ListSectionAndNoteText,{
+    props: {
+        ...ListSectionAndNoteText.props,
+        placeholder: { type: String, optional: true}
     }
 });

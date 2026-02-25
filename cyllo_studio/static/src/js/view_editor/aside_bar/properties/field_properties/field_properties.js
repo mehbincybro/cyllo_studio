@@ -1,72 +1,72 @@
-        /** @odoo-module **/
-        import {
-            Component,
-            onMounted,
-            useState,
-            useEffect,
-            useRef,
-            onWillStart,
-            onWillUpdateProps,
-            useExternalListener,
-        } from "@odoo/owl";
-        import {
-            useService,
-            useOwnedDialogs
-        } from "@web/core/utils/hooks";
-        import {
-            CylloStudioDropdown
-        } from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
-        import {
-            registry
-        } from "@web/core/registry";
-        import {
-            handleUndoRedo
-        } from "@cyllo_studio/js/utils/undo_redo_utils";
-        import {
-            ExpressionEditorDialog
-        } from "@web/core/expression_editor_dialog/expression_editor_dialog";
-        import {
-            _t
-        } from "@web/core/l10n/translation";
-        import {
-            getWidgetTypes,
-            getWidgetSupport
-        } from "@cyllo_studio/js/view_editor/widget";
-        import {MultiSelectDropDown} from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
-        import {
-            DomainSelectorDialog
-        } from "@web/core/domain_selector_dialog/domain_selector_dialog";
+/** @odoo-module **/
+import {
+    Component,
+    onMounted,
+    useState,
+    useEffect,
+    useRef,
+    onWillStart,
+    onWillUpdateProps,
+    useExternalListener,
+} from "@odoo/owl";
+import {
+    useService,
+    useOwnedDialogs
+} from "@web/core/utils/hooks";
+import {
+    CylloStudioDropdown
+} from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
+import {
+    registry
+} from "@web/core/registry";
+import {
+    handleUndoRedo
+} from "@cyllo_studio/js/utils/undo_redo_utils";
+import {
+    ExpressionEditorDialog
+} from "@web/core/expression_editor_dialog/expression_editor_dialog";
+import {
+    _t
+} from "@web/core/l10n/translation";
+import {
+    getWidgetTypes,
+    getWidgetSupport
+} from "@cyllo_studio/js/view_editor/widget";
+import {MultiSelectDropDown} from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
+import {
+    DomainSelectorDialog
+} from "@web/core/domain_selector_dialog/domain_selector_dialog";
 
-        import {
-        SelectionFieldValue
-        } from "@cyllo_studio/js/view_editor/components/selection_field_widget_values/selection_field_value_widget";
-        import {
-         usePopover
-         } from "@web/core/popover/popover_hook";
-        import {
-         ModelFieldSelectorPopover
-         } from "@web/core/model_field_selector/model_field_selector_popover";
-        import {
-         useLoadFieldInfo
-         } from "@web/core/model_field_selector/utils";
+import {
+SelectionFieldValue
+} from "@cyllo_studio/js/view_editor/components/selection_field_widget_values/selection_field_value_widget";
+import {
+ usePopover
+ } from "@web/core/popover/popover_hook";
+import {
+ ModelFieldSelectorPopover
+ } from "@web/core/model_field_selector/model_field_selector_popover";
+import {
+ useLoadFieldInfo
+ } from "@web/core/model_field_selector/utils";
 
-         import {
-          CodeEditor
-           } from "@web/core/code_editor/code_editor";
+ import {
+  CodeEditor
+   } from "@web/core/code_editor/code_editor";
 
-           import {
-          ComputeDialog
-           } from "@cyllo_studio/js/view_editor/aside_bar/dialog/compute_dialog"
+   import {
+  ComputeDialog
+   } from "@cyllo_studio/js/view_editor/aside_bar/dialog/compute_dialog"
 
-        import {
-         DateTimePicker
-         } from "@web/core/datetime/datetime_picker";
+import {
+ DateTimePicker
+ } from "@web/core/datetime/datetime_picker";
 
-         import { ConstraintDialog } from "@cyllo_studio/js/view_editor/aside_bar/dialog/constraint_dialog";
+ import { ConstraintDialog } from "@cyllo_studio/js/view_editor/aside_bar/dialog/constraint_dialog";
 
 
 
-        export class FieldProperties extends Component {
+export class FieldProperties extends Component {
             static template = "cyllo_studio.FieldProperties";
             static props = {
                 attr: {
@@ -139,6 +139,10 @@
                 },
                 readonly: {
                     type: String,
+                    optional: true
+                },
+                  recordData: {
+                    type: [Boolean,Number,String],
                     optional: true
                 },
             dynamic_placeholder: {
