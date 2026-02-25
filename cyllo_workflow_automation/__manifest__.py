@@ -36,6 +36,8 @@
         'data/create.xml',
         'data/write.xml',
         'data/unlink.xml',
+        'data/schedule.xml',
+        'data/onchange.xml',
         'views/views.xml',
         'views/cyllo_base_automation_views.xml'
     ],

@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" ?>
-<odoo>
-    <record id="work_function_time" model="work.function">
-        <field name="name">Schedule At a time</field>
-        <field name="func_name">time</field>
-        <field name="trigger_type">time</field>
-    </record>
-</odoo>
