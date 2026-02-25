@@ -41,11 +41,30 @@
                 <t t-foreach="state.children"
                    t-as="dropItem"
                    t-key="dropItem_index">
-                    <DragItem t-props="dropItem"
-                              draggable="false"
-                              onRemove="() => this.onItemRemove(dropItem_index, state.type)"
-                              options="state.type == 'measure'"
-                              setOptionValue.bind="(val, mode) => this.setFunctions(val, mode, dropItem_index)"/>
+                    <!-- Measure items: show aggregate options (MIN/MAX/AVG/SUM/COUNT) -->
+                    <t t-if="state.type == 'measure'">
+                        <DragItem t-props="dropItem"
+                                  draggable="false"
+                                  onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                  options="true"
+                                  setOptionValue.bind="(val, mode) => this.setFunctions(val, mode, dropItem_index)"/>
+                    </t>
+                    <!-- Date/datetime dimension items on X axis: show Day/Month/Year grouping -->
+                    <t t-elif="state.type == 'dimension' and ['date', 'datetime'].includes(dropItem.field_type)">
+                        <DragItem t-props="dropItem"
+                                  draggable="false"
+                                  onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                  options="true"
+                                  setOptionValue.bind="(val, mode) => this.setDateGroupBy(val, mode, dropItem_index)"/>
+                    </t>
+                    <!-- Other dimension items: no aggregate options -->
+                    <t t-else="">
+                        <DragItem t-props="dropItem"
+                                  draggable="false"
+                                  onRemove="() => this.onItemRemove(dropItem_index, state.type)"
+                                  options="false"
+                                  setOptionValue.bind="(val, mode) => {}"/>
+                    </t>
                 </t>
             </div>
             <div class="d-flex justify-content-center">

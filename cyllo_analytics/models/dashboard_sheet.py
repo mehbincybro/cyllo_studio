@@ -375,6 +375,8 @@ class DashboardSheet(models.Model):
                 "alias": group_by["alias"],
                 "query": group_by["query"],
                 "column": group_by["column"],
+                "source_column": group_by.get("source_column", False),
+                "date_group": group_by.get("date_group", False),
                 "type": "group",
             }
             if not group_by.get("id", False):
@@ -719,7 +721,7 @@ class DashboardSheet(models.Model):
             ["alias", "query", "monetaryInBase", "column", "value", "type"]
         )
         group = self.axis_ids.filtered(lambda x: x.type == "group").read(
-            ["alias", "query", "column", "value", "type"]
+            ["alias", "query", "column", "value", "type", "source_column", "date_group"]
         )
         order = self.axis_ids.filtered(lambda x: x.type == "order").read(
             ["alias", "query", "column", "value", "type"]
@@ -918,6 +920,8 @@ class DashboardSheetAxis(models.Model):
     query = fields.Text("Text")
     monetaryInBase = fields.Text("Base Value Query")
     column = fields.Char("Column")
+    source_column = fields.Char("Source Column", help="Original column before TO_CHAR grouping (e.g. sale_order.create_date)")
+    date_group = fields.Char("Date Group", help="Date grouping level: Day, Month, or Year")
     type = fields.Selection(
         selection=[
             ("measure", "Measure"),
