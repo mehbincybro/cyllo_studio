@@ -918,8 +918,8 @@ class StudioMode(Controller):
 
         view_arch = f'''
                            <xpath expr="/{path}" position="{position}">
-                               <div class="ribbon ribbon-top-right" invisible='{properties['invisible']}'>
-                                   <span class="{properties['color']}">{escape(properties['string']) if properties['string'] else ''}</span>
+                               <div class="ribbon ribbon-top-right" invisible='{properties['invisible']}' style="position: absolute !important; top: 0 !important; right: 0 !important; z-index: 5 !important; margin: 0 !important; padding: 8px 12px !important; pointer-events: auto !important; cursor: pointer !important; overflow: visible !important;">
+                                  <span class="{properties['color']}" style="pointer-events: auto !important; cursor: pointer !important;">{escape(properties['string'])}</span>
                                </div>
                            </xpath>
                        '''
@@ -973,10 +973,20 @@ class StudioMode(Controller):
         edited_ribbons = [r for r in ribbons if not r.get("hasDelete") and r.get("hasEdit")]
         # Loop through the edited ribbons and modify the view
         for ribbon in edited_ribbons:
+
+            # view_arch = f'''
+            #                     <xpath expr="/{ribbon['path']}" position="replace">
+            #                         <div class="ribbon ribbon-top-right" invisible='{escape(ribbon['invisible'])}'>
+            #                             <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
+            #                         </div>
+            #                     </xpath>
+            #                 '''
             view_arch = f'''
                                 <xpath expr="/{ribbon['path']}" position="replace">
-                                    <div class="ribbon ribbon-top-right" invisible='{escape(ribbon['invisible'])}'>
-                                        <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
+                                    <div class="ribbon ribbon-top-right"
+                                         invisible='{escape(ribbon['invisible'])}'
+                                         style="position: absolute !important; top: 0 !important; right: 0 !important; z-index: 5 !important; margin: 0 !important; padding: 8px 12px !important; pointer-events: auto !important; cursor: pointer !important; overflow: visible !important;">
+                                        <span class="{ribbon['color']}" style="pointer-events: auto !important; cursor: pointer !important;">{escape(ribbon['firstElementContent'])}</span>
                                     </div>
                                 </xpath>
                             '''
@@ -4986,18 +4996,26 @@ class StudioMode(Controller):
             str: XML string representing the added ribbon.
         """
         view_rec = self.get_studio_view(viewId, model, viewType)
+        # arch = f"""
+        #     <xpath expr="/{path}" position="{position}">
+        #         <div class="ribbon ribbon-top-right"
+        #              invisible="{properties['invisible']}" style="position: absolute !important; top: 0 !important; right: 0 !important; z-index: 5 !important; margin: 0 !important; padding: 8px 12px !important; pointer-events: auto !important; cursor: pointer !important; overflow: visible !important;">
+        #             <span class="{properties['color']}" style="cursor: pointer; pointer-events: auto;">{escape(properties['string'])}</span>
+        #         </div>
+        #     </xpath>
+        # """
         arch = f"""
             <xpath expr="/{path}" position="{position}">
                 <div class="ribbon ribbon-top-right"
-                     invisible="{properties['invisible']}">
-                    <span class="{properties['color']}" style="cursor: pointer; pointer-events: auto;">{escape(properties['string'])}</span>
+                     invisible="{properties['invisible']}"
+                     style="position: absolute !important; top: 0 !important; right: 0 !important; z-index: 5 !important; margin: 0 !important; padding: 8px 12px !important; pointer-events: auto !important; cursor: pointer !important;">
+                    <span class="{properties['color']}" style="pointer-events: auto !important; cursor: pointer !important;">{escape(properties['string'])}</span>
                 </div>
             </xpath>
         """
 
         xml = etree.fromstring(view_rec.arch_base)
         xml.append(etree.fromstring(arch))
-
         # Handle invisible fields if needed
         not_present_field = self.create_invisible([{
             'invisible': properties['invisible'],
@@ -5054,13 +5072,22 @@ class StudioMode(Controller):
                 invisible_expr = "False"
 
             # Replace the ribbon with updated content
+            # view_arch = f"""
+            #     <xpath expr="{xpath_expr}" position="replace">
+            #         <div class="ribbon ribbon-top-right" invisible="{escape(invisible_expr)}">
+            #             <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
+            #         </div>
+            #     </xpath>
+            # """
             view_arch = f"""
-                <xpath expr="{xpath_expr}" position="replace">
-                    <div class="ribbon ribbon-top-right" invisible="{escape(invisible_expr)}">
-                        <span class="{ribbon['color']}">{escape(ribbon['firstElementContent'])}</span>
-                    </div>
-                </xpath>
-            """
+                   <xpath expr="{xpath_expr}" position="replace">
+                       <div class="ribbon ribbon-top-right" 
+                            invisible="{escape(invisible_expr)}"
+                            style="position: absolute !important; top: 0 !important; right: 0 !important; z-index: 5 !important; margin: 0 !important; padding: 8px 12px !important; pointer-events: auto !important; cursor: pointer !important;">
+                           <span class="{ribbon['color']}" style="pointer-events: auto !important; cursor: pointer !important;">{escape(ribbon['firstElementContent'])}</span>
+                       </div>
+                   </xpath>
+               """
             view_node.append(etree.fromstring(view_arch))
 
             # Add invisible placeholder fields for domain-based conditions
