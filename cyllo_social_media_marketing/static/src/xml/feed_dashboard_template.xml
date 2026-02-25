@@ -37,15 +37,460 @@
                                         <h5 class="cy-soical_marketing-glance_heading m-0 border-bottom">
                                             At a glance
                                         </h5>
+                                        <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box"
+                                             t-att-class="state.currentAccount == 'LinkedIn' ? 'active' : ''"
+                                             t-on-click="() => this.showLinkedinFeed()">
+                                            <div class="w-100 d-flex justify-content-between align-items-center flex-wrap">
+                                                <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
+                                                    <i class="fa fa-linkedin" style="color: #0077b5; font-size: 20px;"/>
+                                                    <t>LinkedIn</t>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-2 cy-soical-market_glancecontainer">
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <i class="ri-article-line cy-icons"/>
+                                                        <p class="cy-soical-market_txt">
+                                                            <t t-esc="(state.LiPostCount or 0) + (state.demo ? 5 : 0)"/>
+                                                        </p>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <i class="ri-heart-line cy-icons"/>
+                                                        <p class="cy-soical-market_txt">
+                                                            <t t-esc="(state.LiTotalLikes or 0) + (state.demo ? 314 : 0)"/>
+                                                        </p>
+                                                    </div>
+                                                    <div class="d-flex align-items-center gap-1">
+                                                        <i class="ri-chat-3-line cy-icons"/>
+                                                        <p class="cy-soical-market_txt">
+                                                            <t t-esc="(state.LiTotalComments or 0) + (state.demo ? 88 : 0)"/>
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                            <div class="cy-social_postingSection">
-                                <div class="d-flex p-0 cy-social_maketing-topSection"/>
+                            <div class="cy-social_postingSection" t-ref="container">
+                                <div class="d-flex p-0 cy-social_maketing-topSection">
+                                    <div t-if="state.currentAccount == 'LinkedIn'" class="col cy-social-marketing-col position-relative">
+                                        <div class="cy-social-market_box cy-border-btm py-3 cy-social_postHead">
+                                            <div class="d-flex align-items-center gap-2 cy-social-market_tophead">
+                                                <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                <t>LinkedIn</t>
+                                            </div>
+                                            <!-- ── Org selector dropdown ─────────────────────────────────── -->
+                                            <t t-if="state.linkedinOrgs.length > 0">
+                                                <div class="d-flex align-items-center flex-wrap gap-2 mt-2 cy-org-selector">
+                                                    <label for="li_org_select" class="small text-muted fw-bold">Filter by Organization:</label>
+                                                    <select id="li_org_select" class="form-select form-select-sm" style="width: auto; min-width: 200px;"
+                                                            t-on-change="onLinkedInOrgChange">
+                                                        <t t-foreach="state.linkedinOrgs" t-as="org" t-key="org.id">
+                                                            <option t-att-value="org.id" t-att-selected="state.selectedOrgId === org.id">
+                                                                <t t-esc="org.name"/>
+                                                            </option>
+                                                        </t>
+                                                    </select>
+                                                </div>
+                                            </t>
+
+                                        </div>
+
+
+                                        <t t-if="state.demo and !state.loading">
+
+                                            <!-- Demo Post 1 -->
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex gap-2 pt-3">
+                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
+                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                    </div>
+                                                    <div>
+                                                        <p class="cy-social-market_subhead">LinkedIn Demo Page</p>
+                                                        <span class="cy-social-market_sm-head">16 Feb 2026, 10:30</span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <span class="badge rounded-pill">Demo</span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content mt-2">
+                                                    Welcome to our corporate LinkedIn page! This is demo data showing how your professional posts will appear. #Networking #Professionalism
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">15</p>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">3</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Demo Post 2 -->
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex gap-2 pt-3">
+                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
+                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                    </div>
+                                                    <div>
+                                                        <p class="cy-social-market_subhead">Corporate Insights</p>
+                                                        <span class="cy-social-market_sm-head">15 Feb 2026, 09:15</span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <span class="badge rounded-pill">Demo</span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content mt-2">
+                                                    Our latest annual report is out! Check out the amazing growth we've achieved this year thanks to our incredible team.
+                                                </p>
+                                                <div class="row cy-soical-marketing_post m-0 py-2">
+                                                    <div class="col-12 p-0">
+                                                        <img src="/cyllo_social_media_marketing/static/description/social-marketing.svg" alt="" class="img-fluid" style="border-radius: 8px; opacity: 0.8;"/>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">42</p>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">12</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Demo Post 3 -->
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex gap-2 pt-3">
+                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
+                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                    </div>
+                                                    <div>
+                                                        <p class="cy-social-market_subhead">Global Expansion</p>
+                                                        <span class="cy-social-market_sm-head">14 Feb 2026, 14:20</span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <span class="badge rounded-pill">Demo</span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content mt-2">
+                                                    Thrilled to announce that we are opening our new headquarters in Dubai! 🌍 A huge step forward in our global mission to innovate.
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">89</p>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">24</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Demo Post 4 -->
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex gap-2 pt-3">
+                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
+                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                    </div>
+                                                    <div>
+                                                        <p class="cy-social-market_subhead">Hiring Alert</p>
+                                                        <span class="cy-social-market_sm-head">13 Feb 2026, 11:00</span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <span class="badge rounded-pill">Demo</span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content mt-2">
+                                                    We're looking for passionate developers to join our elite team! 👨‍💻 If you love solving complex problems, we want to hear from you. #Hiring #Jobs #TechTalent
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">56</p>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">18</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Demo Post 5 -->
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex gap-2 pt-3">
+                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
+                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                    </div>
+                                                    <div>
+                                                        <p class="cy-social-market_subhead">Product Launch</p>
+                                                        <span class="cy-social-market_sm-head">12 Feb 2026, 16:45</span>
+                                                    </div>
+                                                    <div class="ms-auto">
+                                                        <span class="badge rounded-pill">Demo</span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content mt-2">
+                                                    Our next-gen AI assistant is finally here! 🚀 Revolutionize your workflow with the smartest companion in the industry. #AI #Innovation #ProductLaunch
+                                                </p>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">112</p>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
+                                                            <p class="cy-soical-market_txt">31</p>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <t t-foreach="state.LinkedinFeeds" t-as="feed" t-key="feed.id">
+                                            <t t-log="'feeds',state.LinkedinFeeds,state.fields"/>
+                                            <div class="py-2 cy-social-market_box cy-border-btm">
+                                                <div class="d-flex justify-content-between gap-2 pt-3">
+                                                    <div class="d-flex gap-2">
+                                                        <div class="cy-social-market_profile">
+                                                            <img t-att-src="feed.profile_image_url"/>
+                                                        </div>
+                                                        <div>
+                                                            <p class="cy-social-market_subhead"><t t-esc="feed.author_name"/></p>
+                                                            <span class="cy-social-market_sm-head">
+                                                                    <t t-esc="formatDate(feed.posted_date)"/>
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div>
+                                                       <a t-if="feed.author_link_url" t-attf-href="{{feed.author_link_url}}"
+                                                          target="_blank" class="ri-external-link-line" style="font-size: 18px"/>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market_content">
+                                                    <t t-esc="feed.description"/>
+                                                </p>
+                                                <div t-if="feed.posted_image_url" class="row cy-soical-marketing_post m-0 py-2">
+                                                    <div class="col-12 p-0">
+                                                        <img t-attf-src="{{feed.posted_image_url}}" alt="" class="img-fluid"/>
+                                                    </div>
+                                                </div>
+                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <a class="d-flex align-items-center gap-1" title="Likes">
+                                                            <i class="ri-heart-line cy-icons cy-media_icon me-1"/>
+                                                            <t t-esc="feed.likes_count"/>
+                                                        </a>
+                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
+                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments(feed)">
+                                                            <i class="ri-chat-3-line cy-icons cy-media_icon me-1"/>
+                                                            <t t-esc="feed.comments_count"/>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                        <!-- Infinite Scroll Loading Indicator -->
+                                         <div t-if="state.loading and state.currentAccount == 'LinkedIn'" class="d-flex justify-content-center py-3">
+                                             <div class="spinner-border text-primary" role="status">
+                                                 <span class="visually-hidden">Loading...</span>
+                                             </div>
+                                         </div>
+
+                                         <!-- End of Dataset -->
+                                         <div t-if="!state.liHasMore and state.LinkedinFeeds.length > 0 and !state.loading" class="text-center py-4 text-muted border-top mt-2">
+                                             <p class="mb-0"><i class="ri-check-line me-1"/> You've reached the end of the LinkedIn feed.</p>
+                                         </div>
+                                        <!-- End of wrapping t-if !state.loading -->
+
+                                        <div class="cy-social-marketing-nostream" t-if="state.LinkedinFeeds.length == 0 and !state.loading">
+                                            <p class="cy-nostream_add-msg">No LinkedIn posts fetched yet.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </main>
+            </div>
+            <!-- LinkedIn Comments Popup -->
+            <div t-if="state.showCommentsModal" class="cy-social_comment_modal show-modals" tabindex="-1" role="dialog">
+                <div class="cy-onboard_modal-container d-flex align-items-center justify-content-center">
+                    <div class="cy-onboarding_modalbox">
+                        <div class="cy-modal_content">
+                            <div class="cy-modal_content-header" style="position: relative; padding: 1.5rem 2rem; border-bottom: 1px solid #dfdfdf;">
+                                <div style="padding-right: 40px;">
+                                    <h5 style="margin-bottom: 0.25rem; display: flex; align-items: center; font-size: 20px;">
+                                        <i class="fa fa-linkedin me-2" style="color: #0077b5;"/>Comments
+                                    </h5>
+                                    <p t-if="state.commentingFeed" style="font-size: 13px; color: #717684; margin: 0;">
+                                        Post: <t t-esc="state.commentingFeed.author_name"/>
+                                    </p>
+                                </div>
+                                <a type="button" style="cursor: pointer; font-size: 24px; color: #717684; line-height: 1; position: absolute; top: 1.25rem; right: 1.25rem; z-index: 10;"
+                                   t-on-click="CloseCommentsModal" title="Close">
+                                    <i class="ri-close-line"/>
+                                </a>
+                            </div>
+
+
+                            <div class="cy-modal_main-body p-4" style="height: 50vh; overflow-y: auto;">
+                                <!-- Loading Spinner -->
+                                <div t-if="state.commentsLoading" class="p-5 text-center">
+                                    <div class="spinner-border text-primary" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Fetching comments...</p>
+                                </div>
+
+                                <!-- Empty State -->
+                                <div t-if="!state.commentsLoading and state.currentComments.length == 0" class="p-4 text-center text-muted">
+                                    <i class="ri-chat-3-line display-4 mb-2 d-block opacity-25"></i>
+                                    <p>No comments found for this post.</p>
+                                </div>
+
+                                <!-- LinkedIn Comments List -->
+                                <t t-if="!state.commentsLoading" t-foreach="state.currentComments" t-as="comment" t-key="comment.id">
+                                    <div class="cy-social_market-commentReply mb-4">
+                                        <div class="cy-social_marketComment-box p-0">
+                                            <div class="cy-comment-bubble">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <div class="d-flex align-items-center gap-2">
+                                                        <span class="fw-bold" style="font-size: 13px; color: #151E4E;" t-esc="comment.author_name"></span>
+                                                        <span class="cy-soical-comment_txt" style="font-size: 11px;">
+                                                            <t t-esc="formatDate(comment.created_at)"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <p class="cy-soical-market-cmnttile" style="white-space: pre-wrap;" t-esc="comment.text"></p>
+                                            </div>
+
+                                            <!-- Reply Actions & View Replies Toggle -->
+                                            <div class="d-flex justify-content-start align-items-center mt-1 gap-3">
+                                                <a t-on-click="() => this.onClickReplyLinkedIn(comment.id)"
+                                                   class="cursor-pointer d-flex align-items-center gap-1 text-muted text-decoration-none">
+                                                    <i class="ri-chat-3-line" style="font-size: 14px;"/>
+                                                    <span style="font-size: 12px; font-weight: 500;">Reply</span>
+                                                </a>
+
+                                                <!-- View Replies Toggle -->
+                                                <a t-if="comment.comments_count &gt; 0"
+                                                   t-on-click="() => this.toggleReplies(comment.id)"
+                                                   class="cursor-pointer text-primary text-decoration-none d-flex align-items-center gap-1"
+                                                   style="font-size: 12px; font-weight: 600;">
+                                                    <t t-if="!state.showReplies[comment.id]">
+                                                        <i class="ri-arrow-down-s-line"/> View <t t-esc="comment.comments_count"/> replies
+                                                    </t>
+                                                    <t t-else="">
+                                                        <i class="ri-arrow-up-s-line"/> Hide replies
+                                                    </t>
+                                                </a>
+                                            </div>
+
+                                            <!-- Nested Replies Container -->
+                                            <div t-if="state.showReplies[comment.id]" class="mt-2 ps-3 border-start border-2">
+                                                <div t-if="state.repliesLoading[comment.id]" class="text-muted small py-1">
+                                                    <i class="ri-loader-4-line fa-spin"/> Loading replies...
+                                                </div>
+                                                <t t-foreach="state.replies[comment.id] || []" t-as="reply" t-key="reply.id">
+                                                    <div class="mb-2">
+                                                        <div class="cy-comment-bubble bg-light border-0 p-2 rounded-3">
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <div class="d-flex align-items-center gap-2">
+                                                                    <span class="fw-bold" style="font-size: 12px; color: #151E4E;" t-esc="reply.author_name"></span>
+                                                                    <span class="text-muted" style="font-size: 10px;">
+                                                                        <t t-esc="formatDate(reply.created_at)"/>
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <p class="mb-0 small" style="white-space: pre-wrap; font-size: 13px;" t-esc="reply.text"></p>
+                                                        </div>
+                                                    </div>
+                                                </t>
+
+                                                <!-- No replies found message (if count > 0 but API returns none/empty) -->
+                                                <div t-if="!state.repliesLoading[comment.id] &amp;&amp; (!state.replies[comment.id] || state.replies[comment.id].length == 0)" class="text-muted small fst-italic">
+                                                    No replies found.
+                                                </div>
+                                            </div>
+
+                                            <!-- Nested Reply Input -->
+                                            <div t-attf-id="reply_div_{{comment.id}}" class="reply_div d-none mt-2" style="width: 100%;">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <!-- Emoji Button for Reply -->
+                                                    <button class="btn p-0"
+                                                            type="button"
+                                                            title="Add emoji"
+                                                            t-on-mouseenter="(ev) => this.addReplyEmojiPicker(ev, comment.id)"
+                                                            t-on-click="(ev) => this.addReplyEmojiPicker(ev, comment.id)"
+                                                            style="font-size: 18px; color: #717684;">
+                                                        <i class="ri-emotion-line"/>
+                                                    </button>
+
+
+                                                    <input class="form-control"
+                                                           type="text"
+                                                           placeholder="Write a reply..."
+                                                           t-attf-id="reply_input_{{comment.id}}"
+                                                           t-on-input="(ev) => this.onLiReplyInput(ev, comment.id)"
+                                                           autocomplete="off"/>
+                                                    <span class="send_button"
+                                                          t-on-click="() => this.postLinkedInReply(comment)"
+                                                          t-att-disabled="!state.liReplyTexts[comment.id]"
+                                                          t-attf-style="color: {{state.liReplyTexts[comment.id] ? 'var(--primary)' : '#adb5bd'}};">
+                                                        <i class="ri-send-plane-2-line"/>
+                                                    </span>
+                                                </div>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                            <div class="px-4 py-3 border-top bg-light">
+
+                                <div class="cyllo_comment_template bg-white rounded-pill shadow-sm border px-3 py-2 d-flex align-items-center">
+                                    <!-- Emoji Picker Button -->
+                                    <button class="btn p-0 me-2"
+                                            type="button"
+                                            title="Add emoji"
+                                            t-ref="liEmojiButton"
+                                            t-on-click="onCommentEmojiClick"
+                                            style="font-size: 20px; color: #717684;">
+                                        <i class="ri-emotion-line"/>
+                                    </button>
+
+                                    <textarea
+                                        class="form-control"
+                                        id="li_comment_area"
+                                        rows="1"
+                                        placeholder="Write a comment...."
+                                        t-on-input="onLiCommentInput"
+                                        style="border: none; background: transparent; box-shadow: none; resize: none;"></textarea>
+                                    <button class="btn p-0 ms-2"
+                                            t-att-disabled="!state.liCommentText"
+                                            t-attf-style="font-size: 22px; color: {{state.liCommentText ? 'var(--primary)' : '#adb5bd'}};"
+                                            t-on-click="onClickPostLinkedIn">
+                                        <i class="ri-send-plane-2-line"/>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="cy-modal_footer"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </t>

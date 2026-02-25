@@ -23,7 +23,7 @@ from odoo import fields, models
 
 
 class CrmLead(models.Model):
-    """This class extends the 'crm.lead' model in Odoo to include a new field
+    """This class extends the 'crm.lead' model in Cyllo to include a new field
     for storing the unique Facebook ID of a partner."""
     _inherit = 'crm.lead'
 

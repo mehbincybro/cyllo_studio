@@ -35,6 +35,16 @@
                             Link account
                         </button>
                     </div>
+                    <div class="o_social_media_card">
+                        <i class="fa fa-linkedin"/>
+                        <h3>LinkedIn</h3>
+                        <p>Manage your LinkedIn Business account and schedule posts seamlessly
+                        </p>
+                        <button class="btn btn-primary"
+                                t-on-click="() => this.OpenView('linkedin.account')">
+                            Link account
+                        </button>
+                    </div>
                 </div>
                 <div class="o_connected_accounts">
                     <h3>Connected Accounts</h3>
@@ -48,8 +58,10 @@
                                    t-if="account.platform =='social.fb.account'"/>
                                 <i class="fa fa-instagram"
                                    t-if="account.platform =='social.insta.account'"/>
-                                <i class="fa fa-youtube-play"
-                                   t-if="account.platform =='youtube.account'"/>
+                                 <i class="fa fa-youtube-play"
+                                    t-if="account.platform =='youtube.account'"/>
+                                <i class="fa fa-linkedin"
+                                   t-if="account.platform =='linkedin.account'"/>
                             </div>
                             <div class="o_account_details">
                                 <h4>
@@ -98,9 +110,13 @@
                             t-on-click="(ev) => this.setActiveTab(ev, 'instagram')">
                         <i class="ri-instagram-line"/>
                     </button>
-                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'youtube'}"
-                            t-on-click="(ev) => this.setActiveTab(ev, 'youtube')">
+                     <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'youtube'}"
+                             t-on-click="(ev) => this.setActiveTab(ev, 'youtube')">
                         <i class="ri-youtube-line"/>
+                    </button>
+                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'linkedin'}"
+                            t-on-click="(ev) => this.setActiveTab(ev, 'linkedin')">
+                        <i class="ri-linkedin-box-line"/>
                     </button>
                 </div>
                 <div class="o_posts_list"
@@ -111,13 +127,16 @@
                          t-if="state.activePosts"
                          t-on-click="() => this.OpenFeed(post.id)">
                         <div class="d-flex align-items-center gap-2">
-                            <img t-attf-src="{{post.profile_image_url}}"
+                            <img t-att-src="post.profile_image_url"
                                  class="post-profile-image"/>
                             <div class="post-info">
-                                <div class="post-title">
-                                    Post:
-                                    <t t-esc="post.post_id[1]"/>
-                                </div>
+                                    <div class="post-title">
+                                        Post:
+                                        <t t-esc="post.post_id[1]"/>
+                                    </div>
+                                    <div class="post-date text-muted mb-1" style="font-size: 11px;">
+                                        <t t-esc="formatDate(post.posted_date)"/>
+                                    </div>
                                 <div t-attf-id="Details_{{post.id}}"
                                      class="d-flex align-items-center gap-3">
                                     <a class="d-flex align-items-center gap-1">
@@ -138,8 +157,10 @@
                                t-if="post.posted_on_facebook"/>
                             <i class="fa fa-instagram notification-icon"
                                t-if="post.posted_on_ig"/>
-                            <i class="fa fa-youtube notification-icon"
-                               t-if="post.posted_on_youtube"/>
+                             <i class="fa fa-youtube notification-icon"
+                                t-if="post.posted_on_youtube"/>
+                            <i class="fa fa-linkedin notification-icon"
+                               t-if="post.posted_on_linkedin"/>
                         </div>
                     </div>
                 </div>
@@ -179,8 +200,10 @@
                                        t-if="account.platform == 'social.fb.account'"/>
                                     <i class="fa fa-instagram"
                                        t-if="account.platform == 'social.insta.account'"/>
-                                    <i class="fa fa-youtube"
-                                       t-if="account.platform == 'youtube.account'"/>
+                                     <i class="fa fa-youtube"
+                                        t-if="account.platform == 'youtube.account'"/>
+                                    <i class="fa fa-linkedin"
+                                       t-if="account.platform == 'linkedin.account'"/>
                                     <div class="o_account_details">
                                         <h4>
                                             <t t-esc="account.account_name"/>
@@ -215,9 +238,10 @@
                                 Connect
                                 <t t-esc="{
                         'social.fb.account': 'Facebook Account',
-                        'social.insta.account': 'Instagram Account',
-                        'youtube.account': 'YouTube Account',
-                    }[state.selectedPlatform]"/>
+                         'social.insta.account': 'Instagram Account',
+                         'youtube.account': 'YouTube Account',
+                         'linkedin.account': 'LinkedIn Account',
+                     }[state.selectedPlatform]"/>
                             </h5>
                             <a class="close" aria-label="Close"
                                t-on-click="CloseConnectModal"
@@ -284,7 +308,7 @@
                             </div>
 
                             <!-- Instagram Fields -->
-                            <div t-if="state.selectedPlatform == 'social.insta.account'">
+                            <t t-elif="state.selectedPlatform == 'social.insta.account'">
                                 <div class="form-group">
                                     <label for="facebook_insta_page_name"
                                            class="custom-modal-label">Page Name
@@ -339,10 +363,10 @@
                                            t-model="state.InstaMetaAppSecret"
                                            placeholder="Enter Meta App Secret"/>
                                 </div>
-                            </div>
+                            </t>
 
                             <!-- YouTube Fields -->
-                            <div t-if="state.selectedPlatform == 'youtube.account'">
+                            <t t-elif="state.selectedPlatform == 'youtube.account'">
                                 <div class="form-group">
                                     <label for="name"
                                            class="custom-modal-label">Channel
@@ -372,7 +396,40 @@
                                            t-model="state.clientSecret"
                                            placeholder="Enter Client Secret"/>
                                 </div>
-                            </div>
+                            </t>
+
+                            <!-- LinkedIn Fields -->
+                            <t t-elif="state.selectedPlatform == 'linkedin.account'">
+                                <div class="form-group">
+                                    <label for="linkedin_account_name"
+                                           class="custom-modal-label">APP Name
+                                    </label>
+                                    <input autocomplete="off" id="linkedin_account_name" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.linkedinAccountName"
+                                           placeholder="Enter LinkedIn App Name"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="linkedin_username"
+                                           class="custom-modal-label">Email ID
+                                    </label>
+                                    <input autocomplete="off" id="linkedin_username" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.linkedinUsername"
+                                           placeholder="Enter LinkedIn Email"/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="linkedin_access_token"
+                                           class="custom-modal-label">Access Token
+                                    </label>
+                                    <input autocomplete="off" id="linkedin_access_token" type="text"
+                                           class="custom-modal-input"
+                                           t-model="state.linkedinAccessToken"
+                                           placeholder="Enter LinkedIn Access Token (Optional for OAuth)"/>
+                                </div>
+                                <p class="mt-3" t-if="!state.linkedinAccessToken">If Access Token is empty, you will be redirected to LinkedIn to authorize Cyllo.</p>
+                                <p class="mt-3" t-else="">Using manually provided Access Token for connection.</p>
+                            </t>
                         </div>
                         <div class="modal-footer">
                             <button type="button"
