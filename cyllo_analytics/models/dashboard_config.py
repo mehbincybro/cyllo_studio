@@ -169,7 +169,7 @@ class DashboardConfig(models.Model):
                             after_where = parts[1]
 
                             # Reconstruct with ir.rule
-                            after = f"{before_where} {join_clause} WHERE ({where_clause}) AND {after_where}"
+                            after = f"{before_where} {join_clause} WHERE ({where_clause}) AND {after_where}" if where_clause else f"{before_where} {join_clause} WHERE {after_where}"
                     else:
                         # No WHERE clause - add one
                         # Find position after FROM clause(s)
