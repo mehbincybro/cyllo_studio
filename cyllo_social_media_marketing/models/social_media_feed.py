@@ -19,13 +19,17 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
 from odoo import fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class SocialMediaFeed(models.Model):
     """Class to define the fields and functions for social media feeds."""
     _name = "social.media.feed"
     _description = "Social Media Feeds"
+    _order = "posted_date desc, id desc"
 
     description = fields.Text(string="Content",
                               help="Description for the feed created")
@@ -41,8 +45,8 @@ class SocialMediaFeed(models.Model):
     author_link_url = fields.Char(string="Author Url", help="Author url")
     author_link = fields.Html(string="Link of Author",
                               help="The responsible account link")
-    posted_date = fields.Date(string="Date of Posting",
-                              help="Date at which this post was published")
+    posted_date = fields.Datetime(string="Date of Posting",
+                                  help="Date at which this post was published")
     posted_image = fields.Html(string="Image", help="Posted image")
     profile_image = fields.Html(string="Profile Picture",
                                 help="Profile picture of the author")
@@ -57,6 +61,16 @@ class SocialMediaFeed(models.Model):
                                     help="Number of comments on the post")
     post_id = fields.Many2one('social.media.post', string="Related Post",
                               help="Post related to the feed created.")
+    linkedin_account_id = fields.Many2one('linkedin.account', string="LinkedIn Account",
+                                       help="The LinkedIn account associated with this feed.")
+    linkedin_org_id = fields.Many2one(
+        'linkedin.organization',
+        string="LinkedIn Organization",
+        help="The LinkedIn organization page this post belongs to.",
+        ondelete='set null',
+    )
+    posted_on_linkedin = fields.Boolean(string="Posted on LinkedIn", help="If this feed is from LinkedIn")
+    linkedin_post_urn = fields.Char(string="LinkedIn Post URN", help="The LinkedIn URN for this post/share")
 
     def action_compute_likes_count_all(self):
         """Compute the number of likes on the post for all feed."""
@@ -78,8 +92,20 @@ class SocialMediaFeed(models.Model):
                 }
 
     def action_social_media_comments(self):
-        """Placeholder function for handling social media comments."""
-        return
+        """Fetch comments for this feed from the respective social platform."""
+        self.ensure_one()
+        if self.posted_on_linkedin and self.linkedin_account_id:
+            post_urn = self.linkedin_post_urn
+            if post_urn:
+                return self.linkedin_account_id.action_fetch_feed_comments(post_urn)
+        return []
+
+    def action_fetch_nested_comments(self, parent_urn):
+        """Fetch nested comments (replies) for a specific comment."""
+        self.ensure_one()
+        if self.linkedin_account_id:
+            return self.linkedin_account_id.action_fetch_feed_comments(parent_urn)
+        return []
 
     def action_social_media_likes(self):
         """
@@ -152,9 +178,28 @@ class SocialMediaFeed(models.Model):
                     'total_likes': total_likes,
                     'total_comments': total_comments,
                 })
+
+        if 'linkedin.account' in existing_models:
+            linkedin_accounts = self.env['linkedin.account'].search(
+                [('state', '=', 'connected')])
+            for account in linkedin_accounts:
+                feeds = self.env['social.media.feed'].search(
+                    [('linkedin_account_id', '=', account.id)])
+                total_posts = len(feeds)
+                total_likes = sum(feed.likes_count for feed in feeds)
+                total_comments = sum(feed.comments_count for feed in feeds)
+
+                dashboard_data.append({
+                    'id': account.id,
+                    'account_name': account.name,
+                    'platform': 'linkedin.account',
+                    'total_posts': total_posts,
+                    'total_likes': total_likes,
+                    'total_comments': total_comments,
+                })
         return {
             'dashboard_data': dashboard_data,
-            'posts': self.search([]).read()}
+            'posts': self.search([], order='posted_date desc, id desc').read()}
 
     def action_create_connect(self, data,platform):
         account = self.env[platform].sudo().create(data)
@@ -164,6 +209,8 @@ class SocialMediaFeed(models.Model):
             account.action_connect_instagram()
         if platform =="youtube.account":
             account.action_get_authorization_url()
+        if platform =="linkedin.account":
+            account.action_connect_linkedin()
             return account.id
         return False
 
@@ -172,8 +219,10 @@ class SocialMediaFeed(models.Model):
             name = 'cyllo_facebook'
         elif model == 'social.insta.account':
             name = 'cyllo_instagram'
-        else:
+        elif model == 'youtube.account':
             name = 'cyllo_youtube'
+        else:
+            name = 'cyllo_hr_linkedin_recruitment'
         module=self.env['ir.module.module'].sudo().search([('name','=',name),('state', '=', 'installed')])
         if module:
             return True

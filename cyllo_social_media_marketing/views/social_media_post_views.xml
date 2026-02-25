@@ -46,6 +46,13 @@
                                    invisible="mode!='attachment'"/>
                             <field name="description" widget="text_emojis"
                                    placeholder="eg: Grab your offer before the end of season"/>
+                            <field name="posted_on_linkedin"/>
+                            <field name="linkedin_account_ids" widget="many2many_tags"
+                                   invisible="not posted_on_linkedin"/>
+                            <field name="linkedin_organization_ids" widget="many2many_tags"
+                                   invisible="not posted_on_linkedin or not linkedin_account_ids"
+                                   domain="[('account_id', 'in', linkedin_account_ids), ('state', '=', 'active')]"
+                                   required="posted_on_linkedin and linkedin_account_ids"/>
                         </group>
                         <group>
                             <field name="company_id"/>

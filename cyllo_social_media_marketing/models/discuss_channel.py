@@ -23,7 +23,7 @@ from odoo import fields, models
 
 
 class DiscussChannel(models.Model):
-    """This class extends the 'discuss.channel' model in Odoo to include a new field for storing the
+    """This class extends the 'discuss.channel' model in Cyllo to include a new field for storing the
     Instagram Page ID."""
     _inherit = 'discuss.channel'
 

@@ -30,7 +30,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base', 'mail', 'crm'],
+    'depends': ['base', 'mail', 'crm', 'cyllo_hr_linkedin_recruitment'],
     'icon': '/cyllo_social_media_marketing/static/description/social-marketing.svg',
     'data': [
         'security/social_media_marketing_security.xml',
@@ -39,6 +39,7 @@
         'views/social_media_feed_views.xml',
         'views/social_fb_account_views.xml',
         'views/social_insta_account_views.xml',
+        'views/linkedin_account_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
