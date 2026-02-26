@@ -1,0 +1,132 @@
+.quality_container-main {
+    position: absolute;
+    width: 20%;
+    background: #eaeaea;
+    right: 0;
+    height: 100%;
+    z-index: 10;
+    animation-name: slideIn;
+    animation-duration: 1s;
+    padding : 10px;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(100%); /* Start from off-screen to the right */
+    }
+    to {
+        transform: translateX(0); /* Slide to its original position */
+    }
+}
+
+.quality-action-container {
+    width: 70vh;
+    border-radius: 30px;
+    height: 60vh;
+    }
+
+.quality-action-container header.modal-header {
+     border-top-right-radius: 30px;
+     border-top-left-radius: 30px;
+    }
+
+.quality-action-container modal-body {
+     display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    }
+
+.quality-action-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 43vh;
+    }
+
+.quality-card {
+  box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+  transition: 0.3s;
+  border-radius: 10px;
+}
+
+.quality-card:hover {
+  box-shadow: 0 0 0 3px #bdc52e;
+}
+
+.quality-cont {
+  padding: 2px 16px;
+}
+
+.action-container {
+    overflow-y: scroll;
+    max-height: 100vh;
+    height: 100vh;
+    padding:10px 7px 10px 5px;
+}
+
+.quality-check-instruction {
+    border: 2px solid #dfe2b0;
+    padding: 15px;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    height: max-content;
+    overflow-y: scroll;
+    border-radius: 20px;
+    position:relative;
+    }
+
+.instruction-img {
+    width: 100vh;
+    height: 50vh;
+}
+.instruction-img:hover, .instruction-img:hover span {
+	visibility:visible;
+	top:0;
+	left:100px;
+	z-index:1;
+}
+
+.qc-team-user {
+    margin-right: 30vh;
+    }
+
+.action-instruction {
+     margin-top: 30px;
+    }
+
+.float-toggler {
+    width: 40px;
+    height: 100px;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: flex;
+    align-items: center;
+    border-radius: 50% 0 0 50%;
+    position: absolute;
+    left: -41px;
+    top: 175px;
+    background: #a4ab31;
+    cursor: pointer;
+}
+.qc{
+    color:white;
+    }
+
+.quality_container-main.is_inactive {
+    width: 0;
+    padding: unset;
+}
+
+.qc_pass {
+    border: 2px solid green;
+    }
+
+.qc_fail {
+    border: 2px solid red;
+    }
+
+.view-qc-note{
+    opacity: 0.4;
+    }

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="QualityCheckFormView" t-inherit="web.FormView" t-inherit-mode="primary">
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-status-indicator']" position="replace"/>
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-create-button']" position="replace"/>
+        <xpath expr="//Layout/t[@t-set-slot='control-panel-create-button']" position="replace">
+            <t t-set-slot="control-panel-cy-form-cogs">
+                <CogMenuForm
+                        getActiveIds="() => model.root.isNew ? [] : [model.root.resId]"
+                        context="props.context"
+                        items="props.info.actionMenus ? actionMenuItems : {}"
+                        isDomainSelected="model.root.isDomainSelected"
+                        resModel="model.root.resModel"
+                        domain="props.domain"
+                        onActionExecuted="() => model.load({ resId: model.root.resId, resIds: model.root.resIds })"
+                        shouldExecuteAction.bind="shouldExecuteAction"
+                        create.bind="create"
+                        edit.bind="edit"
+                        canCreate="canCreate"
+                        canEdit="canEdit"
+                        discard.bind="discard"
+                        saveButtonClicked.bind="saveButtonClicked"
+                        model="model"
+                />
+            </t>
+        </xpath>
+        <xpath expr="//Layout" position="after">
+            <QualityCheck t-props="qualityProps"/>
+        </xpath>
+    </t>
+</templates>

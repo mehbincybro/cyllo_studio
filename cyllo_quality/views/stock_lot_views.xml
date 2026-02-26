@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="action_view_lots/serial_numbers" model="ir.actions.act_window">
+        <field name="name">Product Lots</field>
+        <field name="res_model">stock.lot</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_lots/serial_numbers"
+              name="Lots/Serial Numbers"
+              parent="cyllo_quality.menu_products_categ"
+              action="action_view_lots/serial_numbers"
+              sequence="30"
+    />
+</odoo>

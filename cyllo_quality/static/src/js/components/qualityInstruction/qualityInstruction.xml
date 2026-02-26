@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_quality.InstructionDialog" owl="1">
+        <Dialog title="'Add Quality Instructions'"
+                size="'medium'"
+                footer="false">
+<!--            <div class="p-3">-->
+<!--                <Record t-props="recordProps">-->
+<!--                    <t t-set-slot="field-instruction">-->
+<!--                        <HtmlField name="'instruction'" />-->
+<!--                    </t>-->
+<!--                </Record>-->
+<!--                <div class="modal-footer justify-content-end mt-3">-->
+<!--                    <button class="btn btn-secondary" t-on-click="props.close">-->
+<!--                        Cancel-->
+<!--                    </button>-->
+<!--                    <button class="btn btn-primary" t-on-click="onSave">-->
+<!--                        Save-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+        </Dialog>
+    </t>
+</templates>

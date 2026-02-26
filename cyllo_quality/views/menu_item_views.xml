@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!--    MenuItem of the Quality-->
+    <menuitem id="menu_cyllo_quality_root"
+              name="Quality"
+              groups="cyllo_quality.group_cyllo_quality_manager,cyllo_quality.group_cyllo_quality_user"
+              web_icon="cyllo_quality,static/description/quality-module-2.svg"/>
+    <!--    MenuItem of the Quality Inspections-->
+    <menuitem id="menu_quality_inspections_categ"
+              name="Quality Inspections"
+              parent="cyllo_quality.menu_cyllo_quality_root"/>
+    <menuitem id="menu_products_categ"
+              name="Products"
+              parent="cyllo_quality.menu_cyllo_quality_root"/>
+    <menuitem id="menu_configuration_categ"
+              name="Configuration"
+              parent="cyllo_quality.menu_cyllo_quality_root"
+              groups="cyllo_quality.group_cyllo_quality_manager"/>
+
+</odoo>
