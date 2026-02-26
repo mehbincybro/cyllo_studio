@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="action_view_product_variants" model="ir.actions.act_window">
+        <field name="name">Product Variants</field>
+        <field name="res_model">product.product</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <menuitem id="menu_product_variants"
+              name=" Product Variants"
+              parent="cyllo_quality.menu_products_categ"
+              action="action_view_product_variants"
+              sequence="20"
+
+    />
+</odoo>

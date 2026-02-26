@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_picking_form_inherit_quality_check" model="ir.ui.view">
+        <field name="name">view.picking.form.inherit.quality.check</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="is_quality_check" invisible="1"/>
+                <field name="quality_check_ids" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='button_validate']" position="after">
+                <button name="action_quality_check"
+                        string="Quality Check"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="not is_quality_check"/>
+            </xpath>
+             <xpath expr="//form" position="attributes">
+                <attribute name="js_class">quality_check_view</attribute>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button class="oe_stat_button" name="action_view_quality_check" type="object"
+                        invisible="qc_count == 0" >
+                    <i class="ri-list-unordered"/>
+                    <field name="qc_count" string="Quality Checks" widget="statinfo"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="QualityAction">
+       <div class="card quality-card mb-2" t-attf-class="{{ state.isPass !== undefined ? state.isPass ? 'qc_pass' : 'qc_fail' : '' }}" t-on-click="onClickQualityAction">
+           <div class="container quality-cont">
+               <h4><b><t t-out="props.action.inspection_action_id[1]"/></b></h4>
+               <p><t t-out="props.action.quality_check_id[1]"/></p>
+           </div>
+       </div>
+    </t>
+</templates>
