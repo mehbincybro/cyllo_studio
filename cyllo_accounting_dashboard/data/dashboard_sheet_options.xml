@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data>
 
         <!-- Row 0: KPI Overview & COA -->
         <record id="dashboard_sheet_option_balance_sheet" model="dashboard.sheet.option">

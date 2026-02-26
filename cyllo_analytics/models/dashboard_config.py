@@ -31,6 +31,12 @@ class DashboardConfig(models.Model):
     _description = 'Dashboard Configuration'
     _inherit = ['image.mixin']
 
+    def _get_placeholder_filename(self, field):
+        image_fields = ["image_%s" % size for size in [1920, 1024, 512, 256, 128]] + ["image"]
+        if field in image_fields:
+            return "cyllo_analytics/static/src/img/demo_dashboard_bw.png"
+        return super()._get_placeholder_filename(field)
+
     def _get_default_user_ids(self):
         """Returns the default admin user ids"""
         return self._get_default_users().ids

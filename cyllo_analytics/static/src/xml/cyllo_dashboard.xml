@@ -345,7 +345,7 @@
                                                        style="margin-left: 5%;"/>
                                                 </DropdownItem>
                                             </Dropdown>
-                                            <Dropdown>
+                                            <Dropdown t-if="hasAccess and !is_subAction">
                                                 <t t-set-slot="toggler"><i class="ri-more-2-fill"/></t>
                                                 <DropdownItem
                                                         t-if="!is_subAction"
@@ -396,7 +396,7 @@
                                                         style="margin-left: 5%;"/>
                                                 </DropdownItem>
                                             </Dropdown>
-                                             <Dropdown>
+                                             <Dropdown t-if="hasAccess and !is_subAction">
                                                 <t t-set-slot="toggler"><i class="ri-more-2-fill"/></t>
                                                  <DropdownItem
                                                          t-if="!is_subAction"

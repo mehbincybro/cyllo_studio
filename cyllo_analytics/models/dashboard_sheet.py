@@ -38,6 +38,12 @@ class DashboardSheet(models.Model):
     _description = "Dashboard Sheet"
     _inherit = ["image.mixin"]
 
+    def _get_placeholder_filename(self, field):
+        image_fields = ["image_%s" % size for size in [1920, 1024, 512, 256, 128]] + ["image"]
+        if field in image_fields:
+            return "cyllo_analytics/static/src/img/demo_graph_bw.png"
+        return super()._get_placeholder_filename(field)
+
     name = fields.Char(required=True)
     table_ids = fields.One2many(
         "dashboard.sheet.table",
@@ -103,7 +109,8 @@ class DashboardSheet(models.Model):
     )
     currency_id = fields.Many2one(
         'res.currency',
-        'Currency'
+        'Currency',
+        default=lambda self: self.env.company.currency_id
     )
 
     @api.model
