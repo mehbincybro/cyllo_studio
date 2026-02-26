@@ -156,6 +156,9 @@ export class WorkFlowAuto extends Component {
             cronDay: 1,
             cronMonth: 1,
             triggerType: "",
+            // Field change fields (used when trigger is field_change)
+            watchedFieldId: false,
+            watchedFieldName: "",
         })
 
         this.initialLoad = true;
@@ -238,6 +241,14 @@ export class WorkFlowAuto extends Component {
                 this.state.cronTime = time_trigger_time || 0;
                 this.state.cronDay = time_trigger_day || 1;
                 this.state.cronMonth = time_trigger_month || 1;
+            }
+
+            // Load watched field for field_change workflows
+            const fieldChangeData = await this.orm.read('work.auto', [this.id], ['field_id']);
+            if (fieldChangeData.length && fieldChangeData[0].field_id) {
+                const [id, name] = fieldChangeData[0].field_id;
+                this.state.watchedFieldId = id;
+                this.state.watchedFieldName = name;
             }
 
             this.env.bus.trigger("onclickMenuBar", { isCollapse: true })
@@ -418,6 +429,11 @@ export class WorkFlowAuto extends Component {
         return this.id
     }
 
+    /** True when the active trigger fires on a field-value change. */
+    get isFieldChangeTrigger() {
+        return this.state.triggerType === 'field_change';
+    }
+
     /**
      * True when the active trigger is time-based.
      * Used by the XML template to hide Create/Write blocks and show the
@@ -444,6 +460,20 @@ export class WorkFlowAuto extends Component {
         }[field];
         if (stateKey) this.state[stateKey] = value;
         await this.orm.write('work.auto', [this.id], { [field]: value });
+    }
+
+    /**
+     * Saves the selected watched field to work.auto.
+     * `current_record` in the global variables context already represents the
+     * triggering record, so no extra variable registration is needed.
+     *
+     * @param {number} fieldId   – id of the selected ir.model.fields record
+     * @param {string} fieldName – user-visible field name / label
+     */
+    async setWatchedField(fieldId, fieldName) {
+        this.state.watchedFieldId = fieldId || false;
+        this.state.watchedFieldName = fieldName || "";
+        await this.orm.write('work.auto', [this.id], { field_id: fieldId || false });
     }
 
     deleteNode(node) {

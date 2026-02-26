@@ -294,7 +294,8 @@ class WorkAuto(models.Model):
     )
     field_id = fields.Many2one(
         'ir.model.fields',
-        'On Change field'
+        'On Change Field',
+        domain="[('model_id', '=', model_id)]"
     )
     time_trigger_mode = fields.Selection([
         ('hour', 'Every Hour'),
@@ -477,15 +478,26 @@ class WorkAuto(models.Model):
                 continue
             Model = self.env.get(auto.model_id.model)
             if auto.trigger_type == 'field_change':
-                def on_change_func(auto_id):
-                    def on_change_field(rec):
-                        res = auto_id._process({'record': rec})
-                        return res
+                # Onchange hook: fires during UI field editing (before save).
+                if not auto.field_id:
+                    continue
 
+                def make_onchange_fn(auto_id, field_name):
+                    def on_change_field(rec):
+                        auto_live = auto_id.with_env(rec.env)
+                        try:
+                            with rec.env.cr.savepoint():
+                                auto_live._process({'record': rec})
+                        except exceptions.ValidationError:
+                            raise  # Surface user-facing warnings to the form
+                        except Exception as e:
+                            _logger.error(
+                                "Field-change onchange %r failed for %s: %s",
+                                field_name, rec.id, e)
                     return on_change_field
 
                 Model._onchange_methods[auto.field_id.name].append(
-                    on_change_func(auto))
+                    make_onchange_fn(auto, auto.field_id.name))
             elif auto.trigger_type == 'time':
                 # Time-based triggers are driven by ir.cron, not method patching.
                 continue
@@ -560,6 +572,15 @@ class WorkAuto(models.Model):
                     "Forbidden action %r executed while the user %s does not have access to %s.",
                     self.name, self.env.user.login, records)
                 raise
+        # When called from a field_change onchange, args carries a single
+        # 'record' key.  The generated Python preamble checks for 'records'
+        # (plural) and assigns current_record from it.  Inject both aliases
+        # so the condition and action nodes see the triggering record correctly.
+        single_record = args.get('record', False)
+        if single_record and not records:
+            args = dict(args)
+            args['records'] = single_record
+            args['current_record'] = single_record
         context = self.get_context()
         context.update(args)
         context.update(_BUILTINS)
