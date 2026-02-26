@@ -700,7 +700,7 @@ export class FieldProperties extends Component {
                     this.state.default_value = String(defaultResult.default_value);
                 }
             } catch (error) {
-                console.error('Error loading default value:', error);
+                console.log('Error loading default value:', error);
             }
         }
 
