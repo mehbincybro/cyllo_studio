@@ -321,11 +321,9 @@ export function validateCondition(condition) {
         return false;
     }
     if (condition.value.value === "") return false;
-    if (!condition.value.value) {
-        if (condition.value.value === false && !condition.value.value) {
+    if (condition.value.value === undefined || condition.value.value === null) {
             return false;
         }
-    }
     if (condition.value.fieldType === "variable") {
         if(!condition.value.value.selectedVariable) return false;
     } else if (condition.value.fieldType === "record") {
