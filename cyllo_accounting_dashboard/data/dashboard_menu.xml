@@ -1,25 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Client action to open the accounting dashboard -->
-        <record id="action_accounting_dashboard" model="ir.actions.client">
-            <field name="name">Accounting Dashboard</field>
+<!--        &lt;!&ndash; Client action to open the accounting dashboard &ndash;&gt;-->
+<!--        <record id="action_accounting_dashboard" model="ir.actions.client">-->
+<!--            <field name="name">Accounting Dashboard DATAA</field>-->
+<!--            <field name="tag">cy_analytic_dashboard</field>-->
+<!--            <field name="target">current</field>-->
+<!--            <field name="context" eval="{'rec_id': ref('cyllo_accounting_dashboard.dashboard_config_accounting'), 'is_subAction': True}"/>-->
+<!--        </record>-->
+
+<!--        &lt;!&ndash; Menu item under Accounting &ndash;&gt;-->
+<!--        <menuitem id="menu_accounting_dashboard_custom"-->
+<!--                  name="Accounting Dashboard"-->
+<!--                  parent="account.menu_finance"-->
+<!--                  action="action_accounting_dashboard"-->
+<!--                  sequence="1"/>-->
+
+<!--        &lt;!&ndash; Link the menu to the dashboard configuration &ndash;&gt;-->
+<!--        <function model="dashboard.config" name="write">-->
+<!--            <value eval="[ref('cyllo_accounting_dashboard.dashboard_config_accounting')]"/>-->
+<!--            <value eval="{'ir_menu_ids': [(4, ref('cyllo_accounting_dashboard.menu_accounting_dashboard_custom'))]}"/>-->
+<!--        </function>-->
+
+        <!-- Client Action -->
+        <record id="action_acc_dashboard_json" model="ir.actions.client">
+            <field name="name">ACC Dashboard JSON</field>
             <field name="tag">cy_analytic_dashboard</field>
             <field name="target">current</field>
-            <field name="context" eval="{'rec_id': ref('cyllo_accounting_dashboard.dashboard_config_accounting'), 'is_subAction': True}"/>
         </record>
 
-        <!-- Menu item under Accounting -->
-        <menuitem id="menu_accounting_dashboard_custom"
-                  name="Accounting Dashboard"
+        <!-- New Menu Under Accounting -->
+        <menuitem id="menu_acc_dashboard_json"
+                  name="ACC Dashboard JSON"
                   parent="account.menu_finance"
-                  action="action_accounting_dashboard"
-                  sequence="1"/>
-
-        <!-- Link the menu to the dashboard configuration -->
-        <function model="dashboard.config" name="write">
-            <value eval="[ref('cyllo_accounting_dashboard.dashboard_config_accounting')]"/>
-            <value eval="{'ir_menu_ids': [(4, ref('cyllo_accounting_dashboard.menu_accounting_dashboard_custom'))]}"/>
-        </function>
+                  action="action_acc_dashboard_json"
+                  sequence="2"/>
     </data>
 </odoo>
