@@ -1,0 +1,355 @@
+/* ===================================================
+   Cyllo Studio – Report Editor Styles
+   =================================================== */
+
+/* ── Report Frame / Editable Area ─────────────────── */
+.editable-area {
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #333;
+}
+
+/* ── Tables – use auto layout so column widths adapt to content ── */
+.editable-area table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: auto;
+    /* NOT fixed – lets cells size naturally */
+    margin-bottom: 8px;
+}
+
+.editable-area table th,
+.editable-area table td {
+    padding: 4px 8px;
+    vertical-align: top;
+    border: none;
+    white-space: normal;
+    overflow-wrap: break-word;
+}
+
+.editable-area table thead th {
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+    text-align: left;
+}
+
+.editable-area table tfoot td,
+.editable-area table tfoot th {
+    border-top: 1px solid #ddd;
+    font-weight: bold;
+}
+
+.editable-area table tbody tr:last-child td {
+    border-bottom: 1px solid #ddd;
+}
+
+/* ── Images ──────────────────────────────────────── */
+.editable-area img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ── Bootstrap-like grid inside the editable area ── */
+.editable-area .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin-right: -10px;
+    margin-left: -10px;
+    box-sizing: border-box;
+}
+
+.editable-area [class*="col-"] {
+    padding-right: 10px;
+    padding-left: 10px;
+    box-sizing: border-box;
+}
+
+.editable-area .col-6 {
+    width: 50%;
+}
+
+.editable-area .col-4 {
+    width: 33.33%;
+}
+
+.editable-area .col-3 {
+    width: 25%;
+}
+
+.editable-area .col-8 {
+    width: 66.66%;
+}
+
+.editable-area .col-9 {
+    width: 75%;
+}
+
+.editable-area .col-12 {
+    width: 100%;
+}
+
+/* ── Text utilities used by Odoo report templates ── */
+.editable-area .text-right {
+    text-align: right;
+}
+
+.editable-area .text-center {
+    text-align: center;
+}
+
+.editable-area .text-left {
+    text-align: left;
+}
+
+.editable-area .font-weight-bold,
+.editable-area strong {
+    font-weight: bold;
+}
+
+/* ── Odoo report helper classes ─────────────────── */
+.editable-area .o_report_page {
+    padding: 0;
+}
+
+.editable-area .address {
+    margin-bottom: 8px;
+}
+
+.editable-area .page-break {
+    page-break-before: always;
+}
+
+/* ── Selected element highlight ─────────────────── */
+.editable-area .selected {
+    outline: 2px dashed #5b8dee;
+    outline-offset: 2px;
+    border-radius: 2px;
+}
+
+/* ── Drag-over highlight ─────────────────────────── */
+.gu-over {
+    outline: 2px dashed #43a047 !important;
+    background-color: rgba(67, 160, 71, 0.05) !important;
+}
+
+/* ── New dropped elements ────────────────────────── */
+.editable-area .c_new {
+    animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Dynamic Fields Luxury Styling ────────────────── */
+[cy-type='dynamic'] {
+    background-color: #e7f3ff;
+    color: #0056b3;
+    border: 1px solid #b3d7ff;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-weight: 600;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease;
+}
+
+[cy-type='dynamic']:hover {
+    background-color: #d1e9ff;
+    border-color: #80bdff;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Snippet panel ───────────────────────────────── */
+.snippet-panel .snippet {
+    user-select: none;
+    cursor: grab;
+}
+
+.snippet-panel .snippet:active {
+    cursor: grabbing;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* ── Native DnD transit / dragging states ──────────── */
+.gu-transit {
+    opacity: 0.4;
+    border: 2px dashed #5b8dee !important;
+}
+
+.snippet-panel .snippet.dragging {
+    opacity: 0.5;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+/* =============================================================================
+   Cyllo Studio – MediumEditor Toolbar Theme
+   ============================================================================= */
+
+/* ── Toolbar container ──────────────────────────────────────────────────────── */
+.medium-editor-toolbar {
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5) !important;
+    padding: 3px 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1px !important;
+    overflow: visible !important;
+}
+
+.medium-editor-toolbar-arrow {
+    display: none !important;
+}
+
+/* ── Button list ────────────────────────────────────────────────────────────── */
+.medium-editor-toolbar ul {
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 1px !important;
+}
+
+.medium-editor-toolbar li {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.medium-editor-toolbar li button {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 6px !important;
+    color: #b8bfba !important;
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    font-family: 'Georgia', 'Times New Roman', serif !important;
+    cursor: pointer !important;
+    transition: background 0.12s ease, color 0.12s ease !important;
+    line-height: 1 !important;
+    outline: none !important;
+}
+
+.medium-editor-toolbar li button:hover {
+    background: #353b37 !important;
+    color: #9ab83a !important;
+}
+
+.medium-editor-toolbar li button.medium-editor-button-active {
+    background: #2d3d1c !important;
+    color: #9ab83a !important;
+    box-shadow: inset 0 0 0 1px #556b22 !important;
+}
+
+/* ── Anchor / link form — COMPACT ───────────────────────────────────────────── */
+.medium-editor-toolbar-form {
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    width: auto !important;
+    max-width: 280px !important;
+    min-width: 0 !important;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+}
+
+.medium-editor-toolbar-input {
+    background: #222622 !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 5px !important;
+    color: #c8cec9 !important;
+    font-size: 11px !important;
+    padding: 3px 7px !important;
+    outline: none !important;
+    width: 160px !important;
+    min-width: 0 !important;
+    max-width: 160px !important;
+    transition: border-color 0.12s !important;
+}
+
+.medium-editor-toolbar-input:focus {
+    border-color: #9ab83a !important;
+    box-shadow: 0 0 0 2px rgba(154, 184, 58, 0.15) !important;
+}
+
+.medium-editor-toolbar-input::placeholder {
+    color: #606860 !important;
+    font-size: 11px !important;
+}
+
+/* ✓ save and ✗ cancel link buttons */
+.medium-editor-toolbar-form a {
+    color: #7a8c7c !important;
+    font-size: 14px !important;
+    text-decoration: none !important;
+    line-height: 1 !important;
+    width: 22px !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 4px !important;
+    transition: background 0.12s, color 0.12s !important;
+    flex-shrink: 0 !important;
+}
+
+.medium-editor-toolbar-form a:hover {
+    color: #9ab83a !important;
+    background: #353b37 !important;
+}
+
+.medium-editor-toolbar-form a.medium-editor-toolbar-close {
+    color: #7a4040 !important;
+}
+
+.medium-editor-toolbar-form a.medium-editor-toolbar-close:hover {
+    color: #e05a5a !important;
+    background: #3d1e1e !important;
+}
+
+/* ── Selected element highlight ─────────────────────────────────────────────── */
+.selected {
+    outline: 2px solid #9ab83a !important;
+    outline-offset: 2px !important;
+    border-radius: 3px !important;
+}
+
+/* ── Drag states ────────────────────────────────────────────────────────────── */
+.gu-transit {
+    opacity: 0.35 !important;
+    outline: 2px dashed #9ab83a !important;
+    outline-offset: 2px !important;
+}
+
+.gu-mirror {
+    opacity: 0.9 !important;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45) !important;
+    border-radius: 4px !important;
+    cursor: grabbing !important;
+}
+
+[cy-template].gu-over {
+    outline: 2px dashed #9ab83a !important;
+    outline-offset: 3px !important;
+    background: rgba(154, 184, 58, 0.04) !important;
+    border-radius: 4px !important;
+}

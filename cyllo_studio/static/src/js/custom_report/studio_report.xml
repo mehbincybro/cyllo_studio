@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="custom_report.edit_report">
+        <div class="d-flex flex-column w-100 bg-200" style="height: calc(100vh - 50px);">
+            <!-- Header -->
+            <div class="w-100 bg-white border-bottom px-4 py-2 d-flex align-items-center shadow-sm">
+                <button class="btn btn-primary px-4 me-2"
+                        t-on-click="() => save_changes(this)">Save</button>
+                <button class="btn btn-light border px-4"
+                        t-on-click="() => close_edit(this)">Discard</button>
+                <div class="flex-grow-1"/>
+                <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1" title="Undo">
+                    <i class="fa fa-undo"/>
+                </button>
+                <button t-ref="redoBtn" t-on-click="redo" class="btn btn-light border mx-1" disabled="1" title="Redo">
+                    <i class="fa fa-repeat"/>
+                </button>
+            </div>
+            
+            <!-- Body -->
+            <div class="d-flex flex-grow-1 overflow-hidden">
+                <!-- Sidebar -->
+                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column" style="width: 260px; overflow-y: auto; z-index: 10;">
+                    <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold" style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
+                    
+                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="box" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
+                        <i class="fa fa-square-o fa-lg text-success me-3"/> 
+                        <span class="fw-semibold text-dark">Box</span>
+                    </div>
+                    
+                    <div class="snippet field bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="field" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
+                        <i class="fa fa-database fa-lg text-success me-3"/> 
+                        <span class="fw-semibold text-dark">Dynamic Field</span>
+                    </div>
+                </div>
+                
+                <!-- Main Area -->
+                <div class="flex-grow-1 overflow-auto d-flex justify-content-center py-5 bg-200" style="position: relative;">
+                    <!-- A4 Paper Container -->
+                    <div class="cyllo-studio-report-container bg-white shadow" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; position: relative;">
+                        <div id="studio_report" t-ref="report_frame" class="editable-area w-100 h-100 text-dark"/>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Branch Selector Popup -->
+            <div id="branchSelector" class="bg-white shadow-lg"
+                 style="position: fixed;
+                        right: 40px;
+                        top: 100px;
+                        width: 300px;
+                        border: 1px solid #dee2e6;
+                        border-radius: 8px;
+                        padding: 20px;
+                        display: none;
+                        z-index: 1050;">
+                <h5 style="margin: 0 0 15px 0;
+                            border-bottom: 2px solid #3b82f6;
+                            padding-bottom: 10px;
+                            font-size: 16px;">
+                    Select Condition
+                </h5>
+                <i class="close-selector fa fa-times text-muted"
+                   t-on-click="closeBranchSelector"
+                   style="position: absolute;
+                          top: 15px;
+                          right: 15px;
+                          cursor: pointer;
+                          font-size: 16px;"/>
+                <div id="branchOptions"></div>
+            </div>
+        </div>
+    </t>
+</templates>
