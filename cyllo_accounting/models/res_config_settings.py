@@ -39,6 +39,19 @@ class ResConfigSettings(models.TransientModel):
     enable_saltedge = fields.Boolean(string='Salt Edge Provider',
                                      config_parameter='saltedge.enable_saltedge',
                                      help='To enable Salt Edge Provider')
+    tax_return_periodicity = fields.Selection([('monthly', 'Monthly'), ('bi_monthly', 'Every 2 months'),
+                                               ('quarterly', 'Quarterly'), ('four_months', 'Every 4 months'),
+                                               ('semi_annually', 'Semi-annually'), ('annually', 'Annually'),
+                                               ('fiscal_year', 'Fiscal Year'), ], string="Tax Return Periodicity",
+                                              config_parameter="cyllo_accounting.tax_return_periodicity",
+                                              default='monthly')
+    tax_return_deadline = fields.Integer(string="Deadline (days after period)",
+                                         config_parameter="cyllo_accounting.tax_return_deadline", default=7)
+    tax_return_journal_id = fields.Many2one('account.journal', string="Journal",
+                                            domain="[('type', '=', 'general')]",
+                                            config_parameter="cyllo_accounting.tax_return_journal_id",
+                                            default=lambda self: self.env.ref('cyllo_accounting.journal_tax_returns',
+                                                                              raise_if_not_found=False))
 
     saltedge_app_id = fields.Char(
         string='App ID',

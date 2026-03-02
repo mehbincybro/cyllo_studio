@@ -95,6 +95,19 @@
 
                 </block>
             </xpath>
+             <xpath expr="//block[@name='default_taxes_setting_container']" position="after">
+                <block title="Tax Returns" id="tax_returns_settings">
+                    <setting id="tax_return_periodicity_setting" help="Periodicity of tax returns">
+                        <field name="tax_return_periodicity"/>
+                    </setting>
+                    <setting id="tax_return_deadline_setting" help="Deadline after the period end (in days)">
+                        <field name="tax_return_deadline"/>
+                    </setting>
+                    <setting id="tax_return_journal_setting" help="Journal used for tax returns">
+                        <field name="tax_return_journal_id"/>
+                    </setting>
+                </block>
+            </xpath>
         </field>
     </record>
 </odoo>

@@ -34,3 +34,8 @@ access_batch_payment_manager,batch.payment.manager,model_batch_payment,account.g
 access_batch_payment_invoice,batch.payment.invoice,model_batch_payment,account.group_account_invoice,1,1,1,1
 
 access_account_move_lock_manager,access.account.move.lock,model_account_move_lock,account.group_account_manager,1,1,1,1
+
+access_tax_return_wizard,access.tax.return.wizard,model_tax_return_wizard,base.group_user,1,1,1,1
+
+cyllo_accounting.access_account_return,access_account_return,cyllo_accounting.model_account_return,base.group_user,1,1,1,1
+
