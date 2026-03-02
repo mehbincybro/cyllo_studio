@@ -28,7 +28,7 @@ class QualityInspection(models.Model):
             'tag': 'quality_instruction_action',
             'target': 'new',
             'params': {
-
+                'res_id': self.id,
             }
         }
 
@@ -37,7 +37,6 @@ class QualityInspection(models.Model):
 
     @api.depends('inspection_type_id')
     def _compute_is_measure(self):
-        print('compute is working')
         measure_inspection_type_id = self.env.ref('cyllo_quality.inspection_type_measure').id
         for record in self:
             record.is_measure = False

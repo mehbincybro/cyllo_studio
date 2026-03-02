@@ -39,7 +39,6 @@ class QualityCheck(models.Model):
         if vals.get('reference', '') == '':
             vals['reference'] = self.env['ir.sequence'].next_by_code(
                 'quality.check') or ''
-            print('vals', vals)
         return super(QualityCheck, self).create(vals)
 
     @api.depends('quality_control_id')
@@ -91,5 +90,4 @@ class QualityCheck(models.Model):
             if not qc:
                 quality_control.append(qc)
             qc['quality_check_line_ids'] = qc_rec['quality_check_line_ids'].read()
-        print('quality_control', quality_control)
         return quality_control

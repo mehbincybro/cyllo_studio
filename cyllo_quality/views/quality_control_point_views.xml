@@ -26,7 +26,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="action_view_quality_checks"
                                 type="object">
-                            <i class="ri-align-justify"/>
+                            <i class="o_button_icon ri-check-line"/>
                             <field name="qc_check_count" string="Quality Checks" widget="statinfo" force_save="1"/>
                         </button>
                     </div>
@@ -59,7 +59,7 @@
                                 <span class="ms-3">% of products</span>
                             </div>
                             <field name="control_by"/>
-                            <label for="control_frequency" string=""/>
+                            <label for="control_frequency"  invisible="control_by != 'periodically'"/>
                             <div class="o_row" invisible="control_type != 'quantity' or control_by == 'all'">
                                 <span>Check every</span>
                                 <field name="control_frequency" nolabel="1"/>

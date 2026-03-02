@@ -25,7 +25,7 @@
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" name="action_view_quality_alert"
                                 type="object">
-                            <i class="ri-align-justify"/>
+                            <i class="o_button_icon ri-check-line"/>
                             <field name="qc_alert_count" string="Quality Alerts" widget="statinfo"/>
                         </button>
                     </div>
