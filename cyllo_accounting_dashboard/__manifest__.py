@@ -17,7 +17,6 @@
 #    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
 #    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
-#acc
 #############################################################################
 {
     'name': 'Accounting Dashboard',
@@ -31,16 +30,18 @@
     'website': "https://www.cyllo.com",
     'depends': ['cyllo_analytics', 'account'],
     'data': [
-        'data/dashboard_sheets.xml',
-        'data/dashboard_tables.xml',
-        'data/dashboard_axes.xml',
-        'data/dashboard_filters.xml',
-        'data/dashboard_config.xml',
-        'data/dashboard_sheet_options.xml',
+        #     'data/dashboard_sheets.xml',
+        #     'data/dashboard_tables.xml',
+        #     'data/dashboard_axes.xml',
+        #     'data/dashboard_filters.xml',
+        #     'data/dashboard_config.xml',
+        #     'data/dashboard_sheet_options.xml',
         'data/dashboard_menu.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
     'application': False,
     'auto_install': True,
+    "post_init_hook": "_post_init_hook",
+    'uninstall_hook': 'uninstall_hook',
 }

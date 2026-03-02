@@ -149,7 +149,7 @@ class DashboardSheet(models.Model):
         for rec in self:
             if rec.query_gen:
                 rec.query = rec.query_gen
-                break
+                continue
             columns = rec.axis_ids.filtered(
                 lambda x: x.type in ["measure", "dimension"]
             )
@@ -162,13 +162,15 @@ class DashboardSheet(models.Model):
             columns_group = columns.filtered(lambda x: "(" in x.query)
             not_columns_group = columns.filtered(lambda x: "(" not in x.query)
             group_by = rec.axis_ids.filtered(lambda x: x.type == "group")
+
+            group_cols = []
             if group_by:
-                query += (
-                    f" GROUP BY {', '.join(group_by.mapped('column'))},"
-                    f" {', '.join(not_columns_group.mapped('alias'))}"
-                )
-            elif columns_group:
-                query += f" GROUP BY {', '.join(not_columns_group.mapped('alias'))}"
+                group_cols.extend(group_by.mapped('column'))
+            if (group_by or columns_group) and not_columns_group:
+                group_cols.extend(not_columns_group.mapped('alias'))
+
+            if group_cols:
+                query += f" GROUP BY {', '.join(group_cols)}"
             order_by = rec.axis_ids.filtered(lambda x: x.type == "order")
             if order_by:
                 query += f" ORDER BY {', '.join(order_by.mapped('column'))}"
@@ -178,7 +180,7 @@ class DashboardSheet(models.Model):
                     initial = group_by.mapped("column")[0]
                 elif columns_group and not_columns_group:
                     initial = not_columns_group.mapped("alias")[0]
-                else:
+                elif not columns_group:  # Only default to .id if there's no aggregate functions
                     main_table = rec.table_ids.filtered(lambda x: not x.linked)
                     if main_table:
                         main_table = main_table[-1]
