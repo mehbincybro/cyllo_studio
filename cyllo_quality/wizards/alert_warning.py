@@ -20,4 +20,3 @@ class AlertWarning(models.TransientModel):
             'stage_id': stage_id
         })
         self.quality_check_line_id.is_alert = True
-        print("ssssssssssss", q)

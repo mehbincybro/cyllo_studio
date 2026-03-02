@@ -36,7 +36,7 @@
                         <h6 class="text-muted mb-0 check-type">Add Measurement :</h6>
                          <input type="text" class="form-control w-50 check-value" placeholder="Enter the value..."
                                 t-model='state.qcValue'/>
-                         <t t-esc="props.quality_check_action.unit_value.unit['name']"/>
+                         <t t-if="props.quality_check_action.unit_value and props.quality_check_action.unit_value.unit" t-esc="props.quality_check_action.unit_value.unit['name']"/>
                      </div>
                      <div class="d-flex align-items-center gap-2 text-center"
                           t-if="props.quality_check_action.inspection_type_id[1] == 'Take a picture'">

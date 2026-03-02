@@ -11,10 +11,13 @@
             </xpath>
             <xpath expr="//button[@name='action_confirm']" position="after">
                 <button name="action_quality_check"
-                        string="Quality Check"
                         type="object"
                         class="oe_highlight"
-                        invisible="not is_quality_check" />
+                        invisible="not is_quality_check">
+                    <span>Quality Check (</span>
+                    <field name="qc_checked_count" nolabel="1"/> / <field name="qc_count" nolabel="1"/>
+                    <span>)</span>
+                </button>
             </xpath>
              <xpath expr="//form" position="attributes">
                 <attribute name="js_class">quality_check_view</attribute>
@@ -22,7 +25,7 @@
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button class="oe_stat_button" name="action_view_quality_check" type="object"
                         invisible="qc_count == 0" >
-                    <i class="ri-list-unordered"/>
+                    <i class="o_button_icon ri-check-line"/>
                     <field name="qc_count" string="Quality Checks" widget="statinfo"/>
                 </button>
             </xpath>

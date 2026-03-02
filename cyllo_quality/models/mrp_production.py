@@ -11,9 +11,9 @@ class MrpProduction(models.Model):
     quality_control_point_ids = fields.Many2many('quality.control.point', copy=False)
     quality_check_ids = fields.Many2many('quality.check', copy=False)
     qc_count = fields.Integer(compute='_compute_quality_checks', copy=False)
+    qc_checked_count = fields.Integer(compute='_compute_quality_checks', copy=False)
 
     def action_confirm(self):
-        print("peodiceeeeeeeeeeeeee")
         quality_points = self.env['quality.control.point'].search(
             [('operation_type_ids', 'in', self.picking_type_id.id)])
         quality_control_points = []
@@ -70,15 +70,33 @@ class MrpProduction(models.Model):
                         'quantity': qty,
                         'uom_id': self.product_uom_id.id
                     })
+                    quality_check.quality_check_line_ids = [fields.Command.create({
+                        'quality_control_id': quality_check.quality_control_id.id,
+                        'inspection_action_id': action.inspection_action_id.id,
+                        'inspection_type_id': action.inspection_type_id.id,
+                        'instruction': action.instruction,
+                        'value': action.value,
+                        'unit_value': {
+                            "unit": {
+                                "id": action.value['unit'].get('id'),
+                                "name": action.value['unit'].get('name')
+                            },
+                            "value": action.value.get('value')
+                        },
+                    }) for action in qcp.quality_inspection_ids]
 
                     qc_ids.append(quality_check.id)
             self.quality_check_ids = [fields.Command.link(qc) for qc in qc_ids]
             self.is_quality_check_created = True
 
-    @api.depends('quality_check_ids')
+    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked')
     def _compute_quality_checks(self):
-        for qc in self:
-            qc.qc_count = len(qc.quality_check_ids)
+        for production in self:
+            all_lines = production.quality_check_ids.quality_check_line_ids
+            production.qc_count = len(all_lines)
+            production.qc_checked_count = len(all_lines.filtered('is_checked'))
+            if production.qc_count > 0 and production.qc_count == production.qc_checked_count:
+                production.is_quality_check = False
 
     def action_view_quality_check(self):
         return {

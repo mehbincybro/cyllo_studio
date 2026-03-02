@@ -35,7 +35,6 @@ class QualityCheckLine(models.Model):
 
     def validate_quality_actions(self, value, note):
         self.ensure_one()
-        print("validate_quality_actions", self, value, self.inspection_action_id.name, note)
         if self.inspection_type_id.name in ['Measure', 'Instructions']:
             if self.value == value:
                 self.write({

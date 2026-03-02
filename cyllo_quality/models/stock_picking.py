@@ -8,9 +8,11 @@ class StockPicking(models.Model):
 
     is_quality_check = fields.Boolean(default=False, copy=False)
     is_quality_check_created = fields.Boolean(default=False, copy=False)
-    quality_control_point_ids = fields.Many2many('quality.control.point', copy=False)
+    quality_control_point_ids = fields.Many2many('quality.control.point',
+                                                 copy=False)
     quality_check_ids = fields.Many2many('quality.check', copy=False)
     qc_count = fields.Integer(compute='_compute_quality_checks', copy=False)
+    qc_checked_count = fields.Integer(compute='_compute_quality_checks', copy=False)
 
     def action_confirm(self):
         quality_points = self.env['quality.control.point'].search(
@@ -22,19 +24,23 @@ class StockPicking(models.Model):
                 quality_control_points.append(point.id)
             elif point.product_category_ids:
                 all_category_id = self.env.ref('product.product_category_all')
-                if point.product_category_ids.filtered(lambda c: c.id == all_category_id.id):
+                if point.product_category_ids.filtered(
+                        lambda c: c.id == all_category_id.id):
                     self.is_quality_check = True
                     quality_control_points.append(point.id)
                 elif self.move_ids_without_package.filtered(
-                        lambda c: (c.product_id.categ_id.id in point.product_category_ids.ids) or (
-                                c.product_id.categ_id.parent_id.id in point.product_category_ids.ids)):
+                        lambda c: (
+                                          c.product_id.categ_id.id in point.product_category_ids.ids) or (
+                                          c.product_id.categ_id.parent_id.id in point.product_category_ids.ids)):
                     self.is_quality_check = True
                     quality_control_points.append(point.id)
             elif point.product_ids and self.move_ids_without_package.filtered(
                     lambda p: p.product_id.id in point.product_ids.ids):
                 self.is_quality_check = True
                 quality_control_points.append(point.id)
-            self.quality_control_point_ids = [fields.Command.link(point_id) for point_id in quality_control_points]
+            self.quality_control_point_ids = [fields.Command.link(point_id) for
+                                              point_id in
+                                              quality_control_points]
         return super(StockPicking, self).action_confirm()
 
     def create_quality_checks(self, move, qcp):
@@ -61,6 +67,13 @@ class StockPicking(models.Model):
             'inspection_type_id': action.inspection_type_id.id,
             'instruction': action.instruction,
             'value': action.value,
+            'unit_value': {
+                "unit": {
+                    "id": action.value['unit'].get('id'),
+                    "name": action.value['unit'].get('name')
+                },
+                "value": action.value.get('value')
+            },
         }) for action in qcp.quality_inspection_ids]
         return quality_check
 
@@ -74,14 +87,19 @@ class StockPicking(models.Model):
                     quality_controls[qcp.id] = {}
                 products_list = []
                 if not qcp.product_ids and not qcp.product_category_ids:
-                    products_list = self.move_ids_without_package.mapped('product_id').ids
+                    products_list = self.move_ids_without_package.mapped(
+                        'product_id').ids
                 elif qcp.product_category_ids:
-                    all_category_id = self.env.ref('product.product_category_all').id
-                    if qcp.product_category_ids.filtered(lambda c: c.id == all_category_id):
-                        products_list = self.move_ids_without_package.mapped('product_id').ids
+                    all_category_id = self.env.ref(
+                        'product.product_category_all').id
+                    if qcp.product_category_ids.filtered(
+                            lambda c: c.id == all_category_id):
+                        products_list = self.move_ids_without_package.mapped(
+                            'product_id').ids
                     product_in_move = self.move_ids_without_package.filtered(
-                        lambda c: (c.product_id.categ_id.id in qcp.product_category_ids.ids) or (
-                                c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids))
+                        lambda c: (
+                                              c.product_id.categ_id.id in qcp.product_category_ids.ids) or (
+                                          c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids))
                     if product_in_move:
                         products_list = product_in_move.mapped('product_id').ids
                 elif qcp.product_ids:
@@ -99,15 +117,19 @@ class StockPicking(models.Model):
                             if move.quantity <= 0:
                                 raise UserError(
                                     _("You cannot perform a quality check if the quantity is zero. Please set the product quantity first."))
-                            quality_check = self.create_quality_checks(move, qcp)
+                            quality_check = self.create_quality_checks(move,
+                                                                       qcp)
                             qc_ids.append(quality_check.id)
             self.quality_check_ids = [fields.Command.link(qc) for qc in qc_ids]
             self.is_quality_check_created = True
-
-    @api.depends('quality_check_ids')
+    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked')
     def _compute_quality_checks(self):
-        for qc in self:
-            qc.qc_count = len(qc.quality_check_ids)
+        for picking in self:
+            all_lines = picking.quality_check_ids.quality_check_line_ids
+            picking.qc_count = len(all_lines)
+            picking.qc_checked_count = len(all_lines.filtered('is_checked'))
+            if picking.qc_count > 0 and picking.qc_count == picking.qc_checked_count:
+                picking.is_quality_check = False
 
     def action_view_quality_check(self):
         return {
