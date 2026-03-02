@@ -291,6 +291,57 @@ export class DropZone extends Component {
             this.env.bus.trigger("CY:UPDATE_QUERY", {type: this.state.type, data: this.state.children})
         }
     }
+
+    /**
+     * Set date group-by function for date/datetime dimension items.
+     * Uses TO_CHAR for human-readable display (e.g. "January (2026)").
+     * Also adds a visual tag in the Group By zone.
+     * @param {string} val - The grouping level: "Day", "Month", or "Year".
+     * @param {string} mode - Always "DATE_GROUP".
+     * @param {number} index - The index of the item.
+     */
+    setDateGroupBy(val, mode, index) {
+        const child = this.state.children[index]
+        const column = child.column
+        const baseAlias = column.replace('.', '_')
+        const rawLabel = (child.original_value || child.value)
+            .replace(/^(Day|Month|Year)\s+of\s+/i, '').trim()
+
+        // Human-readable TO_CHAR format map
+        const sqlExprMap = {
+            "Day": `TO_CHAR(${column}, 'Mon DD, YYYY')`,
+            "Month": `TO_CHAR(${column}, 'FMMonth (YYYY)')`,
+            "Year": `TO_CHAR(${column}, 'YYYY')`,
+        }
+        const sqlExpr = sqlExprMap[val] || sqlExprMap["Month"]
+        const alias = `${baseAlias}_${val.toLowerCase()}`
+
+        this.state.children[index] = {
+            query: `${sqlExpr} AS ${alias}`,
+            alias,
+            column,
+            id: child.id,
+            value: rawLabel,           // keep original label unchanged
+            original_value: rawLabel,
+            type: this.state.type,
+            field_type: child.field_type,
+            DATE_GROUP: val,
+        }
+        this.env.bus.trigger("CY:UPDATE_QUERY", { type: this.state.type, data: this.state.children })
+
+        // Add a visual tag in the Group By zone, keyed by source_column for dedup/replace
+        this.env.bus.trigger("CY:ADD_DATE_GROUPBY", {
+            groupByItem: {
+                type: "group",
+                value: `${val} \u2014 ${rawLabel}`,
+                alias,
+                query: `${sqlExpr} AS ${alias}`,
+                column: sqlExpr,        // full expression → used in GROUP BY SQL
+                source_column: column,  // original column → used for dedup/cleanup
+                date_group: val,
+            }
+        })
+    }
 }
 
 // Define the template and components for the DropZone component
