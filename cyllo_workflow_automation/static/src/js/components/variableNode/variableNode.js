@@ -113,6 +113,17 @@ export class VariableNode extends ConfigurationBase {
         ];
     }
 
+    get returnTypeOptions() {
+        return [
+            { value: false, label: '' },
+            { value: 'string', label: 'String' },
+            { value: 'number', label: 'Number' },
+            { value: 'date', label: 'Date' },
+            { value: 'datetime', label: 'DateTime' },
+            { value: 'boolean', label: 'Boolean' },
+        ];
+    }
+
     get variableName() {
         return this.fieldState.variable_name || false
     }
@@ -127,6 +138,10 @@ export class VariableNode extends ConfigurationBase {
 
     get pythonKeywords() {
         return this.props.identifiers.pythonKeywords || []
+    }
+
+    get codeReturnType() {
+        return this.fieldState.code_return_type || false
     }
 
     get existingVariables () {
@@ -150,6 +165,11 @@ export class VariableNode extends ConfigurationBase {
 
     handleUpdateField(field, value) {
         this.fieldState[field] = value
+        if (field === "code_return_type" && this.fieldState.type === "code") {
+            this.fieldState.variable_type = value || "string";
+            // Important: Sync to props if available
+            this.state.successMessage = ""; // Clear success on change
+        }
     }
 
     genericDeserializeDate(type, value) {
@@ -273,6 +293,8 @@ export class VariableNode extends ConfigurationBase {
                 this.fieldState.variable_type = "date";
             }
             else if (type === "binary") {}
+        } else if (this.fieldState.type === "code") {
+            this.fieldState.variable_type = this.fieldState.code_return_type || "string"; // fallback
         }else {
             this.fieldState.variable_type = this.fieldState.type;
         }
@@ -297,10 +319,13 @@ export class VariableNode extends ConfigurationBase {
 
     validateForm() {
          // Destructure fields from the field state
-        const { type, variable_type, variable_name, variable_value } = this.fieldState;
+        const { type, code_return_type, variable_type, variable_name, variable_value } = this.fieldState;
         const { isValid, errorMessage } = this.validateVariableValue(type, variable_value)
         // Initialize an errors object
         const errors = {};
+        if (type === "code" && !code_return_type) {
+            errors.code_return_type = "Please select a return type for the Python expression."
+        }
         if (!variable_type) {
             errors.variable_type = "Missing variable type."
         }
@@ -323,6 +348,14 @@ export class VariableNode extends ConfigurationBase {
         if(!isValid) {
             this.state.valueErrorMessage = errorMessage;
             errors.value = errorMessage;
+        }
+
+        //Dependency check (don't allow rename if usedIn is not empty)
+        const originalVariable = this.props.variables.find(v => v.variable_name === this.props.variable.variable_name);
+        if (this.props.mode === 'edit' && originalVariable?.usedIn?.length > 0) {
+            if (this.fieldState.variable_name !== originalVariable.variable_name) {
+                errors.variable_name = "This variable is used in other nodes. Rename blocked until dependencies are cleared.";
+            }
         }
 
         // Return the validation result

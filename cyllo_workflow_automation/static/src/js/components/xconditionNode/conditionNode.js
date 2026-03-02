@@ -343,7 +343,13 @@ export class ConditionNode extends ConfigurationBase {
                 }
 
                 if (cond.value.fieldType === "static") {
+                    if (["integer", "float", "monetary", "number"].includes(fieldType)) {
+                        rightField = cond.value.value === "" ? "0" : Number(cond.value.value);
+                    } else if (fieldType === "boolean") {
+                        rightField = cond.value.value ? "True" : "False";
+                    } else {
                     rightField = JSON.stringify(cond.value.value);
+                    }
                 } else if (cond.value.fieldType === "variable") {
                     if (cond.value?.value && onConfirm) {
                         this.updateUsedVariables(cond.value.value.selectedVariable);

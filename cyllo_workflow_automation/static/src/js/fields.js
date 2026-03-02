@@ -12,7 +12,7 @@ export const writeFields = [{ name:'model_id', type:'many2One' }, { name:'write_
 
 export const functionCallFields = [{ name: 'model_id', type: "many2One" }, { name: 'function_name', type: 'json' }, { name: 'function_args', type: 'json' }, {name: 'used_variables', type: 'json'},{name:'label', type: "char"},{name:'function_record',type:"json"},{name:'function_type',type:"char"}]
 
-export const variableFields = [{ name: 'variable_name', type: 'char' }, { name: 'variable_type', type: 'selection' }, { name: 'variable_value', type: 'char' }, {name: 'used_variables', type: 'json'},{name:'label', type: "char"}]
+export const variableFields = [{ name: 'variable_name', type: 'char' }, { name: 'variable_type', type: 'selection' }, { name: 'variable_value', type: 'char' }, { name: 'used_variables', type: 'json' }, { name: 'label', type: "char" }, { name: 'code_return_type', type: 'selection' }]
 
 export const codeFields = [{ name: 'model_id', type: "many2One" },{ name: 'code_code', type: 'char' }, {name: 'used_variables', type: 'json'},{name:'label', type: "char"}]
 
