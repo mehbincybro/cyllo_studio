@@ -23,6 +23,7 @@ export class EditReport extends Component {
 
         // Track SortableJS instances so we can destroy/recreate on DOM changes
         this._sortableInstances = [];
+        this._isDragging = false;
 
         onMounted(async () => {
             const params = this.props.action.params || {};
@@ -87,6 +88,17 @@ export class EditReport extends Component {
 
         const self = this;
         editableArea.addEventListener("click", function (e) {
+            if (self._isDragging) return;
+
+            let el = e.target.nodeType === 3 ? e.target.parentElement : e.target;
+            if (el.classList.contains('page')) {
+                $('.selected').removeClass('selected');
+                if (self.editor) self.editor.destroy();
+                return;
+            }
+
+            const wasSelected = el.classList.contains('selected');
+
             $('.selected').removeClass('selected');
             if ($('#branchSelector').css('display') !== 'none') self.closeBranchSelector();
 
@@ -98,17 +110,34 @@ export class EditReport extends Component {
                 }
             }
 
-            let el = e.target.nodeType === 3 ? e.target.parentElement : e.target;
-            if (el.classList.contains('page')) return;
             el.classList.add('selected');
+
+            // "Select then Edit" strategy:
+            // Only trigger the editor if the element was ALREADY selected.
+            // This ensures the first click just selects it, making it draggable.
+            if (!wasSelected) {
+                if (self.editor) {
+                    self.editor.destroy();
+                    self.editor = null;
+                }
+                return;
+            }
+
             if (self.editor) self.editor.destroy();
 
             self.editor = new MediumEditor(el, {
-                buttons: [
-                    'bold', 'italic', 'underline', 'strikethrough',
-                    'subscript', 'superscript', 'h1', 'h3', 'quote',
-                    'anchor', 'undoButton', 'redoButton','deleteElement',
-                ],
+                toolbar: {
+                    buttons: [
+                        'bold', 'italic', 'underline', 'strikethrough',
+                        'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                    ],
+                },
+                extensions: {
+                    'deleteElement': new window.DeleteButton(),
+                    'undoButton': new window.UndoButton(),
+                    'redoButton': new window.RedoButton(),
+                },
+                owner: self,
                 placeholder: false,
                 disableExtraSpaces: true,
             });
@@ -197,9 +226,24 @@ export class EditReport extends Component {
             animation: 150,
             ghostClass: 'gu-transit',
             chosenClass: 'dragging',
+            onStart: () => {
+                this._isDragging = true;
+                if (this.editor) {
+                    this.editor.destroy();
+                    this.editor = null;
+                }
+                $('.selected').removeClass('selected');
+            },
+            onEnd: () => {
+                console.log('njnjnjnjnj')
+                this._isDragging = false;
+                this._justDragged = true;
+                setTimeout(() => { this._justDragged = false; }, 300);
+            },
             onClone: (evt) => {
-                // Tag the clone so the onAdd handler knows it came from the panel
-                evt.clone.dataset._fromPanel = '1';
+                // Tag the item being dragged (the "real" drop candidate)
+                // so the onAdd handler knows it came from the panel
+                evt.item.dataset._fromPanel = '1';
             },
         });
         this._sortableInstances.push(panelSortable);
@@ -217,61 +261,74 @@ export class EditReport extends Component {
         const instance = Sortable.create(zone, {
             group: {
                 name: 'studio',
-                pull: true,   // elements can be moved out of this zone
-                put: true,    // elements from panel clones or other zones land here
+                pull: true,
+                put: true,
             },
             animation: 150,
-            ghostClass: 'gu-transit',
-            dragClass: 'gu-mirror',
-            // Only allow dragging of movable nodes (not the page/row wrappers)
-            filter: '.page, .row',
-            preventOnFilter: false,
 
-            // Fired when an element from ANOTHER list (panel or other zone) is dropped here
-            onAdd: async (evt) => {
+            onStart() {
+                self._isDragging = true;
+                if (self.editor) {
+                    self.editor.destroy();
+                    self.editor = null;
+                }
+                $('.selected').removeClass('selected');
+            },
+
+            onEnd() {
+                self._isDragging = false;
+            },
+
+            async onAdd(evt) {
+                console.log("DROP", evt);
+                console.log(self.reportFrameRef.el.querySelectorAll('[cy-template]'))
                 const item = evt.item;
                 const fromPanel = item.dataset._fromPanel === '1';
 
-                if (fromPanel) {
-                    // Remove the placeholder node SortableJS already inserted
-                    item.remove();
-                    delete item.dataset._fromPanel;
+                if (!fromPanel) return;
 
-                    const type = item.dataset.type;
-                    let html = '';
+                const type = item.dataset.type; // read BEFORE anything
+                delete item.dataset._fromPanel;
 
-                    if (type === 'field') {
-                        const resModel = self._resModel || self.props.action.params?.res_model || '';
-                        const { fieldPath, fieldInfo } = await self.openFieldSelectorPopover(
-                            zone, resModel,
+                // hide while async runs
+                item.style.opacity = '0.4';
+
+                if (type === 'field') {
+                    const resModel = self._resModel || self.props.action.params?.res_model || '';
+
+                    const { fieldPath, fieldInfo } =
+                        await self.openFieldSelectorPopover(
+                            zone,
+                            resModel,
                             (field) => !['one2many', 'many2many'].includes(field.type),
                         );
-                        if (!fieldPath) return;
-                        html = `<span class="c_new"
-                                t-field="doc.${fieldPath}"
-                                style="cursor:grab;"
-                                title="${fieldInfo.string}">${fieldPath}</span>`;
-                    } else if (type === 'box') {
-                        html = `<div class="box rounded-2 c_new"
-                                style="border:1px solid #000;padding:10px;cursor:grab;">
-                                <span>New box</span>
-                            </div>`;
+
+                    if (!fieldPath) {
+                        console.log('mdnjdnjdnjd')
+                        item.remove(); // cancelled
+                        return;
                     }
 
-                    if (html) {
-                        zone.insertAdjacentHTML('beforeend', html);
-                        // Re-wire sortable so the newly added element is draggable
-                        this._refreshDragHandles();
-                    }
+                    // transform existing dropped node
+                    item.className = 'c_new';
+                    item.innerHTML = fieldPath;
+                    item.setAttribute('t-field', `doc.${fieldPath}`);
+                    item.setAttribute('title', fieldInfo.string);
+                    item.setAttribute('cy-type', 'dynamic');
+                    item.style.cursor = 'grab';
+                    item.style.opacity = '1';
                 }
-                // For existing elements moved between zones, SortableJS handles the
-                // DOM move automatically — nothing extra needed.
-            },
 
-            // After any sort/move within the same list
-            onEnd: () => {
-                // Nothing extra needed; DOM is already updated by SortableJS
-            },
+                if (type === 'box') {
+                    item.className = 'box rounded-2 c_new';
+                    item.innerHTML = '<span>New box</span>';
+                    item.setAttribute('cy-type', 'box');
+                    item.style.border = '1px solid #000';
+                    item.style.padding = '10px';
+                    item.style.cursor = 'grab';
+                    item.style.opacity = '1';
+                }
+            }
         });
 
         this._sortableInstances.push(instance);
@@ -279,7 +336,7 @@ export class EditReport extends Component {
 
     /** Destroy all tracked SortableJS instances. */
     _destroySortableInstances() {
-        this._sortableInstances.forEach(s => { try { s.destroy(); } catch (_) {} });
+        this._sortableInstances.forEach(s => { try { s.destroy(); } catch (_) { } });
         this._sortableInstances = [];
     }
 
@@ -290,7 +347,7 @@ export class EditReport extends Component {
     _refreshDragHandles() {
         // Destroy existing zone sortables (keep panel sortable alive – index 0)
         const [panelSortable, ...zoneSortables] = this._sortableInstances;
-        zoneSortables.forEach(s => { try { s.destroy(); } catch (_) {} });
+        zoneSortables.forEach(s => { try { s.destroy(); } catch (_) { } });
         this._sortableInstances = panelSortable ? [panelSortable] : [];
 
         // Recreate for every cy-template zone
@@ -419,7 +476,7 @@ export class EditReport extends Component {
         if (
             el.querySelector('[t-foreach]') ||
             el.querySelector('[t-set]') ||
-                el.querySelector('[t-call]') ||
+            el.querySelector('[t-call]') ||
             el.querySelector('[t-if]') ||
             el.querySelector('[t-elif]') ||
             el.querySelector('[t-else]')
@@ -435,17 +492,29 @@ export class EditReport extends Component {
 
             items.forEach(change => {
                 if (this._isStructuralNode(change.el)) {
-                    console.warn("[Cyllo Studio] Skipping structural node:", change.xpath);
+                    console.warn("[Cyllo Studio] Skipping structural/table node:", change.xpath);
                     return;
                 }
 
+                // Safety net: skip any xpath that targets table internals
+                const unsafeSegments = ['tbody', 'thead', 'tfoot', '/tr', '/td', '/th'];
+                if (unsafeSegments.some(seg => change.xpath.includes(seg))) {
+                    console.warn("[Cyllo Studio] Skipping unsafe table xpath:", change.xpath);
+                    return;
+                }
+
+                // ── FIX: only use c_new nodes (freshly dropped) as "inside" inserts.
+                // Previously ALL non-cy-xpath children triggered an "inside" insert,
+                // causing already-saved content to be re-inserted on every save.
                 const newNodes = Array.from(change.el.children)
-                    .filter(child => !child.hasAttribute('cy-xpath'));
+                    .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
                 if (newNodes.length) {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
                         this._cleanStudioAttrs(cloned);
+                        // Strip the c_new marker so it isn't saved into the template
+                        cloned.classList.remove('c_new');
 
                         let content = new XMLSerializer()
                             .serializeToString(cloned)
@@ -460,6 +529,7 @@ export class EditReport extends Component {
                     return;
                 }
 
+                // Text-only edit: replace the element
                 const cloned = change.el.cloneNode(true);
                 this._cleanStudioAttrs(cloned);
                 cloned.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));

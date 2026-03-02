@@ -45,8 +45,16 @@
             ('include', 'cyllo_studio.assets_backend')
         ],
         'cyllo_studio.assets_backend': [
+            'cyllo_studio/static/src/lib/medium_editor/medium-editor.min.js',
+            'cyllo_studio/static/src/lib/medium_editor/studio-editor-undo-redo-ext.js',
+            'cyllo_studio/static/src/lib/medium_editor/medium-editor.min.css',
+            'cyllo_studio/static/src/lib/medium_editor/default.min.css',
+            'cyllo_studio/static/src/js/studio_field_selector_popover.js',
+
             'cyllo_studio/static/src/lib/dragula/dragula.min.js',
             'cyllo_studio/static/src/lib/dragula/dragula.min.css',
+            'cyllo_studio/static/src/lib/sortablejs/Sortable.min.js',
+            'cyllo_studio/static/src/lib/sortablejs/Sortable.js',
             'cyllo_studio/static/src/lib/auto_scroll/auto_scroll.min.js',
             'cyllo_studio/static/src/lib/jqueryui/jquery.min.js',
             'cyllo_studio/static/src/lib/flatted/min.js',
