@@ -8,6 +8,10 @@
                         t-on-click="() => save_changes(this)">Save</button>
                 <button class="btn btn-light border px-4"
                         t-on-click="() => close_edit(this)">Discard</button>
+                <div class="ms-4 form-check form-switch pt-1">
+                    <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview" t-att-checked="state.previewMode"/>
+                    <label class="form-check-label fw-bold" for="previewSwitch">Preview</label>
+                </div>
                 <div class="flex-grow-1"/>
                 <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1" title="Undo">
                     <i class="fa fa-undo"/>
@@ -18,9 +22,9 @@
             </div>
             
             <!-- Body -->
-            <div class="d-flex flex-grow-1 overflow-hidden">
-                <!-- Sidebar -->
-                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column" style="width: 260px; overflow-y: auto; z-index: 10;">
+            <div class="d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
+                <!-- Sidebar (Editable) -->
+                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column" t-att-class="{'d-none': state.previewMode}" style="width: 260px; overflow-y: auto; z-index: 10;">
                     <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold" style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
                     
                     <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="box" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
@@ -33,12 +37,92 @@
                         <span class="fw-semibold text-dark">Dynamic Field</span>
                     </div>
                 </div>
-                
+
+                <!-- Properties Sidebar (Preview) -->
+                <div t-if="state.previewMode and !state.showSourceEditor" class="snippet-panel bg-dark text-white border-end p-4 shadow-lg d-flex flex-column h-100" style="width: 320px; z-index: 10;">
+                    <h6 class="text-uppercase small fw-bold mb-4 opacity-75" style="letter-spacing: 1px;">Report Properties</h6>
+
+                    <div class="mb-4">
+                        <label class="small opacity-50 mb-1 d-block">Report name</label>
+                        <input type="text" class="form-control form-control-sm bg-black text-white border-secondary border-opacity-25"
+                               t-att-value="state.reportInfo.name"
+                               t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="small opacity-50 mb-1 d-block">Paper format</label>
+                        <select class="form-select form-select-sm bg-black text-white border-secondary border-opacity-25"
+                                t-on-change="(ev) => this.onReportPropertyChange('paperformat_id', ev.target.value)">
+                            <option t-foreach="state.paperFormats" t-as="fmt" t-key="fmt.id"
+                                    t-att-value="fmt.id"
+                                    t-att-selected="fmt.id === state.reportInfo.paperformat_id">
+                                <t t-esc="fmt.name"/>
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="showPrintMenu"
+                               t-att-checked="true" disabled="1"/>
+                        <label class="form-check-label small" for="showPrintMenu">Show in print menu</label>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" id="reloadAttach"
+                               t-att-checked="state.reportInfo.attachment_use"
+                               t-on-change="(ev) => this.onReportPropertyChange('attachment_use', ev.target.checked)"/>
+                        <label class="form-check-label small" for="reloadAttach">Reload from attachment</label>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-edit" t-on-click="onEditSources">EDIT SOURCES</button>
+                        <button class="btn btn-reset">RESET REPORT</button>
+                    </div>
+                </div>
+
+                <!-- Source Editor -->
+                <div t-if="state.showSourceEditor" class="source-editor-container d-flex flex-column border-end bg-dark" style="width: 500px; z-index: 5;">
+                    <div class="source-editor-header d-flex align-items-center justify-content-between p-2 text-white small fw-bold">
+                        <span>SOURCE EDITOR</span>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-success py-0 px-2" t-on-click="onSaveSource">Save</button>
+                            <button class="btn btn-sm btn-light py-0 px-2" t-on-click="() => state.showSourceEditor = false">Close</button>
+                        </div>
+                    </div>
+                    <div id="ace-editor" t-ref="aceEditor" class="flex-grow-1 w-100" style="font-size: 14px; min-height: 400px;"/>
+                </div>
+
                 <!-- Main Area -->
-                <div class="flex-grow-1 overflow-auto d-flex justify-content-center py-5 bg-200" style="position: relative;">
-                    <!-- A4 Paper Container -->
-                    <div class="cyllo-studio-report-container bg-white shadow" style="width: 210mm; min-height: 297mm; padding: 20mm; box-sizing: border-box; position: relative;">
-                        <div id="studio_report" t-ref="report_frame" class="editable-area w-100 h-100 text-dark"/>
+                <div class="flex-grow-1 overflow-auto d-flex flex-column align-items-center py-4 bg-200" style="position: relative;">
+                    <!-- Preview Toolbar -->
+                    <div t-if="state.previewMode" class="d-flex align-items-center justify-content-between mb-4 sticky-top px-4 py-2 bg-dark rounded-pill shadow-sm border border-secondary border-opacity-25" style="width: 90%; min-width: 600px; z-index: 100;">
+                        <div class="d-flex align-items-center gap-3">
+<!--                             <div class="input-group input-group-sm" style="width: 280px;">-->
+<!--                                <input type="text" class="form-control bg-black text-white border-0 ps-3" placeholder="Search record..." style="border-radius: 20px 0 0 20px;"/>-->
+<!--                                <span class="input-group-text bg-black text-white border-0 pe-3" style="border-radius: 0 20px 20px 0;"><i class="fa fa-search small opacity-50"/></span>-->
+<!--                            </div>-->
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <button class="btn btn-sm btn-outline-light text-white border-secondary border-opacity-50 px-3" t-on-click="onPrintReport">
+                                <i class="fa fa-print me-1"/> Print
+                            </button>
+                            <div class="pagination-controls d-flex align-items-center gap-2 bg-black rounded-pill p-1">
+                                <span class="small px-3 text-white opacity-75"><t t-esc="state.currentIndex + 1"/> / <t t-esc="state.records.length"/></span>
+                                <div class="btn-group">
+                                    <button class="btn btn-sm btn-dark py-1 rounded-circle me-1" t-on-click="onPrevRecord" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;"><i class="fa fa-chevron-left small"/></button>
+                                    <button class="btn btn-sm btn-dark py-1 rounded-circle" t-on-click="onNextRecord" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;"><i class="fa fa-chevron-right small"/></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- A4 / Custom Paper Container -->
+                    <div class="cyllo-studio-report-container bg-white shadow-lg mb-5"
+                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; box-sizing: border-box; position: relative; transition: all 0.3s ease;'">
+                        <iframe t-if="state.previewMode and state.previewHtml"
+                                class="live-report-content w-100 h-100 border-0"
+                                t-att-srcdoc="state.previewHtml"/>
+                        <div t-else="" id="studio_report" t-ref="report_frame" class="editable-area w-100 h-100 text-dark" style="padding: 20mm;"/>
                     </div>
                 </div>
             </div>

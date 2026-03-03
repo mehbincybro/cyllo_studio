@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import re
 from lxml import etree
+import base64
 
 from odoo.http import Controller, route, request
 
@@ -130,6 +131,96 @@ class StudioReportController(Controller):
                 return {'success': False, 'error': f'Template {template!r} not found'}
             arch = view.get_iframe_rendered_template(template)
             return {'success': True, 'arch': arch}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/get_report_preview_data', auth='user', csrf=False, type='json')
+    def get_report_preview_data(self, template, res_model):
+        """
+        Fetch records, report properties, and available paper formats for the preview sidebar.
+        """
+        try:
+            report = request.env['ir.actions.report'].search([('report_name', '=', template)], limit=1)
+            if not report:
+                return {'success': False, 'error': f'Report {template!r} not found'}
+
+            # Fetch recent records from the target model
+            records = request.env[res_model].search([], limit=80)
+
+            # Fetch available paper formats with dimensions
+            paper_formats = request.env['report.paperformat'].search_read(
+                [], ['id', 'name', 'page_width', 'page_height', 'format']
+            )
+
+            return {
+                'success': True,
+                'report': {
+                    'id': report.id,
+                    'name': report.name,
+                    'report_name': report.report_name,
+                    'model': report.model,
+                    'paperformat_id': report.paperformat_id.id if report.paperformat_id else False,
+                    'attachment_use': report.attachment_use,
+                },
+                'record_ids': records.ids,
+                'paper_formats': paper_formats,
+            }
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/render_report_html', auth='user', csrf=False, type='json')
+    def render_report_html(self, report_id, doc_ids):
+        """
+        Render the target report with real data for the given doc_ids and return the HTML.
+        """
+        try:
+            report = request.env['ir.actions.report'].browse(report_id)
+            if not report.exists():
+                return {'success': False, 'error': 'Report not found'}
+
+            html_content, _ = report.sudo()._render_qweb_html(report.id, doc_ids)
+            return {'success': True, 'html': html_content.decode('utf-8')}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/get_report_source', auth='user', csrf=False, type='json')
+    def get_report_source(self, template):
+        """ Fetch the raw XML arch of the report template, preferring custom view. """
+        try:
+            # First look for a custom view
+            custom_view = request.env['ir.ui.view'].search([('name', '=', f'Custom_{template}')], limit=1)
+            if custom_view:
+                return {'success': True, 'arch': custom_view.arch_base}
+
+            # Fallback to base view
+            view = request.env.ref(template, raise_if_not_found=False)
+            if not view:
+                # Try searching by name if ref fails (might just be the view name without module)
+                view = request.env['ir.ui.view'].search([('name', '=', template)], limit=1)
+
+            if not view.exists():
+                return {'success': False, 'error': f'Template {template!r} not found'}
+            return {'success': True, 'arch': view.arch_base}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/save_report_source', auth='user', csrf=False, type='json')
+    def save_report_source(self, template, arch):
+        """ Save the raw XML arch directly to the inherited view (or create one). """
+        try:
+            custom_view = request.env['ir.ui.view'].search([('name', '=', f'Custom_{template}')], limit=1)
+            if custom_view:
+                custom_view.write({'arch_base': arch})
+            else:
+                base_view = request.env.ref(template)
+                request.env['ir.ui.view'].create({
+                    'name': f'Custom_{template}',
+                    'type': 'qweb',
+                    'mode': 'extension',
+                    'inherit_id': base_view.id,
+                    'arch_base': arch,
+                })
+            return {'success': True}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 

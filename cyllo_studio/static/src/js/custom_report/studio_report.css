@@ -156,6 +156,83 @@
     border-color: #80bdff;
 }
 
+/* ── Preview Mode Styling overrides ───────────────────────────────────── */
+.previewing [cy-type='dynamic'] {
+    background-color: transparent;
+    color: inherit;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    pointer-events: none;
+}
+
+.previewing [cy-type='box'] {
+    border: 1px dotted transparent !important;
+    pointer-events: none;
+}
+
+.previewing [cy-template] {
+    outline: none !important;
+    background: transparent !important;
+    pointer-events: none;
+}
+
+.previewing .selected {
+    outline: none !important;
+}
+
+/* ── Enhanced Preview Styling ────────────────────────────────────────── */
+.bg-dark-main {
+    background-color: #1a1b1e !important;
+}
+
+.bg-black {
+    background-color: #000000 !important;
+}
+
+.preview-top-toolbar {
+    transition: all 0.3s ease;
+    background: rgba(33, 37, 41, 0.9) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.pagination-controls .btn-dark {
+    background: #2b2d31;
+    border: none;
+}
+
+.pagination-controls .btn-dark:hover {
+    background: #3b3e44;
+}
+
+.snippet-panel.bg-dark {
+    background-color: #212529 !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+.snippet-panel.bg-dark .form-control,
+.snippet-panel.bg-dark .form-select {
+    font-size: 13px;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.snippet-panel.bg-dark .form-control:focus,
+.snippet-panel.bg-dark .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+}
+
+.cyllo-studio-report-container.shadow-lg {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
+}
+
+.live-report-content {
+    background: white;
+    min-height: 100%;
+}
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -362,4 +439,66 @@
 
 .gu-over {
     outline: 2px dashed #5b8dee;
+}
+
+.cyllo-studio-report-container,
+.d-flex.flex-column {
+    min-height: 0;
+}
+
+/* ── Sidebar Action Buttons ───────────────────────── */
+
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    transition: all 0.2s ease;
+}
+
+/* Edit Sources */
+.btn-edit {
+    background: #9ea700;
+    color: white;
+}
+
+/* Reset Report */
+.btn-reset {
+    background: #e35d6a;
+    color: white;
+}
+
+/* Preview Paper Format */
+select>option {
+    background: #000000 !important;
+}
+
+/* ── Source Editor Refinement ─────────────────────────── */
+.source-editor-container {
+    height: 100%;
+    position: relative;
+    box-shadow: 10px 0 20px rgba(0, 0, 0, 0.2);
+    border-right: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+#ace-editor {
+    border: none !important;
+    line-height: 1.6;
+    background: #1a1b1e !important;
+    min-height: 500px;
+}
+
+.source-editor-header {
+    background: #2b2d31 !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    color: #fff !important;
 }
