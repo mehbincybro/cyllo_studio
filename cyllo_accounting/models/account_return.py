@@ -65,6 +65,8 @@ class AccountReturn(models.Model):
     state = fields.Selection([('draft', 'Draft'), ('posted', 'Posted'), ('cancel', 'Cancelled')], default='draft',
                              help="Status of the tax return.")
 
+    check_ids = fields.One2many('account.return.validation', 'return_id', string="Validation Checks")
+
     @api.constrains('date_from', 'date_to')
     def _check_dates(self):
         """Ensure date range is valid."""
@@ -118,6 +120,38 @@ class AccountReturn(models.Model):
         # Net = Output - Input (this matches Odoo)
         self.net_tax = self.output_tax - self.input_tax
 
+    def action_validate_checks(self):
+        """
+        Run all related validation checks.
+        """
+        self.ensure_one()
+        for check in self.check_ids:
+            check.action_run_validation()
+
+        failed_checks = self.check_ids.filtered(lambda c: c.state == 'failed')
+        if failed_checks:
+            msg = _("The following validation checks failed:\n%s") % "\n".join([f"- {c.name}: {c.result_message}" for c in failed_checks])
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': _('Validation Failed'),
+                    'message': msg,
+                    'sticky': True,
+                    'type': 'danger',
+                }
+            }
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Validation Passed'),
+                'message': _('All validation checks passed.'),
+                'sticky': False,
+                'type': 'success',
+            }
+        }
+
     def action_post(self):
         """
         Create and post settlement journal entry
@@ -128,6 +162,11 @@ class AccountReturn(models.Model):
 
         if self.state != 'draft':
             raise UserError(_("Only draft returns can be posted."))
+
+        # Validate checks before posting
+        self.action_validate_checks()
+        if any(check.state == 'failed' for check in self.check_ids):
+            raise UserError(_("Cannot post tax return because some validation checks failed. Please review the 'Validation Checks' tab."))
 
         # if not self.net_tax:
         #     raise UserError(_("Nothing to settle."))
@@ -213,11 +252,11 @@ class AccountReturn(models.Model):
 
         self.state = 'cancel'
 
-    # def unlink(self):
-    #     """
-    #     Prevent deletion of posted returns.
-    #     """
-    #     for rec in self:
-    #         if rec.state == 'posted':
-    #             raise UserError(_("You cannot delete a posted tax return."))
-    #     return super().unlink()
+    def unlink(self):
+        """
+        Prevent deletion of posted returns.
+        """
+        for rec in self:
+            if rec.state == 'posted':
+                raise UserError(_("You cannot delete a posted tax return."))
+        return super().unlink()
