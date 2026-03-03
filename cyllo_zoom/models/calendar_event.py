@@ -8,6 +8,14 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+# ir.config_parameter keys (must match res_config_settings.py)
+PARAM_ACCESS_TOKEN = 'cyllo_zoom.zoom_token'
+
+
+def _get_global_zoom_token(env):
+    """Helper: return the global Zoom access token from ir.config_parameter."""
+    return env['ir.config_parameter'].sudo().get_param(PARAM_ACCESS_TOKEN, '')
+
 
 class CalendarEvent(models.Model):
     """Inheriting Calendar events to create zoom meetings"""
@@ -112,11 +120,21 @@ class CalendarEvent(models.Model):
     # CREATE EVENT
     # ----------------------------------------------------------------------
     @api.model_create_multi
-    def create(self, vals):
-        events = super().create(vals)
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('is_zoom_meet'):
+                # Fetch Zoom details BEFORE creating the record to avoid secondary write()
+                zoom_data = self._fetch_zoom_data(
+                    name=vals.get('name', 'Unspecified'),
+                    start=fields.Datetime.to_datetime(vals.get('start')),
+                    duration_hours=vals.get('duration', 1.0)
+                )
+                vals.update(zoom_data)
+
+        events = super().create(vals_list)
+
         for event in events:
             if event.is_zoom_meet:
-                self._create_zoom_meet(event)
                 event._send_zoom_invitation_to_attendees()
         return events
 
@@ -129,7 +147,13 @@ class CalendarEvent(models.Model):
 
         for event in self:
             if event.is_zoom_meet and not event.zoom_event:
-                self._create_zoom_meet(event)
+                # If Zoom was toggled on or created via write, fetch and update
+                zoom_data = self._fetch_zoom_data(
+                    name=event.name,
+                    start=event.start,
+                    duration_hours=event.duration
+                )
+                event.write(zoom_data)
                 event._send_zoom_invitation_to_attendees()
             else:
                 old = old_partners.get(event.id, self.env['res.partner'])
@@ -139,20 +163,28 @@ class CalendarEvent(models.Model):
         return res
 
     # ----------------------------------------------------------------------
-    # CREATE ZOOM MEETING (API)
+    # FETCH ZOOM DATA (API)
     # ----------------------------------------------------------------------
-    def _create_zoom_meet(self, cal_event):
+    def _fetch_zoom_data(self, name, start, duration_hours, retry=True):
+        """Helper to call Zoom API and return data dict without writing to record."""
         url = "https://api.zoom.us/v2/users/me/meetings"
-        current_uid = self._context.get('uid')
-        user_id = self.env['res.users'].browse(current_uid)
-        duration = cal_event.duration * 60
+        zoom_token = _get_global_zoom_token(self.env)
+
+        if not zoom_token:
+            raise UserError(_(
+                "Zoom Access Token is not configured. "
+                "Please go to Settings → General Settings → Zoom Integration "
+                "and connect your Zoom account."
+            ))
+
+        duration_minutes = int(duration_hours * 60)
 
         payload = {
-            "topic": cal_event.name,
+            "topic": name,
             "type": 2,
-            "start_time": cal_event.start.isoformat(),
+            "start_time": start.isoformat() if start else fields.Datetime.now().isoformat(),
             "timezone": 'UTC',
-            "duration": int(duration),
+            "duration": duration_minutes,
             "settings": {
                 "email_notification": False,
                 "waiting_room": True,
@@ -164,26 +196,56 @@ class CalendarEvent(models.Model):
         }
 
         headers = {
-            'Authorization': f'Bearer {user_id.zoom_token}',
+            'Authorization': f'Bearer {zoom_token}',
             'Content-Type': 'application/json',
             'Accept': 'application/json',
         }
 
         response = requests.post(url, headers=headers, data=json.dumps(payload))
         res_json = response.json()
-        _logger.debug("Zoom API create response: %s", res_json)
 
-        if res_json.get('code') == 124:
-            raise UserError(_("Zoom Token Expired. Please refresh token."))
+        # Handle Token Expiry (code 124) with an automatic retry
+        if res_json.get('code') == 124 and retry:
+            _logger.info("Zoom Token Expired (124). Attempting auto-refresh and retry...")
+            try:
+                # Trigger the global refresh method
+                self.env['res.config.settings'].sudo().action_zoom_meet_refresh_token()
+                # Retry once without the retry flag
+                return self._fetch_zoom_data(name, start, duration_hours, retry=False)
+            except Exception as e:
+                _logger.error("Auto-refresh failed during meeting creation: %s", e)
+                # Fall through to the normal error handling if refresh fails
 
         if res_json.get('id'):
-            cal_event.zoom_event = res_json.get('id')
-            cal_event.zoom_meet_url = res_json.get('join_url')
-            cal_event.zoom_meet_code = res_json.get('id')
-            cal_event.zoom_meet_password = res_json.get('password') or ''
+            return {
+                'zoom_event': str(res_json.get('id')),
+                'zoom_meet_url': res_json.get('join_url'),
+                'zoom_meet_code': str(res_json.get('id')),
+                'zoom_meet_password': res_json.get('password') or '',
+            }
         else:
+            # If we still have an error after a potential retry
+            error_msg = res_json.get('message', 'Unknown error')
+            if res_json.get('code') == 124:
+                raise UserError(_(
+                    "Zoom Token Expired and auto-refresh failed. Please go to "
+                    "Settings → General Settings → Zoom Integration and "
+                    "manually click 'Refresh Token'."))
+
             raise ValidationError(
-                _("Failed to create Zoom meeting. Please check authorization."))
+                _("Failed to create Zoom meeting: %s") % error_msg)
+
+    # ----------------------------------------------------------------------
+    # DEPRECATED: CREATE ZOOM MEETING (kept for reference or if used by other modules)
+    # ----------------------------------------------------------------------
+    def _create_zoom_meet(self, cal_event):
+        """Standard wrapper around fetch to maintain compatibility if needed."""
+        zoom_data = self._fetch_zoom_data(
+            name=cal_event.name,
+            start=cal_event.start,
+            duration_hours=cal_event.duration
+        )
+        cal_event.write(zoom_data)
 
     # ----------------------------------------------------------------------
     # ONCHANGE: CLEAR ZOOM WHEN DISABLED
@@ -191,17 +253,19 @@ class CalendarEvent(models.Model):
     @api.onchange("is_zoom_meet")
     def _onchange_is_zoom_meet(self):
         if not self.is_zoom_meet and self.zoom_event:
-            current_uid = self._context.get('uid')
-            user_id = self.env['res.users'].browse(current_uid)
+            zoom_token = _get_global_zoom_token(self.env)
             url = f'https://api.zoom.us/v2/meetings/{self.zoom_event}'
             headers = {
-                'Authorization': f'Bearer {user_id.zoom_token}',
+                'Authorization': f'Bearer {zoom_token}',
                 'Content-Type': 'application/json',
             }
 
             response = requests.delete(url, headers=headers)
             if response.status_code == 401:
-                raise UserError(_("Zoom Token Expired. Please refresh token."))
+                raise UserError(_(
+                    "Zoom Token Expired. Please go to Settings → General Settings "
+                    "→ Zoom Integration and click 'Refresh Token'."
+                ))
 
             # Clear all fields
             self.zoom_meet_url = ''
@@ -210,7 +274,7 @@ class CalendarEvent(models.Model):
             self.zoom_event = ''
             # Description clears automatically from compute()
 
-            _logger.info(f"Zoom meeting deleted for event '{self.name}'.")
+            _logger.info("Zoom meeting deleted for event '%s'.", self.name)
 
     # ----------------------------------------------------------------------
     # INVITATIONS
@@ -229,7 +293,7 @@ class CalendarEvent(models.Model):
 
         mail_template.with_context(
             default_partner_ids=target_partners
-        ).send_mail(self.id, force_send=True)
+        ).send_mail(self.id, force_send=False)
 
     # ----------------------------------------------------------------------
     # DELETE EVENT
@@ -237,15 +301,12 @@ class CalendarEvent(models.Model):
     def unlink(self):
         for event in self:
             if event.is_zoom_meet and event.zoom_event:
-                current_uid = self._context.get('uid')
-                user_id = self.env['res.users'].browse(current_uid)
-                company_id = user_id.company_id
+                zoom_token = _get_global_zoom_token(self.env)
                 url = f'https://api.zoom.us/v2/meetings/{event.zoom_event}'
                 headers = {
-                    'Authorization': f'Bearer {company_id.zoom_company_access_token}',
+                    'Authorization': f'Bearer {zoom_token}',
                     'Content-Type': 'application/json',
                 }
-
                 requests.delete(url, headers=headers)
 
         return super().unlink()
@@ -296,7 +357,7 @@ class CalendarEvent(models.Model):
                 partner_ids=rec.attendee_ids.mapped('partner_id').ids
             )
 
-            # Optional: Real-time browser popup
+            # Real-time browser popup
             for partner in rec.attendee_ids.mapped('partner_id'):
                 self.env['bus.bus']._sendone(
                     (self.env.cr.dbname, 'res.partner', partner.id),
@@ -307,4 +368,3 @@ class CalendarEvent(models.Model):
                         'zoom_url': rec.zoom_meet_url,
                     }
                 )
-
