@@ -24,3 +24,4 @@ from . import account_financial_year_op
 from . import account_move_lock
 from . import account_payment_register
 from . import import_bank_statement
+from . import tax_return_wizard

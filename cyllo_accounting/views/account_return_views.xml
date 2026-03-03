@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tree View -->
+    <record id="view_account_return_tree" model="ir.ui.view">
+        <field name="name">account.return.tree</field>
+        <field name="model">account.return</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="periodicity"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+                <field name="output_tax"/>
+                <field name="input_tax"/>
+                <field name="net_tax"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_account_return_form" model="ir.ui.view">
+        <field name="name">account.return.form</field>
+        <field name="model">account.return</field>
+        <field name="arch" type="xml">
+            <form string="Tax Return">
+
+                <header>
+
+                    <!-- Compute: visible only in draft -->
+                    <button name="action_compute"
+                            string="Compute"
+                            type="object"
+                            class="btn-primary"
+                            invisible="state != 'draft'"/>
+
+                    <!-- Post: visible only in draft -->
+                    <button name="action_post"
+                            string="Post"
+                            type="object"
+                            class="btn-success"
+                            invisible="state != 'draft'"/>
+
+                    <!-- Cancel: visible only in posted -->
+                    <button name="action_cancel"
+                            string="Cancel"
+                            type="object"
+                            class="btn-secondary"
+                            invisible="state != 'posted'"/>
+
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="draft,posted,cancel"/>
+                </header>
+
+                <sheet>
+
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="periodicity"/>
+                            <field name="journal_id"/>
+                        </group>
+
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                            <field name="company_id"
+                                   groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+
+                    <separator string="Tax Summary"/>
+
+                    <group>
+                        <group>
+                            <field name="output_tax" readonly="1"/>
+                            <field name="input_tax" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="net_tax" readonly="1"/>
+                            <field name="move_id" readonly="1"/>
+                        </group>
+                    </group>
+
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_account_return" model="ir.actions.act_window">
+        <field name="name">Tax Returns</field>
+        <field name="res_model">account.return</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+</odoo>

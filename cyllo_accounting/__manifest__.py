@@ -33,6 +33,7 @@
     'depends': ['web', 'account', 'mail', 'account_check_printing'],
     'icon': '/cyllo_base/static/src/icons/invoicing.svg',
     'data': [
+        'data/tax_returns_journal.xml',
         'data/ir_actions_server_data.xml',
         'data/account_fiscal_year_data.xml',
         'data/check_layout.xml',
@@ -55,6 +56,8 @@
         'views/batch_payment_views.xml',
         'views/online_bank_provider_views.xml',
         'views/res_config_settings_views.xml',
+        'wizards/tax_return_wizard_views.xml',
+        'views/account_return_views.xml',
         'views/cyllo_accounting_menus.xml',
 
         'reports/ir_actions_report.xml',
