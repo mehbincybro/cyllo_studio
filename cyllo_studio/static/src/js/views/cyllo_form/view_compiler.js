@@ -182,41 +182,41 @@ export class CylloFormCompiler extends FormCompiler {
      * @returns {Element} - Compiled field element.
      */
 
-    compileField(el, params) {
-        const field = super.compileField(el, params);
-        const fieldName = el.getAttribute("name");
-        const fieldString = el.getAttribute("string");
-        const fieldId = el.getAttribute("field_id");
-        const contextViewRef = el.getAttribute("context");
-        const labelsForAttr = el.getAttribute("id") || fieldName;
-        const labels = this.getLabels(labelsForAttr);
-        const dynamicLabel = (label) => {
-            const formLabel = this.createLabelFromField(fieldId, fieldName, fieldString, label, {
-                ...params,
-                currentFieldArchNode: el,
-            });
-            if (formLabel) {
-                label.replaceWith(formLabel);
-            } else {
-                label.remove();
-            }
-            return formLabel;
-        };
-        for (const label of labels) {
-            dynamicLabel(label);
-        }
-        this.encounteredFields[fieldName] = dynamicLabel;
-        return field;
-    }
-
-    /**
-     * Compile a generic node.
-     * Adds handling for invisible nodes, stripes, dynamic click events, and field extraction.
-     * @param {Element} node - The node to compile.
-     * @param {Record<string, any>} params - Compilation parameters.
-     * @param {boolean} evalInvisible - Whether to evaluate invisible nodes.
-     * @returns {Element} - Compiled node.
-     */
+//    compileField(el, params) {
+//        const field = super.compileField(el, params);
+//        const fieldName = el.getAttribute("name");
+//        const fieldString = el.getAttribute("string");
+//        const fieldId = el.getAttribute("field_id");
+//        const contextViewRef = el.getAttribute("context");
+//        const labelsForAttr = el.getAttribute("id") || fieldName;
+//        const labels = this.getLabels(labelsForAttr);
+//        const dynamicLabel = (label) => {
+//            const formLabel = this.createLabelFromField(fieldId, fieldName, fieldString, label, {
+//                ...params,
+//                currentFieldArchNode: el,
+//            });
+//            if (formLabel) {
+//                label.replaceWith(formLabel);
+//            } else {
+//                label.remove();
+//            }
+//            return formLabel;
+//        };
+//        for (const label of labels) {
+//            dynamicLabel(label);
+//        }
+//        this.encounteredFields[fieldName] = dynamicLabel;
+//        return field;
+//    }
+//
+//    /**
+//     * Compile a generic node.
+//     * Adds handling for invisible nodes, stripes, dynamic click events, and field extraction.
+//     * @param {Element} node - The node to compile.
+//     * @param {Record<string, any>} params - Compilation parameters.
+//     * @param {boolean} evalInvisible - Whether to evaluate invisible nodes.
+//     * @returns {Element} - Compiled node.
+//     */
     compileNode(node, params = {}, evalInvisible = false) {
         const invisible_session = sessionStorage.getItem('invisible');
 //        if (invisible_session) {
@@ -238,7 +238,19 @@ export class CylloFormCompiler extends FormCompiler {
                         invisible
                     )}, __comp__.props.record.evalContextWithVirtualIds)`;
                 }
+//                compiledNode.setAttribute("t-if", isVisibleExpr);
+                    const fieldTag = getTag(node, true);
+    const isButton = fieldTag === "button" ||
+                   compiledNode.tagName.toLowerCase() === "button" ||
+                   compiledNode.tagName === "ViewButton";
+    const isSmartButton = compiledNode.tagName === "SmartButton" ||
+                        node.classList?.contains("oe_stat_button") ||
+                        node.classList?.contains("btn");
 
+    // Apply t-if ONLY if it's NOT a button or smart button
+    if (!isButton && !isSmartButton) {
+        compiledNode.setAttribute("t-if", isVisibleExpr);
+    }
                 if (isComponentNode(compiledNode)) {
                     compiledNode.setAttribute('striped', `!${isVisibleExpr}`)
                 } else {
@@ -296,6 +308,7 @@ export class CylloFormCompiler extends FormCompiler {
         }
         return compiledNode;
     }
+
 
     /**
      * Compile the root form element.
@@ -379,14 +392,18 @@ export class CylloFormCompiler extends FormCompiler {
      * @returns {Element} - Compiled header.
      */
     compileHeader(el, params) {
+        console.log("ee",el)
+        console.log("CylloFormCompiler.compileHeader arch:", el.outerHTML);
         const statusBar = createElement("div");
         statusBar.className =
             "o_form_statusbar position-relative d-flex justify-content-between mb-0 mb-md-2 pb-2 pb-md-0";
         statusBar.setAttribute("cy-xpath", el.getAttribute('cy-xpath'));
         statusBar.setAttribute("studio-header", el.getAttribute('studio-header') || "");
+        console.log("stathhhhshfdfadf",statusBar)
         const buttons = [];
         const others = [];
         const hasStatusBar = el.getAttribute('status-bar') || false
+        console.log("hass",hasStatusBar)
         for (const child of el.childNodes) {
             const compiled = this.compileNode(child, params);
             if (!compiled || isTextNode(compiled)) {
@@ -416,7 +433,13 @@ export class CylloFormCompiler extends FormCompiler {
         }
         let slotId = 0;
         const statusBarButtons = createElement("StatusBarButtons");
-        for (const button of buttons) {
+//        console.log('re',statusBarButtons)
+        const buttonLimit = el.getAttribute("button_limit");
+        console.log("byttonsa",buttonLimit)
+        if (buttonLimit) {
+            statusBarButtons.setAttribute("buttonLimit", buttonLimit);
+        }
+       for (const button of buttons) {
             const slot = createElement("t", {
                 "t-set-slot": `button_${slotId++}`,
                 isVisible: button.getAttribute("t-if") || true,
@@ -496,7 +519,8 @@ export class CylloFormCompiler extends FormCompiler {
                   const addLabel = child.hasAttribute("nolabel")
                         ? child.getAttribute("nolabel") !== "1"
                         : true;
-                    slotContent = this.compileNode(child, { ...params, currentSlot: mainSlot }, false);
+                  const invisible_session =  sessionStorage.getItem('invisible');
+                    slotContent = this.compileNode(child, { ...params, currentSlot: mainSlot }, !!invisible_session);
                     if (slotContent && addLabel && !isOuterGroup && !isTextNode(slotContent)) {
                         itemSpan = itemSpan === 1 ? itemSpan + 1 : itemSpan;
                         const fieldName = child.getAttribute("name");

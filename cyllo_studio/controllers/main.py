@@ -26,7 +26,6 @@ import xml.etree.ElementTree as ET
 from odoo import http, api, _, tools
 import json
 import ast
-
 from odoo.exceptions import ValidationError, AccessError,UserError
 from odoo.osv.expression import TERM_OPERATORS_NEGATION
 from odoo.http import Controller, route, request, _logger
@@ -5389,6 +5388,97 @@ class StudioMode(Controller):
         cr.commit()
         return {'success': True, 'message': f'Constraint {constraint_key} removed'}
 
+    @http.route('/cyllo_studio/get_button_limit', type='json', auth='user')
+    def get_button_limit(self, view_id, model):
+        """Get the current button_limit value from header"""
+        try:
+            view = request.env['ir.ui.view'].sudo().browse(view_id)
+            if not view or view.type != 'form':
+                return {'button_limit': None}
 
+            arch = view.arch
+            if not arch:
+                return {'button_limit': None}
+
+            try:
+                root = ET.fromstring(arch)
+                header = root.find('.//header')
+                if header is not None:
+                    button_limit = header.get('button_limit')
+                    if button_limit:
+                        return {'button_limit': button_limit}
+            except ET.ParseError:
+                pass
+
+            return {'button_limit': None}
+        except Exception as e:
+            return {'error': str(e), 'button_limit': None}
+
+    @http.route('/cyllo_studio/set_button_limit', type='json', auth='user')
+    def set_button_limit(self, view_id, model, button_limit):
+        """Set or update the button_limit attribute on header"""
+        try:
+            button_limit = int(button_limit)
+            if button_limit <= 0:
+                return {'success': False, 'message': 'Button limit must be a positive number'}
+
+            view = request.env['ir.ui.view'].sudo().browse(view_id)
+            if not view or view.type != 'form':
+                return {'success': False, 'message': 'Invalid form view'}
+
+            arch = view.arch
+            if not arch:
+                return {'success': False, 'message': 'View has no arch'}
+
+            try:
+                root = ET.fromstring(arch)
+            except ET.ParseError as e:
+                return {'success': False, 'message': f'Invalid XML: {str(e)}'}
+
+            header = root.find('.//header')
+            if header is None:
+                form_elem = root.find('.//form')
+                if form_elem is None:
+                    return {'success': False, 'message': 'No form element found'}
+                header = ET.Element('header')
+                form_elem.insert(0, header)
+
+            header.set('button_limit', str(button_limit))
+            new_arch = ET.tostring(root, encoding='unicode')
+            view.write({'arch': new_arch})
+
+            return {'success': True, 'message': f'Button limit set to {button_limit}'}
+        except ValueError:
+            return {'success': False, 'message': 'Invalid button limit value. Must be a number.'}
+        except Exception as e:
+            return {'success': False, 'message': f'Error: {str(e)}'}
+
+    @http.route('/cyllo_studio/remove_button_limit', type='json', auth='user')
+    def remove_button_limit(self, view_id, model):
+        """Remove the button_limit attribute from header"""
+        try:
+            view = request.env['ir.ui.view'].sudo().browse(view_id)
+            if not view or view.type != 'form':
+                return {'success': False, 'message': 'Invalid form view'}
+
+            arch = view.arch
+            if not arch:
+                return {'success': False, 'message': 'View has no arch'}
+
+            try:
+                root = ET.fromstring(arch)
+            except ET.ParseError as e:
+                return {'success': False, 'message': f'Invalid XML: {str(e)}'}
+
+            header = root.find('.//header')
+            if header is not None and 'button_limit' in header.attrib:
+                del header.attrib['button_limit']
+
+            new_arch = ET.tostring(root, encoding='unicode')
+            view.write({'arch': new_arch})
+
+            return {'success': True, 'message': 'Button limit attribute removed'}
+        except Exception as e:
+            return {'success': False, 'message': f'Error: {str(e)}'}
 
 

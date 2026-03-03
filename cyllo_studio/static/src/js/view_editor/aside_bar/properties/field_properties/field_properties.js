@@ -142,7 +142,7 @@ export class FieldProperties extends Component {
                     optional: true
                 },
                   recordData: {
-                    type: [Boolean,Number,String],
+                    type: Object,
                     optional: true
                 },
             dynamic_placeholder: {
