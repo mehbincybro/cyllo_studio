@@ -81,7 +81,6 @@ class StudioReportController(Controller):
                     [('name', '=', f'Custom_{key}')])
 
                 if custom_arch:
-                    # ── Merge into existing view ─────────────────────────────
                     root = etree.fromstring(custom_arch.arch_base.encode('utf-8'))
                     # Heal any previously saved corruption
                     self._strip_studio_attrs(root)

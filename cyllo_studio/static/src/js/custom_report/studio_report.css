@@ -189,6 +189,7 @@
     opacity: 0.5;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }
+
 /* =============================================================================
    Cyllo Studio – MediumEditor Toolbar Theme
    ============================================================================= */
@@ -269,7 +270,7 @@
     width: auto !important;
     max-width: 280px !important;
     min-width: 0 !important;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
 }
 
 .medium-editor-toolbar-input {
@@ -352,4 +353,13 @@
     outline-offset: 3px !important;
     background: rgba(154, 184, 58, 0.04) !important;
     border-radius: 4px !important;
+}
+
+[cy-template] {
+    min-height: 20px;
+    position: relative;
+}
+
+.gu-over {
+    outline: 2px dashed #5b8dee;
 }
