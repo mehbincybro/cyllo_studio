@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="view_asset_lease_form_inherit_asset_quality" model="ir.ui.view">
+        <field name="name">asset.lease.form.inherit.asset.quality</field>
+        <field name="model">asset.lease</field>
+        <field name="inherit_id" ref="cyllo_asset_management.view_asset_lease_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status']" position="before">
+                <field name="quality_check_done" invisible="1"/>
+            </xpath>
+            <xpath expr="//button[@name='action_return_asset']" position="before">
+                <button type="object" name="action_validate_quality" string="Validate Quality" class="oe_highlight"
+                        invisible="status != 'lease' or quality_check_done"/>
+            </xpath>
+            <xpath expr="//button[@name='action_return_asset']" position="attributes">
+                <attribute name="invisible">status != 'lease' or not quality_check_done</attribute>
+            </xpath>
+        </field>
+    </record>
+</odoo>
