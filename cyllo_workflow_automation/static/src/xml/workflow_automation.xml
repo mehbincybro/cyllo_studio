@@ -247,6 +247,14 @@
                                                      alt=""/>
                                                 <p>Condition</p>
 											</div>
+                                        <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'loop')"
+                                                 data-node="Loop">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/iteration.svg"
+                                                     alt=""/>
+                                                <p>Loop</p>
+                                        </div>
                                         </div>
 								    </div>
 							    </div>

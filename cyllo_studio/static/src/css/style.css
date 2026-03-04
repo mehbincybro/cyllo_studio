@@ -29,7 +29,7 @@
         flex-flow: column nowrap;
         overflow: hidden;
     }
-
+}
 .o-mail-ChatterContainer{
     position:relative !important;
 }
@@ -68,7 +68,7 @@ td.border-class-list {
     background-color: #f8f9e5;/* Changed border into background */
     border:unset !important;
 }
-/* HIDE invisible table cells by default */
+/* striped for invisible */
 .cy-studio-striped {
     display: none !important;
 }

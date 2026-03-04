@@ -15,11 +15,12 @@ import {
     smsFields,
     ActivityFields,
     MappedFields,
-    AssignmentFields
+    AssignmentFields,
+    loopFields,
 } from "./fields";
 import {
     icons,
- } from "./icons";
+} from "./icons";
 import { SearchNode } from "./components/searchNode/searchNode";
 import { jsonrpc } from "@web/core/network/rpc_service";
 import { _t } from "@web/core/l10n/translation";
@@ -33,9 +34,9 @@ import { FollowerNode } from "./components/FollowerNode/followerNode";
 import { SmsNode } from "./components/xsmsNode/smsNode";
 import { ConditionNode } from "./components/xconditionNode/conditionNode";
 import { ActivityNode } from "./components/ActivityNode/activityNode";
-import {PYTHON_KEYWORDS} from "./components/Assists/utils/utils";
+import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
 import { removeNodeIdFromVariables } from "./utils/utils"
-
+import { LoopNode } from "./components/loopNode/loopNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -58,9 +59,9 @@ const MODAL_CONFIGS = {
         component: CodeNode,
         fields: codeFields,
     },
-    'Search':{
-        component:SearchNode,
-        fields:searchFields,
+    'Search': {
+        component: SearchNode,
+        fields: searchFields,
     },
     'Condition': {
         component: ConditionNode,
@@ -82,6 +83,10 @@ const MODAL_CONFIGS = {
         component: ActivityNode,
         fields: ActivityFields
     },
+    'Loop': {
+        component: LoopNode,
+        fields: loopFields,
+    },
 };
 
 export class ModelComponent extends Component {
@@ -90,26 +95,26 @@ export class ModelComponent extends Component {
         this.root = useRef("root");
         this.notification = useService("notification");
         this.env.context.addEventListener("UPDATE-ME", this.updateMe.bind(this))
-        this.env.bus.addEventListener("UPDT-PRIMARY", ({detail}) => {
+        this.env.bus.addEventListener("UPDT-PRIMARY", ({ detail }) => {
             this.props.primary_model_id = detail.model_id
         });
-        this.env.bus.addEventListener("UPDATE-VARIABLE-USAGE", ({detail: { variable, node}}) => {
+        this.env.bus.addEventListener("UPDATE-VARIABLE-USAGE", ({ detail: { variable, node } }) => {
             const updatedVariable = this.env.variables.context.variables.find(item => item.id === variable);
             !updatedVariable.usedIn.includes(node) && updatedVariable.usedIn.push(node);
             this.env.bus.trigger("UPDATE-VARIABLE-STATE");
         });
-        this.env.bus.addEventListener("CHANGE-LABEL",({detail: {label,nodeId}}) => {
-            if(this.props.nodeId === nodeId){
+        this.env.bus.addEventListener("CHANGE-LABEL", ({ detail: { label, nodeId } }) => {
+            if (this.props.nodeId === nodeId) {
                 this.state.label = label
             }
         })
-        this.env.bus.addEventListener("OPEN:MODAL",({detail}) => {
+        this.env.bus.addEventListener("OPEN:MODAL", ({ detail }) => {
             if (this.props.nodeId === detail.nodeId) {
                 this.openConfigModal()
             }
         })
-        this.env.bus.addEventListener("FIND:NODE:VARIABLE:USED",this.handleFindNodeVariableUsed.bind(this))
-        this.env.bus.addEventListener("FLOW:VALIDATION", ({detail: { nodeIds }}) => {
+        this.env.bus.addEventListener("FIND:NODE:VARIABLE:USED", this.handleFindNodeVariableUsed.bind(this))
+        this.env.bus.addEventListener("FLOW:VALIDATION", ({ detail: { nodeIds } }) => {
             if (nodeIds.includes(this.props.nodeId)) {
                 this.state.error = true;
             }
@@ -129,10 +134,10 @@ export class ModelComponent extends Component {
         })
         this.orm = useService("orm");
         onWillStart(this.manageNodeData);
-        onMounted(async() => {
+        onMounted(async () => {
             const label = await this.orm.read("node.struct", [this.props.nodeId], ["label"])
-            if (label && label[0]){
-            this.state.label = label[0].label
+            if (label && label[0]) {
+                this.state.label = label[0].label
             }
             this.state.context = this.context;
         })
@@ -142,7 +147,7 @@ export class ModelComponent extends Component {
     }
 
     handleFindNodeVariableUsed = (event) => {
-        const {detail} = event;
+        const { detail } = event;
         const isCondition = this.props.name === "Condition";
         const parentDiv = this.getParentDiv();
         this.state.findUsage = false;
@@ -192,7 +197,7 @@ export class ModelComponent extends Component {
         this.state.context = this.context;
     }
 
-    get automationIdentifiers () {
+    get automationIdentifiers() {
         const allVariables = [...this.variableContext.variables, ...this.env.globalVariables.context.variables]
         const identifiers = allVariables.map(item => item.variable_name)
         return { pythonKeywords: [...PYTHON_KEYWORDS], variableNames: [...identifiers] };
@@ -301,9 +306,9 @@ export class ModelComponent extends Component {
                 props.functions = functions;
                 props.trigger = this.allTriggerName()
                 props.display_name = "The Button Click Modal lets users quickly access and manage all button and cog menu functions."
-            } else if(this.props.name === 'Code') {
+            } else if (this.props.name === 'Code') {
                 props.display_name = "The Code Modal provides an interface for users to write and execute Python code directly"
-            } else if(this.props.name === 'Search') {
+            } else if (this.props.name === 'Search') {
                 const fields = searchFields.map(field => field.name);
                 const searchFieldData = await this.orm.read('node.struct', [this.props.nodeId], fields)
                 const modelIdToSearch = searchFieldData[0].model_id ? searchFieldData[0].model_id[0] : res_model[0].id;
@@ -315,7 +320,7 @@ export class ModelComponent extends Component {
                 }
                 props.display_name = "The Search Modal helps users quickly find and retrieve specific nodes by using dynamic search criteria."
             } else if (this.props.name === "Condition") {
-                const [{model: modelName}] = await this.orm.read('ir.model', [this.props.primary_model_id], ['model'])
+                const [{ model: modelName }] = await this.orm.read('ir.model', [this.props.primary_model_id], ['model'])
                 props.resModel = modelName ? modelName : res_model[0].model;
                 props.triggerType = this.env.globalContext().triggerType;
                 props.display_name = "The Condition Modal lets users add and apply different conditions to customize and control functionality"
@@ -323,23 +328,63 @@ export class ModelComponent extends Component {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Mail Modal provides an interface for users to compose and send emails easily"
             }
-            else if(this.props.name === "SMS") {
+            else if (this.props.name === "SMS") {
                 props.primaryModelId = this.props.primary_model_id;
-                props.display_name= "The SMS Modal allows users to compose and send text messages efficiently."
-            }else if (this.props.name === "Follower") {
+                props.display_name = "The SMS Modal allows users to compose and send text messages efficiently."
+            } else if (this.props.name === "Follower") {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Followers Modal enables users to manage followers to records or entities"
             }
-            else if (this.props.name === "Warning"){
+            else if (this.props.name === "Warning") {
                 props.display_name = "The Warning Modal allows users to configure and display warning messages to alert users about important information"
             } else if (this.props.name === "Activity") {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Activity Modal enables users to manage Activity"
+            } else if (this.props.name === 'Loop') {
+                props.primaryModelId = this.props.primary_model_id;
+                props.display_name = "The Loop Node iterates over a recordset field or variable, executing child nodes for each record in turn.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    this.updateLoopVariable(fieldState);
+                };
             }
             this.dialogService.add(component, props);
         } else {
             // TODO: Handle unknown modal type
         }
+    }
+
+    /**
+     * Registers the loop iteration variable into the frontend variable context
+     * so nodes inside the loop body can select it from their variable dropdowns.
+     */
+    updateLoopVariable(fieldState) {
+        const varName = fieldState.loop_variable_name;
+        if (!varName) return;
+        const existingVars = this.variableContext.variables;
+        const nodeId = this.props.nodeId;
+        const varId = `loop_var_${nodeId}`;
+        const alreadyRegistered = existingVars.find(v => v.id === varId);
+        if (!alreadyRegistered) {
+            this.env.variables.setContext({
+                variables: [
+                    ...existingVars,
+                    owl.reactive({
+                        id: varId,
+                        variable_name: varName,
+                        variable_type: 'record',
+                        modelId: null,
+                        modelName: null,
+                        scopeId: nodeId,
+                        usedIn: [],
+                        class: this.buttonClass,
+                    })
+                ]
+            });
+        } else {
+            alreadyRegistered.variable_name = varName;
+        }
+        this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
 
     async fetchFunctions(model) {
@@ -371,31 +416,31 @@ export class ModelComponent extends Component {
 
     updateVariable(fieldState) {
         const { model_id, search_variable } = fieldState;
-            const variable = this.variableContext.variables.find(item => item.id === search_variable.id);
-            if (variable) {
-                variable.modelId = model_id;
-                variable.variable_type = search_variable.variable_type;
-                variable.variable_name = search_variable.variable_name;
-            } else {
-                this.env.variables.setContext({variables : [...this.variableContext.variables || [], owl.reactive({...search_variable,  scopeId: this.props.nodeId, class: this.buttonClass})]})
-            }
+        const variable = this.variableContext.variables.find(item => item.id === search_variable.id);
+        if (variable) {
+            variable.modelId = model_id;
+            variable.variable_type = search_variable.variable_type;
+            variable.variable_name = search_variable.variable_name;
+        } else {
+            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass })] })
+        }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
 
     async updateNode(fieldState, code) {
-        await this.orm.call('node.struct', 'save_data', [this.props.nodeId, {...fieldState, code}]);
+        await this.orm.call('node.struct', 'save_data', [this.props.nodeId, { ...fieldState, code }]);
     }
 
     raiseNotification(text, type) {
         this.env.services.effect.add({
-                title: "Success",
-                message: _t(text),
-                type: "notification_panel",
-                notificationType: type,
-            });
+            title: "Success",
+            message: _t(text),
+            type: "notification_panel",
+            notificationType: type,
+        });
     }
 
-    async onConfirm (fieldState, code, usedVariables) {
+    async onConfirm(fieldState, code, usedVariables) {
         this.updateContext(code);
 
         // Sync else_setup_code onto the in-memory context node so updateCode()
@@ -445,18 +490,18 @@ export class ModelComponent extends Component {
         this.raiseNotification("Record Saved...!", "success");
     }
 
-    triggerName(){
+    triggerName() {
         const [, trigger_word] = this.env.globalContext().trigger.split(' ');
         return trigger_word?.toLowerCase();
     }
 
-    allTriggerName(){
+    allTriggerName() {
         const trigger_word = this.env.globalContext().trigger;
         return trigger_word?.toLowerCase();
     }
 
     deleteNode() {
-        this.env.bus.trigger("DELETE:NODE:BY:CLICK", { nodeId: this.props.nodeId,});
+        this.env.bus.trigger("DELETE:NODE:BY:CLICK", { nodeId: this.props.nodeId, });
     }
 
     get getVariables() {
@@ -484,15 +529,15 @@ export class ModelComponent extends Component {
         return this.env.context.context;
     }
     getIconSrc() {
-        if (this.props.type !== 'action'){
-             if (this.props.type == 'model'){
-                    return icons['Model']
-                }
+        if (this.props.type !== 'action') {
+            if (this.props.type == 'model') {
+                return icons['Model']
+            }
             const displayName = this.state.model.display_name;
             return icons[displayName] || '';
         }
 
-        else{
+        else {
             return icons['Action']
         }
     }
