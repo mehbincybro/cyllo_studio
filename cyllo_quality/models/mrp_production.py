@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -70,31 +90,24 @@ class MrpProduction(models.Model):
                         'quantity': qty,
                         'uom_id': self.product_uom_id.id
                     })
-                    quality_check.quality_check_line_ids = [fields.Command.create({
-                        'quality_control_id': quality_check.quality_control_id.id,
-                        'inspection_action_id': action.inspection_action_id.id,
-                        'inspection_type_id': action.inspection_type_id.id,
-                        'instruction': action.instruction,
-                        'value': action.value,
-                        'unit_value': {
-                            "unit": {
-                                "id": action.value['unit'].get('id'),
-                                "name": action.value['unit'].get('name')
-                            },
-                            "value": action.value.get('value')
-                        },
-                    }) for action in qcp.quality_inspection_ids]
 
                     qc_ids.append(quality_check.id)
             self.quality_check_ids = [fields.Command.link(qc) for qc in qc_ids]
             self.is_quality_check_created = True
 
-    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked')
+    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked', 'quality_control_point_ids')
     def _compute_quality_checks(self):
         for production in self:
-            all_lines = production.quality_check_ids.quality_check_line_ids
-            production.qc_count = len(all_lines)
-            production.qc_checked_count = len(all_lines.filtered('is_checked'))
+            if production.quality_check_ids:
+                all_lines = production.quality_check_ids.quality_check_line_ids
+                production.qc_count = len(all_lines)
+                production.qc_checked_count = len(all_lines.filtered('is_checked'))
+            else:
+                # Potential count display
+                count = sum(len(qcp.quality_inspection_ids) for qcp in production.quality_control_point_ids)
+                production.qc_count = count
+                production.qc_checked_count = 0
+
             if production.qc_count > 0 and production.qc_count == production.qc_checked_count:
                 production.is_quality_check = False
 
@@ -108,7 +121,3 @@ class MrpProduction(models.Model):
             'target': 'current',
         }
 
-    # def button_mark_done(self):
-    #     if self.quality_control_point_ids and not self.quality_check_ids:
-    #         raise UserError(_("You need to done the quality check"))
-    #     return super().button_mark_done()

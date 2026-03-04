@@ -16,7 +16,6 @@ export class MeasureUOM extends Component {
     setup() {
         this.orm = useService("orm");
         this.root = useRef("root");
-        console.log(this);
 
         this.state = useState({
             value: this.props.record.data[this.props.name] || 0,
@@ -27,7 +26,6 @@ export class MeasureUOM extends Component {
             uomValues: [],
             editMode: false,
         });
-        console.log(this);
 
         // Fetch UOMs at the start
         onWillStart(() => this.fetchUOMs());
@@ -36,7 +34,6 @@ export class MeasureUOM extends Component {
         document.addEventListener('click', this.globalClickListener.bind(this));
     }
     globalClickListener(ev) {
-        console.log('global click listener', this.root)
         if (this.root.el === null || this.root.el === undefined) {
             return;
         }
@@ -104,7 +101,6 @@ export class MeasureUOM extends Component {
     // Update the record with the current state
     updateRecord(value = this.jsonValue) {
         if (this.isReadonly) return;
-        console.log('update record', this.props, value)
         this.props.record.update({
 
             [this.props.name]: value,

@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
@@ -61,20 +81,6 @@ class StockPicking(models.Model):
             'control_type': qcp.control_type,
             'quantity': qty,
         })
-        quality_check.quality_check_line_ids = [fields.Command.create({
-            'quality_control_id': quality_check.quality_control_id.id,
-            'inspection_action_id': action.inspection_action_id.id,
-            'inspection_type_id': action.inspection_type_id.id,
-            'instruction': action.instruction,
-            'value': action.value,
-            'unit_value': {
-                "unit": {
-                    "id": action.value['unit'].get('id'),
-                    "name": action.value['unit'].get('name')
-                },
-                "value": action.value.get('value')
-            },
-        }) for action in qcp.quality_inspection_ids]
         return quality_check
 
     def action_quality_check(self):
@@ -122,12 +128,42 @@ class StockPicking(models.Model):
                             qc_ids.append(quality_check.id)
             self.quality_check_ids = [fields.Command.link(qc) for qc in qc_ids]
             self.is_quality_check_created = True
-    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked')
+    @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked', 'quality_control_point_ids')
     def _compute_quality_checks(self):
         for picking in self:
-            all_lines = picking.quality_check_ids.quality_check_line_ids
-            picking.qc_count = len(all_lines)
-            picking.qc_checked_count = len(all_lines.filtered('is_checked'))
+            if picking.quality_check_ids:
+                all_lines = picking.quality_check_ids.quality_check_line_ids
+                picking.qc_count = len(all_lines)
+                picking.qc_checked_count = len(all_lines.filtered('is_checked'))
+            else:
+                # Potential count display
+                count = 0
+                for qcp in picking.quality_control_point_ids:
+                    num_actions = len(qcp.quality_inspection_ids)
+                    if qcp.control_type == 'operation':
+                        count += num_actions
+                    else:
+                        # product or quantity - count moves matching qcp
+                        products_ids = qcp.product_ids.ids
+                        products_list = []
+                        if not qcp.product_ids and not qcp.product_category_ids:
+                            products_list = picking.move_ids_without_package.mapped('product_id').ids
+                        elif qcp.product_category_ids:
+                            all_category_id = self.env.ref('product.product_category_all').id
+                            product_in_move = picking.move_ids_without_package.filtered(
+                                lambda c: (c.product_id.categ_id.id in qcp.product_category_ids.ids) or
+                                          (c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids) or 
+                                          (all_category_id in qcp.product_category_ids.ids))
+                            products_list = product_in_move.mapped('product_id').ids
+                        elif qcp.product_ids:
+                            product_in_move = picking.move_ids_without_package.filtered(
+                                lambda p: p.product_id.id in products_ids)
+                            products_list = product_in_move.mapped('product_id').ids
+                        
+                        count += len(products_list) * num_actions
+                picking.qc_count = count
+                picking.qc_checked_count = 0
+
             if picking.qc_count > 0 and picking.qc_count == picking.qc_checked_count:
                 picking.is_quality_check = False
 

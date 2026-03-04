@@ -9,6 +9,10 @@
                  <button class="btn-close" data-bs-dismiss="modal" aria-label="Close"
                          t-on-click.stop="handleModalClose"/>
              </t>
+             <div class="alert alert-warning m-2" role="alert" t-if="state.isBlocked">
+                 <i class="ri-error-warning-line me-2"/>
+                 This action is blocked by <b><t t-esc="state.blockerName"/></b>. Please complete it first.
+             </div>
              <div class="quality-action-body w-80">
                 <div class="quality-detail d-flex ms-2 justify-content-between align-items-center"
                      style="margin-left: 10px;">
@@ -36,7 +40,11 @@
                         <h6 class="text-muted mb-0 check-type">Add Measurement :</h6>
                          <input type="text" class="form-control w-50 check-value" placeholder="Enter the value..."
                                 t-model='state.qcValue'/>
-                         <t t-if="props.quality_check_action.unit_value and props.quality_check_action.unit_value.unit" t-esc="props.quality_check_action.unit_value.unit['name']"/>
+                         <t t-if="props.quality_check_action.unit_id" t-esc="props.quality_check_action.unit_id[1]"/>
+                         <t t-elif="props.quality_check_action.unit_value and props.quality_check_action.unit_value.unit" t-esc="props.quality_check_action.unit_value.unit['name']"/>
+                         <span class="ms-2 text-muted" t-if="props.quality_check_action.measure_start or props.quality_check_action.measure_end">
+                             [<t t-esc="props.quality_check_action.measure_start"/> - <t t-esc="props.quality_check_action.measure_end"/>]
+                         </span>
                      </div>
                      <div class="d-flex align-items-center gap-2 text-center"
                           t-if="props.quality_check_action.inspection_type_id[1] == 'Take a picture'">
@@ -47,7 +55,7 @@
                      <div class="d-flex align-items-center gap-2 text-center"
                           t-if="props.quality_check_action.inspection_type_id[1] == 'Instructions'">
                         <h6 class="text-muted mb-0 check-type">Add Instruction :</h6>
-                         <input type="text" class="o_input w-50  check-value" placeholder="Enter the value..."/>
+                         <input type="text" class="o_input w-50  check-value" t-model="state.qcValue" placeholder="Enter the value..."/>
                      </div>
                      <div class="add_notes" t-if="!state.addNote">
                         <button class="btn btn-outline-primary me-2" t-on-click="addNote">
@@ -62,15 +70,15 @@
              </div>
              <div class="qc-footer">
                 <hr/>
-                 <div class="d-flex"
-                      t-if="props.quality_check_action.inspection_type_id[1] == 'Pass/Fail' or props.quality_check_action.inspection_type_id[1] == 'Take a picture' or props.quality_check_action.inspection_type_id[1] == 'Instructions'">
-                        <button class="btn btn-success me-2" t-on-click="passCheck">Pass</button>
-                     <button class="btn btn-danger me-2" t-on-click="failCheck">Fail</button>
-                 </div>
-                 <div t-if="props.quality_check_action.inspection_type_id[1] == 'Measure'">
-                     <button class="btn btn-primary mt-3 mb-3"
-                             t-on-click="validateQualityCheck">Validate Quality Check</button>
-                 </div>
+                  <div class="d-flex"
+                       t-if="props.quality_check_action.inspection_type_id[1] == 'Pass/Fail' or props.quality_check_action.inspection_type_id[1] == 'Take a picture'">
+                        <button class="btn btn-success me-2" t-on-click="passCheck" t-att-disabled="state.isBlocked">Pass</button>
+                     <button class="btn btn-danger me-2" t-on-click="failCheck" t-att-disabled="state.isBlocked">Fail</button>
+                  </div>
+                  <div t-if="props.quality_check_action.inspection_type_id[1] == 'Measure' or props.quality_check_action.inspection_type_id[1] == 'Instructions'">
+                      <button class="btn btn-primary mt-3 mb-3"
+                              t-on-click="validateQualityCheck" t-att-disabled="state.isBlocked">Validate Quality Check</button>
+                  </div>
              </div>
          </Dialog>
     </t>

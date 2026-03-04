@@ -10,6 +10,5 @@
               parent="cyllo_quality.menu_products_categ"
               action="action_view_product_variants"
               sequence="20"
-
     />
 </odoo>

@@ -13,7 +13,6 @@
                 <field name="picking_id"/>
                 <field name="user_id"/>
                 <field name="color"/>
-
                 <templates>
                     <t t-name="kanban-menu">
                         <a role="menuitem" type="delete" class="dropdown-item">Delete</a>
@@ -50,15 +49,10 @@
                                 <div class="o_kanban_user_avatar">
                                     <field name="user_id" widget="many2one_avatar_user"/>
                                 </div>
-
-
                             </div>
-
-
                         </div>
                     </t>
                 </templates>
-
             </kanban>
         </field>
     </record>

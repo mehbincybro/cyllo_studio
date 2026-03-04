@@ -22,8 +22,30 @@ export class ValidateQualityAction extends Component {
             qcStatus: false,
             qcValue: false,
             checkValue: false,
-            imageSrc: false
+            imageSrc: false,
+            isBlocked: false,
+            blockerName: '',
         })
+
+        onWillStart(async () => {
+            const qcAction = this.props.quality_check_action;
+            const qcActionData = Array.isArray(qcAction) ? qcAction[0] : qcAction;
+            this.props.quality_check_action = qcActionData;
+
+            const quality_check = this.props.quality_check;
+            this.props.quality_check = Array.isArray(quality_check) ? quality_check[0] : quality_check;
+
+            if (this.props.quality_check_action.blocked_by_id) {
+                const results = await this.orm.searchRead("quality.check.line", [
+                    ["quality_check_id", "=", this.props.quality_check_action.quality_check_id[0]],
+                    ["quality_inspection_id", "=", this.props.quality_check_action.blocked_by_id[0]]
+                ], ["is_checked", "inspection_action_id"]);
+                if (results.length > 0 && !results[0].is_checked) {
+                    this.state.isBlocked = true;
+                    this.state.blockerName = results[0].inspection_action_id[1];
+                }
+            }
+        });
 
         onMounted(() => {
             if (this.props.quality_check_action.instruction) {
@@ -55,6 +77,7 @@ export class ValidateQualityAction extends Component {
                 // Set the image preview once the file is read
                 reader.onload = (e) => {
                     this.state.imageSrc = e.target.result;
+                    this.state.qcValue = e.target.result; // Store image data in qcValue for validation
                 };
 
                 // Read the image file as a data URL
@@ -82,16 +105,19 @@ export class ValidateQualityAction extends Component {
     }
 
     async validateQualityCheck() {
-        if ((this.props.quality_check_action.inspection_action_id[1] === 'Take a picture' || this.props.quality_check_action.inspection_type_id[1] === 'Measure')
-            && this.state.qcValue === false) {
+        const type = this.props.quality_check_action.inspection_type_id[1];
+        if (['Take a picture', 'Measure', 'Instructions'].includes(type) && this.state.qcValue === false) {
             this.notification.add(_t(`The value for the inspection action ${this.props.quality_check_action.inspection_action_id[1]} is not added.`), {
                 type: "danger",
             });
         } else {
-            if (this.props.quality_check_action.inspection_action_id[1] != 'Take a picture' || this.props.quality_check_action.inspection_type_id[1] != 'Measure') {
-                this.state.qcValue = this.state.checkValue
+            let finalValue = this.state.qcValue;
+            if (type === 'Take a picture') {
+                finalValue = `${this.state.checkValue}|${this.state.qcValue}`;
+            } else if (!['Measure', 'Instructions'].includes(type)) {
+                finalValue = this.state.checkValue;
             }
-            this.state.qcStatus = await this.orm.call("quality.check.line", "validate_quality_actions", [this.props.quality_check_action.id, this.state.qcValue, this.state.qualityCheckNote])
+            this.state.qcStatus = await this.orm.call("quality.check.line", "validate_quality_actions", [this.props.quality_check_action.id, finalValue, this.state.qualityCheckNote])
             if (status(this) !== "destroyed") {
                 this.env.bus.trigger("RELOAD_QC_DATA")
                 this.handleModalClose()

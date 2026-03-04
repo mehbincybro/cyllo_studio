@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, fields, models
 
 
@@ -32,6 +52,13 @@ class QualityCheck(models.Model):
         'res.company', required=True,
         default=lambda self: self.env.company, tracking=True)
     active = fields.Boolean(default=True, tracking=True, copy=False)
+    state = fields.Selection([
+        ('todo', 'To Do'),
+        ('ongoing', 'Ongoing'),
+        ('pass', 'Pass'),
+        ('fail', 'Fail'),
+    ], string="Status", default='todo',
+        tracking=True, compute='_compute_state', store=True)
 
     @api.model
     def create(self, vals):
@@ -41,6 +68,29 @@ class QualityCheck(models.Model):
                 'quality.check') or ''
         return super(QualityCheck, self).create(vals)
 
+    @api.depends('quality_check_line_ids.is_checked',
+                 'quality_check_line_ids.status')
+    def _compute_state(self):
+        for record in self:
+            lines = record.quality_check_line_ids
+            if not lines:
+                record.state = 'todo'
+                continue
+            checked_lines = lines.filtered(lambda l: l.is_checked)
+            # Nothing checked
+            if not checked_lines:
+                record.state = 'todo'
+            # Some checked but not all
+            elif len(checked_lines) < len(lines):
+                record.state = 'ongoing'
+            # All checked
+            else:
+                # If any line failed → FAIL
+                if any(line.status == 'fail' for line in lines):
+                    record.state = 'fail'
+                else:
+                    record.state = 'pass'
+
     @api.depends('quality_control_id')
     def _compute_products(self):
         for record in self:
@@ -49,16 +99,17 @@ class QualityCheck(models.Model):
     @api.depends('quality_control_id')
     def _compute_quality_check_line_ids(self):
         for record in self:
-            for qc in record.quality_control_id.quality_inspection_ids:
-                print(qc.value,qc, qc.value)
-            record.quality_check_line_ids = [fields.Command.clear()]
-            record.quality_check_line_ids = [fields.Command.create({
+            record.quality_check_line_ids = [fields.Command.clear()] + [fields.Command.create({
                 'quality_check_id': record.id,
                 'quality_inspection_id': qc.id,
                 'quality_control_id': qc.quality_control_id.id,
                 'inspection_action_id': qc.inspection_action_id.id,
                 'inspection_type_id': qc.inspection_type_id.id,
                 'instruction': qc.instruction,
+                'blocked_by_id': qc.blocked_by_id.id,
+                'measure_start': qc.measure_start,
+                'measure_end': qc.measure_end,
+                'unit_id': qc.unit_id.id,
                 'unit_value': {
                     "unit": {
                         "id": qc.value['unit'].get('id'),
