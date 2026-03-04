@@ -76,19 +76,16 @@
               action="action_view_account_move_lock_wizard"/>
     <menuitem id="menu_fiscal_years" name="Fiscal Years" action="action_view_fiscal_years"
               parent="menu_fiscal_years_and_periods_categ"/>
-    <menuitem id="menu_tax_return_wizard"
-              name="Tax Returns"
-              parent="account.menu_finance_entries"
-              action="cyllo_accounting.action_tax_return_wizard"
-              sequence="30"/>
     <menuitem id="menu_account_return"
               name="Tax Returns"
               parent="account.menu_finance_entries"
               action="action_account_return"
-              sequence="50"/>
+              sequence="50"
+              groups="account.group_account_manager"/>
     <menuitem id="menu_validation_engine"
               name="Validation Rules"
               parent="account.menu_finance_configuration"
-              action="action_account_return_checks"/>
+              action="action_account_return_checks"
+              groups="account.group_account_manager"/>
 
 </odoo>
