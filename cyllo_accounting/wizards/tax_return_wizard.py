@@ -26,13 +26,34 @@ class TaxReturnWizard(models.TransientModel):
                                     ('fiscal_year', 'Fiscal Year'),],string="Periodicity",required=True,
                                    default='monthly',help="Defines how tax returns should be grouped.")
     date_from = fields.Date(string="Start Date",required=True,help="Beginning of the overall period.")
-    date_to = fields.Date(string="End Date",required=True,help="End of the overall period.")
+    date_to = fields.Date(string="End Date",required=True,help="End of the overall period.",
+                          default=fields.Datetime.today())
     journal_id = fields.Many2one('account.journal',string="Settlement Journal",
                                  domain="[('type','=','general')]",required=True,
                                  default=lambda self: self.env.ref('cyllo_accounting.journal_tax_returns',
                                                                    raise_if_not_found=False),
                                  help="Journal used to create settlement entries.")
     company_id = fields.Many2one('res.company',default=lambda self: self.env.company,required=True)
+
+    @api.model
+    def default_get(self, fields_list):
+        """
+        Load default values from Accounting Settings (ir.config_parameter)
+        """
+        res = super().default_get(fields_list)
+
+        params = self.env['ir.config_parameter'].sudo()
+
+        periodicity = params.get_param('cyllo_accounting.tax_return_periodicity')
+        journal_id = params.get_param('cyllo_accounting.tax_return_journal_id')
+
+        if periodicity:
+            res['periodicity'] = periodicity
+
+        if journal_id:
+            res['journal_id'] = int(journal_id)
+
+        return res
     def _generate_periods(self):
         """
         Split selected date range based on periodicity
@@ -96,6 +117,17 @@ class TaxReturnWizard(models.TransientModel):
             })
             # Auto compute tax
             record.action_compute()
+
+            # Create validation records from templates for this return
+            template_checks = self.env['account.return.checks'].search([('company_id', '=', self.company_id.id)])
+            for template in template_checks:
+                validation = self.env['account.return.validation'].create({
+                    'template_id': template.id,
+                    'return_id': record.id,
+                })
+                # Run validation immediately
+                validation.action_run_validation()
+
             created_returns.append(record.id)
         return {
             'type': 'ir.actions.act_window',

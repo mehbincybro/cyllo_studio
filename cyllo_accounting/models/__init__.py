@@ -42,3 +42,4 @@ from . import res_company
 from . import res_config_settings
 from . import saltedge_connection
 from . import account_return
+from . import account_return_checks

@@ -58,6 +58,7 @@
         'views/res_config_settings_views.xml',
         'wizards/tax_return_wizard_views.xml',
         'views/account_return_views.xml',
+        'views/account_return_checks_views.xml',
         'views/cyllo_accounting_menus.xml',
 
         'reports/ir_actions_report.xml',

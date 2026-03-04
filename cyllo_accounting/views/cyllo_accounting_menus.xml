@@ -86,5 +86,9 @@
               parent="account.menu_finance_entries"
               action="action_account_return"
               sequence="50"/>
+    <menuitem id="menu_validation_engine"
+              name="Validation Rules"
+              parent="account.menu_finance_configuration"
+              action="action_account_return_checks"/>
 
 </odoo>
