@@ -478,6 +478,81 @@ export class SocialMediaFeed extends Component {
     async loadMoreFeeds() {
         await this.fetchLinkedInFeeds(false); // Load next batch without resetting
     }
+
+    async deleteLinkedInFeed(feedId) {
+        const confirmed = await new Promise((resolve) => {
+            if (confirm("Are you sure you want to delete this LinkedIn post? This will also remove it from LinkedIn.")) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+
+        if (!confirmed) return;
+
+        try {
+            const result = await this.orm.unlink("social.media.feed", [feedId]);
+            if (result) {
+                this.state.LinkedinFeeds = this.state.LinkedinFeeds.filter(f => f.id !== feedId);
+                this.state.Feeds = this.state.Feeds.filter(f => f.id !== feedId);
+                this.detailsRefresh(this);
+            }
+        } catch (error) {
+            console.error("LinkedIn post deletion failed:", error);
+            alert("Failed to delete post. Please check the logs.");
+        }
+    }
+
+    async deleteLinkedInComment(commentId) {
+        const confirmed = await new Promise((resolve) => {
+            if (confirm("Are you sure you want to delete this comment? This will also remove it from LinkedIn.")) {
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+        });
+
+        if (!confirmed) return;
+
+        try {
+            const feed = this.state.commentingFeed;
+            if (!feed || !feed.linkedin_account_id) return;
+
+            const parentUrn = feed.linkedin_post_urn;
+
+            const result = await this.orm.call("linkedin.account", "action_delete_linkedin_comment", [
+                feed.linkedin_account_id[0],
+                parentUrn,
+                commentId,
+                feed.linkedin_org_id ? feed.linkedin_org_id[0] : null
+            ]);
+
+            if (result === true) {
+                // Update UI: Remove from currentComments or replies
+                this.state.currentComments = this.state.currentComments.filter(c => c.id !== commentId);
+
+                // Also check if it was a nested reply
+                for (const parentId in this.state.replies) {
+                    this.state.replies[parentId] = this.state.replies[parentId].filter(r => r.id !== commentId);
+                }
+            } else if (result.error) {
+                alert("Error deleting comment: " + result.error);
+            }
+        } catch (error) {
+            console.error("LinkedIn comment deletion failed:", error);
+            alert("Failed to delete comment. Please check the logs.");
+        }
+    }
+
+    parsePollOptions(jsonStr) {
+        if (!jsonStr) return [];
+        try {
+            return JSON.parse(jsonStr);
+        } catch (e) {
+            console.error("Failed to parse poll options:", e);
+            return [];
+        }
+    }
 }
 
 SocialMediaFeed.template = "cyllo_social_media_marketing.SocialMediaFeed";

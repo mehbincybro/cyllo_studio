@@ -591,3 +591,119 @@ class LinkedInAccount(models.Model):
         except Exception as e:
             _logger.error(f"LinkedIn V2 Reply Exception: {str(e)}", exc_info=True)
             return {'error': str(e)}
+
+    def action_delete_linkedin_post(self, post_urn):
+        """Delete a LinkedIn post via API using a refined exhaustive multi-endpoint strategy."""
+        self.ensure_one()
+        if not self.linkedin_access_token:
+            return {'error': 'LinkedIn account not connected.'}
+
+        _logger.info(f"REFINED EXHAUSTIVE DELETE LinkedIn Post. URN: {post_urn}")
+
+        headers = {
+            'Authorization': f'Bearer {self.linkedin_access_token}',
+            'X-Restli-Protocol-Version': '2.0.0',
+        }
+
+        post_id_val = post_urn.split(':')[-1]
+        
+        # Expanded combinations to try: (endpoint, urn_prefix)
+        # This covers cross-resource shims (e.g., share URN on ugcPosts endpoint)
+        attempts = [
+            # v2/posts (Newest version-less API)
+            ('posts', 'urn:li:post:'), 
+            ('posts', 'urn:li:share:'),
+            ('posts', 'urn:li:ugcPost:'),
+            
+            # v2/ugcPosts (Modern shim API)
+            ('ugcPosts', 'urn:li:ugcPost:'),
+            ('ugcPosts', 'urn:li:share:'), 
+            ('ugcPosts', 'urn:li:activity:'),
+            
+            # v2/shares (Legacy/Shim API)
+            ('shares', 'urn:li:share:'),
+            ('shares', 'urn:li:activity:'),
+            ('shares', ''), # Raw numeric ID
+        ]
+
+        last_error = "All deletion attempts failed."
+        success = False
+
+        # Try to clean up as much as possible. Even if one fails, try others.
+        for endpoint, prefix in attempts:
+            target_urn = prefix + post_id_val if prefix else post_id_val
+            url = f"https://api.linkedin.com/v2/{endpoint}/{urllib.parse.quote(target_urn)}"
+            
+            try:
+                _logger.info(f"Attempting DELETE via {endpoint}: {url}")
+                res = requests.delete(url, headers=headers, timeout=30)
+                _logger.info(f"{endpoint} ({target_urn}) Response: {res.status_code} - {res.text[:100]}")
+                
+                if res.status_code in (200, 204):
+                    _logger.info(f"SUCCESS: Deleted/Cleared {target_urn} via {endpoint}")
+                    success = True
+                    # We continue the loop to ensure shims/activities are also cleared if they exist under other endpoints
+                else:
+                    if res.status_code != 404:
+                        last_error = f"{endpoint} failed ({res.status_code}): {res.text[:200]}"
+            except Exception as e:
+                _logger.warning(f"Deletion attempt failed for {url}: {e}")
+                last_error = str(e)
+
+    def action_delete_linkedin_comment(self, parent_urn, comment_id, org_id=None):
+        """Delete a LinkedIn comment via Social Actions API."""
+        self.ensure_one()
+        if not self.linkedin_access_token:
+            return {'error': 'LinkedIn account not connected.'}
+
+        # Determine actor URN
+        actor_urn = False
+        if org_id:
+            org = self.env['linkedin.organization'].browse(org_id)
+            if org.exists():
+                actor_urn = org.org_urn
+        
+        if not actor_urn:
+            actor_urn = self.env.context.get('linkedin_actor_urn') or self.env['linkedin.organization'].search([('account_id', '=', self.id)], limit=1).org_urn
+        
+        if not parent_urn or not comment_id:
+            return {'error': f'Missing parent_urn ({parent_urn}) or comment_id ({comment_id})'}
+
+        # LinkedIn Social Actions API expects a numeric comment ID in the URL path,
+        # but we store and pass the full URN from the frontend.
+        # Format: urn:li:comment:(urn:li:activity:7429049781064433665,7429479093928194048)
+        comment_id_str = str(comment_id)
+        if 'urn:li:comment:' in comment_id_str:
+            if ',' in comment_id_str:
+                comment_id = comment_id_str.split(',')[-1].replace(')', '')
+            else:
+                comment_id = comment_id_str.split(':')[-1]
+            _logger.info(f"Extracted numeric comment ID: {comment_id} from {comment_id_str}")
+
+        if not actor_urn:
+            return {'error': 'Could not determine actor URN for deletion.'}
+
+        parent_urn_encoded = urllib.parse.quote(str(parent_urn))
+        comment_id_encoded = urllib.parse.quote(str(comment_id))
+        actor_urn_encoded = urllib.parse.quote(actor_urn)
+        
+        url = f"https://api.linkedin.com/v2/socialActions/{parent_urn_encoded}/comments/{comment_id_encoded}?actor={actor_urn_encoded}"
+        
+        headers = {
+            'Authorization': f'Bearer {self.linkedin_access_token}',
+            'X-Restli-Protocol-Version': '2.0.0',
+        }
+        
+        _logger.info(f"DELETE LinkedIn Comment (Actor: {actor_urn}). URL: {url}")
+        
+        try:
+            res = requests.delete(url, headers=headers, timeout=30)
+            _logger.info(f"Comment DELETE Response: {res.status_code} - {res.text[:200]}")
+            
+            if res.status_code in (200, 204):
+                return True
+            else:
+                return {'error': res.text}
+        except Exception as e:
+            _logger.error(f"LinkedIn Comment DELETE Exception: {str(e)}", exc_info=True)
+            return {'error': str(e)}
