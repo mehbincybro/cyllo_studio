@@ -10,6 +10,7 @@
   .cy-icons {
     font-size: 14px;
   }
+
   .cy-soical-market_dropdown {
     font-size: 10px;
     font-weight: 500;
@@ -173,9 +174,9 @@
 .cyllo_comment_template textarea,
 .cy-social_comment_modal textarea {
   width: 100%;
-  max-height: 300px;       /* optional cap */
-  resize: none;            /* disable manual resize */
-  overflow: hidden;        /* hide scrollbar */
+  max-height: 300px;
+  resize: none;
+  overflow: hidden;
   font-size: 14px;
   line-height: 1.5;
   -webkit-user-drag: none;
@@ -335,6 +336,7 @@
 .cy-soical-marketing_dashboard {
   overflow: hidden;
 }
+
 .cy-soical-marketing_insights {
   padding-bottom: 0;
   justify-content: center;
@@ -505,7 +507,9 @@
   width: 60%;
 }
 
-.reply_div input, .reply_div input:hover, .reply_div input:focus {
+.reply_div input,
+.reply_div input:hover,
+.reply_div input:focus {
   border: none;
   padding-right: 40px;
   box-shadow: none;
@@ -536,7 +540,7 @@
   transform: translateY(-50%);
 }
 
-.view_replies > div:last-child .cy-reply-line {
+.view_replies>div:last-child .cy-reply-line {
   border-bottom-left-radius: 10px;
 }
 
@@ -568,7 +572,7 @@
   margin: 1rem 0;
 }
 
-.left_align{
+.left_align {
   margin-left: 2%;
 }
 
@@ -584,44 +588,48 @@
 .grow-div {
   flex-grow: 1;
 }
+
 .toggle_feed {
-    position: relative;
-    display: inline-block;
-    width: 30px;
-    height: 17px;
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
 }
 
 .toggle_feed input {
-    display: none;
+  display: none;
 }
 
 .slider_feed {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: gray;
-    transition: .4s;
-    border-radius: 10px;
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: gray;
+  transition: .4s;
+  border-radius: 10px;
 }
+
 .slider_feed:before {
-    position: absolute;
-    content: "";
-    height: 17px;
-    width: 17px;
-    left: 0px;
-    bottom: 0px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
+  position: absolute;
+  content: "";
+  height: 17px;
+  width: 17px;
+  left: 0px;
+  bottom: 0px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
 }
+
 input:checked+.slider_feed {
-    background-color: green;
+  background-color: green;
 }
+
 input:checked+.slider_feed:before {
-    transform: translateX(13px);
+  transform: translateX(13px);
 }
 
 .cy-kanban-feed-buttons {

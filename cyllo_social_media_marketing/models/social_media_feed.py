@@ -71,6 +71,12 @@ class SocialMediaFeed(models.Model):
     )
     posted_on_linkedin = fields.Boolean(string="Posted on LinkedIn", help="If this feed is from LinkedIn")
     linkedin_post_urn = fields.Char(string="LinkedIn Post URN", help="The LinkedIn URN for this post/share")
+    # ── Poll fields ─────────────────────────────────────────────────────────────
+    is_poll = fields.Boolean(string="Is Poll", default=False, help="Whether this feed is a LinkedIn poll")
+    poll_question = fields.Char(string="Poll Question")
+    poll_options = fields.Text(string="Poll Options (JSON)", help="Stored as JSON list of {text, voteCount}")
+    poll_duration = fields.Char(string="Poll Duration")
+    poll_total_votes = fields.Integer(string="Total Poll Votes")
 
     def action_compute_likes_count_all(self):
         """Compute the number of likes on the post for all feed."""
@@ -228,3 +234,13 @@ class SocialMediaFeed(models.Model):
             return True
         else:
             return False
+
+    def unlink(self):
+        """Override to delete post from LinkedIn when deleted from Odoo timeline."""
+        for feed in self:
+            if feed.posted_on_linkedin and feed.linkedin_account_id and feed.linkedin_post_urn:
+                try:
+                    feed.linkedin_account_id.action_delete_linkedin_post(feed.linkedin_post_urn)
+                except Exception as e:
+                    _logger.error(f"Failed to delete LinkedIn post {feed.linkedin_post_urn}: {e}")
+        return super(SocialMediaFeed, self).unlink()
