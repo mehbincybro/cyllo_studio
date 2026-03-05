@@ -29,5 +29,4 @@ class CrmLeadLost(models.TransientModel):
 
     def action_lost_reason_apply(self):
         res = super().action_lost_reason_apply()
-        print(self.read())
         return res
