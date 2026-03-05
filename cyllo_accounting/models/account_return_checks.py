@@ -1,4 +1,25 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -11,19 +32,14 @@ class AccountReturnChecks(models.Model):
     _order = 'name'
 
     name = fields.Char(required=True)
-    model_name = fields.Selection([
-        ('account.move', 'Journal Entry'),
-        ('account.move.line', 'Journal Item'),
-        ('account.payment', 'Payment'),
-        ('res.partner', 'Contact'),
-    ], required=True)
+    active = fields.Boolean(default=True, help="Set to false to archive this validation rule.")
+    model_name = fields.Selection([('account.move', 'Journal Entry'), ('account.move.line', 'Journal Item'),
+                                   ('account.payment', 'Payment'), ], required=True)
+    is_mandatory = fields.Boolean(string="Mandatory", default=True,
+                                  help="If checked, this rule must pass before the tax return can be posted.")
 
-    company_id = fields.Many2one(
-        'res.company',
-        string='Company',
-        default=lambda self: self.env.company,
-        required=True
-    )
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company,
+                                 required=True)
 
     # dynamic domain field
     domain = fields.Char(string="Condition", default="[]")
@@ -43,8 +59,9 @@ class AccountReturnValidation(models.Model):
     template_id = fields.Many2one('account.return.checks', string="Template", required=True, ondelete='cascade')
     return_id = fields.Many2one('account.return', string="Tax Return", required=True, ondelete='cascade')
     company_id = fields.Many2one('res.company', related='return_id.company_id', store=True)
-    state = fields.Selection([('draft', 'Draft'),('passed', 'Passed'),('failed', 'Failed')], default='draft',
+    state = fields.Selection([('draft', 'Draft'), ('passed', 'Passed'), ('failed', 'Failed')], default='draft',
                              readonly=True)
+    is_mandatory = fields.Boolean(related='template_id.is_mandatory', string="Mandatory", readonly=True, store=True)
     record_count = fields.Integer(string="Matched Records", readonly=True)
     result_message = fields.Text(string="Result", readonly=True)
 
@@ -93,6 +110,10 @@ class AccountReturnValidation(models.Model):
         self.state = 'failed' if records else 'passed'
         self.result_message = f"Found {count} matching record(s)." if records else "No matching records found."
 
+        notification_type = 'success'
+        if records:
+            notification_type = 'danger' if self.is_mandatory else 'warning'
+
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -100,7 +121,7 @@ class AccountReturnValidation(models.Model):
                 'title': _('Validation Completed'),
                 'message': self.result_message,
                 'sticky': False,
-                'type': 'danger' if records else 'success',
+                'type': notification_type,
             }
         }
 

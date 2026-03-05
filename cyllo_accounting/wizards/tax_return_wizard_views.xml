@@ -26,12 +26,4 @@
             </form>
         </field>
     </record>
-
-    <record id="action_tax_return_wizard" model="ir.actions.act_window">
-        <field name="name">Tax Returns</field>
-        <field name="res_model">tax.return.wizard</field>
-        <field name="view_mode">form</field>
-        <field name="view_id" ref="view_tax_return_wizard_form"/>
-        <field name="target">new</field>
-    </record>
 </odoo>

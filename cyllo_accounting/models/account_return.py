@@ -62,10 +62,10 @@ class AccountReturn(models.Model):
                                    "If negative, tax is refundable.")
     move_id = fields.Many2one('account.move', string="Settlement Entry", readonly=True,
                               help="Journal entry created to settle this tax return.")
-    state = fields.Selection([('draft', 'Draft'), ('posted', 'Posted'), ('cancel', 'Cancelled')], default='draft',
-                             help="Status of the tax return.")
-
-    check_ids = fields.One2many('account.return.validation', 'return_id', string="Validation Checks")
+    state = fields.Selection([('draft', 'Draft'), ('posted', 'Posted'), ('cancel', 'Cancelled')],
+                             default='draft',help="Status of the tax return.")
+    check_ids = fields.One2many('account.return.validation', 'return_id',
+                                string="Validation Checks")
 
     @api.constrains('date_from', 'date_to')
     def _check_dates(self):
@@ -85,8 +85,10 @@ class AccountReturn(models.Model):
                 continue
             domain = [('id', '!=', rec.id), ('company_id', '=', rec.company_id.id), ('state', '!=', 'cancel'),
                       ('date_from', '<=', rec.date_to), ('date_to', '>=', rec.date_from), ]
-            # if self.search_count(domain):
-            #     raise UserError(_("Another tax return already exists for this period."))
+            overlapping = self.search(domain)
+            if overlapping:
+                raise UserError(_("Another tax return already exists for this period (%s - %s).") % (
+                overlapping[0].date_from, overlapping[0].date_to))
 
     def action_compute(self):
         """
@@ -128,17 +130,26 @@ class AccountReturn(models.Model):
         for check in self.check_ids:
             check.action_run_validation()
 
-        failed_checks = self.check_ids.filtered(lambda c: c.state == 'failed')
-        if failed_checks:
-            msg = _("The following validation checks failed:\n%s") % "\n".join([f"- {c.name}: {c.result_message}" for c in failed_checks])
+        failed_mandatory = self.check_ids.filtered(lambda c: c.state == 'failed' and c.is_mandatory)
+        failed_optional = self.check_ids.filtered(lambda c: c.state == 'failed' and not c.is_mandatory)
+
+        if failed_mandatory or failed_optional:
+            messages = []
+            if failed_mandatory:
+                messages.append(_("Mandatory failures:\n%s") % "\n".join(
+                    [f"- {c.name}: {c.result_message}" for c in failed_mandatory]))
+            if failed_optional:
+                messages.append(_("Optional warnings:\n%s") % "\n".join(
+                    [f"- {c.name}: {c.result_message}" for c in failed_optional]))
+
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': _('Validation Failed'),
-                    'message': msg,
+                    'title': _('Validation Results'),
+                    'message': "\n\n".join(messages),
                     'sticky': True,
-                    'type': 'danger',
+                    'type': 'danger' if failed_mandatory else 'warning',
                 }
             }
         return {
@@ -165,8 +176,9 @@ class AccountReturn(models.Model):
 
         # Validate checks before posting
         self.action_validate_checks()
-        if any(check.state == 'failed' for check in self.check_ids):
-            raise UserError(_("Cannot post tax return because some validation checks failed. Please review the 'Validation Checks' tab."))
+        if any(check.state == 'failed' and check.is_mandatory for check in self.check_ids):
+            raise UserError(
+                _("Cannot post tax return because some mandatory validation checks failed. Please review the 'Validation Checks' tab."))
 
         # if not self.net_tax:
         #     raise UserError(_("Nothing to settle."))
@@ -251,6 +263,19 @@ class AccountReturn(models.Model):
             self.move_id.button_cancel()
 
         self.state = 'cancel'
+
+    def action_open_tax_return_wizard(self):
+        """
+        Open the Tax Return Wizard from a button.
+        """
+        return {
+            'name': _('Tax Return Generation Wizard'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'tax.return.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': self.env.context,
+        }
 
     def unlink(self):
         """

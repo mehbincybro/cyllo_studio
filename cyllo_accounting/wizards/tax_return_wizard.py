@@ -1,4 +1,25 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+
 
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
@@ -106,9 +127,18 @@ class TaxReturnWizard(models.TransientModel):
         created_returns = []
 
         for start, end in periods:
-            name = f"Tax Return ({start} - {end})"
+            # Overlap check for better error message
+            existing = self.env['account.return'].search([
+                ('company_id', '=', self.company_id.id),
+                ('state', '!=', 'cancel'),
+                ('date_from', '<=', end),
+                ('date_to', '>=', start),
+            ])
+            if existing:
+                raise UserError(_("A Tax Return already exists for the period %s to %s.") % (start, end))
+
             record = self.env['account.return'].create({
-                'name': name,
+                'name': _("Tax Return (%s to %s)") % (start, end),
                 'periodicity': self.periodicity,
                 'date_from': start,
                 'date_to': end,
@@ -129,10 +159,15 @@ class TaxReturnWizard(models.TransientModel):
                 validation.action_run_validation()
 
             created_returns.append(record.id)
+
+        if not created_returns:
+            return {'type': 'ir.actions.act_window_close'}
+
         return {
             'type': 'ir.actions.act_window',
             'name': _('Tax Returns'),
             'res_model': 'account.return',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', created_returns)],
+            'target': 'current',
         }

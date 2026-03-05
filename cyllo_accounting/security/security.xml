@@ -46,4 +46,25 @@
         </field>
     </record>
 
+    <record id="account_return_multi_company_rule" model="ir.rule">
+        <field name="name">Tax Return multi-company</field>
+        <field ref="model_account_return" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="account_return_checks_multi_company_rule" model="ir.rule">
+        <field name="name">Tax Return Checks multi-company</field>
+        <field ref="model_account_return_checks" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
+    <record id="account_return_validation_multi_company_rule" model="ir.rule">
+        <field name="name">Tax Return Validation multi-company</field>
+        <field ref="model_account_return_validation" name="model_id"/>
+        <field eval="True" name="global"/>
+        <field name="domain_force">['|',('company_id','=',False),('company_id', 'in', company_ids)]</field>
+    </record>
+
 </odoo>
