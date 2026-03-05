@@ -9,14 +9,16 @@
     'website': 'https://www.cyllo.com',
     'summary': 'Meeting with cyllo',
     'description': """
-        Cyllo zoom is a application to link with zoom in activity type
+        Cyllo zoom is a application to link with zoom in activity type.
+        Zoom credentials are configured globally in Settings → General Settings
+        → Zoom Integration and apply to all users.
     """,
-    'depends': ['cyllo_base', 'sale', 'crm', 'mail'],
+    'depends': ['base_setup', 'cyllo_base', 'sale', 'crm', 'mail'],
     'data': [
         'data/ir_cron_data.xml',
-        'views/res_users_view.xml',
+        'views/res_config_settings_view.xml',
         'views/calendar_event_views.xml',
-        'views/calender_event_quick_form_view.xml'
+        'views/calender_event_quick_form_view.xml',
     ],
 
     'license': 'LGPL-3',
