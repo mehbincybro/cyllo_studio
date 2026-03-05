@@ -83,7 +83,10 @@ export class FormOverall extends Component {
 			fieldDropped: false,
 			invisible:'',
 			hasStudioChanges: false,
-			isPreviewMode:false
+			isPreviewMode:false,
+			buttonLimitEnabled: false,
+            buttonLimitValue: '',
+            hasButtonLimitAttribute: false,
 		});
 		this.state.deactivatedViews = [];
         this.state.selectedDeactivatedViewId = null;
@@ -100,6 +103,7 @@ export class FormOverall extends Component {
         this.state.isStudioModel = model && model.startsWith("x_");
 
        onWillStart(async () => {
+            await this.loadButtonLimitAttribute();
             this.state.invisible = sessionStorage.getItem('invisible');
 
             if (this.props.model) {
@@ -863,8 +867,6 @@ const handleRibbonClick = function(ribbonElement, e) {
     });
 }
 
-
-
 async loadDeactivatedViews() {
     const view_id = this.props.viewId;
     if (!view_id) return;
@@ -942,7 +944,134 @@ async activateSelectedView() {
     });
 }
 
+/**
+ * Load the current button_limit attribute from the header element
+ */
+async loadButtonLimitAttribute() {
+    try {
+        const view_id = this.props.viewId || this.props.viewDetails?.viewId;
+        const model = this.props.model;
 
+        if (!view_id || !model) {
+            this.state.buttonLimitEnabled = false;
+            this.state.buttonLimitValue = '';
+            return;
+        }
+
+        const result = await this.rpc("/cyllo_studio/get_button_limit", {
+            view_id: view_id,
+            model: model
+        });
+
+        if (result && result.button_limit) {
+            this.state.buttonLimitEnabled = true;
+            this.state.buttonLimitValue = result.button_limit.toString();
+            this.state.hasButtonLimitAttribute = true;
+        } else {
+            this.state.buttonLimitEnabled = false;
+            this.state.buttonLimitValue = '';
+            this.state.hasButtonLimitAttribute = false;
+        }
+    } catch (error) {
+        console.error("Error loading button limit attribute:", error);
+    }
+}
+
+/**
+ * Handle checkbox toggle for button limit
+ */
+async toggleButtonLimit(event) {
+    const isChecked = event.target.checked;
+    this.state.buttonLimitEnabled = isChecked;
+
+    if (!isChecked) {
+        await this.removeButtonLimitAttribute();
+        this.state.buttonLimitValue = '';
+        this.state.hasButtonLimitAttribute = false;
+    }
+}
+
+/**
+ * Handle input field changes for button limit value
+ */
+async updateButtonLimitValue(event) {
+    const value = event.target.value.trim();
+
+    if (!value) {
+        return;
+    }
+
+    const numValue = parseInt(value);
+    if (isNaN(numValue) || numValue <= 0) {
+        return;
+    }
+
+    this.state.buttonLimitValue = numValue.toString();
+
+    try {
+        this.env.services.ui.block();
+        await this.saveButtonLimitAttribute(numValue);
+        this.action.doAction("studio_reload");
+    } catch (error) {
+        console.error("Error updating button limit:", error);
+    } finally {
+        this.env.services.ui.unblock();
+    }
+}
+
+/**
+ * Save button_limit attribute to header element via RPC
+ */
+async saveButtonLimitAttribute(value) {
+    const view_id = this.props.viewId || this.props.viewDetails?.viewId;
+    const model = this.props.model;
+
+    if (!view_id || !model) {
+        throw new Error("Missing required parameters: view_id or model");
+    }
+
+    const result = await this.rpc("/cyllo_studio/set_button_limit", {
+        view_id: view_id,
+        model: model,
+        button_limit: value
+    });
+
+    if (!result.success) {
+        throw new Error(result.message || "Failed to save button limit");
+    }
+
+    this.state.hasButtonLimitAttribute = true;
+}
+
+/**
+ * Remove button_limit attribute from header element via RPC
+ */
+async removeButtonLimitAttribute() {
+    const view_id = this.props.viewId || this.props.viewDetails?.viewId;
+    const model = this.props.model;
+
+    if (!view_id || !model) {
+        console.warn("Missing parameters for removing button limit");
+        return;
+    }
+
+    try {
+        this.env.services.ui.block();
+        const result = await this.rpc("/cyllo_studio/remove_button_limit", {
+            view_id: view_id,
+            model: model
+        });
+
+        if (result.success) {
+            this.state.hasButtonLimitAttribute = false;
+            this.action.doAction("studio_reload");
+        }
+    } catch (error) {
+        console.error("Error removing button limit:", error);
+    } finally {
+        this.env.services.ui.unblock();
+    }
+}
 
 }
 FormOverall.components = {

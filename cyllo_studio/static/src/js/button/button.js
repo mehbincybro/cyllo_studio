@@ -14,6 +14,10 @@ import {
     StatusBarButtons
 } from '@web/views/form/status_bar_buttons/status_bar_buttons';
 import {
+    CylloStatusBarButtons
+} from '@cyllo_base/js/status_bar_buttons';
+
+import {
     patch
 } from '@web/core/utils/patch';
 const {
@@ -32,7 +36,7 @@ import {
 } from "@cyllo_studio/js/root/studio_wrapper";
 
 
-patch(StatusBarButtons.prototype, {
+patch(CylloStatusBarButtons.prototype, {
     setup() {
         super.setup();
         this.notification = useService("effect");

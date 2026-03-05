@@ -211,6 +211,32 @@
                             <span class="label-text">Show Invisible Elements</span>
                         </label>
                     </div>
+                                        <div class="checkbox-item">
+                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="buttonLimit"
+                               name="checkbox4" t-att-checked="state.buttonLimitEnabled"
+                               t-model="state.buttonLimitEnabled"
+                               t-on-click="(ev) => this.toggleButtonLimit(ev)"/>
+                        <label class="checkbox-label" for="buttonLimit">
+                            <span class="checkbox-indicator">
+                                <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                    <polyline points="1 5 4 8 11 1"></polyline>
+                                </svg>
+                            </span>
+                            <span class="label-text">Header Button Limit</span>
+                        </label>
+                    </div>
+                    <div class="mb-2" t-if="state.buttonLimitEnabled">
+                            <label for="buttonLimitInput" class="cy-navbar_label">Button Limit Value
+                            </label>
+                            <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
+                                   reqired="true"
+                                   type="number" id="buttonLimitInput" name="buttonLimitValue"
+                                   placeholder="Eg: 5"
+                                   autocomplete="off" t-model="state.buttonLimitValue"
+                                   t-on-change="(ev) => this.updateButtonLimitValue(ev)"
+                                   t-on-keyup="(ev) => this.updateButtonLimitValue(ev)"/>
+                    </div>
+
                 </div>
             </div>
             <t t-if="state.deactivatedViews.length">
