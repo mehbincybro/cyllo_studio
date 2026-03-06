@@ -36,14 +36,13 @@
         <field name="name">audit.session.tree</field>
         <field name="model">audit.session</field>
         <field name="arch" type="xml">
-            <tree decoration-info="active" decoration-muted="not active" create="false" edit="false" sample="1">
+            <tree decoration-info="is_active" decoration-muted="not is_active" create="false" edit="false" sample="1">
                 <field name="login_time" string="Start"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="name" string="Session ID" optional="hide"/>
                 <field name="ip_address"/>
-                <field name="last_activity" string="Last Seen"/>
                 <field name="log_count" string="Logs Captured" sum="Total Logs"/>
-                <field name="active" widget="boolean_toggle" optional="show"/>
+                <field name="is_active" widget="boolean_toggle" optional="show"/>
             </tree>
         </field>
     </record>
@@ -57,7 +56,7 @@
                 <field name="id"/>
                 <field name="user_id"/>
                 <field name="login_time"/>
-                <field name="last_activity"/>
+                <field name="logout_time"/>
                 <field name="log_count"/>
                 <templates>
                     <t t-name="kanban-box">
@@ -80,7 +79,7 @@
                                             </span>
                                         </div>
                                         <div class="oe_kanban_bottom_right">
-                                            <field name="last_activity" widget="remaining_days"/>
+                                            <field name="logout_time" widget="remaining_days"/>
                                         </div>
                                     </div>
                                 </div>
@@ -109,8 +108,8 @@
                         <group>
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="login_time"/>
-                            <field name="last_activity"/>
-                            <field name="active" widget="boolean_toggle"/>
+                            <field name="logout_time"/>
+                            <field name="is_active" widget="boolean_toggle"/>
                         </group>
                         <group>
                             <field name="ip_address"/>
@@ -118,8 +117,37 @@
                             <field name="log_count"/>
                         </group>
                     </group>
+                    <notebook>
+                        <page name="logs" string="Audit Logs">
+                            <field name="log_ids" readonly="1">
+                                <tree>
+                                    <field name="create_date" string="Date"/>
+                                    <field name="record_name" string="Resource Name"/>
+                                    <field name="model_id" string="Model"/>
+                                    <field name="operation" string="Action"/>
+                                    <field name="user_id" string="User" widget="many2one_avatar_user"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
                 </sheet>
             </form>
+        </field>
+    </record>
+
+    <!-- Action must be defined before view that uses it in context/buttons -->
+    <record id="action_audit_log" model="ir.actions.act_window">
+        <field name="name">Audit Logs</field>
+        <field name="res_model">audit.log</field>
+        <field name="view_mode">tree,form,graph,pivot</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No audit logs yet.
+            </p>
+            <p>
+                Audit logs will appear here when you create audit rules
+                and perform operations on tracked models.
+            </p>
         </field>
     </record>
 
@@ -161,6 +189,7 @@
                             <field name="user_id" widget="many2one_avatar_user"/>
                             <field name="ip_address"/>
                             <field name="session_id" context="{'form_view_ref': 'cyllo_auditlog.view_audit_session_form'}"/>
+                            <field name="http_request_id" context="{'form_view_ref': 'cyllo_auditlog.view_auditlog_http_request_form'}"/>
                         </group>
                         <group name="model" string="Model Metadata">
                             <field name="model_id" options="{'no_open': True}"/>
@@ -270,21 +299,6 @@
         </field>
     </record>
 
-    <!-- Action -->
-    <record id="action_audit_log" model="ir.actions.act_window">
-        <field name="name">Audit Logs</field>
-        <field name="res_model">audit.log</field>
-        <field name="view_mode">tree,form,graph,pivot</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No audit logs yet.
-            </p>
-            <p>
-                Audit logs will appear here when you create audit rules
-                and perform operations on tracked models.
-            </p>
-        </field>
-    </record>
 
     <!-- Dashboard Action -->
     <record id="action_audit_dashboard" model="ir.actions.act_window">
