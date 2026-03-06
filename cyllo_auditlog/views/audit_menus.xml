@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Main Menu -->
+    <menuitem id="menu_audit_root"
+              name="Audit"
+              sequence="90"
+              groups="base.group_system"/>
+
+    <!-- Dashboard Menu -->
+    <menuitem id="menu_audit_dashboard"
+              name="Dashboard"
+              parent="menu_audit_root"
+              action="action_audit_dashboard"
+              sequence="5"
+              groups="base.group_system"/>
+
+    <!-- Audit Logs Menu -->
+    <menuitem id="menu_audit_logs"
+              name="Logs"
+              parent="menu_audit_root"
+              action="action_audit_log"
+              sequence="10"
+              groups="base.group_system"/>
+
+    <!-- User Sessions Menu -->
+    <menuitem id="menu_audit_sessions"
+              name="Sessions"
+              parent="menu_audit_root"
+              action="action_audit_session"
+              sequence="15"
+              groups="base.group_system"/>
+
+    <!-- Audit Rules Menu -->
+    <menuitem id="menu_audit_rules"
+              name="Rules"
+              parent="menu_audit_root"
+              action="action_audit_rule"
+              sequence="20"
+              groups="base.group_system"/>
+
+    <!-- Configuration Menu (optional submenu) -->
+    <menuitem id="menu_audit_configuration"
+              name="Configuration"
+              parent="menu_audit_root"
+              sequence="30"
+              groups="base.group_system"/>
+
+    <menuitem id="menu_audit_rules_config"
+              name="Audit Rules"
+              parent="menu_audit_configuration"
+              action="action_audit_rule"
+              sequence="10"
+              groups="base.group_system"/>
+</odoo>
