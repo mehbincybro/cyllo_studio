@@ -45,6 +45,8 @@ export class EditReport extends Component {
             previewHtml: false,
             showSourceEditor: false,
             sourceCode: "",
+            showResetDialog: false,
+            includeHeaderFooter: true,
         });
 
         // Track SortableJS instances so we can destroy/recreate on DOM changes
@@ -265,6 +267,8 @@ export class EditReport extends Component {
             });
             if (res.success) {
                 this.state.sourceCode = res.arch;
+                // Store the resolved document template name so we save to the right view
+                this._docTemplate = res.doc_template || this._template;
                 this._initAceEditor();
             } else {
                 this.notification.add(res.error, { type: "danger" });
@@ -304,6 +308,7 @@ export class EditReport extends Component {
     async onSaveSource() {
         const res = await this.rpc('/cyllo_studio/save_report_source', {
             template: this._template,
+            doc_template: this._docTemplate || this._template,
             arch: this.state.sourceCode,
         });
         if (res.success) {
@@ -313,6 +318,42 @@ export class EditReport extends Component {
             }
         } else {
             this.notification.add(res.error, { type: "danger" });
+        }
+    }
+
+    onResetReport() {
+        // Show the confirmation dialog
+        this.state.showResetDialog = true;
+    }
+
+    async confirmResetReport() {
+        this.state.showResetDialog = false;
+        const res = await this.rpc('/cyllo_studio/reset_report_source', {
+            template: this._template,
+            include_header_footer: this.state.includeHeaderFooter,
+        });
+        if (res.success) {
+            this.notification.add("Report reset to factory settings", { type: "success" });
+            // If source editor is open, refresh it with the reset arch
+            if (this.state.showSourceEditor && res.arch) {
+                this.state.sourceCode = res.arch;
+                if (this.aceEditor) {
+                    this.aceEditor.setValue(res.arch, -1);
+                }
+            }
+            // Reload the editor preview
+            const result = await this.rpc('/cyllo_studio/get_arch', { template: this._template });
+            if (result && result.success) {
+                this._loadedArch = result.arch;
+                if (!this.state.previewMode) {
+                    this._setupReportFrame(result.arch);
+                    this._setupSortable();
+                } else {
+                    await this._fetchPreviewData();
+                }
+            }
+        } else {
+            this.notification.add(res.error || "Reset failed", { type: "danger" });
         }
     }
 
@@ -422,8 +463,10 @@ export class EditReport extends Component {
 
     _setupSortable() {
         this._snippetPanel = document.getElementById('snippet-panel');
-        this._reportFrame = document.getElementById('studio_report');
-
+        //        this._reportFrame = document.getElementById('studio_report');
+        this._reportFrame = this.reportFrameRef.el
+        console.log('test', this.reportFrameRef.el)
+        if (!this._reportFrame) return;
         // Destroy any previous instances before reinitialising
         this._destroySortableInstances();
 
@@ -739,9 +782,9 @@ export class EditReport extends Component {
                             .replace(/<br>/gi, '<br/>');
 
                         xpathBlock += `
-    <xpath expr="${change.xpath}" position="inside">
-        ${content}
-    </xpath>`;
+                        <xpath expr="${change.xpath}" position="inside">
+                            ${content}
+                        </xpath>`;
                     });
                     return;
                 }

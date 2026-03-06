@@ -146,7 +146,7 @@ class StudioReportController(Controller):
 
             # Fetch recent records from the target model
             records = request.env[res_model].search([], limit=80)
-
+            
             # Fetch available paper formats with dimensions
             paper_formats = request.env['report.paperformat'].search_read(
                 [], ['id', 'name', 'page_width', 'page_height', 'format']
@@ -183,44 +183,137 @@ class StudioReportController(Controller):
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+    # These are layout wrappers – we skip them when searching for the document template
+    _LAYOUT_CALLS = {
+        'web.html_container', 'web.external_layout', 'web.external_layout_standard',
+        'web.external_layout_boxed', 'web.external_layout_clean', 'web.external_layout_background',
+        'web.basic_layout',
+    }
+
+    def _resolve_doc_template(self, template):
+        """
+        Given a wrapper template name (e.g. ``sale.report_saleorder_zew``), walk its
+        ``t-call`` children and return the *first* one that is NOT a known layout
+        wrapper.  That is the real document template whose arch we want to edit.
+
+        Returns ``(view_record, resolved_template_name)``.
+        If no inner call is found, falls back to the wrapper itself.
+        """
+        try:
+            wrapper_view = request.env.ref(template, raise_if_not_found=False)
+            if not wrapper_view:
+                wrapper_view = request.env['ir.ui.view'].search([('name', '=', template)], limit=1)
+            if not wrapper_view or not wrapper_view.exists():
+                return None, template
+
+            arch_src = wrapper_view.arch_base or wrapper_view.arch
+            if not arch_src:
+                return wrapper_view, template
+
+            try:
+                root = etree.fromstring(arch_src.encode('utf-8'))
+            except etree.XMLSyntaxError:
+                return wrapper_view, template
+
+            # Collect all t-call values in document order, skip layout ones
+            for el in root.iter():
+                t_call = el.get('t-call')
+                if t_call and t_call not in self._LAYOUT_CALLS:
+                    # Try to resolve this as an external ID
+                    doc_view = request.env.ref(t_call, raise_if_not_found=False)
+                    if doc_view and doc_view.exists():
+                        return doc_view, t_call
+
+            # Nothing found – return the wrapper itself
+            return wrapper_view, template
+        except Exception:
+            return None, template
+
     @route('/cyllo_studio/get_report_source', auth='user', csrf=False, type='json')
     def get_report_source(self, template):
-        """ Fetch the raw XML arch of the report template, preferring custom view. """
+        """
+        Fetch the raw XML arch of the *document* template (the real content template,
+        not the outer wrapper).  Also returns the resolved template name so the
+        frontend can pass it back on save.
+        """
         try:
-            # First look for a custom view
-            custom_view = request.env['ir.ui.view'].search([('name', '=', f'Custom_{template}')], limit=1)
-            if custom_view:
-                return {'success': True, 'arch': custom_view.arch_base}
+            doc_view, doc_template = self._resolve_doc_template(template)
 
-            # Fallback to base view
-            view = request.env.ref(template, raise_if_not_found=False)
-            if not view:
-                # Try searching by name if ref fails (might just be the view name without module)
-                view = request.env['ir.ui.view'].search([('name', '=', template)], limit=1)
-
-            if not view.exists():
+            if not doc_view or not doc_view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
-            return {'success': True, 'arch': view.arch_base}
+
+            # Always return the base view's full architecture so the source editor
+            # shows the complete document XML (the Architecture tab content), not
+            # the xpath-based custom/inherited diff.
+            return {'success': True, 'arch': doc_view.arch_base, 'doc_template': doc_template}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
     @route('/cyllo_studio/save_report_source', auth='user', csrf=False, type='json')
-    def save_report_source(self, template, arch):
-        """ Save the raw XML arch directly to the inherited view (or create one). """
+    def save_report_source(self, template, arch, doc_template=None):
+        """
+        Save the raw XML arch directly to the document template's inherited view
+        (or create one).  ``doc_template`` is the resolved document template name
+        returned by ``get_report_source``; if not supplied we fall back to
+        auto-detecting it again.
+        """
         try:
-            custom_view = request.env['ir.ui.view'].search([('name', '=', f'Custom_{template}')], limit=1)
-            if custom_view:
-                custom_view.write({'arch_base': arch})
-            else:
-                base_view = request.env.ref(template)
-                request.env['ir.ui.view'].create({
-                    'name': f'Custom_{template}',
-                    'type': 'qweb',
-                    'mode': 'extension',
-                    'inherit_id': base_view.id,
-                    'arch_base': arch,
-                })
+            # Resolve which template to actually save to
+            save_template = doc_template or template
+            if not doc_template:
+                _, save_template = self._resolve_doc_template(template)
+
+            # Validate XML before saving
+            try:
+                etree.fromstring(arch.encode('utf-8'))
+            except etree.XMLSyntaxError as xml_err:
+                return {'success': False, 'error': f'Invalid XML: {xml_err}'}
+
+            # Write directly to the base document view so the PDF immediately
+            # reflects the changes (no extra inherited view is created).
+            base_view = request.env.ref(save_template, raise_if_not_found=False)
+            if not base_view or not base_view.exists():
+                # Fall back: search by name
+                base_view = request.env['ir.ui.view'].search(
+                    [('name', '=', save_template)], limit=1)
+            if not base_view or not base_view.exists():
+                return {'success': False, 'error': f'View {save_template!r} not found'}
+
+            base_view.write({'arch_base': arch})
             return {'success': True}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+
+    @route('/cyllo_studio/reset_report_source', auth='user', csrf=False, type='json')
+    def reset_report_source(self, template, include_header_footer=False):
+        """
+        Reset the document template's arch back to its factory / module defaults
+        by calling ir.ui.view.reset_arch(mode='hard').
+        """
+        try:
+            doc_view, doc_template = self._resolve_doc_template(template)
+            if not doc_view or not doc_view.exists():
+                return {'success': False, 'error': f'View {template!r} not found'}
+
+            # Hard-reset: restores arch from the module XML file on disk
+            doc_view.sudo().reset_arch(mode='hard')
+
+            if include_header_footer:
+                # Delete any custom inherited views on top of the doc template
+                custom_views = request.env['ir.ui.view'].search([
+                    ('inherit_id', '=', doc_view.id),
+                    ('name', 'like', 'Custom_'),
+                ])
+                if custom_views:
+                    custom_views.sudo().unlink()
+
+                # Also reset the outer wrapper if it has an arch_fs
+                wrapper_view = request.env.ref(template, raise_if_not_found=False)
+                if wrapper_view and wrapper_view.exists() and wrapper_view.arch_fs:
+                    wrapper_view.sudo().reset_arch(mode='hard')
+
+            fresh_arch = doc_view.arch_base
+            return {'success': True, 'arch': fresh_arch}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}

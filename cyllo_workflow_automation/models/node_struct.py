@@ -82,6 +82,24 @@ class NodeStruct(models.Model):
     search_domain_tree = fields.Json("Tree")
     search_variable = fields.Json("Variable")
 
+    # Loop block fields
+    loop_source_type = fields.Selection(
+        selection=[
+            ('field', 'Record Field'),
+            ('variable', 'Variable'),
+        ],
+        string="Loop Source Type",
+        default='field'
+    )
+    loop_collection = fields.Char(
+        string="Loop Collection",
+        help="Field name (e.g. order_line) or variable name to iterate over."
+    )
+    loop_variable_name = fields.Char(
+        string="Loop Variable Name",
+        help="Name of the loop iteration variable (e.g. current_line)."
+    )
+
     # create block fields
     create_name = fields.Char()
     create_model_field_value = fields.Char(default="[]")
