@@ -112,8 +112,23 @@
                             </span>
                         </div>
                     </setting>
-                </block>
 
+                    <setting
+                            id="module_crm_zoom_meet_setting"
+                            help="Enable CRM Zoom Meet to create, manage, and link Zoom meetings directly from CRM leads.">
+                        <field name="module_cyllo_zoom"/>
+                        <div class="content-group"
+                             invisible="not module_cyllo_zoom">
+                            <span>
+                                When enabled, users can create Zoom meetings
+                                directly from CRM leads,
+                                store meeting IDs and URLs in the lead, and
+                                optionally automate lead creation
+                                from meeting responses.
+                            </span>
+                        </div>
+                    </setting>
+                </block>
             </xpath>
         </field>
     </record>

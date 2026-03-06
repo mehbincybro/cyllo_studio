@@ -43,34 +43,3 @@
         </field>
     </record>
 </odoo>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<!--<?xml version="1.0" encoding="UTF-8"?>-->
-<!--<odoo>-->
-<!--    <record id="view_calendar_event_form_quick_create_cyllo_google_meet"-->
-<!--            model="ir.ui.view">-->
-<!--        <field name="name">-->
-<!--            view.calendar.event.form.quick_create.cyllo.google.meet-->
-<!--        </field>-->
-<!--        <field name="model">calendar.event</field>-->
-<!--        <field name="inherit_id"-->
-<!--               ref="calendar.view_calendar_event_form_quick_create"/>-->
-<!--        <field name="arch" type="xml">-->
-<!--            <xpath expr="//field[@name='start']" position="after">-->
-<!--                <field name="is_google_meet" widget="boolean_toggle"/>-->
-<!--            </xpath>-->
-<!--        </field>-->
-<!--    </record>-->
-<!--</odoo>-->
-

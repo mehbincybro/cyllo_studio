@@ -36,8 +36,6 @@
     'data': [
         'views/calendar_event_views.xml',
         'views/calender_event_quick_form_view.xml',
-        # 'views/res_config_settings_views.xml',
-        # add other views like meeting templates if needed
     ],
     'license': 'LGPL-3',
     'installable': True,

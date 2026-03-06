@@ -74,6 +74,11 @@ class ResConfigSettings(models.TransientModel):
         config_parameter="cyllo_crm.module_cyllo_google_meet"
     )
 
+    module_cyllo_zoom = fields.Boolean(
+        string="CRM Zoom Meet Integration",
+        help="Enable CRM Zoom Meet to create, manage, and link Zoom meetings directly from CRM leads.",
+        config_parameter="cyllo_crm.module_cyllo_zoom"
+    )
 
     @api.onchange('module_cyllo_crm_advance_lead')
     def _onchange_module_cyllo_crm_advance_lead(self):
@@ -129,10 +134,26 @@ class ResConfigSettings(models.TransientModel):
         # Install CRM Google Meet module
         if self.module_cyllo_google_meet:
             crm_google_meet_module = Module.search(
-                [('name','=', 'module_cyllo_google_meet'),('state','!=', 'installed')],
+                [('name', '=', 'cyllo_google_meet'),
+                 # ✅ fixed: removed 'module_' prefix
+                 ('state', '!=', 'installed')],
+                limit=1  # ✅ fixed: added limit=1
             )
             if crm_google_meet_module:
                 crm_google_meet_module.button_immediate_install()
+
+        # Install CRM Zoom Meet module
+        if self.module_cyllo_zoom:
+            crm_module_cyllo_zoom = Module.search(
+                [('name', '=', 'cyllo_zoom'),
+                 # ✅ fixed: removed 'module_' prefix
+                 ('state', '!=', 'installed')],
+                limit=1  # ✅ fixed: added limit=1
+            )
+            if crm_module_cyllo_zoom:
+                crm_module_cyllo_zoom.button_immediate_install()
+
+
 
     def action_configure_exit_criteria(self):
         """trigger a popup in crm settings and load previously created exit criterias"""
