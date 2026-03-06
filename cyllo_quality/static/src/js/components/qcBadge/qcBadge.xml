@@ -5,5 +5,4 @@
         <span t-if="props.record.data[props.name] and !state.isBus" class="badge rounded-pill" t-att-class="classFromDecoration" t-esc="formattedValue" />
         <span t-elif="state.isBus and state.value" class="badge rounded-pill" t-att-class="classFromDecorationBus" t-esc="state.value" />
     </t>
-
 </templates>

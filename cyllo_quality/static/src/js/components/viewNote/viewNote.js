@@ -9,7 +9,6 @@ export class ViewNote extends Component {
 
     setup() {
         // Ensure value exists and is an array
-        console.log(this)
         this.state = useState({
             endIndex: 0,
             isExpanded: false,

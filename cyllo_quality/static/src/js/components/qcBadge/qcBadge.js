@@ -9,7 +9,6 @@ export class QcBadgeField extends BadgeField{
     static  template = "QcBadgeField"
     setup(){
         super.setup();
-        console.log(this)
         this.state = useState({
             tempContext: {},
             value: "",

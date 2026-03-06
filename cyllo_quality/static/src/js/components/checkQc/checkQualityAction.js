@@ -22,7 +22,6 @@ export class CheckQualityAction extends Component {
     async getQualityCheck(){
             const response = await this.orm.call("quality.check","get_quality_check_actions", [this.props.record.data.quality_check_id[0]])
             this.state.qualityCheck = response[0]
-            console.log(this, 'sdsfsdfsdf', this.state.qualityCheck)
     }
 
     async _onClickCheck(){

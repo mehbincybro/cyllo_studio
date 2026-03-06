@@ -1,5 +1,26 @@
 # -*- coding: utf-8 -*-
-from odoo import fields, models
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import _, fields, models
+from odoo.exceptions import UserError
 
 
 class QualityCheckLine(models.Model):
@@ -11,8 +32,12 @@ class QualityCheckLine(models.Model):
     inspection_action_id = fields.Many2one('inspection.action', string='Actions', required=True)
     inspection_type_id = fields.Many2one('inspection.type', string='Type', required=True)
     quality_inspection_id = fields.Many2one('quality.inspection', string='Type')
+    blocked_by_id = fields.Many2one('quality.inspection', string='Blocked By')
     value = fields.Char()
     unit_value = fields.Json()
+    measure_start = fields.Float(string='Start')
+    measure_end = fields.Float(string='End')
+    unit_id = fields.Many2one('uom.uom', string='Unit')
     note = fields.Text(string='Note')
     instruction = fields.Text(string='Quality Check Instructions')
     is_checked = fields.Boolean(copy=False)
@@ -35,15 +60,46 @@ class QualityCheckLine(models.Model):
 
     def validate_quality_actions(self, value, note):
         self.ensure_one()
-        if self.inspection_type_id.name in ['Measure', 'Instructions']:
-            if self.value == value:
+        if self.blocked_by_id:
+            blocking_line = self.env['quality.check.line'].search([
+                ('quality_check_id', '=', self.quality_check_id.id),
+                ('quality_inspection_id', '=', self.blocked_by_id.id)
+            ], limit=1)
+            if blocking_line and not blocking_line.is_checked:
+                raise UserError(_("This action is blocked by %s. Please complete it first.") % blocking_line.inspection_action_id.name)
+        if self.inspection_type_id.name == 'Measure':
+            try:
+                val = float(value)
+                if self.measure_start <= val <= self.measure_end:
+                    self.write({'status': 'pass'})
+                else:
+                    self.write({'status': 'fail'})
+            except (ValueError, TypeError):
+                self.write({'status': 'fail'})
+            self.write({'value': value})
+        elif self.inspection_type_id.name == 'Instructions':
+            expected_value = self.unit_value.get('value') if self.unit_value else False
+            if str(expected_value) == str(value):
                 self.write({
                     'status': 'pass'
                 })
             else:
                 self.write({
                     'status' : 'fail'})
-        elif self.inspection_type_id.name in ['Pass/Fail', 'Take a picture']:
+            self.write({'value': value})
+        elif self.inspection_type_id.name == 'Take a picture':
+            if value and '|' in value:
+                status, actual_value = value.split('|', 1)
+                self.write({
+                    'status': status,
+                    'value': actual_value
+                })
+            else:
+                self.write({
+                    'status': value,
+                    'value': value
+                })
+        elif self.inspection_type_id.name == 'Pass/Fail':
             if value == 'pass':
                 self.write({
                     'status': 'pass'})

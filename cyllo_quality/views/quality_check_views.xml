@@ -12,6 +12,12 @@
                 <field name="product_id"/>
                 <field name="user_id"/>
                 <field name="quality_team_id"/>
+                <field name="state"
+                       widget="badge"
+                       decoration-success="state == 'pass'"
+                       decoration-danger="state == 'fail'"
+                       decoration-warning="state == 'ongoing'"
+                       decoration-muted="state == 'todo'"/>
             </tree>
         </field>
     </record>
@@ -21,12 +27,19 @@
         <field name="model">quality.check</field>
         <field name="arch" type="xml">
             <form>
+                 <header>
+                    <field name="state"
+                           widget="statusbar"
+                           statusbar_visible="todo,ongoing,pass,fail"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button class="oe_stat_button" name="action_view_quality_alert"
+                        <button class="oe_stat_button"
+                                name="action_view_quality_alert"
                                 type="object">
                             <i class="o_button_icon ri-check-line"/>
-                            <field name="qc_alert_count" string="Quality Alerts" widget="statinfo"/>
+                            <field name="qc_alert_count" string="Quality Alerts"
+                                   widget="statinfo"/>
                         </button>
                     </div>
                     <div class="oe_title">
@@ -38,11 +51,13 @@
                         <group>
                             <field name="name"/>
                             <field name="quality_control_id"/>
-                            <field name="product_id" invisible="control_type != 'product'"/>
+                            <field name="product_id"
+                                   invisible="control_type != 'product'"/>
                             <field name="control_type"/>
-
-                              <label for="quantity" invisible="control_type != 'quantity'"/>
-                            <div class="o_row" invisible="control_type != 'quantity'">
+                            <label for="quantity"
+                                   invisible="control_type != 'quantity'"/>
+                            <div class="o_row"
+                                 invisible="control_type != 'quantity'">
                                 <field name="quantity"/>
                                 <field name="uom_id" readonly="1" nolabel="1"/>
                             </div>
@@ -57,27 +72,41 @@
                         </group>
                     </group>
                     <notebook>
-                        <page name="inspection_actions" string="Inspection Actions">
-                            <field name="quality_check_line_ids" >
-                                <tree >
+                        <page name="inspection_actions"
+                              string="Inspection Actions">
+                            <field name="quality_check_line_ids">
+                                <tree>
                                     <field name="inspection_action_id"/>
                                     <field name="inspection_type_id"/>
-                                    <field name="unit_value" widget="MeasureUOM"/>
+                                    <field name="measure_start" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="measure_end" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="unit_id" invisible="measure_start == 0 and measure_end == 0"/>
+                                    <field name="blocked_by_id"/>
+                                    <field name="unit_value"
+                                           widget="MeasureUOM"/>
                                     <field name="note" widget="view_qc_note"/>
-                                    <field name="is_checked" column_invisible="1"/>
+                                    <field name="is_checked"
+                                           column_invisible="1"/>
                                     <field name="id" column_invisible="1"/>
-                                    <field name="quality_check_id" column_invisible="1"/>
-                                    <field name="quality_control_id" column_invisible="1"/>
+                                    <field name="quality_check_id"
+                                           column_invisible="1"/>
+                                    <field name="quality_control_id"
+                                           column_invisible="1"/>
                                     <field name="is_pass" column_invisible="1"/>
-                                    <field name="is_alert" column_invisible="1"/>
-                                    <field name="instruction" column_invisible="1"/>
+                                    <field name="is_alert"
+                                           column_invisible="1"/>
+                                    <field name="instruction"
+                                           column_invisible="1"/>
                                     <field name="value" column_invisible="1"/>
-                                    <field name="status" widget="qc_badge" decoration-success="status == 'pass'"
+                                    <field name="status" widget="qc_badge"
+                                           decoration-success="status == 'pass'"
                                            decoration-danger="status == 'fail'"/>
                                     <widget name="check_quality_action"/>
                                     <button name="action_create_alert"
-                                            class="btn btn-primary" string="Create Alert"
-                                            type="object" invisible="status != 'fail' or is_alert"/>
+                                            class="btn btn-primary"
+                                            string="Create Alert"
+                                            type="object"
+                                            invisible="status != 'fail' or is_alert"/>
                                 </tree>
                             </field>
                         </page>
@@ -103,14 +132,20 @@
                 <field name="quality_control_id"/>
                 <field name="user_id"/>
                 <field name="quality_team_id"/>
-                <filter string="My Quality Checks" name="my_quality_checks" domain="[('user_id', '=', uid)]"/>
-                <filter string="Active" name="active" domain="[('active', '=', True)]"/>
+                <filter string="My Quality Checks" name="my_quality_checks"
+                        domain="[('user_id', '=', uid)]"/>
+                <filter string="Active" name="active"
+                        domain="[('active', '=', True)]"/>
                 <group expand="0" string="Group By">
-                    <filter string="Quality Control Point" name="group_by_quality_control"
+                    <filter string="Quality Control Point"
+                            name="group_by_quality_control"
                             context="{'group_by': 'quality_control_id'}"/>
-                    <filter string="Responsible" name="group_by_user" context="{'group_by': 'user_id'}"/>
-                    <filter string="Team" name="group_by_team" context="{'group_by': 'quality_team_id'}"/>
-                    <filter string="Company" name="group_by_company" context="{'group_by': 'company_id'}"/>
+                    <filter string="Responsible" name="group_by_user"
+                            context="{'group_by': 'user_id'}"/>
+                    <filter string="Team" name="group_by_team"
+                            context="{'group_by': 'quality_team_id'}"/>
+                    <filter string="Company" name="group_by_company"
+                            context="{'group_by': 'company_id'}"/>
                 </group>
             </search>
         </field>
