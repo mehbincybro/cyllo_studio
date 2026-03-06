@@ -146,7 +146,7 @@ class StudioReportController(Controller):
 
             # Fetch recent records from the target model
             records = request.env[res_model].search([], limit=80)
-            
+
             # Fetch available paper formats with dimensions
             paper_formats = request.env['report.paperformat'].search_read(
                 [], ['id', 'name', 'page_width', 'page_height', 'format']
@@ -242,10 +242,12 @@ class StudioReportController(Controller):
             if not doc_view or not doc_view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
 
-            # Always return the base view's full architecture so the source editor
-            # shows the complete document XML (the Architecture tab content), not
-            # the xpath-based custom/inherited diff.
-            return {'success': True, 'arch': doc_view.arch_base, 'doc_template': doc_template}
+            # Always return the base view's full combined architecture so the source editor
+            # shows the complete document XML (the Architecture tab content), including
+            # any Studio-injected fields from inherited views.
+            combined_arch = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
+            arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
+            return {'success': True, 'arch': arch_xml, 'doc_template': doc_template}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
@@ -280,6 +282,19 @@ class StudioReportController(Controller):
                 return {'success': False, 'error': f'View {save_template!r} not found'}
 
             base_view.write({'arch_base': arch})
+
+            # ── FLATTEN INHERITANCE ──────────────────────────────────────────
+            # Delete any 'Custom_' inherited views for this template. Since we
+            # just saved the full combined arch back to the base 'arch_base',
+            # these inherited views are now redundant and their xpaths might
+            # point to elements we just deleted/modified/commented out.
+            custom_views = request.env['ir.ui.view'].search([
+                ('inherit_id', '=', base_view.id),
+                ('name', '=', f'Custom_{save_template}'),
+            ])
+            if custom_views:
+                custom_views.sudo().unlink()
+
             return {'success': True}
         except Exception as e:
             return {'success': False, 'error': str(e)}

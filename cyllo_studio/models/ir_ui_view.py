@@ -364,6 +364,54 @@ class Model(models.AbstractModel):
         # adding medium editor to head
         head_el = container_doc.xpath('//head')[0]
         head_content = """<data><style>
+                                    /* Global Report Styling for Studio */
+                                    body {
+                                        font-family: "Inter", "Lato", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+                                        font-size: 13px;
+                                        line-height: 1.5;
+                                        color: #333;
+                                    }
+                                    .page {
+                                        word-wrap: break-word;
+                                        padding: 20px;
+                                    }
+                                    /* Ensure Bootstrap tables are visible and styled */
+                                    table {
+                                        border-collapse: collapse !important;
+                                        width: 100% !important;
+                                        margin-bottom: 1rem !important;
+                                    }
+                                    .table {
+                                        margin-bottom: 1rem;
+                                        background-color: transparent;
+                                        border-spacing: 0;
+                                    }
+                                    .table th, .table td {
+                                        padding: 8px !important;
+                                        line-height: 1.42857143;
+                                        vertical-align: top;
+                                        border-top: 1px solid #dee2e6 !important;
+                                    }
+                                    .table thead th {
+                                        vertical-align: bottom;
+                                        border-bottom: 2px solid #dee2e6 !important;
+                                        font-weight: bold;
+                                    }
+                                    .o_main_table {
+                                        border: 1px solid #eee !important;
+                                    }
+                                    .table-sm th, .table-sm td {
+                                        padding: 4px !important;
+                                    }
+                                    /* Classes used in Accounting reports */
+                                    .filter_table {
+                                        color: #fff !important;
+                                        font-weight: bold;
+                                    }
+                                    .fw-bolder { font-weight: 700 !important; }
+                                    .h1 { font-size: 24px !important; margin-bottom: 15px; }
+                                    .h5 { font-size: 14px !important; }
+                                    
                                     .snippet {
                                         padding: 8px;
                                         margin: 4px;
@@ -422,7 +470,7 @@ class Model(models.AbstractModel):
                                         opacity: 0.7;
                                         font-style: italic;
                                     }
-
+                                    
                                     .branch-option {
                                         padding: 12px;
                                         margin: 8px 0;
