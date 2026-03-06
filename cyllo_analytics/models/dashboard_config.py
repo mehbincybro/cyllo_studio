@@ -386,3 +386,68 @@ class DashboardConfig(models.Model):
             raise ValidationError("Can't remove the main Dashboard")
         self.clean_up_menus()
         return super().unlink()
+
+    @api.model
+    def get_app_menus(self, app_id=None):
+        """
+        Fetch top-level apps or a specific app's nested submenus.
+        If app_id is not provided, returns all top-level apps.
+        If app_id is provided, returns the entire nested menu tree for that app.
+        """
+        IrUiMenu = self.env['ir.ui.menu'].sudo()
+        if not app_id:
+            # Fetch all root menus (Apps)
+            apps = IrUiMenu.search([('parent_id', '=', False)], order='sequence')
+            return [{'id': m.id, 'name': m.name, 'sequence': m.sequence} for m in apps]
+
+        def get_children_recursive(menu):
+            children = IrUiMenu.search([('parent_id', '=', menu.id)], order='sequence')
+            result = []
+            for child in children:
+                result.append({
+                    'id': child.id,
+                    'name': child.name,
+                    'sequence': child.sequence,
+                    'children': get_children_recursive(child)
+                })
+            return result
+
+        app = IrUiMenu.browse(app_id)
+        return {
+            'id': app.id,
+            'name': app.name,
+            'sequence': app.sequence,
+            'children': get_children_recursive(app)
+        }
+
+    @api.model
+    def create_menu_with_sequence(self, menu_vals, before_menu_id=None, after_menu_id=None):
+        """
+        Creates a new menu and precisely splices it into the correct order based on sibling IDs,
+        then gracefully re-sequences all siblings by increments of 10 to clear up compression.
+        """
+        IrUiMenu = self.env['ir.ui.menu'].sudo()
+        parent_id = menu_vals.get('parent_id')
+        
+        # Create the new menu initially
+        new_menu = IrUiMenu.create(menu_vals)
+        
+        # Fetch siblings
+        siblings = IrUiMenu.search([('parent_id', '=', parent_id), ('id', '!=', new_menu.id)], order='sequence, id')
+        sibling_list = list(siblings)
+        
+        # Find exact insertion index
+        if before_menu_id:
+            idx = next((i for i, m in enumerate(sibling_list) if m.id == before_menu_id), len(sibling_list))
+            sibling_list.insert(idx, new_menu)
+        elif after_menu_id:
+            idx = next((i for i, m in enumerate(sibling_list) if m.id == after_menu_id), len(sibling_list) - 1)
+            sibling_list.insert(idx + 1, new_menu)
+        else:
+            sibling_list.append(new_menu)
+            
+        # Resequence safely with gaps of 10
+        for i, menu in enumerate(sibling_list):
+            menu.sequence = (i + 1) * 10
+            
+        return new_menu.id

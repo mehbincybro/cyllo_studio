@@ -1,51 +1,290 @@
 /** @odoo-module **/
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component } from "@odoo/owl";
+import { Component, useState, onWillStart } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Record } from "@web/model/record";
-import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { CharField } from "@web/views/fields/char/char_field";
-import { IntegerField } from "@web/views/fields/integer/integer_field";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 
 
+export class MenuTreeNode extends Component {
+    static template = "cyllo_analytics.MenuTreeNode";
+    static components = { MenuTreeNode };
+
+    onDragOver(ev) { this.props.comp.onDragOver(ev); }
+    onDragLeave(ev) { this.props.comp.onDragLeave(ev); }
+    onDrop(ev) { this.props.comp.onDrop(ev); }
+    onDragOverInto(ev) { if (!this.props.node.isTemp) this.props.comp.onDragOverInto(ev); }
+    onDragLeaveInto(ev) { if (!this.props.node.isTemp) this.props.comp.onDragLeaveInto(ev); }
+    onDropInto(ev) { if (!this.props.node.isTemp) this.props.comp.onDropInto(ev); }
+    onResetDrop(ev) { this.props.comp.resetDrop(ev); }
+    onDragStartNewMenu(ev) { if (this.props.node.isTemp) this.props.comp.onDragStartNewMenu(ev); }
+    onDragEndNewMenu(ev) { if (this.props.node.isTemp) this.props.comp.onDragEndNewMenu(ev); }
+}
 export class MenuDialog extends Component {
-    /** Class for creating a menu dialog */
-
     setup(){
         this.orm = useService('orm')
         this.action = useService('action')
         this.menuService = useService("menu")
         this.notification = useService("notification")
         this.data = {};
+        this.state = useState({
+            apps: [],
+            selectedAppId: "",
+            selectedAppName: "",
+            appTree: null,
+            targetParentId: null,
+            targetParentName: "",
+            targetSequence: 0,
+            isDropped: false,
+            isDragging: false,
+            isDropdownOpen: false,
+        });
+        onWillStart(async () => {
+            await this.loadApps();
+        });
     }
-    /**
-     * Define the domain for menu selection.
-     * @returns {Array} - The domain for menu selection.
-     */
-    domain() {
-        const { id } = this.menuService.getCurrentApp()
-        return [["id", '!=', id],["action", '=', false]]
+    async loadApps() {
+        try {
+            this.state.apps = await this.orm.call("dashboard.config", "get_app_menus", [null]);
+        } catch (e) {
+            this.notification.add('Failed to load apps.', { type: 'danger' });
+        }
     }
-    /**
-     * Get record properties for the dialog.
-     * @returns {Object} - Record properties.
-     */
+    async onAppChange(ev) {
+        const appId = ev.target.value;
+        this.selectApp(appId);
+    }
+    async onAppChangeDropdown(appId, appName) {
+        this.selectApp(appId, appName);
+    }
+    toggleAppDropdown() {
+        this.state.isDropdownOpen = !this.state.isDropdownOpen;
+    }
+    async selectApp(appId, appName = "") {
+        this.state.selectedAppId = appId;
+        this.state.selectedAppName = appName || (this.state.apps.find(a => a.id == appId) || {}).name || "";
+        this.state.appTree = null;
+        this.state.targetParentId = null;
+        this.state.targetParentName = "";
+        this.state.isDropped = false;
+        this.state.isDropdownOpen = false;
+        if (appId) {
+            try {
+                this.state.appTree = await this.orm.call("dashboard.config", "get_app_menus", [parseInt(appId)]);
+                // Default to putting it at the TOP of the selected app
+                this.state.targetParentId = this.state.appTree.id;
+                this.state.targetParentName = this.state.appTree.name;
+                // Determine sequence for the top (either 0, or less than the first child)
+                let newSeq = 0;
+                if (this.state.appTree.children && this.state.appTree.children.length > 0) {
+                    newSeq = parseFloat(this.state.appTree.children[0].sequence) - 0.5;
+                }
+                this.state.targetSequence = Math.round(newSeq);
+                this.state.isDropped = true; // Automatically drop it in the default spot
+                this.addTempNodeToTree(this.state.targetParentId, newSeq);
+            } catch (e) {
+                this.notification.add('Failed to load menu structure.', { type: 'danger' });
+            }
+        }
+        }
+    onDragStartNewMenu(ev) {
+        ev.dataTransfer.effectAllowed = "move";
+        this.state.isDragging = true;
+        // --- Custom Drag Ghost Image (Smaller Size) ---
+        const dragIcon = ev.currentTarget.cloneNode(true);
+        // Style it to be smaller
+        dragIcon.style.position = "absolute";
+        dragIcon.style.top = "-1000px";
+        dragIcon.style.left = "-1000px";
+        dragIcon.style.fontSize = "11px";
+        dragIcon.style.padding = "4px 10px";
+        dragIcon.style.opacity = "0.9";
+        dragIcon.style.boxShadow = "none";
+        document.body.appendChild(dragIcon);
+        // Set the custom image
+        // (xOffset, yOffset) sets where the cursor grabs the ghost.
+        ev.dataTransfer.setDragImage(dragIcon, 10, 10);
+        // Remove the temporary clone from the DOM shortly after capture
+        setTimeout(() => document.body.removeChild(dragIcon), 10);
+        // ----------------------------------------------
+        // Apply soft dotted borders and expand height to show possible drop zones
+        document.querySelectorAll('.drop-zone-indicator').forEach(el => {
+            el.style.border = '2px dashed #dee2e6';
+            el.style.height = '18px';
+            el.style.margin = '4px 0';
+        });
+        document.querySelectorAll('.drop-into-zone').forEach(el => {
+            el.style.border = '1px dashed #aabc14';
+        });
+    }
+    onDragEndNewMenu(ev) {
+        this.state.isDragging = false;
+        // Clear all drag styling and collapse drop zones
+        document.querySelectorAll('.drop-zone-indicator').forEach(el => {
+            el.style.border = 'none';
+            el.style.backgroundColor = 'transparent';
+            el.style.height = '0px';
+            el.style.margin = '0';
+        });
+        document.querySelectorAll('.drop-into-zone').forEach(el => {
+            el.style.backgroundColor = 'white';
+            el.style.border = '1px solid #dee2e6'; // Standard bootstrap border
+        });
+    }
+    onDragOver(ev) {
+        ev.preventDefault();
+        ev.currentTarget.style.backgroundColor = '#f4f6e8';
+        ev.currentTarget.style.border = '2px solid #aabc14';
+        ev.currentTarget.style.height = '18px';
+        ev.currentTarget.style.opacity = '1';
+    }
+    onDragLeave(ev) {
+        ev.currentTarget.style.backgroundColor = 'transparent';
+        ev.currentTarget.style.border = '2px dashed #dee2e6';
+        ev.currentTarget.style.height = '14px';
+        ev.currentTarget.style.opacity = '1';
+    }
+    addTempNodeToTree(parentId, sequence, beforeId = null, afterId = null) {
+        if (!this.state.appTree) return;
+        // 1. Remove existing temp node recursively
+        const removeTemp = (node) => {
+            if (node.children) {
+                const idx = node.children.findIndex(c => c.id === 'temp_new_menu');
+                if (idx !== -1) {
+                    node.children.splice(idx, 1);
+                    return true;
+                }
+                for (let child of node.children) {
+                    if (removeTemp(child)) return true;
+                }
+            }
+            return false;
+        };
+        removeTemp(this.state.appTree);
+        // 2. Add new temp node
+        const tempNode = {
+            id: 'temp_new_menu',
+            name: this.data.name || 'New Dashboard Menu',
+            sequence: sequence,
+            isTemp: true,
+            children: []
+        };
+        const insertTemp = (node) => {
+            if (node.id === parentId) {
+                if (!node.children) node.children = [];
+                if (beforeId) {
+                    const idx = node.children.findIndex(c => c.id === parseInt(beforeId));
+                    if (idx !== -1) {
+                        node.children.splice(idx, 0, tempNode);
+                        return true;
+                    }
+                } else if (afterId) {
+                    const idx = node.children.findIndex(c => c.id === parseInt(afterId));
+                    if (idx !== -1) {
+                        node.children.splice(idx + 1, 0, tempNode);
+                        return true;
+    }
+                }
+                // Fallback (e.g. drop into or app init)
+                node.children.push(tempNode);
+                node.children.sort((a, b) => a.sequence - b.sequence);
+                return true;
+            }
+            if (node.children) {
+                for (let child of node.children) {
+                    if (insertTemp(child)) return true;
+                }
+            }
+            return false;
+        };
+        insertTemp(this.state.appTree);
+    }
+    onDrop(ev) {
+        ev.preventDefault();
+        this.onDragLeave(ev); // reset styling
+        const parentId = parseInt(ev.currentTarget.dataset.parentId);
+        const beforeSeq = ev.currentTarget.dataset.beforeSeq;
+        const afterSeq = ev.currentTarget.dataset.afterSeq;
+        const beforeId = ev.currentTarget.dataset.beforeId;
+        const afterId = ev.currentTarget.dataset.afterId;
+        // Calculate sequence. Use a decimal to ensure it sorts EXACTLY between existing integer sequences
+        let newSeq = 0;
+        if (beforeSeq) {
+            newSeq = parseFloat(beforeSeq) - 0.5;
+        } else if (afterSeq) {
+            newSeq = parseFloat(afterSeq) + 10;
+        }
+         this.state.targetParentId = parentId;
+        this.state.targetSequence = Math.round(newSeq); // Send rounded to backend later, but use decimal for accurate UI sorting
+        this.state.targetBeforeId = beforeId ? parseInt(beforeId) : null;
+        this.state.targetAfterId = afterId ? parseInt(afterId) : null;
+        // Find parent name for display
+        const findName = (node) => {
+            if (node.id === parentId) return node.name;
+            if (node.children) {
+                for (let child of node.children) {
+                    const found = findName(child);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        this.state.targetParentName = findName(this.state.appTree) || "Selected Menu";
+        this.state.isDropped = true;
+        this.addTempNodeToTree(parentId, newSeq, beforeId, afterId);
+    }
+    onDragOverInto(ev) {
+        ev.preventDefault();
+        ev.currentTarget.style.backgroundColor = '#f4f6e8';
+        ev.currentTarget.style.border = '2px solid #aabc14';
+    }
+    onDragLeaveInto(ev) {
+        ev.currentTarget.style.backgroundColor = 'white';
+        ev.currentTarget.style.border = '1px solid #dee2e6';
+    }
+    onDropInto(ev) {
+        ev.preventDefault();
+        this.onDragLeaveInto(ev);
+        const parentId = parseInt(ev.currentTarget.dataset.intoParentId);
+        const parentName = ev.currentTarget.dataset.intoParentName;
+        this.state.targetParentId = parentId;
+        this.state.targetParentName = parentName;
+        this.state.targetSequence = 999; // Append at the end of the chosen parent
+        this.state.isDropped = true;
+        this.addTempNodeToTree(parentId, 999);
+        this.notification.add('Target set!', { type: 'success' });
+    }
+    resetDrop(ev) {
+        if (ev) ev.stopPropagation();
+        // Remove temp node recursively
+        if (this.state.appTree) {
+            const removeTemp = (node) => {
+                if (node.children) {
+                    const idx = node.children.findIndex(c => c.id === 'temp_new_menu');
+                    if (idx !== -1) {
+                        node.children.splice(idx, 1);
+                        return true;
+                    }
+                    for (let child of node.children) {
+                        if (removeTemp(child)) return true;
+                    }
+                }
+                return false;
+            };
+            removeTemp(this.state.appTree);
+    }
+         this.state.targetParentId = null;
+        this.state.targetParentName = "";
+        this.state.targetSequence = 0;
+        this.state.targetBeforeId = null;
+        this.state.targetAfterId = null;
+        this.state.isDropped = false;
+    }
     get recordProps() {
-        var name = {
-            type: "char",
-            string: "Name",
-        }
-        var menu_id = {
-            type: "many2one",
-            relation: "ir.ui.menu",
-            string: "Menus",
-            relatedFields: ["id", "name"],
-        }
-        var sequence = {
-            type: "integer",
-            string: "Sequence",
-        }
-        var fields = { name, menu_id, sequence }
+        var name = { type: "char", string: "Name" }
+        var fields = { name }
         return {
             mode: "edit",
             onRecordChanged: (record, changes) => {
@@ -59,35 +298,32 @@ export class MenuDialog extends Component {
              activeFields: fields,
         };
     }
-    /**
-     * Handle confirmation of menu creation.
-     */
     async handleConfirm() {
         if(!this.data.name){
             this.notification.add('Please provide a name', { type: 'danger' })
             return
         }
-        if(!this.data.menu_id){
-            this.notification.add('Please choose a menu', { type: 'danger' })
+         if (!this.state.targetParentId) {
+            this.notification.add('Please select a parent menu by dragging the item.', { type: 'danger' })
             return
         }
         const action = await this.createAction();
-        const menuData = [{
+          const menuData = {
             name: this.data.name,
-            parent_id: this.data.menu_id,
+              parent_id: this.state.targetParentId,
             action: `ir.actions.client,${action}`,
             is_cyllo_analytic_menu: true,
-            sequence: this.data.sequence || 0,
-        }]
-        const menu = await this.orm.create('ir.ui.menu', menuData)
-        await this.orm.call("dashboard.config", "append_menu",[this.props.rec_id, menu[0]])
-        this._cancel()
+              sequence: this.state.targetSequence, // initial UI estimate, backend re-sequences
+        };
+        const newMenuId = await this.orm.call("dashboard.config", "create_menu_with_sequence", [
+            menuData,
+            this.state.targetBeforeId,
+            this.state.targetAfterId
+        ]);
+        await this.orm.call("dashboard.config", "append_menu", [this.props.rec_id, newMenuId]);
+        this._cancel();
         this.action.doAction("reload_context")
     }
-    /**
-     * Create a custom action for the menu.
-     * @returns {Promise} - The created action.
-     */
     async createAction() {
         const actionData = [{
             name: this.props.name,
@@ -101,21 +337,11 @@ export class MenuDialog extends Component {
         const action = await this.orm.create('ir.actions.client', actionData)
         return action
     }
-    /**
-     * Handle cancel action and close the dialog.
-     */
     async _cancel() {
          this.props.close();
-    }
-    get defaultProps() {
-        return {
-            canCreate: false,
-            canCreateEdit: false,
-            canOpen: false,
-            canQuickCreate: false,
-        }
     }
 }
 // Define the template for the MenuDialog component
 MenuDialog.template = "cyllo_analytics.MenuDialog"
-MenuDialog.components = { Dialog, Record, Many2OneField, CharField, IntegerField };
+MenuDialog.components = { Dialog, Record, CharField, MenuTreeNode, Dropdown, DropdownItem };
+
