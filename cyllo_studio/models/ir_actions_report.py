@@ -270,8 +270,66 @@ class IrActionsReport(models.Model):
 
         data = data and dict(data) or {}
 
+        # ── Studio Preview Hack ──────────────────────────────────────────────
+        # AbstractModel reports (like financial reports) usually expect 'data'
+        # from a wizard. In Studio preview, data only contains 'report_type'.
         if report_model is not None:
-            data.update(report_model._get_report_values(docids, data=data))
+            is_studio_preview = not data or set(data.keys()) <= {'report_type', 'context', 'discard_logo_check'}
+            if is_studio_preview:
+                print("DEBUG: STAGE 1 - Studio Preview Detected for %s" % report.report_name)
+                # Use a wider date range and more states to ensure data shows up
+                start_date = '2000-01-01'
+                end_date = '2100-01-01'
+
+                # Defaults for Partner Ledger
+                if 'partner_ledger' in report.report_name:
+                    data.update({
+                        'partner_id': docids or [],
+                        'startDate': start_date,
+                        'endDate': end_date,
+                        'parent_state': ['posted', 'draft'],
+                        'account_type': ['Receivable', 'Payable'],
+                        'report_name': report.name,
+                    })
+                    print("DEBUG: STAGE 2 - Injected Partner Ledger defaults. docids len=%s" % len(docids))
+                # Defaults for PNL / Balance Sheet
+                elif 'profit_n_loss' in report.report_name or 'balance_sheet' in report.report_name:
+                    data.update({
+                        'reportName': report.name,
+                        'filterBy': '',
+                        'periods': {},
+                        'filterData': {
+                            'start_date': start_date,
+                            'end_date': end_date,
+                            'journal_ids': [],
+                            'account_ids': [],
+                            'analytic_ids': [],
+                            'target_move': ['posted', 'draft'],
+                            'comparison_value': 1,
+                            'comparison_type_value': 'month',
+                        }
+                    })
+                    print("DEBUG: STAGE 2 - Injected PNL/BS defaults")
+
+        if report_model is not None:
+            # Call the custom model to get values
+            res_values = report_model._get_report_values(docids, data=data)
+
+            # DEBUG LOGGING of result
+            if 'partner_ledger' in report.report_name:
+                pt = res_values.get('partner_totals', {})
+                print("DEBUG: STAGE 3 - Partner Ledger Values: partner_totals len=%s" % len(pt))
+                if not pt:
+                    print("DEBUG: STAGE 3.1 - partner_totals is empty. Searching for any partner with entries...")
+                    # Fallback: find any partner with entries if the filter yielded nothing
+                    any_partners = self.env['partner.ledger.report'].get_partner()
+                    if any_partners:
+                        print("DEBUG: STAGE 4 - Found any_partners: %s" % any_partners[:5])
+                        data['partner_id'] = any_partners[:5]
+                        res_values = report_model._get_report_values(docids, data=data)
+                        print("DEBUG: STAGE 5 - Re-fetch with any_partners: partner_totals len=%s" % len(res_values.get('partner_totals', {})))
+
+            data.update(res_values)
         else:
             docs = self.env[report.model].browse(docids)
             data.update({
@@ -297,3 +355,86 @@ class IrActionsReport(models.Model):
         qweb_code = self.env['ir.ui.view'].search(
             [('name', 'ilike', data['report_name'].split('.')[1]), ('type', '=', 'qweb')])
         return [{'arch': views.arch} for views in qweb_code]
+
+
+
+    # studio report testing from here
+
+    def get_custom_report_page(self):
+        report = self.report_name.strip()
+        view = self.env.ref(report)
+        arch = view.get_iframe_rendered_template(report)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'edit_report',
+            'params': {
+                'model_id': self.binding_model_id.id,
+                'res_model': self.model,
+                'template': report,
+                'arch': arch,
+            }
+        }
+
+    @api.model
+    def action_create_blank_report(self, name, model_id):
+        """Create a new blank report and its corresponding QWeb view."""
+        self = self.sudo()
+        model_rec = self.env['ir.model'].browse(int(model_id))
+        if not model_rec:
+            return {'success': False, 'error': 'Model not found'}
+
+        # Unique identifier using timestamp
+        identifier = str(fields.Datetime.now().timestamp()).replace('.', '_')
+        report_key = f"studio_report_{identifier}"
+        xml_id = f"cyllo_studio_custom.{report_key}"
+
+        # Create the QWeb view with a basic blank structure
+        view_arch = f"""
+            <t t-name="{xml_id}">
+                <t t-call="web.html_container">
+                    <t t-call="web.external_layout">
+                        <div class="page">
+                            <div class="oe_structure"/>
+                            <div class="row">
+                                <div class="col-12">
+                                    <h2 class="text-center">{name}</h2>
+                                    <p class="text-muted text-center">New Report for {model_rec.name}</p>
+                                </div>
+                            </div>
+                            <div class="oe_structure"/>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        """
+
+        view = self.env['ir.ui.view'].create({
+            'name': name,
+            'type': 'qweb',
+            'model': model_rec.model,
+            'arch': view_arch,
+            'key': xml_id,
+        })
+
+        # Create ir.model.data so env.ref works
+        self.env['ir.model.data'].create({
+            'name': report_key,
+            'module': 'cyllo_studio_custom',
+            'model': 'ir.ui.view',
+            'res_id': view.id,
+            'noupdate': True,
+        })
+
+        # Create the report action
+        report_action = self.create({
+            'name': name,
+            'model': model_rec.model,
+            'report_type': 'qweb-pdf',
+            'report_name': xml_id,
+            'report_file': xml_id,
+            'binding_model_id': model_rec.id,
+            'binding_type': 'report',
+        })
+
+        # Return the studio editor action for the new report
+        return report_action.get_custom_report_page()
