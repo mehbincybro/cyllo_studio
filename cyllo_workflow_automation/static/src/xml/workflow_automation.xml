@@ -24,6 +24,22 @@
                                            style="font-size: 22px;color: #4d5572;"
                                            title="Go Back"/>
 									</a>
+                                    <div class="cy-undo-redo-container d-flex align-items-center">
+                                        <!-- Undo -->
+                                        <a class="cy-menu_icon cy-undo-btn"
+                                           t-att-class="!undoRedo.canUndo ? 'cy-undo-btn--disabled' : ''"
+                                           t-on-click="undo"
+                                           title="Undo (Ctrl+Z)">
+                                            <i class="ri-arrow-go-back-line" style="font-size:18px;color:#4d5572;"/>
+                                        </a>
+                                        <!-- Redo -->
+                                        <a class="cy-menu_icon cy-redo-btn"
+                                           t-att-class="!undoRedo.canRedo ? 'cy-redo-btn--disabled' : ''"
+                                           t-on-click="redo"
+                                           title="Redo (Ctrl+Y)">
+                                            <i class="ri-arrow-go-forward-line" style="font-size:18px;color:#4d5572;"/>
+                                        </a>
+                                    </div>
 								<div class="d-flex" style="gap: 14px !important; position: relative;">
 									<a class="btn btn-primary d-flex align-items-center gap-1"
 									    data-hotkey="c"
@@ -138,6 +154,7 @@
                                                          draggable="true"
                                                          t-attf-data-node="{{action.name}}"
                                                          t-attf-data-action="{{action.id}}"
+                                                         t-att-data-trigger_type="action.trigger_type"
                                                          data-type="trigger">
 														<t t-if="action.icon">
 															<img draggable="false"
@@ -187,6 +204,7 @@
 										</div>
                                     <div class="collapse" id="orm-blocks">
 										<div class="card-body cy_w_sidebar_btn">
+											<t t-if="!isTimeTrigger and !isFieldChangeTrigger">
 											<div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'create')"
                                                  draggable="true" data-node="Create">
@@ -195,6 +213,8 @@
                                                      alt=""/>
                                                 <p>Create</p>
 											</div>
+											</t>
+                                            <t t-if="!isTimeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'write')"
                                                  draggable="true" data-node="Write">
@@ -203,6 +223,7 @@
                                                      alt=""/>
                                                 <p>Write</p>
 											</div>
+                                            </t>
                                             <div class="collapse_btn "
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'search')"
                                                  draggable="true" data-node="Search">
@@ -242,6 +263,14 @@
                                                      alt=""/>
                                                 <p>Condition</p>
 											</div>
+                                        <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'loop')"
+                                                 data-node="Loop">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/iteration.svg"
+                                                     alt=""/>
+                                                <p>Loop</p>
+                                        </div>
                                         </div>
 								    </div>
 							    </div>
@@ -289,6 +318,7 @@
                                                      alt=""/>
                                                 <p>Warning</p>
                                             </div>
+                                            <t t-if="!isFieldChangeTrigger">
                                             <div class="collapse_btn" draggable="true"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'follower')"
                                                  data-node="Follower">
@@ -297,6 +327,8 @@
                                                      alt=""/>
                                                 <p>Follower</p>
                                             </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'mail')"
                                                  draggable="true" data-node="Mail">
@@ -305,6 +337,8 @@
                                                      alt=""/>
                                                 <p>Mail</p>
                                             </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'SMS')"
                                                  draggable="true" data-node="SMS">
@@ -313,6 +347,8 @@
                                                      alt=""/>
                                                 <p>SMS</p>
                                             </div>
+                                            </t>
+                                            <t t-if="!isFieldChangeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'SMS')"
                                                  draggable="true" data-node="Activity">
@@ -321,10 +357,128 @@
                                                      alt=""/>
                                                 <p>Activity</p>
                                             </div>
+                                            </t>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
+                            <!-- Inline Cron Schedule panel – visible only for time-based triggers -->
+                            <t t-if="isTimeTrigger">
+                                <div class="w_card">
+                                    <div class="w_card-header cy-w-trigger-panel" data-bs-toggle="collapse"
+                                         data-bs-target="#cron-settings-panel">
+                                        <h5 class="mb-0">
+                                            <button class="work_btn btn btn-link">
+                                                <span>
+                                                    <i class="ri-time-line" style="margin-right:4px;"/>
+                                                    Cron Schedule
+                                                </span>
+                                                <i class="fa fa-angle-down"/>
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div class="collapse show" id="cron-settings-panel">
+                                        <div class="card-body px-3 py-2">
+
+                                            <!-- Frequency -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Frequency</label>
+                                                <select class="form-control form-select"
+                                                        t-on-change="(ev) => this.onCronFieldChange('time_trigger_mode', ev)">
+                                                    <option value="" t-att-selected="!state.cronMode">-- Choose --</option>
+                                                    <option value="hour" t-att-selected="state.cronMode === 'hour'">Every Hour</option>
+                                                    <option value="day"  t-att-selected="state.cronMode === 'day'">Every Day</option>
+                                                    <option value="month" t-att-selected="state.cronMode === 'month'">Every Month</option>
+                                                    <option value="year" t-att-selected="state.cronMode === 'year'">Every Year</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- Time of day (24 h float, e.g. 14.5 = 14:30) -->
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Time (24h, e.g. 14.5&#160;=&#160;14:30)</label>
+                                                <input type="number" class="form-control"
+                                                       min="0" max="23.99" step="0.25"
+                                                       t-att-value="state.cronTime"
+                                                       t-on-change="(ev) => this.onCronFieldChange('time_trigger_time', ev, 'float')"/>
+                                            </div>
+
+                                            <!-- Day of month – only for month / year -->
+                                            <t t-if="state.cronMode === 'month' or state.cronMode === 'year'">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label cy-modal-form_label">Day of Month (1–31)</label>
+                                                    <input type="number" class="form-control"
+                                                           min="1" max="31"
+                                                           t-att-value="state.cronDay"
+                                                           t-on-change="(ev) => this.onCronFieldChange('time_trigger_day', ev, 'int')"/>
+                                                </div>
+                                            </t>
+
+                                            <!-- Month – only for year -->
+                                            <t t-if="state.cronMode === 'year'">
+                                                <div class="form-group mb-2">
+                                                    <label class="form-label cy-modal-form_label">Month (1–12)</label>
+                                                    <input type="number" class="form-control"
+                                                           min="1" max="12"
+                                                           t-att-value="state.cronMonth"
+                                                           t-on-change="(ev) => this.onCronFieldChange('time_trigger_month', ev, 'int')"/>
+                                                </div>
+                                            </t>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+                            <!-- Inline Watched Field panel – visible only for field_change triggers -->
+                            <t t-if="isFieldChangeTrigger">
+                                <div class="w_card">
+                                    <div class="w_card-header cy-w-trigger-panel" data-bs-toggle="collapse"
+                                         data-bs-target="#field-change-panel">
+                                        <h5 class="mb-0">
+                                            <button class="work_btn btn btn-link">
+                                                <span>
+                                                    <i class="ri-git-branch-line" style="margin-right:4px;"/>
+                                                    Watched Field
+                                                </span>
+                                                <i class="fa fa-angle-down"/>
+                                            </button>
+                                        </h5>
+                                    </div>
+                                    <div class="collapse show" id="field-change-panel">
+                                        <div class="card-body px-3 py-2">
+                                            <div class="form-group mb-2">
+                                                <label class="form-label cy-modal-form_label">Field to Watch</label>
+                                                <t t-if="state.watchedFieldName">
+                                                    <div class="d-flex align-items-center gap-2 mb-1">
+                                                        <span class="badge bg-primary" t-esc="state.watchedFieldName"/>
+                                                        <a class="text-danger" style="cursor:pointer;"
+                                                           t-on-click="() => this.setWatchedField(false, '')">
+                                                            <i class="ri-close-line"/>
+                                                        </a>
+                                                    </div>
+                                                </t>
+                                                <div class="form-control cy-w-select">
+                                                    <Many2XAutocomplete
+                                                        resModel="'ir.model.fields'"
+                                                        getDomain="() => [['model_id', '=', state.model_id], ['store', '=', true]]"
+                                                        fieldString="'Field'"
+                                                        activeActions="{}"
+                                                        update.bind="(selection) => this.setWatchedField(selection[0]?.id, selection[0]?.display_name)"
+                                                        value="state.watchedFieldName"
+                                                        placeholder="'Choose a field to watch'"/>
+                                                </div>
+                                                <small class="text-muted">
+                                                    The workflow runs whenever this field changes on a record.
+                                                    Use <code>current_record</code> in action nodes to access the triggering record.
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+
+
 						</div>
                         <div class="cy-w-section-variable" t-if="state.customTrigger">
 							<CustomTrigger t-props="customTriggerProps"/>

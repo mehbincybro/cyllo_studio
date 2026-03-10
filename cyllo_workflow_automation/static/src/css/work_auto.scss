@@ -283,6 +283,13 @@ li.w_nav-item {
     background: #f5f6e6;
 }
 
+.w_card-header.cy-w-trigger-panel {
+    padding: 5px 0px;
+    border-bottom-color: #b2b2b2;
+    background: #f5f6e6;
+    border-radius: 0 !important;
+}
+
 .cy_w_sidebar-footer {
     border: 1px solid transparent;
     border-top-color: #E2E2E2;
@@ -698,4 +705,36 @@ img.cy-w-trigger-icon {
     .work-auto-inner-icons .cy-menu_icon i {
         color: #aca49a !important;
     }
+}
+
+// Undo/Redo Button Styles
+.cy-undo-redo-container {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    margin-right: 8px;
+}
+
+.cy-undo-btn,
+.cy-redo-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+
+    &:hover:not(.cy-undo-btn--disabled):not(.cy-redo-btn--disabled) {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+}
+
+.cy-undo-btn--disabled,
+.cy-redo-btn--disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    cursor: default;
 }

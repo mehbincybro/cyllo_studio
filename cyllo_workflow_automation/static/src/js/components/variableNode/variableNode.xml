@@ -59,6 +59,35 @@
                         <span class="text">You can't change the variable type in edit mode.</span>
                     </p>
                 </div>
+                <!-- Return Type for Python Expressions -->
+                <div t-if="fieldState.type === 'code'" class="col-12 mb-3 px-2">
+                    <label for="Variable_return_type"
+                           class="form-label cy-modal-form_label">
+                        Expression Return Type
+                    </label>
+                    <CustomDropdown
+                            options="returnTypeOptions"
+                            defaultValue="codeReturnType"
+                            onChange="(value) => this.handleUpdateField('code_return_type', value)"
+                            placeholder="'Select return type...'"
+                            searchable="true"
+                            width="''"
+                            maxHeight="'70px'"
+                            disabled="props.mode === 'edit'"
+                    />
+                    <p t-if="props.mode === 'edit'" t-attf-class="error-message mt-2 d-flex align-items-end">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text">You can't change the return type in edit mode.</span>
+                    </p>
+                    <p t-if="props.errors?.code_return_type || state.errors?.code_return_type" t-attf-class="error-message mt-2 d-flex align-items-end">
+                        <span class="error-icon d-flex align-items-end">
+                            <i class="ri-error-warning-line"/>
+                        </span>
+                        <span class="text" t-esc="props.errors?.code_return_type || state.errors?.code_return_type"/>
+                    </p>
+                </div>
                 <div t-if="fieldState.type" class="col-12  mb-3 px-2">
                     <label for="Variable_value"
                            class="form-label  cy-modal-form_label">

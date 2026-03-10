@@ -1,26 +1,28 @@
 /** @odoo-module */
-import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
-import {registry} from '@web/core/registry';
-import {useService} from "@web/core/utils/hooks";
-import {Many2OneField} from "@web/views/fields/many2one/many2one_field";
-const {useState, onWillStart, Component, onMounted, useRef, mount, useEffect, onWillUnmount} = owl;
-import {useSaveContext} from './useSaveContext'
-import {ModelComponent} from "./workflow_nodes";
-import {Record} from "@web/model/record";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+import { registry } from '@web/core/registry';
+import { useService } from "@web/core/utils/hooks";
+import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
+const { useState, onWillStart, Component, onMounted, useRef, mount, useEffect, onWillUnmount } = owl;
+import { useSaveContext } from './useSaveContext'
+import { ModelComponent } from "./workflow_nodes";
+import { useUndoRedo } from "./useUndoRedo";
+
+import { Record } from "@web/model/record";
 import Context from "./context";
-import {variableFields} from "./fields.js";
-import {VariableNode} from "./components/variableNode/variableNode.js";
-import {Many2ManyTagsField} from "@web/views/fields/many2many_tags/many2many_tags_field";
-import {_t} from "@web/core/l10n/translation";
-import {ConfirmationPopup} from "@cyllo_web/js/popups/popups";
-import {PYTHON_KEYWORDS} from "./components/Assists/utils/utils";
-import {FoldOut} from "./automationComponents/FoldOut/FoldOut";
-import {VariableItem} from "./automationComponents/VariableItem/VariableItem";
-import {VariableDetails} from "./automationComponents/VariableDetails/VariableDetails";
-import {removeNodeIdFromVariables, settingInitialContext} from "./utils/utils"
-import {CustomTrigger} from "./components/customTriggers/customTriggers";
-import {WorkPager} from "./components/Assists/workPager/workPager";
-import {SaveLoading} from "./components/Assists/effect/saveLoading/saveLoading";
+import { variableFields } from "./fields.js";
+import { VariableNode } from "./components/variableNode/variableNode.js";
+import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
+import { _t } from "@web/core/l10n/translation";
+import { ConfirmationPopup } from "@cyllo_web/js/popups/popups";
+import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
+import { FoldOut } from "./automationComponents/FoldOut/FoldOut";
+import { VariableItem } from "./automationComponents/VariableItem/VariableItem";
+import { VariableDetails } from "./automationComponents/VariableDetails/VariableDetails";
+import { removeNodeIdFromVariables, settingInitialContext } from "./utils/utils"
+import { CustomTrigger } from "./components/customTriggers/customTriggers";
+import { WorkPager } from "./components/Assists/workPager/workPager";
+import { SaveLoading } from "./components/Assists/effect/saveLoading/saveLoading";
 
 const BUTTON_CLASSES = [
     'btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'
@@ -97,6 +99,9 @@ export class WorkFlowAuto extends Component {
         this.notification = useService("notification");
         this.action = useService("action");
         this.uiService = useService("ui");
+        this.undoRedo = useUndoRedo();
+        this.lockUndoRedo = false;
+        this._skipNextSnapshot = false;
         this.data = {};
         owl.useSubEnv({
             globalContext: this.getContext.bind(this),
@@ -118,9 +123,9 @@ export class WorkFlowAuto extends Component {
             this.state.variables = [...this.env.variables.context.variables]
         });
 
-        this.env.bus.addEventListener("DELETE:NODE:BY:CLICK", ({detail}) => {
+        this.env.bus.addEventListener("DELETE:NODE:BY:CLICK", ({ detail }) => {
             const data = this.editorValue[0].flow_data?.drawflow?.Home?.data
-            if(data){
+            if (data) {
                 const node = Object.values(data).find(item => item.data.nodeId === detail.nodeId)
                 owl.status(this) !== 'destroyed' && this.deleteNode(node);
             }
@@ -149,11 +154,20 @@ export class WorkFlowAuto extends Component {
             selectedVariable: undefined,
             customTrigger: false,
             recordList: [],
-            saveLoading:false,
+            saveLoading: false,
+            // Cron schedule fields (used when trigger is time-based)
+            cronMode: '',
+            cronTime: 0,
+            cronDay: 1,
+            cronMonth: 1,
+            triggerType: "",
+            // Field change fields (used when trigger is field_change)
+            watchedFieldId: false,
+            watchedFieldName: "",
         })
 
         this.initialLoad = true;
-        const {id} = useSaveContext();
+        const { id } = useSaveContext();
         this.id = id;
         this.editorState = useState({
             value: []
@@ -169,7 +183,7 @@ export class WorkFlowAuto extends Component {
 
         useEffect((value) => {
             if (value) {
-                !this.initialLoad && this.write({variables: this.state.variables, imports: this.imports});
+                !this.initialLoad && this.write({ variables: this.state.variables, imports: this.imports });
                 this.initialLoad = false;
             }
         }, () => [this.state.variables, this.imports]);
@@ -188,18 +202,18 @@ export class WorkFlowAuto extends Component {
         }, () => [this.state.selectedNodeID])
 
         useEffect(() => {
-            this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", {show: false})
+            this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", { show: false })
             return () => {
-                this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", {show: true})
+                this.env.bus.trigger("TOGGLE_NAVBAR:HIDE", { show: true })
             }
         });
 
         onWillStart(async () => {
             this.state.recordList = await this.orm.search("work.auto", [])
-            this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name'])
-            const data = await this.orm.read('work.auto', [this.id], ['name', 'variables', 'imports', 'code']);
+            this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
+            const data = await this.orm.read('work.auto', [this.id], ['name', 'variables', 'imports', 'code', 'trigger_type']);
             if (data.length > 0) {
-                let [{name, variables, imports, code}] = data
+                let [{ name, variables, imports, code, trigger_type }] = data
 
                 imports = imports || GLOBAL_IMPORTS
 
@@ -207,7 +221,8 @@ export class WorkFlowAuto extends Component {
                 this.state.name = name;
                 this.state.imports = [...imports];
                 this.state.code = code;
-                this.env.variables.setContext({variables: [...this.state.variables]});
+                this.state.triggerType = trigger_type || "";
+                this.env.variables.setContext({ variables: [...this.state.variables] });
             }
             await this.loadData();
             await this.setModelState();
@@ -217,13 +232,36 @@ export class WorkFlowAuto extends Component {
                 if (value.data.ttype) {
                     this.state.trigger = value.data.ttype
                 }
+                if (value.data.trigger_type) {
+                    this.state.triggerType = value.data.trigger_type;
+                }
             });
-            this.env.bus.trigger("onclickMenuBar", {isCollapse: true})
+
+            // Load cron schedule fields so the inline panel shows existing values
+            const cronData = await this.orm.read('work.auto', [this.id],
+                ['time_trigger_mode', 'time_trigger_time', 'time_trigger_day', 'time_trigger_month']);
+            if (cronData.length) {
+                const { time_trigger_mode, time_trigger_time, time_trigger_day, time_trigger_month } = cronData[0];
+                this.state.cronMode = time_trigger_mode || '';
+                this.state.cronTime = time_trigger_time || 0;
+                this.state.cronDay = time_trigger_day || 1;
+                this.state.cronMonth = time_trigger_month || 1;
+            }
+
+            // Load watched field for field_change workflows
+            const fieldChangeData = await this.orm.read('work.auto', [this.id], ['field_id']);
+            if (fieldChangeData.length && fieldChangeData[0].field_id) {
+                const [id, name] = fieldChangeData[0].field_id;
+                this.state.watchedFieldId = id;
+                this.state.watchedFieldName = name;
+            }
+
+            this.env.bus.trigger("onclickMenuBar", { isCollapse: true })
         });
 
         onMounted(async () => {
             const globalVariables = await this.getGlobalVariables()
-            this.env.globalVariables.setContext({variables: [...this.env.globalVariables.context.variables, ...globalVariables]});
+            this.env.globalVariables.setContext({ variables: [...this.env.globalVariables.context.variables, ...globalVariables] });
             this.inputNameRef.el.focus();
             this.uiService.block();
             setTimeout(() => {
@@ -239,17 +277,16 @@ export class WorkFlowAuto extends Component {
             };
 
             const renderFunc = (obj, ref) => {
-                const {component, props, options} = obj;
-                this.state.nodeDetails.push({...obj, ref});
-                this.data = {...obj, ref};
+                this.state.nodeDetails.push({ ...obj, ref });
+                this.data = { ...obj, ref };
             };
-            const owlC = {version: 3, h: preRender, render: renderFunc};
+            const owlC = { version: 3, h: preRender, render: renderFunc };
             this.editor = new Drawflow(this.drawBoard.el, owlC);
 
             this.editor.contextmenu = (e) => {
                 if (
                     this.editor.dispatch("contextmenu", e),
-                        e.preventDefault(),
+                    e.preventDefault(),
                     "fixed" === this.editor.editor_mode || "view" === this.editor.editor_mode
                 ) {
                     return false;
@@ -277,7 +314,7 @@ export class WorkFlowAuto extends Component {
             this.editorState.value[0].flow_data && this.registerNodes()
 
             this.editor.start();
-            this.manageData();
+            await this.manageData();
 
             this.editor.on('nodeRemoved', async (id) => {
                 this.state.selectedNodeID = undefined;
@@ -302,7 +339,7 @@ export class WorkFlowAuto extends Component {
                 await this.autoSaveDrawFlow();
             });
             this.editor.on('connectionCreated', (data) => {
-                const {input_class, input_id, output_class, output_id} = data;
+                const { input_class, input_id, output_class, output_id } = data;
                 const inputId = +input_id;
                 const outputId = +output_id;
                 if (!this.canConnect(inputId, outputId, output_class)) {
@@ -314,7 +351,7 @@ export class WorkFlowAuto extends Component {
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).filter(item => item.id === parseInt(input_id))
                 const name = node[0].data.name
                 const nodeId = node[0].data.nodeId
-                this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
+                this.env.bus.trigger("OPEN:MODAL", { name, nodeId });
             });
 
             this.editor.on('connectionRemoved', (data) => {
@@ -336,9 +373,15 @@ export class WorkFlowAuto extends Component {
                     if (this.currentNode) {
                         this.deleteNode(this.currentNode);
                     }
+                } else if (e.ctrlKey && e.key === "z") {
+                    this.undo();
+                } else if (e.ctrlKey && (e.key === "y" || (e.shiftKey && e.key === "Z"))) {
+                    this.redo();
                 }
             });
 
+            // Initial snapshot to allow undoing the first action
+            this.captureSnapshot();
         })
     }
 
@@ -396,6 +439,55 @@ export class WorkFlowAuto extends Component {
         return this.id
     }
 
+    /** True when the active trigger fires on a field-value change. */
+    get isFieldChangeTrigger() {
+        return this.state.triggerType === 'field_change';
+    }
+
+    /**
+     * True when the active trigger is time-based.
+     * Used by the XML template to hide Create/Write blocks and show the
+     * inline Cron Schedule configuration panel.
+     */
+    get isTimeTrigger() {
+        return this.state.triggerType === 'time';
+    }
+
+    /**
+     * Write a single cron schedule field to work.auto and keep the local
+     * state in sync.  The backend write() override calls create_cron()
+     * automatically, so no extra RPC is needed.
+     *
+     * @param {string} field  – one of: time_trigger_mode/time/day/month
+     * @param {*}      value  – the new value
+     */
+    async setCronField(field, value) {
+        this.captureSnapshot();
+        const stateKey = {
+            time_trigger_mode: 'cronMode',
+            time_trigger_time: 'cronTime',
+            time_trigger_day: 'cronDay',
+            time_trigger_month: 'cronMonth',
+        }[field];
+        if (stateKey) this.state[stateKey] = value;
+        await this.write({ [field]: value });
+    }
+
+    /**
+     * Saves the selected watched field to work.auto.
+     * `current_record` in the global variables context already represents the
+     * triggering record, so no extra variable registration is needed.
+     *
+     * @param {number} fieldId   – id of the selected ir.model.fields record
+     * @param {string} fieldName – user-visible field name / label
+     */
+    async setWatchedField(fieldId, fieldName) {
+        this.captureSnapshot();
+        this.state.watchedFieldId = fieldId || false;
+        this.state.watchedFieldName = fieldName || "";
+        await this.write({ field_id: fieldId || false });
+    }
+
     deleteNode(node) {
         const variablesInScope = this.env.variables.context.variables.filter(variable => variable.scopeId === node.data.nodeId);
         const isUsed = variablesInScope.some(item =>
@@ -415,12 +507,14 @@ export class WorkFlowAuto extends Component {
             'model': {
                 body: _t("While deleting this node, All the nodes will be Removed"),
                 onConfirm: async () => {
+                    this.captureSnapshot();
                     await this.resetStatesWhenClear();
                 }
             },
             'action': {
                 body: _t("Do you want to delete the node. The variables with in this scope is also deleted."),
                 onConfirm: async () => {
+                    this.captureSnapshot();
                     this.editor.removeNodeId(`node-${node.id}`);
                     this.state.trigger_blk = true;
                     this.state.other_blk = false;
@@ -430,6 +524,7 @@ export class WorkFlowAuto extends Component {
             'default': {
                 body: _t("Do you want to delete the node. The variables with in this scope is also deleted."),
                 onConfirm: async () => {
+                    this.captureSnapshot();
                     this.editor.removeNodeId(`node-${node.id}`);
                 }
             }
@@ -444,10 +539,10 @@ export class WorkFlowAuto extends Component {
     }
 
     async clearModelNodeData(node) {
-        this.editor.clearModuleSelected();
+        this.editor.clear();
         this.orm.call('work.auto', 'clear_all_nodes', [this.id]);
-        this.env.variables.setContext({variables: []});
-        this.env.context.setContext({nodes: []});
+        this.env.variables.setContext({ variables: [] });
+        this.env.context.setContext({ nodes: [] });
         Object.assign(this.state, {
             variables: [], code: "", imports: [], model_blk: true,
             trigger_blk: false, other_blk: false, model: "", model_id: false,
@@ -479,19 +574,21 @@ export class WorkFlowAuto extends Component {
         const flowNodes = Object.values(this.editorValue[0].flow_data.drawflow.Home.data)
         const createdNode = flowNodes.find(node => node.id === id);
         const nodeId = createdNode.data.nodeId;
-        const isParent = createdNode.name === "Condition"
+        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop"
         //TODO: Handle Context
         const currentContext = this.env.context.context
         const nodes = currentContext?.nodes || []
+        const isLoop = createdNode.name === "Loop";
         this.env.context.setContext({
             nodes: [...nodes, {
                 nodeId,
                 parent: null,
                 left: null,
                 right: null,
-                child1: isParent ? {left: null, right: null, code: "pass"} : null,
+                child1: isParent ? { left: null, right: null, code: "pass" } : null,
                 child2: null,
                 isParent,
+                isLoop,
                 code: ""
             }]
         })
@@ -499,7 +596,7 @@ export class WorkFlowAuto extends Component {
 
     contextUpdateConnection(data, creation) {
         // TODO: Handle Context
-        const {output_id, input_id} = data;
+        const { output_id, input_id } = data;
         const nodes = Object.values(this.editorState.value[0].flow_data.drawflow.Home?.data)
         const inputNode = nodes.find(node => node.id == input_id)
         const outputNode = nodes.find(node => node.id == output_id)
@@ -515,19 +612,19 @@ export class WorkFlowAuto extends Component {
             if (child1.connections.length > 0 && child1.connections[0].node == inputNode.id) {
                 const childId = child1.connections[0].node
                 const childNode = nodes.find(item => item.id == childId);
-                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data.nodeId);
-                context_output_node.child1 = creation ? ctxNode : {left: null, right: null, code: "pass"}
+                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data?.nodeId);
+                context_output_node.child1 = creation ? ctxNode : { left: null, right: null, code: "pass" }
             }
             if (child2.connections.length > 0 && child2.connections[0].node == inputNode.id) {
                 const childId = child2.connections[0].node
                 const childNode = nodes.find(item => item.id == childId);
-                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data.nodeId);
+                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data?.nodeId);
                 context_output_node.child2 = creation ? ctxNode : null
             }
             if (right.connections.length > 0 && right.connections[0].node == inputNode.id) {
                 const childId = right.connections[0].node
                 const childNode = nodes.find(item => item.id == childId);
-                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data.nodeId);
+                const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data?.nodeId);
                 context_output_node.right = creation ? ctxNode : null
             }
         } else context_output_node.right = creation ? context_input_node : null
@@ -541,16 +638,16 @@ export class WorkFlowAuto extends Component {
     }
 
     async onClickNewRule() {
-        const rule = await this.orm.create("work.auto", [{'name':'Automation rule'}])
-        const action ={
+        const rule = await this.orm.create("work.auto", [{ 'name': 'Automation rule' }])
+        const action = {
             type: "ir.actions.client",
             tag: "automation_view",
-            context : {
-                id : rule[0]
+            context: {
+                id: rule[0]
             }
         }
-        const message= _t("You are already in a new record")
-        this.deleteEmptyRecord(action,message)
+        const message = _t("You are already in a new record")
+        this.deleteEmptyRecord(action, message)
     }
 
     onClickMenuBar() {
@@ -558,9 +655,9 @@ export class WorkFlowAuto extends Component {
     }
 
     async setModelState() {
-        const [{model_id: modelData}] = await this.orm.read("work.auto", [this.id], ['model_id']);
+        const [{ model_id: modelData }] = await this.orm.read("work.auto", [this.id], ['model_id']);
         if (modelData) {
-            const [{model}] = await this.orm.read("ir.model", [modelData[0]], ['model'])
+            const [{ model }] = await this.orm.read("ir.model", [modelData[0]], ['model'])
             this.state.model_id = modelData[0];
             this.state.model = modelData[1];
             this.state.model_name = model;
@@ -606,14 +703,16 @@ export class WorkFlowAuto extends Component {
         return accessibleVariables;
     }
 
-    manageData() {
-        if (this.editorValue.length && this.editorValue[0].flow_data) {
-            this.importData(this.editorValue[0].flow_data)
-            this.state.nodeDetails.forEach(node => {
-                const {component, props, ref} = node;
+    async manageData(data) {
+        const flowData = data || (this.editorValue.length && this.editorValue[0].flow_data);
+        if (flowData) {
+            this.state.nodeDetails = [];
+            this.importData(flowData);
+            for (const node of this.state.nodeDetails) {
+                const { component, props, ref } = node;
                 props.updateImports = this.updateImportStatements.bind(this);
-                this.mountComponent(component, ref, props)
-            })
+                await this.mountComponent(component, ref, props);
+            }
         }
     }
 
@@ -628,7 +727,7 @@ export class WorkFlowAuto extends Component {
                 this.state.other_blk = action ? true : this.state.other_blk
             }
         } else {
-            this.editorState.value = await this.orm.searchRead('work.auto', [], [], {limit: 1})
+            this.editorState.value = await this.orm.searchRead('work.auto', [], [], { limit: 1 })
         }
     }
 
@@ -675,10 +774,11 @@ export class WorkFlowAuto extends Component {
     }
 
     async resetStatesWhenClear() {
+        this.captureSnapshot();
         this.orm.call('work.auto', 'clear_all_nodes', [this.id]);
-        this.env.variables.setContext({variables: []});
-        this.env.context.setContext({nodes: []});
-        this.editor.clearModuleSelected();
+        this.env.variables.setContext({ variables: [] });
+        this.env.context.setContext({ nodes: [] });
+        this.editor.clear();
         this.autoSaveDrawFlow().then(() => {
             Object.assign(this.state, {
                 variables: [],
@@ -699,10 +799,10 @@ export class WorkFlowAuto extends Component {
     }
 
     extractBackendInfo() {
-        const {data: mainData} = this.editor.drawflow.drawflow.Home
-        const model_data = Object.values(mainData).find(({data}) => data?.type === "model")
-        const action_data = Object.values(mainData).find(({data}) => data?.type === "action")
-        let backendData = {code: this.state.code, variables: this.state.variables}
+        const { data: mainData } = this.editor.drawflow.drawflow.Home
+        const model_data = Object.values(mainData).find(({ data }) => data?.type === "model")
+        const action_data = Object.values(mainData).find(({ data }) => data?.type === "action")
+        let backendData = { code: this.state.code, variables: this.state.variables }
         if (model_data) {
             backendData = {
                 ...backendData,
@@ -720,11 +820,11 @@ export class WorkFlowAuto extends Component {
 
     get automationIdentifiers() {
         const identifiers = this.env.variables.context.variables.map(item => item.variable_name)
-        return {pythonKeywords: [...PYTHON_KEYWORDS], variableNames: [...identifiers]};
+        return { pythonKeywords: [...PYTHON_KEYWORDS], variableNames: [...identifiers] };
     }
 
     async onSave() {
-        const {isValid, error, nodeIds} = this.validateFlow();
+        const { isValid, error, nodeIds } = this.validateFlow();
         const nameValidation = this.validateName();
         if (!isValid || !nameValidation.isValid) {
             this.handleValidationErrors(isValid, nameValidation, nodeIds, error);
@@ -740,8 +840,8 @@ export class WorkFlowAuto extends Component {
         }
     }
 
-    get saveClass(){
-        return this.state.model? 'btn btn-primary':'btn btn-secondary'
+    get saveClass() {
+        return this.state.model ? 'btn btn-primary' : 'btn btn-secondary'
     }
 
     validateName() {
@@ -754,7 +854,7 @@ export class WorkFlowAuto extends Component {
 
     handleValidationErrors(isFlowValid, nameValidation, nodeIds, err) {
         if (!isFlowValid && nodeIds) {
-            this.env.bus.trigger("FLOW:VALIDATION", {nodeIds});
+            this.env.bus.trigger("FLOW:VALIDATION", { nodeIds });
         }
         if (!nameValidation.isValid) {
             this.showNameError();
@@ -803,8 +903,9 @@ export class WorkFlowAuto extends Component {
     }
 
     updateName(newName) {
+        this.captureSnapshot();
         this.state.name = newName;
-        // You might also want to save this to the server here
+        this.write({ name: newName });
     }
 
     validateFlow() {
@@ -848,9 +949,8 @@ export class WorkFlowAuto extends Component {
             const errorMessage =
                 errors.length === 1
                     ? `${errors[0]} is not configured`
-                    : `${errors.slice(0, -1).join(", ")} and ${
-                          errors[errors.length - 1]
-                      } are not configured`;
+                    : `${errors.slice(0, -1).join(", ")} and ${errors[errors.length - 1]
+                    } are not configured`;
 
             return { isValid: false, nodeIds, error: errorMessage };
         }
@@ -867,7 +967,10 @@ export class WorkFlowAuto extends Component {
     }
 
     write(data) {
-        owl.status(this) !== 'destroyed' && this.orm.write("work.auto", [this.id], data);
+        if (owl.status(this) !== 'destroyed') {
+            Object.assign(this.editorState.value[0], data);
+            this.orm.write("work.auto", [this.id], data);
+        }
     }
 
     removeImports(nodeId) {
@@ -878,12 +981,12 @@ export class WorkFlowAuto extends Component {
     }
 
     updateImportStatements(statement) {
-        const {parent, child, nodeId} = statement;
+        const { parent, child, nodeId } = statement;
         const statementObj = this.imports.find(item => item.importStatement === parent);
         if (statementObj) {
             const childObject = statementObj.childStatement.find(item => item.nodeId === nodeId)
             if (!childObject) {
-                statementObj.childStatement.push({statement: child, nodeId: nodeId});
+                statementObj.childStatement.push({ statement: child, nodeId: nodeId });
                 this.state.imports = [...this.imports]
             } else {
                 childObject.statement = child;
@@ -891,7 +994,7 @@ export class WorkFlowAuto extends Component {
         } else {
             this.state.imports = [...this.imports, {
                 importStatement: parent,
-                childStatement: [{statement: child, nodeId: nodeId}]
+                childStatement: [{ statement: child, nodeId: nodeId }]
             }]
         }
     }
@@ -937,7 +1040,11 @@ export class WorkFlowAuto extends Component {
     }
 
     updateCode() {
-        let node = structuredClone(this.env.context.context?.nodes)[0];
+        const nodes = this.env.context.context?.nodes || [];
+        if (nodes.length === 0) return;
+
+        // Use JSON-safe cloning to avoid DataCloneError with Odoo reactive proxies
+        let node = JSON.parse(JSON.stringify(nodes))[0];
         const variables = this.env.variables.context.variables;
         const globalVariables = this.env.globalVariables.context.variables;
         while (node?.left) {
@@ -947,7 +1054,11 @@ export class WorkFlowAuto extends Component {
         let indentationLevel = "";
         let parentArray = [];
         for (const variable of globalVariables) {
-            codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
+            if (variable.variable_name === 'current_record') {
+                codeLines.push(`${variable.variable_name} = records if 'records' in globals() else env['${this.state.model_name}'].browse()`);
+            } else {
+                codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
+            }
         }
         while (node) {
             const variablesInScope = variables.filter(item => item.scopeId === node.nodeId);
@@ -976,14 +1087,28 @@ export class WorkFlowAuto extends Component {
                 if (condition) {
                     indentationLevel = indentationLevel.slice(0, -4);
                     node = pNode?.right;
+                } else if (pNode.isLoop) {
+                    // Loop ended: no else block. De-indent and move on.
+                    indentationLevel = indentationLevel.slice(0, -4);
+                    node = pNode?.right;
                 } else {
                     node = pNode?.child2;
                     pNode.child2.completed = true;
                     parentArray.push(pNode);
                     indentationLevel = indentationLevel.slice(0, -4);
-                    codeLines.push(`${indentationLevel}else:`);
+                    if (pNode.else_setup_code) {
+                        // Cron-mode condition: emit the complement recordset search and open
+                        // a new independent `if` block so both branches always execute.
+                        codeLines.push(`${indentationLevel}${pNode.else_setup_code}`);
+                        const complementVar = pNode.else_setup_code.split('=')[0].trim();
+                        codeLines.push(`${indentationLevel}if ${complementVar}:`);
+                    } else {
+                        // Standard condition: only one branch executes.
+                        codeLines.push(`${indentationLevel}else:`);
+                    }
                     indentationLevel += "    ";
                 }
+
                 continue;
             }
             node = node.right;
@@ -998,9 +1123,127 @@ export class WorkFlowAuto extends Component {
     }
 
     async autoSaveDrawFlow(values) {
+        if (this.lockUndoRedo) return;
         const flow_data = this.editor.export();
+        // Snapshot the current state before updating it, unless a manual snapshot was just taken
+        if (!this._skipNextSnapshot) {
+            this.captureSnapshot();
+        }
+        this._skipNextSnapshot = false;
         this.editorState.value[0].flow_data = flow_data
-        await this.write({flow_data});
+        await this.write({ flow_data });
+    }
+
+    captureSnapshot() {
+        const record = this.editorState?.value?.[0];
+        if (!record) return;
+
+        // Snapshot the PREVIOUS VALID state (currently sitting in editorState and this.state)
+        // so that 'undo' can return us to this exact point.
+        const bundle = {
+            flow_data: record.flow_data || this.editor.export(),
+            state: {
+                model_id: this.state.model_id,
+                model: this.state.model,
+                model_name: this.state.model_name,
+                trigger: this.state.trigger,
+                triggerType: this.state.triggerType,
+                variables: this.state.variables,
+                imports: this.state.imports,
+                cronMode: this.state.cronMode,
+                cronTime: this.state.cronTime,
+                cronDay: this.state.cronDay,
+                cronMonth: this.state.cronMonth,
+                watchedFieldId: this.state.watchedFieldId,
+                watchedFieldName: this.state.watchedFieldName,
+                model_blk: this.state.model_blk,
+                trigger_blk: this.state.trigger_blk,
+                other_blk: this.state.other_blk,
+                name: this.state.name,
+            }
+        };
+        this.undoRedo.pushSnapshot(JSON.stringify(bundle));
+    }
+
+    async undo() {
+        const currentSnapshot = JSON.stringify(this.getSnapshotBundle());
+        const previousState = this.undoRedo.undo(currentSnapshot);
+        if (previousState) {
+            await this.restoreState(previousState);
+        }
+    }
+
+    async redo() {
+        const currentSnapshot = JSON.stringify(this.getSnapshotBundle());
+        const nextState = this.undoRedo.redo(currentSnapshot);
+        if (nextState) {
+            await this.restoreState(nextState);
+        }
+    }
+
+    getSnapshotBundle() {
+        return {
+            flow_data: this.editor.export(),
+            state: {
+                model_id: this.state.model_id,
+                model: this.state.model,
+                model_name: this.state.model_name,
+                trigger: this.state.trigger,
+                triggerType: this.state.triggerType,
+                variables: this.state.variables,
+                imports: this.state.imports,
+                cronMode: this.state.cronMode,
+                cronTime: this.state.cronTime,
+                cronDay: this.state.cronDay,
+                cronMonth: this.state.cronMonth,
+                watchedFieldId: this.state.watchedFieldId,
+                watchedFieldName: this.state.watchedFieldName,
+                model_blk: this.state.model_blk,
+                trigger_blk: this.state.trigger_blk,
+                other_blk: this.state.other_blk,
+                name: this.state.name,
+            }
+        };
+    }
+
+    async restoreState(jsonState) {
+        const bundle = JSON.parse(jsonState);
+        const { flow_data, state } = bundle;
+
+        this.lockUndoRedo = true;
+        try {
+            // Restore UI state
+            Object.assign(this.state, state);
+            this.env.variables.setContext({ variables: [...state.variables] });
+
+            // Restore Editor - CRITICAL: One single manageData call to import and mount
+            this.editor.clear();
+
+            // Commit data to cache BEFORE registration so components see the correct state
+            this.editorState.value[0].flow_data = flow_data;
+            this.registerNodes();
+            await this.manageData(flow_data); // Single import + mount loop
+
+            // Synchronize backend
+            await this.write({
+                flow_data,
+                model_id: state.model_id,
+                variables: state.variables,
+                imports: state.imports,
+                name: state.name,
+                trigger_type: state.triggerType,
+                time_trigger_mode: state.cronMode,
+                time_trigger_time: state.cronTime,
+                time_trigger_day: state.cronDay,
+                time_trigger_month: state.cronMonth,
+                field_id: state.watchedFieldId ? [state.watchedFieldId, state.watchedFieldName] : false,
+            });
+
+            await settingInitialContext.call(this);
+            await this.updateCode();
+        } finally {
+            this.lockUndoRedo = false;
+        }
     }
 
     dragStart(event, type) {
@@ -1011,6 +1254,7 @@ export class WorkFlowAuto extends Component {
             event.dataTransfer.setData("action", event.target.getAttribute('data-action'));
             event.dataTransfer.setData("node", event.target.getAttribute('data-node'));
             event.dataTransfer.setData("type", event.target.getAttribute('data-type'));
+            event.dataTransfer.setData("trigger_type", event.target.getAttribute('data-trigger_type'));
         }
     }
 
@@ -1018,15 +1262,18 @@ export class WorkFlowAuto extends Component {
         ev.preventDefault();
     }
 
-    mountComponent(component, ref, props) {
-        mount(component, ref, {props, env: this.env})
+    async mountComponent(component, ref, props) {
+        return mount(component, ref, { props, env: this.env });
     }
 
     getContext() {
         return {
-            modelName:this.state.model_name,
+            modelName: this.state.model_name,
             modelState: this.state.modelState,
-            trigger: this.state.trigger
+            trigger: this.state.trigger,
+            // Exposes trigger type (e.g. 'time') so child components such as
+            // the Condition node can adapt their UI for cron-mode workflows.
+            triggerType: this.state.triggerType,
         }
     }
 
@@ -1056,7 +1303,14 @@ export class WorkFlowAuto extends Component {
     }
 
     async updateActions() {
-        this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name'])
+        this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
+    }
+
+    onCronFieldChange(field, ev, type = 'string') {
+        let value = ev.target.value;
+        if (type === 'float') value = parseFloat(value) || 0;
+        if (type === 'int') value = parseInt(value) || 0;
+        this.setCronField(field, value);
     }
 
     get variableDetailProps() {
@@ -1075,7 +1329,7 @@ export class WorkFlowAuto extends Component {
     get usedNodes() {
         const nodeIds = this.state.selectedVariable?.usedIn;
         if (nodeIds && nodeIds.length > 0) {
-            const {data} = this.editorValue[0].flow_data.drawflow.Home;
+            const { data } = this.editorValue[0].flow_data.drawflow.Home;
             const nodes = Object.values(data).filter(item => nodeIds.includes(item.data.nodeId));
             return nodes;
         }
@@ -1083,7 +1337,7 @@ export class WorkFlowAuto extends Component {
     }
 
     get currentNode() {
-        const {data} = this.editorValue[0].flow_data.drawflow.Home;
+        const { data } = this.editorValue[0].flow_data.drawflow.Home;
         const nodes = Object.values(data);
         return nodes.find(node => node.id == this.state.selectedNodeID);
     }
@@ -1111,11 +1365,12 @@ export class WorkFlowAuto extends Component {
             this.dialogService.add(VariableNode, {
                 name: "Make Variable",
                 fields: variableFields,
-                variable: {scopeId: this.currentNode.data.nodeId},
+                variable: { scopeId: this.currentNode.data.nodeId },
                 display_name: "Here you can create new variables. Name for this Variable that's unique within this automation.",
                 variables: this.globalWithAccessibleVariables,
                 identifiers: this.automationIdentifiers,
                 onConfirm: (fieldState, code) => {
+                    this.captureSnapshot();
                     const currentVariableContext = this.env.variables.context;
                     const variables = currentVariableContext.variables || []
                     this.env.variables.setContext({
@@ -1136,8 +1391,8 @@ export class WorkFlowAuto extends Component {
     }
 
     editVariable(variable) {
-        const {variable_name, variable_type, type, variable_value, scopeId} = variable
-        const {data} = this.editorValue[0].flow_data.drawflow.Home;
+        const { variable_name, variable_type, type, variable_value, scopeId } = variable
+        const { data } = this.editorValue[0].flow_data.drawflow.Home;
         const nodes = Object.values(data);
         this.state.selectedNodeID = nodes.find(nod => nod.data.nodeId === scopeId).id;
         this.dialogService.add(VariableNode, {
@@ -1145,13 +1400,14 @@ export class WorkFlowAuto extends Component {
             mode: "edit",
             variables: this.globalWithAccessibleVariables,
             display_name: "Here you can edit variables. Name for this Variable that's unique within this automation.",
-            variable: {variable_name, variable_type, type, variable_value, scopeId},
+            variable: { variable_name, variable_type, type, variable_value, scopeId },
             identifiers: this.automationIdentifiers,
             onConfirm: (fieldState, code) => {
+                this.captureSnapshot();
                 const currentVariableContext = this.env.variables.context;
                 const variables = currentVariableContext.variables;
                 const editedVariable = variables.find(item => item.id === variable.id);
-                Object.assign(editedVariable, {...fieldState, code})
+                Object.assign(editedVariable, { ...fieldState, code })
                 this.setVariableState(variables);
             }
         })
@@ -1169,9 +1425,10 @@ export class WorkFlowAuto extends Component {
                 image: "cyllo_workflow_automation/static/src/img/warning_popup.png"
             });
         } else {
+            this.captureSnapshot();
             const variables = this.state.variables.filter(item => item.id !== variable.id);
             this.setVariableState(variables)
-            this.env.variables.setContext({variables: [...variables]})
+            this.env.variables.setContext({ variables: [...variables] })
         }
     }
 
@@ -1190,10 +1447,10 @@ export class WorkFlowAuto extends Component {
     removeVariables(nodeID) {
         const variables = this.state.variables.filter(item => item.scopeId !== nodeID);
         this.setVariableState(variables);
-        this.env.variables.setContext({variables: [...variables]})
+        this.env.variables.setContext({ variables: [...variables] })
     }
 
-    async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type) {
+    async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type, trigger_type) {
         if (this.editor.editor_mode === 'fixed') return false;
         // Calculate position
         pos_x = pos_x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)));
@@ -1209,7 +1466,7 @@ export class WorkFlowAuto extends Component {
             primary_model_id: this.state.model_id,
             updateImports: this.updateImportStatements.bind(this),
         };
-        this.env.bus.trigger("UPDT-PRIMARY", {model_id: this.state.model_id})
+        this.env.bus.trigger("UPDT-PRIMARY", { model_id: this.state.model_id })
         let specificProps = {};
         let label = name;
         let left = 1;
@@ -1246,30 +1503,32 @@ export class WorkFlowAuto extends Component {
                 right = 0;
                 break;
             case 'Condition':
+            case 'Loop':
                 specificProps.type = "action_to_do";
                 right = 3;
                 break;
             default:
                 specificProps.type = "action";
                 specificProps.ttype = name;
+                specificProps.trigger_type = trigger_type;
                 specificProps.model = [parseInt(action), "work.function"];
                 label = action;
                 break;
         }
 
         // Merge specific properties with common properties
-        const newProps = {...commonProps, ...specificProps};
+        const newProps = { ...commonProps, ...specificProps };
         const uniqueIdentifier = name + '__' + nodeId
 
         // Register node
         this.editor.registerNode(uniqueIdentifier, ModelComponent, newProps, {});
 
         // Add node to editor
-        await this.editor.addNode(name, left, right, pos_x, pos_y, label, {...newProps}, uniqueIdentifier, 3);
+        await this.editor.addNode(name, left, right, pos_x, pos_y, label, { ...newProps }, uniqueIdentifier, uniqueIdentifier);
 
         // Update component
-        let {component, ref, props} = this.data
-        props = {...props, ...newProps};
+        let { component, ref, props } = this.data
+        props = { ...props, ...newProps };
         this.mountComponent(component, ref, props);
     }
 
@@ -1286,14 +1545,18 @@ export class WorkFlowAuto extends Component {
             let record = ev.dataTransfer.getData("record");
             let action = ev.dataTransfer.getData("action");
             const type = ev.dataTransfer.getData("type");
+            const trigger_type = ev.dataTransfer.getData("trigger_type");
             if (data && data !== 'null') {
                 this.state.trigger_blk = (data === 'model' && !(action === true || data !== 'model')) ? true : false;
                 this.state.other_blk = (action == true || data !== 'model') ? true : false
                 this.state.model_blk = record ? false : true
-                type === 'trigger' ? this.state.trigger = data : false
+                if (type === 'trigger') {
+                    this.state.trigger = data;
+                    this.state.triggerType = trigger_type;
+                }
                 this.mainBlk.el.querySelector("#trigger_blocks").classList.remove('show')
                 const selectedValue = this.state.model;
-                this.addNodeToDrawFlow(data, ev.clientX, ev.clientY, selectedValue, record, action, type);
+                this.addNodeToDrawFlow(data, ev.clientX, ev.clientY, selectedValue, record, action, type, trigger_type);
             }
         }
     }
@@ -1315,66 +1578,89 @@ export class WorkFlowAuto extends Component {
     }
 
     async onSelectPrimary(ev) {
-        if (!ev) return;
-        // const model_data = await this.orm.read('ir.model', [ev[0].id], ['display_name', 'model']);
-        const model_data = await this.orm.searchRead('ir.model', [["id","=",ev[0].id]], ['display_name', 'model'])
+        if (!ev) {
+            // If the user clears the object selection, we reset the whole editor
+            await this.resetStatesWhenClear();
+            return;
+        }
+        this.captureSnapshot();
+
+        // If a model was already selected, clear the existing nodes to prevent duplicates/overlaps
+        if (this.state.model_id) {
+            this.editor.clear();
+            this.state.nodeDetails = [];
+            // Inform the backend to clear existing nodes for this workflow
+            await this.orm.call('work.auto', 'clear_all_nodes', [this.id]);
+        }
+
+        const model_data = await this.orm.searchRead('ir.model', [["id", "=", ev[0].id]], ['display_name', 'model'])
         this.state.model = ev[0].display_name ? ev[0].display_name : model_data[0].display_name;
         this.state.model_id = ev[0].id;
         this.state.model_name = model_data[0].model;
         this.settingModelState(ev[0].id);
         await this.updatePrimaryModel(ev[0].id);
+
         const name = "model"
         const action = null
-        this.addNodeToDrawFlow(name, 594, 193, this.state.model, this.state.model_id, action, "model")
+
+        // Lock sub-snapshots to prevent redundant/inconsistent history points
+        this._skipNextSnapshot = true;
+        try {
+            // Use balanced coordinates to match the user's preferred 'first time' position
+            await this.addNodeToDrawFlow(name, 650, 250, this.state.model, this.state.model_id, action, "model")
+        } finally {
+            this._skipNextSnapshot = false;
+        }
+
         this.state.model_blk = false
         this.state.trigger_blk = true
     }
 
     updatePrimaryModel(model_id) {
-        this.orm.write("work.auto", [this.id], {model_id});
+        this.write({ model_id });
     }
 
     settingModelState(model_id) {
         const modelState = this.state.modelState.filter(model => model.type !== 'primary')
-        this.state.modelState = [{id: 0, model_id, type: 'primary'}, ...modelState]
+        this.state.modelState = [{ id: 0, model_id, type: 'primary' }, ...modelState]
     }
 
     getDomain() {
         return []
     }
 
-    async deleteEmpty(){
+    async deleteEmpty() {
         if (!this.env.context.context.nodes.length) {
-                await this.orm.unlink("work.auto", [this.id])
+            await this.orm.unlink("work.auto", [this.id])
         }
     }
-    deleteEmptyRecord(action,message){
-        if(!this.env.context.context.nodes.length){
+    deleteEmptyRecord(action, message) {
+        if (!this.env.context.context.nodes.length) {
             this.dialogService.add(ConfirmationPopup, {
-            title: _t("Are you sure"),
-            message: message || _t("If you leave this page,This empty record will be deleted"),
-            confirmText: _t("Yes, proceed"),
-            cancelText: _t("No, cancel"),
-            onConfirm: async()=> {
-                await this.orm.unlink("work.auto", [this.id])
-                this.action.doAction(action)
-            },
-            onCancel: () => {
-            },
-        })
-        }else{
+                title: _t("Are you sure"),
+                message: message || _t("If you leave this page,This empty record will be deleted"),
+                confirmText: _t("Yes, proceed"),
+                cancelText: _t("No, cancel"),
+                onConfirm: async () => {
+                    await this.orm.unlink("work.auto", [this.id])
+                    this.action.doAction(action)
+                },
+                onCancel: () => {
+                },
+            })
+        } else {
             this.action.doAction(action)
         }
     }
 
-    async navigatePage(navigateId){
-        const action= {
-                    type: "ir.actions.client",
-                    tag: "automation_view",
-                    context: {
-                        id: navigateId
-                    }
-                }
+    async navigatePage(navigateId) {
+        const action = {
+            type: "ir.actions.client",
+            tag: "automation_view",
+            context: {
+                id: navigateId
+            }
+        }
         this.deleteEmptyRecord(action)
 
     }
@@ -1389,10 +1675,10 @@ export class WorkFlowAuto extends Component {
             target: "main",
             name: "Workflow Automation",
             // domain,
-            context: {delete_node_id: !this.env.context.context.nodes.length ? this.id : false}
+            context: { delete_node_id: !this.env.context.context.nodes.length ? this.id : false }
         }
         const message = _t("If you go back, This record will be deleted");
-        this.deleteEmptyRecord(action,message)
+        this.deleteEmptyRecord(action, message)
     }
 
     static components = {
