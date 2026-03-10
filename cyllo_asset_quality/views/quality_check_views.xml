@@ -13,7 +13,7 @@
             </xpath>
             <xpath expr="//field[@name='product_id']" position="after">
                 <field name="asset_operation_type" invisible="control_type != 'asset'"/>
-                <field name="asset_id" invisible="control_type != 'asset'"/>
+                <field name="asset_ids" widget="many2many_tags" invisible="control_type != 'asset'"/>
 <!--                <field name="partner_id" invisible="control_type != 'asset'"/>-->
             </xpath>
         </field>
@@ -34,10 +34,16 @@
             <xpath expr="//div[hasclass('o_row') and field[@name='quantity']]" position="attributes">
                 <attribute name="invisible">control_type != 'quantity'</attribute>
             </xpath>
+            <xpath expr="//field[@name='mo_id']" position="attributes">
+                <attribute name="invisible">control_type == 'asset'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='picking_id']" position="attributes">
+                <attribute name="invisible">control_type == 'asset'</attribute>
+            </xpath>
             <!-- Add asset fields -->
             <xpath expr="//field[@name='control_type']" position="after">
                 <field name="asset_operation_type" invisible="control_type != 'asset'" required="control_type == 'asset'"/>
-                <field name="asset_id" invisible="control_type != 'asset'" required="control_type == 'asset'"/>
+                <field name="asset_ids" widget="many2many_tags" invisible="control_type != 'asset'" required="control_type == 'asset'"/>
             </xpath>
         </field>
     </record>
