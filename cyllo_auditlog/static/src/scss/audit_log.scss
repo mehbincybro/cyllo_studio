@@ -26,33 +26,6 @@
         margin-top: 30px;
         margin-bottom: 15px;
     }
-
-    .o_notebook {
-        .nav-tabs {
-            border-bottom: none;
-            gap: 8px;
-
-            .nav-link {
-                border: none;
-                border-radius: 8px;
-                background: #f1f5f9;
-                color: #64748b;
-                font-weight: 600;
-                padding: 10px 20px;
-                transition: all 0.3s ease;
-
-                &:hover {
-                    background: #e2e8f0;
-                }
-
-                &.active {
-                    background: var(--primary);
-                    color: white;
-                    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
-                }
-            }
-        }
-    }
 }
 
 /* Audit Rule Styling */

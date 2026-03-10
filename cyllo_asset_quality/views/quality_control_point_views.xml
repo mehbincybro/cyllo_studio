@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <record id="view_quality_control_point_tree_inherit_asset_quality" model="ir.ui.view">
+        <field name="name">quality.control.point.tree.inherit.asset.quality</field>
+        <field name="model">quality.control.point</field>
+        <field name="inherit_id" ref="cyllo_quality.view_quality_control_point_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_ids']" position="after">
+                <field name="asset_ids" widget="many2many_tags" invisible="qc_check_for != 'asset'"/>
+            </xpath>
+        </field>
+    </record>
+
     <record id="view_quality_control_point_form_inherit_asset_quality" model="ir.ui.view">
         <field name="name">quality.control.point.form.inherit.asset.quality</field>
         <field name="model">quality.control.point</field>
@@ -13,7 +24,7 @@
                 <attribute name="invisible">qc_check_for == 'asset'</attribute>
             </xpath>
             <xpath expr="//field[@name='qc_check_for']" position="after">
-                <field name="asset_id" widget="many2one" invisible="qc_check_for != 'asset'" required="qc_check_for == 'asset'"/>
+                <field name="asset_ids" widget="many2many_tags" invisible="qc_check_for != 'asset'" required="qc_check_for == 'asset'"/>
                 <field name="asset_operation_type" invisible="qc_check_for != 'asset'" required="qc_check_for == 'asset'"/>
             </xpath>
         </field>

@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="qc_check_for" invisible="1"/>
+                <field name="qc_check_for"/>
                 <field name="operation_type_ids" widget="many2many_tags"/>
                 <field name="product_category_ids" widget="many2many_tags" invisible="qc_check_for != 'category'"/>
                 <field name="product_ids" widget="many2many_tags" invisible="qc_check_for != 'product'"/>
@@ -79,10 +79,8 @@
                             <field name="quality_inspection_ids">
                                 <tree editable="bottom">
                                     <field name="priority" widget="handle"/>
-                                    <field name="priority" string="Order" invisible="1"/>
                                     <field name="quality_control_id" column_invisible="1"/>
                                     <field name="inspection_action_id"/>
-                                    <field name="name" invisible="1"/>
                                     <field name="blocked_by_id"/>
                                     <field name="inspection_type_id"/>
                                     <field name="is_measure" column_invisible="1"/>

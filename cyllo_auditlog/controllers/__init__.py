@@ -19,33 +19,4 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': 'Audit Log System',
-    'version': '1.0',
-    'category': 'Accounting',
-    'summary': """Centralized audit logging""",
-    'description': "Audit log",
-    'author': "Cyllo",
-    'company': "Cyllo",
-    'maintainer': "Cyllo",
-    'website': "https://www.cyllo.com",
-    'depends': ['base'],
-    # 'icon': '',
-    'data': [
-        'security/ir.model.access.csv',
-        'data/ir_cron_data.xml',
-        'views/audit_log_views.xml',
-        'views/audit_rule_views.xml',
-        'views/auditlog_http_request_views.xml',
-        'views/audit_menus.xml'
-    ],
-    'assets': {
-        'web.assets_backend': [
-            'cyllo_auditlog/static/src/scss/audit_log.scss',
-        ],
-    },
-    'license': 'LGPL-3',
-    'installable': True,
-    'application': True,
-    'auto_install': False,
-}
+from . import main

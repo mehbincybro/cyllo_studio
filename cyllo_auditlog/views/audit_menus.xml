@@ -19,7 +19,7 @@
               name="Logs"
               parent="menu_audit_root"
               action="action_audit_log"
-              sequence="10"
+              sequence="2"
               groups="base.group_system"/>
 
     <!-- User Sessions Menu -->
@@ -27,28 +27,23 @@
               name="Sessions"
               parent="menu_audit_root"
               action="action_audit_session"
-              sequence="15"
+              sequence="3"
               groups="base.group_system"/>
+
+    <!-- HTTP Requests Menu -->
+    <menuitem id="menu_auditlog_http_requests"
+              name="HTTP Requests"
+              parent="menu_audit_root"
+              action="action_auditlog_http_request"
+              sequence="4"
+              groups="base.group_system"/>
+
 
     <!-- Audit Rules Menu -->
     <menuitem id="menu_audit_rules"
               name="Rules"
               parent="menu_audit_root"
               action="action_audit_rule"
-              sequence="20"
-              groups="base.group_system"/>
-
-    <!-- Configuration Menu (optional submenu) -->
-    <menuitem id="menu_audit_configuration"
-              name="Configuration"
-              parent="menu_audit_root"
-              sequence="30"
-              groups="base.group_system"/>
-
-    <menuitem id="menu_audit_rules_config"
-              name="Audit Rules"
-              parent="menu_audit_configuration"
-              action="action_audit_rule"
-              sequence="10"
+              sequence="1"
               groups="base.group_system"/>
 </odoo>
