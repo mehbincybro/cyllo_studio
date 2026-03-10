@@ -22,9 +22,20 @@
 {
     'name': 'Audit Log System',
     'version': '1.0',
-    'category': 'Accounting',
-    'summary': """Centralized audit logging""",
-    'description': "Audit log",
+    'summary': """Track create, update, delete, and read activities with company-wise audit visibility.""",
+    'description': """
+        Audit Log System helps administrators monitor business operations with configurable audit rules.
+        It records create, write, unlink, and optional read actions, captures field-level changes, and
+        links events with user sessions and HTTP requests for better traceability.
+        Key features:
+        - Rule-based auditing per model
+        - Field-level tracking (track selected fields or exclude fields)
+        - User/group-based tracking filters
+        - Session and HTTP request logging
+        - Retention policy with manual cleanup support
+        - Dashboard and reporting views
+        - Multi-company visibility control using company-specific rules
+    """,
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
@@ -32,6 +43,7 @@
     'depends': ['base'],
     # 'icon': '',
     'data': [
+        'security/security.xml',
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
         'views/audit_log_views.xml',

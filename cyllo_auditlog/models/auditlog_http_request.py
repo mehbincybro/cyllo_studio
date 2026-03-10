@@ -29,6 +29,8 @@ class AuditlogHttpRequest(models.Model):
     _rec_name = 'path'
 
     path = fields.Char(string='Path', readonly=True, required=True, help='Relative HTTP request path.')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company,
+                                 help='Company that owns this HTTP request audit entry.')
     url = fields.Char(string='Full URL', readonly=True, help='Complete URL captured for the request.')
     method = fields.Char(string='HTTP Method', readonly=True, default='POST', help='HTTP verb used for the request.')
     user_id = fields.Many2one(
@@ -43,8 +45,10 @@ class AuditlogHttpRequest(models.Model):
     user_agent = fields.Text(string='User Agent', readonly=True, help='Browser or client user-agent header.')
     request_data = fields.Text(string='Request Data', readonly=True, help='Captured payload or request body.')
     response_code = fields.Integer(string='Response Code', readonly=True, help='HTTP response status code.')
-    create_date = fields.Datetime(string='Created on', readonly=True, help='Timestamp when this request log was created.')
-    log_ids = fields.One2many('audit.log', 'http_request_id', string='Logs', readonly=True, help='Audit logs generated within this HTTP request.')
+    create_date = fields.Datetime(string='Created on', readonly=True,
+                                  help='Timestamp when this request log was created.')
+    log_ids = fields.One2many('audit.log', 'http_request_id', string='Logs', readonly=True,
+                              help='Audit logs generated within this HTTP request.')
 
     @api.model
     def log_request(self, path, url=None, method='POST', request_data=None,

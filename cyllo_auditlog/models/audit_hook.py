@@ -36,7 +36,7 @@ class BaseAuditHook(models.AbstractModel):
         """Get all active audit rules for this model with request-level caching."""
         # Fast bypass during module installation/uninstallation to prevent PostgreSQL crashes
         if not self.env.registry.ready: return []
-        
+
         request_context = self._get_safe_request()
         if not request_context or getattr(request_context, 'audit_internal_call', False): return []
 
@@ -85,6 +85,7 @@ class BaseAuditHook(models.AbstractModel):
         """Prepare values for audit log creation"""
         vals = {
             'user_id': self.env.user.id,
+            'company_id': rule.company_id.id or self.env.company.id,
             'model_id': rule.model_id.id,
             'res_id': res_id,
             'operation': operation,
@@ -129,7 +130,8 @@ class BaseAuditHook(models.AbstractModel):
         """Get client IP address"""
         if not (request and hasattr(request, 'httprequest')): return ''
         request_environ = request.httprequest.environ
-        return request_environ.get('HTTP_X_FORWARDED_FOR', '').split(',')[0].strip() or request.httprequest.remote_addr or ''
+        return request_environ.get('HTTP_X_FORWARDED_FOR', '').split(',')[
+            0].strip() or request.httprequest.remote_addr or ''
 
     def _get_session_id(self):
         """Get or create audit.session record for current request"""
@@ -141,21 +143,21 @@ class BaseAuditHook(models.AbstractModel):
         request_context = self._get_safe_request()
         if not request_context or not hasattr(request_context, 'httprequest'):
             return False
-            
+
         if hasattr(request_context, 'audit_http_request_id'):
             return request_context.audit_http_request_id
-            
+
         # Create it via our HTTP request model
         path = request_context.httprequest.path
         url = request_context.httprequest.url
         method = request_context.httprequest.method
-        
+
         http_request_log = self.env['audit.http.request'].sudo().log_request(
             path=path,
             url=url,
             method=method,
         )
-        
+
         request_context.audit_http_request_id = http_request_log.id if http_request_log else False
         return request_context.audit_http_request_id
 
@@ -173,8 +175,10 @@ class BaseAuditHook(models.AbstractModel):
             elif command_type == 1:
                 field_differences = []
                 for sub_field_name, new_sub_value in command[2].items():
-                    if sub_field_name in ['write_date', 'write_uid', 'id'] or not self._should_track_field(rule, sub_field_name): continue
-                    old_sub_value = (sub_old_values or {}).get(command_record_id, {}).get(sub_field_name) or related_model.browse(command_record_id)[sub_field_name]
+                    if sub_field_name in ['write_date', 'write_uid', 'id'] or not self._should_track_field(rule,
+                                                                                                           sub_field_name): continue
+                    old_sub_value = (sub_old_values or {}).get(command_record_id, {}).get(sub_field_name) or \
+                                    related_model.browse(command_record_id)[sub_field_name]
                     if str(old_sub_value) != str(new_sub_value):
                         field_differences.append(f"{sub_field_name}: {old_sub_value} -> {new_sub_value}")
                 if field_differences: details.append(f"Line #{command_record_id} ({', '.join(field_differences)})")
@@ -226,7 +230,8 @@ class BaseAuditHook(models.AbstractModel):
                             )
                             for sub_command in (vals.get(field_name) or []):
                                 if isinstance(sub_command, (list, tuple)) and sub_command[0] == 1:
-                                    sub_record = self.env[self._fields[field_name].comodel_name].sudo().browse(sub_command[1])
+                                    sub_record = self.env[self._fields[field_name].comodel_name].sudo().browse(
+                                        sub_command[1])
                                     subrecord_old_values.setdefault(
                                         sub_command[1],
                                         {
