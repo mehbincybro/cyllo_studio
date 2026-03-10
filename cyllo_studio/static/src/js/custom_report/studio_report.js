@@ -199,6 +199,13 @@ export class EditReport extends Component {
         }
         if (this.state.previewMode) {
             this._fetchPreviewData();
+        } else {
+            // If we are exiting preview and source editor was ON,
+            // we might need to re-init Ace to ensure it's properly sized
+            // in the new layout if it's still visible.
+            if (this.state.showSourceEditor) {
+                this._initAceEditor();
+            }
         }
     }
 
@@ -262,6 +269,16 @@ export class EditReport extends Component {
     async onEditSources() {
         this.state.showSourceEditor = !this.state.showSourceEditor;
         if (this.state.showSourceEditor) {
+            // ── SYNC PENDING CHANGES ─────────────────────────────────────────
+            // If there's an active undo stack or modified nodes, we should
+            // save before fetching the source so that the 'combined' arch
+            // returned by the backend includes current DnD changes.
+            const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
+            if (hasChanges) {
+                console.log("[EditSources] Pending changes detected, saving first...");
+                await this.save_changes(this);
+            }
+
             const res = await this.rpc('/cyllo_studio/get_report_source', {
                 template: this._template,
             });
@@ -313,8 +330,19 @@ export class EditReport extends Component {
         });
         if (res.success) {
             this.notification.add("Source saved successfully", { type: "success" });
-            if (this.state.previewMode) {
-                await this._fetchPreviewData();
+
+            // ── LIVE SYNC: Source -> UI ──────────────────────────────────────
+            // Immediately re-fetch the arch and update the visual report frame
+            // so the user sees their XML edits without a page reload.
+            const result = await this.rpc('/cyllo_studio/get_arch', { template: this._template });
+            if (result && result.success) {
+                this._loadedArch = result.arch;
+                if (!this.state.previewMode) {
+                    this._setupReportFrame(result.arch);
+                    this._setupSortable();
+                } else {
+                    await this._fetchPreviewData();
+                }
             }
         } else {
             this.notification.add(res.error, { type: "danger" });
@@ -581,7 +609,23 @@ export class EditReport extends Component {
                     item.style.border = '1px solid #000';
                     item.style.padding = '10px';
                     item.style.cursor = 'grab';
+                    item.style.cursor = 'grab';
                     item.style.opacity = '1';
+                }
+
+                // ── LIVE SYNC: UI -> Source ──────────────────────────────────
+                // If source editor is open, refresh its content to show the
+                // newly added element XML immediately.
+                if (self.state.showSourceEditor) {
+                    const refreshRes = await self.rpc('/cyllo_studio/get_report_source', {
+                        template: self._template,
+                    });
+                    if (refreshRes.success) {
+                        self.state.sourceCode = refreshRes.arch;
+                        if (self.aceEditor) {
+                            self.aceEditor.setValue(refreshRes.arch, -1);
+                        }
+                    }
                 }
             }
         });
@@ -669,11 +713,33 @@ export class EditReport extends Component {
             });
             console.log('[Cyllo Studio] Save result:', result);
             if (result && result['success'] === true) {
-                if (component.state.previewMode) {
-                    component.notification.add("Report saved successfully", { type: "success" });
-                    await component._fetchPreviewData();
-                } else {
-                    component.close_edit(component);
+                component.notification.add("Report saved successfully", { type: "success" });
+
+                // ── PERSISTENT SAVE: Refresh local state instead of closing ────
+                const resArch = await component.rpc('/cyllo_studio/get_arch', {
+                    template: component._template
+                });
+                if (resArch && resArch.success) {
+                    component._loadedArch = resArch.arch;
+                    if (!component.state.previewMode) {
+                        component._setupReportFrame(resArch.arch);
+                        component._setupSortable();
+                    } else {
+                        await component._fetchPreviewData();
+                    }
+
+                    // If source editor is open, refresh it too (UI -> Source sync)
+                    if (component.state.showSourceEditor) {
+                        const refreshRes = await component.rpc('/cyllo_studio/get_report_source', {
+                            template: component._template,
+                        });
+                        if (refreshRes.success) {
+                            component.state.sourceCode = refreshRes.arch;
+                            if (component.aceEditor) {
+                                component.aceEditor.setValue(refreshRes.arch, -1);
+                            }
+                        }
+                    }
                 }
             } else {
                 alert('Save failed: ' + (result?.error || 'Unknown error from server'));

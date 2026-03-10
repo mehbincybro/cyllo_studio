@@ -36,6 +36,23 @@
                         <i class="fa fa-database fa-lg text-success me-3"/> 
                         <span class="fw-semibold text-dark">Dynamic Field</span>
                     </div>
+
+                    <!-- Technical Actions -->
+                    <div class="border-top pt-3 mb-4">
+                        <h6 class="text-uppercase text-muted mb-3 fw-bold" style="font-size: 11px; letter-spacing: 1px;">Technical Tools</h6>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
+                                    style="font-size: 10px; background-color: #9ea700; border: none; border-radius: 4px;"
+                                    t-on-click="onEditSources">
+                                <i class="fa fa-code me-1"/> Edit Sources
+                            </button>
+                            <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
+                                    style="font-size: 10px; background-color: #e85e6a; border: none; border-radius: 4px;"
+                                    t-on-click="onResetReport">
+                                <i class="fa fa-refresh me-1"/> Reset Report
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Properties Sidebar (Preview) -->
@@ -74,9 +91,17 @@
                         <label class="form-check-label small" for="reloadAttach">Reload from attachment</label>
                     </div>
 
-                    <div class="action-buttons">
-                        <button class="btn btn-edit" t-on-click="onEditSources">EDIT SOURCES</button>
-                        <button class="btn btn-reset">RESET REPORT</button>
+                    <div class="action-buttons d-flex gap-2">
+                        <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
+                                style="font-size: 10px; background-color: #9ea700; border: none; border-radius: 4px;"
+                                t-on-click="onEditSources">
+                            <i class="fa fa-code me-1"/> Edit Sources
+                        </button>
+                        <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
+                                style="font-size: 10px; background-color: #e85e6a; border: none; border-radius: 4px;"
+                                t-on-click="onResetReport">
+                            <i class="fa fa-refresh me-1"/> Reset Report
+                        </button>
                     </div>
                 </div>
 
@@ -97,10 +122,6 @@
                     <!-- Preview Toolbar -->
                     <div t-if="state.previewMode" class="d-flex align-items-center justify-content-between mb-4 sticky-top px-4 py-2 bg-dark rounded-pill shadow-sm border border-secondary border-opacity-25" style="width: 90%; min-width: 600px; z-index: 100;">
                         <div class="d-flex align-items-center gap-3">
-<!--                             <div class="input-group input-group-sm" style="width: 280px;">-->
-<!--                                <input type="text" class="form-control bg-black text-white border-0 ps-3" placeholder="Search record..." style="border-radius: 20px 0 0 20px;"/>-->
-<!--                                <span class="input-group-text bg-black text-white border-0 pe-3" style="border-radius: 0 20px 20px 0;"><i class="fa fa-search small opacity-50"/></span>-->
-<!--                            </div>-->
                         </div>
                         <div class="d-flex align-items-center gap-3">
                             <button class="btn btn-sm btn-outline-light text-white border-secondary border-opacity-50 px-3" t-on-click="onPrintReport">
@@ -153,6 +174,43 @@
                           font-size: 16px;"/>
                 <div id="branchOptions"></div>
             </div>
+            <!-- Reset Report Dialog -->
+            <div t-if="state.showResetDialog"
+                 style="position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 2000; display: flex; align-items: center; justify-content: center;">
+                <div class="bg-dark text-white rounded-3 shadow-lg p-4" style="width: 420px; position: relative;">
+                    <!-- Close X -->
+                    <button class="btn-close btn-close-white" style="position: absolute; top: 16px; right: 16px;"
+                            t-on-click="() => state.showResetDialog = false"/>
+
+                    <h5 class="fw-bold mb-3">Reset report</h5>
+
+                    <p class="small opacity-75 mb-4">
+                        All changes done to the report's structure will be discarded and
+                        the report will be reset to its factory settings.
+                    </p>
+
+                    <!-- Include header and footer checkbox -->
+                    <div class="d-flex align-items-start gap-3 mb-4 p-3 rounded-2" style="background: rgba(255,255,255,0.08);">
+                        <div class="mt-1">
+                            <input type="checkbox" id="resetHeaderFooter" class="form-check-input"
+                                   t-att-checked="state.includeHeaderFooter"
+                                   t-on-change="(ev) => state.includeHeaderFooter = ev.target.checked"
+                                   style="width: 18px; height: 18px; accent-color: #28a745;"/>
+                        </div>
+                        <div>
+                            <label for="resetHeaderFooter" class="fw-semibold small mb-1 d-block" style="cursor: pointer;">Include header and footer</label>
+                            <span class="small opacity-50">Header and footer are shared with other reports which may be impacted by the reset.</span>
+                        </div>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-danger px-4" t-on-click="confirmResetReport">Reset report</button>
+                        <button class="btn btn-secondary px-4" t-on-click="() => state.showResetDialog = false">Go back</button>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </t>
 </templates>
