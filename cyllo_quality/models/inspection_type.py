@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import fields, models,api
 
 
 class InspectionType(models.Model):
@@ -27,3 +27,4 @@ class InspectionType(models.Model):
     _description = 'Inspection Types'
 
     name = fields.Char(string='Type')
+

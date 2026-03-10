@@ -78,3 +78,9 @@ class QualityInspection(models.Model):
                 record.is_measure = True
 
 
+    @api.onchange('inspection_type_id')
+    def _onchange_inspection_type_id(self):
+        if self.inspection_type_id.name != 'Measure':
+            self.measure_start = False
+            self.measure_end = False
+            self.unit_id = False

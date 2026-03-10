@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import _, fields, models
+from odoo import api,_, fields, models
 from odoo.exceptions import UserError
 
 
@@ -76,17 +76,23 @@ class QualityCheckLine(models.Model):
                     self.write({'status': 'fail'})
             except (ValueError, TypeError):
                 self.write({'status': 'fail'})
-            self.write({'value': value})
+            self.write({
+                'value': value,
+                'unit_value': {
+                    'unit': {
+                        'id': self.unit_id.id,
+                        'name': self.unit_id.name or '',
+                    },
+                    'value': value
+                }
+            })
         elif self.inspection_type_id.name == 'Instructions':
-            expected_value = self.unit_value.get('value') if self.unit_value else False
-            if str(expected_value) == str(value):
+            if value == 'pass':
                 self.write({
-                    'status': 'pass'
-                })
+                    'status': 'pass'})
             else:
                 self.write({
                     'status' : 'fail'})
-            self.write({'value': value})
         elif self.inspection_type_id.name == 'Take a picture':
             if value and '|' in value:
                 status, actual_value = value.split('|', 1)

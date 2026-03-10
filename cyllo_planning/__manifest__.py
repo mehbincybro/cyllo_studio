@@ -38,7 +38,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_hr'],
+    'depends': ['cyllo_hr','hr_holidays'],
     'icon': '/cyllo_planning/static/description/planning.svg',
     'data': [
         'security/cyllo_planning_security.xml',

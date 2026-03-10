@@ -113,7 +113,7 @@ class QualityCheck(models.Model):
                 'unit_value': {
                     "unit": {
                         "id": qc.value['unit'].get('id'),
-                        "name": qc.value['unit'].get('name')
+                        "name": qc.value['unit'].get('name') or ""
                     },
                     "value": qc.value.get('value')
                 },
