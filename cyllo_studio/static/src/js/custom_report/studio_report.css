@@ -141,19 +141,69 @@
 
 /* ── Dynamic Fields Luxury Styling ────────────────── */
 [cy-type='dynamic'] {
-    background-color: #e7f3ff;
-    color: #0056b3;
-    border: 1px solid #b3d7ff;
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-weight: 600;
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    background-color: transparent !important;
+    color: inherit !important;
+    border: 1px dashed transparent !important;
+    border-radius: 2px !important;
+    padding: 0px 2px !important;
+    font-weight: inherit !important;
+    box-shadow: none !important;
+    transition: all 0.2s ease;
+    vertical-align: baseline;
+}
+
+[cy-type='dynamic']:hover,
+[cy-type='dynamic'].selected {
+    background-color: rgba(91, 141, 238, 0.08) !important;
+    border: 1px dashed rgba(91, 141, 238, 0.4) !important;
+}
+
+/* ── Table Node Styling ───────────────────────────── */
+[cy-type='table'] {
+    width: 100%;
+    margin: 15px 0;
     transition: all 0.2s ease;
 }
 
-[cy-type='dynamic']:hover {
-    background-color: #d1e9ff;
-    border-color: #80bdff;
+[cy-type='table']:hover,
+[cy-type='table'].selected {
+    outline: 2px dashed rgba(91, 141, 238, 0.4) !important;
+    outline-offset: 4px;
+}
+
+[cy-type='table'] table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.text-danger {
+    color: #e35d6a !important;
+}
+
+.table-active {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* ── Page Breaks for PDF Export ───────────────────── */
+.editable-area table {
+    page-break-inside: auto;
+}
+
+.editable-area tr {
+    page-break-inside: avoid;
+    page-break-after: auto;
+}
+
+.editable-area thead {
+    display: table-header-group;
+}
+
+.editable-area tfoot {
+    display: table-footer-group;
+}
+
+.editable-area .page-break {
+    page-break-before: always;
 }
 
 /* ── Preview Mode Styling overrides ───────────────────────────────────── */
@@ -501,4 +551,434 @@ select>option {
     background: #2b2d31 !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     color: #fff !important;
+}
+
+/* ===================================================================
+   Table Config Modal — Light theme with Cyllo green accents
+   =================================================================== */
+
+.tcm-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: tcm-fadeIn 0.2s ease;
+}
+
+@keyframes tcm-fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.tcm-modal {
+    background: #ffffff;
+    width: 560px;
+    max-height: 80vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.10);
+    animation: tcm-slideUp 0.25s ease;
+}
+
+@keyframes tcm-slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ── Modal header ──────────────────────────────────── */
+.tcm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tcm-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.tcm-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+    transition: color 0.15s;
+}
+
+.tcm-close:hover {
+    color: #374151;
+}
+
+/* ── Section layout ────────────────────────────────── */
+.tcm-section {
+    padding: 20px 24px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.tcm-section:last-of-type {
+    border-bottom: none;
+}
+
+.tcm-section-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+
+/* ── Preset cards — 2×2 grid ──────────────────────── */
+.tcm-preset-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.tcm-preset-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-height: 72px;
+}
+
+.tcm-preset-card:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+}
+
+.tcm-preset-card.active {
+    background: #f0faf3;
+    border: 2px solid #2d9c4a;
+}
+
+.tcm-preset-card.active .tcm-preset-title {
+    color: #2d9c4a;
+}
+
+.tcm-preset-icon {
+    font-size: 18px;
+    color: #9ca3af;
+    margin-top: 2px;
+    flex-shrink: 0;
+    width: 22px;
+    text-align: center;
+}
+
+.tcm-preset-card.active .tcm-preset-icon {
+    color: #2d9c4a;
+}
+
+.tcm-preset-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.tcm-preset-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 2px;
+}
+
+.tcm-preset-desc {
+    font-size: 11px;
+    color: #9ca3af;
+    line-height: 1.3;
+}
+
+/* ── Inputs & dropdowns ───────────────────────────── */
+.tcm-input,
+.tcm-select {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #374151;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.tcm-input:focus,
+.tcm-select:focus {
+    border-color: #2d9c4a;
+    box-shadow: 0 0 0 3px rgba(45, 156, 74, 0.10);
+}
+
+.tcm-input::placeholder {
+    color: #9ca3af;
+}
+
+.tcm-input-sm {
+    padding: 6px 10px;
+    font-size: 12px;
+}
+
+/* ── Column rows ──────────────────────────────────── */
+.tcm-col-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.tcm-add-btn {
+    font-size: 12px;
+    font-weight: 600;
+    color: #2d9c4a;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.tcm-add-btn:hover {
+    background: #f0faf3;
+}
+
+.tcm-col-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 8px 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    transition: background 0.15s;
+}
+
+.tcm-col-row:hover {
+    background: #f3f4f6;
+}
+
+.tcm-col-drag {
+    cursor: grab;
+    color: #d1d5db;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.tcm-col-drag:active {
+    cursor: grabbing;
+}
+
+.tcm-col-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.tcm-col-remove {
+    background: none;
+    border: none;
+    color: #d1d5db;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+}
+
+.tcm-col-remove:hover {
+    color: #dc2626;
+    background: #fef2f2;
+}
+
+.tcm-col-agg {
+    width: 90px;
+    flex-shrink: 0;
+}
+
+.tcm-col-width {
+    width: 70px;
+    flex-shrink: 0;
+}
+
+/* ── Radio buttons ────────────────────────────────── */
+.tcm-radio-group {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.tcm-radio {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+}
+
+.tcm-radio input[type="radio"] {
+    accent-color: #2d9c4a;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.tcm-manual-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: 8px;
+}
+
+.tcm-manual-count label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.tcm-manual-count input {
+    width: 60px;
+}
+
+/* ── Checkboxes (Options) ─────────────────────────── */
+.tcm-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.tcm-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #374151;
+}
+
+.tcm-checkbox input[type="checkbox"] {
+    accent-color: #2d9c4a;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+/* ── Domain editor ────────────────────────────────── */
+.tcm-domain-editor {
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.tcm-domain-editor label {
+    font-size: 11px;
+    color: #6b7280;
+    font-weight: 600;
+    margin-bottom: 6px;
+    display: block;
+}
+
+/* ── Warning / info text ──────────────────────────── */
+.tcm-warning {
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.tcm-info {
+    color: #6b7280;
+    font-size: 11px;
+}
+
+.tcm-field-meta {
+    font-size: 10px;
+    color: #9ca3af;
+    margin-left: 4px;
+}
+
+/* ── Footer ───────────────────────────────────────── */
+.tcm-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 16px 24px 20px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.tcm-btn-cancel {
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tcm-btn-cancel:hover {
+    background: #f3f4f6;
+}
+
+.tcm-btn-insert {
+    padding: 8px 24px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff;
+    background: #2d9c4a;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.tcm-btn-insert:hover {
+    background: #247a3b;
+}
+
+.tcm-btn-insert:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+}
+
+/* ── Empty state ──────────────────────────────────── */
+.tcm-empty-state {
+    text-align: center;
+    padding: 20px;
+    color: #9ca3af;
+    font-size: 13px;
+    font-style: italic;
 }

@@ -47,7 +47,13 @@ export class EditReport extends Component {
             sourceCode: "",
             showResetDialog: false,
             includeHeaderFooter: true,
+            // ── Table Config Modal state ──
+            showTableModal: false,
+            tcm: this._getDefaultTcmState(),
         });
+
+        // Promise resolver for the table config modal
+        this._tcmResolve = null;
 
         // Track SortableJS instances so we can destroy/recreate on DOM changes
         this._sortableInstances = [];
@@ -613,6 +619,24 @@ export class EditReport extends Component {
                     item.style.opacity = '1';
                 }
 
+                if (type === 'table') {
+                    const resModel = self._resModel || self.props.action.params?.res_model || '';
+                    const config = await self.openTableConfigModal(zone, resModel);
+
+                    if (!config) {
+                        item.remove();
+                        return;
+                    }
+
+                    // transform existing dropped node
+                    item.className = 'c_new table-container';
+                    item.innerHTML = self._generateTableHtml(config);
+                    item.setAttribute('cy-type', 'table');
+                    item.setAttribute('cy-config', JSON.stringify(config));
+                    item.style.cursor = 'grab';
+                    item.style.opacity = '1';
+                }
+
                 // ── LIVE SYNC: UI -> Source ──────────────────────────────────
                 // If source editor is open, refresh its content to show the
                 // newly added element XML immediately.
@@ -632,6 +656,554 @@ export class EditReport extends Component {
 
         this._sortableInstances.push(instance);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Table Config Modal — Preset Definitions
+    // ─────────────────────────────────────────────────────────────────────────
+
+    static TABLE_PRESETS = {
+        balance_sheet: {
+            model: 'account.account',
+            columns: [
+                { label: 'Account', field: 'name', fieldType: 'char', aggregation: 'none', width: '40%' },
+                { label: 'Debit', field: 'debit', fieldType: 'monetary', aggregation: 'sum', width: '30%' },
+                { label: 'Credit', field: 'credit', fieldType: 'monetary', aggregation: 'sum', width: '30%' },
+            ],
+            rowSource: 'dynamic',
+            headerRow: true,
+            totalsRow: true,
+            manualRows: 5,
+            applyDomain: false,
+            domain: '',
+            includeAllCompanies: false,
+            sections: [
+                {
+                    label: 'Assets',
+                    rowType: 'static',
+                    domain: [["account_type", "in", ["asset_receivable", "asset_cash", "asset_current", "asset_non_current"]]],
+                    subtotal: true,
+                },
+                {
+                    label: 'Liabilities & Equity',
+                    rowType: 'static',
+                    domain: [["account_type", "in", ["liability_payable", "liability_current", "equity"]]],
+                    subtotal: true,
+                },
+            ],
+            grandTotal: {
+                rowType: 'computed',
+                formula: 'Total Assets = Total Liabilities + Equity',
+                validate: true,
+            },
+        },
+        p_and_l: {
+            model: 'account.move.line',
+            columns: [
+                { label: 'Account', field: 'account_id', fieldType: 'many2one', aggregation: 'none', width: '40%' },
+                { label: 'Debit', field: 'debit', fieldType: 'monetary', aggregation: 'sum', width: '30%' },
+                { label: 'Credit', field: 'credit', fieldType: 'monetary', aggregation: 'sum', width: '30%' },
+            ],
+            rowSource: 'dynamic',
+            headerRow: true,
+            totalsRow: true,
+            manualRows: 5,
+            applyDomain: false,
+            domain: '',
+            includeAllCompanies: false,
+            sections: [
+                {
+                    label: 'Revenue',
+                    rowType: 'static',
+                    domain: [["account_id.account_type", "=", "income"]],
+                    subtotal: true,
+                },
+                {
+                    label: 'Expenses',
+                    rowType: 'static',
+                    domain: [["account_id.account_type", "=", "expense"]],
+                    subtotal: true,
+                },
+            ],
+            grandTotal: {
+                rowType: 'computed',
+                formula: 'Net Profit = Revenue - Expenses',
+                validate: true,
+            },
+        },
+        invoice: {
+            model: 'account.move.line',
+            columns: [
+                { label: 'Description', field: 'name', fieldType: 'char', aggregation: 'none', width: '40%' },
+                { label: 'Quantity', field: 'quantity', fieldType: 'float', aggregation: 'sum', width: '15%' },
+                { label: 'Unit Price', field: 'price_unit', fieldType: 'float', aggregation: 'none', width: '20%' },
+                { label: 'Amount', field: 'price_subtotal', fieldType: 'monetary', aggregation: 'sum', width: '25%' },
+            ],
+            rowSource: 'dynamic',
+            headerRow: true,
+            totalsRow: true,
+            manualRows: 5,
+            applyDomain: false,
+            domain: '',
+            includeAllCompanies: false,
+            sections: [],
+            grandTotal: null,
+        },
+        blank: {
+            model: '',
+            columns: [],
+            rowSource: 'dynamic',
+            headerRow: true,
+            totalsRow: false,
+            manualRows: 5,
+            applyDomain: false,
+            domain: '',
+            includeAllCompanies: false,
+            sections: [],
+            grandTotal: null,
+        },
+    };
+
+    _getDefaultTcmState() {
+        const preset = EditReport.TABLE_PRESETS.balance_sheet;
+        return {
+            preset: 'balance_sheet',
+            model: preset.model,
+            columns: JSON.parse(JSON.stringify(preset.columns)),
+            rowSource: preset.rowSource,
+            manualRows: preset.manualRows,
+            headerRow: preset.headerRow,
+            totalsRow: preset.totalsRow,
+            applyDomain: preset.applyDomain,
+            domain: preset.domain,
+            includeAllCompanies: preset.includeAllCompanies,
+            sections: JSON.parse(JSON.stringify(preset.sections)),
+            grandTotal: preset.grandTotal ? JSON.parse(JSON.stringify(preset.grandTotal)) : null,
+            availableModels: [],
+            availableFields: [],
+        };
+    }
+
+    async openTableConfigModal(targetEl, resModel) {
+        // Reset state to default
+        Object.assign(this.state.tcm, this._getDefaultTcmState());
+
+        // Fetch available models
+        try {
+            const models = await this.orm.searchRead('ir.model', [], ['name', 'model'], { order: 'name' });
+            this.state.tcm.availableModels = models.map(m => ({ name: m.name, model: m.model }));
+        } catch (e) {
+            console.warn('[TableConfig] Could not fetch models:', e);
+            this.state.tcm.availableModels = [
+                { name: 'Account', model: 'account.account' },
+                { name: 'Journal Item', model: 'account.move.line' },
+                { name: 'Invoice', model: 'account.move' },
+            ];
+        }
+
+        // Apply default preset to load fields for the default model
+        await this._loadModelFields(this.state.tcm.model);
+
+        // Show the modal and return a promise
+        this.state.showTableModal = true;
+
+        return new Promise((resolve) => {
+            this._tcmResolve = resolve;
+        });
+    }
+
+    onSelectPreset(presetName) {
+        const preset = EditReport.TABLE_PRESETS[presetName];
+        if (!preset) return;
+
+        this.state.tcm.preset = presetName;
+        this.state.tcm.model = preset.model;
+        this.state.tcm.columns = JSON.parse(JSON.stringify(preset.columns));
+        this.state.tcm.rowSource = preset.rowSource;
+        this.state.tcm.manualRows = preset.manualRows;
+        this.state.tcm.headerRow = preset.headerRow;
+        this.state.tcm.totalsRow = preset.totalsRow;
+        this.state.tcm.applyDomain = preset.applyDomain;
+        this.state.tcm.domain = preset.domain;
+        this.state.tcm.includeAllCompanies = preset.includeAllCompanies;
+        this.state.tcm.sections = JSON.parse(JSON.stringify(preset.sections));
+        this.state.tcm.grandTotal = preset.grandTotal ? JSON.parse(JSON.stringify(preset.grandTotal)) : null;
+
+        if (preset.model) {
+            this._loadModelFields(preset.model);
+        } else {
+            this.state.tcm.availableFields = [];
+        }
+    }
+
+    async onModelChange(ev) {
+        const model = ev.target.value;
+        this.state.tcm.model = model;
+        if (model) {
+            await this._loadModelFields(model);
+        } else {
+            this.state.tcm.availableFields = [];
+        }
+    }
+
+    async _loadModelFields(modelName) {
+        if (!modelName) {
+            this.state.tcm.availableFields = [];
+            return;
+        }
+        try {
+            const fields = await this.orm.call(modelName, 'fields_get', [], {
+                attributes: ['string', 'type', 'store', 'relation'],
+            });
+            const HIDDEN_TYPES = ['one2many', 'many2many', 'binary'];
+            const fieldList = Object.entries(fields)
+                .filter(([name, info]) => !HIDDEN_TYPES.includes(info.type) && !name.startsWith('__'))
+                .map(([name, info]) => ({
+                    name,
+                    string: info.string || name,
+                    type: info.type,
+                    store: info.store,
+                    relation: info.relation || null,
+                }))
+                .sort((a, b) => (a.string || a.name).localeCompare(b.string || b.name));
+            this.state.tcm.availableFields = fieldList;
+        } catch (e) {
+            console.warn('[TableConfig] Could not fetch fields for', modelName, e);
+            this.state.tcm.availableFields = [];
+        }
+    }
+
+    // ── Column management ────────────────────────────────────────────────────
+
+    onAddColumn() {
+        this.state.tcm.columns.push({
+            label: '',
+            field: '',
+            fieldType: '',
+            aggregation: 'none',
+            width: '',
+        });
+    }
+
+    onRemoveColumn(index) {
+        this.state.tcm.columns.splice(index, 1);
+    }
+
+    onColumnLabelChange(index, ev) {
+        this.state.tcm.columns[index].label = ev.target.value;
+    }
+
+    onColumnFieldChange(index, ev) {
+        const fieldName = ev.target.value;
+        this.state.tcm.columns[index].field = fieldName;
+        // Auto-detect field type from availableFields
+        const fieldInfo = this.state.tcm.availableFields.find(f => f.name === fieldName);
+        if (fieldInfo) {
+            this.state.tcm.columns[index].fieldType = fieldInfo.type;
+            // Auto-set label if empty
+            if (!this.state.tcm.columns[index].label) {
+                this.state.tcm.columns[index].label = fieldInfo.string || fieldName;
+            }
+        }
+    }
+
+    onColumnAggChange(index, ev) {
+        this.state.tcm.columns[index].aggregation = ev.target.value;
+    }
+
+    onColumnWidthChange(index, ev) {
+        this.state.tcm.columns[index].width = ev.target.value;
+    }
+
+    // ── Modal confirm / cancel ───────────────────────────────────────────────
+
+    onTableModalConfirm() {
+        const config = JSON.parse(JSON.stringify(this.state.tcm));
+        // Remove internal UI fields
+        delete config.availableModels;
+        delete config.availableFields;
+        this.state.showTableModal = false;
+        if (this._tcmResolve) {
+            this._tcmResolve(config);
+            this._tcmResolve = null;
+        }
+    }
+
+    onTableModalCancel() {
+        this.state.showTableModal = false;
+        if (this._tcmResolve) {
+            this._tcmResolve(null);
+            this._tcmResolve = null;
+        }
+    }
+
+    _generateTableHtml(config) {
+        const cols = config.columns || [];
+        const colCount = cols.length || 3;
+
+        // Column width style helper
+        const colStyle = (col, align) => {
+            let s = `text-align: ${align || 'left'}; padding: 8px;`;
+            if (col.width) s += ` width: ${col.width};`;
+            return s;
+        };
+
+        // Determine if a field type is numeric
+        const isNumeric = (type) => ['float', 'monetary', 'integer'].includes(type);
+
+        let html = `<table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse;">`;
+
+        // ── Header Row ────────────────────────────────────────────────
+        if (config.headerRow && cols.length > 0) {
+            html += `<thead style="border-bottom: 2px solid #333;"><tr>`;
+            cols.forEach(col => {
+                const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                html += `<th style="${colStyle(col, align)}">${col.label || col.field || 'Column'}</th>`;
+            });
+            html += `</tr></thead>`;
+        }
+
+        html += `<tbody style="border-bottom: 1px solid #dee2e6;">`;
+
+        // ── Preset: Balance Sheet ─────────────────────────────────────
+        if (config.preset === 'balance_sheet' && config.sections && config.sections.length > 0) {
+            config.sections.forEach(section => {
+                const domainStr = JSON.stringify(section.domain || []);
+                // Section header
+                html += `
+                    <tr class="table-active section-header" style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #333;">
+                        <td colspan="${colCount}">${(section.label || 'Section').toUpperCase()}</td>
+                    </tr>`;
+                // Data rows — use t-foreach with the model
+                html += `
+                    <t t-set="section_records" t-value="docs.filtered(lambda r: r.account_type in ${this._pythonDomainValues(section.domain)})"/>
+                    <t t-foreach="section_records" t-as="rec">
+                        <tr class="data-row" style="border-bottom: 1px solid #eee;">`;
+                cols.forEach(col => {
+                    const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                    if (col.fieldType === 'many2one') {
+                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                    } else if (isNumeric(col.fieldType)) {
+                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}" t-att-class="rec.${col.field} &lt; 0 and 'text-danger' or ''"/></td>`;
+                    } else {
+                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                    }
+                });
+                html += `
+                        </tr>
+                    </t>`;
+                // Section subtotal
+                if (section.subtotal) {
+                    html += `
+                    <tr class="total-row" style="border-top: 1px solid #333; font-weight: bold; background-color: #fafafa;">`;
+                    cols.forEach((col, ci) => {
+                        const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                        if (ci === 0) {
+                            html += `<td style="${colStyle(col, align)}">Total ${section.label || ''}</td>`;
+                        } else if (isNumeric(col.fieldType) && col.aggregation === 'sum') {
+                            html += `<td style="${colStyle(col, 'right')}"><span t-esc="sum(section_records.mapped('${col.field}'))"/></td>`;
+                        } else {
+                            html += `<td style="${colStyle(col, align)}"></td>`;
+                        }
+                    });
+                    html += `</tr>`;
+                }
+            });
+
+            // ── Preset: Invoice ───────────────────────────────────────────
+        } else if (config.preset === 'invoice') {
+            html += `
+                <t t-foreach="doc.invoice_line_ids" t-as="line">
+                    <tr style="border-bottom: 1px solid #f8f9fa;">`;
+            cols.forEach(col => {
+                const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}"/></td>`;
+            });
+            html += `
+                    </tr>
+                </t>`;
+
+            // ── Preset: P&L ──────────────────────────────────────────────
+        } else if (config.preset === 'p_and_l' && config.sections && config.sections.length > 0) {
+            config.sections.forEach(section => {
+                html += `
+                    <tr class="table-active section-header" style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #333;">
+                        <td colspan="${colCount}">${(section.label || 'Section').toUpperCase()}</td>
+                    </tr>
+                    <t t-foreach="doc.line_ids.filtered(lambda l: l.${section.domain?.[0]?.[0] || 'account_id.account_type'} ${section.domain?.[0]?.[1] || '='} '${section.domain?.[0]?.[2] || 'income'}')" t-as="line">
+                        <tr class="data-row" style="border-bottom: 1px solid #eee;">`;
+                cols.forEach(col => {
+                    const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                    html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}"/></td>`;
+                });
+                html += `
+                        </tr>
+                    </t>`;
+                if (section.subtotal) {
+                    html += `
+                    <tr class="total-row" style="border-top: 1px solid #333; font-weight: bold; background-color: #fafafa;">`;
+                    cols.forEach((col, ci) => {
+                        if (ci === 0) {
+                            html += `<td>Total ${section.label || ''}</td>`;
+                        } else if (isNumeric(col.fieldType)) {
+                            html += `<td style="text-align: right;">—</td>`;
+                        } else {
+                            html += `<td></td>`;
+                        }
+                    });
+                    html += `</tr>`;
+                }
+            });
+
+            // ── Dynamic / Manual / Blank ─────────────────────────────────
+        } else {
+            if (config.rowSource === 'manual') {
+                const rows = config.manualRows || 5;
+                for (let r = 0; r < rows; r++) {
+                    html += `<tr style="border-bottom: 1px solid #f8f9fa;">`;
+                    cols.forEach(col => {
+                        html += `<td style="padding: 8px;">${col.label || ''}</td>`;
+                    });
+                    html += `</tr>`;
+                }
+            } else if (config.model && cols.length > 0) {
+                // Dynamic with model — t-foreach over docs
+                html += `
+                <t t-foreach="docs" t-as="rec">
+                    <tr style="border-bottom: 1px solid #f8f9fa;">`;
+                cols.forEach(col => {
+                    const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                    if (col.field) {
+                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                    } else {
+                        html += `<td style="padding: 8px;">${col.label || ''}</td>`;
+                    }
+                });
+                html += `
+                    </tr>
+                </t>`;
+            } else {
+                // Fallback — empty placeholder rows
+                for (let r = 0; r < 3; r++) {
+                    html += `<tr style="border-bottom: 1px solid #f8f9fa;">`;
+                    for (let c = 0; c < Math.max(colCount, 3); c++) {
+                        html += `<td style="padding: 8px;">Data ${r + 1}-${c + 1}</td>`;
+                    }
+                    html += `</tr>`;
+                }
+            }
+        }
+
+        html += `</tbody>`;
+
+        // ── Totals Row ────────────────────────────────────────────────
+        if (config.totalsRow && cols.length > 0) {
+            html += `<tfoot style="border-top: 2px solid #333; font-weight: bold;"><tr>`;
+            cols.forEach((col, ci) => {
+                const align = isNumeric(col.fieldType) ? 'right' : 'left';
+                if (ci === 0) {
+                    html += `<td style="${colStyle(col, align)}">Total</td>`;
+                } else if (col.aggregation && col.aggregation !== 'none' && isNumeric(col.fieldType)) {
+                    html += `<td style="${colStyle(col, 'right')}">—</td>`;
+                } else {
+                    html += `<td style="${colStyle(col, align)}"></td>`;
+                }
+            });
+            html += `</tr></tfoot>`;
+        }
+
+        html += `</table>`;
+        return html;
+    }
+
+    /**
+     * Helper: extract domain values for Python filtering.
+     * Converts [["account_type", "in", ["asset_receivable",...]]] → the list values.
+     */
+    _pythonDomainValues(domain) {
+        if (!domain || !domain.length) return '[]';
+        const first = domain[0];
+        if (Array.isArray(first) && first.length >= 3 && Array.isArray(first[2])) {
+            return JSON.stringify(first[2]).replace(/"/g, "'");
+        }
+        return '[]';
+    }
+    //    _createZoneSortable(zone) {
+    //        const self = this;
+    //
+    //        const instance = Sortable.create(zone, {
+    //            group: {
+    //                name: 'studio',
+    //                pull: 'clone',   // elements can be moved out of this zone
+    //                put: true,    // elements from panel clones or other zones land here
+    //            },
+    //            animation: 150,
+    //            ghostClass: 'gu-transit',
+    //            dragClass: 'gu-mirror',
+    //
+    //            onStart: () => {
+    //                self._isDragging = true;
+    //                if (self.editor) {
+    //                    self.editor.destroy();
+    //                    self.editor = null;
+    //                }
+    //                $('.selected').removeClass('selected');
+    //            },
+    //
+    //            onEnd: () => {
+    //                self._isDragging = false;
+    //            },
+    //
+    //            // Fired when an element from ANOTHER list (panel or other zone) is dropped here
+    //            onAdd: async (evt) => {
+    //                console.log('avtttt',evt)
+    //                const item = evt.item;
+    //                const fromPanel = item.dataset._fromPanel === '1';
+    //
+    //                if (fromPanel) {
+    //                    // Remove the placeholder node SortableJS already inserted
+    //                    item.remove();
+    //                    delete item.dataset._fromPanel;
+    //
+    //                    const type = item.dataset.type;
+    //                    let html = '';
+    //
+    //                    if (type === 'field') {
+    //                        const resModel = self._resModel || self.props.action.params?.res_model || '';
+    //                        const { fieldPath, fieldInfo } = await self.openFieldSelectorPopover(
+    //                            zone, resModel,
+    //                            (field) => !['one2many', 'many2many'].includes(field.type),
+    //                        );
+    //                        if (!fieldPath) return;
+    //                        html = `<span class="c_new"
+    //                                t-field="doc.${fieldPath}"
+    //                                style="cursor:grab;"
+    //                                title="${fieldInfo.string}">${fieldPath}</span>`;
+    //                    } else if (type === 'box') {
+    //                        html = `<div class="box rounded-2 c_new"
+    //                                style="border:1px solid #000;padding:10px;cursor:grab;">
+    //                                <span>New box</span>
+    //                            </div>`;
+    //                    }
+    //
+    //                    if (html) {
+    //                        zone.insertAdjacentHTML('beforeend', html);
+    //                        // Re-wire sortable so the newly added element is draggable
+    //                        this._refreshDragHandles();
+    //                    }
+    //                }
+    //                // For existing elements moved between zones, SortableJS handles the
+    //                // DOM move automatically — nothing extra needed.
+    //            },
+    //
+    //            // After any sort/move within the same list
+    //            onEnd: () => {
+    //                // Nothing extra needed; DOM is already updated by SortableJS
+    //            },
+    //
+    //        });
+    //
+    //        this._sortableInstances.push(instance);
+    //    }
 
     /** Destroy all tracked SortableJS instances. */
     _destroySortableInstances() {
@@ -798,14 +1370,17 @@ export class EditReport extends Component {
 
     _isStructuralNode(el) {
         if (!el) return false;
-        if (el.tagName && el.tagName.toLowerCase() === 't') return true;
+        const tagName = el.tagName ? el.tagName.toLowerCase() : '';
+        // Known structural tags
+        if (tagName === 't' || tagName === 'cy-qweb-t') return true;
+        // Any node with QWeb control directives is structural
         if (
-            el.querySelector('[t-foreach]') ||
-            el.querySelector('[t-set]') ||
-            el.querySelector('[t-call]') ||
-            el.querySelector('[t-if]') ||
-            el.querySelector('[t-elif]') ||
-            el.querySelector('[t-else]')
+            el.hasAttribute('t-foreach') ||
+            el.hasAttribute('t-set') ||
+            el.hasAttribute('t-call') ||
+            el.hasAttribute('t-if') ||
+            el.hasAttribute('t-elif') ||
+            el.hasAttribute('t-else')
         ) return true;
         return false;
     }
@@ -817,18 +1392,6 @@ export class EditReport extends Component {
             let xpathBlock = "";
 
             items.forEach(change => {
-                if (this._isStructuralNode(change.el)) {
-                    console.warn("[Cyllo Studio] Skipping structural/table node:", change.xpath);
-                    return;
-                }
-
-                // Safety net: skip any xpath that targets table internals
-                const unsafeSegments = ['tbody', 'thead', 'tfoot', '/tr', '/td', '/th'];
-                if (unsafeSegments.some(seg => change.xpath.includes(seg))) {
-                    console.warn("[Cyllo Studio] Skipping unsafe table xpath:", change.xpath);
-                    return;
-                }
-
                 // ── FIX: only use c_new nodes (freshly dropped) as "inside" inserts.
                 // Previously ALL non-cy-xpath children triggered an "inside" insert,
                 // causing already-saved content to be re-inserted on every save.
@@ -855,7 +1418,14 @@ export class EditReport extends Component {
                     return;
                 }
 
-                // Text-only edit: replace the element
+                // Text-only edit or attribute edit: replace the element
+                // ONLY if the element itself is not structural. Replacing a structural
+                // node (like a t-foreach) with its static rendering would break the report.
+                if (this._isStructuralNode(change.el)) {
+                    console.warn("[Cyllo Studio] Skipping replacement of structural node:", change.xpath);
+                    return;
+                }
+
                 const cloned = change.el.cloneNode(true);
                 this._cleanStudioAttrs(cloned);
                 cloned.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));
@@ -866,10 +1436,10 @@ export class EditReport extends Component {
                     .replace(/<br>/gi, '<br/>');
 
                 xpathBlock += `
-    <xpath expr="${change.xpath}" position="replace">
-        ${content}
-    </xpath>`;
-            });
+                <xpath expr="${change.xpath}" position="replace">
+                    ${content}
+                </xpath>`;
+                 });
 
             if (xpathBlock.trim()) {
                 new_inherits.push({
@@ -884,5 +1454,5 @@ export class EditReport extends Component {
 }
 
 EditReport.template = "custom_report.edit_report";
-registry.category("actions").add("edit_report", EditReport);
 
+registry.category("actions").add("edit_report", EditReport);
