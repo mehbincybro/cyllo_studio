@@ -24,9 +24,11 @@ import json
 import re
 from datetime import datetime
 from typing import Annotated, Any, Dict, List, Optional
+from dotenv import load_dotenv
 
 import psycopg2
 from langchain.agents import create_agent
+
 from langchain.tools import ToolRuntime
 from langchain_core.tools import tool
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -40,12 +42,22 @@ from odoo.fields import Date, _logger
 from odoo.tools import SQL, Query
 from typing_extensions import TypedDict
 
+from langsmith import Client
+from langsmith import traceable
 
 class BasicChatState(TypedDict):
     """Conversation state for managing user queries and chat history in Cyllo chatbot."""
     user_query: Optional[str]
     messages: Annotated[list, add_messages]
     company_id: Optional[list]
+    agent_mode: Optional[str]  # 'Operational', 'functional', 'studio', 'analytics'
+
+    # UI context — all fields are optional since any combination can be absent
+    active_model: Optional[str]   # res.model technical name, e.g. 'sale.order' (absent in client actions)
+    active_id: Optional[int]      # record ID (only present in form view of a specific record)
+    active_view: Optional[str]    # 'form' | 'list' | 'kanban' | 'client_action' | None
+    active_name: Optional[str]    # human-readable action name, e.g. 'Discuss', 'Dashboard', 'Sales'
+    active_action_id: Optional[int]  # the ir.actions ID — always available regardless of view type
 
 
 class CylloQuery(Query):
@@ -64,7 +76,6 @@ class CylloQuery(Query):
             SQL(" LIMIT %s", self.limit) if self.limit else SQL(),
             SQL(" OFFSET %s", self.offset) if self.offset else SQL(),
         )
-
 
 
 
@@ -509,8 +520,12 @@ class ChatbotAgent(models.AbstractModel):
         - Returns a compiled conversational agent with thread-based memory
         """
         llm = self._get_llm()
-        tools = []  # Add your tools here
 
+        # Add your tools here
+        Operational_tools = []
+        functional_tools = []
+        studio_tools = []
+        analysis_tools = []
 
         @tool
         def analytic_record( runtime: ToolRuntime) -> str:
@@ -539,6 +554,7 @@ class ChatbotAgent(models.AbstractModel):
             "model: The model name to generate the hyperlink for"
             """
             try:
+                print('****************')
                 user_query = runtime.state.get("user_query")
                 company_ids = runtime.state["company_id"]
                 models = self._get_model_name()
@@ -623,16 +639,18 @@ class ChatbotAgent(models.AbstractModel):
                         model_obj._flush_search([])
                 sql, params = query.select(*[SQL(f) for f in sql_query.get("select")])
                 try:
-
+                    print(sql,params,'SQL&PARAMS-----------analytical record--')
                     # Validate SQL with EXPLAIN
                     self.env.cr.execute(f"EXPLAIN {sql}", params)
                     # Execute actual query
                     self.env.cr.execute(sql, params)
                     rows = self.env.cr.fetchall()
+                    print(rows,'ROWSS------------analytical record--')
                     # Get column names
                     column_names = [description[0] for description in self.env.cr.description]
                     # Convert rows to dict
                     result = [dict(zip(column_names, row)) for row in rows]
+                    print(result,'RESULT------------analytical record--')
                     # Build entity links
                     select_fields = sql_query.get("select", [])
                     entities = []
@@ -677,8 +695,8 @@ class ChatbotAgent(models.AbstractModel):
                     return json.dumps({"result": result, "entities": entities}, default=str)
 
                 except psycopg2.Error as e:
+                    # self.env.cr.rollback()
                     self.env.cr.rollback()
-
                     # Build prompt for LLM to correct query
                     prompt = f"""
                     The following SQL query failed during validation or execution:
@@ -773,7 +791,7 @@ class ChatbotAgent(models.AbstractModel):
                 error_msg = f"⚠️ Error in analytic_record tool: {str(e)}"
                 return error_msg
 
-        tools.append(analytic_record)
+        Operational_tools.append(analytic_record)
 
         @tool
         def prepare_crud(user_query: str) -> dict:
@@ -783,6 +801,7 @@ class ChatbotAgent(models.AbstractModel):
             can be constructed and executed as a **single Odoo ORM operation** rather than multiple steps."""
 
             try:
+                print('************OPERATIONAL_PREPARE_CRUD*************')
                 models = self._get_model_name()
                 prompt_model = f"""You are a Cyllo SQL table selector. 
                 From the list of provided models, return only the list of 
@@ -795,7 +814,8 @@ class ChatbotAgent(models.AbstractModel):
                 model_list = [line.strip() for line in response_text.content.strip().splitlines() if line.strip()]
                 model_list = self._get_model_from_table(model_list)
                 fields_info = self._get_fields_for_models(model_list, crud=True)
-
+                print("*******",model_list,'****MODEL_LIST******')
+                print('*******',fields_info,'****FIELDS_LIST******')
 
                 prompt = f"""
                 You are a Cyllo ORM data planner.
@@ -905,7 +925,7 @@ class ChatbotAgent(models.AbstractModel):
                 # Invoke LLM
                 response = llm.invoke(prompt)
                 raw = response.content if hasattr(response, "content") else str(response)
-
+                print('*******',raw,'******RAW*******')
                 # Strip markdown code fences if present
                 if raw.startswith("```"):
                     raw = re.sub(r"^```(?:json)?\n?", "", raw)
@@ -918,21 +938,22 @@ class ChatbotAgent(models.AbstractModel):
 
 
                 parsed = json.loads(raw)
-
+                print('**********',parsed,'**********PARSED**********')
                 if not isinstance(parsed, dict):
                     raise Exception(f"❌ Expected a dict, got {type(parsed)}: {parsed}")
 
                 orm_query = self._build_orm_query_string(parsed)
+                print('**********',orm_query,'********ORM_QUERY**********')
                 if orm_query.get('error'):
                     raise ValueError(f"Failed to build ORM query: {orm_query['error']}")
                 query = orm_query.get('query')
-
+                print('*********',query,'********QUERY********')
                 return query
 
             except Exception as e:
                 return {"error": f"⚠️ Error in prepare_crud tool: {str(e)}"}
 
-        tools.append(prepare_crud)
+        Operational_tools.append(prepare_crud)
 
         @tool
         def execute_crud(query: str) -> dict:
@@ -989,7 +1010,7 @@ class ChatbotAgent(models.AbstractModel):
                 _logger.error("ORM execution failed: %s", e)
                 return {"message": f"❌ ORM query failed: {str(e)}"}
 
-        tools.append(execute_crud)
+        Operational_tools.append(execute_crud)
 
         @tool
         def get_url(text: str,record_id: str, model: str) -> str:
@@ -997,7 +1018,7 @@ class ChatbotAgent(models.AbstractModel):
             _logger.debug("text for url: ", text)
             url = f'web?studio=#id={record_id}&cids=1&model={self._get_model_from_table(model)[0]}&view_type=form'
             return url
-        tools.append(get_url)
+        Operational_tools.append(get_url)
 
         @tool
         def currency_conversion(amount: float, from_currency_name: str, to_currency_name: str) -> dict:
@@ -1028,7 +1049,7 @@ class ChatbotAgent(models.AbstractModel):
                 "from": from_currency_name,
                 "to": to_currency_name,
             }
-        tools.append(currency_conversion)
+        Operational_tools.append(currency_conversion)
 
         @tool
         def get_currency_name(id: int) -> dict:
@@ -1037,109 +1058,228 @@ class ChatbotAgent(models.AbstractModel):
             if not currency.active:
                 return {"error": f"Currency with'{id}' is inactive."}
             return {'name' : currency.name}
-        tools.append(get_currency_name)
+        Operational_tools.append(get_currency_name)
 
-        system_prompt = (
-                "You are a helpful assistant for **Cyllo**, a modern ERP system. "
-                "Cyllo is a powerful, modular business management platform designed for flexibility and customization. "
-                "Cyllo is built on top of a robust open-source ERP engine, but for all user-facing communication, you must "
-                "refer to it only as **Cyllo**. Never mention the underlying platform or the word **Odoo** unless specifically "
-                "asked to explain the history or technology stack. "
-                "Your goal is to help users interact with the Cyllo ERP system by using available tools to answer questions, "
-                "generate reports, or manage operations.\n\n"
+        # ------------------ new tools
+        @tool
+        def get_active_record_data(runtime: ToolRuntime[BasicChatState]) -> str:
+            """Fetches the current record's data (field values) or describes the current screen context."""
+            print('tooooooooooooooooooooooooooooooooooooooooolll')
+            try:
+                print('TOOOOOOOOOOOOOOOOL')
+                model = runtime.state.get("active_model")
+                res_id = runtime.state.get("active_id")
+                active_view = runtime.state.get("active_view")
+                active_name = runtime.state.get("active_name")
+                print(model,'model****')
+                print(res_id,'resid****')
+                print(active_view,'active_view****')
+                print(active_name,'active_name****')
+                # Case 1: Client Action / Dashboard (No Model)
+                if not model:
+                    if active_name or active_view == 'client_action':
+                        return (f"Current Context: {active_name or 'Specialized View'}. "
+                                f"This is a client action or dashboard, so there is no single record to fetch field data from.")
+                    return "No active record or screen context found."
 
-                "You follow the **ReAct pattern** (Thought → Action → Observation) and use tools to query or modify ERP data.\n"
-                "Time: " + str(Date.today()) + "\n"
+                # Case 2: List/Kanban View (Model present, but no specific ID)
+                if not res_id:
+                    return (f"Current Context: {active_name} ({model}). "
+                            f"You are currently in a {active_view or 'multi-record'} view. "
+                            f"Please ask the user to select or open a specific record if you need to read individual field values.")
 
-            "## Available Actions\n"
-            "You can use tools to:\n"
-            "- Analyze or fetch data (e.g., sales, inventory, products)\n"
-            "- Create, update, or delete records\n"
-            "- Generate SQL queries or correct them\n\n"
+                # Case 3: Form View / Specific Record
+                record = self.env[model].browse(int(res_id))
+                if not record.exists():
+                    return f"Record {res_id} in model {model} not found."
 
-            "**🛠 Tool Selection Rules:**\n"
-            "- For **analytical queries or data insights**, you must use the **`analytic_record`** tool only.\n"
-            "- For **CRUD operations** (create, read, update, delete), you must use the **`prepare_crud`** tool only.\n"
-            "- Do not attempt CRUD with `analytic_record`, and do not perform analysis with `prepare_crud`.\n\n"
+                # Standard record read
+                fields_data = record.read()[0]
+                return json.dumps(fields_data, default=str)
 
-            "**⚡ CRUD Execution Rules:**\n"
-            "- When using the `prepare_crud` tool, always produce all the data needed to build **one complete ORM query per operation** (create/update/delete/read) — do **not** break it into micro-steps.\n"
-            "- The output of `prepare_crud` must be sufficient for constructing a **single Odoo ORM statement** that performs the full intended action in one go (e.g., create a record with all fields, update with all values, delete with all filters).\n"
-            "- Do not divide CRUD operations into multiple partial calls. Each logical user request = exactly one CRUD plan.\n"
-            "- Handle validation dynamically: if required records (e.g., customer or product) don’t exist, surface that as **one consolidated validation failure** rather than multiple interruptions.\n"
-            "- After `prepare_crud` returns the plan, the system will build the ORM query and then `execute_crud` will be called to confirm and execute — there should be no intermediate CRUD steps between them.\n\n"
+            except Exception as e:
+                return f"Error fetching screen/record data: {str(e)}"
+        functional_tools.append(get_active_record_data)
 
-            "## 🔗 URL Generation Workflow Rules\n"
-            "- For every CRUD operation that needs a link, the agent **must** follow this exact sequence:\n"
-            "  1. **Call `prepare_crud`** to generate the ORM query for the requested action (create, read, update, delete).\n"
-            "  2. **Call `execute_crud`** to run that ORM query and obtain the resulting `model` and `id`.\n"
-            "  3. **Only after `execute_crud` returns a valid `model` and `id`, call `get_url`** with exactly that `model` and `id` to generate the link.\n\n"
-            "- Do **not** call `get_url` before `execute_crud` or with guessed/stale IDs.\n"
-            "- If `execute_crud` returns no `id` (record not found or no record created), do **not** call `get_url`. Instead, inform the user that no record was found or created.\n"
-            "- When the user asks for a link to a specific record (e.g., “link of purchase order P00945”), the agent must:\n"
-            "  - Use a **READ** operation via `prepare_crud` to locate the record’s `id`.\n"
-            "  - Pass that `id` to `execute_crud` to retrieve the record.\n"
-            "  - Then call `get_url` with the `model` and `id` returned by `execute_crud`.\n\n"
-            "- Never generate or guess URLs yourself; only use the `get_url` tool with a verified `model` + `id`.\n\n"
+        @tool
+        def get_field_definitions(runtime: ToolRuntime) -> str:
+            """Fetches labels and help tooltips for all fields in the current active_model."""
+            print('tooooooooooooooooooooool22222222')
+            try:
+                print('TOOOOOOOOOOOOOOOOOOOOLLLLLLLLLL222222')
+                model_name = runtime.state.get("active_model")
+                if not model_name:
+                    return "No active model context found."
+                
+                model = self.env[model_name]
+                field_defs = {}
+                for name, field in model._fields.items():
+                    field_defs[name] = {
+                        "string": field.string,
+                        "help": field.help or "No help text available.",
+                        "type": field.type,
+                        "required": field.required,
+                    }
+                return json.dumps(field_defs)
+            except Exception as e:
+                return f"Error fetching field definitions: {str(e)}"
+        functional_tools.append(get_field_definitions)
+        studio_tools.append(get_field_definitions)
 
-            "## Error Handling\n"
-            "- If a tool returns a failed SQL or validation error:\n"
-            "  - **Reflect**, fix the issue, and retry with the corrected tool input\n"
-            "---\n"
+        @tool
+        def get_view_arch(runtime: ToolRuntime) -> str:
+            """Fetches the XML architecture of the current view for Studio-related queries."""
+            try:
+                model_name = runtime.state.get("active_model")
+                if not model_name:
+                    return "No active model context found."
+                
+                # Try to get the default form view
+                view = self.env['ir.ui.view'].search([
+                    ('model', '=', model_name),
+                    ('type', '=', 'form')
+                ], limit=1)
+                
+                if not view:
+                    return f"No form view found for model {model_name}."
+                
+                return view.arch_db or "No architecture found."
+            except Exception as e:
+                return f"Error fetching view architecture: {str(e)}"
+        studio_tools.append(get_view_arch)
 
-            "## Data Privacy and Security Rules\n"
-            "- Never display, use, or reference sensitive fields such as `login`, `password`, `api_key`, `token`, or `access_token`\n"
-            "- If a field contains credentials or identifiers meant for internal use only, **exclude it** from all outputs\n"
-            "- If a user asks for sensitive data, respond that it cannot be shown due to security policy\n"
-            "- When referring to users, always prefer `res_partner.name` (via the `partner_id` relationship) instead of `res_users.login`\n"
-            "- Do not include or infer login names unless explicitly required and authorized by tool logic\n"
-            "- If unsure whether a field is sensitive, treat it as sensitive by default\n"
-            "---\n"
-
+        base_instructions = (
+            "You are a helpful assistant for **Cyllo**, a modern ERP system. "
+            "Cyllo is built on a robust open-source engine, but you must refer to it only as **Cyllo**. "
+            "Never mention **Odoo** unless specifically asked about history.\n\n"
+            "## Data Privacy Rules\n"
+            "- Never display sensitive fields like `login`, `password`, `api_key`, `token`.\n"
+            "- Favor `res_partner.name` over `res_users.login`.\n\n"
             "## Response Format\n"
-            "- Use **Markdown** for all replies\n"
-            "- Use `#`, `##` headings, **bold**, _italic_, `code`, and tables/bullets to organize data\n"
-            "- Never return plain text — even short answers must follow markdown rules\n"
-            "- If a record ID is present, use the corresponding model name and record ID to construct a URL pointing to the record from the 'get_url' tool. \n"
-            "- The associated text (e.g., name or title) should be clickable and act as a hyperlink. Do not display the raw URL itself in the message; only the clickable text should appear.\n"
-            "- The URL must be obtained strictly via the 'get_url' tool; **do not generate or hallucinate the link yourself under any circumstance.**\n"
-            "- If your response involves numerical data suitable for visualization (e.g., comparisons, trends, distributions), return a `chart_config` alongside your `text` output.\n"
-            "- `chart_config` must be a valid [Apache ECharts](https://echarts.apache.org/en/index.html) configuration in JSON format.\n"
-            "- You must return your response as a JSON object with two fields:\n"
-            "  - `text`: Markdown-formatted summary of the result.\n"
-            "  - `chart_config`: (optional) A JSON-compatible object for an ECharts chart.\n"
-            "- Do **not** include any additional explanation outside the JSON object.\n"
-            "- If no chart is needed, return only the `text` key.\n"
-            "---\n"
-
-            "## SQL Naming Conventions\n"
-            "- Always use the **full model/table name as the SQL alias**. For example:\n"
-            "  - Use `res_partner` instead of `rp`\n"
-            "  - Use `res_users` instead of `ru`\n"
-            "  - Use `sale_order_line` instead of `sol`\n"
-            "- Do **not** use short or ambiguous aliases like `rp`, `so`, `ru`, etc.\n"
-            "- This ensures clarity and consistency in joins, selections, and WHERE clauses.\n"
-             "Tool Response Rules:"
-             "- null in results = 0 or no records (NOT an error or inability to find data)"
-             "- For quantities: null = 0"
-             "- For counts: null = 0"
-             "- Never retry the tool if it returns null"
-             "- Always respond confidently: 'The quantity is 0' NOT 'couldn't find the quantity'"
-            "## Available Actions\n"
-
+            "- Use **Markdown** for all replies. Use headings, bold, and tables.\n"
+            "- If your result contains a list of records or data rows, **always format them as a Markdown table** within the `text` field.\n"
+            "- Return your response as a JSON object: `{\"text\": \"...\", \"chart_config\": {}}`.\n"
         )
-        memory = self._get_memory(thread_id)  # ✅ reuses memory if exists
-        agent_node = create_agent(
-            model=llm,
-            system_prompt=system_prompt,
-            tools=tools,
-            debug=True,
-            name="react_new_agent",
-            state_schema=BasicChatState,
+
+        Operational_prompt = base_instructions + (
+            "## Operational Expert Mode\n"
+            "You follow the **ReAct pattern** (Thought → Action → Observation) and use tools to query or modify Cyllo data.\n"
+            "Current Date: " + str(Date.today()) + "\n\n"
+
+            "### Tool Selection Rules\n"
+            "- **Analytical queries / Data fetching**: Use the `analytic_record` tool.\n"
+            "- **CRUD operations** (Create, Update, Delete): Use `prepare_crud` followed by `execute_crud`.\n"
+            "- **Do not** mix these: use `analytic_record` for reading/counting and `prepare_crud` for modifying.\n\n"
+
+            "### CRUD & URL Workflow\n"
+            "1. **Analyze**: Determine the action (Create/Update/Delete).\n"
+            "2. **Plan**: Call `prepare_crud` to get the ORM query string.\n"
+            "3. **Execute**: Call `execute_crud` with that query string to get the `model` and `id`.\n"
+            "4. **Link**: If a link is needed, call `get_url` using the *exact* `model` and `id` from the result.\n"
+            "- **Never** generate links or guess IDs yourself. Only use `get_url` after execution.\n\n"
+
+            "### SQL & Data Rules\n"
+            "- When using `analytic_record`, use full table names as aliases (e.g., `res_partner` instead of `rp`).\n"
+            "- If a quantity or count is null, report it as **0** confidently.\n\n"
+            
+            "### Response Guidelines\n"
+            "- If you find multiple records, **always format them in a Markdown table**.\n"
+            "- If the data is numerical (trends, comparisons), include a **`chart_config`** (Apache ECharts JSON).\n"
+            "- Do not include explanations outside the JSON object.\n"
         )
+
+        functional_prompt = base_instructions + (
+            "## Functional Expert Mode\n"
+            "You are a Functional Assistant helping users understand the current UI screen.\n\n"
+
+            "### Current UI Context\n"
+            "- Screen: {active_name} (Action ID: {active_action_id})\n"
+            "- View: {active_view} | Model: {active_model} | ID: {active_id}\n\n"
+
+            "### Context Interpretation\n"
+            "- **No Model**: Client action or dashboard. Explain the screen's purpose.\n"
+            "- **No ID**: List/Kanban view. Explain the model and available filters/actions.\n"
+            "- **Model & ID**: Specific record. Inspect record data and explain fields/states.\n\n"
+
+            "### Tools\n"
+            "- Use `get_active_record_data` for current record values.\n"
+            "- Use `get_field_definitions` for field labels and tooltips.\n\n"
+
+            "### Guidelines\n"
+            "- Explain UI elements in simple business terms.\n"
+            "- Avoid technical jargon unless asked.\n"
+            "- Always format lists (like field definitions) as a Markdown table.\n"
+        ).format(
+            active_model=self.env.context.get('active_model'),
+            active_id=self.env.context.get('active_id'),
+            active_view=self.env.context.get('active_view'),
+            active_name=self.env.context.get('active_name'),
+            active_action_id=self.env.context.get('active_action_id'),
+        )
+
+        studio_prompt = base_instructions + (
+            "## Studio Expert Mode\n"
+            "You help users with UI customizations and XML structure in Cyllo Studio.\n\n"
+            "- **Analyze**: Use `get_view_arch` to see the current XML architecture.\n"
+            "- **Inspect**: Use `get_field_definitions` to understand available fields.\n"
+            "- **Guide**: Explain XPaths and inheritance. Provide clear instructions for UI changes.\n"
+            "- **Format**: Use code blocks for XML snippets and tables for field lists.\n"
+        )
+
+        analytics_expert_prompt = base_instructions + (
+            "## Analytics Expert Mode\n"
+            "Focus on generating data insights and visualizations.\n\n"
+            "- **Fetch**: Use `analytic_record` to get the necessary data.\n"
+            "- **Visualize**: **Always** provide a `chart_config` (ECharts JSON) for numerical data.\n"
+            "- **Summarize**: Explain the trends or insights clearly in the `text` field using Markdown tables.\n"
+        )
+
+        # Define Agents
+        Operational_agent = create_agent(
+            model=llm, system_prompt=Operational_prompt, tools=Operational_tools, debug=True,
+            name="Operational_expert", state_schema=BasicChatState,
+        )
+
+        functional_agent = create_agent(
+            model=llm, system_prompt=functional_prompt, tools=functional_tools, debug=True,
+            name="functional_expert", state_schema=BasicChatState,
+        )
+
+        studio_agent = create_agent(
+            model=llm, system_prompt=studio_prompt, tools=studio_tools, debug=True,
+            name="studio_expert", state_schema=BasicChatState,
+        )
+
+        analytics_agent = create_agent(
+            model=llm, system_prompt=analytics_expert_prompt, tools=analysis_tools, debug=True,
+            name="analytics_expert", state_schema=BasicChatState,
+        )
+
+        def router(state: BasicChatState):
+            return state.get("agent_mode") or "Operational"
+
+        memory = self._get_memory(thread_id)
         graph = StateGraph(BasicChatState)
-        graph.add_node("agent", agent_node)
-        graph.set_entry_point("agent")
-        graph.add_edge("agent", END)
+        graph.add_node("Operational", Operational_agent)
+        graph.add_node("functional", functional_agent)
+        graph.add_node("studio", studio_agent)
+        graph.add_node("analytics", analytics_agent)
+
+        graph.set_conditional_entry_point(
+            router,
+            {
+                "Operational": "Operational",
+                "functional": "functional",
+                "studio": "studio",
+                "analytics": "analytics",
+            }
+        )
+
+        graph.add_edge("Operational", END)
+        graph.add_edge("functional", END)
+        graph.add_edge("studio", END)
+        graph.add_edge("analytics", END)
+
         app = graph.compile(checkpointer=memory)
         return app
+

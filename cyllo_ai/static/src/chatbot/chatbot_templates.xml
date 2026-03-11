@@ -11,6 +11,10 @@
                             <img t-att-src="'/cyllo_ai/static/src/img/hamburger.svg'" class="hamburger-icon"
                                  t-on-click="toggleHistory"/>
                             <div class="navigation-bar">
+                                <div class="agent-mode-selector" t-on-click="toggleAgentMode" t-att-title="'Current Mode: ' + state.agent_mode">
+                                    <t t-esc="state.agent_mode"/>
+                                    <i class="fa fa-refresh ms-1" style="font-size: 8px;"/>
+                                </div>
                                 <i class="fa fa-times close-icon" t-on-click="_minimize_chatbot"/>
                             </div>
                         </div>

@@ -28,8 +28,8 @@
                    title="Download Table"/>
             </div>
         </div>
-        <t t-if="props.chart_config">
-                        <t t-log="'props.chart_config', props.chart_config.__target__"/>
+        <t t-if="props.chart_config &amp;&amp; Object.keys(props.chart_config).length">
+            <t t-log="'props.chart_config', props.chart_config"/>
             <div class="chart-config">
                 <div style="box-shadow: rgba(0, 0, 0, 0.11) 0px 3px 6px 0px; border-radius: 16px; display: grid; padding: 0px; margin:0px;"
                      class="chat-bubble bot bg-white w-100">
