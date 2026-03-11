@@ -21,7 +21,6 @@
 #############################################################################
 import collections.abc
 from werkzeug.exceptions import (NotFound)
-
 from odoo.http import JsonRPCDispatcher, serialize_exception, SessionExpiredException
 
 

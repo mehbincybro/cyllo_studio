@@ -49,23 +49,29 @@ export class StudioMenuSideBar extends MenuSideBar {
         }, () => [this.state.MenuDraggable, this.state.CustomMenuDraggable])
     }
     /**
-     * Creates a dragula instance for drag-and-drop menus
+     * Creates a SortableJS instance for drag-and-drop menus
      * @param {HTMLElement} el - The container element for draggable menus
      */
     createDragulaConfig(el) {
-        return dragula([el], {
-            revertOnSpill: true,
-            moves: (el, container, handle) => {
-                return handle.classList.contains("ri-drag-move-line");
-            },
-            accepts: (el, target, source, sibling) => {
-                if (el.classList.contains('cy-SubMenuDrag') && (sibling?.classList.contains('cy-ParentMenuDrag') || !sibling)) {
-                    return false;
-                }
-                return true;
+        console.log("menu dragged")
+    const existingSortable = Sortable.get(el);
+    if (existingSortable) existingSortable.destroy();
+    return Sortable.create(el, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        handle: '.ri-drag-move-line',
+        onMove: function(evt) {
+            if (
+                evt.dragged.classList.contains('cy-SubMenuDrag') &&
+                (evt.related?.classList.contains('cy-ParentMenuDrag') || !evt.related)
+            ) {
+                return false;
             }
-        }).on('drop', async (el, target, source, sibling) => {
-            const elements = source.querySelectorAll('.menu-draggable');
+            return true;
+        },
+
+        onEnd: async function(evt) {
+            const elements = el.querySelectorAll('.menu-draggable');
             const MenuPosition = {};
             elements.forEach((element, index) => {
                 if (!element.classList.contains('prevent-drag') && element.hasChildNodes()) {
@@ -81,8 +87,9 @@ export class StudioMenuSideBar extends MenuSideBar {
                 },
             });
             this.action.doAction("studio_reload");
-        });
-    }
+        }.bind(this),
+    });
+}
 
     /**
      * Initializes drag for main (mega) menus.

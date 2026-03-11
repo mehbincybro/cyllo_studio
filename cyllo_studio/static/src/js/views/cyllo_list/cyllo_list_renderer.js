@@ -102,62 +102,121 @@ export class CylloListRenderer extends listView.Renderer {
        const self = this
        const treeEl = self.list_trRef.el
        if (self.props.activeActions.type === "view" && !isGrouped && treeEl) {
-                var drake = dragula([treeEl], {
-                    revertOnSpill: true,
-                    moves: (el, container, handle) => {
-                        if (handle.classList.contains("add-fields") || el.classList.contains('add-fields') || el.classList.contains('o_list_open_form_view') || handle.classList.contains('o_list_open_form_view')) {
-                            return false;
-                        }
-                        return !el.classList.contains('o_list_controller');
-                    },
-                    accepts: (el, target, source, sibling) => {
-                        return sibling
-                    }
-                }).on('cloned', function (clone, original, type) {
-                    clone.style.backgroundColor = '#f8f9e5'
-                }).on('drop', async (el, target, source, sibling) => {
-                    if(this.state.drop === true){
-                            this.env.bus.trigger("CLEAR-MENU");
-                    }
-                    const view_id = self.env.config.viewId
+       let originalOrder = Array.from(treeEl.children);
+    const sortableInstance = Sortable.create(treeEl, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
 
-                    const fieldPath = el.getAttribute('cy-xpath') ? el.getAttribute('cy-xpath') : el.querySelector('.cy-listBtn').getAttribute('cyxpath')
-                    const siblingField = sibling.getAttribute('cy-xpath') ? sibling.getAttribute('cy-xpath') : sibling.querySelector('.cy-listBtn') ? sibling.querySelector('.cy-listBtn').getAttribute('cyxpath') : null
+      filter: function(evt, item) {
+        const el = evt.target;
+        return (
+          el.classList.contains("add-fields") ||
+          item.classList.contains('add-fields') ||
+          item.classList.contains('o_list_open_form_view') ||
+          el.classList.contains('o_list_open_form_view') ||
+          item.classList.contains('o_list_controller')
+        );
+      },
 
-                    const sourceField = source.getAttribute('cy-xpath')
-                    const path = siblingField || sourceField;
-                    const position = siblingField ? 'before' : 'inside';
-                    try {
-                        const response = await self.rpc("/cyllo_studio/move/tree", {
-                            method: 'move_tree',
-                            model: self.props.list.model.config.resModel,
-                            view_id: self.env.config.viewId,
-                            view_type: self.env.config.viewType === 'list' ? 'tree' : self.env.config.viewType,
-                            args: [],
-                            kwargs: {
-                                path,
-                                position,
-                                fieldPath,
-                                viewType: self.env.config.viewType,
-                                view_id: view_id ? view_id : null,
-                                model: self.props.list.model.config.resModel
-                            }
-                        })
-                        if (response) {
-                            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                            let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                            storedArray.push(cleanedStr);
-                            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                            sessionStorage.setItem('ReDO', JSON.stringify([]));
-                        }
-                    } finally {
-                        this.env.services.ui.unblock();
-                    }
-                    this.action.doAction('studio_reload');
-                });
+      onStart: function(evt) {
+        // Snapshot the current order when drag starts
+        originalOrder = Array.from(treeEl.children);
+      },
+
+      onEnd: async function(evt) {
+        const el = evt.item;
+
+        // No movement — nothing to do
+        if (evt.oldIndex === evt.newIndex) return;
+
+        // --- KEY FIX: Read the sibling AFTER Sortable has moved the element ---
+        // At this point, Sortable has already rearranged the DOM.
+        // The next o_column_* or th sibling after el is our "before" target.
+        const allThs = Array.from(treeEl.children);
+        const droppedIdx = allThs.indexOf(el);
+
+        // Find the next real column th after the dropped position
+        let siblingEl = null;
+        for (let i = droppedIdx + 1; i < allThs.length; i++) {
+          const th = allThs[i];
+          // Skip non-column headers (optional button, open form view, etc.)
+          if (
+            th.classList.contains('add-fields') ||
+            th.classList.contains('o_list_open_form_view') ||
+            th.classList.contains('o_list_controller') ||
+            th.classList.contains('o_list_record_selector')
+          ) continue;
+          siblingEl = th;
+          break;
+        }
+
+        // --- IMMEDIATELY revert DOM to original order ---
+        // This prevents visual glitch since studio_reload will re-render correctly
+        originalOrder.forEach(child => treeEl.appendChild(child));
+
+        // Resolve paths
+        const fieldPath =
+          el.getAttribute('cy-xpath') ||
+          el.querySelector('.cy-listBtn')?.getAttribute('cyxpath');
+
+        const siblingField = siblingEl
+          ? (siblingEl.getAttribute('cy-xpath') ||
+             siblingEl.querySelector('.cy-listBtn')?.getAttribute('cyxpath'))
+          : null;
+
+        // If no sibling found, we're dropping at the end → position 'inside' parent
+        // If sibling found → position 'before' that sibling
+        const sourceField = evt.from?.getAttribute('cy-xpath');
+        const path = siblingField || sourceField;
+        const position = siblingField ? 'before' : 'inside';
+
+        if (!fieldPath) {
+          console.error('Could not resolve fieldPath for dragged column', el);
+          return;
+        }
+
+        if (self.state.drop === true) {
+          self.env.bus.trigger("CLEAR-MENU");
+        }
+
+        const view_id = self.env.config.viewId;
+
+        try {
+          const response = await self.rpc("/cyllo_studio/move/tree", {
+            method: 'move_tree',
+            model: self.props.list.model.config.resModel,
+            view_id: self.env.config.viewId,
+            view_type: self.env.config.viewType === 'list'
+              ? 'tree'
+              : self.env.config.viewType,
+            args: [],
+            kwargs: {
+              path,
+              position,
+              fieldPath,
+              viewType: self.env.config.viewType,
+              view_id: view_id ?? null,
+              model: self.props.list.model.config.resModel
             }
+          });
 
+          if (response) {
+            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+            let cleanedStr = response.replace(/\s+/g, ' ').trim();
+            storedArray.push(cleanedStr);
+            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+            sessionStorage.setItem('ReDO', JSON.stringify([]));
+          }
+        } finally {
+          self.env.services.ui.unblock();
+        }
 
+        self.action.doAction('studio_reload');
+      }
+    });
+  }
 
     });
   }

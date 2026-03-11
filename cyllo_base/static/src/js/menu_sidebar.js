@@ -1,15 +1,15 @@
 /** @odoo-module **/
-const { useState, Component, xml, useEffect, useRef, onMounted, onWillStart } = owl;
-import { session } from "@web/session";
-import { jsonrpc } from "@web/core/network/rpc_service";
-import { useBus, useService } from "@web/core/utils/hooks";
-import { ActionContainer } from '@web/webclient/actions/action_container';
-import { Dropdown } from "@web/core/dropdown/dropdown";
-import { DropdownItem } from "@web/core/dropdown/dropdown_item";
-import { _t } from "@web/core/l10n/translation";
-import { sprintf } from "@web/core/utils/strings";
-import { registry } from "@web/core/registry";
-import { clearUncommittedChanges } from "@web/webclient/actions/action_service";
+const {useState, Component, xml, useEffect, useRef, onMounted, onWillStart} = owl;
+import {session} from "@web/session";
+import {jsonrpc} from "@web/core/network/rpc_service";
+import {useBus, useService} from "@web/core/utils/hooks";
+import {ActionContainer} from '@web/webclient/actions/action_container';
+import {Dropdown} from "@web/core/dropdown/dropdown";
+import {DropdownItem} from "@web/core/dropdown/dropdown_item";
+import {_t} from "@web/core/l10n/translation";
+import {sprintf} from "@web/core/utils/strings";
+import {registry} from "@web/core/registry";
+import {clearUncommittedChanges} from "@web/webclient/actions/action_service";
 
 
 export class MenuSideBar extends Component {
@@ -28,7 +28,7 @@ export class MenuSideBar extends Component {
         }
         this.menuService = useService("menu");
         this.env.bus.addEventListener("RESET_MENUS", async (event) => {
-            const { mainMenu } = event.detail;
+            const {mainMenu} = event.detail;
             this.resetOptions.actionId++
             this.resetOptions.condition = mainMenu || false;
             this.state.isApp = true
@@ -96,7 +96,7 @@ export class MenuSideBar extends Component {
         if (this.state.currentSelectedApp !== menu.appID) {
             this.onClickMenu(menu.appID, true)
         }
-        if (menu.appID !== menu.id) {
+        if (menu.appID !== menu.id){
             this.onClickMenu(menu.id, false)
         }
     }
@@ -207,7 +207,7 @@ export class MenuSideBar extends Component {
         var cyLeftSidebarContextMenu = event.target.querySelector('.context-menu')
         if (cyLeftSidebarContextMenu) {
             cyLeftSidebarContextMenu.style.display = 'block';
-            document.addEventListener('click', function () {
+            document.addEventListener('click', function() {
                 cyLeftSidebarContextMenu.style.display = 'none';
             });
         }
@@ -268,7 +268,7 @@ export class MenuSideBar extends Component {
     }
 
     async RemoveFromShortcut(menuObj) {
-        var { actionID, name, actionModel } = menuObj
+        var {actionID, name, actionModel} = menuObj
         if (actionID) {
             const result = await jsonrpc('/menubar/remove_from_shortcuts', {
                 actionId: actionID,
@@ -369,10 +369,11 @@ export class MenuSideBar extends Component {
                     if (menuElement) {
                         menuElement.classList.add('cy_active_main_menu');
                     }
+//                    this.state.currentSelectedMenu = false;
                     this.env.bus.trigger("homeButtonClicked", {
                         isSubMenuOn: false
                     })
-                    if (id === this.homeActionId) {
+                    if (menu.name === 'Home') {
                         this.onClickLogo()
                     }
                 }
@@ -385,8 +386,8 @@ export class MenuSideBar extends Component {
         } else {
             this.notification.add(
                 _t("You have unsaved changes. Save or discard them to continue."), {
-                type: "danger"
-            }
+                    type: "danger"
+                }
             );
         }
     }

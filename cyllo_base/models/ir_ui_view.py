@@ -19,9 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from xml.etree import ElementTree
-
 from odoo import api, fields, models
+from xml.etree import ElementTree
 
 
 class IrUiView(models.Model):

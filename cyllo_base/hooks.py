@@ -22,8 +22,6 @@
 import base64
 import os
 from .models.ir_ui_menu import ICONS
-from odoo.exceptions import UserError
-
 
 icons = {
     'Sales': '/cyllo_base/static/src/icons/sales.svg',
@@ -84,7 +82,7 @@ def change_email_color(env):
     companies = env['res.company'].search([])
     for company in companies:
         company.write({
-            'primary_color': '#000000',
+            'primary_color': '#FFFFFF',
             'secondary_color': '#9EA700',
             'email_primary_color': '#FFFFFF',
             'email_secondary_color': '#9EA700',
@@ -108,6 +106,3 @@ def change_user_name(env):
     user.write({'name': 'CylloBot',
                 'image_1920': base64_encoded_image
                 })
-
-def uninstall_hook(cr):
-    raise UserError("This module cannot be uninstalled as it contains critical system configurations.")

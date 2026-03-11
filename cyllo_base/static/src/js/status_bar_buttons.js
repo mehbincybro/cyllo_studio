@@ -6,6 +6,8 @@ import { FormRenderer } from "@web/views/form/form_renderer";
 import { Dropdown } from "@web/core/dropdown/dropdown";
 import { DropdownItem } from "@web/core/dropdown/dropdown_item";
 import { patch } from "@web/core/utils/patch";
+import { useState } from "@odoo/owl";
+
 
 export class CylloStatusBarButtons extends StatusBarButtons {
 
@@ -13,6 +15,18 @@ export class CylloStatusBarButtons extends StatusBarButtons {
      * Slot names to render inline (up to buttonLimit).
      * Falls back to all visible slots when no limit is defined.
      */
+    setup() {
+        super.setup();
+        this.dropdownState = useState({ isOpen: false });
+    }
+    toggleDropdown() {
+        this.dropdownState.isOpen = !this.dropdownState.isOpen;
+    }
+
+    closeDropdown() {
+        this.dropdownState.isOpen = false;
+    }
+
          get _limit() {
         const val = parseInt(this.props.buttonLimit, 10);
         return (!isNaN(val) && val > 0) ? val : null;

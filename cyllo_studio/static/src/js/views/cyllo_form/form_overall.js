@@ -81,7 +81,6 @@ export class FormOverall extends Component {
 			hasChatter: this.props.isChatterAvailable,
 			isNotebookPageChange: true,
 			fieldDropped: false,
-			invisible:'',
 			hasStudioChanges: false,
 			isPreviewMode:false,
 			buttonLimitEnabled: false,
@@ -590,56 +589,6 @@ document.addEventListener('click', async (event) => {
 					}
 				});
 
-//            const setupRibbonClickHandlers = () => {
-//                const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
-//                ribbons.forEach((ribbon, index) => {
-//                    ribbon.style.cursor = 'pointer';
-//                    ribbon.style.pointerEvents = 'auto';
-//                    ribbon.removeEventListener('click', handleRibbonClick);
-//                    ribbon.addEventListener('click', handleRibbonClick, false);
-//                });
-//            };
-//
-//            const handleRibbonClick = function(e) {
-//                e.stopPropagation();
-//                e.stopImmediatePropagation();
-//                e.preventDefault();
-//                const ribbonElement = e.currentTarget;
-//                const ribbonPath = ribbonElement.getAttribute('cy-xpath');
-//                console.log("ribbon path",ribbonPath)
-//                if (!ribbonPath) {
-//                    console.warn("No cy-xpath found on ribbon");
-//                    return;
-//                }
-//                const allRibbons = document.querySelectorAll('div.ribbon[cy-xpath]');
-//                const span = ribbonElement.querySelector('span');
-//                const ribbonLabel = span ? span.textContent : 'New';
-//                const ribbonColor = span ? span.className : 'text-bg-danger';
-//                const ribbonInvisible = ribbonElement.getAttribute('invisible') || 'False';
-//                const viewId = self.props.viewId;
-//                const model = self.props.model || self.action.currentController.props.resModel;
-//
-//                // Build kanban fields list for the dialog
-//                const fields = [];
-//                if (self.props.allFields) {
-//                    for (const [fieldName, field] of Object.entries(self.props.allFields)) {
-//                        fields.push({ value: fieldName, label: field.string });
-//                    }
-//                }
-//
-//                // Open the RibbonDialog just like in Kanban
-//                self.dialogService.add(RibbonDialog, {
-//                    fields: fields,
-//                    ribbonElement: Array.from(allRibbons),
-//                    viewDetails: {
-//                        viewId: viewId,
-//                        viewType: self.props.viewType,
-//                        model: model,
-//                        active_fields: self.props.allFields,
-//                        ribbonPath: ribbonPath,
-//                    },
-//                });
-//            };
 const setupRibbonClickHandlers = () => {
     const ribbons = document.querySelectorAll('div.ribbon[cy-xpath]');
     ribbons.forEach((ribbon) => {
@@ -716,8 +665,6 @@ const handleRibbonClick = function(ribbonElement, e) {
 
     return false;
 };
-
-            // Initial setup
             setupRibbonClickHandlers();
 
             const selectedRibbonPath = sessionStorage.getItem('SelectedRibbonXPath');

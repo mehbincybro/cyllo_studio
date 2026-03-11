@@ -56,48 +56,57 @@ export class ActivityPopover extends Component {
 		this.recordTemplate = templates["activity-box"];
 
 		onMounted(() => {
-			const self = this;
-			const container = document.querySelector(".cy-activity")
-				.closest('.o_activity_record')
-				.querySelector(':scope > * > * > *');
-			const dBlockElements = container.querySelectorAll(".d-block");
+    const self = this;
+    const container = document.querySelector(".cy-activity")
+        .closest('.o_activity_record')
+        .querySelector(':scope > * > * > *');
+    const dBlockElements = container.querySelectorAll(".d-block");
 
-			dBlockElements.forEach(element => {
-				const cyXpath = element.getAttribute("cy-xpath");
-			});
-			const drake = dragula([container], {
-					revertOnSpill: true,
-					moves: (el, container, handle) => {
-						return true
-					},
-				})
-				.on('drop', async (el, target, source, sibling) => {
-					const path = el.getAttribute("cy-xpath");
-					const parent = target.getAttribute("cy-xpath");
-					const sibling_path = sibling?.getAttribute("cy-xpath") || null;
-					sibling_path || el.previousElementSibling?.getAttribute("cy-xpath");
-					const position = sibling_path ? "before" : "after";
-					self.env.services.ui.block();
-					try {
-						const response = await self.rpc("cyllo_studio/activity/move/field", {
-							method: 'move_activity_field',
-							view_id: this.props.viewId,
-							model: this.props.model,
-							path,
-							position,
-							sibling_path,
-							parent,
-						});
-						if (response) {
-							handleUndoRedo(response)
-						}
-					} finally {
-						self.env.services.ui.unblock();
-					}
-					this.save=true
-                    this.env.bus.trigger("RENDER_LOAD");
-				})
-		})
+    dBlockElements.forEach(element => {
+        const cyXpath = element.getAttribute("cy-xpath");
+    });
+
+    // Destroy existing sortable if any
+    const existingSortable = Sortable.get(container);
+    if (existingSortable) existingSortable.destroy();
+
+    Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+
+        onEnd: async function(evt) {
+            const el = evt.item;
+            const path = el.getAttribute("cy-xpath");
+            const parent = container.getAttribute("cy-xpath");
+
+            // Get the sibling that is now after the dropped element
+            const sibling = el.nextElementSibling || null;
+            const sibling_path = sibling?.getAttribute("cy-xpath") || null;
+            sibling_path || el.previousElementSibling?.getAttribute("cy-xpath");
+            const position = sibling_path ? "before" : "after";
+
+            self.env.services.ui.block();
+            try {
+                const response = await self.rpc("cyllo_studio/activity/move/field", {
+                    method: 'move_activity_field',
+                    view_id: self.props.viewId,
+                    model: self.props.model,
+                    path,
+                    position,
+                    sibling_path,
+                    parent,
+                });
+                if (response) {
+                    handleUndoRedo(response);
+                }
+            } finally {
+                self.env.services.ui.unblock();
+            }
+            self.save = true;
+            self.env.bus.trigger("RENDER_LOAD");
+        },
+    });
+})
 		this.env.bus.addEventListener('ActivityFieldDetails', (ev) => {
 			this.state.widget = ev.detail.widget
 			this.state.editable = true

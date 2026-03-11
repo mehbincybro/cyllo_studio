@@ -21,7 +21,6 @@
 #############################################################################
 import io
 from docx import Document
-
 from odoo.http import (Controller, content_disposition, request, route,
                        serialize_exception)
 from odoo.tools import html_escape, json

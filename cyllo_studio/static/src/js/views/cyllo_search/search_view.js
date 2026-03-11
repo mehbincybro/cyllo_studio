@@ -7,7 +7,7 @@
  *
  * Features:
  * ----------
- * 1. Extends search view interactivity with drag-and-drop (via `dragula`) for reordering filters, groups, and fields.
+ * 1. Extends search view interactivity with drag-and-drop (via `SortableJS`) for reordering filters, groups, and fields.
  * 2. Integrates RPC calls for modifying search view structure (add, update, remove filters, groups, fields, and search panels).
  * 3. Supports undo/redo history management using `sessionStorage`.
  * 4. Provides UI dialogs for search-related entities:
@@ -62,7 +62,7 @@ export class SearchView extends SearchBarMenu {
     })
   }
 
-  onMounted() {
+    onMounted() {
     //starlin
     this.state.visibleSearchElement = JSON.parse(sessionStorage.getItem("showInvisibleSearch")) || false;
     const self = this;
@@ -73,68 +73,89 @@ export class SearchView extends SearchBarMenu {
     let perv_path = null;
     let next_path = null;
 
-    var drake = dragula([filter, group, searchField,searchPanel], {
-      revertOnSpill: true,
-      moves: function (el, container, handle) {
-        if (handle.classList.contains("handle-drag")) {
-              return true;
-        }
-        return false
-      },
-      accepts: function (el, target, source, sibling) {
-        if (target === source) {
-          return true;
-        }
-        return false;
-      },
-    }).on("drag", function (el, source){
-        perv_path = el.previousElementSibling?.getAttribute("cy-xpath") || null;
-        next_path = el.nextElementSibling?.getAttribute("cy-xpath") || null;
+    const containers = [filter, group, searchField, searchPanel];
 
-    }).on("drop", async function (el, target, source, sibling) {
-        const previous_path = el.previousElementSibling?.getAttribute("cy-xpath") || null;;
-        const first_el_xpath = target.querySelector('div').getAttribute("cy-xpath") || null
-      let path = el.getAttribute("cy-xpath");
-      const sibling_path = sibling?.getAttribute("cy-xpath") || null;
-
-      const position = sibling_path ? "before" : "after";
-      self.env.services.ui.block();
-      try {
-       const response =  await self.rpc("cyllo_studio/search/move/item", {
-          view_id: self.env.searchModel.searchViewId,
-          model: self.env.searchModel.resModel,
-          path,
-          position,
-          sibling_path,
-          previous_path,
-          perv_path,
-          next_path,
-          first_el_xpath,
-        });
-
-         if(response){
-                    let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                    let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                    storedArray.push(cleanedStr);
-                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                    sessionStorage.setItem('ReDO', JSON.stringify([]));
-                }
-         else{
-            self.notification.add({
-                    title: _t("Warning"),
-                    message: "Separators cannot be placed next to each other or at the top.",
-                    type: "notification_panel",
-                    notificationType: "warning",
-                });
-         }
-      } finally {
-          setTimeout(() => {
-            self.env.services.ui.unblock();
-            window.location.reload();
-          }, 3000); // Wait 3 seconds before reload
-      }
+    // Destroy existing sortables if any
+    containers.forEach((container) => {
+        if (!container) return;
+        const existing = Sortable.get(container);
+        if (existing) existing.destroy();
     });
-  }
+
+    containers.forEach((container) => {
+        if (!container) return;
+
+        Sortable.create(container, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+
+            // Only allow dragging via the handle
+            handle: '.handle-drag',
+
+            // Only allow dropping within the same container (mirrors accepts: target === source)
+            group: {
+                name: 'search-items',
+                pull: false,
+                put: false,
+            },
+
+            onStart: function(evt) {
+                perv_path = evt.item.previousElementSibling?.getAttribute("cy-xpath") || null;
+                next_path = evt.item.nextElementSibling?.getAttribute("cy-xpath") || null;
+            },
+
+            onEnd: async function(evt) {
+                // If dropped back to same position, do nothing
+                if (evt.oldIndex === evt.newIndex) return;
+
+                const el = evt.item;
+                const previous_path = el.previousElementSibling?.getAttribute("cy-xpath") || null;
+                const first_el_xpath = container.querySelector('div')?.getAttribute("cy-xpath") || null;
+                let path = el.getAttribute("cy-xpath");
+
+                // Get sibling now after the dropped element
+                const sibling = el.nextElementSibling || null;
+                const sibling_path = sibling?.getAttribute("cy-xpath") || null;
+                const position = sibling_path ? "before" : "after";
+
+                self.env.services.ui.block();
+                try {
+                    const response = await self.rpc("cyllo_studio/search/move/item", {
+                        view_id: self.env.searchModel.searchViewId,
+                        model: self.env.searchModel.resModel,
+                        path,
+                        position,
+                        sibling_path,
+                        previous_path,
+                        perv_path,
+                        next_path,
+                        first_el_xpath,
+                    });
+
+                    if (response) {
+                        let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                        let cleanedStr = response.replace(/\s+/g, ' ').trim();
+                        storedArray.push(cleanedStr);
+                        sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                        sessionStorage.setItem('ReDO', JSON.stringify([]));
+                    } else {
+                        self.notification.add({
+                            title: _t("Warning"),
+                            message: "Separators cannot be placed next to each other or at the top.",
+                            type: "notification_panel",
+                            notificationType: "warning",
+                        });
+                    }
+                } finally {
+                    setTimeout(() => {
+                        self.env.services.ui.unblock();
+                        window.location.reload();
+                    }, 3000);
+                }
+            },
+        });
+    });
+}
 
   /** @returns {string[]} Sample values for testing. */
   get sampleValues(){

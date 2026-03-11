@@ -87,61 +87,75 @@ export class CalendarViewDialog extends CalendarCommonPopover {
         /**
          * Initialize drag-and-drop for calendar items
          *
-         * Uses Dragula to enable dragging fields in the calendar popover.
+         * Uses SortableJS to enable dragging fields in the calendar popover.
          * Stores changes in sessionStorage for undo/redo.
          * Integrates with autoScroll for smoother dragging experience.
          */
         onMounted(() => {
-            const self = this
-            if (!this.fieldNodeRef.el) {
-                return
+    const self = this;
+    if (!this.fieldNodeRef.el) {
+        return;
+    }
+
+    const container = this.fieldNodeRef.el;
+
+    // Destroy existing sortable if any
+    const existingSortable = Sortable.get(container);
+    if (existingSortable) existingSortable.destroy();
+
+    const sortable = Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+
+        // Only allow dragging via the handle
+        handle: '.handle-drag',
+
+        onEnd: async function(evt) {
+            const el = evt.item;
+            let path = el.getAttribute("cy-xpath");
+
+            // Get sibling after the dropped element
+            const sibling = el.nextElementSibling || null;
+            const nextSiblingPath = sibling?.getAttribute("cy-xpath") || null;
+            const sibling_path = nextSiblingPath || el.previousElementSibling.getAttribute("cy-xpath");
+            const position = nextSiblingPath ? "before" : "after";
+
+            self.env.services.ui.block();
+            try {
+                const response = await self.rpc("cyllo_studio/calendar/move/item", {
+                    view_id: self.props.viewId,
+                    model: self.props.model.resModel,
+                    path,
+                    position,
+                    sibling_path,
+                });
+                if (response) {
+                    let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                    let cleanedStr = response.replace(/\s+/g, ' ').trim();
+                    storedArray.push(cleanedStr);
+                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                    sessionStorage.setItem('ReDO', JSON.stringify([]));
+                }
+            } finally {
+                self.env.services.ui.unblock();
             }
+            self.props.showInvisible(self.state.showInvisible);
+            self.action.doAction("studio_reload");
+        },
+    });
 
-            const drake = dragula([this.fieldNodeRef.el], {
-                revertOnSpill: true,
-                moves: (el, container, handle) => {
-                    return handle.classList.contains('handle-drag')
-                },
-            }).on('drop', async (el, target, source, sibling) => {
-
-                let path = el.getAttribute("cy-xpath");
-                const nextSiblingPath = sibling?.getAttribute("cy-xpath") || null;
-                const sibling_path = nextSiblingPath || el.previousElementSibling.getAttribute("cy-xpath");
-                const position = nextSiblingPath ? "before" : "after";
-                self.env.services.ui.block();
-                try {
-                    const response = await self.rpc("cyllo_studio/calendar/move/item", {
-                        view_id: self.props.viewId,
-                        model: self.props.model.resModel,
-                        path,
-                        position,
-                        sibling_path,
-                    });
-                    if (response) {
-                        let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                        let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                        storedArray.push(cleanedStr);
-                        sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                        sessionStorage.setItem('ReDO', JSON.stringify([]));
-                    }
-                } finally {
-                    self.env.services.ui.unblock();
-                }
-                self.props.showInvisible(self.state.showInvisible)
-                self.action.doAction("studio_reload");
-            })
-            autoScroll([
-                document.querySelector('.cy-scrollable-calendar')
-            ], {
-                margin: 20,
-                maxSpeed: 5,
-                scrollWhenOutside: true,
-                autoScroll: function() {
-                    //Only scroll when the pointer is down, and there is a child being dragged.
-                    return this.down && drake.dragging;
-                }
-            });
-        })
+    autoScroll([
+        document.querySelector('.cy-scrollable-calendar')
+    ], {
+        margin: 20,
+        maxSpeed: 5,
+        scrollWhenOutside: true,
+        autoScroll: function() {
+            // Only scroll when the pointer is down, and there is a child being dragged.
+            return this.down && sortable.dragging;
+        }
+    });
+})
 
     }
     /**

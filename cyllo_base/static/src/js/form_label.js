@@ -2,8 +2,6 @@
 import { FormLabel } from "@web/views/form/form_label";
 import { patch } from '@web/core/utils/patch';
 import { useService } from '@web/core/utils/hooks';
-import {session} from "@web/session";
-
 patch(FormLabel.prototype, {
 /** Patch FormLabel to edit the label on double click */
     setup(){
@@ -12,31 +10,29 @@ patch(FormLabel.prototype, {
     },
     /** Edit label via double click on it */
     async onDblClick(ev){
-        if(session.is_admin){
-            var InnerText = ev.srcElement.innerText
-            this.first_val = InnerText
-            this.access = false
-            var self = this;
-            self.field_name = ''
-            if(ev.target.localName === 'label'){
-                this.originalLabel = ev.target;
-                var input = document.createElement('input');
-                input.id = 'label_edit';
-                input.className = 'edit_label';
-                input.dataset.label_for = ev.target.getAttribute('for');
-                if (InnerText.charAt(InnerText.length - 1) == '?') {
-                    InnerText = InnerText.substring(0, InnerText.length - 1);
-                }
-                input.value = InnerText;
-                self.input = input;
-                self.field_name = ev.srcElement.innerText;
-                this.originalLabel.parentNode.replaceChild(input, ev.target);
-                document.querySelector("#label_edit").onmouseout = function() {
-                    if (InnerText == document.getElementById('label_edit').value){
-                        self.replaceInputWithLabel(input, InnerText, self.originalLabel);
-                    }else{self.ChangeLabel(event)}
-                };
+        var InnerText = ev.srcElement.innerText
+        this.first_val = InnerText
+        this.access = false
+        var self = this;
+        self.field_name = ''
+        if(ev.target.localName === 'label'){
+            this.originalLabel = ev.target;
+            var input = document.createElement('input');
+            input.id = 'label_edit';
+            input.className = 'edit_label';
+            input.dataset.label_for = ev.target.getAttribute('for');
+            if (InnerText.charAt(InnerText.length - 1) == '?') {
+                InnerText = InnerText.substring(0, InnerText.length - 1);
             }
+            input.value = InnerText;
+            self.input = input;
+            self.field_name = ev.srcElement.innerText;
+            this.originalLabel.parentNode.replaceChild(input, ev.target);
+            document.querySelector("#label_edit").onmouseout = function() {
+                if (InnerText == document.getElementById('label_edit').value){
+                    self.replaceInputWithLabel(input, InnerText, self.originalLabel);
+                }else{self.ChangeLabel(event)}
+            };
         }
     },
     /** Change <input> into label with old attributes **/

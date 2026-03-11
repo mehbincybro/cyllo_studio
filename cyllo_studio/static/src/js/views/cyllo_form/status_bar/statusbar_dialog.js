@@ -88,111 +88,112 @@ export class StatusBarDialog extends Component {
             }
         }, ()=> [this.state.selectedField])
 
-         useEffect(() => {
-            const self = this;
-            if (this.selectionValuesRef.el) {
-                var drake = dragula([this.selectionValuesRef.el], {
-                    revertOnSpill: true,
-                    moves: (el, container, handle) => {
-                        return handle.classList.contains('handle-drag');
-                    },
-                }).on('drop', function(el, target, source, sibling) {
-                    let selectionValuesArr = self.state.selectionValues;
-                    let currentIndex = parseInt(el.getAttribute("data-index"));
-                    let currentValue = selectionValuesArr[currentIndex];
-                    let targetIndex = sibling ? parseInt(sibling.getAttribute("data-index")) - 1 : selectionValuesArr.length - 1;
+        useEffect(() => {
+            console.log("usefeeced")
+    const self = this;
+    const container = this.selectionValuesRef.el;
+    if (!container) return;
+    const existingSortable = Sortable.get(container);
+    if (existingSortable) existingSortable.destroy();
 
-                    self.state.selectionValues = selectionValuesArr.map((element, index) => {
-                        if (index >= currentIndex && index <= targetIndex) {
-                            return index == targetIndex ? currentValue : selectionValuesArr[index + 1];
-                        }
-                        return element;
-                    });
+    Sortable.create(container, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        handle: '.handle-drag',
 
-                    this.cancel();
-                });
-            }
-        }, () => [this.state.selectionValues]);
+        onEnd: function(evt) {
+            let selectionValuesArr = self.state.selectionValues;
+            const currentIndex = evt.oldIndex;
+            const targetIndex = evt.newIndex;
+            const currentValue = selectionValuesArr[currentIndex];
+            const updated = [...selectionValuesArr];
+            updated.splice(currentIndex, 1);
+            updated.splice(targetIndex, 0, currentValue);
+            self.state.selectionValues = updated;
+        },
+    });
+}, () => [this.state.selectionValues]);
     }
 
     /**
      * Initializes dragula for drag-and-drop functionality on selection values
      */
-    initializeDragAndDrop() {
-        const self = this;
-
-        // Prevent modal header from being draggable
-        const modalHeader = document.body.querySelector('.modal-header');
-        if (modalHeader) {
-            modalHeader.setAttribute('class', 'modal-header-no-drag');
-        }
-
-        // Initialize dragula for new field selection values
-        if (this.selectionValuesRef.el) {
-            const drake = dragula([this.selectionValuesRef.el], {
-                revertOnSpill: true,
-                moves: function (el, container, handle) {
-                    // Allow dragging only by the drag handle icon
-                    return handle.classList.contains('drag-handle') ||
-                           handle.closest('.drag-handle');
-                },
-                accepts: function (el, target, source, sibling) {
-                    return true;
-                },
-            });
-
-            drake.on('drop', function(el, target, source, sibling) {
-                // Get all selection field elements after drop
-                const elements = source.querySelectorAll('.selection-field-item');
-                const newOrder = [];
-
-                elements.forEach(function(element, index) {
-                    const value = element.getAttribute('data-value');
-                    if (value !== null && value !== undefined) {
-                        newOrder.push(value);
-                    }
-                });
-
-                // Update state with new order
-                if (self.state.field === 'new') {
-                    self.state.selectionValues = newOrder;
-                }
-            });
-        }
-
-        // Initialize dragula for existing field selection values
-        if (this.existingSelectionRef.el) {
-            const drakeExisting = dragula([this.existingSelectionRef.el], {
-                revertOnSpill: true,
-                moves: function (el, container, handle) {
-                    return handle.classList.contains('drag-handle') ||
-                           handle.closest('.drag-handle');
-                },
-                accepts: function (el, target, source, sibling) {
-                    return true;
-                },
-            });
-
-            drakeExisting.on('drop', function(el, target, source, sibling) {
-                const elements = source.querySelectorAll('.selection-field-item');
-                const newOrder = [];
-
-                elements.forEach(function(element, index) {
-                    const valueKey = element.getAttribute('data-value-key');
-                    const valueLabel = element.getAttribute('data-value-label');
-
-                    if (valueKey !== null && valueLabel !== null) {
-                        newOrder.push([valueKey, valueLabel]);
-                    }
-                });
-
-                // Update state with new order
-                if (self.state.field === 'existing') {
-                    self.state.values = newOrder;
-                }
-            });
-        }
-    }
+    // initializeDragAndDrop() {
+    //     console.log("huererererere")
+    //     const self = this;
+    //
+    //     // Prevent modal header from being draggable
+    //     const modalHeader = document.body.querySelector('.modal-header');
+    //     if (modalHeader) {
+    //         modalHeader.setAttribute('class', 'modal-header-no-drag');
+    //     }
+    //
+    //     // Initialize dragula for new field selection values
+    //     if (this.selectionValuesRef.el) {
+    //         const drake = dragula([this.selectionValuesRef.el], {
+    //             revertOnSpill: true,
+    //             moves: function (el, container, handle) {
+    //                 // Allow dragging only by the drag handle icon
+    //                 return handle.classList.contains('drag-handle') ||
+    //                        handle.closest('.drag-handle');
+    //             },
+    //             accepts: function (el, target, source, sibling) {
+    //                 return true;
+    //             },
+    //         });
+    //
+    //         drake.on('drop', function(el, target, source, sibling) {
+    //             // Get all selection field elements after drop
+    //             const elements = source.querySelectorAll('.selection-field-item');
+    //             const newOrder = [];
+    //
+    //             elements.forEach(function(element, index) {
+    //                 const value = element.getAttribute('data-value');
+    //                 if (value !== null && value !== undefined) {
+    //                     newOrder.push(value);
+    //                 }
+    //             });
+    //
+    //             // Update state with new order
+    //             if (self.state.field === 'new') {
+    //                 self.state.selectionValues = newOrder;
+    //             }
+    //         });
+    //     }
+    //
+    //     // Initialize dragula for existing field selection values
+    //     if (this.existingSelectionRef.el) {
+    //         const drakeExisting = dragula([this.existingSelectionRef.el], {
+    //             revertOnSpill: true,
+    //             moves: function (el, container, handle) {
+    //                 return handle.classList.contains('drag-handle') ||
+    //                        handle.closest('.drag-handle');
+    //             },
+    //             accepts: function (el, target, source, sibling) {
+    //                 return true;
+    //             },
+    //         });
+    //
+    //         drakeExisting.on('drop', function(el, target, source, sibling) {
+    //             const elements = source.querySelectorAll('.selection-field-item');
+    //             const newOrder = [];
+    //
+    //             elements.forEach(function(element, index) {
+    //                 const valueKey = element.getAttribute('data-value-key');
+    //                 const valueLabel = element.getAttribute('data-value-label');
+    //
+    //                 if (valueKey !== null && valueLabel !== null) {
+    //                     newOrder.push([valueKey, valueLabel]);
+    //                 }
+    //             });
+    //
+    //             // Update state with new order
+    //             if (self.state.field === 'existing') {
+    //                 self.state.values = newOrder;
+    //             }
+    //         });
+    //     }
+    // }
     /**
      * Converts an array of selection field objects to a dropdown-friendly format.
      *

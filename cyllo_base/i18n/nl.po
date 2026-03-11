@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 08:30+0000\n"
-"PO-Revision-Date: 2026-01-13 08:30+0000\n"
+"POT-Creation-Date: 2023-12-01 04:16+0000\n"
+"PO-Revision-Date: 2023-12-01 04:16+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -17,63 +17,198 @@ msgstr ""
 
 #. module: cyllo_base
 #. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/menu_sidebar.js:0
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_add_templates.xml:0
 #, python-format
-msgid "\"%s\" added to your shortcuts"
-msgstr "\"%s\" toegevoegd aan je snelkoppelingen"
+msgid "CLOSE"
+msgstr "DICHTBIJ"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__colour
+msgid "Color"
+msgstr "Kleur"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__company_id
+msgid "Company"
+msgstr "Bedrijf"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_sticky_note__create_date
+msgid "Create date of a note"
+msgstr "Creëer datum van een notitie"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__create_date
+msgid "Created Date"
+msgstr "Gemaakte datum"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__create_uid
+msgid "Created by"
+msgstr "Gemaakt door"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_sticky_note__company_id
+msgid "Current Company"
+msgstr "Huidig ​​bedrijf"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__description
+msgid "Description"
+msgstr "Beschrijving"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__display_name
+msgid "Display Name"
+msgstr "Weergavenaam"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__id
+msgid "ID"
+msgstr "ID kaart"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__write_uid
+msgid "Last Updated by"
+msgstr "Laatst bijgewerkt door"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__write_date
+msgid "Last Updated on"
+msgstr "Laatst geupdate op"
 
 #. module: cyllo_base
 #. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/menu_sidebar.js:0
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_create_templates.xml:0
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_update_templates.xml:0
 #, python-format
-msgid "\"%s\" removed from shortcut"
-msgstr "\"%s\" verwijderd uit snelkoppeling"
+msgid "Note a description"
+msgstr "Let op een beschrijving"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.reset_password_email
-msgid "+1 650-123-4567"
-msgstr "+1 650-123-4567"
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_create_templates.xml:0
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_update_templates.xml:0
+#, python-format
+msgid "Note a title"
+msgstr "Let op een titel"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.reset_password_email
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/xml/sticky_note_templates.xml:0
+#, python-format
+msgid "Notes"
+msgstr "Aantekeningen"
+
+#. module: cyllo_base
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_create_templates.xml:0
+#, python-format
+msgid "Save"
+msgstr "Redden"
+
+#. module: cyllo_base
+#: model:ir.model,name:cyllo_base.model_sticky_note
+msgid "Sticky Note"
+msgstr "Notitie"
+
+#. module: cyllo_base
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/xml/sticky_note_icon_templates.xml:0
+#, python-format
+msgid "Sticky Notes"
+msgstr "Plakbriefjes"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__title
+msgid "Title"
+msgstr "Titel"
+
+#. module: cyllo_base
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/xml/sticky_notes_update_templates.xml:0
+#, python-format
+msgid "Update"
+msgstr "Update"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_sticky_note__colour
+msgid "color of the note"
+msgstr "Kleur van de notitie"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_sticky_note__description
+msgid "description of the note"
+msgstr "Beschrijving van de notitie"
+
+#. module: cyllo_base
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/js/sticky_notes_create.js:0
+#, python-format
+msgid "please add the description to save ..."
+msgstr "Voeg de beschrijving toe om op te slaan ..."
+
+#. module: cyllo_base
+#. odoo-javascript
+#: code:addons/cyllo_base/static/src/js/sticky_notes_create.js:0
+#, python-format
+msgid "please add the title to save ..."
+msgstr "Voeg de titel toe om op te slaan ..."
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_sticky_note__title
+msgid "title of the note"
+msgstr "Titel van de notitie"
+
+#. module: cyllo_base
+#. odoo-python
+#: code:addons/cyllo_base/wizards/field_create.py:0
+#, python-format
 msgid ""
-",\n"
-"                                                        <br/>\n"
-"                                                        <br/>\n"
-"                                                        A password reset was\n"
-"                                                        requested for the Cyllo\n"
-"                                                        account linked to this\n"
-"                                                        email.\n"
-"                                                        You may change your\n"
-"                                                        password by following\n"
-"                                                        this link which will\n"
-"                                                        remain\n"
-"                                                        valid during 24 hours:\n"
-"                                                        <br/>"
+"<?xml version=\"1.0\"?><data><field name=\"%s\" position=\"%s\"><field "
+"name=\"%s\" widget=\"%s\"/></field></data>"
 msgstr ""
-",\n"
-"                                                        <br/>\n"
-"                                                        <br/>\n"
-"                                                        Er is een wachtwoordherstel\n"
-"                                                        aangevraagd voor het Cyllo-account\n"
-"                                                        gekoppeld aan dit e-mailadres.\n"
-"                                                        U kunt uw wachtwoord\n"
-"                                                        wijzigen via deze link, die\n"
-"                                                        24 uur geldig\n"
-"                                                        blijft:\n"
-"                                                        <br/>"
+"<?xml version=\"1.0\"?><data><field name=\"%s\" position=\"%s\"><field "
+"name=\"%s\" widget=\"%s\"/></field></data>"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Activate"
-msgstr "Activeren"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/navbar.xml:0
+#. odoo-python
+#: code:addons/cyllo_base/wizards/field_create.py:0
 #, python-format
-msgid "Activities"
-msgstr "Activiteiten"
+msgid ""
+"<?xml version=\"1.0\"?><data><field name=\"%s\" position=\"%s\"><field "
+"name=\"%s\"/></field></data>"
+msgstr ""
+"<?xml version=\"1.0\"?><data><field name=\"%s\" position=\"%s\"><field "
+"name=\"%s\"/></field></data>"
+
+#. module: cyllo_base
+#. odoo-python
+#: code:addons/cyllo_base/wizards/field_create.py:0
+#, python-format
+msgid ""
+"<?xml version=\"1.0\"?><data><xpath expr=\"//tree\" "
+"position=\"inside\"><field name=\"%s\" optional=\"hide\"/></xpath></data>"
+msgstr ""
+"<?xml version=\"1.0\"?><data><xpath expr=\"//tree\" "
+"position=\"inside\"><field name=\"%s\" optional=\"hide\"/></xpath></data>"
+
+#. module: cyllo_base
+#: model_terms:ir.ui.view,arch_db:cyllo_base.field_create_view_form
+msgid ""
+"<span style=\"color: red;\" invisible=\"not same_name\">\n"
+"                            Field name already exists\n"
+"                        </span>\n"
+"                        <span style=\"color: red; width: 180%; display: block;\" invisible=\"not name_x_\">\n"
+"                            Custom fields must have a name that starts with 'x_'\n"
+"                        </span>"
+msgstr ""
+"<span style=\"color: red;\" invisible=\"not same_name\">\n"
+"                            Veldnaam bestaat al\n"
+"                        </span>\n"
+"                        <span style=\"color: red; width: 180%; display: block;\" invisible=\"not name_x_\">\n"
+"                            Aangepaste velden moeten een naam hebben die begint met 'x_'\n"
+"                        </span>"
 
 #. module: cyllo_base
 #. odoo-javascript
@@ -83,57 +218,16 @@ msgid "Add Field"
 msgstr "Veld toevoegen"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_notes_add_templates.xml:0
-#, python-format
-msgid "Add New Note..."
-msgstr "Nieuwe notitie toevoegen..."
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_ir_ui_menu__add_to_shortcuts
-msgid "Add To Shortcuts"
-msgstr "Toevoegen aan snelkoppelingen"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/menu_sidebar.xml:0
-#, python-format
-msgid "Add to shortcuts"
-msgstr "Toevoegen aan snelkoppelingen"
-
-#. module: cyllo_base
 #: model:ir.model.fields.selection,name:cyllo_base.selection__field_create__position__after
 msgid "After"
 msgstr "Na"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_pinned_menu__app_id
-msgid "App"
-msgstr "App"
-
-#. module: cyllo_base
-#: model:ir.actions.act_window,name:cyllo_base.action_view_main_apps
-msgid "Apps"
-msgstr "Apps"
-
-#. module: cyllo_base
 #. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/ListController.js:0
+#: code:addons/cyllo_base/static/src/js/form_controller.js:0
 #, python-format
 msgid "Archive"
-msgstr "Archiveren"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/user_menu.xml:0
-#, python-format
-msgid "Auto Edit"
-msgstr "Automatisch bewerken"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_res_users__auto_edit
-msgid "Auto Edit Fields"
-msgstr "Velden automatisch bewerken"
+msgstr "Archief"
 
 #. module: cyllo_base
 #: model:ir.model.fields.selection,name:cyllo_base.selection__field_create__position__before
@@ -141,72 +235,19 @@ msgid "Before"
 msgstr "Voor"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_notes_create_templates.xml:0
-#, python-format
+#: model_terms:ir.ui.view,arch_db:cyllo_base.field_create_view_form
 msgid "Cancel"
 msgstr "Annuleren"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Cancel Install"
-msgstr "Installatie annuleren"
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__create_id
+msgid "Connection Field"
+msgstr "Verbindingsveld"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Cancel Uninstall"
-msgstr "Deinstallatie annuleren"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/sticky_notes/sticky_note.js:0
-#, python-format
-msgid "Cancel the creating note to continue..."
-msgstr "Annuleer het maken van de notitie om door te gaan..."
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.reset_password_email
-msgid "Change password"
-msgstr "Wachtwoord wijzigen"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.cyllo_webclient_offline
-msgid "Check again"
-msgstr "Opnieuw controleren"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.cyllo_webclient_offline
-msgid ""
-"Check your network connection and come back here. Cyllo will\n"
-"                    load as soon as you're back online."
-msgstr ""
-"Controleer uw netwerkverbinding en kom hier terug. Cyllo zal\n"
-"                    laden zodra u weer online bent."
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__client_action_id
-msgid "Client Action"
-msgstr "Clientactie"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__colour
-msgid "Color"
-msgstr "Kleur"
-
-#. module: cyllo_base
-#: model:ir.model,name:cyllo_base.model_res_company
-msgid "Companies"
-msgstr "Bedrijven"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__company_id
-msgid "Company"
-msgstr "Bedrijf"
-
-#. module: cyllo_base
-#: model:ir.model,name:cyllo_base.model_res_config_settings
-msgid "Config Settings"
-msgstr "Configuratie-instellingen"
+#: model:ir.model.fields,help:cyllo_base.field_field_selection__create_id
+msgid "Connection field to 'field.create' model"
+msgstr "Verbindingsveld met 'field.create' model"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__copied
@@ -214,74 +255,67 @@ msgid "Copied"
 msgstr "Gekopieerd"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/menu_sidebar.js:0
-#, python-format
-msgid "Could not add shortcut to dashboard"
-msgstr "Kon snelkoppeling niet toevoegen aan dashboard"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_field_create_form
+#: model_terms:ir.ui.view,arch_db:cyllo_base.field_create_view_form
 msgid "Create Field"
-msgstr "Veld maken"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__create_date
-msgid "Created Date"
-msgstr "Aanmaakdatum"
+msgstr "Creëer veld"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__create_uid
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__create_uid
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__create_uid
 msgid "Created by"
 msgstr "Gemaakt door"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__create_date
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__create_date
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__create_date
 msgid "Created on"
 msgstr "Gemaakt op"
 
 #. module: cyllo_base
 #. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/error_dialogs.js:0
-#, python-format
-msgid "Cyllo Warning"
-msgstr "Cyllo-waarschuwing"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.reset_password_email
-msgid "Dear"
-msgstr "Beste"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/ListController.js:0
+#: code:addons/cyllo_base/static/src/js/form_controller.js:0
 #, python-format
 msgid "Delete"
 msgstr "Verwijderen"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__description
-msgid "Description"
-msgstr "Omschrijving"
-
-#. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__display_name
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__display_name
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__display_name
 msgid "Display Name"
-msgstr "Schermnaam"
+msgstr "Weergavenaam"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__display_name
+msgid "Display name of field"
+msgstr "Donature Naam van het veld"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__index
+msgid "Does the field need to be indexed"
+msgstr "Moet het veld worden geïndexeerd"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__copied
+msgid ""
+"Does the value in the field can be copied, eg: while duplicating the record"
+msgstr ""
+"Kan de waarde in het veld worden gekopieerd, bijv. Tijdens het dupliceren "
+"van het record"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__required
+msgid "Does this a required field"
+msgstr "Doet dit een vereist veld"
 
 #. module: cyllo_base
 #. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/user_menu.js:0
-#, python-format
-msgid "Documentation"
-msgstr "Documentatie"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/ListController.js:0
+#: code:addons/cyllo_base/static/src/js/form_controller.js:0
 #, python-format
 msgid "Duplicate"
-msgstr "Dupliceren"
+msgstr "Duplicaat"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_ir_model_fields__is_dynamic_field
@@ -289,40 +323,22 @@ msgid "Dynamic Field"
 msgstr "Dynamisch veld"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_model_fields_search
+#: model_terms:ir.ui.view,arch_db:cyllo_base.view_model_fields_search
 msgid "Dynamic Fields"
 msgstr "Dynamische velden"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_res_users_form
-msgid "Edit preference"
-msgstr "Voorkeur bewerken"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/user_menu.xml:0
-#, python-format
-msgid "Enable this to auto-edit the field."
-msgstr "Schakel dit in om het veld automatisch te bewerken."
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/ListController.js:0
-#, python-format
-msgid "Export"
-msgstr "Exporteren"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__xml_id
-msgid "External ID"
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__form_view_external_id
+msgid "External Id"
 msgstr "Externe ID"
 
 #. module: cyllo_base
 #: model:ir.model,name:cyllo_base.model_field_create
 msgid "Field Create"
-msgstr "Veld maken"
+msgstr "Veld creëren"
 
-#. module: cyllo_javascript
+#. module: cyllo_base
+#. odoo-javascript
 #: code:addons/cyllo_base/static/src/js/form_controller.js:0
 #, python-format
 msgid "Field Creation"
@@ -339,9 +355,19 @@ msgid "Field Name"
 msgstr "Veldnaam"
 
 #. module: cyllo_base
+#: model:ir.model,name:cyllo_base.model_field_selection
+msgid "Field Selection"
+msgstr "Veldselectie"
+
+#. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__field_type
 msgid "Field Type"
-msgstr "Veldtype"
+msgstr "Veld soort"
+
+#. module: cyllo_base
+#: model:ir.model,name:cyllo_base.model_field_widget
+msgid "Field Widget"
+msgstr "Veldwidget"
 
 #. module: cyllo_base
 #: model:ir.model,name:cyllo_base.model_ir_model_fields
@@ -354,21 +380,16 @@ msgid "Flag"
 msgstr "Vlag"
 
 #. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__form_view_external_id
+msgid "Form View External Id"
+msgstr "Formulier Bekijk externe ID"
+
+#. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__id
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__id
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__id
 msgid "ID"
-msgstr "ID"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.reset_password_email
-msgid "If you do not expect this, you can safely ignore this email."
-msgstr "Als u dit niet verwacht, kunt u deze e-mail veilig negeren."
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/importRecords.xml:0
-#, python-format
-msgid "Import records"
-msgstr "Records importeren"
+msgstr "ID kaart"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__index
@@ -376,41 +397,53 @@ msgid "Indexed"
 msgstr "Geïndexeerd"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Installed"
-msgstr "Geïnstalleerd"
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__name_x_
+msgid "Is Name Correct"
+msgstr "Is de naam correct"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__same_name
+msgid "Is Same Name"
+msgstr "Is dezelfde naam"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__name_x_
+msgid "Is name starts with 'x_'"
+msgstr "Is naam begint met 'x_'"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__same_name
+msgid "Is same name is used for field in this model"
+msgstr "Is dezelfde naam wordt gebruikt voor het veld in dit model"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_ir_model_fields__is_dynamic_field
+msgid "Is this field is newly added"
+msgstr "Is dit veld nieuw toegevoegd"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__readonly
+msgid "Is this is a readonly field"
+msgstr "Is dit een readonly veld"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_selection__value
+msgid "Key of newly creating field"
+msgstr "Sleutel van het nieuwe veld"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__write_uid
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__write_uid
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__write_uid
 msgid "Last Updated by"
 msgstr "Laatst bijgewerkt door"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__write_date
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__write_date
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__write_date
 msgid "Last Updated on"
-msgstr "Laatst bijgewerkt op"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_ir_model__list_split_view
-msgid "List Split View"
-msgstr "Lijst gesplitste weergave"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_ir_model__master_search
-msgid "Master Search"
-msgstr "Hoofdzoekopdracht"
-
-#. module: cyllo_base
-#: model:ir.model,name:cyllo_base.model_ir_ui_menu
-msgid "Menu"
-msgstr "Menu"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/navbar.xml:0
-#, python-format
-msgid "Messages"
-msgstr "Berichten"
+msgstr "Laatst geupdate op"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__model
@@ -418,40 +451,20 @@ msgid "Model"
 msgstr "Model"
 
 #. module: cyllo_base
-#: model:ir.actions.act_window,name:cyllo_base.action_view_my_account
-msgid "My Account"
-msgstr "Mijn account"
-
-#. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_selection__name
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__name
 msgid "Name"
 msgstr "Naam"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/kanban_controller.xml:0
-#, python-format
-msgid "New"
-msgstr "Nieuw"
+#: model:ir.model.fields,help:cyllo_base.field_field_selection__name
+msgid "Option that shows in newly creating selection field"
+msgstr "Optie die wordt weergegeven in het nieuwe veld Selecteren"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/control_panel.xml:0
-#, python-format
-msgid "Next"
-msgstr "Volgende"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_note_templates.xml:0
-#, python-format
-msgid "Notes"
-msgstr "Notities"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__path
-msgid "Path"
-msgstr "Pad"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__selection_ids
+msgid "Options for new selection field"
+msgstr "Opties voor nieuw selectieveld"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__position
@@ -459,54 +472,39 @@ msgid "Position"
 msgstr "Positie"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.mail_notification_layout
-msgid "Powered by"
-msgstr "Mogelijk gemaakt door"
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__field_id
+msgid "Position Field"
+msgstr "Positieveld"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/user_menu.js:0
-#, python-format
-msgid "Preferences"
-msgstr "Voorkeuren"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/control_panel.xml:0
-#, python-format
-msgid "Previous"
-msgstr "Vorige"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__position
+msgid "Position of field"
+msgstr "Veldpositie"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__readonly
 msgid "Readonly"
-msgstr "Alleen-lezen"
+msgstr "Alleen lezen"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/menu_sidebar.xml:0
-#, python-format
-msgid "Remove from shortcut"
-msgstr "Verwijderen uit snelkoppeling"
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__ref_model_id
+msgid "Reference Model"
+msgstr "Referentiemodel"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_create__ref_model_id
+msgid "Reference model for Many2one and Many2many field creation"
+msgstr "Referentiemodel voor veel2One en vele 2 -man veldencreatie"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__required
 msgid "Required"
-msgstr "Verplicht"
+msgstr "Vereist"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_notes_create_templates.xml:0
-#, python-format
-msgid "Save"
-msgstr "Opslaan"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/menu_sidebar.xml:0
-#, python-format
-msgid "Search for menu"
-msgstr "Zoeken naar menu"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__field_id
+msgid "Select a position field for create new field"
+msgstr "Selecteer een positieveld voor het maken van een nieuw veld"
 
 #. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__selection_ids
@@ -514,178 +512,78 @@ msgid "Selection"
 msgstr "Selectie"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__server_action_id
-msgid "Server Action"
-msgstr "Serveractie"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/user_menu.js:0
-#, python-format
-msgid "Shortcuts"
-msgstr "Snelkoppelingen"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/split_view.xml:0
-#, python-format
-msgid "Split View"
-msgstr "Gesplitste weergave"
-
-#. module: cyllo_base
-#: model:ir.model,name:cyllo_base.model_sticky_note
-msgid "Sticky Note"
-msgstr "Plaknotitie"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_note_icon_templates.xml:0
-#, python-format
-msgid "Sticky Notes"
-msgstr "Plaknotities"
-
-#. module: cyllo_base
 #: model:ir.model.fields,field_description:cyllo_base.field_field_create__store
 msgid "Store"
-msgstr "Opslaan"
+msgstr "Winkel"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/user_menu.js:0
-#, python-format
-msgid "Support"
-msgstr "Ondersteuning"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__model
+msgid "Stores current model to filter the fields"
+msgstr "Slaat het huidige model op om de velden te filteren"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/error_dialogs.js:0
-#, python-format
-msgid "System Error"
-msgstr "Systeemfout"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__name
+msgid "Technical name of field"
+msgstr "Technische naam van het veld"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_sticky_note__title
-msgid "Title"
-msgstr "Titel"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/ListController.js:0
-#, python-format
-msgid "Unarchive"
-msgstr "Dearchiveren"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Uninstall"
-msgstr "Deïnstalleren"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_notes_update_templates.xml:0
-#, python-format
-msgid "Update"
-msgstr "Bijwerken"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_ir_module_module_kanban
-msgid "Upgrade"
-msgstr "Upgraden"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/user_menu.xml:0
-#, python-format
-msgid "User"
-msgstr "Gebruiker"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__field_type
+msgid "Type of field"
+msgstr "Type veld"
 
 #. module: cyllo_base
 #. odoo-javascript
 #: code:addons/cyllo_base/static/src/js/form_controller.js:0
 #, python-format
-msgid "Validation Error"
-msgstr "Validatiefout"
+msgid "Unarchive"
+msgstr "Ontketenen"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__value
+#: model:ir.model.fields,help:cyllo_base.field_field_create__help
+msgid "Use of the Field"
+msgstr "Gebruik van het veld"
+
+#. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_ir_ui_view__flag
+msgid "Uses to know if the label changing is done correctly"
+msgstr "Gebruikt om te weten of het labelverandering correct wordt gedaan"
+
+#. module: cyllo_base
+#: model:ir.model.fields,field_description:cyllo_base.field_field_widget__datatype
 msgid "Value"
 msgstr "Waarde"
 
 #. module: cyllo_base
+#: model:ir.model.fields,help:cyllo_base.field_field_widget__datatype
+msgid "Value to show the name of widget"
+msgstr "Waarde om de naam van de widget weer te geven"
+
+#. module: cyllo_base
 #: model:ir.model,name:cyllo_base.model_ir_ui_view
 msgid "View"
-msgstr "Weergave"
+msgstr "Bekijk"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/user_menu.xml:0
-#, python-format
-msgid "View Account"
-msgstr "Account bekijken"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__store
+msgid "Whether the value is stored in database"
+msgstr "Of de waarde wordt opgeslagen in de database"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__view_type
-msgid "View Type"
-msgstr "Weergavetype"
-
-#. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.view_res_partner_form
-msgid "Website"
-msgstr "Website"
-
-#. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_field_create__widget_id
+#: model:ir.model.fields,field_description:cyllo_base.field_field_create__widget
 msgid "Widget"
 msgstr "Widget"
 
 #. module: cyllo_base
-#: model:ir.model.fields,field_description:cyllo_base.field_shortcut_menu__window_action_id
-msgid "Window Action"
-msgstr "Vensteractie"
+#: model:ir.model.fields,help:cyllo_base.field_field_create__widget
+msgid "Widget for the field"
+msgstr "Widget voor het veld"
 
 #. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_notes/sticky_notes_create_templates.xml:0
-#, python-format
-msgid "Write your note here..."
-msgstr "Schrijf hier je notitie..."
+#: model:ir.model.fields,help:cyllo_base.field_field_widget__name
+msgid "name to add in the xml for apply the widget"
+msgstr "Naam om de XML toe te voegen om de widget toe te passen"
 
 #. module: cyllo_base
-#: model_terms:ir.ui.view,arch_db:cyllo_base.cyllo_webclient_offline
-msgid "You are offline"
-msgstr "U bent offline"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/form_controller.js:0
-#, python-format
-msgid "You cannot delete a record while in split view"
-msgstr "U kunt geen record verwijderen in de gesplitste weergave"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/menu_sidebar.js:0
-#, python-format
-msgid "You have unsaved changes. Save or discard them to continue."
-msgstr "U heeft niet-opgeslagen wijzigingen. Bewaar of verwijder ze om door te gaan."
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/xml/sticky_note_templates.xml:0
-#, python-format
-msgid "close"
-msgstr "sluiten"
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/sticky_notes/sticky_notes_create.js:0
-#, python-format
-msgid "please add the description to save ..."
-msgstr "voeg de omschrijving toe om op te slaan ..."
-
-#. module: cyllo_base
-#. odoo-javascript
-#: code:addons/cyllo_base/static/src/js/sticky_notes/sticky_notes_create.js:0
-#, python-format
-msgid "please add the title to save ..."
-msgstr "voeg de titel toe om op te slaan ..."
+#: model:ir.model.fields,field_description:cyllo_base.field_field_selection__value
+msgid "value"
+msgstr "waarde"

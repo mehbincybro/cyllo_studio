@@ -31,18 +31,5 @@ class ResUsers(models.Model):
     @api.model
     def action_systray_view_account(self):
         """This is the action to view user form"""
-        return self.sudo().env.ref('cyllo_base.action_view_my_account').read()[
+        return self.sudo().env.ref('cyllo_base.action_my_account_form').read()[
             0]
-
-class CheckIdentity(models.TransientModel):
-    _inherit = 'res.users.identitycheck'
-
-    def _check_identity(self):
-        try:
-            self.create_uid._check_credentials(
-                self.password, {'interactive': True}
-            )
-        except AccessDenied:
-            raise UserError(
-                _("Incorrect Password, try again or click on Forgot Password to reset your password.")
-            )

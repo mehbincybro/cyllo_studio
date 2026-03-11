@@ -19,10 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-import psycopg2
-
 from odoo import http
 from odoo.http import request
+import psycopg2
 
 SIZE = 5
 

@@ -33,6 +33,7 @@ import { CylloListRenderer } from "@cyllo_studio/js/views/cyllo_list/cyllo_list_
 import { CylloKanbanRenderer } from "@cyllo_studio/js/views/cyllo_kanban/cyllo_kanban_renderer";
 import { serializeXML } from "@web/core/utils/xml";
 const { useState, useEffect, onWillStart } = owl;
+const Sortable = window.Sortable;
 
 export class CylloFormController extends FormController {
     async setup() {
@@ -47,7 +48,8 @@ export class CylloFormController extends FormController {
             isX2Many: false,
             CyX2Many: false,
             x2ManyDetails: {}
-        })
+        });
+        this.sortableInstances = [];
         const storedPages = sessionStorage.getItem("cy_studio_active_notebook");
             if (storedPages) {
                 try {
@@ -87,227 +89,683 @@ export class CylloFormController extends FormController {
                 );
             }
         };
-        useEffect(
-            () => {
-            const storedPages = sessionStorage.getItem("cy_studio_active_notebook");
-            if (storedPages) {
-                try {
-                    const parsedPages = JSON.parse(storedPages);
-                    Object.keys(parsedPages).forEach(notebookId => {
-                        const pageIndex = parsedPages[notebookId];
-                        const notebook = document.querySelector(`.o_notebook[data-notebook-id="${notebookId}"]`);
-                        if (!notebook) {
-                            // Fallback: try to find the first notebook
-                            const firstNotebook = document.querySelector('.o_notebook');
-                            if (firstNotebook) {
-                                const tabs = firstNotebook.querySelectorAll('.nav-link');
-                                if (tabs[pageIndex]) {
-                                    tabs[pageIndex].click();
-                                }
+        useEffect(() => {
+        const self = this;
+
+        // Cleanup previous instances
+        self.sortableInstances.forEach(instance => instance?.destroy());
+        self.sortableInstances = [];
+
+        const InGrps = document.getElementsByClassName("o_inner_group");
+
+        // Store drag state
+        let dragState = {
+            initialIndex: '',
+            initialX: '',
+            draggedElement: null,
+            sourceContainer: null
+        };
+
+        Array.from(InGrps).forEach((group, groupIndex) => {
+            const sortableInstance = Sortable.create(group, {
+                group: 'studio-fields',
+                animation: 150,
+                fallbackOnBody: false,
+                fallbackTolerance: 3,
+                swapThreshold: 0.5,
+                invertSwap: false,
+                direction: 'auto',
+                draggable: '.o_wrap_field',
+                ghostClass: 'sortable-ghost',
+                chosenClass: 'sortable-chosen',
+                dragClass: 'sortable-drag',
+                forceFallback:true,
+                fallbackClass: "cyllo-fallback-ghost",
+                scroll: document.querySelector('.o_content'),
+                scrollSensitivity: 90,
+                scrollSpeed: 20,
+                bubbleScroll: true,
+                filter: function(evt, item) {
+                    if (evt.target.closest(".cy-studio-icon")) return true;
+                    if (evt.target.closest(".add-fields")) return true;
+                    const el = evt.target.closest(".o_wrap_field");
+                    if (el && el.children.length > 3) return true;
+                    return false;
+                },
+                onClone: function(evt) {
+                    const ghost = evt.clone;
+                    ghost.style.width = evt.item.offsetWidth + "px";
+                    ghost.style.height = evt.item.offsetHeight + "px";
+                },
+
+                onChoose: function(evt) {
+                    console.log('onChoose triggered', evt.item);
+                },
+                onUnchoose: function(evt) {
+                },
+                onStart: function(evt) {
+                    console.log('onStart triggered', evt);
+                    dragState.draggedElement = evt.item;
+                    dragState.sourceContainer = evt.from;
+                    dragState.initialIndex = evt.oldIndex;
+                    dragState.initialX = evt.item.getBoundingClientRect().left;
+                    const allInnerGroups = document.querySelectorAll('.o_inner_group');
+                        allInnerGroups.forEach(group => {
+                            if (group.classList.contains('grid')) {
+                                group.classList.remove('grid');
+                                group.setAttribute('data-had-grid', 'true');
                             }
-                        } else {
-                            const tabs = notebook.querySelectorAll('.nav-link');
-                            if (tabs[pageIndex]) {
-                                tabs[pageIndex].click();
+                        });
+                    const allGroups = document.querySelectorAll('.o_inner_group');
+                    allGroups.forEach(grp => {
+                        const fields = grp.querySelectorAll('.o_wrap_field');
+                        fields.forEach(field => {
+                            if (field.classList.contains('d-sm-contents')){
+                                field.classList.remove('d-sm-contents','flex-column');
+                                field.setAttribute('data-was-contents','true');
                             }
-                        }
+                        });
                     });
-                } catch (e) {
-                    console.error("Error restoring tabs:", e);
+                    const elementIcon = evt.item.querySelector(".cy-studio-field-icons");
+                    elementIcon?.classList.add("d-none");
+//                    evt.item.classList.remove("flex-column");
+                },
+                onClone: function(evt) {
+                    const ghost = evt.clone;
+                    const source = evt.item;
+
+                    // Copy exact bounding box
+                    const rect = source.getBoundingClientRect();
+                    ghost.style.width = rect.width + "px";
+                    ghost.style.height = rect.height + "px";
+
+                    // Copy padding, margin, display
+                    const styles = window.getComputedStyle(source);
+                    ghost.style.padding = styles.padding;
+                    ghost.style.margin = styles.margin;
+                    ghost.style.display = styles.display;
+
+                    // OPTIONAL — copy whole computed styles (keeps UI consistent)
+                    for (let prop of styles) {
+                        ghost.style[prop] = styles[prop];
+                    }
+                },
+
+                onMove: function(evt, originalEvent) {
+                const related = evt.related;
+
+                console.log('onMove - related:', related?.className);
+
+                // Block drops on trash container and separators
+                if (related && related.classList.contains('cy-inner-trash-container')) {
+                    console.log('Blocking drop on trash');
+                    return false;
+                }
+                if (related && related.classList.contains('g-col-sm-2')) {
+                    console.log('Blocking drop on separator');
+                    return false;
+                }
+
+                // Allow drops on o_wrap_field elements
+                if (related && related.classList.contains('o_wrap_field')) {
+                    return true;
+                }
+                return true;
+            },
+                onEnd: async function(evt) {
+                    console.log(' onEnd triggered', evt);
+                    const el = evt.item;
+                    const elementIcon = el.querySelector(".cy-studio-field-icons");
+                    elementIcon?.classList.remove("d-none");
+                    const allInnerGroups = document.querySelectorAll('.o_inner_group[data-had-grid="true"]');
+                    allInnerGroups.forEach(group => {
+                        group.classList.add('grid');
+                        group.removeAttribute('data-had-grid');
+                    });
+                    const allGroups = document.querySelectorAll('.o_inner_group');
+                        allGroups.forEach(grp => {
+                            const fields = grp.querySelectorAll('.o_wrap_field[data-was-contents="true"]');
+                            fields.forEach(field => {
+                                field.classList.add('d-sm-contents');
+                                field.removeAttribute('data-was-contents');
+                            });
+                        });
+                    if (el.getAttribute('data-was-contents') === 'true') {
+                        el.classList.add('d-sm-contents');
+                        el.removeAttribute('data-was-contents');
+                    }
+                    el.classList.add("flex-column");
+                    // Only process if item was actually moved
+                    if (evt.oldIndex === evt.newIndex && evt.from === evt.to) {
+                        return;
+                    }
+                    await self.handleFieldDrop(evt, dragState);
+                }
+            });
+            self.sortableInstances.push(sortableInstance);
+        });
+
+        console.log('Total sortable instances:', self.sortableInstances.length);
+
+        return () => {
+            console.log('Cleanup: destroying instances');
+            // self.sortableInstances.forEach(instance => instance?.destroy());
+            //    self.sortableInstances.forEach(instance => {
+            //     try {
+            //         if (instance && instance.el !== null && instance.el !== undefined) {
+            //             instance.destroy();
+            //         }
+            //     } catch(e) {}
+            // });
+            self.sortableInstances.forEach(instance => {
+        try {
+            if (instance) {
+                // Remove from SortableJS global list BEFORE destroying
+                const sortables = Sortable.utils?.sortables || [];
+                const idx = sortables.indexOf(instance);
+                if (idx > -1) sortables.splice(idx, 1);
+
+                if (instance.el) {
+                    instance.destroy();
                 }
             }
-        },
-        () => []
-        );
-        useEffect(
-            () => {
-                var self = this;
-                const InGrps = document.getElementsByClassName("o_inner_group");
-                var drake = dragula([...InGrps], {
-                    revertOnSpill: true,
-                    moves: function(el, container, handle) {
-                        if (handle.classList.contains("cy-studio-icon") || el.classList.contains("add-fields")) {
-                            return false;
-                        }
-                        if(el.children.length > 2){
-                            return false
-                        }
-                        if (el.classList.contains("o_wrap_field")) {
-                            return true;
-                        }
-                        return false;
-                    },
-                    accepts: function(el, target, source, sibling) {
-                        if (!sibling || sibling.classList.contains('o_wrap_field') || sibling.classList.contains('o_cell')|| sibling.classList.contains('cy-inner-trash-container')) {
-                            return true;
-                        }
-                        return false;
-                    },
-                });
-                let initialIndex = ''
-                let initialX = ''
-                drake.on("drag", (el,source) => {
-                        initialIndex = Array.from(source.children).indexOf(el);
-                        initialX = el.getBoundingClientRect().left;
-                        const elementIcon = el.querySelector(".cy-studio-field-icons");
-                        elementIcon?.classList.add("d-none");
-
-                        el.classList.remove("d-sm-contents", "flex-column");
-                        if (el.children[1]) {
-                            el.children[0]?.classList.add(
-                                "col-6",
-                                "border",
-                                "border-primary",
-                                "me-3",
-                                "w-100",
-                                "h-100",
-
-                            );
-                            el.children[1]?.classList.add(
-                                "col-6",
-                                "border",
-                                "border-primary",
-                                "ms-3",
-                                "w-100",
-                                "h-100",
-                            );
-                        } else {
-                            el.children[0]?.classList.add(
-                                "col-12",
-                                "border",
-                                "border-primary"
-                            );
-                        }
-                    })
-                    .on("over", function(el, container, source) {
-                        const ghostDiv = container.querySelector('ghost-container')
-                        el.classList.add("d-sm-contents", "flex-column");
-                    })
-                    .on("dragend", function(el, container) {
-                        const elementIcon = el.querySelector(".cy-studio-field-icons");
-                        elementIcon?.classList.remove("d-none");
-                        el.classList.add("d-sm-contents", "flex-column");
-                        if (el.children[1]) {
-                            el.children[0]?.classList.remove(
-                                "col-6",
-                                "border",
-                                "border-primary"
-                            );
-                            el.children[1]?.classList.remove(
-                                "col-6",
-                                "border",
-                                "border-primary"
-                            );
-                        } else {
-                            el.children[0]?.classList.remove(
-                                "col-12",
-                                "border",
-                                "border-primary"
-                            );
-                        }
-                    })
-                    .on("drop", async (el, target, source, sibling) => {
-                        let finalIndex = Array.from(target.children).indexOf(el);
-                        let finalX = el.getBoundingClientRect().left;
-                        let path = target?.getAttribute("cy-xpath");
-                        let position = "inside";
-                        if (sibling) {
-                            position = "before";
-                            if(sibling.classList.contains('cy-inner-trash-container')){
-                                const siblingPath = sibling.nextElementSibling?.firstElementChild?.getAttribute("cy-xpath");
-                                path = siblingPath ? siblingPath : sibling.nextElementSibling?.firstElementChild?.firstElementChild?.getAttribute("cy-xpath");
-                            }else{
-                                path = sibling.firstElementChild?.getAttribute("cy-xpath");
-                            }
-                            if (!path){
-                                let child = sibling.firstElementChild;
-                                path = child.firstElementChild?.getAttribute("cy-xpath");
-                            }
-                        }
-                        let has_multipath = false;
-                        let item_path = el.firstElementChild?.getAttribute("cy-xpath") || "";
-                        if (!item_path) {
-                            let child = el.firstElementChild;
-                            if (child.firstElementChild.nodeName == "BUTTON") {
-                                item_path = child.firstElementChild?.getAttribute("cy-xpath");
-                            } else if(!child.nextElementSibling){
-                                item_path = child.firstElementChild?.getAttribute("cy-xpath")
-                            } else {
-                                has_multipath = true;
-                                item_path = {
-                                    first_path: child.firstElementChild?.getAttribute("cy-xpath"),
-                                    second_path: child.nextElementSibling.firstElementChild?.getAttribute(
-                                        "cy-xpath"
-                                    ),
-                                };
-                            }
-                        }
-                        let direction = "";
-                        if (finalIndex > initialIndex) {
-                            direction = "down"; // Moved Down
-                        } else if (finalIndex < initialIndex) {
-                            direction = "up"; // Moved Up
-                        }
-                        if (finalX > initialX) {
-                            direction = "right";
-                        } else if (finalX < initialX) {
-                            direction = "left";
-                        }
-                        if(path){
-                        self.env.services.ui.block();
-                            try {
-                                const currentNotebook = document.querySelector('.o_notebook .nav-link.active');
-                                    if (currentNotebook) {
-                                        const notebookContainer = currentNotebook.closest('.o_notebook');
-                                        const notebookId = notebookContainer?.getAttribute('data-notebook-id') || 'default';
-                                        const pageIndex = Array.from(currentNotebook.parentElement.parentElement.children)
-                                            .indexOf(currentNotebook.parentElement);
-
-                                        const storedPages = JSON.parse(sessionStorage.getItem("cy_studio_active_notebook") || "{}");
-                                        storedPages[notebookId] = pageIndex;
-                                        sessionStorage.setItem("cy_studio_active_notebook", JSON.stringify(storedPages));
-                                    }
-                                const args = {
-                                    'item_path': item_path,
-                                    'path': path,
-                                    'position': position,
-                                    'has_multipath': has_multipath,
-                                    'model': self.props.resModel,
-                                    'view_id': self.env.config.viewId,
-                                    'direction': direction,
-                                    'inSource': target === source,
-                                }
-                                const result = await self.rpc("/cyllo_studio/FieldPositionMove", {
-                                    args
-                                });
-                               if(result){
-                                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                                let cleanedStr = result.FormArch.replace(/\s+/g, ' ').trim();
-                                storedArray.push(cleanedStr)
-                                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                                sessionStorage.setItem('ReDO', JSON.stringify([]));
-                                }
-                        } finally {
-                            self.env.services.ui.unblock();
-                        }
-                        }
-                        self.action.doAction("studio_reload");
-                        this.env.bus.trigger('resetProperties')
-                    });
-                return () => {
-                    drake.destroy();
-                };
-            },
-            () => [this.fieldMove.toggle]
-        );
-
-         await this.env.bus.addEventListener('X2ManyDetails', (ev) => {
+        } catch(e) {}
+    });
+            self.sortableInstances = [];
+        };
+    },
+    () => [this.fieldMove.toggle]);
+       await this.env.bus.addEventListener('X2ManyDetails', (ev) => {
             this.state.x2ManyDetails = ev.detail
             this.state.isX2Many = true
             this.path = ev.detail.path
-
-        });
+       });
     }
+//    async handleFieldDrop(evt, dragState) {
+//    const el = evt.item;
+//    const target = evt.to;
+//    const source = evt.from;
+//
+//    console.log('=== DROP DEBUG START ===');
+//    console.log('Event oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex);
+//    console.log('Same container:', source === target);
+//
+//    // Get ALL children from the target container
+//    const allChildren = Array.from(target.children);
+//
+//    // Find where the dropped element currently is (Sortable has already moved it)
+//    const droppedIndex = allChildren.indexOf(el);
+//    console.log('Dropped element current index:', droppedIndex);
+//
+//    // Find the next o_wrap_field element AFTER the dropped position
+//    let sibling = null;
+//    for (let i = droppedIndex + 1; i < allChildren.length; i++) {
+//        if (allChildren[i].classList.contains('o_wrap_field')) {
+//            sibling = allChildren[i];
+//            console.log('Found sibling at index', i);
+//            break;
+//        }
+//    }
+//
+//    let path = target?.getAttribute("cy-xpath");
+//    let position = sibling ? "before" : "inside";
+//
+//    console.log('Position:', position, 'Sibling:', sibling ? 'found' : 'none');
+//
+//    // Get path from sibling if positioning "before"
+//    if (sibling) {
+//        let siblingPath = sibling.querySelector('[cy-xpath]')?.getAttribute('cy-xpath');
+//
+//        if (!siblingPath) {
+//            siblingPath = sibling.firstElementChild?.getAttribute('cy-xpath');
+//        }
+//
+//        if (!siblingPath) {
+//            siblingPath = sibling.firstElementChild?.firstElementChild?.getAttribute('cy-xpath');
+//        }
+//
+//        if (siblingPath) {
+//            path = siblingPath;
+//            console.log('Using sibling path:', path);
+//        }
+//    }
+//
+//    // Get item path (what we're moving)
+//    let has_multipath = false;
+//    let item_path = el.querySelector('[cy-xpath]')?.getAttribute('cy-xpath') || "";
+//
+//    if (!item_path) {
+//        item_path = el.firstElementChild?.getAttribute("cy-xpath") || "";
+//    }
+//
+//    if (!item_path) {
+//        const child = el.firstElementChild;
+//        const firstChild = child?.firstElementChild;
+//
+//        if (firstChild?.nodeName === "BUTTON") {
+//            item_path = firstChild.getAttribute("cy-xpath");
+//        } else if (!child?.nextElementSibling) {
+//            item_path = firstChild?.getAttribute("cy-xpath");
+//        } else {
+//            has_multipath = true;
+//            item_path = {
+//                first_path: firstChild?.getAttribute("cy-xpath"),
+//                second_path: child.nextElementSibling?.firstElementChild?.getAttribute("cy-xpath"),
+//            };
+//        }
+//    }
+//
+//    console.log('Item path:', item_path);
+//
+//    // Determine direction of movement
+//    let direction = "";
+//    let finalX = el.getBoundingClientRect().left;
+//
+//    if (source === target) {
+//        // Moving within same container (up/down)
+//        // Use oldIndex and newIndex from Sortable
+//        if (evt.newIndex > dragState.initialIndex) {
+//            direction = "down";
+//            console.log('Direction: down');
+//        } else if (evt.newIndex < dragState.initialIndex) {
+//            direction = "up";
+//            console.log('Direction: up');
+//        }
+//    } else {
+//        // Moving between containers (left/right)
+//        if (finalX > dragState.initialX) {
+//            direction = "right";
+//            console.log('Direction: right');
+//        } else if (finalX < dragState.initialX) {
+//            direction = "left";
+//            console.log('Direction: left');
+//        }
+//    }
+//
+//    console.log('Final data:', {
+//        item_path,
+//        path,
+//        position,
+//        direction,
+//        has_multipath
+//    });
+//    console.log('=== DROP DEBUG END ===');
+//
+//    if (!path) {
+//        console.error('ERROR: No path found!');
+//        return;
+//    }
+//
+//    if (!item_path) {
+//        console.error('ERROR: No item_path found!');
+//        return;
+//    }
+//
+//    this.env.services.ui.block();
+//    try {
+//        const args = {
+//            'item_path': item_path,
+//            'path': path,
+//            'position': position,
+//            'has_multipath': has_multipath,
+//            'model': this.props.resModel,
+//            'view_id': this.env.config.viewId,
+//            'direction': direction,
+//            'inSource': target === source,
+//        };
+//
+//        console.log('Sending RPC:', args);
+//
+//        const result = await this.rpc("/cyllo_studio/FieldPositionMove", {
+//            args
+//        });
+//
+//        if (result) {
+//            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//            let cleanedStr = result.FormArch.replace(/\s+/g, ' ').trim();
+//            storedArray.push(cleanedStr);
+//            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//            sessionStorage.setItem('ReDO', JSON.stringify([]));
+//            console.log('RPC successful');
+//        }
+//    } catch (error) {
+//        console.error('RPC Error:', error);
+//    } finally {
+//        this.env.services.ui.unblock();
+//        this.action.doAction('studio_reload');
+//    }
+//
+//    await this.action.doAction("studio_reload");
+//    this.env.bus.trigger('resetProperties');
+//}
+
+ // async handleFieldDrop(evt, dragState) {
+ //    const el = evt.item;
+ //    const target = evt.to;
+ //    const source = evt.from;
+ //    const movedInsideSame = source === target;
+ //
+ //    console.log('oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex, 'sameContainer:', movedInsideSame);
+ //
+ //    const children = Array.from(target.children);
+ //    const droppedIndex = children.indexOf(el);
+ //    if (droppedIndex === -1) {
+ //        console.error('Dropped element not found in target children. Aborting.');
+ //        return;
+ //    }
+ //    console.log('Dropped index:', droppedIndex);
+ //
+ //    // Find next o_wrap_field element after the dropped index
+ //    let sibling = null;
+ //    for (let i = droppedIndex + 1; i < children.length; i++) {
+ //        if (children[i].classList.contains('o_wrap_field')) {
+ //            sibling = children[i];
+ //            break;
+ //        }
+ //    }
+ //
+ //    const position = sibling ? 'before' : 'inside';
+ //    console.log('Position decided:', position, sibling ? 'sibling found' : 'no sibling');
+ //
+ //    // --- 2) Resolve target path (cy-xpath) ---
+ //    let targetPath = target.getAttribute('cy-xpath') || '';
+ //
+ //    if (sibling) {
+ //        targetPath =
+ //            sibling.querySelector('[cy-xpath]')?.getAttribute('cy-xpath') ||
+ //            sibling.firstElementChild?.getAttribute('cy-xpath') ||
+ //            sibling.firstElementChild?.firstElementChild?.getAttribute('cy-xpath') ||
+ //            targetPath;
+ //    }
+ //    console.log('Target path:', targetPath);
+ //
+ //    let item_path = '';
+ //    let has_multipath = false;
+ //
+ //    // Try to find direct cy-xpath nodes inside the dropped wrapper
+ //    let subfields;
+ //    try {
+ //        subfields = el.querySelectorAll(':scope > div [cy-xpath]');
+ //    } catch (e) {
+ //        subfields = el.querySelectorAll('div [cy-xpath]');
+ //    }
+ //
+ //    if (subfields && subfields.length > 1) {
+ //        has_multipath = true;
+ //        item_path = {
+ //            first_path: subfields[0].getAttribute('cy-xpath'),
+ //            second_path: subfields[1].getAttribute('cy-xpath'),
+ //        };
+ //    } else if (subfields && subfields.length === 1) {
+ //        item_path = subfields[0].getAttribute('cy-xpath');
+ //    } else {
+ //        // If no subfields found, try other robust fallbacks:
+ //        // 1) direct [cy-xpath] inside element
+ //        const direct = el.querySelector('[cy-xpath]');
+ //        if (direct) {
+ //            item_path = direct.getAttribute('cy-xpath');
+ //        } else {
+ //            // 2) maybe the wrapper has nested structure: try a few nested attempts
+ //            const f1 = el.firstElementChild?.querySelector('[cy-xpath]') || el.firstElementChild;
+ //            const f2 = el.firstElementChild?.nextElementSibling?.querySelector('[cy-xpath]');
+ //
+ //            if (f1 && f2) {
+ //                has_multipath = true;
+ //                item_path = {
+ //                    first_path: f1.getAttribute ? f1.getAttribute('cy-xpath') : null,
+ //                    second_path: f2.getAttribute ? f2.getAttribute('cy-xpath') : null,
+ //                };
+ //            } else if (f1 && f1.getAttribute && f1.getAttribute('cy-xpath')) {
+ //                item_path = f1.getAttribute('cy-xpath');
+ //            } else {
+ //                item_path = '';
+ //            }
+ //        }
+ //    }
+ //
+ //    let direction = '';
+ //    if (movedInsideSame) {
+ //        // Prefer Sortable's newIndex vs saved initialIndex
+ //        if (typeof dragState.initialIndex === 'number' && typeof evt.newIndex === 'number') {
+ //            direction = evt.newIndex > dragState.initialIndex ? 'down' : 'up';
+ //        } else {
+ //            direction = evt.newIndex > evt.oldIndex ? 'down' : 'up';
+ //        }
+ //    } else {
+ //        // Compare final x to initialX (dragState should store initialX on dragStart)
+ //        const finalX = el.getBoundingClientRect().left;
+ //        if (typeof dragState.initialX === 'number') {
+ //            direction = finalX > dragState.initialX ? 'right' : 'left';
+ //        } else {
+ //            // fallback: if source index unknown, default to left (safe)
+ //            direction = 'left';
+ //        }
+ //    }
+ //    console.log('Direction:', direction);
+ //
+ //    // --- 5) Validate paths before RPC ---
+ //    if (!targetPath) {
+ //        console.error('No target path found - aborting move.');
+ //        return;
+ //    }
+ //    if (!item_path || (has_multipath && (!item_path.first_path || !item_path.second_path))) {
+ //        console.error('No valid item_path detected - aborting move. Multipath:', has_multipath);
+ //        return;
+ //    }
+ //
+ //    // --- 6) Prepare payload and call server ---
+ //    const payload = {
+ //        item_path,
+ //        path: targetPath,
+ //        position,
+ //        has_multipath,
+ //        model: this.props.resModel,
+ //        view_id: this.env.config.viewId,
+ //        direction,
+ //        inSource: movedInsideSame,
+ //    };
+ //
+ //    console.log('Sending RPC payload:', payload);
+ //
+ //    this.env.services.ui.block();
+ //    try {
+ //        const result = await this.rpc('/cyllo_studio/FieldPositionMove', { args: payload });
+ //
+ //                                        const storedPages = JSON.parse(sessionStorage.getItem("cy_studio_active_notebook") || "{}");
+ //                                        storedPages[notebookId] = pageIndex;
+ //                                        sessionStorage.setItem("cy_studio_active_notebook", JSON.stringify(storedPages));
+ //                                    }
+ //                                const args = {
+ //                                    'item_path': item_path,
+ //                                    'path': path,
+ //                                    'position': position,
+ //                                    'has_multipath': has_multipath,
+ //                                    'model': self.props.resModel,
+ //                                    'view_id': self.env.config.viewId,
+ //                                    'direction': direction,
+ //                                    'inSource': target === source,
+ //                                }
+ //                                const result = await self.rpc("/cyllo_studio/FieldPositionMove", {
+ //                                    args
+ //                                });
+ //                               if(result){
+ //                                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+ //                                let cleanedStr = result.FormArch.replace(/\s+/g, ' ').trim();
+ //                                storedArray.push(cleanedStr)
+ //                                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+ //                                sessionStorage.setItem('ReDO', JSON.stringify([]));
+ //                                }
+ //                        } finally {
+ //                            self.env.services.ui.unblock();
+ //                        }
+ //                        }
+ //                        self.action.doAction("studio_reload");
+ //                        this.env.bus.trigger('resetProperties')
+ //                    });
+ //                return () => {
+ //                    drake.destroy();
+ //                };
+ //            },
+ //            () => [this.fieldMove.toggle]
+ //        );
+ //
+ //         await this.env.bus.addEventListener('X2ManyDetails', (ev) => {
+ //            this.state.x2ManyDetails = ev.detail
+ //            this.state.isX2Many = true
+ //            this.path = ev.detail.path
+ //
+ //        });
+ //    }
+     async handleFieldDrop(evt, dragState) {
+    const el = evt.item;
+    const target = evt.to;
+    const source = evt.from;
+    const movedInsideSame = source === target;
+
+    console.log('oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex, 'sameContainer:', movedInsideSame);
+
+    const children = Array.from(target.children);
+    const droppedIndex = children.indexOf(el);
+    if (droppedIndex === -1) {
+        console.error('Dropped element not found in target children. Aborting.');
+        return;
+    }
+    console.log('Dropped index:', droppedIndex);
+
+    // Find next o_wrap_field element after the dropped index
+    let sibling = null;
+    for (let i = droppedIndex + 1; i < children.length; i++) {
+        if (children[i].classList.contains('o_wrap_field')) {
+            sibling = children[i];
+            break;
+        }
+    }
+
+    const position = sibling ? 'before' : 'inside';
+    console.log('Position decided:', position, sibling ? 'sibling found' : 'no sibling');
+
+    // --- 2) Resolve target path (cy-xpath) ---
+    let targetPath = target.getAttribute('cy-xpath') || '';
+
+    if (sibling) {
+        targetPath =
+            sibling.querySelector('[cy-xpath]')?.getAttribute('cy-xpath') ||
+            sibling.firstElementChild?.getAttribute('cy-xpath') ||
+            sibling.firstElementChild?.firstElementChild?.getAttribute('cy-xpath') ||
+            targetPath;
+    }
+    console.log('Target path:', targetPath);
+
+    let item_path = '';
+    let has_multipath = false;
+
+    // Try to find direct cy-xpath nodes inside the dropped wrapper
+    let subfields;
+    try {
+        subfields = el.querySelectorAll(':scope > div [cy-xpath]');
+    } catch (e) {
+        subfields = el.querySelectorAll('div [cy-xpath]');
+    }
+
+    if (subfields && subfields.length > 1) {
+        has_multipath = true;
+        item_path = {
+            first_path: subfields[0].getAttribute('cy-xpath'),
+            second_path: subfields[1].getAttribute('cy-xpath'),
+        };
+    } else if (subfields && subfields.length === 1) {
+        item_path = subfields[0].getAttribute('cy-xpath');
+    } else {
+        const direct = el.querySelector('[cy-xpath]');
+        if (direct) {
+            item_path = direct.getAttribute('cy-xpath');
+        } else {
+            // 2) maybe the wrapper has nested structure: try a few nested attempts
+            const f1 = el.firstElementChild?.querySelector('[cy-xpath]') || el.firstElementChild;
+            const f2 = el.firstElementChild?.nextElementSibling?.querySelector('[cy-xpath]');
+
+            if (f1 && f2) {
+                has_multipath = true;
+                item_path = {
+                    first_path: f1.getAttribute ? f1.getAttribute('cy-xpath') : null,
+                    second_path: f2.getAttribute ? f2.getAttribute('cy-xpath') : null,
+                };
+            } else if (f1 && f1.getAttribute && f1.getAttribute('cy-xpath')) {
+                item_path = f1.getAttribute('cy-xpath');
+            } else {
+                item_path = '';
+            }
+        }
+    }
+
+    let direction = '';
+    if (movedInsideSame) {
+        // Prefer Sortable's newIndex vs saved initialIndex
+        if (typeof dragState.initialIndex === 'number' && typeof evt.newIndex === 'number') {
+            direction = evt.newIndex > dragState.initialIndex ? 'down' : 'up';
+        } else {
+            direction = evt.newIndex > evt.oldIndex ? 'down' : 'up';
+        }
+    } else {
+        // Compare final x to initialX (dragState should store initialX on dragStart)
+        const finalX = el.getBoundingClientRect().left;
+        if (typeof dragState.initialX === 'number') {
+            direction = finalX > dragState.initialX ? 'right' : 'left';
+        } else {
+            // fallback: if source index unknown, default to left (safe)
+            direction = 'left';
+        }
+    }
+    console.log('Direction:', direction);
+
+    // --- 5) Validate paths before RPC ---
+    if (!targetPath) {
+        console.error('No target path found - aborting move.');
+        return;
+    }
+    if (!item_path || (has_multipath && (!item_path.first_path || !item_path.second_path))) {
+        console.error('No valid item_path detected - aborting move. Multipath:', has_multipath);
+        return;
+    }
+
+    // --- 6) Prepare payload and call server ---
+    const payload = {
+        item_path,
+        path: targetPath,
+        position,
+        has_multipath,
+        model: this.props.resModel,
+        view_id: this.env.config.viewId,
+        direction,
+        inSource: movedInsideSame,
+    };
+
+    console.log('Sending RPC payload:', payload);
+
+    this.env.services.ui.block();
+    try {
+        const result = await this.rpc('/cyllo_studio/FieldPositionMove', { args: payload });
+
+        if (result && result.FormArch) {
+            // store clean arch patch for undo
+            let stored = JSON.parse(sessionStorage.getItem('UndoRedo') || '[]');
+            // keep patch trimmed to avoid huge whitespace diffs
+            const cleaned = (typeof result.FormArch === 'string') ? result.FormArch.replace(/\s+/g, ' ').trim() : JSON.stringify(result.FormArch);
+            stored.push(cleaned);
+            sessionStorage.setItem('UndoRedo', JSON.stringify(stored));
+            sessionStorage.setItem('ReDO', JSON.stringify([]));
+        } else {
+            console.warn('RPC returned no FormArch; server result:', result);
+        }
+    } catch (err) {
+        console.error('RPC Error:', err);
+    } finally {
+        this.env.services.ui.unblock();
+        await this.action.doAction('studio_reload');
+        this.env.bus.trigger('resetProperties');
+    }
+}
+
 
     get rendererX2ManyProps() {
         const props = {
