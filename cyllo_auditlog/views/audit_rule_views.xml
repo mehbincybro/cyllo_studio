@@ -28,7 +28,7 @@
         <field name="arch" type="xml">
             <form string="Audit Rule" class="o_audit_rule_form">
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
+                    <div class="oe_button_box" name="button_box" invisible="log_count == 0">
                         <button name="%(action_audit_log)d" type="action" class="oe_stat_button" icon="fa-history"
                                 context="{'search_default_model_id': model_id}">
                             <field name="log_count" widget="statinfo" string="Logs"/>
@@ -54,7 +54,7 @@
                             <div class="o_row">
                                 <field name="track_read" widget="boolean_toggle" nolabel="1"/>
                                 <span class="text-warning ms-2" invisible="not track_read">
-                                    <i class="fa fa-exclamation-triangle me-1"/>
+                                    <i class="fa fa-exclamation-triangle me-1" title="Warning"/>
                                     Read tracking can generate many logs and impact performance.
                                 </span>
                             </div>
@@ -122,7 +122,7 @@
                             </group>
                             <div class="o_audit_summary_box" invisible="user_selection_type == 'all'">
                                 <div class="o_summary_icon">
-                                    <i class="fa fa-users"/>
+                                    <i class="fa fa-users" title="Users"/>
                                 </div>
                                 <div class="o_summary_content">
                                     <div class="o_summary_label">Tracked Users</div>

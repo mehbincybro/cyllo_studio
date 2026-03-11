@@ -25,6 +25,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class AuditSession(models.Model):
     _name = 'audit.session'
     _description = 'User Audit Session'
@@ -34,16 +35,26 @@ class AuditSession(models.Model):
         ('unique_session_user', 'unique(name, user_id)', 'A session for this user ID already exists!')
     ]
 
-    name = fields.Char(string='Session ID', required=True, readonly=True, help='Session identifier captured from the web session.')
-    user_id = fields.Many2one('res.users', string='User', required=True, readonly=True, help='User owning this audited session.')
-    ip_address = fields.Char(string='IP Address', readonly=True, help='Client IP address at login/session creation time.')
-    user_agent = fields.Text(string='User Agent', readonly=True, help='Browser or client user-agent captured for the session.')
-    login_time = fields.Datetime(string='Login Time', default=fields.Datetime.now, readonly=True, help='Timestamp when the session was first logged.')
-    logout_time = fields.Datetime(string='Logout Time', readonly=True, help='Timestamp when the session ended, if available.')
-    is_active = fields.Boolean(string='Still Active?', compute='_compute_is_active', help='Indicates whether the session is still open.')
+    name = fields.Char(string='Session ID', required=True, readonly=True,
+                       help='Session identifier captured from the web session.')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company,
+                                 help='Company of the session owner at session creation.')
+    user_id = fields.Many2one('res.users', string='User', required=True, readonly=True,
+                              help='User owning this audited session.')
+    ip_address = fields.Char(string='IP Address', readonly=True,
+                             help='Client IP address at login/session creation time.')
+    user_agent = fields.Text(string='User Agent', readonly=True,
+                             help='Browser or client user-agent captured for the session.')
+    login_time = fields.Datetime(string='Login Time', default=fields.Datetime.now, readonly=True,
+                                 help='Timestamp when the session was first logged.')
+    logout_time = fields.Datetime(string='Logout Time', readonly=True,
+                                  help='Timestamp when the session ended, if available.')
+    is_active = fields.Boolean(string='Still Active?', compute='_compute_is_active',
+                               help='Indicates whether the session is still open.')
 
     log_ids = fields.One2many('audit.log', 'session_id', string='Logs', help='Audit logs linked to this session.')
-    log_count = fields.Integer(string='Logs', compute='_compute_log_count', help='Number of audit logs linked to this session.')
+    log_count = fields.Integer(string='Logs', compute='_compute_log_count',
+                               help='Number of audit logs linked to this session.')
 
     def _compute_is_active(self):
         """Mark sessions as active when no logout timestamp exists."""
@@ -90,5 +101,6 @@ class AuditSession(models.Model):
             # Another concurrent request already inserted the exact same session ID & user.
             # The database threw a Unique Violation error. We catch it, Postgres rolls back our
             # tiny savepoint, and we safely fetch the record the OTHER request just made.
-            _logger.debug(f"Caught IntegrityError for concurrent session creation on User ID {current_user.id}. Safely fetching existing.")
+            _logger.debug(
+                f"Caught IntegrityError for concurrent session creation on User ID {current_user.id}. Safely fetching existing.")
             return self.sudo().search([('name', '=', sid), ('user_id', '=', current_user.id)], limit=1)

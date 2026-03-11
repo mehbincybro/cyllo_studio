@@ -37,11 +37,15 @@ class AuditRule(models.Model):
         return (last_sequence_rule.sequence + 10) if last_sequence_rule else 10
 
     name = fields.Char(string='Rule Name', required=True, help='Human-readable name of the audit rule.')
-    sequence = fields.Integer(string='Sequence', default=_default_sequence, help='Ordering priority used when evaluating rules.')
+    sequence = fields.Integer(string='Sequence', default=_default_sequence,
+                              help='Ordering priority used when evaluating rules.')
     active = fields.Boolean(string='Active', default=True, help='Enable or disable this rule without deleting it.')
+    company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company,
+                                 help='Company that owns this audit rule.')
     model_id = fields.Many2one('ir.model', string='Model', required=True, domain=[('transient', '=', False)],
                                ondelete='cascade', help='Select the model to audit')
-    model_name = fields.Char(string='Model Name', related='model_id.model', store=True, help='Technical model name derived from the selected model.')
+    model_name = fields.Char(string='Model Name', related='model_id.model', store=True,
+                             help='Technical model name derived from the selected model.')
     log_level = fields.Selection([('info', 'Info'), ('warning', 'Warning'), ('critical', 'Critical')],
                                  string='Log Level', default='info', required=True,
                                  help='Severity level assigned to logs created by this rule.')
@@ -80,22 +84,25 @@ class AuditRule(models.Model):
                               help='Advanced domain filter for users (e.g., [("company_id", "=", 1)])')
     # Additional Options
     track_ip = fields.Boolean(string='Track IP Address', default=True, help='Capture client IP address in audit logs.')
-    track_session = fields.Boolean(string='Track Session', default=False, help='Link logs to an audit session when available.')
+    track_session = fields.Boolean(string='Track Session', default=False,
+                                   help='Link logs to an audit session when available.')
     # Retention Policy
-    has_retention = fields.Boolean(string='Enable Retention Policy', default=False, help='Automatically remove old logs for this model.')
-    retention_days = fields.Integer(string='Keep Logs for (Days)', default=30, help='Number of days to retain logs when retention is enabled.')
+    has_retention = fields.Boolean(string='Enable Retention Policy', default=False,
+                                   help='Automatically remove old logs for this model.')
+    retention_days = fields.Integer(string='Keep Logs for (Days)', default=30,
+                                    help='Number of days to retain logs when retention is enabled.')
     # Statistics
-    log_count = fields.Integer(string='Log Count', compute='_compute_log_count', help='Total number of audit logs matching this rule model.')
+    log_count = fields.Integer(string='Log Count', compute='_compute_log_count',
+                               help='Total number of audit logs matching this rule model.')
     notes = fields.Text(string='Notes', help='Internal notes or operational comments for this rule.')
-    user_count = fields.Integer(string='Affected Users', compute='_compute_user_count', store=True, help='Number of users currently included by this rule.')
+    user_count = fields.Integer(string='Affected Users', compute='_compute_user_count', store=True,
+                                help='Number of users currently included by this rule.')
 
     @api.depends('model_id')
     def _compute_log_count(self):
         """Compute the number of logs related to the configured model."""
         for audit_rule in self:
-            audit_rule.log_count = self.env['audit.log'].search_count([
-                ('model_id', '=', audit_rule.model_id.id)
-            ])
+            audit_rule.log_count = self.env['audit.log'].search_count([('model_id', '=', audit_rule.model_id.id)])
 
     @api.onchange('tracking_scope')
     def _onchange_tracking_scope(self):
@@ -115,8 +122,7 @@ class AuditRule(models.Model):
             if audit_rule.tracked_field_ids and audit_rule.excluded_field_ids:
                 raise models.ValidationError(
                     'You cannot set both Tracked Fields and Excluded Fields. '
-                    'Please choose one scope.'
-                )
+                    'Please choose one scope.')
 
     def _get_tracked_users(self):
         """Get the list of users that should be tracked concisely."""
@@ -172,8 +178,6 @@ class AuditRule(models.Model):
         for audit_rule in self:
             audit_rule.user_count = len(audit_rule._get_tracked_users())
 
-
-
     def action_cleanup_logs(self):
         """Manually clean up ALL audit logs linked to this rule."""
         self.ensure_one()
@@ -202,8 +206,7 @@ class AuditRule(models.Model):
             retention_limit_date = fields.Datetime.subtract(fields.Datetime.now(), days=audit_rule.retention_days)
             expired_audit_logs = self.env['audit.log'].sudo().search([
                 ('model_id', '=', audit_rule.model_id.id),
-                ('create_date', '<', retention_limit_date)
-            ])
+                ('create_date', '<', retention_limit_date)])
             if expired_audit_logs:
                 _logger.info("Audit: Cleaned up %d expired logs for rule %s", len(expired_audit_logs), audit_rule.name)
                 expired_audit_logs.unlink()
