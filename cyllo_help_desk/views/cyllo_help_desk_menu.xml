@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <menuitem id="cyllo_help_desk_menu_root" name="Help Desk"/>
+    <menuitem id="cyllo_helpdesk_overview_menu" name="Overview"
+              action="helpdesk_overview_team_action"
+              parent="cyllo_help_desk_menu_root"/>
+    <menuitem id="cyllo_helpdesk_ticket_menu" name="Tickets"
+              parent="cyllo_help_desk_menu_root"/>
+    <menuitem id="cyllo_helpdesk_my_ticket_menu" name="My Tickets"
+              action="helpdesk_my_ticket_action"
+              parent="cyllo_helpdesk_ticket_menu"/>
+    <menuitem id="cyllo_helpdesk_all_ticket_menu" name="All Tickets"
+              action="helpdesk_ticket_action"
+              parent="cyllo_helpdesk_ticket_menu"/>
+    <menuitem id="cyllo_helpdesk_reporting_menu" name="Reporting"
+              parent="cyllo_help_desk_menu_root"/>
+    <menuitem id="cyllo_helpdesk_analysis_menu" name="Help Desk Analysis"
+              action="helpdesk_analysis_action"
+              parent="cyllo_helpdesk_reporting_menu"/>
+    <menuitem id="cyllo_helpdesk_report_menu" name="Help Desk Report"
+              action="helpdesk_report_action"
+              parent="cyllo_helpdesk_reporting_menu"/>
+    <menuitem id="cyllo_helpdesk_daily_target_menu" name="Daily Targets"
+              action="daily_target_action"
+              parent="cyllo_helpdesk_reporting_menu"/>
+    <menuitem id="cyllo_helpdesk_customer_rating_menu" name="Customer Ratings"
+              action="rating_rating_action_helpdesk_ticket"
+              parent="cyllo_helpdesk_reporting_menu"/>
+    <menuitem id="cyllo_helpdesk_configuration_menu" name="Configuration"
+              parent="cyllo_help_desk_menu_root"
+              groups="cyllo_help_desk_manager"/>
+    <menuitem id="cyllo_helpdesk_category_menu" name="Category"
+              action="helpdesk_category_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_tag_menu" name="Tag"
+              action="helpdesk_tag_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_stage_menu" name="Stage"
+              action="helpdesk_stage_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_team_menu" name="Team"
+              action="helpdesk_team_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_sla_menu" name="SLA Policy"
+              action="helpdesk_sla_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_skill_menu" name="Skills"
+              action="helpdesk_skill_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+    <menuitem id="cyllo_helpdesk_canned_response_menu" name="Canned Responses"
+              action="helpdesk_canned_response_action"
+              parent="cyllo_helpdesk_configuration_menu"/>
+</odoo>

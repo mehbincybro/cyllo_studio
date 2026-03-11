@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="ir.module.category" id="cyllo_help_desk_groups">
+        <field name="name">Help Desk</field>
+        <field name="description">User access level for Helpdesk module
+        </field>
+        <field name="sequence">10</field>
+    </record>
+    <record id="cyllo_help_desk_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="cyllo_help_desk_groups"/>
+    </record>
+    <record id="cyllo_help_desk_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="cyllo_help_desk_groups"/>
+        <field name="implied_ids" eval="[(4, ref('cyllo_help_desk_user'))]"/>
+    </record>
+</odoo>

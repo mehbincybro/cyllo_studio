@@ -1,0 +1,210 @@
+import datetime
+import io
+import json
+import time
+from odoo import fields, models
+from odoo.exceptions import ValidationError
+from odoo.tools import date_utils
+
+try:
+    from odoo.tools.misc import xlsxwriter
+except ImportError:
+    import xlsxwriter
+
+
+class HelpDeskReport(models.TransientModel):
+    _name = "helpdesk.report"
+    _description = "HelpDesk Report"
+
+    start_date = fields.Datetime(string="Start Date",
+                                 default=time.strftime('%Y-%m-01'),
+                                 required=True)
+    end_date = fields.Datetime(string="End Date",
+                               default=datetime.datetime.now(),
+                               required=True)
+    category_ids = fields.Many2many('helpdesk.category', string="Category",
+                                    help="Choose a category")
+    customer_ids = fields.Many2many('res.partner', string="Customer",
+                                    help="Choose a customer")
+    current_date = fields.Date(default=fields.Date.today())
+
+    def get_helpdesk_ticket(self):
+        query = """select helpdesk_ticket.name, helpdesk_category.name as 
+                    category, res_partner.name as customer,
+                    helpdesk_stage.name as stage, helpdesk_team.name as team, 
+                    helpdesk_ticket.date, helpdesk_ticket.description from 
+                    helpdesk_ticket left join helpdesk_category on 
+                    helpdesk_ticket.category_id = helpdesk_category.id 
+                    left join res_partner on 
+                    helpdesk_ticket.customer_id = res_partner.id 
+                    left join helpdesk_stage on 
+                    helpdesk_ticket.stage_id = helpdesk_stage.id 
+                    left join helpdesk_team on 
+                    helpdesk_ticket.team_id = helpdesk_team.id WHERE 1=1
+         """
+        return query
+
+    def action_generate_pdf(self):
+        """Prints PDF report on clicking the button"""
+        query = self.get_helpdesk_ticket()
+        params = []
+        if self.category_ids:
+            query += " AND ("
+            params.append(self.category_ids[0].id)
+            query += "helpdesk_ticket.category_id = %s"
+
+            if len(self.category_ids) > 1:
+                for category in self.category_ids[1:]:
+                    query += " OR helpdesk_ticket.category_id = %s"
+                    params.append(category.id)
+            query += ")"
+
+        if self.customer_ids:
+            query += " AND ("
+            params.append(self.customer_ids[0].id)
+            query += "helpdesk_ticket.customer_id = %s"
+
+            if len(self.customer_ids) > 1:
+                for customer in self.customer_ids[1:]:
+                    query += " OR helpdesk_ticket.customer_id = %s"
+                    params.append(customer.id)
+            query += ")"
+        if self.start_date:
+            query += """ AND helpdesk_ticket.date >= %s"""
+            params.append(self.start_date)
+        if self.end_date:
+            query += """ AND helpdesk_ticket.date <= %s"""
+            params.append(self.end_date)
+        if self.start_date > self.end_date:
+            raise ValidationError('Start Date must be less than End Date')
+        cr_ = self._cr
+        cr_.execute(query, params)
+        helpdesk_ticket_data = self._cr.dictfetchall()
+        data = {
+            'customer': ', '.join([customer.name for customer in self.customer_ids]),
+            'category': ', '.join([category.name for category in self.category_ids]),
+            'date_start': self.start_date,
+            'date_end': self.end_date,
+            'current_date': self.current_date,
+            'helpdesk_ticket_data': helpdesk_ticket_data
+        }
+        return self.env.ref(
+            'cyllo_help_desk.action_report_helpdesk_ticket'). \
+            report_action(None, data=data)
+
+    def action_generate_xlsx(self):
+        query = self.get_helpdesk_ticket()
+        params = []
+        if self.category_ids:
+            query += " AND ("
+            params.append(self.category_ids[0].id)
+            query += "helpdesk_ticket.category_id = %s" % self.category_ids[0].id
+            if len(self.category_ids) > 1:
+                for category in self.category_ids[1:]:
+                    query += " OR helpdesk_ticket.category_id = %s" % category.id
+                    params.append(category.id)
+            query += ")"
+        if self.customer_ids:
+            query += " AND ("
+            params.append(self.customer_ids[0].id)
+            query += "helpdesk_ticket.customer_id = %s" % self.customer_ids[0].id
+            if len(self.customer_ids) > 1:
+                for customer in self.customer_ids[1:]:
+                    query += " OR helpdesk_ticket.customer_id = %s" % customer.id
+                    params.append(customer.id)
+            query += ")"
+        if self.start_date:
+            query += """ AND helpdesk_ticket.date >= '%s'""" % self.start_date
+        if self.end_date:
+            query += """ AND helpdesk_ticket.date <= '%s'""" % self.end_date
+        if self.start_date > self.end_date:
+            raise ValidationError('Start Date must be less than End Date')
+        cr_ = self._cr
+        cr_.execute(query, params)
+        helpdesk_ticket_data = self._cr.dictfetchall()
+        data = {
+            'customer': ', '.join([customer.name for customer in self.customer_ids]),
+            'category': ', '.join([category.name for category in self.category_ids]),
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'current_date': self.current_date,
+            'helpdesk_ticket_data': helpdesk_ticket_data,
+        }
+        return {
+            'type': 'ir.actions.report',
+            'data': {'model': 'helpdesk.report',
+                     'options': json.dumps(data,
+                                           default=date_utils.json_default),
+                     'output_format': 'xlsx',
+                     'report_name': 'Helpdesk Report',
+                     },
+            'report_type': 'xlsx',
+        }
+
+    def get_xlsx_report(self, data, response):
+        data = json.loads(data)
+        from_date = data['start_date']
+        to_date = data['end_date']
+        current_date = data['current_date']
+        helpdesk_ticket_data = data['helpdesk_ticket_data']
+        output = io.BytesIO()
+        workbook = xlsxwriter.Workbook(output, {'in_memory': True})
+        sheet = workbook.add_worksheet()
+        header = workbook.add_format({'bold': True, 'align': 'center'})
+        header_style = workbook.add_format({'bold': True})
+        head = workbook.add_format(
+            {'align': 'center', 'bold': True, 'font_size': '20px'})
+        row = 4
+        if from_date:
+            sheet.write(row, 0, 'From Date :  ' + from_date, header_style)
+            row += 1
+            if to_date:
+                sheet.write(row, 0, 'To date :  ' + to_date, header_style)
+                row += 1
+        else:
+            sheet.write(row, 0, 'Date :  ' + current_date, header_style)
+            row += 1
+        row += 1
+        column = 0
+        sheet.merge_range('A2:I3', 'HELPDESK TICKET REPORT', head)
+        sheet.write(row, column, 'Sl.no', header)
+        column += 1
+        sheet.write(row, column, 'Helpdesk Ticket Name', header)
+        column += 1
+        sheet.write(row, column, 'Customer', header)
+        column += 1
+        sheet.write(row, column, 'Category', header)
+        column += 1
+        sheet.write(row, column, 'Stage', header)
+        column += 1
+        sheet.write(row, column, 'Team', header)
+        column += 1
+        sheet.write(row, column, 'Date', header)
+        column += 1
+        sheet.write(row, column, 'Description', header)
+        column += 1
+        sheet.set_column(1, 1, 20)
+        sheet.set_column(2, 2, 20)
+        sheet.set_column(2, 2, 20)
+        sheet.set_column(3, 3, 20)
+        sheet.set_column(4, 4, 20)
+        sheet.set_column(6, 6, 20)
+        sheet.set_column(7, 7, 20)
+        sheet.set_column(8, 8, 20)
+        row += 1
+        number = 1
+        for data in helpdesk_ticket_data:
+            sheet.write(row, 0, number)
+            sheet.write(row, 1, data['name'])
+            sheet.write(row, 2, data['customer'])
+            sheet.write(row, 3, data['category'])
+            sheet.write(row, 4, data['stage'])
+            sheet.write(row, 5, data['team'])
+            sheet.write(row, 6, str(data['date']))
+            sheet.write(row, 7, data['description'])
+            number += 1
+            row += 1
+        workbook.close()
+        output.seek(0)
+        response.stream.write(output.read())
+        output.close()

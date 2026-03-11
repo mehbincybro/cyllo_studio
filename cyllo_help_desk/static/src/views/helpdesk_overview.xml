@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates>
+    <t t-name="cyllo_help_desk.ToggleTag" owl="1">
+        <div  class="some_class"
+             style="cursor: pointer">
+            <t t-if="toggle.tag">
+                <input t-ref="root" class="w-100 o_input_tag" t-on-blur="onBlurEvent"
+                       style="text-align:center"
+                       type="text" inputmode="decimal"
+                       pattern="[0-9]*[.,]?[0-9]*"
+                       t-att-value="toggle.value"
+                />
+            </t>
+            <t t-else="">
+                <div t-on-click="changeElement">
+                    <span><t t-out="toggle.value"/></span>
+                </div>
+            </t>
+        </div>
+    </t>
+    <t t-name="cyllo_help_desk.HelpdeskOverview" owl="1">
+        <div class="container-fluid py-4 border-bottom bg-white">
+            <div class="row justify-content-between gap-3 gap-lg-0">
+                <div class="col-12 col-lg-5 col-xl-5 col-xxl-4 flex-grow-1 flex-lg-grow-0 flex-shrink-0">
+                    <div class="grid gap-4">
+                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start">
+                            <h3 class="o_highlight">My Tickets</h3>
+                        </div>
+                        <div class="g-col-9 g-col-sm-10 grid gap-1">
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="My Tickets"
+                                 filter_name="user_id, stage_id"
+                                 name="cyllo_help_desk.helpdesk_my_open_ticket_action">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
+                                    <div class="fs-2"
+                                         t-out="ticketData['all_tickets']"/>
+                                    Tickets
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="High Priority"
+                                 filter_name="high_priority"
+                                 name="cyllo_help_desk.helpdesk_my_high_priority_open_ticket_action">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
+                                    <div class="fs-2"
+                                         t-out="ticketData['high_priority']"/>
+                                    High Priority
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Urgent Tickets"
+                                 filter_name="urgent_tickets"
+                                 name="cyllo_help_desk.helpdesk_my_urgent_priority_open_ticket_action">
+                                <a href="#"
+                                   class="btn btn-primary w-100 h-100 border-0 rounded-0 text-capitalize fw-normal">
+                                    <div class="fs-2"
+                                         t-out="ticketData['urgent']"/>Urgent
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid gap-4">
+                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start">
+                            Average Open Hours
+                        </div>
+                        <div class="g-col-9 g-col-sm-10 grid gap-2">
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Average Open Hours"
+                                 filter_name="open_tickets"
+                                 name="cyllo_help_desk.helpdesk_my_ticket_average_open_hours_action">
+                                <a href="#"
+                                   class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['average_open_hour']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="High Priority Average Open Hour"
+                                 filter_name="high_priority_open_tickets"
+                                 name="cyllo_help_desk.helpdesk_high_priority_ticket_average_open_hours_action">
+                                <a href="#"
+                                   class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['high_priority_average_open_hour']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Urgent Average Open Hours"
+                                 filter_name="urgent_open_tickets"
+                                 name="cyllo_help_desk.helpdesk_urgent_ticket_average_open_hours_action">
+                                <a href="#"
+                                   class="btn btn-light d-flex align-items-center w-100 h-100 p-0 border-0 bg-100 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['urgent_average_open_hour']"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="grid gap-4">
+                        <div class="g-col-3 g-col-sm-2 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start">
+                            Failed Tickets
+                        </div>
+                        <div class="g-col-9 g-col-sm-10 grid gap-2">
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Failed Tickets"
+                                 filter_name="failed_tickets"
+                                 name="cyllo_help_desk.helpdesk_my_failed_ticket_action">
+                                <a href="#"
+                                   class="btn btn-warning btn-light d-flex align-items-center w-100 h-100 p-0 border-0 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['failed_ticket_count']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Failed High Priority Tickets"
+                                 filter_name="failed_high_priority_tickets"
+                                 name="cyllo_help_desk.helpdesk_high_priority_failed_ticket_action">
+                                <a href="#"
+                                   class="btn btn-warning btn-light d-flex align-items-center w-100 h-100 p-0 border-0 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['failed_high_priority_ticket_count']"/>
+                                </a>
+                            </div>
+                            <div class="g-col-4 p-0"
+                                 t-on-click="getSearchDetails"
+                                 title="Failed Urgent Tickets"
+                                 filter_name="failed_urgent_tickets"
+                                 name="cyllo_help_desk.helpdesk_urgent_failed_ticket_action">
+                                <a href="#"
+                                   class="btn btn-warning btn-light d-flex align-items-center w-100 h-100 p-0 border-0 fw-normal">
+                                    <div class="w-100 p-2"
+                                         t-out="ticketData['failed_urgent_ticket_count']"/>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-7 col-xl-6 col-xxl-5 flex-shrink-0">
+                    <div class="d-flex flex-column justify-content-between gap-2 h-100">
+                        <div class="grid gap-2 h-100">
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-md-0">
+                                    <h3 class="o_highlight">My Performance</h3>
+                                    <br/>
+                                    <span>Today</span>
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-5 d-flex align-items-center justify-content-center py-2 bg-light"
+                                     name="cyllo_help_desk.helpdesk_my_today_closed_ticket_action"
+                                     t-on-click="getSearchDetails">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_today_closed_ticket_count']"/>
+                                        Closed Tickets
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light"
+                                     name="cyllo_help_desk.helpdesk_my_sla_success_ticket_action"
+                                     t-on-click="getSearchDetails">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_success_rate_ticket_count']"/>
+                                        Success Rate
+                                    </a>
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light"
+                                     name="cyllo_help_desk.helpdesk_my_sla_success_ticket_action"
+                                     t-on-click="getSearchDetails">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_average_rating']"/>
+                                        Average Rating
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid gap-2 h-100">
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-md-0">
+                                    Average Last 7 days
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-5 d-flex align-items-center justify-content-center py-2 bg-light"
+                                     name="cyllo_help_desk.helpdesk_my_last_seven_days_closed_tickets_action"
+                                     t-on-click="getSearchDetails">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_last_seven_days_closed_ticket_count']"/>
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light"
+                                     name="cyllo_help_desk.helpdesk_my_last_seven_days_sla_success_ticket_action"
+                                     t-on-click="getSearchDetails">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_last_seven_days_success_rate']"/>
+                                    </a>
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light">
+                                    <a href="#"
+                                       class="btn w-100 h-100 text-capitalize">
+                                        <div class="fs-2"
+                                             t-out="ticketData['my_last_seven_days_average_rating']"/>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid gap-2 h-100">
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-4 g-col-lg-6 d-flex align-items-center justify-content-center text-center justify-content-md-end text-md-end mt-4 mt-md-0">
+                                    Daily Target
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-5 d-flex align-items-center justify-content-center py-2 bg-light">
+                                    <ToggleTag tag="false"
+                                               value="ticketData['daily_target_ticket_count']"
+                                               fieldName="'ticket_count'"/>
+                                </div>
+                            </div>
+                            <div class="g-col-6 g-col-md-6 grid gap-1 gap-md-4">
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light">
+                                    <ToggleTag tag="true"
+                                               value="ticketData['daily_target_success_rate']"
+                                               float="true"
+                                               fieldName="'success_rate'"/>
+                                </div>
+                                <div class="g-col-12 g-col-sm-8 g-col-lg-6 d-flex align-items-center justify-content-center py-2 bg-light">
+                                    <ToggleTag tag="true"
+                                               value="ticketData['daily_target_average_rating']"
+                                               float="true"
+                                               fieldName="'average_rating'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

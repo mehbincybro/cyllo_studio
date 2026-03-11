@@ -1,0 +1,533 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <!-- Action for helpdesk ticket -->
+    <record id="helpdesk_ticket_action" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form,kanban,activity,pivot</field>
+    </record>
+    <record id="helpdesk_ticket_sequence" model="ir.sequence">
+        <field name="name">Ticket ID</field>
+        <field name="code">helpdesk.ticket</field>
+        <field name="prefix">HT</field>
+        <field name="padding">5</field>
+    </record>
+    <!-- Tree view for helpdesk ticket -->
+    <record id="helpdesk_ticket_view_tree" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.tree</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <tree default_order="priority desc" class="o_helpdesk_list">
+                <field name="stage_name" invisible="1"/>
+                <field name="priority" widget="priority"/>
+                <field name="name"/>
+                <field name="team_id"/>
+                <field name="customer_id"/>
+                <field name="date"/>
+                <field name="user_id"/>
+                <field name="company_id"/>
+                <field name="stage_id" widget="badge"
+                       decoration-success="stage_name == 'Solved'"
+                       decoration-info="stage_name == 'New'"
+                       decoration-primary="stage_name == 'In Progress'"
+                       decoration-muted="stage_name == 'Canceled'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Kanban view for helpdesk tickets -->
+    <record id="helpdesk_ticket_view_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.kanban</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="stage_id" quick_create="True"
+                    default_order="stage_id" groups_draggable="True"
+                    records_draggable="1" group_create="True"
+                    class="o_slide_kanban o_helpdesk_kanban" sample="1">
+                <field name="name"/>
+                <field name="team_id"/>
+                <field name="customer_id"/>
+                <field name="user_id"/>
+                <field name="stage_id"/>
+                <progressbar field="activity_state"
+                             colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row mb4">
+                                <div>
+                                    <h3>
+                                        <field name="name"/>
+                                    </h3>
+                                </div>
+                            </div>
+                            <div>
+                                <span>
+                                    <field name="team_id"/>
+                                </span>
+                            </div>
+                            <div class="row">
+                                <div class="col-12">
+                                    <div>
+                                        <field name="customer_id"/>
+                                    </div>
+                                    <div>
+                                        <field name="user_id"/>
+                                    </div>
+                                    <div>
+                                        <field name="activity_ids"
+                                               widget="kanban_activity"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    <record id="helpdesk_ticket_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_toggle_sla_pause" type="object" string="Pause SLA" class="btn-warning" invisible="not sla_flag or sla_paused"/>
+                    <button name="action_toggle_sla_pause" type="object" string="Resume SLA" class="btn-success" invisible="not sla_flag or not sla_paused"/>
+                    <button name="action_create_sale_order" type="object" string="Create Sales Order" invisible="not customer_id"/>
+                    <button name="action_create_refund" type="object" string="Create Refund" invisible="not customer_id"/>
+                    <button name="action_create_coupon" type="object" string="Create Coupon" invisible="not customer_id"/>
+                    <button name="action_create_fsm_task" type="object" string="Create FSM Task" invisible="not customer_id"/>
+                    <button name="action_create_repair" type="object" string="Create Repair Order" invisible="not customer_id"/>
+                    <button name="action_create_return" type="object" string="Create Return / Replacement" invisible="not customer_id"/>
+                    <button name="action_create_crm_lead" type="object" string="Create CRM Lead" invisible="not customer_id"/>
+                    <field name="stage_id" widget="statusbar"
+                           options="{'clickable': '1'}"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="sale_order_count == 0">
+                            <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
+                        </button>
+                        <button name="action_view_refunds" type="object" class="oe_stat_button" icon="fa-reply" invisible="refund_count == 0">
+                            <field name="refund_count" widget="statinfo" string="Refunds"/>
+                        </button>
+                        <button name="action_view_coupons" type="object" class="oe_stat_button" icon="fa-ticket" invisible="coupon_count == 0">
+                            <field name="coupon_count" widget="statinfo" string="Coupons"/>
+                        </button>
+                        <button name="action_view_tasks" type="object" class="oe_stat_button" icon="fa-tasks" invisible="task_count == 0">
+                            <field name="task_count" widget="statinfo" string="FSM Tasks"/>
+                        </button>
+                        <button name="action_view_repairs" type="object" class="oe_stat_button" icon="fa-wrench" invisible="repair_count == 0">
+                            <field name="repair_count" widget="statinfo" string="Repairs"/>
+                        </button>
+                        <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck" invisible="picking_count == 0">
+                            <field name="picking_count" widget="statinfo" string="Returns"/>
+                        </button>
+                        <button name="action_view_crm_leads" type="object" class="oe_stat_button" icon="fa-bullseye" invisible="crm_lead_count == 0">
+                            <field name="crm_lead_count" widget="statinfo" string="CRM Leads"/>
+                        </button>
+                    </div>
+                    <group>
+                        <field name="name" placeholder="Eg: Product arrived damaged"/>
+                        <field name="sla_flag" invisible="1"/>
+                        <field name="sla_paused" invisible="1"/>
+                        <field name="stage_name" invisible="1"/>
+                        <field name="sla_ids" widget="many2many_tags" invisible="not sla_flag"/>
+                        <field name="sla_progress" widget="progressbar" invisible="not sla_flag or stage_name == 'Solved'"/>
+                        <field name="sla_failed" invisible="1"/>
+                    </group>
+                    <group invisible="1">
+                        <field name="sale_order_ids"/>
+                        <field name="refund_ids"/>
+                        <field name="task_ids"/>
+                        <field name="repair_ids"/>
+                        <field name="crm_lead_ids"/>
+                        <field name="timesheet_bool"/>
+                    </group>
+                    <group col="2">
+                        <group>
+                            <separator string="Customer Details"/>
+                            <field name="date"/>
+                            <field name="closed_date" invisible="1"/>
+                            <field name="customer_id"/>
+                            <field name="email"/>
+                            <field name="phone"/>
+                        </group>
+                        <group>
+                            <separator string="Ticket Details"/>
+                            <field name="sequence" invisible="1"/>
+                            <field name="team_id"/>
+                            <field name="priority" widget="priority"/>
+                            <field name="user_id"/>
+                            <field name="category_id"/>
+                            <field name="tag_ids" widget="many2many_tags"/>
+                            <field name="canned_response_id"/>
+                            <field name="skill_ids" widget="many2many_tags"/>
+                            <field name="parent_id" domain="[('id', '!=', active_id)]"/>
+                            <field name="company_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field name="description"/>
+                        </page>
+                        <page string="Internal Notes" groups="cyllo_help_desk.cyllo_help_desk_user">
+                            <field name="internal_notes"/>
+                        </page>
+                        <page string="Timesheet" invisible="not timesheet_bool">
+                            <field name="timesheet_ids"/>
+                        </page>
+                        <page string="Sub-tickets">
+                            <field name="child_ids">
+                                <tree editable="bottom">
+                                    <field name="ticket"/>
+                                    <field name="name"/>
+                                    <field name="user_id"/>
+                                    <field name="stage_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Dependencies">
+                            <field name="dependency_ids" widget="many2many">
+                                <tree editable="bottom">
+                                    <field name="ticket"/>
+                                    <field name="name"/>
+                                    <field name="stage_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="helpdesk_ticket_view_search" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.search</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="arch" type="xml">
+            <search>
+                <filter string="My Tickets" name="user_id"
+                        domain="[('user_id','=', uid)]"/>
+                <separator/>
+                <filter string="Open Tickets" name="stage_id"
+                        domain="[('stage_id.is_closed','=', False)]"/>
+                <filter string="Closed Tickets" name="closed_tickets"
+                        domain="[('stage_id.is_closed','=', True)]"/>
+                <separator/>
+                <filter string="High Priority Tickets" name="high_priority"
+                        domain="[('priority','=', '2')]"/>
+                <filter string="Urgent Tickets" name="urgent"
+                        domain="[('priority','=', '3')]"/>
+                <filter string="SLA Success"
+                        name="sla_success"
+                        domain="[('sla_failed','=', False)]"/>
+                <separator/>
+                <filter string="Team Tickets" name="team"
+                        domain="[('team_id','=', active_id)]"/>
+                <separator/>
+                <filter string="Unassigned Tickets" name="unassigned"
+                        domain="[('user_id','=', False)]"/>
+                <filter string="Failed Tickets" name="failed"
+                        domain="[('sla_failed','=', True)]"/>
+                <filter string="Closed Last 7 Days"
+                        name="closed_last_seven_days"
+                        domain="[('closed_date','>', (datetime.datetime.now() - datetime.timedelta(days=6)))]"/>
+<!--                <filter string="Closed Today" name="closed_today"-->
+<!--                        domain="[('is_closed_today','=', True)]"/>-->
+            </search>
+        </field>
+    </record>
+    <!-- Action for my open tickets view-->
+    <record id="helpdesk_my_open_ticket_action" model="ir.actions.act_window">
+        <field name="name">My Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            }
+        </field>
+    </record>
+    <!-- Action for my high priority open tickets view-->
+    <record id="helpdesk_my_high_priority_open_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">High Priority Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_high_priority':True,
+            }
+        </field>
+    </record>
+    <!-- Action for my urgent open tickets view-->
+    <record id="helpdesk_my_urgent_priority_open_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Urgent Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_urgent':True,
+            }
+        </field>
+    </record>
+    <!-- Action for average open hours of all my tickets view-->
+    <record id="helpdesk_my_ticket_average_open_hours_action"
+            model="ir.actions.act_window">
+        <field name="name">Average Open Hours</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            }
+        </field>
+    </record>
+    <!-- Action for average open hours of high priority tickets view-->
+    <record id="helpdesk_high_priority_ticket_average_open_hours_action"
+            model="ir.actions.act_window">
+        <field name="name">Average Open Hours</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_high_priority':True,
+            }
+        </field>
+    </record>
+    <!-- Action for average open hours of urgent tickets view-->
+    <record id="helpdesk_urgent_ticket_average_open_hours_action"
+            model="ir.actions.act_window">
+        <field name="name">Average Open Hours</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_urgent':True,
+            }
+        </field>
+    </record>
+    <!-- Action for failed tickets of current user view-->
+    <record id="helpdesk_my_failed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_failed':True,
+            }
+        </field>
+    </record>
+    <!-- Action for high priority failed tickets of current user view-->
+    <record id="helpdesk_high_priority_failed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_failed':True,
+            'search_default_high_priority':True,
+            }
+        </field>
+    </record>
+    <!-- Action for urgent failed tickets of current user view-->
+    <record id="helpdesk_urgent_failed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Failed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_stage_id':True,
+            'search_default_failed':True,
+            'search_default_urgent':True,
+            }
+        </field>
+    </record>
+    <!-- Action for current team tickets view-->
+    <record id="helpdesk_team_ticket_action" model="ir.actions.act_window">
+        <field name="name">Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team open tickets view-->
+    <record id="helpdesk_team_open_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Open Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_stage_id':True,
+            'search_default_team':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team unassigned tickets view-->
+    <record id="helpdesk_team_unassigned_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Unassigned Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_unassigned':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team urgent tickets view-->
+    <record id="helpdesk_team_urgent_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Urgent Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_urgent':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team failed tickets view-->
+    <record id="helpdesk_team_failed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Urgent Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_failed':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team closed tickets in last seven days view-->
+    <record id="helpdesk_team_closed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Closed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_closed_last_seven_days':True
+            }
+        </field>
+    </record>
+    <!-- Action for current team solved tickets in last seven days view-->
+    <record id="helpdesk_team_successfully_solved_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Successfully Solved Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_team':True,
+            'search_default_closed_last_seven_days':True,
+            'search_default_sla_success':True
+            }
+        </field>
+    </record>
+    <!-- Action for today closed tickets of current user view-->
+    <record id="helpdesk_my_today_closed_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Today Closed Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_tickets':True
+            }
+        </field>
+    </record>
+    <!-- Action for closed SLA success tickets of current user view-->
+    <record id="helpdesk_my_sla_success_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Success Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_tickets':True,
+            'search_default_sla_success':True
+            }
+        </field>
+    </record>
+    <!-- Action for my tickets closed in last 7 days view-->
+    <record id="helpdesk_my_last_seven_days_closed_tickets_action"
+            model="ir.actions.act_window">
+        <field name="name">Closed Last Seven Days</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_last_seven_days':True,
+            }
+        </field>
+    </record>
+    <!-- Action for Last seven days closed SLA success tickets of current user view-->
+    <record id="helpdesk_my_last_seven_days_sla_success_ticket_action"
+            model="ir.actions.act_window">
+        <field name="name">Last Seven Days Success Tickets</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">helpdesk.ticket</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="cyllo_help_desk.helpdesk_ticket_view_search"/>
+        <field name="context">{
+            'search_default_user_id':True,
+            'search_default_closed_last_seven_days':True,
+            'search_default_sla_success':True
+            }
+        </field>
+    </record>
+</odoo>
