@@ -46,9 +46,9 @@ export class SearchNode extends ConfigurationBase {
         context: {},
     };
 
-    setup(){
+    setup() {
         super.setup()
-        this.fieldState = useState({...ConfigurationBase.fieldState, search_domain_tree: null})
+        this.fieldState = useState({ ...ConfigurationBase.fieldState, search_domain_tree: null })
         this.confirmButtonRef = useRef("confirm");
         this.modelState = useState({});
         useEffect((value) => {
@@ -57,18 +57,25 @@ export class SearchNode extends ConfigurationBase {
             }
         }, () => [this.fieldState.search_limit, this.modelState.model_name,]);
     }
-     async fetchData() {
+    async fetchData() {
         await this.setModelState();
         await super.fetchData();
-     }
+    }
 
-    async setModelState () {
-        let [{ display_name, id } ]= await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
-        const [{ model_id }] = await this.orm.read("node.struct", [this.props.id], ['model_id']);
-        if (model_id) {
-            [{ display_name, id }] = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
+    async setModelState() {
+        const model_res = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
+        if (model_res.length > 0) {
+            let { display_name, id } = model_res[0];
+            const struct_res = await this.orm.read("node.struct", [this.props.id], ['model_id']);
+            if (struct_res.length > 0 && struct_res[0].model_id) {
+                const updated_model_res = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
+                if (updated_model_res.length > 0) {
+                    display_name = updated_model_res[0].display_name;
+                    id = updated_model_res[0].id;
+                }
+            }
+            this.updateModelState({ display_name, model: this.props.resModel, id })
         }
-        this.updateModelState({ display_name, model: this.props.resModel, id})
     }
 
     get pythonKeywords() {
@@ -92,48 +99,48 @@ export class SearchNode extends ConfigurationBase {
         this.state.successMessage = "";
     }
 
-    getModelsDomain(){
+    getModelsDomain() {
         return [];
     }
 
-    onChangeLabel(label){
+    onChangeLabel(label) {
         const nodeId = this.props.id
-        this.env.bus.trigger("CHANGE-LABEL",{label,nodeId});
+        this.env.bus.trigger("CHANGE-LABEL", { label, nodeId });
     }
 
     get recordProps() {
-         const related = {
+        const related = {
             display_name: {
                 name: "display_name",
                 type: "char"
             }
         }
-         const label = {
+        const label = {
             type: "char",
             string: "Label"
         }
-         const search_limit = {
-             type: "integer",
-             string: "Limit",
-         }
-         const search_order = {
-             type: "selection",
-             string: "Order",
-         }
+        const search_limit = {
+            type: "integer",
+            string: "Limit",
+        }
+        const search_order = {
+            type: "selection",
+            string: "Order",
+        }
 
-         const fields = { search_limit, search_order,label }
-         return {
-             mode: "edit",
-             onRecordChanged: (record, changes) => {
-                for (var key in changes){
+        const fields = { search_limit, search_order, label }
+        return {
+            mode: "edit",
+            onRecordChanged: (record, changes) => {
+                for (var key in changes) {
                     this.fieldState[key] = changes[key]
                 }
-             },
-             resModel: "node.struct",
-             resId: this.props.id,
-             fieldNames: fields,
-             activeFields: fields,
-         };
+            },
+            resModel: "node.struct",
+            resId: this.props.id,
+            fieldNames: fields,
+            activeFields: fields,
+        };
     }
 
     async handleModelSelect(ev) {
@@ -144,17 +151,17 @@ export class SearchNode extends ConfigurationBase {
             "value": "&"
         }
         if (!ev) {
-            this.updateModelState({display_name: false, model: '', id: false});
+            this.updateModelState({ display_name: false, model: '', id: false });
             this.fieldState.model_id = false;
             return;
         }
         const modelData = await this.orm.read('ir.model', [ev[0].id], ['display_name', 'model']);
         const display_name = ev[0].display_name ? ev[0].display_name : modelData[0].display_name;
-        this.updateModelState({...modelData[0], display_name});
+        this.updateModelState({ ...modelData[0], display_name });
         this.fieldState.model_id = ev[0].id;
     }
 
-    async updateModelBackend (model_id) {
+    async updateModelBackend(model_id) {
         await this.orm.write("node.struct", [this.props.id], { model_id });
     }
 
@@ -164,7 +171,7 @@ export class SearchNode extends ConfigurationBase {
         this.modelState.model_id = id;
         this.modelState.model_name = model;
     }
-    updatePath(path){
+    updatePath(path) {
         this.fieldState.search_order_field = path;
     }
 
@@ -205,7 +212,7 @@ export class SearchNode extends ConfigurationBase {
             const variableName = variableMap.get(value.record);
             this.updateUsedVariables(value.record);
             return variableName ? `v_${variableName}.${value.pathValue}` : value;
-        }else if (value && typeof value === "object" && 'selectedVariable' in value) {
+        } else if (value && typeof value === "object" && 'selectedVariable' in value) {
             this.updateUsedVariables(value.selectedVariable)
             return `v_${value.pathValue}`;
         }
@@ -221,7 +228,7 @@ export class SearchNode extends ConfigurationBase {
         const limit = this.fieldState.search_limit || null;
         const order = this.findOrder(this.fieldState.search_order_field, this.fieldState.search_order);
         const formatedDomain = domain.replace(/"v_([^"]*)"/g, '$1');
-        return `${this.fieldState.search_variable.variable_name } = env['${this.modelState.model_name}'].search(${formatedDomain}${order ? order: ''}${limit ? ', limit='+limit : ''})`;
+        return `${this.fieldState.search_variable.variable_name} = env['${this.modelState.model_name}'].search(${formatedDomain}${order ? order : ''}${limit ? ', limit=' + limit : ''})`;
     }
 
     findOrder(field, order) {
@@ -234,12 +241,12 @@ export class SearchNode extends ConfigurationBase {
     }
 
     get getOptions() {
-        const variables =  this.variables.map(variable => [variable.variable_name, variable.variable_name]);
+        const variables = this.variables.map(variable => [variable.variable_name, variable.variable_name]);
         return [[false, ""], ...variables];
     }
 
     validateForm() {
-        const { model_id, search_limit, search_variable,label } = this.fieldState;
+        const { model_id, search_limit, search_variable, label } = this.fieldState;
         // Validation rules
         const errors = {};
 
@@ -257,7 +264,7 @@ export class SearchNode extends ConfigurationBase {
         if (!search_variable.variable_name || typeof search_variable.variable_name !== 'string') {
             errors.search_variable = "Search variable must be a non-empty string.";
         } else {
-            if(!this.validateInput(search_variable.variable_name)) {
+            if (!this.validateInput(search_variable.variable_name)) {
                 errors.search_variable = "Enter valid variable name."
             }
             clearTimeout(this.messageTimeout);
@@ -266,7 +273,7 @@ export class SearchNode extends ConfigurationBase {
             }, 5000);
         }
 
-         if (!label || typeof label !== 'string') {
+        if (!label || typeof label !== 'string') {
             errors.label = "Label must be a non-empty string.";
         }
 
@@ -279,11 +286,11 @@ export class SearchNode extends ConfigurationBase {
 
     }
 
-    setNewValue(){
+    setNewValue() {
         if (this.fieldState.search_variable) {
-            this.fieldState.search_variable = { id: this.fieldState.search_variable.id,  variable_name: this.state.searchInput, modelId: this.fieldState.model_id, modelName: this.modelState.model_name , variable_type: this.fieldState.search_limit === 1 ? "record" : "recordset", variable_value: false, code:"", usedIn: [], delete: false }
+            this.fieldState.search_variable = { id: this.fieldState.search_variable.id, variable_name: this.state.searchInput, modelId: this.fieldState.model_id, modelName: this.modelState.model_name, variable_type: this.fieldState.search_limit === 1 ? "record" : "recordset", variable_value: false, code: "", usedIn: [], delete: false }
         } else {
-            this.fieldState.search_variable = { id: new Date().toISOString(), variable_name: this.state.searchInput, modelId: this.fieldState.model_id, modelName: this.modelState.model_name, variable_type: this.fieldState.search_limit === 1 ? "record" : "recordset", variable_value: false, code:"", usedIn: [], delete: false }
+            this.fieldState.search_variable = { id: new Date().toISOString(), variable_name: this.state.searchInput, modelId: this.fieldState.model_id, modelName: this.modelState.model_name, variable_type: this.fieldState.search_limit === 1 ? "record" : "recordset", variable_value: false, code: "", usedIn: [], delete: false }
         }
 
     }

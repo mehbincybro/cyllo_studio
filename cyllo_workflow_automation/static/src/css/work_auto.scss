@@ -706,35 +706,3 @@ img.cy-w-trigger-icon {
         color: #aca49a !important;
     }
 }
-
-// Undo/Redo Button Styles
-.cy-undo-redo-container {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-left: 8px;
-    margin-right: 8px;
-}
-
-.cy-undo-btn,
-.cy-redo-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-    cursor: pointer;
-
-    &:hover:not(.cy-undo-btn--disabled):not(.cy-redo-btn--disabled) {
-        background-color: rgba(0, 0, 0, 0.05);
-    }
-}
-
-.cy-undo-btn--disabled,
-.cy-redo-btn--disabled {
-    opacity: 0.35;
-    pointer-events: none;
-    cursor: default;
-}

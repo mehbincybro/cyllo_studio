@@ -52,10 +52,8 @@ export class RecordPathSelector extends Component {
      * @param {String|Boolean} value - The selected variable's ID or false if none is selected.
      */
     async handleUpdateRecord(value) {
-        console.log('value', value)
         if (value) {
             const selectedVariable = this.props.variables.find(item => item.id === value);
-            console.log('selectedVariable : ', selectedVariable)
             const model = await this.orm.read("ir.model", [selectedVariable.modelId], []);
             this.state.model = model? model[0] : undefined;
             this.state.selectedRecord = value;
