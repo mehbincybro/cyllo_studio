@@ -859,6 +859,7 @@ export class CylloKanbanRecord extends KanbanRecord {
                 const isDivDrag = evt.item.tagName.toUpperCase() === 'DIV'
                     && !!evt.item.getAttribute('data-drag');
                 await doRemove(evt.item, !isDivDrag);
+                evt.item.style.visibility = 'visible';
             },
         });
     }

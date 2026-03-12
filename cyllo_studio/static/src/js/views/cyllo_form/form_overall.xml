@@ -222,7 +222,7 @@
                                     <polyline points="1 5 4 8 11 1"></polyline>
                                 </svg>
                             </span>
-                            <span class="label-text">Header Button Limit</span>
+                            <span class="label-text">Statusbar Button Limit</span>
                         </label>
                     </div>
                     <div class="px-2" t-if="state.buttonLimitEnabled">
