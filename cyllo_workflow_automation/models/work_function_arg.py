@@ -673,13 +673,11 @@ class WorkAuto(models.Model):
 
     def unlink(self):
         """
-        Override unlink to remove any linked ir.cron jobs before deleting the
-        automation record, preventing orphaned scheduled actions.
-
-        Returns:
-            bool: True if the unlink operation was successful.
+        Override unlink to remove linked cron jobs and node.struct records before
+        deleting the automation, preventing FK violations and orphaned schedules.
         """
         self.mapped('schedule_id').sudo().unlink()
+        self.mapped('node_struct_ids').unlink()
         return super().unlink()
 
     def _unregister_hook(self):

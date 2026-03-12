@@ -52,7 +52,19 @@
 						</div>
                     </div>
                     <div class="work-auto-buttons work-save-container d-flex gap-1">
-						<div class="d-flex gap-2">
+                        <div class="d-flex gap-2">
+                             <a class="btn btn-secondary d-flex align-items-center gap-1"
+                                t-att-disabled="!state.canUndo"
+                                t-on-click="undo"
+                                title="Undo (Ctrl+Z)">
+                                <i class="ri-arrow-go-back-line"/>
+                            </a>
+                            <a class="btn btn-secondary d-flex align-items-center gap-1"
+                                t-att-disabled="!state.canRedo"
+                                t-on-click="redo"
+                                title="Redo (Ctrl+Shift+Z)">
+                                <i class="ri-arrow-go-forward-line"/>
+                            </a>
                             <a class="btn btn-secondary d-flex align-items-center gap-1"
 							    data-hotkey="x"
                                t-on-click.prevent="clearModuleSelected">
@@ -91,12 +103,12 @@
                     <t t-if="state.block">
 						<div class="cy-w-tab-content" t-if="!state.customTrigger" t-ref="mainBlk" id="myTabContent">
 							<div class="form-group px-3 pt-3 mb-3"
-                                 t-attf-class="#{!state.model_blk? ' cy_w_disabled': ''}">
+                                 t-attf-class="#{model_blk? '': ' cy_w_disabled'}">
 								<label class="form-label  cy-modal-form_label">
 									<h6>Object</h6>
 								</label>
                                 <div class="form-control cy-w-select"
-                                     t-attf-class=" {{state.model_blk? 'glowing-border':'' }}"
+                                     t-attf-class=" {{model_blk? 'glowing-border':'' }}"
                                      data-node="model"
                                      data-type="model">
 									<Many2XAutocomplete
@@ -111,7 +123,7 @@
 								</div>
 							</div>
                             <div id="accordion">
-								<div t-attf-class="w_card #{!state.trigger_blk? ' cy_w_disabled': ''} ">
+								<div t-attf-class="w_card #{trigger_blk? ' ': ' cy_w_disabled'} ">
 									<div class="trigger w_card-header" data-bs-toggle="collapse"
                                          data-bs-target="#trigger_blocks">
 										<h5 class="mb-0">
@@ -169,7 +181,7 @@
 										</div>
 									</div>
 								</div>
-                                <div t-attf-class="w_card #{!state.other_blk? 'cy_w_disabled': ''}">
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
 										<div class="w_card-header" data-bs-toggle="collapse"
                                              data-bs-target="#orm-blocks">
 											<h5 class="mb-0">
@@ -219,8 +231,8 @@
 										</div>
 									</div>
 								</div>
-                                <div t-attf-class="w_card #{!state.other_blk? 'cy_w_disabled': ''}">
-								<div t-attf-class="w_card-header #{!state.other_blk? 'cy_w_disabled': ''}"
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
+								<div t-attf-class="w_card-header #{other_blk? ' ': 'cy_w_disabled'}"
                                      data-bs-toggle="collapse"
                                      data-bs-target="#logic-blocks">
 									<h5 class="mb-0">
@@ -258,8 +270,8 @@
                                         </div>
 								    </div>
 							    </div>
-                                <div t-attf-class="w_card #{!state.other_blk? 'cy_w_disabled': ''}">
-									<div t-attf-class="w_card-header #{!state.other_blk? 'cy_w_disabled': ''}"
+                                <div t-attf-class="w_card #{other_blk? ' ': 'cy_w_disabled'}">
+									<div t-attf-class="w_card-header #{other_blk? ' ': 'cy_w_disabled'}"
                                          data-bs-toggle="collapse"
                                          data-bs-target="#functional-blocks">
 										<h5 class="mb-0">
