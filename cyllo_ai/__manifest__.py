@@ -28,7 +28,7 @@
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
     'license': 'LGPL-3',
-    "depends": ["base", "web", "sale", "cyllo_web", "cyllo_analytics"],
+    "depends": ["base", "web", "cyllo_web", "cyllo_analytics"],
     'icon': '/cyllo_ai/static/src/img/cyllo-ai.png',
     "data": [
             'security/ir.model.access.csv',

@@ -27,6 +27,9 @@ from langchain_core.messages import HumanMessage
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_openai import ChatOpenAI
 from langgraph.types import Command
+
+import langsmith as ls
+
 from odoo import fields, http
 from odoo.http import Controller, request
 
@@ -65,23 +68,30 @@ class ChatBotController(Controller):
             model_name = request.env['cyllo.llm'].browse(int(model_id)).name
             if agent_llm == "ChatGoogleGenerativeAI":
                 llm = ChatGoogleGenerativeAI(model=model_name, google_api_key=api_key, max_retries=0)
-            else:
-                llm = ChatOpenAI(model=model_name, api_key=api_key)
-            audio_mime_type = "audio/mpeg"
-            result = llm.invoke(
-                [
-                    HumanMessage(
-                        content=[
-                            {"type": "text", "text": "Transcribe the audio."},
-                            {
-                                "type": "media",
-                                "data": encoded_audio,  # Base64 string
-                                "mime_type": audio_mime_type,
-                            },
-                        ]
-                    )
+                # Gemini format
+                message_content = [
+                    {"type": "text", "text": "Transcribe the audio."},
+                    {
+                        "type": "media",
+                        "data": encoded_audio,
+                        "mime_type": "audio/mpeg",
+                    },
                 ]
-            )
+            else:
+                # OpenAI and OpenRouter format
+                llm = ChatOpenAI(model=model_name, api_key=api_key)
+                message_content = [
+                    {"type": "text", "text": "Transcribe the audio."},
+                    {
+                        "type": "input_audio",
+                        "input_audio": {
+                            "data": encoded_audio,
+                            "format": "mp3"  # or "wav", "opus", etc.
+                        },
+                    },
+                ]
+
+            result = llm.invoke([HumanMessage(content=message_content)])
             return result.content
 
         except ResourceExhausted as e:
@@ -104,34 +114,59 @@ class ChatBotController(Controller):
         user_id = kwargs.get('userId')
         interrupted = kwargs.get('interrupted')
         session_id = kwargs.get('session_id')
-        company_ids =kwargs.get('company_ids')
+        company_ids = kwargs.get('company_ids')
+        agent_mode = kwargs.get('agent_mode')
+        active_model = kwargs.get('active_model')
+        active_id = kwargs.get('active_id')
+        active_view = kwargs.get('active_view')
+        active_name = kwargs.get('active_name')
+        active_action_id = kwargs.get('active_action_id')
 
-        agent_model = request.env['chatbot.agent']
+        agent_model = request.env['chatbot.agent'].with_context(
+            active_model=active_model,
+            active_id=active_id,
+            active_view=active_view,
+            active_name=active_name,
+            active_action_id=active_action_id,
+        )
         app = agent_model.build_agent(session_id)
-        _logger = logging.getLogger(__name__)
         last_message = ""
         try:
+            client = ls.Client(
+                api_key="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",  # This can be retrieved from a secrets manager
+                api_url="https://api.smith.langchain.com",
+                # Update appropriately for self-hosted installations or the EU region
+            )
             if not interrupted:
-                result = app.invoke(
-                    {
-                        "messages": [HumanMessage(content=text)],
-                        "user_query": text,
-                        "company_id" : company_ids,
-                    },
-                    config={
-                        "configurable": {
-                            "thread_id": session_id
+                with ls.tracing_context(client=client, project_name="cyllo-ai-phase2", enabled=True):
+                    result = app.invoke(
+                        {
+                            "messages": [HumanMessage(content=text)],
+                            "user_query": text,
+                            "company_id": company_ids,
+                            "agent_mode": agent_mode,
+                            "active_model": active_model,
+                            "active_id": active_id,
+                            "active_view": active_view,
+                            "active_name": active_name,
+                            "active_action_id": active_action_id,
+                        },
+                        config={
+                            "configurable": {
+                                "thread_id": session_id
+                            },
+                            "recursion_limit": 15
                         }
-                    }
-                )
-                last_message = result["messages"][-1].content
+                    )
+                    last_message = result["messages"][-1].content
             else:
                 result = app.invoke(
                     Command(resume=text),
                     config={
                         "configurable": {
                             "thread_id": session_id
-                        }
+                        },
+                        "recursion_limit": 15
                     }
                 )
                 last_message = result["messages"][-1].content
@@ -241,7 +276,7 @@ class ChatBotController(Controller):
         return history
 
     @http.route('/chatbot/set_interrupt', type='json', auth='user')
-    def set_interrupt(self, record_id):
+    def set_interrupt(self, record_id): 
         """
         Reset the interrupted status of a conversation record.
 

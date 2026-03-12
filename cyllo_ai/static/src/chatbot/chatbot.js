@@ -48,6 +48,7 @@ export class ChatBot extends Component {
             sessions: [],
             sessionsLoading: false,
             historyOpen: false,
+            agent_mode: 'Operational', // 'Operational', 'functional', 'studio', 'analytics'
         })
         this.rpc = useService("rpc");
         this.chartDiv = useRef('echart')
@@ -196,6 +197,31 @@ export class ChatBot extends Component {
         return sessionId;
     }
 
+    _getUIContext() {
+        const controller = this.env.services.action?.currentController;
+        const action = controller?.action;
+        console.log(action?.res_model, 'aaaaa')
+        console.log(action?.res_id, 'bbbbbbb')
+        console.log(controller?.view?.type, 'ccccccc')
+        console.log(action?.name, 'ddddddddd')
+        console.log(action?.id, 'eeeeeeeeeee')
+
+        return {
+            active_model: action?.res_model || null,       // null for client actions
+            active_id: action?.res_id || null,             // null for list/kanban/client
+            active_view: controller?.view?.type || null,  // 'form', 'list', 'kanban', etc.
+            active_name: action?.name || null,             // always available
+            active_action_id: action?.id || null,          // always available
+        };
+    }
+
+    toggleAgentMode() {
+        const modes = ['Operational', 'functional'];
+        //        const modes = ['Operational', 'functional', 'studio', 'analytics'];  ----use later
+        const currentIndex = modes.indexOf(this.state.agent_mode);
+        this.state.agent_mode = modes[(currentIndex + 1) % modes.length];
+    }
+
     handleClickOutside(ev) {
         const chatbotEl = this.chatbotDiv.el;
         const sidebarEl = document.querySelector('.chatbot-history-sidebar');
@@ -331,8 +357,21 @@ export class ChatBot extends Component {
             const { userId } = this.user;
             const interrupted = this.state.interrupted;
             const session_id = __sessionId;
+            const { active_model, active_id, active_view, active_name, active_action_id } = this._getUIContext();
 
-            const response = await this.rpc("/chatbot/query", { text, userId, interrupted, session_id, company_ids: companyIds });
+            const response = await this.rpc("/chatbot/query", {
+                text,
+                userId,
+                interrupted,
+                session_id,
+                company_ids: companyIds,
+                agent_mode: this.state.agent_mode,
+                active_model,
+                active_id,
+                active_view,
+                active_name,
+                active_action_id,
+            });
             let raw = response.last_message;
             let isInterrupted = false;
 
