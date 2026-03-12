@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="help_desk_mail_template" model="mail.template">
+        <field name="name">Help Desk</field>
+        <field name="model_id"
+               ref="cyllo_help_desk.model_helpdesk_ticket"/>
+        <field name="subject">Ticket Generated</field>
+        <field name="body_html" type="html">
+            <br/>
+            <h4>Dear<t t-out="object.customer_id.name"/>,
+                <br/>
+                Your helpdesk ticket
+                <span>
+                    <a t-attf-href='/service_request/details/request/{{object.id}}'
+                       style="text-decoration:none;"
+                       class="text-decoration-none">
+                        <t t-out="object.name"/>
+                    </a>
+                </span>
+                has been submitted.
+            </h4>
+            <p style="font-size:15px;font-weight:bold;">Request No :
+                <span>
+                    <t t-out="object.ticket"/>
+                </span>
+            </p>
+            <p style="font-size:15px;font-weight:bold;">Team :
+                <span>
+                    <t t-out="object.team_id.name"/>
+                </span>
+            </p>
+            <p style="font-size:15px;font-weight:bold;">Responsible Person :
+                <span>
+                    <t t-out="object.user_id.name"/>
+                </span>
+            </p>
+            <p style="font-size:15px;font-weight:bold;">State :
+                <span>
+                    <t t-out="object.stage_id.name"/>
+                </span>
+            </p>
+        </field>
+    </record>
+</odoo>

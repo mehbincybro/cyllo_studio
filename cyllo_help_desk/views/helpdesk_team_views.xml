@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- Action for helpdesk team -->
+    <record id="helpdesk_team_action" model="ir.actions.act_window">
+        <field name="name">Team</field>
+        <field name="res_model">helpdesk.team</field>
+        <field name="view_mode">tree,form,kanban</field>
+        <field name="context">{'overview':false}</field>
+    </record>
+    <!-- Tree view for helpdesk team -->
+    <record id="helpdesk_team_view_tree" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.tree</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for helpdesk team -->
+    <record id="helpdesk_team_view_form" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.form</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name" placeholder="Support Team"/>
+                    </group>
+                    <group col="2">
+                        <group>
+                            <separator string="General"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="color" widget="color_picker"/>
+                            <field name="working_hour_id"/>
+                            <field name="description" placeholder="Short description..."/>
+                        </group>
+                        <group>
+                            <separator string="Core Features"/>
+                            <field name="timesheet"/>
+                            <field name="sla_policy"/>
+                            <field name="customer_rating"/>
+                            <field name="use_sla"/>
+                            <field name="use_timesheet"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Integrations">
+                            <group col="2">
+                                <group>
+                                    <separator string="Commerce"/>
+                                    <field name="use_credit_notes"/>
+                                    <field name="use_coupons"/>
+                                    <field name="use_gift_cards"/>
+                                </group>
+                                <group>
+                                    <separator string="Operations"/>
+                                    <field name="use_replacements"/>
+                                    <field name="use_returns"/>
+                                    <field name="use_repairs"/>
+                                    <field name="use_field_service"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Automation">
+                            <group col="2">
+                                <group>
+                                    <separator string="Assignment"/>
+                                    <field name="assignment_method" widget="radio" options="{'horizontal': true}"/>
+                                </group>
+                                <group>
+                                    <separator string="Auto-close"/>
+                                    <field name="auto_close_days"/>
+                                    <field name="auto_close_reminder_days"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Kanban view for helpdesk team -->
+    <record id="helpdesk_team_view_kanban" model="ir.ui.view">
+        <field name="name">helpdesk.team.view.kanban</field>
+        <field name="model">helpdesk.team</field>
+        <field name="arch" type="xml">
+            <kanban class="o_slide_kanban o_kanban_dashboard"
+                    js_class="helpdesk_dashboard_kanban" sample="1">
+                <field name="name"/>
+                <field name="color"/>
+                <field name="sla_failed" invisible="1"/>
+                <field name="success_rate" invisible="1"/>
+                <field name="sla_policy" invisible="1"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="{{'oe_kanban_color_' + kanban_getcolor(record.color.raw_value) }} container o_kanban_card_content">
+                            <field name="display_name"/>
+                            <div class="row">
+                                <div class="col o_kanban_primary_left">
+                                    <button class="btn btn-primary"
+                                            name="action_get_team_tickets"
+                                            type="object">Tickets
+                                    </button>
+                                </div>
+                                <div class="col o_kanban_primary_right">
+                                    <div>
+                                        <a class="justify-content-between flex-nowrap"
+                                           name="get_team_closed_tickets"
+                                           type="object"
+                                           invisible="closed_ticket_count == 0">
+                                            <span>Ticket Closed</span>
+                                            <span class="ms-3">
+                                                <field name="closed_ticket_count"/>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div invisible="not sla_policy">
+                                        <a class="justify-content-between flex-nowrap"
+                                           name="get_team_solved_tickets"
+                                           type="object"
+                                           invisible="success_rate == 0">
+                                            <span>Success Rate</span>
+                                            <span class="ms-3">
+                                                <field name="success_rate"/>
+                                                <span>%</span>
+                                            </span>
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <a class="justify-content-between flex-nowrap">
+                                            <span>Average Rating</span>
+                                            <span class="ms-3">
+                                            </span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row pt-5">
+                                <div class="col">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_open_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="open_count"/>
+                                        </span>
+                                        <span class="text-muted">Open</span>
+                                    </a>
+                                </div>
+                                <div class="col border-start">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_unassigned_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="unassigned_count"/>
+                                        </span>
+                                        <span class="text-muted">Unassigned
+                                        </span>
+                                    </a>
+                                </div>
+                                <div class="col border-start">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_urgent_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="urgent_count"/>
+                                        </span>
+                                        <span class="text-muted">Urgent</span>
+                                    </a>
+                                </div>
+                                <div class="col border-start"
+                                     invisible="not sla_policy">
+                                    <a class="d-flex flex-column align-item-center"
+                                       name="get_team_failed_tickets"
+                                       type="object">
+                                        <span class="fw-bold">
+                                            <field name="failed_sla_count"/>
+                                        </span>
+                                        <span class="text-muted">Failed</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+</odoo>

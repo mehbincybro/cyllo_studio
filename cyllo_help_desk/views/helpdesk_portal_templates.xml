@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="portal_my_home_menu_helpdesk" name="Portal layout : helpdesk menu entries" inherit_id="portal.portal_breadcrumbs" priority="20">
+        <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
+            <li t-if="page_name == 'ticket'" class="breadcrumb-item active">
+                Tickets
+            </li>
+        </xpath>
+    </template>
+
+    <template id="portal_my_home_helpdesk" name="Portal My Home : Helpdesk entries" inherit_id="portal.portal_my_home" priority="20">
+        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
+            <t t-call="portal.portal_docs_entry">
+                <t t-set="title">Tickets</t>
+                <t t-set="url" t-value="'/my/tickets'"/>
+                <t t-set="placeholder_count" t-value="'ticket_count'"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="portal_my_tickets" name="My Tickets">
+        <t t-call="portal.portal_layout">
+            <t t-set="breadcrumbs_searchbar" t-value="True"/>
+            <t t-call="portal.portal_searchbar">
+                <t t-set="title">Tickets</t>
+            </t>
+            <t t-if="not tickets">
+                <p>There are currently no tickets for your account.</p>
+            </t>
+            <t t-if="tickets" t-call="portal.portal_table">
+                <thead>
+                    <tr class="active">
+                        <th>Ticket #</th>
+                        <th>Name</th>
+                        <th class="text-end">Stage</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="tickets" t-as="ticket">
+                        <tr>
+                            <td><a t-attf-href="/my/ticket/#{ticket.id}"><t t-esc="ticket.ticket"/></a></td>
+                            <td><t t-esc="ticket.name"/></td>
+                            <td class="text-end"><t t-esc="ticket.stage_id.name"/></td>
+                        </tr>
+                    </t>
+                </tbody>
+            </t>
+        </t>
+    </template>
+
+    <template id="portal_ticket_page" name="My Ticket">
+        <t t-call="portal.portal_layout">
+            <div id="optional_placeholder"></div>
+            <div class="container">
+                <div class="card">
+                    <div class="card-header pr-0">
+                        <div class="row g-0">
+                            <div class="col-12 col-md">
+                                <h4 class="mb-1">
+                                    <t t-esc="ticket.name"/>
+                                    <small class="text-muted"> (#<t t-esc="ticket.ticket"/>)</small>
+                                </h4>
+                            </div>
+                            <div class="col-12 col-md-auto text-end" t-if="not ticket.stage_id.is_closed">
+                                <a role="button" class="btn btn-secondary" t-attf-href="/my/ticket/#{ticket.id}/close">
+                                    <i class="fa fa-times"/> Close Ticket
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-12 col-md-6">
+                                <strong>Date:</strong> <span t-field="ticket.date" t-options='{"widget": "datetime"}'/><br/>
+                                <strong>Stage:</strong> <span t-field="ticket.stage_id.name"/>
+                            </div>
+                            <div class="col-12 col-md-6" t-if="ticket.user_id">
+                                <strong>Assigned to:</strong> <span t-field="ticket.user_id.name"/>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <strong>Description:</strong>
+                                <div t-field="ticket.description"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt32">
+                    <h4>Discussion</h4>
+                    <t t-call="portal.message_thread">
+                        <t t-set="object" t-value="ticket"/>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

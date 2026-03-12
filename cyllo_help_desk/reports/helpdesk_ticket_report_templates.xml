@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="report_helpdesk_ticket_form">
+        <t t-call="web.html_container">
+            <t t-call="web.external_layout">
+                <div class="page">
+                    <h2 style="text-align:center;">Helpdesk Ticket</h2>
+                    <div>
+                        <t t-foreach="docs" t-as="o">
+                            <h2 style="text-align:center;">
+                                <span t-esc="o.name"/>
+                            </h2>
+                            <br/>
+                            Date
+                            <span t-esc="o.date"/>
+                            <br/>
+                            <br/>
+                            <table border="1px solid" class="table"
+                                   style="width:100%">
+                                <tr>
+                                    <td>
+                                        <span>Customer</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.customer_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>Ticket Category</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.category_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>Responsible Person</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.user_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>Company</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.company_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>Stage</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.stage_id.name"/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <span>Ticket Description</span>
+                                    </td>
+                                    <td>
+                                        <span t-esc="o.description"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </t>
+                    </div>
+                    <br></br>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>
