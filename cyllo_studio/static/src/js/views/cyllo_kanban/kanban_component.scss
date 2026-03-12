@@ -335,3 +335,11 @@
   }
 }
 
+.sortable-ghost-source {
+    opacity: 1;
+    display: block !important;
+    visibility: visible !important;
+    height: auto !important;
+    width: auto !important;
+    border: 2px dashed #999;
+}

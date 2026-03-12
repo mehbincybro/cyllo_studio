@@ -65,27 +65,62 @@ patch(CylloStatusBarButtons.prototype, {
         })
     },
 
-    onMounted() {
-        const sheet = document.querySelector('.o_form_sheet')?.getAttribute('sheet')
+     onMounted() {
+        const sheet = document.querySelector('.o_form_sheet')?.getAttribute('sheet');
         if (sheet) {
-            this.state.hasSheet = false
+            this.state.hasSheet = false;
         }
-        const self = this
-        const button = this.buttonRef.el
-        var drake = dragula([this.buttonRef.el], {
-                revertOnSpill: true,
-                moves: (el, container, handle) => {
-                    return !el.classList.contains('cy-add-button');
-                },
-                accepts: (el, target, source, sibling) => {
-                    return sibling
+
+        const self = this;
+        const buttonContainer = this.buttonRef.el;
+
+        if (!buttonContainer) return;
+
+        // Destroy existing sortable if any
+        const existingSortable = Sortable.get(buttonContainer);
+        if (existingSortable) existingSortable.destroy();
+
+        Sortable.create(buttonContainer, {
+            group: {
+                name: 'status-bar-buttons',
+                pull: false,
+                put: false,
+            },
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+
+            // Prevent the "add new button" element from being dragged
+            filter: '.cy-add-button',
+            preventOnFilter: true,
+
+            // Only allow dropping before an existing button (not at the end)
+            onMove: function(evt) {
+                // Prevent moving after the last real button
+                // (i.e. don't allow dropping after cy-add-button)
+                if (evt.related?.classList.contains('cy-add-button')) {
+                    return false;
                 }
-            })
-            .on('drop', async function(el, target, source, sibling) {
+                return true;
+            },
+
+            onEnd: async function(evt) {
+                // If dropped back to same position, do nothing
+                if (evt.oldIndex === evt.newIndex) return;
+
+                const el = evt.item;
                 const buttonPath = el.getAttribute('cy-xpath');
-                const siblingPath = sibling.getAttribute('cy-xpath')
+                const children = Array.from(buttonContainer.children);
+                const sibling = children[evt.newIndex + 1] || null;
+                if (!sibling || sibling.classList.contains('cy-add-button')) {
+                    const referenceNode = children[evt.oldIndex] || null;
+                    buttonContainer.insertBefore(el, referenceNode);
+                    return;
+                }
+
+                const siblingPath = sibling.getAttribute('cy-xpath');
                 const path = siblingPath || '/form/header';
                 const position = siblingPath ? 'before' : 'inside';
+
                 self.env.services.ui.block();
                 try {
                     const response = await self.env.model.rpc("cyllo_studio/move/button", {
@@ -98,19 +133,23 @@ patch(CylloStatusBarButtons.prototype, {
                             view_id: self.env.config.viewId,
                             view_type: self.env.config.viewType,
                         }
-                    })
+                    });
                     if (response) {
                         let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
                         let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                        storedArray.push(cleanedStr)
+                        storedArray.push(cleanedStr);
                         sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
                         sessionStorage.setItem('ReDO', JSON.stringify([]));
                     }
+                } catch(err) {
+                    console.error("Move button RPC error:", err);
                 } finally {
                     self.env.services.ui.unblock();
                 }
-                self.env.model.action.doAction('studio_reload')
-            });
+
+                self.env.model.action.doAction('studio_reload');
+            },
+        });
     },
 
     async addNewButton() {

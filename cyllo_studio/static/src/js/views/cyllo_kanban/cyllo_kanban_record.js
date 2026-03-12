@@ -119,243 +119,817 @@ export class CylloKanbanRecord extends KanbanRecord {
 
             })();
         })
-        onMounted(()=>{
-            const self = this
-            // Fallback: enforce selected ribbon visibility from session after Studio reload
-            try {
-                const selectedXPath = sessionStorage.getItem('SelectedRibbonXPath');
-                if (selectedXPath && this.rootRef?.el) {
-                    const ribbons = this.rootRef.el.querySelectorAll('[data-ribbon], .ribbon');
-                    ribbons.forEach((rb) => {
-                        const rbXPath = rb.getAttribute('cy-xpath');
-                        if (rbXPath === selectedXPath) {
-                            rb.style.display = '';
-                        } else {
-                            rb.style.display = 'none';
-                        }
-                    });
-                }
-            } catch(e) { /* noop */ }
-            this.rootRef.el.addEventListener("mousemove", (el)=> {
-                const elements = this.rootRef.el.querySelectorAll(".cy-studio-kanban-border");
-                elements.forEach((e) => {
-                  e.classList.remove("cy-studio-kanban-border");
+       // onMounted(()=>{
+       //     const self = this
+       //     // Fallback: enforce selected ribbon visibility from session after Studio reload
+       //     try {
+       //         const selectedXPath = sessionStorage.getItem('SelectedRibbonXPath');
+       //         if (selectedXPath && this.rootRef?.el) {
+       //             const ribbons = this.rootRef.el.querySelectorAll('[data-ribbon], .ribbon');
+       //             ribbons.forEach((rb) => {
+       //                 const rbXPath = rb.getAttribute('cy-xpath');
+       //                 if (rbXPath === selectedXPath) {
+       //                     rb.style.display = '';
+       //                 } else {
+       //                     rb.style.display = 'none';
+       //                 }
+       //             });
+       //         }
+       //     } catch(e) { /* noop */ }
+       //     this.rootRef.el.addEventListener("mousemove", (el)=> {
+       //         const elements = this.rootRef.el.querySelectorAll(".cy-studio-kanban-border");
+       //         elements.forEach((e) => {
+       //           e.classList.remove("cy-studio-kanban-border");
+       //         });
+       //         el.target.closest('[cy-xpath]')?.classList.add('cy-studio-kanban-border')
+       //     });
+       //     const divElements = Array.from(this.rootRef.el.querySelectorAll('[data-drag="1"]'));
+       //     //@Todo:- Merge both foreach together after completing the functionality
+       //     divElements.forEach(div => {
+       //        div.addEventListener('click', (event) => {
+       //             if (event.target === div) {
+       //                 const elements = document.querySelectorAll('.border-class');
+       //                 elements.forEach(e => {
+       //                     e.classList.remove('border-class');
+       //                 });
+       //                 div.classList.add('border-class')
+       //                 const path = div.getAttribute('cy-xpath')
+       //                 this.env.bus.trigger("KANBAN_DIV", {
+       //                     view_id: this.env.config.viewId,
+       //                     type: "KanbanDivProperties",
+       //                     view_type: this.env.config.viewType,
+       //                     model: this.action.currentController.props.resModel,
+       //                     path,
+       //                     div,
+       //                 })
+       //             }
+       //       });
+       //     });
+       //     divElements.forEach((element, index) => {
+       //          var children = Array.from(element.children);
+       //          var nonChildDivs = divElements.filter((otherDiv) => {
+       //             return otherDiv !== element && !children.includes(otherDiv);
+       //         });
+       //         dragula([...nonChildDivs, this.trashRef.el], {
+       //             revertOnSpill: true,
+       //              moves: (el, container, handle) => {
+       //                     const elementPath = el.getAttribute('cy-xpath')
+       //                     const isDrag = el.getAttribute('data-drag') || false
+       //                     const handlePath = handle.getAttribute('cy-xpath')
+       //                     if(el.tagName.toUpperCase() === 'DIV' && isDrag && elementPath === handlePath && el.getAttribute('data-restrict')){
+       //                         this.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.")
+       //                         return false
+       //                     }
+       //                     return el.tagName.toUpperCase() === 'DIV' && isDrag && elementPath === handlePath;
+       //             },
+       //              accepts: (el, target, source, sibling) => {
+       //                return !el.contains(target)
+       //             },
+       //         }).on('drag', (el)=> {
+       //              self.trashRef.el.classList.replace("opacity-0", "opacity-100");
+       //              nonChildDivs.forEach((e) => {
+       //                 if(!el.contains(e)){
+       //                     e.classList.add('cy-studio-kanban-container');
+       //                 }
+       //             });
+       //         }).on('shadow', (el, container, source)=>{
+       //         if(container === self.trashRef.el){
+       //             el.classList.add('d-none')
+       //             self.trashRef.el.classList.replace("opacity-75", "opacity-100");
+       //             self.trashRef.el.style.backgroundImage = "radial-gradient(white, #fde0e0, #feaaaa)"
+       //         } else {
+       //             self.trashRef.el.classList.replace("opacity-100", "opacity-75");
+       //             self.trashRef.el.style.backgroundImage = ""
+       //             el.classList.remove('d-none')
+       //         }
+       //         }).on('dragend', ()=>{
+       //             self.trashRef.el?.classList.remove("opacity-75", "opacity-100");
+       //         self.trashRef.el.classList.add("opacity-0");
+       //              nonChildDivs.forEach((e) => {
+       //                 e.classList.remove('cy-studio-kanban-container');
+       //             });
+       //         }).on('drop', async(el, target, source, sibling)=>{
+       //             const path = el.getAttribute('cy-xpath')
+       //             const siblingPath = sibling?.getAttribute('cy-xpath');
+       //             const targetPath = target.getAttribute('cy-xpath');
+       //             const sibling_path = siblingPath || targetPath;
+       //             const position = siblingPath ? 'before' : 'inside';
+       //             try{
+       //                 if(target == self.trashRef.el){
+       //                    const response =  await self.rpc("cyllo_studio/kanban/remove", {
+       //                         view_id: self.env.config.viewId,
+       //                         view_type: self.env.config.viewType,
+       //                         model: self.action.currentController.props.resModel,
+       //                         path,
+       //                         field_name: "",
+       //                     })
+       //                     if(response){
+       //                         let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+       //                         let cleanedStr = response.replace(/\s+/g, ' ').trim();
+       //                         storedArray.push(cleanedStr);
+       //                         sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+       //                         sessionStorage.setItem('ReDO', JSON.stringify([]));
+       //                     }
+       //                 } else {
+       //                     self.env.services.ui.block();
+       //                         const response = await self.rpc("cyllo_studio/kanban/move", {
+       //                         view_type: self.env.config.viewType,
+       //                         model: self.action.currentController.props.resModel,
+       //                         view_id: self.env.config.viewId,
+       //                         path,
+       //                         position,
+       //                         sibling_path,
+       //                     })
+       //                     if(response){
+       //                         let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+       //                         let cleanedStr = response.replace(/\s+/g, ' ').trim();
+       //                         storedArray.push(cleanedStr);
+       //                         sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+       //                         sessionStorage.setItem('ReDO', JSON.stringify([]));
+       //                     }
+       //                 }
+       //             } finally {
+       //                 self.env.services.ui.unblock();
+       //             }
+       //             this.env.bus.trigger('resetProperties');
+       //             self.action.doAction('studio_reload')
+       //         })
+       //     });
+       //      var drake = dragula([...divElements, this.trashRef.el], {
+       //         revertOnSpill: true,
+       //         moves: (el, container, handle) => {
+       //             if((handle.tagName === 'BUTTON' || handle.closest('button')) && el.getAttribute('data-restrict')){
+       //                 return false;
+       //             }
+       //             return !el.getAttribute('data-restrict');
+       //         },
+       //         accepts: (el, target, source, sibling) => {
+       //            return !el.contains(target)
+       //         },
+       //     })
+       //     drake.on('drag', (el)=>{
+       //     if(el.getAttribute('data-restrict')){
+       //             this.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.")
+       //             drake.cancel(true);
+       //             return;
+       //         }
+       //
+       //         self.trashRef.el.classList.replace("opacity-0", "opacity-100");
+       //         divElements.forEach((element) => {
+       //             element.classList.add('cy-studio-kanban-container');
+       //         });
+       //     }).on('shadow', (el, container, source)=>{
+       //         if(container === self.trashRef.el){
+       //             el.classList.add('d-none')
+       //             self.trashRef.el.classList.replace("opacity-75", "opacity-100");
+       //             self.trashRef.el.style.backgroundImage = "radial-gradient(white, #fde0e0, #feaaaa)"
+       //         } else {
+       //             self.trashRef.el.classList.replace("opacity-100", "opacity-75");
+       //             self.trashRef.el.style.backgroundImage = ""
+       //             el.classList.remove('d-none')
+       //         }
+       //     }).on('dragend', ()=> {
+       //         self.trashRef.el?.classList.remove("opacity-75", "opacity-100");
+       //         self.trashRef.el.classList.add("opacity-0");
+       //         divElements.forEach((element) => {
+       //             element.classList.remove('cy-studio-kanban-container');
+       //         });
+       //     }).on('drop', async(el, target, source, sibling)=>{
+       //         console.log('herlloo')
+       //         const path = el.getAttribute('cy-xpath')
+       //         const fieldName = el.getAttribute('name')
+       //         const regex = /field(\[\d+\])?$/;
+       //         const isField = regex.test(path);
+       //         const siblingPath = sibling?.getAttribute('cy-xpath');
+       //         const targetPath = target?.getAttribute('cy-xpath');
+       //
+       //         const sibling_path = siblingPath || targetPath;
+       //         const position = siblingPath ? 'before' : 'inside';
+       //         try{
+       //             self.env.services.ui.block();
+       //             if(target == self.trashRef.el){
+       //                 console.log("hllloo")
+       //                 let field = ""
+       //                 if(isField){
+       //                     const fieldNodes = self.props.archInfo.fieldNodes;
+       //                     const nameExists = Object.keys(fieldNodes).filter(element => element.startsWith(fieldName));
+       //                     let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
+       //                     field = isPathIncluded ? "" : fieldName
+       //                 }
+       //                 console.log("huhu")
+       //                 const response = await self.rpc("cyllo_studio/kanban/remove", {
+       //                     view_id: self.env.config.viewId,
+       //                     view_type: self.env.config.viewType,
+       //                     model: self.action.currentController.props.resModel,
+       //                     path,
+       //                     field_name: field,
+       //                 })
+       //                 if(response){
+       //                     let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+       //                     let cleanedStr = response.replace(/\s+/g, ' ').trim();
+       //                     storedArray.push(cleanedStr);
+       //                     sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+       //                     sessionStorage.setItem('ReDO', JSON.stringify([]));
+       //                 }
+       //             } else {
+       //                 const response = await self.rpc("cyllo_studio/kanban/move", {
+       //                     view_type: self.env.config.viewType,
+       //                     model: self.action.currentController.props.resModel,
+       //                     view_id: self.env.config.viewId,
+       //                     path,
+       //                     position,
+       //                     sibling_path
+       //                 })
+       //                 if(response){
+       //                     let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+       //                     let cleanedStr = response.replace(/\s+/g, ' ').trim();
+       //                     storedArray.push(cleanedStr);
+       //                     sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+       //                     sessionStorage.setItem('ReDO', JSON.stringify([]));
+       //                 }
+       //             }
+       //         } finally {
+       //             self.env.services.ui.unblock();
+       //         }
+       //         this.env.bus.trigger('resetProperties');
+       //         self.action.doAction('studio_reload')
+       //
+       //      }).on('cancel', (el, container, source)=> {
+       //         self.action.doAction('studio_reload')
+       //     })
+       // })
+//  onMounted(()=>{
+//     const self = this
+//     console.log("hehe",self)
+//     try {
+//         const selectedXPath = sessionStorage.getItem('SelectedRibbonXPath');
+//         if (selectedXPath && this.rootRef?.el) {
+//             const ribbons = this.rootRef.el.querySelectorAll('[data-ribbon], .ribbon');
+//             ribbons.forEach((rb) => {
+//                 const rbXPath = rb.getAttribute('cy-xpath');
+//                 if (rbXPath === selectedXPath) {
+//                     rb.style.display = '';
+//                 } else {
+//                     rb.style.display = 'none';
+//                 }
+//             });
+//         }
+//     } catch(e) { /* noop */ }
+//
+//     this.rootRef.el.addEventListener("mousemove", (el)=> {
+//         const elements = this.rootRef.el.querySelectorAll(".cy-studio-kanban-border");
+//         elements.forEach((e) => {
+//             e.classList.remove("cy-studio-kanban-border");
+//         });
+//         el.target.closest('[cy-xpath]')?.classList.add('cy-studio-kanban-border')
+//     });
+//
+//     const divElements = Array.from(this.rootRef.el.querySelectorAll('[data-drag="1"]'));
+//
+//     divElements.forEach(div => {
+//         div.addEventListener('click', (event) => {
+//             if (event.target === div) {
+//                 const elements = document.querySelectorAll('.border-class');
+//                 elements.forEach(e => {
+//                     e.classList.remove('border-class');
+//                 });
+//                 div.classList.add('border-class')
+//                 const path = div.getAttribute('cy-xpath')
+//                 this.env.bus.trigger("KANBAN_DIV", {
+//                     view_id: this.env.config.viewId,
+//                     type: "KanbanDivProperties",
+//                     view_type: this.env.config.viewType,
+//                     model: this.action.currentController.props.resModel,
+//                     path,
+//                     div,
+//                 })
+//             }
+//         });
+//     });
+//
+//     const fieldContainers = [...divElements, this.trashRef.el];
+//
+//     fieldContainers.forEach((container) => {
+//         const existingSortable = Sortable.get(container);
+//         if (existingSortable) {
+//             return;
+//         }
+//
+//         Sortable.create(container, {
+//             group: {
+//                 name: 'kanban-fields',
+//                 pull: false,
+//                 put: function(to, from, dragEl) {
+//                     if((dragEl.tagName === 'BUTTON' || dragEl.closest('button')) && dragEl.getAttribute('data-restrict')){
+//                         return false;
+//                     }
+//                     return !dragEl.getAttribute('data-restrict');
+//                 }
+//             },
+//             animation: 150,
+//             ghostClass: 'sortable-ghost',
+//
+//             // ✅ SHOW TRASH ON DRAG START
+//             onStart: function(evt) {
+//                 console.log("start test")
+//                 if(evt.item.getAttribute('data-restrict')){
+//                     self.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.");
+//                     return;
+//                 }
+//
+//                 // Show trash icon
+//                 const trash = self.trashRef.el;
+//                 if (trash) {
+//                     trash.classList.remove("opacity-0");
+//                     trash.classList.add("opacity-100");
+//                 }
+//
+//                 divElements.forEach((element) => {
+//                     element.classList.add('cy-studio-kanban-container');
+//                 });
+//             },
+//
+//             onEnd: function(evt) {
+//                 const trash = self.trashRef.el;
+//                 if (trash) {
+//                     trash?.classList.remove("opacity-75", "opacity-100");
+//                     trash.classList.add("opacity-0");
+//                 }
+//
+//                 divElements.forEach((element) => {
+//                     element.classList.remove('cy-studio-kanban-container');
+//                 });
+//             },
+//
+//             onAdd: async function(evt) {
+//                 const el = evt.item;
+//                 const target = evt.to;
+//
+//                 const path = el.getAttribute('cy-xpath');
+//                 const fieldName = el.getAttribute('name');
+//                 const regex = /field(\[\d+\])?$/;
+//                 const isField = regex.test(path);
+//
+//                 let siblingPath = null;
+//                 const targetChildren = Array.from(target.children);
+//
+//                 if (targetChildren.length > evt.newIndex + 1) {
+//                     const sibling = targetChildren[evt.newIndex + 1];
+//                     siblingPath = sibling?.getAttribute('cy-xpath');
+//                 }
+//
+//                 const targetPath = target?.getAttribute('cy-xpath');
+//                 const sibling_path = siblingPath || targetPath;
+//                 const position = siblingPath ? 'before' : 'inside';
+//
+//                 if (!sibling_path || sibling_path === 'None' || sibling_path === null) {
+//                     console.error("ERROR: Invalid sibling_path:", sibling_path);
+//                     self.notification.add({
+//                         title: "Error",
+//                         message: "Cannot determine drop location",
+//                         type: "notification_panel",
+//                         notificationType: "danger",
+//                     });
+//                     el.remove();
+//                     return;
+//                 }
+//
+//                 try {
+//                     self.env.services.ui.block();
+//                     if(target === self.trashRef.el){
+//                         el.classList.add('d-none');
+//                         let field = "";
+//                         if(isField){
+//                             const fieldNodes = self.props.archInfo.fieldNodes;
+//                             const nameExists = Object.keys(fieldNodes).filter(element => element.startsWith(fieldName));
+//                             let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
+//                             field = isPathIncluded ? "" : fieldName;
+//                         }
+//
+//                         const response = await self.rpc("cyllo_studio/kanban/remove", {
+//                             view_id: self.env.config.viewId,
+//                             view_type: self.env.config.viewType,
+//                             model: self.action.currentController.props.resModel,
+//                             path,
+//                             field_name: field,
+//                         });
+//                         if(response){
+//                             let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//                             let cleanedStr = response.replace(/\s+/g, ' ').trim();
+//                             storedArray.push(cleanedStr);
+//                             sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//                             sessionStorage.setItem('ReDO', JSON.stringify([]));
+//                         }
+//                     } else {
+//                         const response = await self.rpc("cyllo_studio/kanban/move", {
+//                             view_type: self.env.config.viewType,
+//                             model: self.action.currentController.props.resModel,
+//                             view_id: self.env.config.viewId,
+//                             path,
+//                             position,
+//                             sibling_path
+//                         });
+//                         if(response){
+//                             let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//                             let cleanedStr = response.replace(/\s+/g, ' ').trim();
+//                             storedArray.push(cleanedStr);
+//                             sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//                             sessionStorage.setItem('ReDO', JSON.stringify([]));
+//                         }
+//                     }
+//                 } catch (error) {
+//                     console.error("RPC Error:", error);
+//                 } finally {
+//                     self.env.services.ui.unblock();
+//                 }
+//                 self.env.bus.trigger('resetProperties');
+//                 self.action.doAction('studio_reload');
+//             }
+//         });
+//     });
+//
+//     // ============ SETUP DIV SORTABLES ============
+//     divElements.forEach((element, index) => {
+//         console.log("hqqw")
+//         var children = Array.from(element.children);
+//         var nonChildDivs = divElements.filter((otherDiv) => {
+//             return otherDiv !== element && !children.includes(otherDiv);
+//         });
+//
+//         const divContainers = [...nonChildDivs, this.trashRef.el];
+//         console.log("ddidv",divContainers)
+//         divContainers.forEach((container) => {
+//             const existingSortable = Sortable.get(container);
+//             if (existingSortable) {
+//                 return;
+//             }
+//
+//             Sortable.create(container, {
+//                 group: {
+//                     name: `divs-movement`,
+//                     pull: false,
+//                     put: function(to, from, dragEl) {
+//                         const elementPath = dragEl.getAttribute('cy-xpath');
+//                         const isDrag = dragEl.getAttribute('data-drag') || false;
+//
+//                         if(dragEl.tagName.toUpperCase() === 'DIV' && isDrag && dragEl.getAttribute('data-restrict')){
+//                             self.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.");
+//                             return false;
+//                         }
+//
+//                         return dragEl.tagName.toUpperCase() === 'DIV' && isDrag;
+//                     }
+//                 },
+//                 animation: 150,
+//                 ghostClass: 'sortable-ghost',
+//
+//                 onStart: function(evt) {
+//                     const trash = self.trashRef.el;
+//                     console.log("trash",trash)
+//                     if (trash) {
+//                         trash.classList.remove("opacity-0");
+//                         trash.classList.add("opacity-100");
+//                     }
+//
+//                     nonChildDivs.forEach((e) => {
+//                         if(!evt.item.contains(e)){
+//                             e.classList.add('cy-studio-kanban-container');
+//                         }
+//                     });
+//                 },
+//
+//                 onEnd: function(evt) {
+//                     const trash = self.trashRef.el;
+//                     if (trash) {
+//                         trash?.classList.remove("opacity-75", "opacity-100");
+//                         trash.classList.add("opacity-0");
+//                     }
+//
+//                     nonChildDivs.forEach((e) => {
+//                         e.classList.remove('cy-studio-kanban-container');
+//                     });
+//                 },
+//
+//                 onAdd: async function(evt) {
+//                     const el = evt.item;
+//                     const target = evt.to;
+//
+//                     const path = el.getAttribute('cy-xpath');
+//
+//                     let siblingPath = null;
+//                     if (target.children.length > evt.newIndex + 1) {
+//                         const sibling = target.children[evt.newIndex + 1];
+//                         siblingPath = sibling?.getAttribute('cy-xpath');
+//                     }
+//
+//                     const targetPath = target.getAttribute('cy-xpath');
+//                     const sibling_path = siblingPath || targetPath;
+//                     const position = siblingPath ? 'before' : 'inside';
+//
+//                     if (!sibling_path || sibling_path === 'None' || sibling_path === null) {
+//                         console.error("ERROR: Invalid sibling_path:", sibling_path);
+//                         self.notification.add({
+//                             title: "Error",
+//                             message: "Cannot determine drop location",
+//                             type: "notification_panel",
+//                             notificationType: "danger",
+//                         });
+//                         el.remove();
+//                         return;
+//                     }
+//
+//                     try {
+//                         if(target === self.trashRef.el){
+//                             el.classList.add('d-none');
+//                             const response = await self.rpc("cyllo_studio/kanban/remove", {
+//                                 view_id: self.env.config.viewId,
+//                                 view_type: self.env.config.viewType,
+//                                 model: self.action.currentController.props.resModel,
+//                                 path,
+//                                 field_name: "",
+//                             });
+//                             if(response){
+//                                 let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//                                 let cleanedStr = response.replace(/\s+/g, ' ').trim();
+//                                 storedArray.push(cleanedStr);
+//                                 sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//                                 sessionStorage.setItem('ReDO', JSON.stringify([]));
+//                             }
+//                         } else {
+//                             self.env.services.ui.block();
+//                             const response = await self.rpc("cyllo_studio/kanban/move", {
+//                                 view_type: self.env.config.viewType,
+//                                 model: self.action.currentController.props.resModel,
+//                                 view_id: self.env.config.viewId,
+//                                 path,
+//                                 position,
+//                                 sibling_path,
+//                             });
+//                             if(response){
+//                                 let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+//                                 let cleanedStr = response.replace(/\s+/g, ' ').trim();
+//                                 storedArray.push(cleanedStr);
+//                                 sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+//                                 sessionStorage.setItem('ReDO', JSON.stringify([]));
+//                             }
+//                         }
+//                     } catch (error) {
+//                         console.error("RPC Error:", error);
+//                     } finally {
+//                         self.env.services.ui.unblock();
+//                     }
+//                     self.env.bus.trigger('resetProperties');
+//                     self.action.doAction('studio_reload');
+//                 }
+//             });
+//         });
+//     });
+// })
+
+        onMounted(() => {
+    const self = this;
+    try {
+        const selectedXPath = sessionStorage.getItem('SelectedRibbonXPath');
+        if (selectedXPath && this.rootRef?.el) {
+            this.rootRef.el.querySelectorAll('[data-ribbon], .ribbon').forEach((rb) => {
+                rb.style.display = rb.getAttribute('cy-xpath') === selectedXPath ? '' : 'none';
+            });
+        }
+    } catch(e) {}
+    this.rootRef.el.addEventListener("mousemove", (el) => {
+        this.rootRef.el.querySelectorAll(".cy-studio-kanban-border")
+            .forEach(e => e.classList.remove("cy-studio-kanban-border"));
+        el.target.closest('[cy-xpath]')?.classList.add('cy-studio-kanban-border');
+    });
+
+    const trashEl = this.trashRef.el;
+    const divElements = Array.from(this.rootRef.el.querySelectorAll('[data-drag="1"]'));
+
+    divElements.forEach(div => {
+        div.addEventListener('click', (event) => {
+            if (event.target === div) {
+                document.querySelectorAll('.border-class')
+                    .forEach(e => e.classList.remove('border-class'));
+                div.classList.add('border-class');
+                this.env.bus.trigger("KANBAN_DIV", {
+                    view_id: this.env.config.viewId,
+                    type: "KanbanDivProperties",
+                    view_type: this.env.config.viewType,
+                    model: this.action.currentController.props.resModel,
+                    path: div.getAttribute('cy-xpath'),
+                    div,
                 });
-                el.target.closest('[cy-xpath]')?.classList.add('cy-studio-kanban-border')
+            }
+        });
+    });
+    const showTrash = () => {
+        if (!trashEl) return;
+        trashEl.style.setProperty('opacity', '1', 'important');
+    };
+
+    const hideTrash = () => {
+        if (!trashEl) return;
+        trashEl.style.setProperty('opacity', '0', 'important');
+        trashEl.style.backgroundImage = '';
+        // trashEl.style.background = '#fff0f0';
+    };
+
+    const glowTrash = () => {
+        if (!trashEl) return;
+        trashEl.style.setProperty('opacity', '100', 'important');
+        trashEl.style.backgroundImage = 'radial-gradient(white, #fde0e0, #feaaaa)';
+        // trashEl.style.setProperty('border-color', '#ff0000', 'important');
+    };
+
+    const unglowTrash = () => {
+        if (!trashEl) return;
+        trashEl.style.setProperty('opacity', '75', 'important');
+        trashEl.style.backgroundImage = '';
+        // trashEl.style.setProperty('border-color', '#ff4d4d', 'important');
+    };
+    const doRemove = async (el, withFieldCheck = true) => {
+        el.classList.add('d-none');
+        const path = el.getAttribute('cy-xpath');
+        const fieldName = el.getAttribute('name');
+        const regex = /field(\[\d+\])?$/;
+        const isField = withFieldCheck && regex.test(path);
+
+        let field = "";
+        if (isField) {
+            const fieldNodes = self.props.archInfo.fieldNodes;
+            const nameExists = Object.keys(fieldNodes).filter(k => k.startsWith(fieldName));
+            const isPathIncluded = nameExists.some(n => fieldNodes[n].MainPath.includes('/kanban/field'));
+            field = isPathIncluded ? "" : fieldName;
+        }
+        try {
+            self.env.services.ui.block();
+            const response = await self.rpc("cyllo_studio/kanban/remove", {
+                view_id: self.env.config.viewId,
+                view_type: self.env.config.viewType,
+                model: self.action.currentController.props.resModel,
+                path,
+                field_name: field,
             });
-            const divElements = Array.from(this.rootRef.el.querySelectorAll('[data-drag="1"]'));
-            //@Todo:- Merge both foreach together after completing the functionality
-            divElements.forEach(div => {
-               div.addEventListener('click', (event) => {
-                    if (event.target === div) {
-                        const elements = document.querySelectorAll('.border-class');
-                        elements.forEach(e => {
-                            e.classList.remove('border-class');
-                        });
-                        div.classList.add('border-class')
-                        const path = div.getAttribute('cy-xpath')
-                        this.env.bus.trigger("KANBAN_DIV", {
-                            view_id: this.env.config.viewId,
-                            type: "KanbanDivProperties",
-                            view_type: this.env.config.viewType,
-                            model: this.action.currentController.props.resModel,
-                            path,
-                            div,
-                        })
-                    }
-              });
+            if (response) {
+                let arr = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                arr.push(response.replace(/\s+/g, ' ').trim());
+                sessionStorage.setItem('UndoRedo', JSON.stringify(arr));
+                sessionStorage.setItem('ReDO', JSON.stringify([]));
+            }
+        } catch(err) {
+            console.error("Remove RPC error:", err);
+        } finally {
+            self.env.services.ui.unblock();
+        }
+        self.env.bus.trigger('resetProperties');
+        self.action.doAction('studio_reload');
+    };
+    const doMove = async (el, target, newIndex) => {
+        const path = el.getAttribute('cy-xpath');
+        const targetChildren = Array.from(target.children);
+        let siblingPath = null;
+        if (targetChildren.length > newIndex + 1) {
+            siblingPath = targetChildren[newIndex + 1]?.getAttribute('cy-xpath');
+        }
+        const sibling_path = siblingPath || target.getAttribute('cy-xpath');
+        const position = siblingPath ? 'before' : 'inside';
+
+        if (!sibling_path || sibling_path === 'None') {
+            console.error("Invalid sibling_path:", sibling_path);
+            el.remove();
+            return;
+        }
+
+        try {
+            self.env.services.ui.block();
+            const response = await self.rpc("cyllo_studio/kanban/move", {
+                view_type: self.env.config.viewType,
+                model: self.action.currentController.props.resModel,
+                view_id: self.env.config.viewId,
+                path,
+                position,
+                sibling_path,
             });
-            divElements.forEach((element, index) => {
-                 var children = Array.from(element.children);
-                 var nonChildDivs = divElements.filter((otherDiv) => {
-                    return otherDiv !== element && !children.includes(otherDiv);
-                });
-                dragula([...nonChildDivs, this.trashRef.el], {
-                    revertOnSpill: true,
-                     moves: (el, container, handle) => {
-                            const elementPath = el.getAttribute('cy-xpath')
-                            const isDrag = el.getAttribute('data-drag') || false
-                            const handlePath = handle.getAttribute('cy-xpath')
-                            if(el.tagName.toUpperCase() === 'DIV' && isDrag && elementPath === handlePath && el.getAttribute('data-restrict')){
-                                this.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.")
-                                return false
-                            }
-                            return el.tagName.toUpperCase() === 'DIV' && isDrag && elementPath === handlePath;
-                    },
-                     accepts: (el, target, source, sibling) => {
-                       return !el.contains(target)
-                    },
-                }).on('drag', (el)=> {
-                     self.trashRef.el.classList.replace("opacity-0", "opacity-100");
-                     nonChildDivs.forEach((e) => {
-                        if(!el.contains(e)){
-                            e.classList.add('cy-studio-kanban-container');
-                        }
-                    });
-                }).on('shadow', (el, container, source)=>{
-                if(container === self.trashRef.el){
-                    el.classList.add('d-none')
-                    self.trashRef.el.classList.replace("opacity-75", "opacity-100");
-                    self.trashRef.el.style.backgroundImage = "radial-gradient(white, #fde0e0, #feaaaa)"
-                } else {
-                    self.trashRef.el.classList.replace("opacity-100", "opacity-75");
-                    self.trashRef.el.style.backgroundImage = ""
-                    el.classList.remove('d-none')
-                }
-                }).on('dragend', ()=>{
-                    self.trashRef.el?.classList.remove("opacity-75", "opacity-100");
-                self.trashRef.el.classList.add("opacity-0");
-                     nonChildDivs.forEach((e) => {
-                        e.classList.remove('cy-studio-kanban-container');
-                    });
-                }).on('drop', async(el, target, source, sibling)=>{
-                    const path = el.getAttribute('cy-xpath')
-                    const siblingPath = sibling?.getAttribute('cy-xpath');
-                    const targetPath = target.getAttribute('cy-xpath');
-                    const sibling_path = siblingPath || targetPath;
-                    const position = siblingPath ? 'before' : 'inside';
-                    try{
-                        if(target == self.trashRef.el){
-                           const response =  await self.rpc("cyllo_studio/kanban/remove", {
-                                view_id: self.env.config.viewId,
-                                view_type: self.env.config.viewType,
-                                model: self.action.currentController.props.resModel,
-                                path,
-                                field_name: "",
-                            })
-                            if(response){
-                                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                                let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                                storedArray.push(cleanedStr);
-                                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                                sessionStorage.setItem('ReDO', JSON.stringify([]));
-                            }
-                        } else {
-                            self.env.services.ui.block();
-                                const response = await self.rpc("cyllo_studio/kanban/move", {
-                                view_type: self.env.config.viewType,
-                                model: self.action.currentController.props.resModel,
-                                view_id: self.env.config.viewId,
-                                path,
-                                position,
-                                sibling_path,
-                            })
-                            if(response){
-                                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                                let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                                storedArray.push(cleanedStr);
-                                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                                sessionStorage.setItem('ReDO', JSON.stringify([]));
-                            }
-                        }
-                    } finally {
-                        self.env.services.ui.unblock();
-                    }
-                    this.env.bus.trigger('resetProperties');
-                    self.action.doAction('studio_reload')
-                })
+            if (response) {
+                let arr = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                arr.push(response.replace(/\s+/g, ' ').trim());
+                sessionStorage.setItem('UndoRedo', JSON.stringify(arr));
+                sessionStorage.setItem('ReDO', JSON.stringify([]));
+            }
+        } catch(err) {
+            console.error("Move RPC error:", err);
+        } finally {
+            self.env.services.ui.unblock();
+        }
+        self.env.bus.trigger('resetProperties');
+        self.action.doAction('studio_reload');
+    };
+    const existingOptionsMap = new Map();
+    divElements.forEach((el) => {
+        const existing = Sortable.get(el);
+        if (existing) {
+            existingOptionsMap.set(el, {
+                onAdd: existing.options.onAdd,
+                onStart: existing.options.onStart,
+                onEnd: existing.options.onEnd,
             });
-             var drake = dragula([...divElements, this.trashRef.el], {
-                revertOnSpill: true,
-                moves: (el, container, handle) => {
-                    if((handle.tagName === 'BUTTON' || handle.closest('button')) && el.getAttribute('data-restrict')){
-                        return false;
-                    }
-                    return !el.getAttribute('data-restrict');
-                },
-                accepts: (el, target, source, sibling) => {
-                   return !el.contains(target)
-                },
-            })
-            drake.on('drag', (el)=>{
-            if(el.getAttribute('data-restrict')){
-                    this.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.")
-                    drake.cancel(true);
+            existing.destroy();
+        }
+    });
+    if (trashEl) {
+        const existingTrash = Sortable.get(trashEl);
+        if (existingTrash) existingTrash.destroy();
+
+        Sortable.create(trashEl, {
+            group: {
+                name: 'trash',
+                pull: false,
+                put: ['kanban-fields', 'kanban-components'],
+            },
+            animation: 0,
+            onAdd: async function(evt) {
+                console.log("TRASH onAdd:", evt.item.getAttribute('cy-xpath'));
+                hideTrash();
+                const isFromSidebar = !evt.item.getAttribute('cy-xpath');
+                if (isFromSidebar) {
+                    evt.item.remove();
                     return;
                 }
 
-                self.trashRef.el.classList.replace("opacity-0", "opacity-100");
-                divElements.forEach((element) => {
-                    element.classList.add('cy-studio-kanban-container');
-                });
-            }).on('shadow', (el, container, source)=>{
-                if(container === self.trashRef.el){
-                    el.classList.add('d-none')
-                    self.trashRef.el.classList.replace("opacity-75", "opacity-100");
-                    self.trashRef.el.style.backgroundImage = "radial-gradient(white, #fde0e0, #feaaaa)"
+                const isDivDrag = evt.item.tagName.toUpperCase() === 'DIV'
+                    && !!evt.item.getAttribute('data-drag');
+                await doRemove(evt.item, !isDivDrag);
+                evt.item.style.visibility = 'visible';
+            },
+        });
+    }
+
+    divElements.forEach((container) => {
+        const savedOptions = existingOptionsMap.get(container);
+
+        Sortable.create(container, {
+            group: {
+                name: 'kanban-fields',
+                pull: true,
+                put: function(to, from, dragEl) {
+                    // Always accept drops from the sidebar component panel
+                    if (from.options?.group?.name === 'kanban-components') return true;
+                    // Reject restricted elements
+                    if ((dragEl.tagName === 'BUTTON' || dragEl.closest?.('button'))
+                            && dragEl.getAttribute('data-restrict')) return false;
+                    return !dragEl.getAttribute('data-restrict');
+                },
+            },
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+
+            onStart: function(evt) {
+                console.log("FIELD onStart:", evt.item.getAttribute('cy-xpath'));
+                if (evt.item.getAttribute('data-restrict')) {
+                    self.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.");
+                    return;
+                }
+                showTrash();
+                divElements.forEach(el => el.classList.add('cy-studio-kanban-container'));
+                savedOptions?.onStart?.call(this, evt);
+            },
+
+            onMove: function(evt) {
+                if (evt.to === trashEl) {
+                    glowTrash();
                 } else {
-                    self.trashRef.el.classList.replace("opacity-100", "opacity-75");
-                    self.trashRef.el.style.backgroundImage = ""
-                    el.classList.remove('d-none')
+                    unglowTrash();
                 }
-            }).on('dragend', ()=> {
-                self.trashRef.el?.classList.remove("opacity-75", "opacity-100");
-                self.trashRef.el.classList.add("opacity-0");
-                divElements.forEach((element) => {
-                    element.classList.remove('cy-studio-kanban-container');
-                });
-            }).on('drop', async(el, target, source, sibling)=>{
-                const path = el.getAttribute('cy-xpath')
-                const fieldName = el.getAttribute('name')
-                const regex = /field(\[\d+\])?$/;
-                const isField = regex.test(path);
-                const siblingPath = sibling?.getAttribute('cy-xpath');
-                const targetPath = target?.getAttribute('cy-xpath');
+                return !evt.dragged.contains(evt.related);
+            },
 
-                const sibling_path = siblingPath || targetPath;
-                const position = siblingPath ? 'before' : 'inside';
-                try{
-                    self.env.services.ui.block();
-                    if(target == self.trashRef.el){
-                        let field = ""
-                        if(isField){
-                            const fieldNodes = self.props.archInfo.fieldNodes;
-                            const nameExists = Object.keys(fieldNodes).filter(element => element.startsWith(fieldName));
-                            let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
-                            field = isPathIncluded ? "" : fieldName
-                        }
+            onEnd: function(evt) {
+                console.log("FIELD onEnd:", evt.item.getAttribute('cy-xpath'));
+                hideTrash();
+                divElements.forEach(el => el.classList.remove('cy-studio-kanban-container'));
+                savedOptions?.onEnd?.call(this, evt);
+            },
 
-                        const response = await self.rpc("cyllo_studio/kanban/remove", {
-                            view_id: self.env.config.viewId,
-                            view_type: self.env.config.viewType,
-                            model: self.action.currentController.props.resModel,
-                            path,
-                            field_name: field,
-                        })
-                        if(response){
-                            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                            let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                            storedArray.push(cleanedStr);
-                            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                            sessionStorage.setItem('ReDO', JSON.stringify([]));
-                        }
-                    } else {
-                        const response = await self.rpc("cyllo_studio/kanban/move", {
-                            view_type: self.env.config.viewType,
-                            model: self.action.currentController.props.resModel,
-                            view_id: self.env.config.viewId,
-                            path,
-                            position,
-                            sibling_path
-                        })
-                        if(response){
-                            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                            let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                            storedArray.push(cleanedStr);
-                            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                            sessionStorage.setItem('ReDO', JSON.stringify([]));
-                        }
-                    }
-                } finally {
-                    self.env.services.ui.unblock();
+            onAdd: async function(evt) {
+                console.log("FIELD onAdd to:", evt.to?.getAttribute?.('cy-xpath'), "item:", evt.item.getAttribute('cy-xpath'));
+
+                if (evt.to === trashEl) return;
+                const isFromSidebar = !evt.item.getAttribute('cy-xpath');
+                if (isFromSidebar) {
+                    savedOptions?.onAdd?.call(this, evt);
+                    return;
                 }
-                this.env.bus.trigger('resetProperties');
-                self.action.doAction('studio_reload')
 
-             }).on('cancel', (el, container, source)=> {
-                self.action.doAction('studio_reload')
-            })
-        })
+                await doMove(evt.item, evt.to, evt.newIndex);
+            },
+        });
+    });
+
+    divElements.forEach((el, i) => {
+        const s = Sortable.get(el);
+    });
+})
+
     }
 
     /**

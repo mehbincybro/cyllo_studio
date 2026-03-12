@@ -57,21 +57,47 @@ export class CylloNotebook extends Notebook {
     }
 
     initDragDrop() {
-      const self = this
-      const page = this.pageRef.el
-      var drake = dragula([page], {
-            revertOnSpill: true,
-            moves: (el, container, handle) => {
-                return !el.classList.contains('add-page');
-            },
-            accepts: (el, target, source, sibling) => {
-                return sibling
+    const self = this;
+    const page = this.pageRef.el;
+    if (!page) return;
+
+    // Destroy existing sortable if any
+    const existingSortable = Sortable.get(page);
+    if (existingSortable) existingSortable.destroy();
+
+    Sortable.create(page, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+
+        // Prevent the "add page" element from being dragged
+        filter: '.add-page',
+        preventOnFilter: true,
+
+        // Only allow dropping before an existing sibling (not at the end)
+        onMove: function(evt) {
+            if (!evt.related || evt.related.classList.contains('add-page')) {
+                return false;
             }
-        }).on('drop', async (el, target, source, sibling) => {
-            const view_id = self.env.config.viewId
+            return true;
+        },
+
+        onEnd: async function(evt) {
+            console.log("notebook worked on end");
+            const view_id = self.env.config.viewId;
+            const el = evt.item;
             const pagePath = el.getAttribute('cy-xpath');
-            const siblingPath = sibling.getAttribute('cy-xpath');
-            const sourcePath = source.getAttribute('cy-xpath');
+
+            // Get sibling now after the dropped element
+            const sibling = el.nextElementSibling || null;
+            const siblingPath = sibling?.getAttribute('cy-xpath') || null;
+            const sourcePath = page.getAttribute('cy-xpath');
+
+            if (!sibling || sibling.classList.contains('add-page')) {
+                const children = Array.from(page.children);
+                const referenceNode = children[evt.oldIndex] || null;
+                page.insertBefore(el, referenceNode);
+                return;
+            }
 
             const path = siblingPath || sourcePath;
             const position = siblingPath ? 'before' : 'inside';
@@ -89,14 +115,15 @@ export class CylloNotebook extends Notebook {
                     view_id: view_id ? view_id : null,
 
                 }
-            })
-           if(response){
-                handleUndoRedo(response)
+            });
+            if (response) {
+                handleUndoRedo(response);
             }
             self.env.services.ui.unblock();
-            self.action.doAction('studio_reload')
-        });
-    }
+            self.action.doAction('studio_reload');
+        },
+    });
+}
     /**
      * Add a new page to the notebook
      * @param {Event} e - Click event

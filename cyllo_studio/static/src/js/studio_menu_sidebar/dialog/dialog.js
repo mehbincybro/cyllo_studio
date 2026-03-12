@@ -205,32 +205,33 @@ export class MenuConfigurationDialog extends Component {
             Parents: [],
             types:'',
         })
-        onMounted(async() => {
-            const modalHeader = document.body.querySelector('.modal-header');
-            modalHeader.setAttribute('class', 'modal-header-no-drag');
-            const menuData = await this.orm.read('ir.ui.menu', [this.props.Menu.id], ['groups_id']);
-            this.state.group_ids = menuData[0].groups_id;
-            if (this.selectionValuesRef.el) {
-                const SiblingMenu = this.selectionValuesRef.el.querySelectorAll('.SiblingMenu')
-                var drake = dragula([this.selectionValuesRef.el], {
-                    revertOnSpill: true,
-                    moves: function (el, container, handle) {
-                        return true; // Allow dragging for all other elements
-                    },
-                    accepts: function (el, target, source, sibling) {
-                        return true; // elements can be dropped in any of the `containers` by default
-                      },
-                });
-                drake.on('drop', async function(el, target, source, sibling) {
-                    var elements = source.querySelectorAll('.SiblingMenu');
-                    elements.forEach(function(element, index) {
-                        var Fields = element.attributes.value ? element.attributes.value.value : [null]
-                        self.state.SiblingPosition[index] =  Fields;
-                    })
-                })
-            }
 
-        })
+        onMounted(async() => {
+    const modalHeader = document.body.querySelector('.modal-header');
+    modalHeader.setAttribute('class', 'modal-header-no-drag');
+    const menuData = await this.orm.read('ir.ui.menu', [this.props.Menu.id], ['groups_id']);
+    this.state.group_ids = menuData[0].groups_id;
+    if (this.selectionValuesRef.el) {
+        const container = this.selectionValuesRef.el;
+
+        // Destroy existing sortable if any
+        const existingSortable = Sortable.get(container);
+        if (existingSortable) existingSortable.destroy();
+
+        Sortable.create(container, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+
+            onEnd: function(evt) {
+                var elements = container.querySelectorAll('.SiblingMenu');
+                elements.forEach(function(element, index) {
+                    var Fields = element.attributes.value ? element.attributes.value.value : [null];
+                    self.state.SiblingPosition[index] = Fields;
+                });
+            },
+        });
+    }
+})
         useEffect((ev)=> {
             this.selected_parent(ev, this.state.ParentMenu)
         }, ()=> [this.state.ParentMenu])

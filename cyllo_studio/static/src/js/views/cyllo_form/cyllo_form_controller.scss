@@ -56,6 +56,66 @@ div[name="delay_from"] {
     align-items: center;
     vertical-align: middle;
 }
+// .cyllo-fallback-ghost {
+//     opacity: 0.8 !important;
+//     background-color: #bbdefb !important;
+//     border: 2px dashed #2196f3 !important;
+//     cursor: move !important;
+// }
+/* Visible ghost element */
+// .sortable-ghost {
+//     opacity: 0.4 !important;
+//     background: #d0e7ff !important;
+//     border: 1px dashed #2c7be5 !important;
+// }
+
+/* Make Sortable fallback ghost behave like floating element */
+// .cyllo-fallback-ghost {
+//     position: absolute !important;
+//     z-index: 999999 !important;
+//     display: inline-flex !important;
+// //     flex-direction: column !important;
+//     width: auto !important;
+//     min-width: 300px !important;
+//     max-width: 600px !important;
+//     height: auto !important;
+//     opacity: 0.9 !important;
+//     background-color: #7c8a00 !important;
+//     border: 1px dashed #7c8a00 !important;
+//     border-radius: 4px !important;
+//     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.25) !important;
+// }
+.cyllo-fallback-ghost {
+    position: absolute !important;
+    z-index: 10000 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    width: auto !important;
+    height: auto !important;
+    min-width: 500px !important;                   // ← CHANGED
+    min-height: 25px !important;                  // ← CHANGED
+    justify-content: center !important;
+        align-items: center !important;
+    gap: 8px !important;                      /* ← NEW */
+    padding: 8px 12px !important;
+    opacity: 0.95 !important;
+    background-color: transparent !important;    // ✅ CHANGED FROM: white
+//     border: none !important;                      // ✅ CHANGED FROM: 1px solid #ddd
+    border-radius: 4px !important;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
+
+    pointer-events: none !important;
+    cursor: grabbing !important;
+    overflow: visible !important;
+    visibility: visible !important;
+
+}
+
+
+
+
+
+
 
 
 

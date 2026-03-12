@@ -81,76 +81,94 @@ patch(ButtonBox.prototype, {
      * Handles reordering and updates via RPC
      */
     onMounted() {
-        const self = this
-        const smart_button = this.ref.el
-        const drake = dragula([smart_button], {
-                revertOnSpill: true,
-                moves: (el, container, handle) => {
-                    return !el.classList.contains('cy-add-smart-button');
-                },
-                accepts: (el, target, source, sibling) => {
-                    return sibling
+    const self = this;
+    const smart_button = this.ref.el;
+
+    // Destroy existing sortable if any
+    const existingSortable = Sortable.get(smart_button);
+    if (existingSortable) existingSortable.destroy();
+
+    Sortable.create(smart_button, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+
+        // Prevent the "add smart button" element from being dragged
+        filter: '.cy-add-smart-button',
+        preventOnFilter: true,
+
+        // Only allow dropping before an existing sibling (not at the end)
+        onMove: function(evt) {
+            if (!evt.related || evt.related.classList.contains('cy-add-smart-button')) {
+                return false;
+            }
+            return true;
+        },
+
+        onEnd: function(evt) {
+            const {
+                config,
+                services,
+                bus
+            } = self.env;
+            const model = self.action.currentController.action.res_model;
+            const viewId = config.viewId || null;
+
+            const el = evt.item;
+            const smartButtonPath = el?.getAttribute('cy-xpath');
+
+            // Get sibling that is now after the dropped element
+            const sibling = el.nextElementSibling || null;
+            const siblingPath = sibling?.getAttribute('cy-xpath');
+            const sourcePath = smart_button?.getAttribute('cy-xpath');
+
+            if (!(siblingPath || sourcePath) || !smartButtonPath || !model) {
+                return;
+            }
+            if (!sibling || sibling.classList.contains('cy-add-smart-button')) {
+                const children = Array.from(smart_button.children);
+                const referenceNode = children[evt.oldIndex] || null;
+                smart_button.insertBefore(el, referenceNode);
+                return;
+            }
+
+            const position = siblingPath ? 'before' : 'inside';
+
+            services.ui.block();
+
+            self.rpc("cyllo_studio/move/smart_button", {
+                kwargs: {
+                    sourcePath: siblingPath || sourcePath,
+                    position,
+                    smartButtonPath,
+                    model,
+                    view_id: viewId,
+                    viewType: 'form',
                 }
-            })
-            .on('drop', function(el, target, source, sibling) {
-                const {
-                    config,
-                    services,
-                    bus
-                } = self.env;
-                const model = self.action.currentController.action.res_model;
-                const viewId = config.viewId || null;
-
-                // Cache attributes
-                const smartButtonPath = el?.getAttribute('cy-xpath');
-                const siblingPath = sibling?.getAttribute('cy-xpath');
-                const sourcePath = source?.getAttribute('cy-xpath');
-
-                if (!(siblingPath || sourcePath) || !smartButtonPath || !model) {
-                    return;
+            }).then((response) => {
+                if (response?.trim()) {
+                    const undoList = sessionStorage.getItem('UndoRedo');
+                    const storedArray = undoList ? JSON.parse(undoList) : [];
+                    storedArray.push(response.replace(/\s+/g, ' ').trim());
+                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                    sessionStorage.setItem('ReDO', '[]');
                 }
-
-                const position = siblingPath ? 'before' : 'inside';
-
-                services.ui.block();
-
-                self.rpc("cyllo_studio/move/smart_button", {
-                    kwargs: {
-                        sourcePath: siblingPath || sourcePath,
-                        position,
-                        smartButtonPath,
-                        model,
-                        view_id: viewId,
-                        viewType: 'form',
-                    }
-                }).then((response) => {
-                    if (response?.trim()) {
-                        // Minimize parsing/writing
-                        const undoList = sessionStorage.getItem('UndoRedo');
-                        const storedArray = undoList ? JSON.parse(undoList) : [];
-
-                        storedArray.push(response.replace(/\s+/g, ' ').trim());
-
-                        sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                        sessionStorage.setItem('ReDO', '[]');
-                    }
-
-                    services.ui.unblock();
-                    self.action.doAction('studio_reload');
-                    bus.trigger('resetProperties');
-                }).catch((err) => {
-                    services.ui.unblock();
-                });
+                services.ui.unblock();
+                self.action.doAction('studio_reload');
+                bus.trigger('resetProperties');
+            }).catch((err) => {
+                services.ui.unblock();
             });
-            this.env.bus.addEventListener("BUTTON_EDIT_STARTED", ({ detail }) => {
-                this.state.isEditingButton = detail.isEditingButton
-            })
+        },
+    });
 
-            this.env.bus.addEventListener("STUDIO_EDIT_STARTED", ({ detail }) => {
-                this.state.isStudioEdit = detail.isStudioEdit
-            })
+    this.env.bus.addEventListener("BUTTON_EDIT_STARTED", ({ detail }) => {
+        this.state.isEditingButton = detail.isEditingButton;
+    });
 
-    },
+    this.env.bus.addEventListener("STUDIO_EDIT_STARTED", ({ detail }) => {
+        this.state.isStudioEdit = detail.isStudioEdit;
+    });
+},
 
     /**
      * Add a new Smart Button

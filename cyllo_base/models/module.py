@@ -20,12 +20,11 @@
 #
 #############################################################################
 from textwrap import dedent
-
-from odoo import api, models, modules
+from odoo.tools.parse_version import parse_version
 from odoo.addons.base.models.ir_module import assert_log_admin_access, Module
 from odoo.http import request
+from odoo import api, models, modules
 from odoo.tools.misc import file_path
-from odoo.tools.parse_version import parse_version
 
 icons = {
     'Sales': '/cyllo_base/static/src/icons/sales.svg',

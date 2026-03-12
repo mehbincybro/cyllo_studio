@@ -20,11 +20,10 @@
 #
 #############################################################################
 import base64
-
+from odoo.addons.web.controllers.webmanifest import WebManifest
 from odoo import http
 from odoo.http import request
 from odoo.tools import file_open
-from odoo.addons.web.controllers.webmanifest import WebManifest
 
 
 class CylloWebManifest(WebManifest):

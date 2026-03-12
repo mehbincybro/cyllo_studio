@@ -222,11 +222,17 @@
                                     <polyline points="1 5 4 8 11 1"></polyline>
                                 </svg>
                             </span>
-                            <span class="label-text">Header Button Limit</span>
+                            <span class="label-text">Statusbar Button Limit</span>
                         </label>
                     </div>
-                    <div class="mb-2" t-if="state.buttonLimitEnabled">
-                            <label for="buttonLimitInput" class="cy-navbar_label">Button Limit Value
+                    <div class="px-2" t-if="state.buttonLimitEnabled">
+                            <label for="buttonLimitInput" style="font-size: 11px;
+            color: #9aa07a;
+            margin: 0 0 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        ">Button Limit Value
                             </label>
                             <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
                                    reqired="true"
