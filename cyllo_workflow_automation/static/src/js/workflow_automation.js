@@ -22,6 +22,7 @@ import { CustomTrigger } from "./components/customTriggers/customTriggers";
 import { WorkPager } from "./components/Assists/workPager/workPager";
 import { SaveLoading } from "./components/Assists/effect/saveLoading/saveLoading";
 import { HistoryManager } from "./utils/historyManager";
+import { cloneState } from "./utils/stateClone";
 
 const BUTTON_CLASSES = [
     'btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'
@@ -182,7 +183,10 @@ export class WorkFlowAuto extends Component {
 
         useEffect((value) => {
             if (value) {
-                !this.initialLoad && this.write({ variables: this.state.variables, imports: this.imports });
+                !this.initialLoad && this.write({
+                    variables: this.getSerializableVariables(),
+                    imports: this.getSerializableImports()
+                });
                 this.initialLoad = false;
             }
         }, () => [this.state.variables, this.imports]);
@@ -210,18 +214,23 @@ export class WorkFlowAuto extends Component {
         onWillStart(async () => {
             this.state.recordList = await this.orm.search("work.auto", [])
             this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
-            const data = await this.orm.read('work.auto', [this.id], ['name', 'variables', 'imports', 'code', 'trigger_type']);
-            if (data.length > 0) {
-                let [{ name, variables, imports, code, trigger_type }] = data
+            const recordId = this.id;
+            if (recordId) {
+                const data = await this.orm.read('work.auto', [recordId], ['name', 'variables', 'imports', 'code', 'trigger_type']);
+                if (data.length > 0) {
+                    let [{ name, variables, imports, code, trigger_type }] = data
 
-                imports = imports || GLOBAL_IMPORTS
+                    imports = imports || GLOBAL_IMPORTS
 
-                this.state.variables = variables ? variables : [];
-                this.state.name = name;
-                this.state.imports = [...imports];
-                this.state.code = code;
-                this.state.triggerType = trigger_type || "";
-                this.env.variables.setContext({ variables: [...this.state.variables] });
+                    this.state.variables = variables ? variables : [];
+                    this.state.name = name;
+                    this.state.imports = [...imports];
+                    this.state.code = code;
+                    this.state.triggerType = trigger_type || "";
+                    this.env.variables.setContext({ variables: [...this.state.variables] });
+                }
+            } else {
+                this.state.imports = [...GLOBAL_IMPORTS];
             }
             await this.loadData();
             await this.setModelState();
@@ -238,23 +247,25 @@ export class WorkFlowAuto extends Component {
                 });
             }
 
-            // Load cron schedule fields so the inline panel shows existing values
-            const cronData = await this.orm.read('work.auto', [this.id],
-                ['time_trigger_mode', 'time_trigger_time', 'time_trigger_day', 'time_trigger_month']);
-            if (cronData.length) {
-                const { time_trigger_mode, time_trigger_time, time_trigger_day, time_trigger_month } = cronData[0];
-                this.state.cronMode = time_trigger_mode || '';
-                this.state.cronTime = time_trigger_time || 0;
-                this.state.cronDay = time_trigger_day || 1;
-                this.state.cronMonth = time_trigger_month || 1;
-            }
+            if (recordId) {
+                // Load cron schedule fields so the inline panel shows existing values
+                const cronData = await this.orm.read('work.auto', [recordId],
+                    ['time_trigger_mode', 'time_trigger_time', 'time_trigger_day', 'time_trigger_month']);
+                if (cronData.length) {
+                    const { time_trigger_mode, time_trigger_time, time_trigger_day, time_trigger_month } = cronData[0];
+                    this.state.cronMode = time_trigger_mode || '';
+                    this.state.cronTime = time_trigger_time || 0;
+                    this.state.cronDay = time_trigger_day || 1;
+                    this.state.cronMonth = time_trigger_month || 1;
+                }
 
-            // Load watched field for field_change workflows
-            const fieldChangeData = await this.orm.read('work.auto', [this.id], ['field_id']);
-            if (fieldChangeData.length && fieldChangeData[0].field_id) {
-                const [id, name] = fieldChangeData[0].field_id;
-                this.state.watchedFieldId = id;
-                this.state.watchedFieldName = name;
+                // Load watched field for field_change workflows
+                const fieldChangeData = await this.orm.read('work.auto', [recordId], ['field_id']);
+                if (fieldChangeData.length && fieldChangeData[0].field_id) {
+                    const [id, name] = fieldChangeData[0].field_id;
+                    this.state.watchedFieldId = id;
+                    this.state.watchedFieldName = name;
+                }
             }
 
             this.env.bus.trigger("onclickMenuBar", { isCollapse: true })
@@ -327,12 +338,12 @@ export class WorkFlowAuto extends Component {
 
                     // Critical: Initialize history with the loaded state directly from the database
                     // to ensure S0 (initial state) is never empty or corrupted.
-                    const initialState = {
+                    const initialState = cloneState({
                         drawflow: this.editorState.value[0].flow_data,
-                        variables: JSON.parse(JSON.stringify(this.state.variables)),
-                        context: JSON.parse(JSON.stringify(this.env.context.context)),
-                        imports: JSON.parse(JSON.stringify(this.state.imports))
-                    };
+                        variables: this.state.variables,
+                        context: this.env.context.context,
+                        imports: this.state.imports,
+                    });
                     this.history.init(initialState);
                 } else {
                     this.editor.start();
@@ -745,13 +756,15 @@ export class WorkFlowAuto extends Component {
             return getAllLeftNodeIds(node.left, nodeIds, visited);
         };
         const currentNodeId = this.currentNode?.data?.nodeId;
-        const currentContext = this.env.context.context;
-        const allVariables = this.env.variables.context.variables;
-        let selectedNode = currentContext.nodes.find(
+        const currentContext = this.env.context.context || {};
+        const allVariables = this.env.variables.context.variables || [];
+        const contextNodes = currentContext.nodes || [];
+        let selectedNode = contextNodes.find(
             item => item.nodeId === currentNodeId
         );
         const scopeIds = getAllLeftNodeIds(selectedNode);
-        const accessibleVariables = allVariables.filter(variable =>
+        const filteredVariables = allVariables || [];
+        const accessibleVariables = filteredVariables.filter(variable =>
             scopeIds.includes(variable.scopeId)
         );
         return accessibleVariables;
@@ -762,8 +775,11 @@ export class WorkFlowAuto extends Component {
             this.importData(this.editorValue[0].flow_data)
             this.state.nodeDetails.forEach(node => {
                 const { component, props, ref } = node;
+                if (!ref || !ref.isConnected) {
+                    return;
+                }
                 props.updateImports = this.updateImportStatements.bind(this);
-                this.mountComponent(component, ref, props)
+                this.mountComponent(component, ref, props);
             })
         }
     }
@@ -861,12 +877,13 @@ export class WorkFlowAuto extends Component {
     }
 
     getHistorySnapshot() {
-        return {
+        const snapshot = {
             drawflow: this.editor.export(),
-            variables: JSON.parse(JSON.stringify(this.state.variables)),
-            context: JSON.parse(JSON.stringify(this.env.context.context)),
-            imports: JSON.parse(JSON.stringify(this.state.imports))
+            variables: this.state.variables,
+            context: this.env.context.context,
+            imports: this.state.imports,
         };
+        return cloneState(snapshot);
     }
 
     saveHistory() {
@@ -940,10 +957,11 @@ export class WorkFlowAuto extends Component {
 
     onKeyDown(e) {
         if (e.ctrlKey || e.metaKey) {
-            if (e.shiftKey && e.key.toLowerCase() === 'z') {
+            const key = e.key.toLowerCase();
+            if (key === 'y') {
                 e.preventDefault();
                 this.redo();
-            } else if (e.key.toLowerCase() === 'z') {
+            } else if (key === 'z') {
                 e.preventDefault();
                 this.undo();
             }
@@ -1097,8 +1115,17 @@ export class WorkFlowAuto extends Component {
         this.state.image = image
     }
 
+    getRecordId() {
+        const id = Number(this.id);
+        return Number.isInteger(id) && id > 0 ? id : null;
+    }
+
     write(data) {
-        owl.status(this) !== 'destroyed' && this.orm.write("work.auto", [this.id], data);
+        const recordId = this.getRecordId();
+        if (!recordId) {
+            return;
+        }
+        owl.status(this) !== 'destroyed' && this.orm.write("work.auto", [recordId], data);
     }
 
     removeImports(nodeId) {
@@ -1456,6 +1483,18 @@ export class WorkFlowAuto extends Component {
         this.env.variables.setContext({ variables: [...variables] })
     }
 
+    getSerializableVariables() {
+        const variables = this.state.variables || [];
+        return variables.map(variable => ({ ...variable }));
+    }
+
+    getSerializableImports() {
+        return this.imports.map(statement => ({
+            importStatement: statement.importStatement,
+            childStatement: (statement.childStatement || []).map(child => ({ ...child })),
+        }));
+    }
+
     async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type, trigger_type) {
         if (this.editor.editor_mode === 'fixed') return false;
         // Calculate position
@@ -1592,8 +1631,8 @@ export class WorkFlowAuto extends Component {
         const name = "model"
         const action = null
         const precanvasRect = this.editor.precanvas.getBoundingClientRect();
-        const defaultX = precanvasRect.left + precanvasRect.width / 30;
-        const defaultY = precanvasRect.top + precanvasRect.height / 2 - 6;
+        const defaultX = precanvasRect.left + precanvasRect.width / 35;
+        const defaultY = precanvasRect.top + precanvasRect.height / 5 - 8;
         this.addNodeToDrawFlow(name, defaultX, defaultY, this.state.model, this.state.model_id, action, "model")
     }
 
