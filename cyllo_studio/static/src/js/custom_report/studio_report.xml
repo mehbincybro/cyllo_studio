@@ -220,7 +220,7 @@
                 <div class="tcm-modal">
                     <!-- Header -->
                     <div class="tcm-header">
-                        <h5>🗃 Add Table</h5>
+                        <h5>Add Table</h5>
                         <button class="tcm-close" t-on-click="onTableModalCancel">✕</button>
                     </div>
 
