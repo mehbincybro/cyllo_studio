@@ -20,6 +20,7 @@
 #
 #############################################################################
 from odoo import api, fields, models
+from odoo.exceptions import ValidationError
 
 
 class QualityControlPoint(models.Model):
@@ -101,6 +102,9 @@ class QualityControlPoint(models.Model):
 
 
 
+
+
+
     @api.depends('quality_team_id')
     def _compute_user_id(self):
         for qcp in self:
@@ -114,6 +118,12 @@ class QualityControlPoint(models.Model):
         """Compute quality checks count"""
         for qcp in self:
             qcp.qc_check_count = self.env['quality.check'].search_count([('quality_control_id', '=', qcp.id)])
+
+    @api.constrains('quality_inspection_ids')
+    def _check_quality_inspection_ids(self):
+        for record in self:
+            if not record.quality_inspection_ids:
+                raise ValidationError("You must add at least one Quality Inspection line before saving.")
 
 
 

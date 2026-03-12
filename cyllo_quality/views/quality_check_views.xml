@@ -33,10 +33,12 @@
                            statusbar_visible="todo,ongoing,pass,fail"/>
                 </header>
                 <sheet>
+                    <field name="qc_alert_count" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button"
                                 name="action_view_quality_alert"
-                                type="object">
+                                type="object"
+                                invisible="not qc_alert_count">
                             <i class="o_button_icon ri-check-line"/>
                             <field name="qc_alert_count" string="Quality Alerts"
                                    widget="statinfo"/>
@@ -77,7 +79,7 @@
                             <field name="quality_check_line_ids">
                                 <tree>
                                     <field name="inspection_action_id"/>
-                                    <field name="inspection_type_id"/>
+                                    <field name="inspection_type_id" options="{'no_create': True, 'no_create_edit': True}"/>
                                     <field name="measure_start" invisible="measure_start == 0 and measure_end == 0"/>
                                     <field name="measure_end" invisible="measure_start == 0 and measure_end == 0"/>
                                     <field name="unit_id" invisible="measure_start == 0 and measure_end == 0"/>

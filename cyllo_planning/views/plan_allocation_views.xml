@@ -31,7 +31,13 @@
                         <group name="allocation_info" string="Time Period">
                             <field name="start_datetime"/>
                             <field name="end_datetime"/>
-                            <field name="duration" widget="float_time"/>
+                            <label for="duration" string="Allocated Time"/>
+                            <div class="o_row">
+                                <field name="duration" widget="float_time" nolabel="1"/>
+                                <span>(</span>
+                                <field name="allocation_percentage" nolabel="1" widget="float" digits="[5,2]"/>
+                                <span>%)</span>
+                            </div>
                         </group>
                         <group name="other_info" string="Allocation Details">
                             <field name="allocation_type_id" options="{'no_create': True, 'no_open': True}"/>
@@ -39,6 +45,7 @@
                             <field name="company_id" groups="base.group_multi_company" options="{'no_create': True}"/>
                         </group>
                     </group>
+                    <field name="auto_filled" invisible="1"/>
                     <notebook>
                         <page name="description" string="Description">
                             <field name="description" placeholder="Add a description..."/>

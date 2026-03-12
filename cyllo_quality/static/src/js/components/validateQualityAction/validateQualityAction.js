@@ -106,7 +106,7 @@ export class ValidateQualityAction extends Component {
 
     async validateQualityCheck() {
         const type = this.props.quality_check_action.inspection_type_id[1];
-        if (['Take a picture', 'Measure', 'Instructions'].includes(type) && this.state.qcValue === false) {
+        if (['Take a picture', 'Measure'].includes(type) && this.state.qcValue === false) {
             this.notification.add(_t(`The value for the inspection action ${this.props.quality_check_action.inspection_action_id[1]} is not added.`), {
                 type: "danger",
             });
@@ -114,7 +114,7 @@ export class ValidateQualityAction extends Component {
             let finalValue = this.state.qcValue;
             if (type === 'Take a picture') {
                 finalValue = `${this.state.checkValue}|${this.state.qcValue}`;
-            } else if (!['Measure', 'Instructions'].includes(type)) {
+            } else if (!['Measure'].includes(type)) {
                 finalValue = this.state.checkValue;
             }
             this.state.qcStatus = await this.orm.call("quality.check.line", "validate_quality_actions", [this.props.quality_check_action.id, finalValue, this.state.qualityCheckNote])
