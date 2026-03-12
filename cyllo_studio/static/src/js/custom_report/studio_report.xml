@@ -20,21 +20,26 @@
                     <i class="fa fa-repeat"/>
                 </button>
             </div>
-            
+
             <!-- Body -->
             <div class="d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
                 <!-- Sidebar (Editable) -->
                 <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column" t-att-class="{'d-none': state.previewMode}" style="width: 260px; overflow-y: auto; z-index: 10;">
                     <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold" style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
-                    
+
                     <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="box" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-square-o fa-lg text-success me-3"/> 
+                        <i class="fa fa-square-o fa-lg text-success me-3"/>
                         <span class="fw-semibold text-dark">Box</span>
                     </div>
-                    
+
                     <div class="snippet field bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="field" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-database fa-lg text-success me-3"/> 
+                        <i class="fa fa-database fa-lg text-success me-3"/>
                         <span class="fw-semibold text-dark">Dynamic Field</span>
+                    </div>
+
+                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="table" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
+                        <i class="fa fa-table fa-lg text-success me-3"/>
+                        <span class="fw-semibold text-dark">Table</span>
                     </div>
 
                     <!-- Technical Actions -->
@@ -210,7 +215,191 @@
                     </div>
                 </div>
             </div>
+            <!-- Table Config Modal — inline overlay (controlled by state.showTableModal) -->
+            <div t-if="state.showTableModal" class="tcm-overlay" t-on-click.self="onTableModalCancel">
+                <div class="tcm-modal">
+                    <!-- Header -->
+                    <div class="tcm-header">
+                        <h5>🗃 Add Table</h5>
+                        <button class="tcm-close" t-on-click="onTableModalCancel">✕</button>
+                    </div>
+
+                    <!-- Section 1: Template Preset -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Template</div>
+                        <div class="tcm-preset-grid">
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'balance_sheet' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('balance_sheet')">
+                                <div class="tcm-preset-icon"><i class="fa fa-balance-scale"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Balance Sheet</div>
+                                    <div class="tcm-preset-desc">Assets, Liabilities &amp; Equity with computed totals</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'p_and_l' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('p_and_l')">
+                                <div class="tcm-preset-icon"><i class="fa fa-line-chart"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Profit &amp; Loss</div>
+                                    <div class="tcm-preset-desc">Revenue and expense sections with net total</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'invoice' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('invoice')">
+                                <div class="tcm-preset-icon"><i class="fa fa-file-text-o"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Invoice Lines</div>
+                                    <div class="tcm-preset-desc">Line items with qty, rate, amount and grand total</div>
+                                </div>
+                            </div>
+                            <div t-att-class="'tcm-preset-card' + (state.tcm.preset === 'blank' ? ' active' : '')"
+                                 t-on-click="() => this.onSelectPreset('blank')">
+                                <div class="tcm-preset-icon"><i class="fa fa-th"/></div>
+                                <div class="tcm-preset-info">
+                                    <div class="tcm-preset-title">Blank Table</div>
+                                    <div class="tcm-preset-desc">Fully manual, no assumptions</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Odoo Model -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Model</div>
+                        <select class="tcm-select"
+                                t-on-change="onModelChange">
+                            <option value="">— Select a model —</option>
+                            <t t-foreach="state.tcm.availableModels" t-as="m" t-key="m.model">
+                                <option t-att-value="m.model"
+                                        t-att-selected="m.model === state.tcm.model">
+                                    <t t-esc="m.name"/> (<t t-esc="m.model"/>)
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <!-- Section 3: Columns -->
+                    <div class="tcm-section">
+                        <div class="tcm-col-header">
+                            <div class="tcm-section-label" style="margin-bottom:0">Columns</div>
+                            <button class="tcm-add-btn" t-on-click="onAddColumn">+ Add</button>
+                        </div>
+                        <t t-if="state.tcm.columns.length === 0">
+                            <div class="tcm-empty-state">No columns added yet. Click "+ Add" above.</div>
+                        </t>
+                        <t t-foreach="state.tcm.columns" t-as="col" t-key="col_index">
+                            <div class="tcm-col-row">
+                                <span class="tcm-col-drag" title="Drag to reorder">⠿</span>
+                                <input type="text" class="tcm-input tcm-input-sm tcm-col-field"
+                                       placeholder="Label"
+                                       t-att-value="col.label"
+                                       t-on-change="(ev) => this.onColumnLabelChange(col_index, ev)"/>
+                                <select class="tcm-select tcm-input-sm tcm-col-field"
+                                        t-on-change="(ev) => this.onColumnFieldChange(col_index, ev)">
+                                    <option value="">— Field —</option>
+                                    <t t-foreach="state.tcm.availableFields" t-as="f" t-key="f.name">
+                                        <option t-att-value="f.name"
+                                                t-att-selected="f.name === col.field">
+                                            <t t-esc="f.string || f.name"/>
+                                            <t t-if="f.type"> (<t t-esc="f.type"/>)</t>
+                                        </option>
+                                    </t>
+                                </select>
+                                <select class="tcm-select tcm-input-sm tcm-col-agg"
+                                        t-att-value="col.aggregation"
+                                        t-on-change="(ev) => this.onColumnAggChange(col_index, ev)">
+                                    <option value="none">None</option>
+                                    <option value="sum" t-att-selected="col.aggregation === 'sum'">SUM</option>
+                                    <option value="avg" t-att-selected="col.aggregation === 'avg'">AVG</option>
+                                    <option value="count" t-att-selected="col.aggregation === 'count'">COUNT</option>
+                                </select>
+                                <input type="text" class="tcm-input tcm-input-sm tcm-col-width"
+                                       placeholder="Width"
+                                       t-att-value="col.width"
+                                       t-on-change="(ev) => this.onColumnWidthChange(col_index, ev)"/>
+                                <button class="tcm-col-remove" t-on-click="() => this.onRemoveColumn(col_index)">✕</button>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Section 4: Row Source -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Row Source</div>
+                        <div class="tcm-radio-group">
+                            <label class="tcm-radio">
+                                <input type="radio" name="tcm_rowsource" value="dynamic"
+                                       t-att-checked="state.tcm.rowSource === 'dynamic'"
+                                       t-on-change="() => this.state.tcm.rowSource = 'dynamic'"/>
+                                Dynamic (repeats per record)
+                            </label>
+                            <label class="tcm-radio">
+                                <input type="radio" name="tcm_rowsource" value="manual"
+                                       t-att-checked="state.tcm.rowSource === 'manual'"
+                                       t-on-change="() => this.state.tcm.rowSource = 'manual'"/>
+                                Manual
+                            </label>
+                            <div t-if="state.tcm.rowSource === 'manual'" class="tcm-manual-count">
+                                <label>Rows:</label>
+                                <input type="number" class="tcm-input tcm-input-sm" style="width: 60px;"
+                                       t-att-value="state.tcm.manualRows"
+                                       t-on-change="(ev) => this.state.tcm.manualRows = parseInt(ev.target.value) || 5"
+                                       min="1" max="100"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Options -->
+                    <div class="tcm-section">
+                        <div class="tcm-section-label">Options</div>
+                        <div class="tcm-options-grid">
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.headerRow"
+                                       t-on-change="(ev) => this.state.tcm.headerRow = ev.target.checked"/>
+                                Header row
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.totalsRow"
+                                       t-on-change="(ev) => this.state.tcm.totalsRow = ev.target.checked"/>
+                                Totals row
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.applyDomain"
+                                       t-on-change="(ev) => this.state.tcm.applyDomain = ev.target.checked"/>
+                                Apply domain filter
+                            </label>
+                            <label class="tcm-checkbox">
+                                <input type="checkbox"
+                                       t-att-checked="state.tcm.includeAllCompanies"
+                                       t-on-change="(ev) => this.state.tcm.includeAllCompanies = ev.target.checked"/>
+                                Include all companies
+                            </label>
+                        </div>
+
+                        <!-- Inline domain editor -->
+                        <div t-if="state.tcm.applyDomain" class="tcm-domain-editor">
+                            <label>Domain filter (Odoo syntax)</label>
+                            <input type="text" class="tcm-input tcm-input-sm"
+                                   placeholder="[('account_type', '=', 'asset_receivable')]"
+                                   t-att-value="state.tcm.domain"
+                                   t-on-change="(ev) => this.state.tcm.domain = ev.target.value"/>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="tcm-footer">
+                        <button class="tcm-btn-cancel" t-on-click="onTableModalCancel">Cancel</button>
+                        <button class="tcm-btn-insert" t-on-click="onTableModalConfirm"
+                                t-att-disabled="state.tcm.preset !== 'blank' ? false : !state.tcm.model">
+                            Insert Table
+                        </button>
+                    </div>
+                </div>
+            </div>
 
         </div>
     </t>
+
 </templates>
