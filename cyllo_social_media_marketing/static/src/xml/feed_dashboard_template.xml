@@ -37,7 +37,7 @@
                                         <h5 class="cy-soical_marketing-glance_heading m-0 border-bottom">
                                             At a glance
                                         </h5>
-                                        <div class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box"
+                                        <div t-if="state.isLinkedinInstalled" class="col py-3 cy-social-market_box cy-social_market-glancebox cy-social-market_glance_box"
                                              t-att-class="state.currentAccount == 'LinkedIn' ? 'active' : ''"
                                              t-on-click="() => this.showLinkedinFeed()">
                                             <div class="w-100 d-flex justify-content-between align-items-center flex-wrap">
@@ -172,58 +172,54 @@
                                                         </a>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            <!-- Demo Post 5 -->
-                                            <div class="py-2 cy-social-market_box cy-border-btm">
-                                                <div class="d-flex gap-2 pt-3">
-                                                    <div class="cy-social-market_profile" style="background: #eef3f8; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 4px;">
-                                                        <i class="fa fa-linkedin" style="color: #0077b5; font-size: 25px;"/>
+                                                <div class="cy-card-content" t-esc="feed.description"/>
+                                                <!-- Poll Card -->
+                                                <div t-if="feed.is_poll and feed.poll_options" class="cy-poll-card mt-2">
+                                                    <div class="cy-poll-question">
+                                                        <i class="ri-bar-chart-2-line me-1 text-primary"/>
+                                                        <span t-esc="feed.poll_question"/>
                                                     </div>
-                                                    <div>
-                                                        <p class="cy-social-market_subhead">Product Launch</p>
-                                                        <span class="cy-social-market_sm-head">12 Feb 2026, 16:45</span>
-                                                    </div>
-                                                    <div class="ms-auto">
-                                                        <span class="badge rounded-pill">Demo</span>
+                                                    <t t-set="pollOpts" t-value="parsePollOptions(feed.poll_options)"/>
+                                                    <t t-set="totalVotes" t-value="feed.poll_total_votes or 0"/>
+                                                    <t t-foreach="pollOpts" t-as="opt" t-key="opt_index">
+                                                        <t t-set="pct" t-value="totalVotes > 0 ? Math.round((opt.voteCount / totalVotes) * 100) : 0"/>
+                                                        <div class="cy-poll-option">
+                                                            <div class="cy-poll-option-bar" t-attf-style="width: #{pct}%;"/>
+                                                            <span class="cy-poll-option-text" t-esc="opt.text"/>
+                                                            <span class="cy-poll-option-pct" t-esc="pct + '%'"/>
+                                                        </div>
+                                                    </t>
+                                                    <div class="cy-poll-meta">
+                                                        <span t-esc="totalVotes"/> votes ·
+                                                        <span t-esc="feed.poll_duration ? feed.poll_duration.replace('_', ' ').toLowerCase() : ''"/>
                                                     </div>
                                                 </div>
-                                                <p class="cy-soical-market_content mt-2">
-                                                    Our next-gen AI assistant is finally here! 🚀 Revolutionize your workflow with the smartest companion in the industry. #AI #Innovation #ProductLaunch
-                                                </p>
-                                                <div class="d-flex justify-content-between align-items-center cy-soical-market_glancecontainer py-2">
-                                                    <div class="d-flex align-items-center gap-2">
-                                                        <a class="d-flex align-items-center gap-1" title="Likes">
-                                                            <i class="ri-heart-line cy-icons cy-media_icon"/>
-                                                            <p class="cy-soical-market_txt">112</p>
-                                                        </a>
-                                                        <a class="d-flex align-items-center gap-1 cy-soical-market_comment"
-                                                           title="Comments" t-on-click="() => this.OpenLinkedInComments('demo')">
-                                                            <i class="ri-chat-3-line cy-icons cy-media_icon"/>
-                                                            <p class="cy-soical-market_txt">31</p>
-                                                        </a>
+                                                <!-- ── Video Post ── -->
+                                                <div t-if="feed.video_url" class="cy-card-media cy-card-video">
+                                                    <video controls="controls" preload="metadata"
+                                                           t-att-poster="feed.video_thumbnail_url or ''"
+                                                           style="width:100%;max-height:420px;border-radius:8px;background:#000;">
+                                                        <t t-set="_vurl" t-value="feed.video_url"/>
+                                                        <source t-att-src="_vurl" type="video/mp4"/>
+                                                        <!-- fallback: poster thumbnail as clickable link -->
+                                                        <img t-if="feed.video_thumbnail_url"
+                                                             t-att-src="feed.video_thumbnail_url"
+                                                             alt="Video thumbnail" style="width:100%;"/>
+                                                    </video>
+                                                </div>
+                                                <!-- ── Carousel ── -->
+                                                <div t-elif="feed.carousel_images_json" class="cy-card-media cy-carousel">
+                                                    <t t-set="carouselImgs" t-value="parseCarouselImages(feed.carousel_images_json)"/>
+                                                    <div class="cy-carousel-strip" style="display:flex;gap:6px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:4px;">
+                                                        <t t-foreach="carouselImgs" t-as="cimg" t-key="cimg_index">
+                                                            <img t-att-src="cimg" alt="Carousel image"
+                                                                 style="flex:0 0 auto;max-width:260px;max-height:300px;object-fit:cover;border-radius:6px;scroll-snap-align:start;"/>
+                                                        </t>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </t>
-                                        <t t-foreach="state.LinkedinFeeds" t-as="feed" t-key="feed.id">
-                                            <t t-log="'feeds',state.LinkedinFeeds,state.fields"/>
-                                            <div class="py-2 cy-social-market_box cy-border-btm">
-                                                <div class="d-flex justify-content-between gap-2 pt-3">
-                                                    <div class="d-flex gap-2">
-                                                        <div class="cy-social-market_profile">
-                                                            <img t-att-src="feed.profile_image_url"/>
-                                                        </div>
-                                                        <div>
-                                                            <p class="cy-social-market_subhead"><t t-esc="feed.author_name"/></p>
-                                                            <span class="cy-social-market_sm-head">
-                                                                    <t t-esc="formatDate(feed.posted_date)"/>
-                                                            </span>
-                                                        </div>
-                                                    </div>
-                                                    <div>
-                                                       <a t-if="feed.author_link_url" t-attf-href="{{feed.author_link_url}}"
-                                                          target="_blank" class="ri-external-link-line" style="font-size: 18px"/>
-                                                    </div>
+                                                <!-- ── Single Image ── -->
+                                                <div t-elif="feed.posted_image_url" class="cy-card-media">
+                                                    <img t-att-src="feed.posted_image_url" alt="Post Image"/>
                                                 </div>
                                                 <div class="cy-card-footer">
                                                     <div class="cy-interaction-btn" title="Likes">
@@ -238,7 +234,7 @@
                                             </div>
                                         </t>
                                         <!-- Infinite Scroll Loading Indicator -->
-                                         <div t-if="state.loading and state.currentAccount == 'LinkedIn'" class="d-flex justify-content-center py-3">
+                                         <div t-if="(state.loading or state.syncing) and state.currentAccount == 'LinkedIn'" class="d-flex justify-content-center py-3">
                                              <div class="spinner-border text-primary" role="status">
                                                  <span class="visually-hidden">Loading...</span>
                                              </div>

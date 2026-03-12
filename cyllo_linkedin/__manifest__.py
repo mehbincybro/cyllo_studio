@@ -19,11 +19,25 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import crm_lead
-from . import discuss_channel
-from . import mail_message
-from . import social_fb_account
-from . import social_insta_account
-from . import social_media_feed
-from . import social_media_post
-from . import res_config_settings
+{
+    'name': 'Cyllo LinkedIn',
+    'version': '1.0',
+    'category': 'Marketing',
+    'summary': 'LinkedIn Integration for Cyllo',
+    'description': 'LinkedIn Integration for Cyllo',
+    'author': 'Cyllo',
+    'company': 'Cyllo',
+    'maintainer': 'Cyllo',
+    'website': 'https://www.cyllo.com',
+    'icon': '/cyllo_linkedin/static/description/linkedin.svg',
+    'depends': ['base', 'mail', 'cyllo_social_media_marketing'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/linkedin_account_views.xml',
+        'views/social_media_post_views.xml',
+    ],
+    'license': 'LGPL-3',
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}

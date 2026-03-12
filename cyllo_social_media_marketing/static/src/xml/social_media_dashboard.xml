@@ -114,7 +114,7 @@
                              t-on-click="(ev) => this.setActiveTab(ev, 'youtube')">
                         <i class="ri-youtube-line"/>
                     </button>
-                    <button t-att-class="{'tab-button': true, 'active': state.activeTab === 'linkedin'}"
+                    <button t-if="state.isLinkedinInstalled" t-att-class="{'tab-button': true, 'active': state.activeTab === 'linkedin'}"
                             t-on-click="(ev) => this.setActiveTab(ev, 'linkedin')">
                         <i class="ri-linkedin-box-line"/>
                     </button>

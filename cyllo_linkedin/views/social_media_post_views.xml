@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_social_media_post_form" model="ir.ui.view">
+        <field name="name">view.social.media.post.form</field>
+        <field name="model">social.media.post</field>
+        <field name="inherit_id" ref="cyllo_social_media_marketing.view_social_media_post_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='posted_date']" position="after">
+                <field name="posted_on_linkedin"/>
+                <field name="linkedin_account_ids" widget="many2many_tags"
+                       invisible="not posted_on_linkedin"/>
+                <field name="linkedin_organization_ids" widget="many2many_tags"
+                       invisible="not posted_on_linkedin or not linkedin_account_ids"
+                       domain="[('account_id', 'in', linkedin_account_ids), ('state', '=', 'active')]"
+                       required="posted_on_linkedin and linkedin_account_ids"/>
+                <!-- LinkedIn Content Type selector -->
+                <field name="linkedin_content_type" widget="radio"
+                       invisible="not posted_on_linkedin"/>
+                <!-- Image fields -->
+                <field name="linkedin_image_ids"
+                       widget="many2many_binary"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'image'"
+                       required="posted_on_linkedin and linkedin_content_type == 'image'"
+                       string="Attach Images (max 20)"/>
+                <!-- Poll fields -->
+                <field name="linkedin_poll_question"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"
+                       required="posted_on_linkedin and linkedin_content_type == 'poll'"
+                       placeholder="Ask a question..."/>
+                <field name="linkedin_poll_option_1"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"
+                       required="posted_on_linkedin and linkedin_content_type == 'poll'"
+                       placeholder="Option 1"/>
+                <field name="linkedin_poll_option_2"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"
+                       required="posted_on_linkedin and linkedin_content_type == 'poll'"
+                       placeholder="Option 2"/>
+                <field name="linkedin_poll_option_3"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"
+                       placeholder="Option 3 (optional)"/>
+                <field name="linkedin_poll_option_4"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"
+                       placeholder="Option 4 (optional)"/>
+                <field name="linkedin_poll_duration"
+                       invisible="not posted_on_linkedin or linkedin_content_type != 'poll'"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

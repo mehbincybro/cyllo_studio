@@ -19,11 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import crm_lead
-from . import discuss_channel
-from . import mail_message
-from . import social_fb_account
-from . import social_insta_account
-from . import social_media_feed
 from . import social_media_post
-from . import res_config_settings
+from . import linkedin_account
+from . import linkedin_organization
+from . import social_media_feed
