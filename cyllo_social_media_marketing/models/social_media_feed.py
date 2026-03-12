@@ -19,10 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-import logging
 from odoo import fields, models
-
-_logger = logging.getLogger(__name__)
 
 
 class SocialMediaFeed(models.Model):
@@ -48,6 +45,7 @@ class SocialMediaFeed(models.Model):
     posted_date = fields.Datetime(string="Date of Posting",
                                   help="Date at which this post was published")
     posted_image = fields.Html(string="Image", help="Posted image")
+    last_sync_social_actions = fields.Datetime(string='Last Social Actions Sync', help='Last time likes/comments were synced')
     profile_image = fields.Html(string="Profile Picture",
                                 help="Profile picture of the author")
     company_id = fields.Many2one(string="Related Company",
@@ -61,22 +59,6 @@ class SocialMediaFeed(models.Model):
                                     help="Number of comments on the post")
     post_id = fields.Many2one('social.media.post', string="Related Post",
                               help="Post related to the feed created.")
-    linkedin_account_id = fields.Many2one('linkedin.account', string="LinkedIn Account",
-                                       help="The LinkedIn account associated with this feed.")
-    linkedin_org_id = fields.Many2one(
-        'linkedin.organization',
-        string="LinkedIn Organization",
-        help="The LinkedIn organization page this post belongs to.",
-        ondelete='set null',
-    )
-    posted_on_linkedin = fields.Boolean(string="Posted on LinkedIn", help="If this feed is from LinkedIn")
-    linkedin_post_urn = fields.Char(string="LinkedIn Post URN", help="The LinkedIn URN for this post/share")
-    # ── Poll fields ─────────────────────────────────────────────────────────────
-    is_poll = fields.Boolean(string="Is Poll", default=False, help="Whether this feed is a LinkedIn poll")
-    poll_question = fields.Char(string="Poll Question")
-    poll_options = fields.Text(string="Poll Options (JSON)", help="Stored as JSON list of {text, voteCount}")
-    poll_duration = fields.Char(string="Poll Duration")
-    poll_total_votes = fields.Integer(string="Total Poll Votes")
 
     def action_compute_likes_count_all(self):
         """Compute the number of likes on the post for all feed."""
@@ -98,20 +80,8 @@ class SocialMediaFeed(models.Model):
                 }
 
     def action_social_media_comments(self):
-        """Fetch comments for this feed from the respective social platform."""
-        self.ensure_one()
-        if self.posted_on_linkedin and self.linkedin_account_id:
-            post_urn = self.linkedin_post_urn
-            if post_urn:
-                return self.linkedin_account_id.action_fetch_feed_comments(post_urn)
-        return []
-
-    def action_fetch_nested_comments(self, parent_urn):
-        """Fetch nested comments (replies) for a specific comment."""
-        self.ensure_one()
-        if self.linkedin_account_id:
-            return self.linkedin_account_id.action_fetch_feed_comments(parent_urn)
-        return []
+        """Placeholder function for handling social media comments."""
+        return
 
     def action_social_media_likes(self):
         """
@@ -228,19 +198,9 @@ class SocialMediaFeed(models.Model):
         elif model == 'youtube.account':
             name = 'cyllo_youtube'
         else:
-            name = 'cyllo_hr_linkedin_recruitment'
+            name = 'cyllo_linkedin'
         module=self.env['ir.module.module'].sudo().search([('name','=',name),('state', '=', 'installed')])
         if module:
             return True
         else:
             return False
-
-    def unlink(self):
-        """Override to delete post from LinkedIn when deleted from Odoo timeline."""
-        for feed in self:
-            if feed.posted_on_linkedin and feed.linkedin_account_id and feed.linkedin_post_urn:
-                try:
-                    feed.linkedin_account_id.action_delete_linkedin_post(feed.linkedin_post_urn)
-                except Exception as e:
-                    _logger.error(f"Failed to delete LinkedIn post {feed.linkedin_post_urn}: {e}")
-        return super(SocialMediaFeed, self).unlink()

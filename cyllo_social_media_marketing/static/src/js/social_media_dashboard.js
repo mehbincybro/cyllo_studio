@@ -17,10 +17,12 @@ export class SocialMediaDashboard extends Component {
             activePosts: false,
             linkedinUsername: '',
             linkedinAccountName: '',
-            linkedinAccessToken: ''
+            linkedinAccessToken: '',
+            isLinkedinInstalled: false
         });
         onWillStart(async () => {
             var self = this;
+            this.state.isLinkedinInstalled = await this.orm.call("social.media.feed", "get_model", ["", "linkedin.account"], {});
             await this.orm.call("social.media.feed", "get_dashboard_data", [""]).then((results) => {
                 self.state.accounts = results.dashboard_data;
                 self.state.posts = results.posts;

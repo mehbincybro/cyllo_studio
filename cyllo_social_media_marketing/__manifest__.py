@@ -39,7 +39,6 @@
         'views/social_media_feed_views.xml',
         'views/social_fb_account_views.xml',
         'views/social_insta_account_views.xml',
-        'views/linkedin_account_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -56,6 +55,7 @@
             'cyllo_social_media_marketing/static/src/js/chatter_container.js',
             'cyllo_social_media_marketing/static/src/js/chatter_action.js',
             'cyllo_social_media_marketing/static/src/scss/kanban.scss',
+            'cyllo_social_media_marketing/static/src/css/feed_kanban.css',
         ],
     },
     'images': [
