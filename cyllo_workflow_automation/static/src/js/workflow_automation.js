@@ -21,6 +21,7 @@ import { removeNodeIdFromVariables, settingInitialContext } from "./utils/utils"
 import { CustomTrigger } from "./components/customTriggers/customTriggers";
 import { WorkPager } from "./components/Assists/workPager/workPager";
 import { SaveLoading } from "./components/Assists/effect/saveLoading/saveLoading";
+import { HistoryManager } from "./utils/historyManager";
 
 const BUTTON_CLASSES = [
     'btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'
@@ -141,8 +142,6 @@ export class WorkFlowAuto extends Component {
             block: true,
             modelSelectable: false,
             trigger: "",
-            model_blk: true,
-            trigger_blk: false,
             other_blk: false,
             name: "",
             nameError: false,
@@ -159,7 +158,12 @@ export class WorkFlowAuto extends Component {
             // Field change fields (used when trigger is field_change)
             watchedFieldId: false,
             watchedFieldName: "",
+            canUndo: false,
+            canRedo: false,
         })
+
+        this.history = new HistoryManager(100);
+        this.isRestoring = false;
 
         this.initialLoad = true;
         const { id } = useSaveContext();
@@ -223,14 +227,16 @@ export class WorkFlowAuto extends Component {
             await this.setModelState();
             await settingInitialContext.call(this);
 
-            Object.entries(this.editorState.value[0].flow_data.drawflow?.Home?.data || {}).forEach(([key, value]) => {
-                if (value.data.ttype) {
-                    this.state.trigger = value.data.ttype
-                }
-                if (value.data.trigger_type) {
-                    this.state.triggerType = value.data.trigger_type;
-                }
-            });
+            if (this.editorState.value.length > 0 && this.editorState.value[0].flow_data) {
+                Object.entries(this.editorState.value[0].flow_data.drawflow?.Home?.data || {}).forEach(([key, value]) => {
+                    if (value.data.ttype) {
+                        this.state.trigger = value.data.ttype
+                    }
+                    if (value.data.trigger_type) {
+                        this.state.triggerType = value.data.trigger_type;
+                    }
+                });
+            }
 
             // Load cron schedule fields so the inline panel shows existing values
             const cronData = await this.orm.read('work.auto', [this.id],
@@ -252,6 +258,11 @@ export class WorkFlowAuto extends Component {
             }
 
             this.env.bus.trigger("onclickMenuBar", { isCollapse: true })
+            window.addEventListener('keydown', this.onKeyDown.bind(this));
+        });
+
+        onWillUnmount(() => {
+            window.removeEventListener('keydown', this.onKeyDown.bind(this));
         });
 
         onMounted(async () => {
@@ -307,34 +318,62 @@ export class WorkFlowAuto extends Component {
 
             }
 
-            this.editorState.value[0].flow_data && this.registerNodes()
+            this.isRestoring = true;
+            try {
+                if (this.editorState.value[0] && this.editorState.value[0].flow_data) {
+                    this.registerNodes();
+                    this.editor.start();
+                    this.manageData();
 
-            this.editor.start();
-            this.manageData();
+                    // Critical: Initialize history with the loaded state directly from the database
+                    // to ensure S0 (initial state) is never empty or corrupted.
+                    const initialState = {
+                        drawflow: this.editorState.value[0].flow_data,
+                        variables: JSON.parse(JSON.stringify(this.state.variables)),
+                        context: JSON.parse(JSON.stringify(this.env.context.context)),
+                        imports: JSON.parse(JSON.stringify(this.state.imports))
+                    };
+                    this.history.init(initialState);
+                } else {
+                    this.editor.start();
+                    this.history.init(this.getHistorySnapshot());
+                }
+                this.updateHistoryState();
+            } finally {
+                this.isRestoring = false;
+            }
 
             this.editor.on('nodeRemoved', async (id) => {
                 this.state.selectedNodeID = undefined;
-                if (!this.editorState.value[0].flow_data) return
-                const node = Object.values(this.editorState.value[0].flow_data.drawflow.Home?.data).find(node => node.id === +id)
-                node && await this.orm.unlink("node.struct", [node.data.nodeId]);
-                this.env.context.deleteNode(node.data.nodeId);
-                this.removeVariables(node.data.nodeId);
-                this.removeImports(node.data.nodeId)
-                //FIXME: update the variable usage array here.
-                //TODO: remove deleted node id from all variables usedIn Array.
-                this.removeNodeIdFromVariables(node.data.nodeId);
+                const flowData = this.editor.drawflow.drawflow.Home.data;
+                const node = Object.values(flowData).find(node => node.id === +id)
+                if (node) {
+                    this.env.context.deleteNode(node.data.nodeId);
+                    this.removeVariables(node.data.nodeId);
+                    this.removeImports(node.data.nodeId)
+                    this.removeNodeIdFromVariables(node.data.nodeId);
+                }
+                this.saveHistory();
+                if (node) {
+                    await this.orm.unlink("node.struct", [node.data.nodeId]);
+                }
                 await this.autoSaveDrawFlow();
             });
 
             this.editor.on('nodeCreated', async (id) => {
-                await this.autoSaveDrawFlow();
                 this.contextUpdateNodeCreation(id);
+                this.saveHistory();
+                await this.autoSaveDrawFlow();
             });
 
             this.editor.on('nodeMoved', async (id) => {
-                await this.autoSaveDrawFlow();
+                this.saveHistoryDebounced();
+                if (this.moveDbTimeout) clearTimeout(this.moveDbTimeout);
+                this.moveDbTimeout = setTimeout(async () => {
+                    await this.autoSaveDrawFlow();
+                }, 1000);
             });
-            this.editor.on('connectionCreated', (data) => {
+            this.editor.on('connectionCreated', async (data) => {
                 const { input_class, input_id, output_class, output_id } = data;
                 const inputId = +input_id;
                 const outputId = +output_id;
@@ -342,18 +381,19 @@ export class WorkFlowAuto extends Component {
                     this.editor.removeSingleConnection(outputId, inputId, output_class, input_class, true);
                     return;
                 }
-                this.autoSaveDrawFlow();
                 this.contextUpdateConnection(data, true);
+                this.saveHistory();
+                await this.autoSaveDrawFlow();
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).filter(item => item.id === parseInt(input_id))
                 const name = node[0].data.name
                 const nodeId = node[0].data.nodeId
                 this.env.bus.trigger("OPEN:MODAL", { name, nodeId });
             });
 
-            this.editor.on('connectionRemoved', (data) => {
+            this.editor.on('connectionRemoved', async (data) => {
                 this.contextUpdateConnection(data, false)
-                this.autoSaveDrawFlow();
-
+                this.saveHistory();
+                await this.autoSaveDrawFlow();
             });
 
             this.editor.on('nodeSelected', (id) => {
@@ -441,6 +481,25 @@ export class WorkFlowAuto extends Component {
      */
     get isTimeTrigger() {
         return this.state.triggerType === 'time';
+    }
+
+    get model_blk() {
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const modelNode = Object.values(flowData).find(node => node.data?.type === "model");
+        return !modelNode;
+    }
+
+    get trigger_blk() {
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const actionNode = Object.values(flowData).find(node => node.data?.type === "action");
+        const modelNode = Object.values(flowData).find(node => node.data?.type === "model");
+        return !!modelNode && !actionNode;
+    }
+
+    get other_blk() {
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const actionNode = Object.values(flowData).find(node => node.data?.type === "action");
+        return !!actionNode;
     }
 
     /**
@@ -556,8 +615,10 @@ export class WorkFlowAuto extends Component {
     }
 
     contextUpdateNodeCreation(id) {
-        const flowNodes = Object.values(this.editorValue[0].flow_data.drawflow.Home.data)
+        const flowData = this.editor.drawflow.drawflow.Home.data;
+        const flowNodes = Object.values(flowData)
         const createdNode = flowNodes.find(node => node.id === id);
+        if (!createdNode) return;
         const nodeId = createdNode.data.nodeId;
         const isParent = createdNode.name === "Condition" || createdNode.name === "Loop"
         //TODO: Handle Context
@@ -582,9 +643,11 @@ export class WorkFlowAuto extends Component {
     contextUpdateConnection(data, creation) {
         // TODO: Handle Context
         const { output_id, input_id } = data;
-        const nodes = Object.values(this.editorState.value[0].flow_data.drawflow.Home?.data)
+        const flowData = this.editor.drawflow.drawflow.Home.data;
+        const nodes = Object.values(flowData)
         const inputNode = nodes.find(node => node.id == input_id)
         const outputNode = nodes.find(node => node.id == output_id)
+        if (!inputNode || !outputNode) return;
         const currentContext = this.env.context.context
         const context_input_node = currentContext.nodes.find(node => node.nodeId === inputNode.data.nodeId)
         const context_output_node = currentContext.nodes.find(node => node.nodeId === outputNode.data.nodeId)
@@ -640,12 +703,18 @@ export class WorkFlowAuto extends Component {
     }
 
     async setModelState() {
-        const [{ model_id: modelData }] = await this.orm.read("work.auto", [this.id], ['model_id']);
-        if (modelData) {
-            const [{ model }] = await this.orm.read("ir.model", [modelData[0]], ['model'])
-            this.state.model_id = modelData[0];
-            this.state.model = modelData[1];
-            this.state.model_name = model;
+        if (!this.id) return;
+        const data = await this.orm.read("work.auto", [this.id], ['model_id']);
+        if (data.length > 0) {
+            const modelData = data[0].model_id;
+            if (modelData) {
+                const model_res = await this.orm.read("ir.model", [modelData[0]], ['model']);
+                if (model_res.length > 0) {
+                    this.state.model_id = modelData[0];
+                    this.state.model = modelData[1];
+                    this.state.model_name = model_res[0].model;
+                }
+            }
         }
     }
 
@@ -703,11 +772,7 @@ export class WorkFlowAuto extends Component {
         if (this.id) {
             this.editorState.value = await this.orm.read('work.auto', [this.id]);
             if (this.editorState.value[0] && this.editorState.value[0].flow_data.drawflow) {
-                const model = Object.values(this.editorState.value[0].flow_data.drawflow.Home.data).find(data => data?.data.type === "model")
-                this.state.model_blk = model ? false : this.state.model_blk
-                const action = Object.values(this.editorState.value[0].flow_data.drawflow.Home.data).find(data => data?.data.type === "action")
-                this.state.trigger_blk = ((typeof (action) === 'undefined') && !this.state.model_blk) ? true : this.state.trigger_blk
-                this.state.other_blk = action ? true : this.state.other_blk
+                // No longer needed to set block states here as they are now reactive getters
             }
         } else {
             this.editorState.value = await this.orm.searchRead('work.auto', [], [], { limit: 1 })
@@ -732,8 +797,6 @@ export class WorkFlowAuto extends Component {
 
     changeMode() {
         this.drawBoardState.edit = !this.drawBoardState.edit;
-        const model = Object.values(this.editorState.value[0].flow_data.drawflow.Home.data).find(data => data?.data.type === "model")
-        !this.drawBoardState.edit ? this.state.model_blk = false : (model ? this.state.model_blk = false : this.state.model_blk = true)
         this.editor.editor_mode = this.drawBoardState.edit ? 'edit' : 'fixed';
         this.env.services.effect.add({
             message: this.drawBoardState.edit ? "Unlocked!" : 'Locked!',
@@ -766,9 +829,6 @@ export class WorkFlowAuto extends Component {
                 variables: [],
                 code: "",
                 imports: GLOBAL_IMPORTS,
-                model_blk: true,
-                trigger_blk: false,
-                other_blk: false,
                 model: "",
                 model_id: false,
                 selectedNodeID: undefined,
@@ -798,6 +858,96 @@ export class WorkFlowAuto extends Component {
             }
         }
         return backendData
+    }
+
+    getHistorySnapshot() {
+        return {
+            drawflow: this.editor.export(),
+            variables: JSON.parse(JSON.stringify(this.state.variables)),
+            context: JSON.parse(JSON.stringify(this.env.context.context)),
+            imports: JSON.parse(JSON.stringify(this.state.imports))
+        };
+    }
+
+    saveHistory() {
+        if (this.isRestoring) return;
+        this.history.save(this.getHistorySnapshot());
+        this.updateHistoryState();
+    }
+
+    saveHistoryDebounced() {
+        if (this.isRestoring) return;
+        if (this.moveTimeout) clearTimeout(this.moveTimeout);
+        this.moveTimeout = setTimeout(() => {
+            this.saveHistory();
+        }, 300);
+    }
+
+    undo() {
+        if (this.history.canUndo()) {
+            const state = this.history.undo();
+            this.restoreHistoryState(state);
+        }
+    }
+
+    redo() {
+        if (this.history.canRedo()) {
+            const state = this.history.redo();
+            this.restoreHistoryState(state);
+        }
+    }
+
+    restoreHistoryState(snapshot) {
+        if (!snapshot || !snapshot.drawflow) {
+            console.error("Attempted to restore invalid history state:", snapshot);
+            return;
+        }
+        this.isRestoring = true;
+        try {
+            const { drawflow, variables, context, imports } = snapshot;
+            this.editor.import(drawflow);
+            if (this.editorState.value[0]) {
+                this.editorState.value[0].flow_data = drawflow;
+            }
+
+            this.state.variables = variables;
+            this.env.variables.setContext({ variables: [...variables] });
+
+            this.env.context.setContext(context);
+
+            this.state.imports = imports;
+
+            this.state.nodeDetails = [];
+            this.registerNodes();
+            this.manageData();
+            this.updateHistoryState();
+            this.autoSaveDrawFlow();
+            this.updateCode();
+        } finally {
+            this.isRestoring = false;
+        }
+        // Since we imported, we might need to re-register nodes or fix Owl components
+        // Drawflow import usually reconstructs the HTML but the Owl components need to be alive.
+        // In this implementation, the components are managed via state.nodeDetails
+        // and registerNode. Re-importing might require some orchestration if Owl components
+        // get destroyed. However, Drawflow OWL integration often handles this.
+    }
+
+    updateHistoryState() {
+        this.state.canUndo = this.history.canUndo();
+        this.state.canRedo = this.history.canRedo();
+    }
+
+    onKeyDown(e) {
+        if (e.ctrlKey || e.metaKey) {
+            if (e.shiftKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                this.redo();
+            } else if (e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                this.undo();
+            }
+        }
     }
 
     get automationIdentifiers() {
@@ -1240,6 +1390,7 @@ export class WorkFlowAuto extends Component {
                         })]
                     })
                     this.setVariableState(this.env.variables.context.variables);
+                    this.saveHistory();
                 }
             })
         }
@@ -1263,6 +1414,7 @@ export class WorkFlowAuto extends Component {
                 const editedVariable = variables.find(item => item.id === variable.id);
                 Object.assign(editedVariable, { ...fieldState, code })
                 this.setVariableState(variables);
+                this.saveHistory();
             }
         })
         this.state.selectedNodeID = undefined;
@@ -1282,6 +1434,7 @@ export class WorkFlowAuto extends Component {
             const variables = this.state.variables.filter(item => item.id !== variable.id);
             this.setVariableState(variables)
             this.env.variables.setContext({ variables: [...variables] })
+            this.saveHistory();
         }
     }
 
@@ -1400,9 +1553,6 @@ export class WorkFlowAuto extends Component {
             const type = ev.dataTransfer.getData("type");
             const trigger_type = ev.dataTransfer.getData("trigger_type");
             if (data && data !== 'null') {
-                this.state.trigger_blk = (data === 'model' && !(action === true || data !== 'model')) ? true : false;
-                this.state.other_blk = (action == true || data !== 'model') ? true : false
-                this.state.model_blk = record ? false : true
                 if (type === 'trigger') {
                     this.state.trigger = data;
                     this.state.triggerType = trigger_type;
@@ -1441,9 +1591,10 @@ export class WorkFlowAuto extends Component {
         await this.updatePrimaryModel(ev[0].id);
         const name = "model"
         const action = null
-        this.addNodeToDrawFlow(name, 594, 193, this.state.model, this.state.model_id, action, "model")
-        this.state.model_blk = false
-        this.state.trigger_blk = true
+        const precanvasRect = this.editor.precanvas.getBoundingClientRect();
+        const defaultX = precanvasRect.left + precanvasRect.width / 30;
+        const defaultY = precanvasRect.top + precanvasRect.height / 2 - 6;
+        this.addNodeToDrawFlow(name, defaultX, defaultY, this.state.model, this.state.model_id, action, "model")
     }
 
     updatePrimaryModel(model_id) {
