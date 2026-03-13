@@ -105,7 +105,8 @@ class View(models.Model):
         if tree.tag == 'search':
             filters_without_context = tree.xpath('//filter[not(@context)]')
             filters_with_context = tree.xpath('//filter[@context]')
-            last_filter_without_context = filters_without_context[-1] if filters_without_context else None
+            last_filter_without_context = filters_without_context[
+                -1] if filters_without_context else None
             last_filter_with_context = filters_with_context[-1] if filters_with_context else None
             new_element = etree.Element("studio")
             if last_filter_without_context is not None:
@@ -121,7 +122,8 @@ class View(models.Model):
                 new_sheet = etree.Element("sheet")
                 new_sheet.set('cy-xpath', '/form/sheet')
                 new_sheet.set('sheet', 'true')
-                children_to_move = [child for child in tree if child.getparent() is tree and child.tag != "header"]
+                children_to_move = [child for child in tree if
+                                    child.getparent() is tree and child.tag != "header"]
                 for child in children_to_move:
                     new_sheet.append(child)
                 tree.insert(0, new_sheet)
@@ -142,16 +144,19 @@ class View(models.Model):
 
         for node in tree.xpath('//*[@groups]'):
             attrib_groups = node.attrib.get('groups')
-            if node.tag == 't' and (not node.attrib or (len(node.attrib) == 2 and 'groups' in node.attrib)):
+            if node.tag == 't' and (
+                    not node.attrib or (len(node.attrib) == 2 and 'groups' in node.attrib)):
                 for child in reversed(node):
                     node.addnext(child)
                 node.getparent().remove(node)
                 continue
             if attrib_groups and not self.user_has_groups(attrib_groups):
-                if tree.tag in ['tree', 'kanban'] and request.session.get('invisible', 'False') != "False":
+                if tree.tag in ['tree', 'kanban'] and request.session.get('invisible',
+                                                                          'False') != "False":
                     node.set('striped', 'true')
                 elif tree.tag == 'form' and request.session.get('invisible', 'False') != "False":
-                    if node.tag == 'div' and 'class' in node.attrib and 'o_row' in node.attrib['class'].split():
+                    if node.tag == 'div' and 'class' in node.attrib and 'o_row' in node.attrib[
+                        'class'].split():
                         node.set('class', f"{node.attrib['class']} cy-studio-striped")
                     else:
                         node.set('striped', 'true')
@@ -288,7 +293,8 @@ class View(models.Model):
                         ))
             except ValueError as e:
                 if hasattr(e, 'context'):
-                    lines = etree.tostring(combined_arch, encoding='unicode').splitlines(keepends=True)
+                    lines = etree.tostring(combined_arch, encoding='unicode').splitlines(
+                        keepends=True)
                     fivelines = "".join(lines[max(0, e.context["line"] - 3):e.context["line"] + 2])
                     err = ValidationError(_(
                         "Error while validating view near:\n\n%(fivelines)s\n%(error)s",
@@ -298,7 +304,8 @@ class View(models.Model):
                     raise err.with_traceback(e.__traceback__) from None
                 else:
                     err = ValidationError(_(
-                        "Error while validating view (%(view)s):\n\n%(error)s", view=self.key or self.id,
+                        "Error while validating view (%(view)s):\n\n%(error)s",
+                        view=self.key or self.id,
                         error=tools.ustr(e.__context__),
                     ))
                     err.context = {'name': 'invalid view'}
@@ -337,7 +344,8 @@ class Model(models.AbstractModel):
         if view_type in views:
             xml_string = re.sub(r'\s+js_class="[^"]*"', '', result['arch'])
             xml_string = re.sub(r'(<group[^>]*?)\s+col="4"', r'\1', xml_string)
-            xml_string = re.sub(r'<t[^>]*groups="stock.group_stock_manager"[^>]*>.*?</t>', '', xml_string,
+            xml_string = re.sub(r'<t[^>]*groups="stock.group_stock_manager"[^>]*>.*?</t>', '',
+                                xml_string,
                                 flags=re.DOTALL)
 
             result['arch'] = xml_string
@@ -358,7 +366,11 @@ class Model(models.AbstractModel):
         html_body = self._expand_template_for_iframe(template_name, depth=0, max_depth=max_depth,
                                                      cache=cache)
 
-        html_container = self.env['ir.qweb']._render('web.html_container', {})
+        # Provide web_base_url so that t-call-assets and relative URLs resolve correctly
+        base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        html_container = self.env['ir.qweb']._render('web.html_container', {
+            'web_base_url': base_url,
+        })
         container_doc = html.fromstring(html_container)
 
         # adding medium editor to head
@@ -442,24 +454,26 @@ class Model(models.AbstractModel):
                                     }
                                     /* Premium Dynamic Field Styling */
                                     [cy-type='dynamic'] {
-                                        background-color: #e7f3ff !important;
-                                        color: #0056b3 !important;
-                                        border: 1px solid #b3d7ff !important;
-                                        padding: 2px 4px !important;
-                                        border-radius: 4px !important;
+                                        background-color: transparent !important;
+                                        color: inherit !important;
+                                        border: 1px dashed transparent !important;
+                                        padding: 0px 2px !important;
+                                        border-radius: 2px !important;
                                         font-family: inherit;
                                         display: inline-block;
                                         max-width: 100%;
                                         overflow: hidden;
                                         text-overflow: ellipsis;
-                                        vertical-align: middle;
-                                        font-weight: 500;
+                                        vertical-align: baseline;
+                                        font-weight: inherit !important;
                                         cursor: pointer;
+                                        box-shadow: none !important;
                                     }
-                                    [cy-type='dynamic']:hover {
-                                        background-color: #d1e9ff !important;
-                                        border-color: #80bdff !important;
-                                        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.1);
+                                    [cy-type='dynamic']:hover,
+                                    [cy-type='dynamic'].selected {
+                                        background-color: rgba(91, 141, 238, 0.08) !important;
+                                        border: 1px dashed rgba(91, 141, 238, 0.4) !important;
+                                        box-shadow: none !important;
                                     }
                                     /* Special label for empty fields to show path */
                                     [cy-type='dynamic'][t-field]:empty::before,
@@ -513,7 +527,7 @@ class Model(models.AbstractModel):
                                         font-size: 18px;
                                         position: relative;
                                     }
-
+                                    
                                     .col-insert-btn::after {
                                         content: "";
                                         position: absolute;
@@ -524,6 +538,26 @@ class Model(models.AbstractModel):
                                         height: 20px;
                                         background: #611e13;
                                     }
+
+                                /* ── Table Node V2 ── */
+                                .text-danger { color: #dc3545 !important; }
+                                .cyllo-table-col-resize {
+                                    position: absolute; right: 0; top: 0;
+                                    width: 4px; height: 100%;
+                                    cursor: col-resize;
+                                    background: rgba(91,141,238,0.2);
+                                }
+                                @media print {
+                                    .cyllo-table thead { display: table-header-group; }
+                                    .cyllo-table { page-break-inside: auto; }
+                                    .cyllo-table tr { page-break-inside: avoid; page-break-after: auto; }
+                                }
+                                .cyllo-table .section-header td {
+                                    background-color: #f2f2f2;
+                                    font-weight: bold;
+                                    border-top: 2px solid #333;
+                                }
+                                .cyllo-table .total-row td { font-weight: bold; background: #fafafa; }
                                 </style></data>"""
         head_content = etree.fromstring(head_content.encode())
         for child in head_content:
@@ -569,18 +603,18 @@ class Model(models.AbstractModel):
         root = custom_doc.getroot() if isinstance(custom_doc, etree._ElementTree) else custom_doc
 
         def annotate(node):
-            if not isinstance(node.tag, str) or node.tag in ["p", "b", "i", "u", "em", "strike",
-                                                             "sub", "sup", "blockquote",
-                                                             "h1", "h3", "br", "strong", "thead", "tbody",
-                                                             "cy-qweb-t"]:
-                # Skip cy-qweb-t (renamed <t> nodes) — these are pure QWeb control-flow nodes
-                # and must not receive cy-type so the JS editor ignores them as containers.
+            if not isinstance(node.tag, str):
                 return
 
-            # --- Determine type ---
-            cy_type = "dynamic" if any(
-                k in ["t-out", "t-esc", "t-field"] for k in node.attrib.keys()) else "static"
-            node.set("cy-type", cy_type)
+            # Keep recursion going into structural/control tags, but don't mark them as static/dynamic
+            # so the JS editor doesn't try to use them as containers.
+            CONTROLS = ["cy-qweb-t", "thead", "tbody", "br"]
+
+            if node.tag not in CONTROLS:
+                # --- Determine type ---
+                cy_type = "dynamic" if any(
+                    k in ["t-out", "t-esc", "t-field"] for k in node.attrib.keys()) else "static"
+                node.set("cy-type", cy_type)
 
             for child in node:
                 annotate(child)
@@ -610,14 +644,13 @@ class Model(models.AbstractModel):
             raise ValidationError("Architecture missing")
         tree = etree.ElementTree(root)
         for node in root.iter():
-            if isinstance(node.tag, str) and node.tag not in ["p", "b", "i", "u", "em", "strike", "sub", "sup", "blockquote", "h1", "h3", "br", "strong", "thead", "tbody"]:
-                # <t> nodes (t-foreach, t-set, t-if etc.) MUST get cy-xpath
-                # so they are preserved in the inheritance XML.
-                if not (node.tag in ["span"] or 'c_new' in (node.attrib.get('class', '').split())):
-                    if 'cy-xpath' not in node.attrib:
-                        node.set("cy-xpath", tree.getpath(node))
-                    if 'cy-template' not in node.attrib:
-                        node.set("cy-template", template_name)
+            # Allow p, b, i, span, div etc. to have XPaths so we can save granular changes
+            # and use them as drop zones.
+            if isinstance(node.tag, str) and node.tag not in ["br", "hr", "img", "input"]:
+                if 'cy-xpath' not in node.attrib:
+                    node.set("cy-xpath", tree.getpath(node))
+                if 'cy-template' not in node.attrib:
+                    node.set("cy-template", template_name)
 
         # Find all <t t-call="..."> nodes
         for node in list(root.xpath(".//t[@t-call]")):
