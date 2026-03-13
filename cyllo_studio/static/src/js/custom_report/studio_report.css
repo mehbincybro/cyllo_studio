@@ -168,6 +168,86 @@
 [cy-type='table']:hover,
 [cy-type='table'].selected {
     outline: 2px dashed rgba(91, 141, 238, 0.4) !important;
+    outline-offset: -2px;
+}
+
+.table-handle {
+    background: #5b8dee;
+    color: white;
+    padding: 0;
+    width: 24px;
+    height: 4px;
+    border-radius: 2px 2px 0 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    user-select: none;
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    transition: all 0.2s;
+}
+
+[cy-type='table']:hover>.table-handle,
+[cy-type='table'].selected>.table-handle {
+    display: flex;
+}
+
+.table-handle:hover {
+    height: 14px;
+    top: -14px;
+}
+
+.tcm-delete-table {
+    border: none;
+    background: #e35d6a;
+    color: white;
+    font-size: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.table-handle:hover .tcm-delete-table {
+    display: flex;
+}
+
+.table-wrapper {
+    position: relative;
+    margin-top: 30px !important;
+    padding: 8px;
+    /* Buffer for selection click */
+    border: 1px transparent solid;
+    transition: border-color 0.2s;
+}
+
+/* Hit zone for selecting the table via border */
+.table-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: -2px;
+    border: 10px solid transparent;
+    /* Invisible hit zone */
+    pointer-events: none;
+    /* Let clicks pass through to wrapper */
+    z-index: 1;
+}
+
+.table-wrapper:hover {
+    border-color: rgba(91, 141, 238, 0.2);
+}
+
+.table-wrapper.selected table {
+    outline: 2px solid #5b8dee !important;
     outline-offset: 4px;
 }
 
@@ -227,8 +307,63 @@
     pointer-events: none;
 }
 
+.previewing .table-handle,
+.previewing .box-handle,
+.previewing .field-handle {
+    display: none !important;
+}
+
 .previewing .selected {
     outline: none !important;
+}
+
+/* ── Element Handles ────────────────────────────────── */
+.box-handle,
+.field-handle {
+    background: #5b8dee;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: none;
+    margin-right: 5px;
+    cursor: grab;
+    user-select: none;
+    flex-shrink: 0;
+}
+
+.box-wrapper:hover .box-handle,
+.box-wrapper.selected .box-handle,
+.dynamic-field-wrapper:hover .field-handle,
+.dynamic-field-wrapper.selected .field-handle {
+    display: inline-block;
+}
+
+.dynamic-field-wrapper {
+    position: relative;
+    padding: 2px 6px;
+    border: 1px dashed rgba(91, 141, 238, 0.4);
+    border-radius: 4px;
+    background: rgba(91, 141, 238, 0.05);
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    gap: 4px;
+}
+
+.field-container {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.field-label {
+    color: #444;
+    font-size: 0.95em;
+    font-weight: 700;
+}
+
+.box-wrapper {
+    position: relative;
 }
 
 /* ── Enhanced Preview Styling ────────────────────────────────────────── */

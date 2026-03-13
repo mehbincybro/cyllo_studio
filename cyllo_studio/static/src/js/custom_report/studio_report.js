@@ -49,6 +49,7 @@ export class EditReport extends Component {
             includeHeaderFooter: true,
             // ── Table Config Modal state ──
             showTableModal: false,
+            isSaving: false,
             tcm: this._getDefaultTcmState(),
         });
 
@@ -136,12 +137,30 @@ export class EditReport extends Component {
                 return;
             }
 
+            // If we clicked something inside a table, we might want to select the cell OR the whole table.
+            // Requirement says: clicking border/edge selects entire table.
+            // Internal click should still allow cell editing.
+            const tableWrapper = el.closest('.table-wrapper');
+            const isHandle = el.classList.contains('table-handle') || el.closest('.table-handle');
+
+            if (isHandle && tableWrapper) {
+                el = tableWrapper;
+            } else if (tableWrapper) {
+                // Determine if we clicked near the edge or the table tag itself
+                const isTableTag = el.tagName === 'TABLE';
+                const isInCell = el.closest('td, th');
+
+                if (isTableTag || !isInCell) {
+                    el = tableWrapper;
+                }
+            }
+
             const wasSelected = el.classList.contains('selected');
 
             $('.selected').removeClass('selected');
             if ($('#branchSelector').css('display') !== 'none') self.closeBranchSelector();
 
-            let element = e.target;
+            let element = el;
             for (let i = 0; i <= 4 && element; i++, element = element.parentElement) {
                 if (['t-if', 't-elif', 't-else'].some(attr => element.hasAttribute(attr))) {
                     self.showBranchSelector(element);
@@ -153,8 +172,8 @@ export class EditReport extends Component {
 
             // "Select then Edit" strategy:
             // Only trigger the editor if the element was ALREADY selected.
-            // This ensures the first click just selects it, making it draggable.
-            if (!wasSelected) {
+            // And DON'T trigger MediumEditor for the whole table wrapper.
+            if (!wasSelected || el.classList.contains('table-wrapper')) {
                 if (self.editor) {
                     self.editor.destroy();
                     self.editor = null;
@@ -163,6 +182,14 @@ export class EditReport extends Component {
             }
 
             if (self.editor) self.editor.destroy();
+            self.editor = null;
+
+            if (e.target.classList.contains('tcm-delete-table') || e.target.closest('.tcm-delete-table')) {
+                if (tableWrapper && confirm("Are you sure you want to delete this table?")) {
+                    tableWrapper.remove();
+                    return;
+                }
+            }
 
             self.editor = new MediumEditor(el, {
                 toolbar: {
@@ -555,6 +582,7 @@ export class EditReport extends Component {
             },
             animation: 150,
 
+            handle: '.table-handle, .box, [cy-type="dynamic"]',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -599,23 +627,25 @@ export class EditReport extends Component {
                     }
 
                     // transform existing dropped node
-                    item.className = 'c_new';
-                    item.innerHTML = fieldPath;
-                    item.setAttribute('t-field', `doc.${fieldPath}`);
-                    item.setAttribute('title', fieldInfo.string);
+                    item.className = 'c_new dynamic-field-wrapper';
+                    item.innerHTML = `
+                        <span class="field-handle" contenteditable="false"></span>
+                        <div class="field-container d-inline-flex gap-1">
+                            <strong class="field-label">${fieldInfo.string}: </strong>
+                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
+                        </div>`;
                     item.setAttribute('cy-type', 'dynamic');
-                    item.style.cursor = 'grab';
+                    item.style.cursor = 'default';
                     item.style.opacity = '1';
                 }
 
                 if (type === 'box') {
-                    item.className = 'box rounded-2 c_new';
-                    item.innerHTML = '<span>New box</span>';
+                    item.className = 'box rounded-2 c_new box-wrapper';
+                    item.innerHTML = '<div class="box-handle" contenteditable="false"></div><span>New box</span>';
                     item.setAttribute('cy-type', 'box');
                     item.style.border = '1px solid #000';
                     item.style.padding = '10px';
-                    item.style.cursor = 'grab';
-                    item.style.cursor = 'grab';
+                    item.style.cursor = 'default';
                     item.style.opacity = '1';
                 }
 
@@ -629,11 +659,11 @@ export class EditReport extends Component {
                     }
 
                     // transform existing dropped node
-                    item.className = 'c_new table-container';
+                    item.className = 'c_new table-wrapper';
                     item.innerHTML = self._generateTableHtml(config);
                     item.setAttribute('cy-type', 'table');
                     item.setAttribute('cy-config', JSON.stringify(config));
-                    item.style.cursor = 'grab';
+                    item.style.cursor = 'default';
                     item.style.opacity = '1';
                 }
 
@@ -950,7 +980,11 @@ export class EditReport extends Component {
         // Determine if a field type is numeric
         const isNumeric = (type) => ['float', 'monetary', 'integer'].includes(type);
 
-        let html = `<table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse;">`;
+        let html = `
+            <div class="table-handle" contenteditable="false">
+                <button class="tcm-delete-table" title="Delete Table">✕</button>
+            </div>
+            <table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse;">`;
 
         // ── Header Row ────────────────────────────────────────────────
         if (config.headerRow && cols.length > 0) {
@@ -1263,27 +1297,40 @@ export class EditReport extends Component {
     }
 
     async save_changes(component) {
-        document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-        document.querySelectorAll('[class="/"], [class=""]').forEach(el => el.removeAttribute('class'));
-        $('[t-if], [t-elif], [t-else]').removeAttr('style');
-        if (component.editor) component.editor.destroy();
-
-        const editedHTML = component.reportFrameRef.el.innerHTML;
-        const parser = new DOMParser();
-        const editedDoc = parser.parseFromString(editedHTML, 'text/html');
-        const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
-
-        const changes = component.getChangedElements(originalDoc, editedDoc);
-        console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
-
-        const newTemplates = component.buildInheritanceXML(changes);
-        console.log('[Cyllo Studio] Sending templates:', newTemplates);
-
+        if (component.state.isSaving) return;
+        component.state.isSaving = true;
         try {
+            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+            document.querySelectorAll('[class="/"], [class=""]').forEach(el => el.removeAttribute('class'));
+            $('[t-if], [t-elif], [t-else]').removeAttr('style');
+            if (component.editor) component.editor.destroy();
+            component.editor = null;
+
+            // Ensure any pending DOM updates are finished
+            await new Promise(r => setTimeout(r, 100));
+
+            const editedHTML = component.reportFrameRef.el.innerHTML;
+            console.log('[Cyllo Studio] Serializing HTML...', editedHTML.length, 'bytes');
+            const parser = new DOMParser();
+            const editedDoc = parser.parseFromString(editedHTML, 'text/html');
+            const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
+
+            const changes = component.getChangedElements(originalDoc, editedDoc);
+            console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
+
+            if (changes.length === 0) {
+                component.state.isSaving = false;
+                return;
+            }
+
+            const newTemplates = component.buildInheritanceXML(changes);
+            console.log('[Cyllo Studio] Sending templates:', newTemplates);
+
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
                 all_arch: newTemplates,
             });
             console.log('[Cyllo Studio] Save result:', result);
+
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
 
@@ -1314,11 +1361,10 @@ export class EditReport extends Component {
                     }
                 }
             } else {
-                alert('Save failed: ' + (result?.error || 'Unknown error from server'));
+                alert('Save failed: ' + result.error);
             }
-        } catch (e) {
-            console.error('[Cyllo Studio] Save RPC error:', e);
-            alert('Save failed: ' + e.message);
+        } finally {
+            component.state.isSaving = false;
         }
     }
 
@@ -1363,6 +1409,17 @@ export class EditReport extends Component {
             studioAttrs.forEach(a => node.removeAttribute && node.removeAttribute(a));
             if (node.style && node.style.cursor) node.style.removeProperty('cursor');
             if (node.style && node.style.outline) node.style.removeProperty('outline');
+
+            // Remove handles!
+            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table')) : [];
+            handles.forEach(h => h.remove());
+
+            // If the node ITSELF is a handle, remove its content or itself if possible
+            // but usually we are cleaning a branch.
+            if (node.classList && (node.classList.contains('table-handle') || node.classList.contains('box-handle') || node.classList.contains('field-handle'))) {
+                node.innerHTML = '';
+            }
+
             Array.from(node.children || []).forEach(clean);
         };
         clean(el);
@@ -1402,8 +1459,9 @@ export class EditReport extends Component {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
                         this._cleanStudioAttrs(cloned);
-                        // Strip the c_new marker so it isn't saved into the template
-                        cloned.classList.remove('c_new');
+                        // Strip the c_new marker AND wrapper classes so it isn't saved into the template
+                        cloned.classList.remove('c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper');
+                        if (cloned.classList.length === 0) cloned.removeAttribute('class');
 
                         let content = new XMLSerializer()
                             .serializeToString(cloned)
@@ -1428,6 +1486,7 @@ export class EditReport extends Component {
 
                 const cloned = change.el.cloneNode(true);
                 this._cleanStudioAttrs(cloned);
+                cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper');
                 cloned.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));
 
                 let content = new XMLSerializer()
@@ -1439,7 +1498,7 @@ export class EditReport extends Component {
                 <xpath expr="${change.xpath}" position="replace">
                     ${content}
                 </xpath>`;
-                 });
+            });
 
             if (xpathBlock.trim()) {
                 new_inherits.push({
