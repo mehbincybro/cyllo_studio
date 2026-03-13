@@ -17,6 +17,7 @@ import {
     MappedFields,
     AssignmentFields,
     loopFields,
+    reusableAutomationFields,
 } from "./fields";
 import {
     icons,
@@ -37,6 +38,7 @@ import { ActivityNode } from "./components/ActivityNode/activityNode";
 import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
 import { removeNodeIdFromVariables } from "./utils/utils"
 import { LoopNode } from "./components/loopNode/loopNode";
+import { ReusableAutomationNode } from "./components/reusableAutomationNode/reusableAutomationNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -86,6 +88,10 @@ const MODAL_CONFIGS = {
     'Loop': {
         component: LoopNode,
         fields: loopFields,
+    },
+    'Reuse Automation': {
+        component: ReusableAutomationNode,
+        fields: reusableAutomationFields,
     },
 };
 

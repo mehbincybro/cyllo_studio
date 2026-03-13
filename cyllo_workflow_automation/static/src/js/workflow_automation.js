@@ -105,12 +105,20 @@ export class WorkFlowAuto extends Component {
             context: new Context({}),
             variables: new Context({}),
             globalVariables: new Context({
-                variables: [owl.reactive({
-                    id: "global/variable/current/rec",
-                    variable_name: "current_record",
-                    variable_value: "records",
-                    variable_type: "record"
-                })]
+                variables: [
+                    owl.reactive({
+                        id: "global/variable/current/rec",
+                        variable_name: "current_record",
+                        variable_value: "records",
+                        variable_type: "record"
+                    }),
+                    owl.reactive({
+                        id: "global/variable/workflow/stack",
+                        variable_name: "__workflow_stack__",
+                        variable_value: "[]",
+                        variable_type: "list"
+                    }),
+                ]
             })
         })
 
@@ -1509,7 +1517,9 @@ export class WorkFlowAuto extends Component {
             nodeId,
             model: [],
             primary_model_id: this.state.model_id,
+            primary_model_name: this.state.model_name,
             updateImports: this.updateImportStatements.bind(this),
+            work_auto_id: this.id,
         };
         this.env.bus.trigger("UPDT-PRIMARY", { model_id: this.state.model_id })
         let specificProps = {};
@@ -1551,6 +1561,9 @@ export class WorkFlowAuto extends Component {
             case 'Loop':
                 specificProps.type = "action_to_do";
                 right = 3;
+                break;
+            case 'Reuse Automation':
+                specificProps.type = "action_to_do";
                 break;
             default:
                 specificProps.type = "action";

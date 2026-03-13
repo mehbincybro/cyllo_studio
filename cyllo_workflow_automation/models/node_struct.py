@@ -1,104 +1,45 @@
 # -*- coding: utf-8 -*-
-#############################################################################
-#
-#    Cyllo Pvt. Ltd.
-#
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
-#    Author: Cyllo(<https://www.cyllo.com>)
-#
-#    You can modify it under the terms of the GNU LESSER
-#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
-#
-#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    (LGPL v3) along with this program.
-#    If not, see <http://www.gnu.org/licenses/>.
-#
-#############################################################################
-from odoo import fields, models
+from odoo import models, fields
 
 
 class NodeStruct(models.Model):
     _name = 'node.struct'
-    _description = "Workflow Node Structure"
 
     name = fields.Char()
-    work_auto_id = fields.Many2one(
-        'work.auto',
-        ondelete='cascade'
-    )
+    work_auto_id = fields.Many2one('work.auto', ondelete='cascade')
+    reused_work_auto_id = fields.Many2one('work.auto', string="Reusable Automation", ondelete='set null')
+    reused_variable = fields.Json("Reusable Record Variable")
     code = fields.Char("Code")
     label = fields.Char()
-    type = fields.Selection(
-        selection=[
-            ("trigger", "Trigger"),
-            ("model", "Model"),
-            ("node", "Node")
-        ]
-    )
+    type = fields.Selection(selection=[("trigger", "Trigger"), ("model", "Model"), ("node", "Node")])
     model_id = fields.Many2one('ir.model')
     used_variables = fields.Json("Used Variables")
     condition_tree_value = fields.Json("condition_tree_value")
     else_setup_code = fields.Char(string="Else Setup Code")
 
-
     # warning block fields
     warning = fields.Selection(
         string="Warning",
-        selection=[
-            ('UserError', 'User Error'),
-            ('AccessError', 'Access Error'),
-            ('AccessDenied', 'Access Denied'),
-            ('ValidationError', 'Validation Error'),
-            ('MissingError', 'Missing Error')
-        ]
-    )
+        selection=[('UserError', 'User Error'),
+                   ('AccessError', 'Access Error'),
+                   ('AccessDenied', 'Access Denied'),
+                   ('ValidationError', 'Validation Error'),
+                   ('MissingError', 'Missing Error'),
+        ])
     warning_text = fields.Char(string="Warning Text")
-    model_name = fields.Char(
-        "Model Name",
-        related="model_id.model"
-    )
-    warning_type = fields.Char(
-        string="Warning Type",
-        default="error"
-    )
+    model_name = fields.Char("Model Name", related="model_id.model")
+    warning_type = fields.Char(string="Warning Type", default="error")
     notification_type = fields.Char(string="Notification Type")
     notification_title = fields.Char(string="Notification Title")
 
-    # search block fields
+    #search block fields
     search_domain = fields.Char()
     search_limit = fields.Integer()
     search_order = fields.Selection(
-        selection=[
-            ('asc', 'ASC'),
-            ('desc', 'DESC')
-        ]
-    )
+        selection=[('asc', 'ASC'), ('desc', 'DESC')])
     search_order_field = fields.Char()
     search_domain_tree = fields.Json("Tree")
     search_variable = fields.Json("Variable")
-
-    # Loop block fields
-    loop_source_type = fields.Selection(
-        selection=[
-            ('field', 'Record Field'),
-            ('variable', 'Variable'),
-        ],
-        string="Loop Source Type",
-        default='field'
-    )
-    loop_collection = fields.Char(
-        string="Loop Collection",
-        help="Field name (e.g. order_line) or variable name to iterate over."
-    )
-    loop_variable_name = fields.Char(
-        string="Loop Variable Name",
-        help="Name of the loop iteration variable (e.g. current_line)."
-    )
 
     # create block fields
     create_name = fields.Char()
@@ -107,23 +48,17 @@ class NodeStruct(models.Model):
     create_tree_fields_values = fields.Json("createTreeFields")
     create_required_field = fields.Json("createRequiredField")
 
-    # Write block fields
+    #Write block fields
     write_field_value = fields.Char(default="[]")
     write_selected_record = fields.Json("Record")
 
-    # Function call block fields
+    #Function call block fields
     function_name = fields.Json("Function Name")
-    function_type = fields.Char(
-        string="Function Type",
-        default="server_action"
-    )
+    function_type = fields.Char(string="Function Type", default="server_action")
     function_record = fields.Json()
-    function_args = fields.Json(
-        "Function Arguments",
-        default={}
-    )
+    function_args = fields.Json("Function Arguments", default={})
 
-    # Variables block fields
+    #Variables block fields
     variable_name = fields.Char("Variable Name")
     variable_type = fields.Selection(
         string="Variable Type",
@@ -134,11 +69,10 @@ class NodeStruct(models.Model):
             ('datetime', 'DateTime'),
             ('boolean', 'Boolean'),
             ('dynamic', 'Dynamic Values'),
-        ]
-    )
+        ])
     variable_value = fields.Char(string="Variable Value")
 
-    # codeNode block fields
+    #codeNode block fields
     code_code = fields.Char(string="Code")
 
     # mailNode block fields
