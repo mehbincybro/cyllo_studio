@@ -29,11 +29,12 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base', 'mail', 'sale', 'hr_timesheet', 'rating', 'crm', 'repair', 'stock', 'sale_loyalty', 'project', 'portal'],
+    'depends': ['base', 'mail', 'im_livechat', 'sale', 'hr_timesheet', 'rating', 'crm', 'repair', 'stock', 'sale_loyalty', 'project', 'portal', 'website'],
     'data': [
         'security/cyllo_help_desk_security_group.xml',
         'security/ir.model.access.csv',
         'data/helpdesk_stage_data.xml',
+        'data/website_form_data.xml',
         'data/cyllo_help_desk_mail_template.xml',
         'data/cyllo_help_desk_mail_template_issue_solved.xml',
         'data/onboarding_data.xml',
@@ -63,10 +64,14 @@
     ],
     'assets': {
         'web.assets_backend': [
+            'cyllo_help_desk/static/src/core/common/channel_commands.js',
             'cyllo_help_desk/static/src/views/helpdesk_overview.xml',
             'cyllo_help_desk/static/src/js/helpdesk_overview.js',
             'cyllo_help_desk/static/src/views/helpdesk_team_kanbanview.xml',
             'cyllo_help_desk/static/src/js/helpdesk_team_kanbanview.js',
+        ],
+        'im_livechat.assets_embed_core': [
+            'cyllo_help_desk/static/src/core/common/channel_commands.js',
         ],
     },
     'license': 'LGPL-3',

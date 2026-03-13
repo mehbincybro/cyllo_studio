@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from odoo import http, _
+from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
 
 
 class HelpdeskPortal(CustomerPortal):
-
     def _prepare_home_portal_values(self, counters):
         values = super(HelpdeskPortal, self)._prepare_home_portal_values(counters)
         if 'ticket_count' in counters:
@@ -71,3 +71,50 @@ class HelpdeskPortal(CustomerPortal):
             solved_stage = request.env.ref('cyllo_help_desk.solved_ticket')
             ticket.stage_id = solved_stage.id
         return request.redirect('/my/ticket/%s' % ticket_id)
+
+    @http.route(['/helpdesk/create'], type='http', auth="public", website=True)
+    def website_create_ticket(self, **kw):
+        values = self._prepare_ticket_form_values()
+        return request.render("cyllo_help_desk.website_create_ticket", values)
+
+    @http.route(['/helpdesk/create/submit'], type='http', auth="public", website=True, methods=['POST'])
+    def website_create_ticket_submit(self, **post):
+        errors = {}
+        required_fields = ["name", "email", "subject", "message", "team_id"]
+        for field_name in required_fields:
+            if not post.get(field_name):
+                errors[field_name] = _("This field is required.")
+        team = request.env["helpdesk.team"].sudo().browse(int(post.get("team_id"))) if post.get("team_id") else request.env["helpdesk.team"]
+        if post.get("team_id") and (not team.exists() or not team.use_website_ticket_creation):
+            errors["team_id"] = _("Please select a valid website-enabled helpdesk team.")
+        if errors:
+            values = self._prepare_ticket_form_values(values=post, errors=errors)
+            return request.render("cyllo_help_desk.website_create_ticket", values)
+
+        partner_values = {
+            "name": post.get("name"),
+            "email": post.get("email"),
+            "phone": post.get("phone"),
+            "company_name": post.get("company"),
+        }
+        partner = request.env["res.partner"].sudo().search(
+            [("email", "=", post.get("email"))],
+            limit=1,
+        )
+        if partner:
+            partner.sudo().write({key: value for key, value in partner_values.items() if value})
+        else:
+            partner = request.env["res.partner"].sudo().create(partner_values)
+
+        ticket = request.env["helpdesk.ticket"].sudo().create(
+            {
+                "name": post.get("subject"),
+                "team_id": team.id,
+                "customer_id": partner.id,
+                "email": post.get("email"),
+                "phone": post.get("phone"),
+                "description": plaintext2html(post.get("message")),
+                "user_id": False,
+            }
+        )
+        return request.redirect("/helpdesk/create?success=%s" % ticket.ticket)
