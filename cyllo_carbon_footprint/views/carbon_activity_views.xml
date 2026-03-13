@@ -1,0 +1,59 @@
+<odoo>
+    <record id="view_carbon_activity_tree" model="ir.ui.view">
+        <field name="name">carbon.activity.tree</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="date"/>
+                <field name="source_id"/>
+                <field name="scope_id"/>
+                <field name="quantity"/>
+                <field name="uom_name"/>
+                <field name="factor_id" domain="[('source_id', '=', source_id)]"/>
+                <field name="emission_total"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_carbon_activity_form" model="ir.ui.view">
+        <field name="name">carbon.activity.form</field>
+        <field name="model">carbon.activity</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_apply_rules" type="object" string="Apply Rules" class="btn-secondary"/>
+                    <button name="action_compute" type="object" string="Compute" class="btn-primary"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="date"/>
+                        <field name="calculation_id"/>
+                        <field name="source_id"/>
+                        <field name="scope_id"/>
+                    </group>
+                    <group>
+                        <field name="quantity"/>
+                        <field name="uom_name"/>
+                        <field name="factor_id" domain="[('source_id', '=', source_id)]"/>
+                        <field name="gas_id"/>
+                        <field name="factor_value"/>
+                        <field name="emission_total" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="note"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_carbon_activity" model="ir.actions.act_window">
+        <field name="name">Activities</field>
+        <field name="res_model">carbon.activity</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+</odoo>
