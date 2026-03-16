@@ -10,8 +10,8 @@ from . import daily_target
 from . import helpdesk_overview
 from . import helpdesk_sla
 from . import helpdesk_ticket
+from . import discuss_channel
 from . import helpdesk_integration
-from . import res_users
 from . import onboarding_onboading
 from . import onboarding_onboarding_step
 from . import sla_status

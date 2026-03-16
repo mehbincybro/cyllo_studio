@@ -57,6 +57,14 @@ class HelpDeskTeam(models.Model):
     use_gift_cards = fields.Boolean(string="Use Gift Cards")
     use_returns = fields.Boolean(string="Use Returns")
     use_repairs = fields.Boolean(string="Use Repairs")
+    use_website_ticket_creation = fields.Boolean(
+        string="Website Ticket Creation",
+        help="Allow this team to receive tickets created from the website form.",
+    )
+    use_livechat_ticket_creation = fields.Boolean(
+        string="LiveChat Ticket Creation",
+        help="Allow this team to receive tickets created from the livechat /ticket command.",
+    )
     
     # Assignment Settings
     assignment_method = fields.Selection([

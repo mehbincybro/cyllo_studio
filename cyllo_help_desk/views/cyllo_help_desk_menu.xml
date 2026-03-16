@@ -48,6 +48,6 @@
               action="helpdesk_skill_action"
               parent="cyllo_helpdesk_configuration_menu"/>
     <menuitem id="cyllo_helpdesk_canned_response_menu" name="Canned Responses"
-              action="helpdesk_canned_response_action"
+              action="mail.mail_shortcode_action"
               parent="cyllo_helpdesk_configuration_menu"/>
 </odoo>

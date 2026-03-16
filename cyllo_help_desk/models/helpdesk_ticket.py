@@ -105,7 +105,7 @@ class HelpDeskTicket(models.Model):
     website_published = fields.Boolean(string='Visible in Portal', default=True)
 
     # Canned Response
-    canned_response_id = fields.Many2one('helpdesk.canned.response', string='Canned Response')
+    canned_response_id = fields.Many2one('mail.shortcode', string='Canned Response')
 
     @api.onchange('stage_id')
     def onchange_stage_id(self):

@@ -61,6 +61,13 @@
                                     <field name="use_field_service"/>
                                 </group>
                             </group>
+                            <group col="2">
+                                <group>
+                                    <separator string="Channels"/>
+                                    <field name="use_website_ticket_creation"/>
+                                    <field name="use_livechat_ticket_creation"/>
+                                </group>
+                            </group>
                         </page>
                         <page string="Automation">
                             <group col="2">
