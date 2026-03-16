@@ -1,0 +1,48 @@
+<odoo>
+    <template id="report_carbon_calc_document">
+        <t t-call="web.external_layout">
+            <div class="page">
+                <h2>Carbon Calculation</h2>
+                <p><strong>Name:</strong> <t t-esc="doc.name"/></p>
+                <p><strong>Date:</strong> <t t-esc="doc.date"/></p>
+                <p><strong>Total Emissions:</strong> <t t-esc="doc.total_emissions"/></p>
+                <table class="table table-sm mt16">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Date</th>
+                            <th>Source</th>
+                            <th>Scope</th>
+                            <th>Quantity</th>
+                            <th>Factor</th>
+                            <th>Emissions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="doc.activity_ids" t-as="line">
+                            <tr>
+                                <td><t t-esc="line.name"/></td>
+                                <td><t t-esc="line.date"/></td>
+                                <td><t t-esc="line.source_id.name"/></td>
+                                <td><t t-esc="line.scope_id.name"/></td>
+                                <td><t t-esc="line.quantity"/></td>
+                                <td><t t-esc="line.factor_value"/></td>
+                                <td><t t-esc="line.emission_total"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </template>
+
+    <report
+        id="action_carbon_calc_report"
+        model="carbon.calc"
+        string="Carbon Calculation"
+        report_type="qweb-pdf"
+        name="cyllo_carbon_footprint.report_carbon_calc_document"
+        file="cyllo_carbon_footprint.report_carbon_calc_document"
+        print_report_name="'Carbon - %s' % (object.name)"
+    />
+</odoo>

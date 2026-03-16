@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_carbon_gas,carbon.gas,model_carbon_gas,base.group_user,1,1,1,1
+access_carbon_unit,carbon.unit,model_carbon_unit,base.group_user,1,1,1,1
+access_carbon_scope,carbon.scope,model_carbon_scope,base.group_user,1,1,1,1
+access_carbon_source,carbon.source,model_carbon_source,base.group_user,1,1,1,1
+access_carbon_factor,carbon.factor,model_carbon_factor,base.group_user,1,1,1,1
+access_carbon_assign_rule,carbon.assign.rule,model_carbon_assign_rule,base.group_user,1,1,1,1
+access_carbon_activity,carbon.activity,model_carbon_activity,base.group_user,1,1,1,1
+access_carbon_calc,carbon.calc,model_carbon_calc,base.group_user,1,1,1,1
+access_carbon_compute_wizard,carbon.compute.wizard,model_carbon_compute_wizard,base.group_user,1,1,1,1

@@ -1,0 +1,9 @@
+<odoo>
+    <menuitem id="menu_carbon_root" name="Carbon Footprint" sequence="10"/>
+    <menuitem id="menu_carbon_calc" name="Calculations" parent="menu_carbon_root" action="action_carbon_calc" sequence="10"/>
+    <menuitem id="menu_carbon_activity" name="Activities" parent="menu_carbon_root" action="action_carbon_activity" sequence="20"/>
+    <menuitem id="menu_carbon_source" name="Emission Sources" parent="menu_carbon_root" action="action_carbon_source" sequence="40"/>
+    <menuitem id="menu_carbon_rule" name="Assignation Rules" parent="menu_carbon_root" action="action_carbon_rule" sequence="50"/>
+    <menuitem id="menu_carbon_scope" name="Scopes" parent="menu_carbon_root" action="action_carbon_scope" sequence="60"/>
+    <menuitem id="menu_carbon_gas" name="Gases" parent="menu_carbon_root" action="action_carbon_gas" sequence="70"/>
+</odoo>

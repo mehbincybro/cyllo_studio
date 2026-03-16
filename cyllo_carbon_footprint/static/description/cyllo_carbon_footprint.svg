@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
+  <defs>
+    <style>
+      .cls-1 { fill: #26261A; }
+      .cls-2 { fill: #d7d6ca; }
+      .cls-3 { fill: #c9c9b9; }
+      .cls-4 { fill: #969686; }
+      .cls-5 { fill: #BCBBA7; }
+      .text { font-family: "Montserrat", "Trebuchet MS", Arial, sans-serif; font-weight: 700; }
+    </style>
+  </defs>
+  <g id="Layer_1-2" data-name="Layer 1">
+    <rect class="cls-1" style="fill:#26261A !important;" width="850" height="850" rx="72.61" ry="72.61"/>
+    <circle class="cls-2" style="fill:#d7d6ca !important;" cx="425" cy="425" r="260"/>
+    <circle class="cls-3" style="fill:#c9c9b9 !important;" cx="425" cy="425" r="215"/>
+    <circle class="cls-5" style="fill:#BCBBA7 !important;" cx="425" cy="425" r="160"/>
+    <text class="text" x="425" y="455" font-size="170" text-anchor="middle" fill="#26261A">CO</text>
+    <text class="text" x="585" y="505" font-size="90" text-anchor="start" fill="#26261A">2</text>
+    <path class="cls-4" style="fill:#969686 !important;" d="m245,515c55,70,142,115,240,115,95,0,181-42,236-108-46,29-101,45-160,45-106,0-200-52-256-132Z"/>
+  </g>
+</svg>
