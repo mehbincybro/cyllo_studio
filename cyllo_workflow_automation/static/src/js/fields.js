@@ -34,3 +34,9 @@ export const loopFields = [
 
 export const MappedFields = [];
 export const AssignmentFields = [];
+
+export const reusableAutomationFields = [
+    { name: 'reused_work_auto_id', type: 'many2One' },
+    { name: 'reused_variable', type: 'json' },
+    { name: 'label', type: 'char' },
+];

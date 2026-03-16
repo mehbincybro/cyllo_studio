@@ -1,5 +1,7 @@
 /** @odoo-module */
 
+import { cloneState } from "./stateClone";
+
 export class HistoryManager {
     constructor(limit = 100) {
         this.undoStack = [];
@@ -12,7 +14,7 @@ export class HistoryManager {
      * @param {Object|string} state
      */
     init(state) {
-        this.undoStack = [JSON.parse(JSON.stringify(state))];
+        this.undoStack = [cloneState(state)];
         this.redoStack = [];
     }
 
@@ -21,11 +23,7 @@ export class HistoryManager {
      * @param {Object|string} state
      */
     save(state) {
-        const newState = JSON.parse(JSON.stringify(state));
-        // If the state is the same as the current one, don't save.
-        if (this.undoStack.length > 0 && JSON.stringify(this.undoStack[this.undoStack.length - 1]) === JSON.stringify(newState)) {
-            return;
-        }
+        const newState = cloneState(state);
 
         this.undoStack.push(newState);
         this.redoStack = []; // Clear redo stack on new action
@@ -45,7 +43,7 @@ export class HistoryManager {
         const currentState = this.undoStack.pop();
         this.redoStack.push(currentState);
 
-        return JSON.parse(JSON.stringify(this.undoStack[this.undoStack.length - 1]));
+        return cloneState(this.undoStack[this.undoStack.length - 1]);
     }
 
     /**
@@ -58,7 +56,7 @@ export class HistoryManager {
         const nextState = this.redoStack.pop();
         this.undoStack.push(nextState);
 
-        return JSON.parse(JSON.stringify(nextState));
+        return cloneState(nextState);
     }
 
     canUndo() {

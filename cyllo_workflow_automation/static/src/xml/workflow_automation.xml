@@ -354,6 +354,14 @@
                                                 <p>Activity</p>
                                             </div>
                                             </t>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'reuseAutomation')"
+                                                 data-node="Reuse Automation">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/Map.svg"
+                                                     alt=""/>
+                                                <p>Reuse Automation</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

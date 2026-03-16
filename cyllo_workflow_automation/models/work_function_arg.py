@@ -29,7 +29,7 @@ from lxml import etree
 
 from dateutil.relativedelta import relativedelta
 
-from odoo import api, exceptions, fields, models, tools
+from odoo import _, api, exceptions, fields, models, tools
 from odoo.exceptions import AccessError
 from odoo.tools import file_open
 from odoo.tools.safe_eval import _BUILTINS, safe_eval
@@ -563,6 +563,16 @@ class WorkAuto(models.Model):
            Returns:
                None: The function executes the workflow code, but does not return a value.
         """
+        stack = args.get('__workflow_stack__', [])
+        if not isinstance(stack, list):
+            stack = list(stack)
+        if self.id in stack:
+            raise exceptions.ValidationError(
+                _('Circular automation reuse detected for %s. Review nested reusable nodes to avoid recursion.', self.name)
+            )
+        stack = [*stack, self.id]
+        args = dict(args, __workflow_stack__=stack)
+
         records = args.get('records', False)
         if records:
             try:
