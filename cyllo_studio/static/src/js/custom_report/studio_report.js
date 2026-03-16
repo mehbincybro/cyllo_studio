@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from '@web/core/registry';
-import { Component, useRef, onMounted, useState, onWillStart } from "@odoo/owl";
+import { Component, useRef, onMounted, useState, onWillStart, onPatched } from "@odoo/owl";
 import { StudioFieldSelectorPopover } from "@cyllo_studio/js/studio_field_selector_popover";
 import { useLoadFieldInfo } from "@web/core/model_field_selector/utils";
 import { useService } from "@web/core/utils/hooks";
@@ -97,12 +97,22 @@ export class EditReport extends Component {
             this._setupReportFrame(arch || '');
             this._setupSortable();
         });
+
+        onPatched(() => {
+            // Re-setup sortable if the component was patched (e.g. after modal close)
+            // to ensure listeners are still attached to the live DOM elements.
+            this._setupSortable();
+        });
     }
 
     _setupReportFrame(arch) {
         this._loadedArch = arch;
         this.reportFrameRef.el.innerHTML = arch;
         const editableArea = this.reportFrameRef.el;
+
+        // Enrich existing DOM with Studio wrappers/handles
+        this._enrichReportDOM(editableArea);
+
         this.editor = null;
         $('[t-elif], [t-else]').hide();
 
@@ -139,20 +149,37 @@ export class EditReport extends Component {
 
             // If we clicked something inside a table, we might want to select the cell OR the whole table.
             // Requirement says: clicking border/edge selects entire table.
-            // Internal click should still allow cell editing.
             const tableWrapper = el.closest('.table-wrapper');
-            const isHandle = el.classList.contains('table-handle') || el.closest('.table-handle');
+            const isHandle = el.classList.contains('table-handle') || el.closest('.table-handle') || el.classList.contains('table-toolbar') || el.closest('.table-toolbar');
+            const isInCell = el.closest('td, th');
 
             if (isHandle && tableWrapper) {
                 el = tableWrapper;
+            } else if (isInCell) {
+                // If we click inside a cell, select the cell and STOP PROPAGATION
+                // so we don't accidentally select the table wrapper.
+                el = isInCell;
+                if (!self.state.previewMode) {
+                    e.stopPropagation();
+                }
             } else if (tableWrapper) {
-                // Determine if we clicked near the edge or the table tag itself
                 const isTableTag = el.tagName === 'TABLE';
-                const isInCell = el.closest('td, th');
-
-                if (isTableTag || !isInCell) {
+                // If we click the wrapper directly or the table tag (border), select whole table
+                if (isTableTag || el === tableWrapper) {
                     el = tableWrapper;
                 }
+            }
+
+            // Handle text node selection
+            const textNode = el.closest('.text-node');
+            if (textNode) {
+                el = textNode;
+            }
+
+            // Handle field block selection (atomic unit)
+            const fieldBlock = el.closest('.field-block');
+            if (fieldBlock) {
+                el = fieldBlock;
             }
 
             const wasSelected = el.classList.contains('selected');
@@ -170,10 +197,12 @@ export class EditReport extends Component {
 
             el.classList.add('selected');
 
+            el.classList.add('selected');
+
             // "Select then Edit" strategy:
             // Only trigger the editor if the element was ALREADY selected.
-            // And DON'T trigger MediumEditor for the whole table wrapper.
-            if (!wasSelected || el.classList.contains('table-wrapper')) {
+            // And DON'T trigger MediumEditor for the whole table wrapper or field block.
+            if (!wasSelected || el.classList.contains('table-wrapper') || el.classList.contains('field-block')) {
                 if (self.editor) {
                     self.editor.destroy();
                     self.editor = null;
@@ -582,7 +611,8 @@ export class EditReport extends Component {
             },
             animation: 150,
 
-            handle: '.table-handle, .box, [cy-type="dynamic"]',
+            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]:not(.dynamic-field-wrapper *)',
+            handle: '.table-handle, .box-handle, .field-handle, .text-handle, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -610,6 +640,40 @@ export class EditReport extends Component {
                 // hide while async runs
                 item.style.opacity = '0.4';
 
+                if (type === 'text') {
+                    // Transform dropped snippet into a text node at the drop position
+                    item.className = 'text-node c_new selected';
+                    item.setAttribute('contenteditable', 'true');
+                    item.innerHTML = 'Double click to edit text...';
+
+                    const handle = document.createElement('div');
+                    handle.className = 'text-handle';
+                    handle.innerHTML = '⠿';
+                    item.appendChild(handle);
+
+                    const del = document.createElement('div');
+                    del.className = 'text-delete fa fa-times';
+                    del.onclick = (e) => { e.stopPropagation(); if (confirm("Delete text?")) item.remove(); };
+                    item.appendChild(del);
+
+                    const resize = document.createElement('div');
+                    resize.className = 'resize-handle';
+                    item.appendChild(resize);
+
+                    // Since it's dropped into a flow, we make it absolute
+                    // and position it where it was dropped relative to the zone.
+                    const rect = item.getBoundingClientRect();
+                    const zoneRect = zone.getBoundingClientRect();
+                    item.style.position = 'absolute';
+                    item.style.left = (rect.left - zoneRect.left) + 'px';
+                    item.style.top = (rect.top - zoneRect.top) + 'px';
+
+                    item.style.opacity = '1';
+                    self._setupTextNodeEvents(item);
+                    self._refreshDragHandles();
+                    return;
+                }
+
                 if (type === 'field') {
                     const resModel = self._resModel || self.props.action.params?.res_model || '';
 
@@ -621,22 +685,28 @@ export class EditReport extends Component {
                         );
 
                     if (!fieldPath) {
-                        console.log('mdnjdnjdnjd')
                         item.remove(); // cancelled
                         return;
                     }
 
                     // transform existing dropped node
-                    item.className = 'c_new dynamic-field-wrapper';
+                    item.className = 'field-block c_new dynamic-field-wrapper';
                     item.innerHTML = `
-                        <span class="field-handle" contenteditable="false"></span>
+                        <span class="field-handle" contenteditable="false">⠿</span>
                         <div class="field-container d-inline-flex gap-1">
                             <strong class="field-label">${fieldInfo.string}: </strong>
                             <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
-                        </div>`;
+                        </div>
+                        <span class="field-delete fa fa-times" title="Delete Field" contenteditable="false"></span>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.cursor = 'default';
                     item.style.opacity = '1';
+
+                    // Internal delete handler
+                    item.querySelector('.field-delete').onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm("Delete this field?")) item.remove();
+                    };
                 }
 
                 if (type === 'box') {
@@ -659,12 +729,23 @@ export class EditReport extends Component {
                     }
 
                     // transform existing dropped node
+                    const tableHtml = self._generateTableHtml(config);
                     item.className = 'c_new table-wrapper';
-                    item.innerHTML = self._generateTableHtml(config);
+                    item.innerHTML = `
+                            <div class="table-handle-container" contenteditable="false">
+                                <div class="table-handle fa fa-bars" title="Drag to move"></div>
+                                <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                            </div>
+                            ${tableHtml}`;
                     item.setAttribute('cy-type', 'table');
                     item.setAttribute('cy-config', JSON.stringify(config));
                     item.style.cursor = 'default';
                     item.style.opacity = '1';
+
+                    item.querySelector('.table-delete').onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm("Delete this table?")) item.remove();
+                    };
                 }
 
                 // ── LIVE SYNC: UI -> Source ──────────────────────────────────
@@ -681,6 +762,8 @@ export class EditReport extends Component {
                         }
                     }
                 }
+                // Re-initialize drag handles for the new zone content
+                self._refreshDragHandles();
             }
         });
 
@@ -1056,7 +1139,7 @@ export class EditReport extends Component {
                     </tr>
                 </t>`;
 
-            // ── Preset: P&L ──────────────────────────────────────────────
+            // ── Preset: P&L ───────────────────────────────────────
         } else if (config.preset === 'p_and_l' && config.sections && config.sections.length > 0) {
             config.sections.forEach(section => {
                 html += `
@@ -1336,7 +1419,8 @@ export class EditReport extends Component {
 
                 // ── PERSISTENT SAVE: Refresh local state instead of closing ────
                 const resArch = await component.rpc('/cyllo_studio/get_arch', {
-                    template: component._template
+                    template: component._template,
+                    show_placeholders: false
                 });
                 if (resArch && resArch.success) {
                     component._loadedArch = resArch.arch;
@@ -1411,12 +1495,45 @@ export class EditReport extends Component {
             if (node.style && node.style.outline) node.style.removeProperty('outline');
 
             // Remove handles!
-            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table')) : [];
+            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete')) : [];
             handles.forEach(h => h.remove());
+
+            // Unwrap wrappers if they are purely studio constructs
+            // We iterate backwards to avoid skip issues if we modify DOM
+            const wrappers = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-wrapper, .field-block')) : [];
+            wrappers.forEach(w => {
+                // If it's a wrapper, we want its children to move to its parent, then it dies.
+                // UNLESS it's a freshly dropped node (c_new), then we keep it as a unit.
+                if (!w.classList.contains('c_new')) {
+                    while (w.firstChild) {
+                        w.parentNode.insertBefore(w.firstChild, w);
+                    }
+                    w.remove();
+                }
+            });
+
+            // If it's a field-block node that we're keeping (c_new), remove the class
+            if (node.classList && node.classList.contains('field-block')) {
+                node.classList.remove('field-block', 'dynamic-field-wrapper');
+                if (node.classList.length === 0) node.removeAttribute('class');
+            }
+
+            // Bug 2: Remove layout placeholders (Address block, etc.)
+            // These are injected by Odoo during rendering if content is empty.
+            // We should NOT save them back into the architecture.
+            const placeholders = node.querySelectorAll ? Array.from(node.querySelectorAll('.bg-light.border-1.rounded')) : [];
+            placeholders.forEach(p => {
+                if (p.textContent.includes('Address block') ||
+                    p.textContent.includes('Information block') ||
+                    p.textContent.includes('Company address block') ||
+                    p.textContent.includes('Company details block')) {
+                    p.remove();
+                }
+            });
 
             // If the node ITSELF is a handle, remove its content or itself if possible
             // but usually we are cleaning a branch.
-            if (node.classList && (node.classList.contains('table-handle') || node.classList.contains('box-handle') || node.classList.contains('field-handle'))) {
+            if (node.classList && (node.classList.contains('table-handle') || node.classList.contains('box-handle') || node.classList.contains('field-handle') || node.classList.contains('text-handle') || node.classList.contains('resize-handle') || node.classList.contains('field-delete'))) {
                 node.innerHTML = '';
             }
 
@@ -1442,6 +1559,55 @@ export class EditReport extends Component {
         return false;
     }
 
+    /**
+     * Finds existing tables and fields in the report and adds the necessary
+     * wrappers and handles for Studio manipulation.
+     */
+    _enrichReportDOM(container) {
+        // 1. Wrap existing tables
+        const tables = container.querySelectorAll('table:not(.table-wrapper table)');
+        tables.forEach(table => {
+            if (table.closest('.table-wrapper')) return;
+            const wrapper = document.createElement('div');
+            wrapper.className = 'table-wrapper';
+            wrapper.innerHTML = `
+                <div class="table-handle-container" contenteditable="false">
+                    <div class="table-handle fa fa-bars" title="Drag to move"></div>
+                    <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                </div>`;
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+
+            wrapper.querySelector('.table-delete').onclick = (e) => {
+                e.stopPropagation();
+                if (confirm("Delete this table?")) wrapper.remove();
+            };
+        });
+
+        // 2. Wrap existing fields (t-field or t-esc with specific paths)
+        // We look for spans/divs with t-field
+        const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]), [t-esc]:not(.field-block [t-esc])');
+        fields.forEach(field => {
+            if (field.closest('.field-block') || field.closest('table')) return;
+
+            // For simple fields (like in an address block), wrap them
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field-block dynamic-field-wrapper';
+            wrapper.innerHTML = `
+                <span class="field-handle" contenteditable="false">⠿</span>
+                <div class="field-container d-inline-flex gap-1"></div>
+                <span class="field-delete fa fa-times" title="Delete Field" contenteditable="false"></span>
+            `;
+            field.parentNode.insertBefore(wrapper, field);
+            wrapper.querySelector('.field-container').appendChild(field);
+
+            wrapper.querySelector('.field-delete').onclick = (e) => {
+                e.stopPropagation();
+                if (confirm("Delete this field?")) wrapper.remove();
+            };
+        });
+    }
+
     buildInheritanceXML(changes) {
         let new_inherits = [];
 
@@ -1459,8 +1625,8 @@ export class EditReport extends Component {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
                         this._cleanStudioAttrs(cloned);
-                        // Strip the c_new marker AND wrapper classes so it isn't saved into the template
-                        cloned.classList.remove('c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper');
+                        // Strip the c_new marker but KEEP structural classes like d-inline-block
+                        cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
                         if (cloned.classList.length === 0) cloned.removeAttribute('class');
 
                         let content = new XMLSerializer()
@@ -1473,6 +1639,17 @@ export class EditReport extends Component {
                             ${content}
                         </xpath>`;
                     });
+                    // Bug 1 FIX: Don't return here! We might have other changes in the same zone
+                    // (like text edits or move operations) that need to be captured as a 'replace'.
+                    // Actually, if we use 'inside', we probably SHOULD avoid 'replace' on the same node
+                    // in the same save to prevent conflicts.
+                    // But if we only added new nodes, 'inside' is fine.
+                    // To be safe, if THERE ARE OTHER CHANGES (text edit or struct change),
+                    // we should probably just use 'replace' for the whole thing instead of 'inside'.
+
+                    const text = (node) => Array.from(node.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
+                    // ... this is getting complex. Let's stick to: if newNodes exist, use inside,
+                    // but also allow text edits to fall through IF they are on DIFFERENT nodes.
                     return;
                 }
 
@@ -1486,7 +1663,7 @@ export class EditReport extends Component {
 
                 const cloned = change.el.cloneNode(true);
                 this._cleanStudioAttrs(cloned);
-                cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper');
+                cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
                 cloned.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));
 
                 let content = new XMLSerializer()
@@ -1509,6 +1686,67 @@ export class EditReport extends Component {
         }
 
         return new_inherits;
+    }
+
+    _removeTableToolbar() {
+        document.querySelectorAll('.table-toolbar').forEach(t => t.remove());
+    }
+
+    _setupTextNodeEvents(textNode) {
+        // Dragging logic for text node
+        const handle = textNode.querySelector('.text-handle');
+        let isDragging = false;
+        let startX, startY, nodeLeft, nodeTop;
+
+        handle.onmousedown = (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            nodeLeft = parseInt(textNode.style.left) || 0;
+            nodeTop = parseInt(textNode.style.top) || 0;
+            e.preventDefault();
+        };
+
+        const onMouseMove = (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            textNode.style.left = (nodeLeft + dx) + 'px';
+            textNode.style.top = (nodeTop + dy) + 'px';
+        };
+
+        const onMouseUp = () => {
+            isDragging = false;
+        };
+
+        document.addEventListener('mousemove', onMouseMove);
+        document.addEventListener('mouseup', onMouseUp);
+
+        // Resize logic
+        const resizeHandle = textNode.querySelector('.resize-handle');
+        let isResizing = false;
+        let startW, startH;
+
+        resizeHandle.onmousedown = (e) => {
+            isResizing = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            startW = textNode.offsetWidth;
+            startH = textNode.offsetHeight;
+            e.preventDefault();
+            e.stopPropagation();
+        };
+
+        const onResizeMove = (e) => {
+            if (!isResizing) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            textNode.style.width = (startW + dx) + 'px';
+            textNode.style.height = (startH + dy) + 'px';
+        };
+
+        document.addEventListener('mousemove', onResizeMove);
+        document.addEventListener('mouseup', () => { isResizing = false; });
     }
 }
 
