@@ -89,6 +89,7 @@
                             <field name="trigger_type"/>
                             <field name="company_id"/>
                             <field name="active" invisible="1"/>
+                            <field name="is_reusable"/>
                         </group>
                         <notebook>
                             <page string="Code">
@@ -124,6 +125,7 @@
                     <field name="name"/>
                     <field name="function_id"/>
                     <field name="model_id"/>
+                    <field name="trigger_function_ids"/>
                     <field name="is_record_saved"/>
                 </workflowCard>
             </field>

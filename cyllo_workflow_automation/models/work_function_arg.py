@@ -310,6 +310,14 @@ class WorkAuto(models.Model):
     flow_data = fields.Json(string="Flow data")
     context = fields.Char(string="Context")
     variables = fields.Json(string="Variables")
+    trigger_function_ids = fields.Many2many(
+        'work.function',
+        string="Trigger Functions",
+        compute='_compute_trigger_functions',
+        store=True,
+        copy=False,
+    )
+    is_reusable = fields.Boolean(string="Reusable", default=False)
     node_struct_ids = fields.One2many(
         'node.struct',
         'work_auto_id'
@@ -348,28 +356,24 @@ class WorkAuto(models.Model):
         workflow_auto_id = self or False
         img = kwargs.get('image', False)
         t_ttype = 'before' if ttype else 'after'
+        trigger_function_ids = kwargs.get('trigger_function_ids', []) or []
+        trigger_commands = [(6, 0, trigger_function_ids)] if trigger_function_ids else [(6, 0, [])]
+        target_function = trigger_function_ids[0] if trigger_function_ids else False
+        values = {
+            'flow_data': data,
+            'model_id': kwargs.get('model_id', False),
+            'code': kwargs.get('code', False),
+            'variables': kwargs.get('variables', []),
+            'ttype': t_ttype,
+            'is_record_saved': True,
+            'trigger_function_ids': trigger_commands,
+            'function_id': target_function,
+        }
         if not self:
-            workflow_auto_id = self.create(
-                {'flow_data': data,
-                 'model_id': kwargs.get('model_id', False),
-                 'function_id': kwargs.get('function_id', False),
-                 'code': kwargs.get('code', False),
-                 'variables': kwargs.get('variables', []),
-                 'ttype': t_ttype,
-                 'is_record_saved' : True
-                 }
-            )
+            workflow_auto_id = self.create(values)
         else:
-            self.write({
-                'name': name,
-                'flow_data': data,
-                'model_id': kwargs.get('model_id', False),
-                'function_id': kwargs.get('function_id', False),
-                'code': kwargs.get('code', False),
-                'variables': kwargs.get('variables', []),
-                'ttype': t_ttype,
-                'is_record_saved': True
-            })
+            values.update({'name': name})
+            self.write(values)
         return workflow_auto_id.id
 
     def clear_all_nodes(self):
@@ -394,6 +398,60 @@ class WorkAuto(models.Model):
         """
         self.flow_data = flow_data
         return self.id
+
+    @staticmethod
+    def _extract_trigger_function_ids_from_flow(flow_data):
+        """
+        Helper to extract unique trigger function ids from the drawflow data.
+        """
+        if not flow_data:
+            return []
+        drawflow = flow_data.get('drawflow', {}) or {}
+        home = drawflow.get('Home', {}) or {}
+        nodes = home.get('data', {}) or {}
+        function_ids = []
+        seen_trigger_types = set()
+        for node in nodes.values():
+            data = node.get('data') or {}
+            if data.get('type') != 'action':
+                continue
+            model_info = data.get('model')
+            trigger_type = data.get('trigger_type')
+            if trigger_type and trigger_type in seen_trigger_types:
+                continue
+            if isinstance(model_info, (list, tuple)) and model_info:
+                func_id = model_info[0]
+            elif isinstance(model_info, dict):
+                func_id = model_info.get('id')
+            else:
+                func_id = False
+            if isinstance(func_id, int):
+                function_ids.append(func_id)
+                if trigger_type:
+                    seen_trigger_types.add(trigger_type)
+        # preserve insertion order while removing duplicates
+        return list(dict.fromkeys(function_ids))
+
+    @api.depends('flow_data')
+    def _compute_trigger_functions(self):
+        for automation in self:
+            function_ids = automation._extract_trigger_function_ids_from_flow(automation.flow_data)
+            automation.trigger_function_ids = self.env['work.function'].browse(function_ids)
+
+    @api.constrains('trigger_function_ids')
+    def _check_unique_trigger_types(self):
+        for automation in self:
+            trigger_types = [
+                fn.trigger_type for fn in automation.trigger_function_ids if fn.trigger_type
+            ]
+            duplicates = [t for t in set(trigger_types) if trigger_types.count(t) > 1]
+            if duplicates:
+                duplicate_type = duplicates[0]
+                trigger = automation.trigger_function_ids.filtered(lambda f: f.trigger_type == duplicate_type)
+                trigger_name = trigger and trigger[0].name or duplicate_type
+                raise exceptions.ValidationError(
+                    _("Trigger %s is already part of this automation. Each trigger type can only be used once.") % trigger_name
+                )
 
     def initial_model_setup(self):
         """
@@ -470,15 +528,20 @@ class WorkAuto(models.Model):
                 setattr(ModelClass, name, method)
 
         for auto in self.with_context({}).search([]):
-            if auto.function_id:
-                function_id = auto.function_id
-            elif auto.read()[0]["function_id"]:
-                function_id = self.env["work.function"].browse(auto.read()[0]["function_id"][0])
-            else:
+            functions = auto.trigger_function_ids
+            if not functions:
                 continue
             Model = self.env.get(auto.model_id.model)
-            if auto.trigger_type == 'field_change':
-                # Onchange hook: fires during UI field editing (before save).
+            if Model is None:
+                _logger.warning(
+                    "Automation rule with name '%s' (ID %d) depends on model %s",
+                    auto.name,
+                    auto.id,
+                    auto.model_id.model if auto.model_id else 'unknown')
+                continue
+
+            field_change_functions = functions.filtered(lambda f: f.trigger_type == 'field_change')
+            if field_change_functions:
                 if not auto.field_id:
                     continue
 
@@ -498,16 +561,14 @@ class WorkAuto(models.Model):
 
                 Model._onchange_methods[auto.field_id.name].append(
                     make_onchange_fn(auto, auto.field_id.name))
-            elif auto.trigger_type == 'time':
-                # Time-based triggers are driven by ir.cron, not method patching.
-                continue
-            else:
-                if not function_id.c_make_function:
+
+            for function in functions.filtered(lambda f: f.trigger_type not in ('field_change', 'time')):
+                if not function.c_make_function:
                     continue
-                code_obj = compile(function_id.c_make_function, '<string>', 'exec')
+                code_obj = compile(function.c_make_function, '<string>', 'exec')
                 func = types.FunctionType(code_obj.co_consts[0], globals(),
-                                          function_id.func_name)()
-                patch(Model, function_id.func_name, func)
+                                          function.func_name)()
+                patch(Model, function.func_name, func)
         return super()._register_hook()
 
     @api.model
@@ -530,16 +591,16 @@ class WorkAuto(models.Model):
             """
         model_id = self.env['ir.model'].sudo().search([
             ('model', '=', record._name)
-        ])
+        ], limit=1)
         function_id = self.env['work.function'].search([
             ('model_id', 'in', [model_id.id, False]),
             ('func_name', '=', func)
-        ])
+        ], limit=1)
         if not model_id or not function_id:
             return self
         auto_ids = self.search([
             ('model_id', '=', model_id.id),
-            ('function_id', '=', function_id.id)
+            ('trigger_function_ids', 'in', function_id.ids)
         ])
         return auto_ids
 
@@ -679,7 +740,14 @@ class WorkAuto(models.Model):
         if time_fields & vals.keys():
             self.create_cron()
         self._update_registry()
+        if 'flow_data' in vals:
+            self._update_primary_function()
         return res
+
+    def _update_primary_function(self):
+        for automation in self:
+            function_ids = automation._extract_trigger_function_ids_from_flow(automation.flow_data)
+            automation.function_id = function_ids[0] if function_ids else False
 
     def unlink(self):
         """

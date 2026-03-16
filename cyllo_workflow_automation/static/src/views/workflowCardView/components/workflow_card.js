@@ -34,7 +34,12 @@ export class WorkflowCard extends Component {
     }
 
     get WorkflowCard() {
-        return this.props.value.data;
+        return this.props.value?.data || {};
+    }
+
+    get triggerNames() {
+        const triggers = this.WorkflowCard.trigger_function_ids || [];
+        return (triggers || []).map(item => item?.[1]).filter(Boolean);
     }
 
     async openView() {

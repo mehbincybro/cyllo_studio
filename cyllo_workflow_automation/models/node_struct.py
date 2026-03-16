@@ -127,18 +127,3 @@ class NodeStruct(models.Model):
         else:
             self.write(data)
         return struct_node_id.id
-
-    def unlink(self):
-        """
-        Override the unlink method to handle specific business logic before deletion.
-
-        This method checks each record before deletion. If the record has a `work_auto_id` and is of type 'trigger',
-        it unlinks the associated `function_id` from the automation work record before proceeding with the deletion.
-
-        Returns:
-            bool: True if the records were successfully deleted.
-        """
-        for record in self:
-            if record.work_auto_id and record.type == "trigger":
-                record.work_auto_id.function_id = False
-        return super().unlink()
