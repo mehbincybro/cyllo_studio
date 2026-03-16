@@ -343,9 +343,9 @@ export class ModelComponent extends Component {
             } else if (this.props.name === 'Loop') {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Loop Node iterates over a recordset field or variable, executing child nodes for each record in turn.";
-                props.onConfirm = (fieldState, code, usedVariables) => {
+                props.onConfirm = (fieldState, code, usedVariables, modelInfo) => {
                     this.onConfirm(fieldState, code, usedVariables);
-                    this.updateLoopVariable(fieldState);
+                    this.updateLoopVariable(fieldState, modelInfo);
                 };
             }
             this.dialogService.add(component, props);
@@ -358,7 +358,7 @@ export class ModelComponent extends Component {
      * Registers the loop iteration variable into the frontend variable context
      * so nodes inside the loop body can select it from their variable dropdowns.
      */
-    updateLoopVariable(fieldState) {
+    updateLoopVariable(fieldState, modelInfo = {}) {
         const varName = fieldState.loop_variable_name;
         if (!varName) return;
         const existingVars = this.variableContext.variables;
@@ -373,8 +373,10 @@ export class ModelComponent extends Component {
                         id: varId,
                         variable_name: varName,
                         variable_type: 'record',
-                        modelId: null,
-                        modelName: null,
+                        modelId: modelInfo.modelId || null,
+                        modelName: modelInfo.modelName || null,
+                        model_id: modelInfo.modelId || null,
+                        model_name: modelInfo.modelName || null,
                         scopeId: nodeId,
                         usedIn: [],
                         class: this.buttonClass,
@@ -383,6 +385,10 @@ export class ModelComponent extends Component {
             });
         } else {
             alreadyRegistered.variable_name = varName;
+            alreadyRegistered.modelId = modelInfo.modelId || alreadyRegistered.modelId;
+            alreadyRegistered.modelName = modelInfo.modelName || alreadyRegistered.modelName;
+            alreadyRegistered.model_id = modelInfo.modelId || alreadyRegistered.model_id;
+            alreadyRegistered.model_name = modelInfo.modelName || alreadyRegistered.model_name;
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
@@ -415,14 +421,20 @@ export class ModelComponent extends Component {
     }
 
     updateVariable(fieldState) {
-        const { model_id, search_variable } = fieldState;
+        const { search_variable } = fieldState;
         const variable = this.variableContext.variables.find(item => item.id === search_variable.id);
         if (variable) {
-            variable.modelId = model_id;
+            variable.modelId = search_variable.modelId;
+            variable.modelName = search_variable.modelName;
+            variable.model_id = search_variable.model_id || search_variable.modelId;
+            variable.model_name = search_variable.model_name || search_variable.modelName;
             variable.variable_type = search_variable.variable_type;
             variable.variable_name = search_variable.variable_name;
         } else {
-            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass })] })
+            const reactiveVar = owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass });
+            reactiveVar.model_id = reactiveVar.model_id || reactiveVar.modelId;
+            reactiveVar.model_name = reactiveVar.model_name || reactiveVar.modelName;
+            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], reactiveVar] })
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }

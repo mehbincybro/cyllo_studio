@@ -111,15 +111,28 @@ class StudioReportController(Controller):
                         else:
                             data_node = data_nodes[0]
 
-                        existing_exprs = {el.get('expr') for el in root.xpath('//*[@expr]')}
                         for new_el in arch_el:
                             expr = new_el.get('expr')
-                            if expr in existing_exprs:
-                                for old_el in root.xpath(f'//*[@expr="{expr}"]'):
-                                    parent = old_el.getparent()
-                                    if parent is not None:
-                                        parent.remove(old_el)
-                        data_node.insert(0, new_el)
+                            position = new_el.get('position')
+
+                            # Purge logic:
+                            for old_el in list(root.xpath('//*[@expr]')):
+                                old_expr = old_el.get('expr', '')
+                                
+                                # 1. If we are REPLACING this exact node, remove the old replacement.
+                                if position == 'replace' and old_expr == expr:
+                                    p = old_el.getparent()
+                                    if p is not None:
+                                        p.remove(old_el)
+                                
+                                # 2. If we are modifying/replacing this node, any existing XPaths 
+                                # that target its children are now stale/invalid.
+                                elif old_expr.startswith(expr + '/'):
+                                    p = old_el.getparent()
+                                    if p is not None:
+                                        p.remove(old_el)
+                            
+                            data_node.append(new_el)
                     except Exception as e:
                         print(f"[Cyllo Studio] Error merging into existing view: {e}")
                         # Fallback: just overwrite if merging fails
@@ -143,7 +156,6 @@ class StudioReportController(Controller):
                         'arch_base': clean_arch,
                         'model': base_view.model,  # Model is required for inheritance to work
                     })
-
             return {'success': True}
 
         except Exception as e:

@@ -17,7 +17,7 @@
  * - Layout, CogMenu, SearchBar components.
  * - Odoo services: rpc, orm, action.
  */
-import { registry} from '@web/core/registry';
+import { registry } from '@web/core/registry';
 import { Layout } from "@web/search/layout";
 import { useModel } from "@web/model/model";
 import { SearchBar } from "@web/search/search_bar/search_bar";
