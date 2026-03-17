@@ -1,0 +1,13 @@
+<odoo>
+
+    <record id="action_mps_schedule" model="ir.actions.client">
+            <field name="name">MPS</field>
+            <field name="tag">cyllo_manufacturing_mps.mps</field>
+        </record>
+
+    <menuitem id="menu_mps_schedule"
+          name="My MPS Tool"
+          parent="mrp.mrp_planning_menu_root"
+          action="action_mps_schedule"
+          sequence="200"/>
+</odoo>
