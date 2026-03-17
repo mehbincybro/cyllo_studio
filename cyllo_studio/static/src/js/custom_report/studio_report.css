@@ -1117,3 +1117,229 @@ select>option {
     font-size: 13px;
     font-style: italic;
 }
+
+/* ── Table Toolbar ─────────────────────────────────── */
+.table-toolbar {
+    position: absolute;
+    background: #2b2f2c !important;
+    border: 1px solid #3e4440 !important;
+    border-radius: 8px !important;
+    padding: 4px !important;
+    display: flex !important;
+    gap: 4px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+
+    /* ── Table Wrapper & Handle ───────────────────────── */
+    .table-wrapper {
+        position: relative !important;
+        padding-top: 15px !important;
+        margin-bottom: 20px !important;
+        border: 1px dashed transparent !important;
+        transition: all 0.2s !important;
+    }
+
+    .table-wrapper:hover {
+        border-color: #9ab83a !important;
+    }
+
+    .table-wrapper.selected {
+        border: 1px solid #9ab83a !important;
+        background: rgba(154, 184, 58, 0.02) !important;
+    }
+
+    .table-handle-container {
+        position: absolute !important;
+        top: -10px;
+        left: -10px;
+        display: flex;
+        flex-direction: column;
+        z-index: 1000;
+        background: #9ab83a;
+        border-radius: 4px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        border: 1px solid white;
+    }
+
+    .table-handle {
+        width: 22px;
+        height: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: grab;
+        font-size: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-delete {
+        width: 22px;
+        height: 22px;
+        background: #e35d6a;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        transition: background 0.2s;
+    }
+
+    .table-delete:hover {
+        background: #c62828 !important;
+    }
+
+    .table-handle:hover {
+        background: #8aa334;
+    }
+
+    /* ── Field Block (Atomic Unit) ─────────────────────── */
+    .field-block {
+        position: relative !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        padding: 2px 6px !important;
+        border: 1px dashed #ccc !important;
+        background: #fdfdfd !important;
+        border-radius: 4px !important;
+        transition: all 0.2s !important;
+        cursor: grab !important;
+        vertical-align: middle;
+    }
+
+    .field-block:hover {
+        border-color: #9ab83a !important;
+        background: #f7f9f0 !important;
+    }
+
+    .field-block.selected {
+        border: 1px solid #9ab83a !important;
+        background: #f0f4e4 !important;
+        box-shadow: 0 0 5px rgba(154, 184, 58, 0.2) !important;
+    }
+
+    .field-handle {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 20px;
+        height: 20px;
+        background: #9ab83a;
+        color: white;
+        border-radius: 3px;
+        font-size: 10px;
+        cursor: grab;
+        margin-right: 4px;
+    }
+
+    .field-delete {
+        color: #ccc;
+        font-size: 10px;
+        cursor: pointer;
+        margin-left: 4px;
+    }
+
+    .field-delete:hover {
+        color: #e35d6a;
+    }
+
+    /* ── Text Nodes ────────────────────────────────────── */
+    .text-node {
+        position: absolute !important;
+        min-width: 120px !important;
+        min-height: 40px !important;
+        padding: 12px 18px !important;
+        background: white !important;
+        border: 1.5px dashed #9ab83a !important;
+        border-radius: 6px !important;
+        cursor: default !important;
+        z-index: 1000 !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        transition: box-shadow 0.3s !important;
+    }
+
+    .text-node.selected {
+        border-style: solid !important;
+        box-shadow: 0 6px 16px rgba(154, 184, 58, 0.25) !important;
+    }
+
+    .text-handle {
+        position: absolute !important;
+        top: -12px;
+        left: -12px;
+        width: 24px;
+        height: 24px;
+        background: #9ab83a;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        cursor: grab;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+
+    .text-delete {
+        position: absolute !important;
+        top: -12px;
+        right: -12px;
+        width: 24px;
+        height: 24px;
+        background: #f44336;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .text-node:hover .text-delete {
+        opacity: 1;
+    }
+
+    .resize-handle {
+        position: absolute !important;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+    }
+
+    .resize-handle {
+        position: absolute !important;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        background: #9ab83a;
+        cursor: nwse-resize;
+        border-radius: 50% 0 0 0;
+    }
+
+    .text-node .text-handle {
+        display: none;
+        position: absolute !important;
+        top: -12px;
+        left: -12px;
+    }
+
+    .text-node:hover .text-handle,
+    .text-node.selected .text-handle {
+        display: flex !important;
+    }
+
+    .text-node .text-handle::after {
+        content: "⠿";
+        color: white;
+        font-size: 10px;
+    }

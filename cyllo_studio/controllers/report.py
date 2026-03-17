@@ -162,7 +162,7 @@ class StudioReportController(Controller):
             return {'success': False, 'error': str(e)}
 
     @route('/cyllo_studio/get_arch', auth='user', csrf=False, type='json')
-    def get_arch(self, template):
+    def get_arch(self, template, show_placeholders=True):
         """
         Re-fetch the rendered report arch for a given template name.
         Called by the frontend when arch is lost after a browser page refresh
@@ -172,7 +172,7 @@ class StudioReportController(Controller):
             view = request.env.ref(template)
             if not view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
-            arch = view.get_iframe_rendered_template(template)
+            arch = view.get_iframe_rendered_template(template, show_placeholders=show_placeholders)
             return {'success': True, 'arch': arch}
         except Exception as e:
             return {'success': False, 'error': str(e)}

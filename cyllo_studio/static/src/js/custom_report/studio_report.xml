@@ -5,7 +5,11 @@
             <!-- Header -->
             <div class="w-100 bg-white border-bottom px-4 py-2 d-flex align-items-center shadow-sm">
                 <button class="btn btn-primary px-4 me-2"
-                        t-on-click="() => save_changes(this)">Save</button>
+                        t-att-disabled="state.isSaving"
+                        t-on-click="() => save_changes(this)">
+                    <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
+                    Save
+                </button>
                 <button class="btn btn-light border px-4"
                         t-on-click="() => close_edit(this)">Discard</button>
                 <div class="ms-4 form-check form-switch pt-1">
