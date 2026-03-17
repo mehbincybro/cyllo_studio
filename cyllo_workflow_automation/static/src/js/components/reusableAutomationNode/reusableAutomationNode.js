@@ -18,7 +18,11 @@ export class ReusableAutomationNode extends ConfigurationBase {
     }
 
     async loadAutomations() {
-        const domain = [['active', '=', true]];
+        const domain = [
+            ['active', '=', true],
+            ['is_reusable', '=', true],
+            ['trigger_function_ids', '!=', false],
+        ];
         if (this.props.primary_model_id) {
             domain.push(['model_id', '=', this.props.primary_model_id]);
         }

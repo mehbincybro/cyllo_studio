@@ -18,8 +18,8 @@
                                 <!-- Box 2 -->
                                 <div class="d-flex" style="">
                                     <div class="kanban-flow-box1">
-                                        <t t-if="WorkflowCard.function_id">
-                                            <t t-esc="WorkflowCard.function_id[1]"/> <!-- Dynamic text for Box 1 -->
+                                        <t t-if="WorkflowCard &amp;&amp; WorkflowCard.triggerNames &amp;&amp; WorkflowCard.triggerNames.length">
+                                            <t t-esc="WorkflowCard.triggerNames.join(', ')"/>
                                         </t>
                                         <t t-else="">
                                             <t t-esc="'Trigger Block'"/>

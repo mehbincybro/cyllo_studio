@@ -171,6 +171,9 @@ export class WorkFlowAuto extends Component {
             canRedo: false,
         })
 
+        this.branchInputMap = {};
+        this.connectionBranchMap = {};
+        this.branchDefaultPrefix = "branch";
         this.history = new HistoryManager(100);
         this.isRestoring = false;
 
@@ -301,13 +304,13 @@ export class WorkFlowAuto extends Component {
                 };
             };
 
-            const renderFunc = (obj, ref) => {
-                const { component, props, options } = obj;
-                this.state.nodeDetails.push({ ...obj, ref });
-                this.data = { ...obj, ref };
-            };
-            const owlC = { version: 3, h: preRender, render: renderFunc };
-            this.editor = new Drawflow(this.drawBoard.el, owlC);
+        const renderFunc = (obj, ref) => {
+            const { component, props, options } = obj;
+            this.state.nodeDetails.push({ ...obj, ref });
+            this.data = { ...obj, ref };
+        };
+        const owlC = { version: 3, h: preRender, render: renderFunc };
+        this.editor = new Drawflow(this.drawBoard.el, owlC);
 
             this.editor.contextmenu = (e) => {
                 if (
@@ -343,6 +346,7 @@ export class WorkFlowAuto extends Component {
                     this.registerNodes();
                     this.editor.start();
                     this.manageData();
+                    this.rebuildBranchConnections();
 
                     // Critical: Initialize history with the loaded state directly from the database
                     // to ensure S0 (initial state) is never empty or corrupted.
@@ -355,6 +359,7 @@ export class WorkFlowAuto extends Component {
                     this.history.init(initialState);
                 } else {
                     this.editor.start();
+                    this.rebuildBranchConnections();
                     this.history.init(this.getHistorySnapshot());
                 }
                 this.updateHistoryState();
@@ -377,6 +382,7 @@ export class WorkFlowAuto extends Component {
                     await this.orm.unlink("node.struct", [node.data.nodeId]);
                 }
                 await this.autoSaveDrawFlow();
+                this.rebuildBranchConnections();
             });
 
             this.editor.on('nodeCreated', async (id) => {
@@ -510,15 +516,133 @@ export class WorkFlowAuto extends Component {
 
     get trigger_blk() {
         const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
-        const actionNode = Object.values(flowData).find(node => node.data?.type === "action");
         const modelNode = Object.values(flowData).find(node => node.data?.type === "model");
-        return !!modelNode && !actionNode;
+        return !!modelNode;
     }
 
     get other_blk() {
         const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
         const actionNode = Object.values(flowData).find(node => node.data?.type === "action");
         return !!actionNode;
+    }
+
+    getNodeBranchId(node) {
+        if (!node || !node.data) return null;
+        if (node.data.branchId) {
+            return node.data.branchId;
+        }
+        const branchIds = node.data.branchIds || [];
+        if (branchIds.length) {
+            return branchIds[0];
+        }
+        return `${this.branchDefaultPrefix}-${node.data.nodeId}`;
+    }
+
+    assignNodeBranch(node, branchId) {
+        if (!node || !branchId) return;
+        const branchIds = node.data.branchIds || [];
+        if (!branchIds.includes(branchId)) {
+            branchIds.push(branchId);
+        }
+        node.data.branchIds = branchIds;
+        node.data.branchId = branchId;
+    }
+
+    removeNodeBranch(node, branchId) {
+        if (!node || !branchId || !node.data.branchIds) return;
+        const filtered = node.data.branchIds.filter(id => id !== branchId);
+        if (filtered.length) {
+            node.data.branchIds = filtered;
+            node.data.branchId = filtered[0];
+        } else {
+            delete node.data.branchIds;
+            delete node.data.branchId;
+        }
+    }
+
+    recordBranchConnection(branchId, inputId) {
+        const key = Number(inputId);
+        if (!this.branchInputMap[key]) {
+            this.branchInputMap[key] = new Set();
+        }
+        this.branchInputMap[key].add(branchId);
+        this.connectionBranchMap[`${branchId}-${key}`] = true;
+    }
+
+    removeBranchConnection(branchId, inputId) {
+        const key = Number(inputId);
+        const set = this.branchInputMap[key];
+        if (set) {
+            set.delete(branchId);
+            if (!set.size) {
+                delete this.branchInputMap[key];
+            }
+        }
+        delete this.connectionBranchMap[`${branchId}-${key}`];
+    }
+
+    rebuildBranchConnections() {
+        this.branchInputMap = {};
+        this.connectionBranchMap = {};
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        Object.values(flowData).forEach(node => {
+            const outputs = node.outputs || {};
+            Object.values(outputs).forEach(output => {
+                const connections = output.connections || [];
+                connections.forEach(connection => {
+                    const inputNode = Object.values(flowData).find(item => item.id === connection.node);
+                    if (!inputNode) return;
+                    const branchId = this.getNodeBranchId(node);
+                    this.assignNodeBranch(node, branchId);
+                    this.assignNodeBranch(inputNode, branchId);
+                    this.recordBranchConnection(branchId, connection.node);
+                });
+            });
+        });
+    }
+
+    get usedTriggerFunctionIds() {
+        const data = this.editorValue?.[0]?.flow_data?.drawflow?.Home?.data || {};
+        const ids = [];
+        Object.values(data).forEach(node => {
+            const modelInfo = node.data?.model;
+            if (node.data?.type === 'action' && Array.isArray(modelInfo) && modelInfo[0]) {
+                ids.push(modelInfo[0]);
+            }
+        });
+        return [...new Set(ids)];
+    }
+
+    get usedTriggerTypes() {
+        const data = this.editorValue?.[0]?.flow_data?.drawflow?.Home?.data || {};
+        const types = [];
+        Object.values(data).forEach(node => {
+            const triggerType = node.data?.trigger_type;
+            if (node.data?.type === 'action' && triggerType) {
+                types.push(triggerType);
+            }
+        });
+        return [...new Set(types)];
+    }
+
+    get usedTriggerNames() {
+        const ids = this.usedTriggerFunctionIds;
+        if (!ids.length) {
+            return [];
+        }
+        return this.state.actions
+            .filter(action => ids.includes(action.id))
+            .map(action => action.name);
+    }
+
+    isTriggerUsed(action) {
+        if (this.usedTriggerFunctionIds.includes(action.id)) {
+            return true;
+        }
+        if (action.trigger_type && this.usedTriggerTypes.includes(action.trigger_type)) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -570,21 +694,18 @@ export class WorkFlowAuto extends Component {
         }
 
         const dialogConfigs = {
-            'model': {
-                body: _t("While deleting this node, All the nodes will be Removed"),
-                onConfirm: async () => {
-                    await this.resetStatesWhenClear();
-                }
-            },
-            'action': {
-                body: _t("Do you want to delete the node. The variables with in this scope is also deleted."),
-                onConfirm: async () => {
-                    this.editor.removeNodeId(`node-${node.id}`);
-                    this.state.trigger_blk = true;
-                    this.state.other_blk = false;
-                    this.state.trigger = ""
-                }
-            },
+                'model': {
+                    body: _t("While deleting this node, All the nodes will be Removed"),
+                    onConfirm: async () => {
+                        await this.resetStatesWhenClear();
+                    }
+                },
+                'action': {
+                    body: _t("Do you want to delete the node. The variables with in this scope is also deleted."),
+                    onConfirm: async () => {
+                        this.editor.removeNodeId(`node-${node.id}`);
+                    }
+                },
             'default': {
                 body: _t("Do you want to delete the node. The variables with in this scope is also deleted."),
                 onConfirm: async () => {
@@ -622,11 +743,12 @@ export class WorkFlowAuto extends Component {
         if ((outPutNode.data.type === "model" && inPutNode.data.type !== "action") || (inPutNode.data.type === "action" && outPutNode.data.type !== "model")) {
             return false
         }
-        const hasOutputConnection = outputClass === "output_1" ?
-            (outPutNode.outputs?.output_1?.connections.length > 0) : outputClass === "output_2" ? (outPutNode.outputs?.output_2?.connections.length > 0) : (outPutNode.outputs?.output_3?.connections.length > 0)
-        const hasInputConnection =
-            (inPutNode.inputs?.input_1?.connections.length > 0)
-        return !hasOutputConnection && !hasInputConnection;
+        const branchId = this.getNodeBranchId(outPutNode);
+        const currentBranches = this.branchInputMap[inputId] || new Set();
+        if (currentBranches.has(branchId)) {
+            return false;
+        }
+        return true;
     }
 
     selectTab(value) {
@@ -654,7 +776,8 @@ export class WorkFlowAuto extends Component {
                 child2: null,
                 isParent,
                 isLoop,
-                code: ""
+                code: "",
+                type: createdNode.data.type
             }]
         })
     }
@@ -670,7 +793,20 @@ export class WorkFlowAuto extends Component {
         const currentContext = this.env.context.context
         const context_input_node = currentContext.nodes.find(node => node.nodeId === inputNode.data.nodeId)
         const context_output_node = currentContext.nodes.find(node => node.nodeId === outputNode.data.nodeId)
-        context_input_node.left = creation ? context_output_node : null
+        const isModelOutput = outputNode.data.type === "model";
+        const branchId = isModelOutput
+            ? `${this.branchDefaultPrefix}-${outputNode.data.nodeId}-${inputNode.data.nodeId}`
+            : this.getNodeBranchId(outputNode);
+        this.assignNodeBranch(outputNode, branchId);
+        this.assignNodeBranch(inputNode, branchId);
+        if (creation) {
+            context_input_node.left = context_output_node;
+            this.recordBranchConnection(branchId, inputNode.id);
+        } else {
+            context_input_node.left = null;
+            this.removeBranchConnection(branchId, inputNode.id);
+            this.removeNodeBranch(inputNode, branchId);
+        }
         if (context_output_node.isParent) {
             const conditionNode = nodes.find(item => item.data.nodeId === context_output_node.nodeId);
             const child1 = conditionNode.outputs.output_1;
@@ -694,7 +830,9 @@ export class WorkFlowAuto extends Component {
                 const ctxNode = currentContext.nodes.find(item => item.nodeId == childNode.data?.nodeId);
                 context_output_node.right = creation ? ctxNode : null
             }
-        } else context_output_node.right = creation ? context_input_node : null
+        } else if (!isModelOutput) {
+            context_output_node.right = creation ? context_input_node : null
+        }
     }
 
     registerNodes() {
@@ -858,6 +996,8 @@ export class WorkFlowAuto extends Component {
                 selectedNodeID: undefined,
             });
         });
+        this.branchInputMap = {};
+        this.connectionBranchMap = {};
     }
 
     changeModule(module) {
@@ -865,23 +1005,43 @@ export class WorkFlowAuto extends Component {
     }
 
     extractBackendInfo() {
-        const { data: mainData } = this.editor.drawflow.drawflow.Home
-        const model_data = Object.values(mainData).find(({ data }) => data?.type === "model")
-        const action_data = Object.values(mainData).find(({ data }) => data?.type === "action")
-        let backendData = { code: this.state.code, variables: this.state.variables }
+        const { data: mainData } = this.editor.drawflow.drawflow.Home;
+        const model_data = Object.values(mainData).find(({ data }) => data?.type === "model");
+        const trigger_nodes = Object.values(mainData).filter(({ data }) => data?.type === "action");
+        const triggerFunctionIds = [];
+        const seenTriggerTypes = new Set();
+        trigger_nodes.forEach(({ data }) => {
+            const modelInfo = data?.model;
+            const triggerType = data?.trigger_type;
+            if (triggerType && seenTriggerTypes.has(triggerType)) {
+                return;
+            }
+            if (Array.isArray(modelInfo) && modelInfo[0]) {
+                triggerFunctionIds.push(modelInfo[0]);
+                if (triggerType) {
+                    seenTriggerTypes.add(triggerType);
+                }
+            }
+        });
+        const uniqueTriggerIds = [...new Set(triggerFunctionIds)];
+        let backendData = { code: this.state.code, variables: this.state.variables };
         if (model_data) {
             backendData = {
                 ...backendData,
                 model_id: model_data.data.model[0]
-            }
+            };
         }
-        if (action_data) {
+        if (uniqueTriggerIds.length) {
             backendData = {
                 ...backendData,
-                function_id: action_data.data.model[0]
-            }
+                function_id: uniqueTriggerIds[0]
+            };
         }
-        return backendData
+        backendData = {
+            ...backendData,
+            trigger_function_ids: uniqueTriggerIds,
+        };
+        return backendData;
     }
 
     getHistorySnapshot() {
@@ -1112,6 +1272,18 @@ export class WorkFlowAuto extends Component {
             return { isValid: false, nodeIds, error: errorMessage };
         }
 
+        const duplicateTriggerType = this.findDuplicateTriggerType(data);
+        if (duplicateTriggerType) {
+            const duplicateAction = this.state.actions.find(
+                (action) => action.trigger_type === duplicateTriggerType
+            );
+            const label = duplicateAction?.name || duplicateTriggerType;
+            return {
+                isValid: false,
+                error: _t("Trigger %s already exists in this workflow.", label),
+            };
+        }
+
         return { isValid: true, error: "" };
     }
 
@@ -1203,15 +1375,10 @@ export class WorkFlowAuto extends Component {
     }
 
     updateCode() {
-        let node = structuredClone(this.env.context.context?.nodes)[0];
+        const contextNodes = structuredClone(this.env.context.context?.nodes || []);
         const variables = this.env.variables.context.variables;
         const globalVariables = this.env.globalVariables.context.variables;
-        while (node?.left) {
-            node = node.left
-        }
         let codeLines = [];
-        let indentationLevel = "";
-        let parentArray = [];
         for (const variable of globalVariables) {
             if (variable.variable_name === 'current_record') {
                 codeLines.push(`${variable.variable_name} = records if 'records' in globals() else env['${this.state.model_name}'].browse()`);
@@ -1219,17 +1386,55 @@ export class WorkFlowAuto extends Component {
                 codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
             }
         }
+        const flowRoots = this.getFlowRoots(contextNodes);
+        if (flowRoots.length) {
+            codeLines.push("");
+            flowRoots.forEach((root, index) => {
+                const flowLines = this.buildFlowLines(root, variables);
+                if (!flowLines.length) {
+                    return;
+                }
+                codeLines.push(...flowLines);
+                if (index < flowRoots.length - 1) {
+                    codeLines.push("");
+                }
+            });
+        }
+        const combinedCode = codeLines.join('\n');
+        const imports = this.importStateMent;
+        this.state.code = imports + "\n" + combinedCode;
+    }
+
+    getFlowRoots(nodes) {
+        const actionRoots = nodes.filter(
+            (node) => node?.type === 'action' && (!node.left || node.left?.type === 'model')
+        );
+        if (actionRoots.length) {
+            return actionRoots;
+        }
+        const fallback = nodes.find((node) => !node.left);
+        return fallback ? [fallback] : [];
+    }
+
+    buildFlowLines(startNode, variables) {
+        if (!startNode) {
+            return [];
+        }
+        let node = startNode;
+        let indentationLevel = "";
+        const parentArray = [];
+        const lines = [];
         while (node) {
             const variablesInScope = variables.filter(item => item.scopeId === node.nodeId);
 
             for (const item of variablesInScope) {
                 if (!item.code) continue;
-                codeLines.push(`${indentationLevel}${item.code}`);
+                lines.push(`${indentationLevel}${item.code}`);
             }
             if (node.code) {
-                const lines = node.code.split('\n');
-                for (const line of lines) {
-                    codeLines.push(`${indentationLevel}${line}`);
+                const splitLines = node.code.split('\n');
+                for (const line of splitLines) {
+                    lines.push(`${indentationLevel}${line}`);
                 }
             }
 
@@ -1247,7 +1452,6 @@ export class WorkFlowAuto extends Component {
                     indentationLevel = indentationLevel.slice(0, -4);
                     node = pNode?.right;
                 } else if (pNode.isLoop) {
-                    // Loop ended: no else block. De-indent and move on.
                     indentationLevel = indentationLevel.slice(0, -4);
                     node = pNode?.right;
                 } else {
@@ -1256,14 +1460,11 @@ export class WorkFlowAuto extends Component {
                     parentArray.push(pNode);
                     indentationLevel = indentationLevel.slice(0, -4);
                     if (pNode.else_setup_code) {
-                        // Cron-mode condition: emit the complement recordset search and open
-                        // a new independent `if` block so both branches always execute.
-                        codeLines.push(`${indentationLevel}${pNode.else_setup_code}`);
+                        lines.push(`${indentationLevel}${pNode.else_setup_code}`);
                         const complementVar = pNode.else_setup_code.split('=')[0].trim();
-                        codeLines.push(`${indentationLevel}if ${complementVar}:`);
+                        lines.push(`${indentationLevel}if ${complementVar}:`);
                     } else {
-                        // Standard condition: only one branch executes.
-                        codeLines.push(`${indentationLevel}else:`);
+                        lines.push(`${indentationLevel}else:`);
                     }
                     indentationLevel += "    ";
                 }
@@ -1272,9 +1473,18 @@ export class WorkFlowAuto extends Component {
             }
             node = node.right;
         }
-        const combinedCode = codeLines.join('\n');
-        const imports = this.importStateMent;
-        this.state.code = imports + "\n" + combinedCode;
+        return lines;
+    }
+
+    findDuplicateTriggerType(flowData) {
+        const typeCounts = {};
+        Object.values(flowData).forEach(node => {
+            const triggerType = node.data?.trigger_type;
+            if (node.data?.type === 'action' && triggerType) {
+                typeCounts[triggerType] = (typeCounts[triggerType] || 0) + 1;
+            }
+        });
+        return Object.keys(typeCounts).find(type => typeCounts[type] > 1);
     }
 
     showCode() {
@@ -1297,6 +1507,24 @@ export class WorkFlowAuto extends Component {
             event.dataTransfer.setData("type", event.target.getAttribute('data-type'));
             event.dataTransfer.setData("trigger_type", event.target.getAttribute('data-trigger_type'));
         }
+    }
+
+    dragStartTrigger(ev, action) {
+        if (this.isTriggerUsed(action)) {
+            ev.preventDefault();
+            this.showDuplicateTriggerMessage(action);
+            return;
+        }
+        this.dragStart(ev, action.name);
+    }
+
+    showDuplicateTriggerMessage(action) {
+        this.notification.add({
+            title: "Trigger already added",
+            message: `${action.name} is already part of this automation. Each trigger may appear only once.`,
+            type: "notification_panel",
+            notificationType: "warning",
+        });
     }
 
     allowDrop(ev) {
