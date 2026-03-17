@@ -31,7 +31,15 @@ class PosOrder(models.Model):
                                                ("waiting", "Cooking"),
                                                ("ready", "Ready"),
                                                ("cancel", "Cancel")],
+                                    default="draft",
                                     help='To know the status of order')
+    kitchen_stage_id = fields.Many2one(
+        "kitchen.screen.stage",
+        string="Kitchen Stage",
+        index=True,
+        ondelete="set null",
+        help="Current stage of this order on the kitchen screen (dynamic stages).",
+    )
     order_ref = fields.Char(string="Order Reference",
                             help='Reference of the order')
     is_cooking = fields.Boolean(string="Is Cooking",
@@ -51,9 +59,10 @@ class PosOrder(models.Model):
                                      "notification",
                                      message)
         for order in self:
-            if order.order_status == "waiting" and vals.get(
-                    "order_status") != "ready":
-                vals["order_status"] = order.order_status
+            # Keep legacy behavior unless explicitly overridden by the kitchen UI.
+            if not self.env.context.get("kitchen_force_status"):
+                if order.order_status == "waiting" and vals.get("order_status") != "ready":
+                    vals["order_status"] = order.order_status
             if vals.get("state") and vals[
                 "state"] == "paid" and order.name == "/":
                 vals["name"] = self._compute_order_name()
@@ -106,17 +115,57 @@ class PosOrder(models.Model):
                 orders.lines = dic[0]['lines']
         kitchen_screen = self.env["kitchen.screen"].sudo().search(
             [("pos_config_id", "=", shop_id)])
-        pos_orders = self.env["pos.order.line"].search(
-            ["&", ("is_cooking", "=", True),
-             ("product_id.pos_categ_ids", "in",
-              [rec.id for rec in kitchen_screen.pos_categ_ids])])
-        pos = self.env["pos.order"].search(
-            [("lines", "in", [rec.id for rec in pos_orders])],
-            order="date_order")
-        pos_lines = pos.lines.search(
-            [("product_id.pos_categ_ids", "in",
-              [rec.id for rec in kitchen_screen.pos_categ_ids])])
-        values = {"orders": pos.read(), "order_lines": pos_lines.read()}
+        if kitchen_screen.pos_categ_ids:
+            pos_orders = self.env["pos.order.line"].search(
+                [("is_cooking", "=", True),
+                 ("product_id.pos_categ_ids", "in",
+                  kitchen_screen.pos_categ_ids.ids)])
+            pos = self.env["pos.order"].search(
+                [("lines", "in", pos_orders.ids)],
+                order="date_order")
+            pos_lines = pos.lines.search(
+                [("product_id.pos_categ_ids", "in",
+                  kitchen_screen.pos_categ_ids.ids)])
+        else:
+            pos_orders = self.env["pos.order.line"].search(
+                [("is_cooking", "=", True),
+                 ("order_id.config_id", "=", shop_id)])
+            pos = self.env["pos.order"].search(
+                [("id", "in", pos_orders.mapped('order_id').ids)],
+                order="date_order")
+            pos_lines = pos.lines
+            
+        # Ensure 'All' stage exists for existing kitchen screens
+        all_stage = kitchen_screen.stage_ids.filtered(lambda s: s.name == 'All' and not s.is_done and not s.is_cancelled)
+        
+        if kitchen_screen and not all_stage:
+            self.env['kitchen.screen.stage'].sudo().create({
+                'name': 'All',
+                'is_done': False,
+                'is_cancelled': False,
+                'sequence': 1,
+                'kitchen_screen_id': kitchen_screen.id
+            })
+            # Refresh stage recordset
+            kitchen_screen.invalidate_recordset(['stage_ids'])
+
+        # Backfill dynamic kitchen stage for existing kitchen orders (legacy installs).
+        default_stage = (
+            kitchen_screen.stage_ids.filtered(lambda s: s.name != "All" and not s.is_done and not s.is_cancelled)
+            .sorted(lambda s: (s.sequence, s.id))[:1]
+        )
+        if default_stage:
+            legacy_orders = pos.filtered(lambda o: o.is_cooking and not o.kitchen_stage_id)
+            if legacy_orders:
+                legacy_orders.with_context(kitchen_force_status=True).write(
+                    {"kitchen_stage_id": default_stage.id, "order_status": "waiting"}
+                )
+
+        values = {
+            "orders": pos.read(),
+            "order_lines": pos_lines.read(),
+            "stages": kitchen_screen.stage_ids.read()
+        }
         return values
 
     def action_pos_order_paid(self):
@@ -133,6 +182,22 @@ class PosOrder(models.Model):
                 line.is_cooking = True
             self.is_cooking = True
             self.order_ref = self.name
+            # Put the order into the first active kitchen stage by default.
+            # (Ignore 'All' + Completed + Cancelled stages.)
+            default_stage = (
+                kitchen_screen.stage_ids.filtered(
+                    lambda s: s.name != "All" and not s.is_done and not s.is_cancelled
+                )
+                .sorted(lambda s: (s.sequence, s.id))[:1]
+            )
+            if default_stage:
+                self.with_context(kitchen_force_status=True).write(
+                    {
+                        "kitchen_stage_id": default_stage.id,
+                        # Keep legacy status usable for UI coloring/line interaction.
+                        "order_status": "waiting",
+                    }
+                )
         return res
 
     @api.onchange("order_status")
@@ -160,15 +225,72 @@ class PosOrder(models.Model):
         kitchen_screen = self.env["kitchen.screen"].search(
             [("pos_config_id", "=", self.config_id.id)])
         stage = []
-        for line in self.lines:
-            for categ in line.product_id.pos_categ_ids:
-                if categ.id in [rec.id for rec in
-                                kitchen_screen.pos_categ_ids]:
-                    stage.append(line.order_status)
+        if kitchen_screen.pos_categ_ids:
+            for line in self.lines:
+                for categ in line.product_id.pos_categ_ids:
+                    if categ.id in kitchen_screen.pos_categ_ids.ids:
+                        stage.append(line.order_status)
+        else:
+            stage = self.lines.mapped('order_status')
+
         if "waiting" in stage or "draft" in stage:
             self.order_status = "ready"
         else:
             self.order_status = "ready"
+
+    def set_kitchen_order_status(self, status):
+        """Force-set order + lines status from the kitchen UI (supports drag back)."""
+        allowed = {"draft", "waiting", "ready", "cancel"}
+        if status not in allowed:
+            return False
+        for order in self.with_context(kitchen_force_status=True):
+            order.order_status = status
+            # Keep order lines aligned with the order stage for clear workflow tracking.
+            if status == "ready":
+                order.lines.with_context(kitchen_force_status=True).write({"order_status": "ready"})
+            else:
+                order.lines.with_context(kitchen_force_status=True).write({"order_status": status})
+        return True
+
+    def set_kitchen_stage(self, stage_id):
+        """Set dynamic kitchen stage for orders from the kitchen UI."""
+        stage = self.env["kitchen.screen.stage"].sudo().browse(int(stage_id)) if stage_id else False
+        res = {}
+        for order in self:
+            # Validate stage is part of the kitchen screen for this POS config.
+            if stage:
+                kitchen_screen = self.env["kitchen.screen"].sudo().search(
+                    [("pos_config_id", "=", order.config_id.id)], limit=1
+                )
+                if not kitchen_screen or stage.kitchen_screen_id.id != kitchen_screen.id:
+                    continue
+
+            # Keep legacy status meaningful:
+            # active stages => waiting, done => ready, cancelled => cancel.
+            if stage and stage.is_done:
+                new_status = "ready"
+            elif stage and stage.is_cancelled:
+                new_status = "cancel"
+            else:
+                new_status = "waiting"
+
+            order.with_context(kitchen_force_status=True).write(
+                {
+                    "kitchen_stage_id": stage.id if stage else False,
+                    "order_status": new_status,
+                }
+            )
+            # Keep order lines aligned for clarity.
+            if new_status in ("ready", "cancel", "waiting"):
+                order.lines.with_context(kitchen_force_status=True).write({"order_status": new_status})
+
+            res[order.id] = {
+                "order_status": order.order_status,
+                "kitchen_stage_id": [order.kitchen_stage_id.id, order.kitchen_stage_id.name]
+                if order.kitchen_stage_id
+                else False,
+            }
+        return res
 
     def check_order(self, order_name):
         """Calling function from js to know status of the order"""
@@ -176,12 +298,12 @@ class PosOrder(models.Model):
             [('pos_reference', '=', str(order_name))])
         kitchen_order = self.env['kitchen.screen'].sudo().search(
             [('pos_config_id', '=', pos_order.config_id.id)])
-        if kitchen_order:
+        if kitchen_order and kitchen_order.pos_categ_ids:
             for category in pos_order.lines.mapped('product_id').mapped(
                     'pos_categ_ids').mapped('id'):
                 if category not in kitchen_order.pos_categ_ids.mapped('id'):
                     return {
-                        'category': pos_order.lines.product_id.pos_categ_ids.browse(
+                        'category': self.env['pos.category'].browse(
                             category).name}
         if kitchen_order and pos_order:
             if pos_order.order_status != 'ready':
@@ -191,16 +313,25 @@ class PosOrder(models.Model):
         else:
             return False
 
+    def remove_from_kitchen(self):
+        """Method to remove order from kitchen screen"""
+        for order in self:
+            order.is_cooking = False
+            order.kitchen_stage_id = False
+            for line in order.lines:
+                line.is_cooking = False
+
     def check_order_status(self, order_name):
         """To check order status"""
         pos_order = self.env['pos.order'].sudo().search(
             [('pos_reference', '=', str(order_name))])
         kitchen_order = self.env['kitchen.screen'].sudo().search(
             [('pos_config_id', '=', pos_order.config_id.id)])
-        for category in pos_order.lines.mapped('product_id').mapped(
-                'pos_categ_ids').mapped('id'):
-            if category not in kitchen_order.pos_categ_ids.mapped('id'):
-                return 'no category'
+        if kitchen_order and kitchen_order.pos_categ_ids:
+            for category in pos_order.lines.mapped('product_id').mapped(
+                    'pos_categ_ids').mapped('id'):
+                if category not in kitchen_order.pos_categ_ids.mapped('id'):
+                    return 'no category'
         if kitchen_order:
             if pos_order.order_status == 'ready':
                 return False
