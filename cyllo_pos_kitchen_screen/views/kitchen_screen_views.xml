@@ -47,8 +47,10 @@
                                 <label for="pos_categ_ids"/>
                                 <div>
                                     <div>
+                                        <field name="allowed_pos_categ_ids" invisible="1"/>
                                         <field name="pos_categ_ids"
                                                widget="many2many_tags"
+                                               domain="[('id', 'in', allowed_pos_categ_ids)]"
                                                options="{'no_create': True}"/>
                                     </div>
                                     This will be the Allowed POS category for
@@ -77,6 +79,23 @@
                                     </div>
                                     Click Here to See the kitchen Orders
                                 </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 o_setting_box" id="stage_ids">
+                            <div class="o_setting_right_pane">
+                                <label for="stage_ids" string="Kitchen Stages"/>
+                                <div class="text-muted">
+                                    Define the stages to be displayed on the kitchen screen.
+                                </div>
+                                <field name="stage_ids">
+                                    <list editable="bottom">
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="name"/>
+                                        <field name="is_done"/>
+                                        <field name="is_cancelled"/>
+                                    </list>
+                                </field>
                             </div>
                         </div>
                     </div>

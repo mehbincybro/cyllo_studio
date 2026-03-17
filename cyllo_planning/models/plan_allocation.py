@@ -23,7 +23,7 @@
 import pytz
 from dateutil.relativedelta import relativedelta
 from collections import defaultdict
-from odoo import api, fields, models, _
+from odoo import api, fields, models, _, exceptions
 
 
 class PlanAllocation(models.Model):
@@ -31,7 +31,13 @@ class PlanAllocation(models.Model):
     _name = 'plan.allocation'
     _description = "Planning Allocation"
 
-    name = fields.Char(compute='_compute_name')
+    def init(self):
+        """Override init to ensure the 'name' column exists in the DB if we are making it stored."""
+        self.env.cr.execute("""
+            ALTER TABLE plan_allocation ADD COLUMN IF NOT EXISTS name VARCHAR;
+        """)
+
+    name = fields.Char(compute='_compute_name', store=True)
     start_datetime = fields.Datetime(string="From", required=True)
     end_datetime = fields.Datetime(string="To", required=True)
 
@@ -74,10 +80,23 @@ class PlanAllocation(models.Model):
         help="Used to suppress warnings when dates are auto-filled."
     )
 
-    _sql_constraints = [
-        ('check_period_validation', 'CHECK(end_datetime >= start_datetime)',
-         'End date should be greater than start date'),
-    ]
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to ensure duration is calculated server-side."""
+        for vals in vals_list:
+            if any(key in vals for key in ['start_datetime', 'end_datetime', 'employee_id', 'allocation_type_id']):
+                vals.pop('duration', None)
+                vals.pop('allocation_percentage', None)
+                vals.pop('name', None)
+        return super().create(vals_list)
+
+    def write(self, vals):
+        """Override write to force recomputation of duration and percentage if dates change."""
+        if any(key in vals for key in ['start_datetime', 'end_datetime', 'employee_id', 'allocation_type_id']):
+            vals.pop('duration', None)
+            vals.pop('allocation_percentage', None)
+            vals.pop('name', None)
+        return super().write(vals)
 
 
     @api.depends('allocation_type_id', 'employee_id')
@@ -114,10 +133,13 @@ class PlanAllocation(models.Model):
         start_utc = pytz.UTC.localize(start_datetime)
         end_utc = pytz.UTC.localize(end_datetime)
 
-        duration = calendar.get_work_hours_count(
+        work_intervals = calendar._work_intervals_batch(
             start_utc,
-            end_utc
+            end_utc,
+            resources=self.employee_id.resource_id
         )
+        intervals = work_intervals.get(self.employee_id.resource_id.id, [])
+        duration = sum((stop - start).total_seconds() / 3600 for start, stop, meta in intervals)
 
         return round(duration, 2)
 
@@ -137,13 +159,12 @@ class PlanAllocation(models.Model):
                 allocation.allocation_percentage = 0.0
                 continue
 
-            # Compute total working hours for the allocation day (excl. lunch)
-            day_start = pytz.UTC.localize(
-                allocation.start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
-            )
-            day_end = pytz.UTC.localize(
-                allocation.start_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
-            )
+            # Use employee timezone for day bounds (excl. lunch)
+            tz = pytz.timezone(allocation.employee_id.tz or 'UTC')
+            start_dt = pytz.UTC.localize(allocation.start_datetime).astimezone(tz)
+
+            day_start = tz.localize(start_dt.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=None)).astimezone(pytz.UTC)
+            day_end = tz.localize(start_dt.replace(hour=23, minute=59, second=59, microsecond=0, tzinfo=None)).astimezone(pytz.UTC)
 
             work_intervals = calendar._work_intervals_batch(
                 day_start,
@@ -297,6 +318,23 @@ class PlanAllocation(models.Model):
         ]
 
         return bool(Leave.sudo().search_count(domain))
+
+    @api.constrains('start_datetime', 'end_datetime', 'employee_id')
+    def _check_scheduling_constraints(self):
+        """Enforce scheduling constraints: work hours and leaves."""
+        for record in self:
+            if record.auto_filled:
+                continue
+
+            errors = []
+            if record._check_outside_workhours():
+                errors.append(_("The selected time slot falls outside the employee's working hours."))
+
+            if record._check_on_leave():
+                errors.append(_("The employee is on approved leave during the selected time period."))
+
+            if errors:
+                raise exceptions.ValidationError("\n".join(errors))
 
     # ---------------------------------------------------------
     # AUTO WORKSHIFT
