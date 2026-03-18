@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Repayment — Tree View (standalone)
+    ============================================================ -->
+    <record id="view_cyllo_loan_repayment_tree" model="ir.ui.view">
+        <field name="name">cyllo.loan.repayment.tree</field>
+        <field name="model">cyllo.loan.repayment</field>
+        <field name="arch" type="xml">
+            <tree string="Repayment Installments"
+                  decoration-danger="state == 'overdue'"
+                  decoration-success="state == 'paid'"
+                  decoration-muted="state == 'draft'">
+                <field name="loan_id"/>
+                <field name="sequence" string="#"/>
+                <field name="partner_id"/>
+                <field name="loan_direction" widget="badge"
+                    decoration-info="loan_direction == 'giving'"
+                    decoration-warning="loan_direction == 'taking'"/>
+                <field name="due_date"/>
+                <field name="principal_amount" widget="monetary" sum="Total"/>
+                <field name="interest_amount" widget="monetary" sum="Total"/>
+                <field name="total_amount" widget="monetary" sum="Total"/>
+                <field name="amount_paid" widget="monetary" sum="Total"/>
+                <field name="amount_remaining" widget="monetary" sum="Total"/>
+                <field name="days_overdue" string="Days Overdue"
+                    invisible="state != 'overdue'"/>
+                <field name="payment_date" optional="hide"/>
+                <field name="invoice_id" optional="hide"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" widget="badge"
+                    decoration-success="state == 'paid'"
+                    decoration-warning="state == 'posted'"
+                    decoration-danger="state == 'overdue'"/>
+                <button name="action_post" type="object" string="Post"
+                    icon="fa-check" invisible="state != 'draft'"
+                    groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                <button name="action_register_payment" type="object" string="Pay"
+                    icon="fa-money" invisible="state not in ('posted', 'overdue')"
+                    groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Repayment — Search View
+    ============================================================ -->
+    <record id="view_cyllo_loan_repayment_search" model="ir.ui.view">
+        <field name="name">cyllo.loan.repayment.search</field>
+        <field name="model">cyllo.loan.repayment</field>
+        <field name="arch" type="xml">
+            <search string="Search Installments">
+                <field name="loan_id"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="Due Today" name="due_today"
+                    domain="[('due_date', '=', context_today().strftime('%Y-%m-%d')), ('state', '!=', 'paid')]"/>
+                <filter string="Overdue" name="overdue"
+                    domain="[('state', '=', 'overdue')]"/>
+                <filter string="Unpaid" name="unpaid"
+                    domain="[('state', 'in', ('draft', 'posted', 'overdue'))]"/>
+                <filter string="Paid" name="paid" domain="[('state', '=', 'paid')]"/>
+                <separator/>
+                <filter string="Loan Giving" name="giving"
+                    domain="[('loan_direction', '=', 'giving')]"/>
+                <filter string="Loan Taking" name="taking"
+                    domain="[('loan_direction', '=', 'taking')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Loan" name="group_loan"
+                        context="{'group_by': 'loan_id'}"/>
+                    <filter string="Partner" name="group_partner"
+                        context="{'group_by': 'partner_id'}"/>
+                    <filter string="Status" name="group_state"
+                        context="{'group_by': 'state'}"/>
+                    <filter string="Due Month" name="group_due"
+                        context="{'group_by': 'due_date:month'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_cyllo_loan_repayment_due" model="ir.actions.act_window">
+        <field name="name">Due Installments</field>
+        <field name="res_model">cyllo.loan.repayment</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('state', 'in', ('posted', 'overdue'))]</field>
+        <field name="context">{'search_default_unpaid': 1}</field>
+    </record>
+
+    <record id="action_cyllo_loan_repayment_overdue" model="ir.actions.act_window">
+        <field name="name">Overdue Installments</field>
+        <field name="res_model">cyllo.loan.repayment</field>
+        <field name="view_mode">tree</field>
+        <field name="domain">[('state', '=', 'overdue')]</field>
+        <field name="context">{'search_default_overdue': 1}</field>
+    </record>
+
+</odoo>
