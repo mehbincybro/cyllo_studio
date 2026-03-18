@@ -692,12 +692,14 @@ export class EditReport extends Component {
                     // transform existing dropped node
                     item.className = 'field-block c_new dynamic-field-wrapper';
                     item.innerHTML = `
-                        <span class="field-handle" contenteditable="false">⠿</span>
+                        <div class="field-handle-container" contenteditable="false">
+                            <span class="field-handle fa fa-bars" title="Drag to move"></span>
+                            <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                        </div>
                         <div class="field-container d-inline-flex gap-1">
                             <strong class="field-label">${fieldInfo.string}: </strong>
                             <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
-                        </div>
-                        <span class="field-delete fa fa-times" title="Delete Field" contenteditable="false"></span>`;
+                        </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.cursor = 'default';
                     item.style.opacity = '1';
@@ -1064,9 +1066,6 @@ export class EditReport extends Component {
         const isNumeric = (type) => ['float', 'monetary', 'integer'].includes(type);
 
         let html = `
-            <div class="table-handle" contenteditable="false">
-                <button class="tcm-delete-table" title="Delete Table">✕</button>
-            </div>
             <table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse;">`;
 
         // ── Header Row ────────────────────────────────────────────────
@@ -1491,30 +1490,31 @@ export class EditReport extends Component {
         const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable'];
         const clean = (node) => {
             studioAttrs.forEach(a => node.removeAttribute && node.removeAttribute(a));
+            if (node.removeAttribute) {
+                node.removeAttribute('onmouseover');
+                node.removeAttribute('onmouseout');
+                node.removeAttribute('onclick');
+            }
             if (node.style && node.style.cursor) node.style.removeProperty('cursor');
             if (node.style && node.style.outline) node.style.removeProperty('outline');
 
             // Remove handles!
-            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete')) : [];
+            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container')) : [];
             handles.forEach(h => h.remove());
 
             // Unwrap wrappers if they are purely studio constructs
-            // We iterate backwards to avoid skip issues if we modify DOM
-            const wrappers = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-wrapper, .field-block')) : [];
+            // We always unwrap these to keep the final XML clean and prevent redundant nesting.
+            const wrappers = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-wrapper, .field-block, .field-container, .dynamic-field-wrapper, .table-handle-container, .field-handle-container')) : [];
             wrappers.forEach(w => {
-                // If it's a wrapper, we want its children to move to its parent, then it dies.
-                // UNLESS it's a freshly dropped node (c_new), then we keep it as a unit.
-                if (!w.classList.contains('c_new')) {
-                    while (w.firstChild) {
-                        w.parentNode.insertBefore(w.firstChild, w);
-                    }
-                    w.remove();
+                while (w.firstChild) {
+                    w.parentNode.insertBefore(w.firstChild, w);
                 }
+                w.remove();
             });
 
-            // If it's a field-block node that we're keeping (c_new), remove the class
-            if (node.classList && node.classList.contains('field-block')) {
-                node.classList.remove('field-block', 'dynamic-field-wrapper');
+            // Remove remaining layout classes and attributes from logical blocks
+            if (node.classList) {
+                node.classList.remove('field-block', 'dynamic-field-wrapper', 'table-wrapper', 'c_new', 'bg-white');
                 if (node.classList.length === 0) node.removeAttribute('class');
             }
 
@@ -1568,6 +1568,16 @@ export class EditReport extends Component {
         const tables = container.querySelectorAll('table:not(.table-wrapper table)');
         tables.forEach(table => {
             if (table.closest('.table-wrapper')) return;
+
+            // Check if table is wrapped in structural nodes (t-foreach, t-set, etc)
+            // We wrap ALL consecutive structural parents that only contain this table
+            let targetNode = table;
+            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                targetNode.parentElement.children.length === 1 &&
+                !targetNode.parentElement.classList.contains('page')) {
+                targetNode = targetNode.parentElement;
+            }
+
             const wrapper = document.createElement('div');
             wrapper.className = 'table-wrapper';
             wrapper.innerHTML = `
@@ -1575,8 +1585,8 @@ export class EditReport extends Component {
                     <div class="table-handle fa fa-bars" title="Drag to move"></div>
                     <div class="table-delete fa fa-trash" title="Delete Table"></div>
                 </div>`;
-            table.parentNode.insertBefore(wrapper, table);
-            wrapper.appendChild(table);
+            targetNode.parentNode.insertBefore(wrapper, targetNode);
+            wrapper.appendChild(targetNode);
 
             wrapper.querySelector('.table-delete').onclick = (e) => {
                 e.stopPropagation();
@@ -1585,21 +1595,31 @@ export class EditReport extends Component {
         });
 
         // 2. Wrap existing fields (t-field or t-esc with specific paths)
-        // We look for spans/divs with t-field
-        const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]), [t-esc]:not(.field-block [t-esc])');
+        // We look for spans/divs with t-field, excluding those already wrapped or in tables
+        const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]):not(.field-container [t-field]), [t-esc]:not(.field-block [t-esc]):not(.field-container [t-esc])');
         fields.forEach(field => {
             if (field.closest('.field-block') || field.closest('table')) return;
+
+            // Check if field is wrapped in structural nodes (t-foreach, etc)
+            let targetNode = field;
+            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                targetNode.parentElement.children.length === 1 &&
+                !targetNode.parentElement.classList.contains('page')) {
+                targetNode = targetNode.parentElement;
+            }
 
             // For simple fields (like in an address block), wrap them
             const wrapper = document.createElement('div');
             wrapper.className = 'field-block dynamic-field-wrapper';
             wrapper.innerHTML = `
-                <span class="field-handle" contenteditable="false">⠿</span>
+                <div class="field-handle-container" contenteditable="false">
+                    <span class="field-handle fa fa-bars" title="Drag to move"></span>
+                    <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                </div>
                 <div class="field-container d-inline-flex gap-1"></div>
-                <span class="field-delete fa fa-times" title="Delete Field" contenteditable="false"></span>
             `;
-            field.parentNode.insertBefore(wrapper, field);
-            wrapper.querySelector('.field-container').appendChild(field);
+            targetNode.parentNode.insertBefore(wrapper, targetNode);
+            wrapper.querySelector('.field-container').appendChild(targetNode);
 
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();

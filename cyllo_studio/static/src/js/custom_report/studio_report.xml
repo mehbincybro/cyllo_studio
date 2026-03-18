@@ -46,6 +46,11 @@
                         <span class="fw-semibold text-dark">Table</span>
                     </div>
 
+                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm" style="cursor: grab; transition: all 0.2s;" data-type="text" onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
+                        <i class="fa fa-font fa-lg text-success me-3"/>
+                        <span class="fw-semibold text-dark">Text</span>
+                    </div>
+
                     <!-- Technical Actions -->
                     <div class="border-top pt-3 mb-4">
                         <h6 class="text-uppercase text-muted mb-3 fw-bold" style="font-size: 11px; letter-spacing: 1px;">Technical Tools</h6>

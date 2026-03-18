@@ -171,54 +171,50 @@
     outline-offset: -2px;
 }
 
-.table-handle {
+/* ── Unified Popup Handles ───────────────────────── */
+.table-handle-container,
+.field-handle-container {
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    height: 20px;
     background: #5b8dee;
-    color: white;
-    padding: 0;
-    width: 24px;
-    height: 4px;
-    border-radius: 2px 2px 0 0;
+    border-radius: 4px;
     display: none;
     align-items: center;
-    justify-content: center;
-    cursor: grab;
-    user-select: none;
-    position: absolute;
-    top: -4px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 10;
-    transition: all 0.2s;
+    padding: 0 4px;
+    gap: 6px;
+    z-index: 100;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-[cy-type='table']:hover>.table-handle,
-[cy-type='table'].selected>.table-handle {
+.table-wrapper:hover>.table-handle-container,
+.table-wrapper.selected>.table-handle-container,
+.dynamic-field-wrapper:hover>.field-handle-container,
+.dynamic-field-wrapper.selected>.field-handle-container {
     display: flex;
 }
 
-.table-handle:hover {
-    height: 14px;
-    top: -14px;
-}
-
-.tcm-delete-table {
-    border: none;
-    background: #e35d6a;
+.table-handle,
+.field-handle {
     color: white;
     font-size: 10px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    cursor: pointer;
-    line-height: 1;
+    cursor: grab;
+    padding: 2px;
 }
 
-.table-handle:hover .tcm-delete-table {
-    display: flex;
+.table-delete,
+.field-delete {
+    color: #ffdce0;
+    font-size: 10px;
+    cursor: pointer;
+    padding: 2px;
+    transition: color 0.15s;
+}
+
+.table-delete:hover,
+.field-delete:hover {
+    color: white;
 }
 
 .table-wrapper {
