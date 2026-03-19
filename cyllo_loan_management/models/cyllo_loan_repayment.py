@@ -184,9 +184,19 @@ class CylloLoanRepayment(models.Model):
             if record.state not in ('posted', 'overdue'):
                 raise UserError(_('Only posted or overdue installments can be paid.'))
             # record._post_repayment_entry()
+            account_type = 'asset_receivable' if record.loan_direction == 'giving' else 'liability_payable'
+
+            outstanding_lines = record.invoice_id.line_ids.filtered(
+                lambda l: l.account_id.account_type == account_type
+                    and not l.reconciled
+                    and l.partner_id
+                    and l.account_id not in [record.loan_id.loan_account_id,
+                                             record.loan_id.interest_account_id]
+            )
+            print('out', outstanding_lines)
             payment_register = self.env['account.payment.register'].with_context(
-                active_model='account.move',
-                active_ids=self.invoice_id.ids
+                active_model='account.move.line',
+                active_ids=outstanding_lines.ids
             ).create({
                 'payment_date': fields.Date.today(),
             })
