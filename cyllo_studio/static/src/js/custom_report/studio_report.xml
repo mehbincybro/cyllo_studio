@@ -389,7 +389,7 @@
 
                         <!-- Inline domain editor -->
                         <div t-if="state.tcm.applyDomain" class="tcm-domain-editor">
-                            <label>Domain filter (Odoo syntax)</label>
+                            <label>Domain filter</label>
                             <input type="text" class="tcm-input tcm-input-sm"
                                    placeholder="[('account_type', '=', 'asset_receivable')]"
                                    t-att-value="state.tcm.domain"

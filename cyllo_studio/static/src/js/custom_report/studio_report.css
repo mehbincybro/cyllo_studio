@@ -1240,102 +1240,35 @@ select>option {
     .field-delete:hover {
         color: #e35d6a;
     }
+}
 
-    /* ── Text Nodes ────────────────────────────────────── */
-    .text-node {
-        position: absolute !important;
-        min-width: 120px !important;
-        min-height: 40px !important;
-        padding: 12px 18px !important;
-        background: white !important;
-        border: 1.5px dashed #9ab83a !important;
-        border-radius: 6px !important;
-        cursor: default !important;
-        z-index: 1000 !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-        transition: box-shadow 0.3s !important;
-    }
+/* ── Text Nodes ────────────────────────────────────── */
+.text-node {
+    position: relative;
+    display: inline-block;
+    min-width: 10px;
+    min-height: 1em;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+    border: none;
+    cursor: grab;
+    vertical-align: middle;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
 
-    .text-node.selected {
-        border-style: solid !important;
-        box-shadow: 0 6px 16px rgba(154, 184, 58, 0.25) !important;
-    }
+.text-node:active {
+    cursor: grabbing;
+}
 
-    .text-handle {
-        position: absolute !important;
-        top: -12px;
-        left: -12px;
-        width: 24px;
-        height: 24px;
-        background: #9ab83a;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 11px;
-        cursor: grab;
-        border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    }
+.text-node.selected {
+    outline: 1px dashed rgba(154, 184, 58, 0.6);
+    outline-offset: 2px;
+}
 
-    .text-delete {
-        position: absolute !important;
-        top: -12px;
-        right: -12px;
-        width: 24px;
-        height: 24px;
-        background: #f44336;
-        color: white;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 10px;
-        cursor: pointer;
-        border: 2px solid white;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-        opacity: 0;
-        transition: opacity 0.2s;
-    }
-
-    .text-node:hover .text-delete {
-        opacity: 1;
-    }
-
-    .resize-handle {
-        position: absolute !important;
-        bottom: 0;
-        right: 0;
-        width: 12px;
-        height: 12px;
-    }
-
-    .resize-handle {
-        position: absolute !important;
-        bottom: 0;
-        right: 0;
-        width: 12px;
-        height: 12px;
-        background: #9ab83a;
-        cursor: nwse-resize;
-        border-radius: 50% 0 0 0;
-    }
-
-    .text-node .text-handle {
-        display: none;
-        position: absolute !important;
-        top: -12px;
-        left: -12px;
-    }
-
-    .text-node:hover .text-handle,
-    .text-node.selected .text-handle {
-        display: flex !important;
-    }
-
-    .text-node .text-handle::after {
-        content: "⠿";
-        color: white;
-        font-size: 10px;
-    }
+.text-node[contenteditable="true"] {
+    cursor: text;
+    outline: 1px solid #9ab83a;
+    outline-offset: 2px;
+}

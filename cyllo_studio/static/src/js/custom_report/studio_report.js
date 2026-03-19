@@ -8,6 +8,8 @@ import { useService } from "@web/core/utils/hooks";
 import { loadJS } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { groupBy } from "@web/core/utils/arrays";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+
 const Sortable = window.Sortable;
 const SS_TEMPLATE = 'cyllo_report_template';
 const SS_RES_MODEL = 'cyllo_report_res_model';
@@ -35,6 +37,7 @@ export class EditReport extends Component {
         this.rpc = useService("rpc");
         this.orm = useService("orm");
         this.notification = useService("notification");
+        this.dialog = useService("dialog");
 
         this.state = useState({
             previewMode: false,
@@ -197,20 +200,28 @@ export class EditReport extends Component {
 
             el.classList.add('selected');
 
-            el.classList.add('selected');
-
             // "Select then Edit" strategy:
             // Only trigger the editor if the element was ALREADY selected.
             // And DON'T trigger MediumEditor for the whole table wrapper or field block.
             if (!wasSelected || el.classList.contains('table-wrapper') || el.classList.contains('field-block')) {
                 if (self.editor) {
+                    const prevEl = self.editor.elements[0];
                     self.editor.destroy();
                     self.editor = null;
+                    if (prevEl && prevEl.classList.contains('text-node')) {
+                        prevEl.setAttribute('contenteditable', 'false');
+                    }
                 }
                 return;
             }
 
-            if (self.editor) self.editor.destroy();
+            if (self.editor) {
+                const prevEl = self.editor.elements[0];
+                self.editor.destroy();
+                if (prevEl && prevEl.classList.contains('text-node')) {
+                    prevEl.setAttribute('contenteditable', 'false');
+                }
+            }
             self.editor = null;
 
             if (e.target.classList.contains('tcm-delete-table') || e.target.closest('.tcm-delete-table')) {
@@ -220,12 +231,18 @@ export class EditReport extends Component {
                 }
             }
 
+            // Bug fix: for text-nodes, enable contenteditable before MediumEditor init
+            if (el.classList.contains('text-node')) {
+                el.setAttribute('contenteditable', 'true');
+            }
+
             self.editor = new MediumEditor(el, {
                 toolbar: {
                     buttons: [
                         'bold', 'italic', 'underline', 'strikethrough',
                         'h1', 'h3', 'quote', 'anchor', 'deleteElement',
                     ],
+                    relativeContainer: self.reportFrameRef.el,
                 },
                 extensions: {
                     'deleteElement': new window.DeleteButton(),
@@ -612,7 +629,7 @@ export class EditReport extends Component {
             animation: 150,
 
             draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]:not(.dynamic-field-wrapper *)',
-            handle: '.table-handle, .box-handle, .field-handle, .text-handle, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]',
+            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -642,34 +659,17 @@ export class EditReport extends Component {
 
                 if (type === 'text') {
                     // Transform dropped snippet into a text node at the drop position
-                    item.className = 'text-node c_new selected';
-                    item.setAttribute('contenteditable', 'true');
-                    item.innerHTML = 'Double click to edit text...';
-
-                    const handle = document.createElement('div');
-                    handle.className = 'text-handle';
-                    handle.innerHTML = '⠿';
-                    item.appendChild(handle);
-
-                    const del = document.createElement('div');
-                    del.className = 'text-delete fa fa-times';
-                    del.onclick = (e) => { e.stopPropagation(); if (confirm("Delete text?")) item.remove(); };
-                    item.appendChild(del);
-
-                    const resize = document.createElement('div');
-                    resize.className = 'resize-handle';
-                    item.appendChild(resize);
-
-                    // Since it's dropped into a flow, we make it absolute
-                    // and position it where it was dropped relative to the zone.
-                    const rect = item.getBoundingClientRect();
-                    const zoneRect = zone.getBoundingClientRect();
-                    item.style.position = 'absolute';
-                    item.style.left = (rect.left - zoneRect.left) + 'px';
-                    item.style.top = (rect.top - zoneRect.top) + 'px';
-
+                    item.className = 'text-node c_new';
+                    item.setAttribute('contenteditable', 'false');
+                    item.innerHTML = 'Click to select, click again to edit';
+                    item.style.position = '';
+                    item.style.left = '';
+                    item.style.top = '';
                     item.style.opacity = '1';
-                    self._setupTextNodeEvents(item);
+                    // Select the new text node
+                    setTimeout(() => {
+                        item.classList.add('selected');
+                    }, 0);
                     self._refreshDragHandles();
                     return;
                 }
@@ -746,7 +746,18 @@ export class EditReport extends Component {
 
                     item.querySelector('.table-delete').onclick = (e) => {
                         e.stopPropagation();
-                        if (confirm("Delete this table?")) item.remove();
+                        self.dialog.add(ConfirmationDialog, {
+                            title: "Delete Table",
+                            body: "Are you sure you want to delete this table?",
+                            confirm: async () => {
+                                // Remove orphaned <t> siblings BEFORE removing the wrapper
+                                // (HTML foster-parenting leaves them stranded in the zone).
+                                self._removeOrphanedQwebElements(item);
+                                item.remove();
+                                await self.save_changes(self);
+                            },
+                            cancel: () => { },
+                        });
                     };
                 }
 
@@ -1321,6 +1332,55 @@ export class EditReport extends Component {
     //        this._sortableInstances.push(instance);
     //    }
 
+    /**
+     * Remove orphaned <t>/<cy-qweb-t> structural nodes that the HTML parser
+     * foster-parents as siblings of the table wrapper.
+     *
+     * Background: `<t t-foreach>` / `<t t-set>` are not valid inside <tbody>,
+     * so the browser hoists them *before* the <table> as zone siblings while
+     * leaving the actual <tr> rows inside <tbody>.  When the .table-wrapper is
+     * removed these empty <t> ghosts remain and get serialised into the saved
+     * QWeb XML.  We kill them here BEFORE calling wrapper.remove().
+     *
+     * @param {HTMLElement} wrapper  The .table-wrapper about to be deleted.
+     */
+    _removeOrphanedQwebElements(wrapper) {
+        const zone = wrapper.parentElement;
+        if (!zone) return;
+
+        const siblings = Array.from(zone.children);
+        const wrapperIdx = siblings.indexOf(wrapper);
+
+        siblings.forEach((sib, idx) => {
+            const tag = (sib.tagName || '').toLowerCase();
+            if (tag !== 't' && tag !== 'cy-qweb-t') return;
+
+            // Determine whether this <t> carries visible user content.
+            // Structural nodes (t-foreach, t-set, t-as, t-value …) foster-parented
+            // out of the table will be empty or only contain other <t> nodes.
+            const hasVisibleContent =
+                sib.textContent.trim().length > 0 &&
+                Array.from(sib.children).some(
+                    c => !['t', 'cy-qweb-t'].includes((c.tagName || '').toLowerCase())
+                );
+
+            // Remove if: (a) it has no real visible content, OR
+            //             (b) it is immediately adjacent to the wrapper (within 2 slots)
+            //                 and has no visible content at all.
+            const isAdjacent = Math.abs(idx - wrapperIdx) <= 2;
+            if (!hasVisibleContent || isAdjacent) {
+                sib.remove();
+            }
+        });
+
+        // Safety sweep: catch any remaining empty structural orphans in the zone.
+        zone.querySelectorAll('t, cy-qweb-t').forEach(el => {
+            if (!el.textContent.trim() && el.children.length === 0) {
+                el.remove();
+            }
+        });
+    }
+
     /** Destroy all tracked SortableJS instances. */
     _destroySortableInstances() {
         this._sortableInstances.forEach(s => { try { s.destroy(); } catch (_) { } });
@@ -1477,7 +1537,7 @@ export class EditReport extends Component {
             const structChanged = cyXpathChildren(original) !== cyXpathChildren(el);
 
             if (textChanged || innerChanged || structChanged) {
-                allChanges.push({ el, xpath, template });
+                allChanges.push({ el, xpath, template, structChanged });
             }
         });
 
@@ -1487,16 +1547,21 @@ export class EditReport extends Component {
     }
 
     _cleanStudioAttrs(el) {
-        const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable'];
+        const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-type', 'cy-config'];
         const clean = (node) => {
             studioAttrs.forEach(a => node.removeAttribute && node.removeAttribute(a));
             if (node.removeAttribute) {
                 node.removeAttribute('onmouseover');
                 node.removeAttribute('onmouseout');
                 node.removeAttribute('onclick');
+                node.removeAttribute('contenteditable');
             }
-            if (node.style && node.style.cursor) node.style.removeProperty('cursor');
-            if (node.style && node.style.outline) node.style.removeProperty('outline');
+            if (node.style) {
+                if (node.style.cursor) node.style.removeProperty('cursor');
+                if (node.style.outline) node.style.removeProperty('outline');
+                if (node.style.opacity) node.style.removeProperty('opacity');
+                if (node.getAttribute && node.getAttribute('style') === '') node.removeAttribute('style');
+            }
 
             // Remove handles!
             const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container')) : [];
@@ -1512,9 +1577,16 @@ export class EditReport extends Component {
                 w.remove();
             });
 
+            // Safety net: strip any residual empty structural <t>/<cy-qweb-t> nodes that
+            // survived foster-parenting and were not caught by _removeOrphanedQwebElements.
+            const structOrphans = node.querySelectorAll ? Array.from(node.querySelectorAll('t, cy-qweb-t')) : [];
+            structOrphans.forEach(el => {
+                if (!el.textContent.trim() && el.children.length === 0) el.remove();
+            });
+
             // Remove remaining layout classes and attributes from logical blocks
             if (node.classList) {
-                node.classList.remove('field-block', 'dynamic-field-wrapper', 'table-wrapper', 'c_new', 'bg-white');
+                node.classList.remove('field-block', 'dynamic-field-wrapper', 'table-wrapper', 'c_new', 'bg-white', 'selected');
                 if (node.classList.length === 0) node.removeAttribute('class');
             }
 
@@ -1588,9 +1660,25 @@ export class EditReport extends Component {
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.appendChild(targetNode);
 
+            //            wrapper.querySelector('.table-delete').onclick = (e) => {
+            //                e.stopPropagation();
+            //                if (confirm("Delete this table?")) wrapper.remove();
+            //            };
             wrapper.querySelector('.table-delete').onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("Delete this table?")) wrapper.remove();
+
+                this.dialog.add(ConfirmationDialog, {
+                    title: "Delete Table",
+                    body: "Are you sure you want to delete this table?",
+                    confirm: async () => {
+                        // Remove orphaned <t> siblings BEFORE removing the wrapper
+                        // (HTML foster-parenting leaves them stranded in the zone).
+                        this._removeOrphanedQwebElements(wrapper);
+                        wrapper.remove();
+                        await this.save_changes(this);
+                    },
+                    cancel: () => { },
+                });
             };
         });
 
@@ -1626,6 +1714,13 @@ export class EditReport extends Component {
                 if (confirm("Delete this field?")) wrapper.remove();
             };
         });
+
+        // 3. Mark salvaged text nodes as ready
+        // (No handles needed, just ensure they are targetable)
+        const textNodes = container.querySelectorAll('.text-node');
+        textNodes.forEach(textNode => {
+            textNode.setAttribute('contenteditable', 'false');
+        });
     }
 
     buildInheritanceXML(changes) {
@@ -1635,17 +1730,36 @@ export class EditReport extends Component {
             let xpathBlock = "";
 
             items.forEach(change => {
-                // ── FIX: only use c_new nodes (freshly dropped) as "inside" inserts.
-                // Previously ALL non-cy-xpath children triggered an "inside" insert,
-                // causing already-saved content to be re-inserted on every save.
                 const newNodes = Array.from(change.el.children)
                     .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
+                // ── STRUCTURAL CHANGE / DELETION DETECTION ──────────────────
+                // If the zone has structural changes (deletions or reorders),
+                // we MUST emit a zone-level 'replace' to reflect the final state.
+                // Partial inside/replace logic won't capture the absence of a node.
+                if (change.structChanged) {
+                    const clonedZone = change.el.cloneNode(true);
+                    this._cleanStudioAttrs(clonedZone);
+                    clonedZone.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
+                    if (clonedZone.classList.length === 0) clonedZone.removeAttribute('class');
+
+                    let content = new XMLSerializer()
+                        .serializeToString(clonedZone)
+                        .replace(/ xmlns="[^"]*"/g, "")
+                        .replace(/<br>/gi, '<br/>');
+
+                    xpathBlock += `
+                    <xpath expr="${change.xpath}" position="replace">
+                        ${content}
+                    </xpath>`;
+                    return;
+                }
+
+                // If only additions (no deletions/reorders), use relative "inside" XPath.
                 if (newNodes.length) {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
                         this._cleanStudioAttrs(cloned);
-                        // Strip the c_new marker but KEEP structural classes like d-inline-block
                         cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
                         if (cloned.classList.length === 0) cloned.removeAttribute('class');
 
@@ -1659,23 +1773,12 @@ export class EditReport extends Component {
                             ${content}
                         </xpath>`;
                     });
-                    // Bug 1 FIX: Don't return here! We might have other changes in the same zone
-                    // (like text edits or move operations) that need to be captured as a 'replace'.
-                    // Actually, if we use 'inside', we probably SHOULD avoid 'replace' on the same node
-                    // in the same save to prevent conflicts.
-                    // But if we only added new nodes, 'inside' is fine.
-                    // To be safe, if THERE ARE OTHER CHANGES (text edit or struct change),
-                    // we should probably just use 'replace' for the whole thing instead of 'inside'.
-
-                    const text = (node) => Array.from(node.childNodes).filter(n => n.nodeType === 3).map(n => n.textContent.trim()).join('');
-                    // ... this is getting complex. Let's stick to: if newNodes exist, use inside,
-                    // but also allow text edits to fall through IF they are on DIFFERENT nodes.
                     return;
                 }
 
                 // Text-only edit or attribute edit: replace the element
-                // ONLY if the element itself is not structural. Replacing a structural
-                // node (like a t-foreach) with its static rendering would break the report.
+                // We skip replacing structural nodes (t-foreach, etc.) directly
+                // unless it is a structural change (handled above).
                 if (this._isStructuralNode(change.el)) {
                     console.warn("[Cyllo Studio] Skipping replacement of structural node:", change.xpath);
                     return;
@@ -1713,60 +1816,7 @@ export class EditReport extends Component {
     }
 
     _setupTextNodeEvents(textNode) {
-        // Dragging logic for text node
-        const handle = textNode.querySelector('.text-handle');
-        let isDragging = false;
-        let startX, startY, nodeLeft, nodeTop;
-
-        handle.onmousedown = (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            nodeLeft = parseInt(textNode.style.left) || 0;
-            nodeTop = parseInt(textNode.style.top) || 0;
-            e.preventDefault();
-        };
-
-        const onMouseMove = (e) => {
-            if (!isDragging) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            textNode.style.left = (nodeLeft + dx) + 'px';
-            textNode.style.top = (nodeTop + dy) + 'px';
-        };
-
-        const onMouseUp = () => {
-            isDragging = false;
-        };
-
-        document.addEventListener('mousemove', onMouseMove);
-        document.addEventListener('mouseup', onMouseUp);
-
-        // Resize logic
-        const resizeHandle = textNode.querySelector('.resize-handle');
-        let isResizing = false;
-        let startW, startH;
-
-        resizeHandle.onmousedown = (e) => {
-            isResizing = true;
-            startX = e.clientX;
-            startY = e.clientY;
-            startW = textNode.offsetWidth;
-            startH = textNode.offsetHeight;
-            e.preventDefault();
-            e.stopPropagation();
-        };
-
-        const onResizeMove = (e) => {
-            if (!isResizing) return;
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            textNode.style.width = (startW + dx) + 'px';
-            textNode.style.height = (startH + dy) + 'px';
-        };
-
-        document.addEventListener('mousemove', onResizeMove);
-        document.addEventListener('mouseup', () => { isResizing = false; });
+        // No manual listeners needed anymore as we switched to MediumEditor-first interaction
     }
 }
 
