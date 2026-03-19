@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Report Action -->
+    <record id="report_cyllo_loan_schedule_pdf" model="ir.actions.report">
+        <field name="name">Loan Repayment Schedule</field>
+        <field name="model">cyllo.loan</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">cyllo_loan_management.report_cyllo_loan_schedule_doc</field>
+        <field name="report_file">cyllo_loan_management.report_cyllo_loan_schedule_doc</field>
+        <field name="binding_model_id" ref="model_cyllo_loan"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="base.paperformat_euro"/>
+    </record>
+
+</odoo>

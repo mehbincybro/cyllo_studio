@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<template id="report_cyllo_loan_schedule_doc">
+    <t t-call="web.html_container">
+        <t t-foreach="docs" t-as="loan">
+            <t t-call="web.external_layout">
+                <div class="page">
+
+                    <!-- Header -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <h2>Loan Repayment Schedule</h2>
+                            <h3 class="text-muted">
+                                <t t-esc="loan.name"/>
+                            </h3>
+                        </div>
+                        <div class="col-6 text-end">
+                            <span t-if="loan.loan_direction == 'giving'"
+                                class="badge bg-info fs-6">Loan Giving (We Lend)</span>
+                            <span t-else=""
+                                class="badge bg-warning fs-6">Loan Taking (We Borrow)</span>
+                        </div>
+                    </div>
+
+                    <!-- Loan Details -->
+                    <div class="row mb-4">
+                        <div class="col-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="fw-bold">Loan Type:</td>
+                                    <td><t t-esc="loan.loan_type_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">
+                                        <t t-if="loan.loan_direction == 'giving'">Borrower:</t>
+                                        <t t-else="">Lender:</t>
+                                    </td>
+                                    <td><t t-esc="loan.partner_id.name"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Responsible:</td>
+                                    <td><t t-esc="loan.user_id.name"/></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-6">
+                            <table class="table table-sm table-borderless">
+                                <tr>
+                                    <td class="fw-bold">Principal Amount:</td>
+                                    <td>
+                                        <t t-esc="loan.principal_amount"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Interest Rate:</td>
+                                    <td><t t-esc="'%.4f%%' % loan.interest_rate"/> p.a.</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Interest Type:</td>
+                                    <td><t t-esc="dict(loan._fields['interest_type'].selection).get(loan.interest_type)"/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Disbursement Date:</td>
+                                    <td><t t-esc="loan.date_start" t-options='{"widget": "date"}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Maturity Date:</td>
+                                    <td><t t-esc="loan.date_end" t-options='{"widget": "date"}'/></td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-bold">Duration:</td>
+                                    <td><t t-esc="loan.duration"/> months</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Repayment Table -->
+                    <table class="table table-sm table-striped table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Due Date</th>
+                                <th class="text-end">Principal</th>
+                                <th class="text-end">Interest</th>
+                                <th class="text-end">Penalty</th>
+                                <th class="text-end">Total Due</th>
+                                <th class="text-end">Amount Paid</th>
+                                <th class="text-end">Balance</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="loan.repayment_ids" t-as="line">
+                                <tr t-attf-class="#{line.state == 'overdue' and 'table-danger' or ''} #{line.state == 'paid' and 'table-success' or ''}">
+                                    <td><t t-esc="line.sequence"/></td>
+                                    <td><t t-esc="line.due_date" t-options='{"widget": "date"}'/></td>
+                                    <td class="text-end">
+                                        <t t-esc="line.principal_amount"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-esc="line.interest_amount"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-esc="line.penalty_amount"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td class="text-end fw-bold">
+                                        <t t-esc="line.total_amount"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-esc="line.amount_paid"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td class="text-end">
+                                        <t t-esc="line.amount_remaining"
+                                            t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="dict(line._fields['state'].selection).get(line.state)"/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                        <tfoot class="table-secondary fw-bold">
+                            <tr>
+                                <td colspan="2">Total</td>
+                                <td class="text-end">
+                                    <t t-esc="loan.principal_amount"
+                                        t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="loan.total_interest"
+                                        t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                </td>
+                                <td></td>
+                                <td class="text-end">
+                                    <t t-esc="loan.total_repayment"
+                                        t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="loan.amount_paid"
+                                        t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                </td>
+                                <td class="text-end">
+                                    <t t-esc="loan.amount_remaining"
+                                        t-options='{"widget": "monetary", "display_currency": loan.currency_id}'/>
+                                </td>
+                                <td/>
+                            </tr>
+                        </tfoot>
+                    </table>
+
+                    <!-- Footer note -->
+                    <div class="mt-3 text-muted small">
+                        <p>Generated on: <t t-esc="context_timestamp(datetime.datetime.now())" t-options='{"widget": "datetime"}'/></p>
+                        <p t-if="loan.interest_type == 'reducing'">
+                            Note: This schedule uses the Reducing Balance method. Interest is calculated on the outstanding principal.
+                        </p>
+                        <p t-else="">
+                            Note: This schedule uses the Flat Rate method. Interest is calculated on the original principal.
+                        </p>
+                    </div>
+
+                </div>
+            </t>
+        </t>
+    </t>
+</template>
+</odoo>

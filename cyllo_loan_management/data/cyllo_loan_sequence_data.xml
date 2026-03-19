@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- Loan Reference Sequence -->
+        <record id="sequence_cyllo_loan" model="ir.sequence">
+            <field name="name">Cyllo Loan</field>
+            <field name="code">cyllo.loan</field>
+            <field name="prefix">LOAN/%(year)s/</field>
+            <field name="padding">5</field>
+            <field name="company_id" eval="False"/>
+        </record>
+
+        <!-- Scheduled Action: Mark Overdue Installments -->
+        <record id="ir_cron_cyllo_loan_mark_overdue" model="ir.cron">
+            <field name="name">Cyllo Loan: Mark Overdue Installments</field>
+            <field name="model_id" ref="model_cyllo_loan_repayment"/>
+            <field name="state">code</field>
+            <field name="code">model.action_mark_overdue()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active" eval="True"/>
+        </record>
+
+    </data>
+</odoo>
