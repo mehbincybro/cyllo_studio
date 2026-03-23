@@ -6,12 +6,12 @@
             <div class="w-100 bg-white border-bottom px-4 py-2 d-flex align-items-center shadow-sm">
                 <button class="btn btn-primary px-4 me-2"
                         t-att-disabled="state.isSaving"
-                        t-on-click="() => save_changes(this)">
+                        t-on-click="() => this.save_changes(this)">
                     <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
                     Save
                 </button>
                 <button class="btn btn-light border px-4"
-                        t-on-click="() => close_edit(this)">Discard</button>
+                        t-on-click="() => this.close_edit(this)">Discard</button>
                 <div class="ms-4 form-check form-switch pt-1">
                     <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview" t-att-checked="state.previewMode"/>
                     <label class="form-check-label fw-bold" for="previewSwitch">Preview</label>

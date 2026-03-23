@@ -1,0 +1,93 @@
+/* Exact Cyllo Analytics Tile Card Design */
+
+.o_kanban_view.o_kanban_ungrouped {
+    background: #ffffff !important;
+    padding: 20px !important;
+}
+
+.o_kanban_view.o_kanban_ungrouped .o_kanban_record {
+    border: none !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 8px !important;
+    box-shadow: none !important;
+    flex: 1 1 18% !important;
+    max-width: 19% !important;
+    min-width: 150px !important;
+}
+
+.cyllo_report_card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0.6rem;
+    border: 1px solid #DFDFDF;
+    background: #FFF;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
+    height: 195px;
+    width: 100%;
+}
+
+.cyllo_report_card:hover {
+    border-color: #9ea700;
+}
+
+.cyllo_report_thumbnail_wrapper {
+    position: relative;
+    width: 170px;
+    height: 135px;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+    background: #fff;
+}
+
+.cyllo_report_thumbnail {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease-in-out;
+}
+
+.cyllo_report_card:hover .cyllo_report_thumbnail {
+    transform: scale(1.1);
+}
+
+.cyllo_report_title {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+    text-align: center;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 5px;
+}
+
+/* Base override for Odoo Kanban list */
+.o_kanban_view .o_kanban_renderer {
+    background-color: #ffffff !important;
+}
+
+@media (max-width: 1200px) {
+    .o_kanban_view.o_kanban_ungrouped .o_kanban_record {
+        flex: 0 0 22% !important;
+    }
+}
+
+@media (max-width: 900px) {
+    .o_kanban_view.o_kanban_ungrouped .o_kanban_record {
+        flex: 0 0 30% !important;
+    }
+}
+
+@media (max-width: 600px) {
+    .o_kanban_view.o_kanban_ungrouped .o_kanban_record {
+        flex: 0 0 45% !important;
+    }
+}

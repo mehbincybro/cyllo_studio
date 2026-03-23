@@ -22,8 +22,9 @@
 import re
 import logging
 
+import copy
 from io import StringIO
-from lxml import etree
+from lxml import etree, html
 
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
@@ -354,17 +355,18 @@ class Model(models.AbstractModel):
     # studio report modification
 
     @api.model
-    def get_iframe_rendered_template(self, template_name, max_depth=8):
+    def get_iframe_rendered_template(self, template_name, max_depth=8, show_placeholders=True):
         """
         Render a full template for iframe editing:
         - Expands internal t-calls.
         - Skips global web.* / report.* templates.
         - Preserves <t> nodes (does not solve t directives).
+        - show_placeholders: If False, strips/hides Odoo standard layout blocks.
         - Returns HTML string ready to embed in <iframe srcdoc>.
         """
         cache = {}
         html_body = self._expand_template_for_iframe(template_name, depth=0, max_depth=max_depth,
-                                                     cache=cache)
+                                                     cache=cache, show_placeholders=show_placeholders)
 
         # Provide web_base_url so that t-call-assets and relative URLs resolve correctly
         base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
@@ -625,7 +627,7 @@ class Model(models.AbstractModel):
     # --------------------------------------------------------------
     # Recursive internal helper
     # --------------------------------------------------------------
-    def _expand_template_for_iframe(self, template_name, depth, max_depth, cache):
+    def _expand_template_for_iframe(self, template_name, depth, max_depth, cache, show_placeholders=True):
         """Recursively expand inner t-calls while skipping web/report templates."""
         if depth > max_depth:
             return f"<!-- recursion limit reached for {template_name} -->"
@@ -661,7 +663,7 @@ class Model(models.AbstractModel):
                 continue
 
             expanded = self._expand_template_for_iframe(
-                called_name, depth + 1, max_depth, cache
+                called_name, depth + 1, max_depth, cache, show_placeholders=show_placeholders
             )
 
             # Parse called template
@@ -675,6 +677,14 @@ class Model(models.AbstractModel):
                 node.insert(0, copy.deepcopy(ch))
 
             node.insert(0, etree.Comment(f"expanded from {called_name}"))
+
+        # Strip placeholders if requested
+        if not show_placeholders:
+            # Look for common Odoo layout placeholders injected by background colors/borders
+            for node in root.xpath("//div[contains(@class, 'bg-light') and contains(@class, 'border-1')]"):
+                text = "".join(node.itertext())
+                if any(p in text for p in ['Address block', 'Information block', 'Company address block', 'Company details block']):
+                    node.getparent().remove(node)
 
         xml_string = etree.tostring(root, encoding="unicode", pretty_print=True)
         cache[template_name] = xml_string

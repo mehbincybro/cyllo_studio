@@ -140,21 +140,15 @@ export class CylloNavBar extends NavBar {
     }
     /** Open report view for the current model. */
     async ReportClick() {
-    const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl",
-    [this.action.currentController.action.res_model, 'ir.actions.report']);
-
-    const currentAction = this.action.currentController.action;
-
-    this.action.doAction({
-        type: "ir.actions.client",
-        tag: "report_view",
-        name: `${currentAction.display_name || currentAction.name} `,
-        context: {
-            parent_model: currentAction.res_model,
-            parent_name: currentAction.display_name || currentAction.name,
-        }
-    });
-}
+        const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.actions.report']);
+        this.action.doAction({
+            name: 'Reports',
+            type: 'ir.actions.act_window',
+            res_model: 'ir.actions.report',
+            target: 'current',
+            views: [[viewId, 'kanban']],
+        });
+    }
 
     /** Toggle light/dark mode for studio UI. */
     handleDarkMode() {
