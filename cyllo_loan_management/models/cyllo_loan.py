@@ -176,7 +176,6 @@ class CylloLoan(models.Model):
         'move_id',
         string='Invoices / Bills',
         copy=False,
-        domain="[('move_type', 'in', ['out_invoice', 'in_invoice', 'out_refund', 'in_refund'])]",
     )
     # Computed summaries
     total_interest = fields.Monetary(
@@ -265,7 +264,9 @@ class CylloLoan(models.Model):
             move_ids = record.repayment_ids.mapped('move_id').ids
             if record.disburse_move_id:
                 move_ids.append(record.disburse_move_id.id)
-            record.move_count = len(set(move_ids))
+            if record.invoice_ids:
+                move_ids += record.invoice_ids.ids
+            record.move_count = len(move_ids)
 
     # -------------------------------------------------------------------------
     # Constraints and onchanges
@@ -406,12 +407,14 @@ class CylloLoan(models.Model):
         move_ids = self.repayment_ids.mapped('move_id').ids
         if self.disburse_move_id:
             move_ids.append(self.disburse_move_id.id)
+        if self.invoice_ids:
+            move_ids += self.invoice_ids.ids
         return {
             'type': 'ir.actions.act_window',
             'name': _('Journal Entries'),
             'res_model': 'account.move',
             'view_mode': 'tree,form',
-            'domain': [('id', 'in', list(set(move_ids)))],
+            'domain': [('id', 'in', list(move_ids))],
         }
 
     def action_generate_schedule(self):
