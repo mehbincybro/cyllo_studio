@@ -14,10 +14,12 @@
     </record>
     <record model="helpdesk.stage" id="solved_ticket">
         <field name="name">Solved</field>
+        <field name="is_closed" eval="True"/>
         <field name="sequence">4</field>
     </record>
     <record model="helpdesk.stage" id="canceled_ticket">
         <field name="name">Canceled</field>
+        <field name="is_closed" eval="True"/>
         <field name="fold" eval="False"/>
         <field name="sequence">5</field>
     </record>

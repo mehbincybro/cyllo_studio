@@ -99,25 +99,28 @@
                                         <td style="font-size: 13px;">
                                             <table style="width:100%;text-align:center;margin-top:2rem;">
                                                 <tr>
-                                                    <td>
+                                                    <td style="padding: 0 10px;">
                                                         <a t-attf-href="/rate/{{ access_token }}/5">
                                                             <img alt="Satisfied"
-                                                                 src="/cyllo_help_desk/static/src/img/satisfied.jpg"
-                                                                 title="Satisfied"/>
+                                                                 src="/cyllo_help_desk/static/src/img/satisfied.png"
+                                                                 title="Satisfied"
+                                                                 style="width: 60px; height: 60px;"/>
                                                         </a>
                                                     </td>
-                                                    <td>
+                                                    <td style="padding: 0 10px;">
                                                         <a t-attf-href="/rate/{{ access_token }}/3">
                                                             <img alt="Okay"
-                                                                 src="/static/src/img/okay.png"
-                                                                 title="Okay"/>
+                                                                 src="/cyllo_help_desk/static/src/img/okay.png"
+                                                                 title="Okay"
+                                                                 style="width: 60px; height: 60px;"/>
                                                         </a>
                                                     </td>
-                                                    <td>
+                                                    <td style="padding: 0 10px;">
                                                         <a t-attf-href="/rate/{{ access_token }}/1">
                                                             <img alt="Dissatisfied"
-                                                                 src="static/src/img/dissatisfied.png"
-                                                                 title="Dissatisfied"/>
+                                                                 src="/cyllo_help_desk/static/src/img/dissatisfied.png"
+                                                                 title="Dissatisfied"
+                                                                 style="width: 60px; height: 60px;"/>
                                                         </a>
                                                     </td>
                                                 </tr>
