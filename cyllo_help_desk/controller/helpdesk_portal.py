@@ -2,6 +2,7 @@
 from odoo import http, _
 from odoo.exceptions import AccessError, MissingError
 from odoo.http import request
+from odoo.tools import plaintext2html
 from odoo.addons.portal.controllers.portal import CustomerPortal, pager as portal_pager
 
 
@@ -65,11 +66,23 @@ class HelpdeskPortal(CustomerPortal):
         return request.render("cyllo_help_desk.portal_ticket_page", values)
 
     @http.route(['/my/ticket/<int:ticket_id>/close'], type='http', auth="user", website=True)
-    def portal_my_ticket_close(self, ticket_id, **kw):
+    def portal_my_ticket_close(self, ticket_id, solved=None, reason=None, **kw):
         ticket = request.env['helpdesk.ticket'].browse(ticket_id)
         if ticket.customer_id == request.env.user.partner_id:
-            solved_stage = request.env.ref('cyllo_help_desk.solved_ticket')
-            ticket.stage_id = solved_stage.id
+            vals = {}
+            if solved == '1':
+                stage = request.env.ref('cyllo_help_desk.solved_ticket')
+            else:
+                stage = request.env.ref('cyllo_help_desk.canceled_ticket')
+            vals['stage_id'] = stage.id
+            
+            if reason:
+                # Append the reason to existing internal notes (HTML field)
+                note = ticket.internal_notes or ""
+                new_note = f"Reason for closing: {reason}"
+                vals['internal_notes'] = f"{note}<br/>{new_note}" if note else new_note
+            
+            ticket.write(vals)
         return request.redirect('/my/ticket/%s' % ticket_id)
 
     @http.route(['/helpdesk/create'], type='http', auth="public", website=True)

@@ -1,3 +1,4 @@
+import random
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models, _
@@ -33,6 +34,11 @@ class HelpDeskTicket(models.Model):
                                  required=True,
                                  default=lambda self: self.env.company,
                                  help="Company for the helpdesk ticket")
+    sale_order_line_id = fields.Many2one(
+        'sale.order.line',
+        string="Sales Order Item",
+        help="Sales order line linked to this ticket (filtered by the selected customer).",
+    )
     description = fields.Html(string="Description",
                               help="Description about the issue or question")
     internal_notes = fields.Html(string="Internal Notes",
@@ -78,7 +84,8 @@ class HelpDeskTicket(models.Model):
     dependency_ids = fields.Many2many('helpdesk.ticket', 'helpdesk_ticket_dependency_rel', 'ticket_id', 'dependency_id', string='Dependencies')
 
     # Skills and Assignment
-    skill_ids = fields.Many2many('helpdesk.skill', string='Required Skills')
+    skill_ids = fields.Many2many('hr.skill', string='Required Skills')
+    team_member_ids = fields.Many2many('res.users', related='team_id.member_ids')
 
     # SLA Pause
     sla_paused = fields.Boolean(string='SLA Paused', default=False)
@@ -119,41 +126,79 @@ class HelpDeskTicket(models.Model):
             if unresolved_deps:
                 raise UserError(_("Cannot close ticket until dependencies are resolved: %s") % (", ".join(unresolved_deps.mapped('ticket'))))
 
-        if self._origin.sla_ids:
-            sorted_records = sorted(self._origin.sla_ids,
-                                    key=lambda x: x['within_hour'])
-            for record in sorted_records:
-                # Calculating the time difference between created datetime and
-                # current datetime
-                created_date = datetime.strptime(str(self._origin.create_date),
-                                                 "%Y-%m-%d %H:%M:%S.%f")
+    @api.onchange('team_id', 'skill_ids')
+    def _onchange_team_id_assignment(self):
+        """Handle automated assignment when the team or skills are changed."""
+        if not self.team_id:
+            return
 
-                # Calculating the SLA deadline
-                work_hours = self._origin.team_id.working_hour_id
-                average_work_hours = work_hours.hours_per_day or 8
-                deadline = record.within_hour / average_work_hours
-                deadline_in_hours = deadline * average_work_hours
-                deadline_date = work_hours.plan_hours(deadline_in_hours,
-                                                      created_date,
-                                                      compute_leaves=True)
-                if record.target_stage.sequence >= self.stage_id.sequence and deadline_date >= datetime.now():
-                    if record.target_stage.sequence == self.stage_id.sequence:
-                        self.sla_status_ids.create(
-                            {'id': record.id, 'ticket_id': self._origin.id,
-                             'state': 'pass'})
-                else:
-                    if record.target_stage.sequence == self.stage_id.sequence or (
-                            record.target_stage.sequence >= self.stage_id.sequence and deadline_date <= datetime.now()):
-                        self.sla_status_ids.create(
-                            {'id': record.id, 'ticket_id': self._origin.id,
-                             'state': 'fail'})
-                        self._escalate_ticket()
-        if self._origin.stage_id.is_closed:
-            self.closed_date = datetime.now()
-            # If parent is closed, close children
-            if self.child_ids:
-                closed_stage = self.env.ref('cyllo_help_desk.solved_ticket')
-                self.child_ids.write({'stage_id': closed_stage.id})
+        method = self.team_id.assignment_method
+        members = self.team_id.member_ids
+
+        if method == 'manual':
+            self.user_id = False
+        elif method == 'random' and members:
+            self.user_id = random.choice(members.ids)
+        elif method == 'round_robin' and members:
+            # Load-balanced assignment: find member with least open tickets
+            ticket_counts = {}
+            for member in members:
+                count = self.env['helpdesk.ticket'].search_count([
+                    ('user_id', '=', member.id),
+                    ('stage_id.is_closed', '=', False)
+                ])
+                ticket_counts[member] = count
+            if ticket_counts:
+                best_member = min(ticket_counts, key=ticket_counts.get)
+                self.user_id = best_member.id
+        elif method == 'skill' and members:
+            # Unified Best Match assignment (HR Skills)
+            required_skill_ids = self.skill_ids.ids
+            
+            # Fetch employees for all team members
+            employees = self.env['hr.employee'].search([
+                ('user_id', 'in', members.ids)
+            ])
+            
+            member_data = []
+            for emp in employees:
+                emp_skill_ids = emp.employee_skill_ids.mapped('skill_id.id')
+                # Intersection of IDs
+                match_count = len(set(emp_skill_ids) & set(required_skill_ids))
+                
+                # We always consider team members for load balancing, 
+                # but if skill matching is preferred, we prioritize those with matches.
+                ticket_count = self.env['helpdesk.ticket'].search_count([
+                    ('user_id', '=', emp.user_id.id),
+                    ('stage_id.is_closed', '=', False)
+                ])
+                member_data.append({
+                    'user_id': emp.user_id.id,
+                    'matches': match_count,
+                    'tickets': ticket_count
+                })
+            
+            if member_data:
+                # Primary: Most matches | Secondary: Least tickets
+                best_candidates = sorted(member_data, key=lambda x: (-x['matches'], x['tickets']))
+                self.user_id = best_candidates[0]['user_id']
+
+    @api.onchange('customer_id')
+    def _onchange_customer_id_clear_sale_line(self):
+        """Keep the selected SO line consistent with the chosen customer."""
+        domain = [('id', '=', False)]
+        if self.customer_id:
+            commercial = self.customer_id.commercial_partner_id
+            domain = [
+                ('state', '=', 'sale'),
+                ('order_partner_id', 'child_of', commercial.id),
+            ]
+            if self.sale_order_line_id and self.sale_order_line_id.order_partner_id.commercial_partner_id != commercial:
+                self.sale_order_line_id = False
+        else:
+            self.sale_order_line_id = False
+
+        return {'domain': {'sale_order_line_id': domain}}
 
     @api.depends('create_date', 'sla_ids', 'stage_id', 'sla_paused')
     def _compute_sla_progress(self):
@@ -202,16 +247,29 @@ class HelpDeskTicket(models.Model):
             if members:
                 import random
                 self.user_id = random.choice(members.ids)
-        elif team.assignment_method == 'skill':
-            required_skills = self.skill_ids
-            if required_skills:
-                candidates = self.env['res.users'].search([
-                    ('helpdesk_skill_ids', 'in', required_skills.ids),
-                    ('groups_id', 'in', self.env.ref('cyllo_help_desk.cyllo_help_desk_user').id)
+        elif team.assignment_method == 'skill' and self.skill_ids:
+            # Consistent Best Match logic for background assignment
+            required_skill_ids = self.skill_ids.ids
+            employees = self.env['hr.employee'].search([
+                ('user_id', 'in', team.member_ids.ids)
+            ])
+            member_data = []
+            for emp in employees:
+                emp_skill_ids = emp.employee_skill_ids.mapped('skill_id.id')
+                match_count = len(set(emp_skill_ids) & set(required_skill_ids))
+                ticket_count = self.env['helpdesk.ticket'].search_count([
+                    ('user_id', '=', emp.user_id.id),
+                    ('stage_id.is_closed', '=', False)
                 ])
-                if candidates:
-                    candidate = max(candidates, key=lambda c: len(c.helpdesk_skill_ids & required_skills))
-                    self.user_id = candidate.id
+                member_data.append({
+                    'user_id': emp.user_id.id,
+                    'matches': match_count,
+                    'tickets': ticket_count
+                })
+            
+            if member_data:
+                best_candidates = sorted(member_data, key=lambda x: (-x['matches'], x['tickets']))
+                self.user_id = best_candidates[0]['user_id']
         elif team.assignment_method == 'round_robin':
             members = self.env['res.users'].search([
                 ('groups_id', 'in', self.env.ref('cyllo_help_desk.cyllo_help_desk_user').id)
@@ -250,6 +308,10 @@ class HelpDeskTicket(models.Model):
 
     def write(self, vals):
         result = super(HelpDeskTicket, self).write(vals)
+        if 'stage_id' in vals:
+            for ticket in self:
+                if ticket.child_ids:
+                    ticket.child_ids.write({'stage_id': vals['stage_id']})
         if self.stage_id.id == self.env.ref(
                 'cyllo_help_desk.in_progress_ticket').id:
             mail_template_exec = self.env.ref(

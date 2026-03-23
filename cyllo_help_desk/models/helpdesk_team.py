@@ -74,6 +74,7 @@ class HelpDeskTeam(models.Model):
         ('skill', 'Skill-based')
     ], string='Assignment Method', default='manual')
     last_assigned_user_id = fields.Many2one('res.users', string='Last Assigned User', help="Used for Round Robin assignment")
+    member_ids = fields.Many2many('res.users', string='Team Members', help="Users who can be assigned to tickets in this team")
     
     # Auto-close settings
     auto_close_days = fields.Integer(string='Auto-close after (days)', default=0)
@@ -81,6 +82,10 @@ class HelpDeskTeam(models.Model):
     closed_ticket_count = fields.Integer(
         compute="_compute_closed_ticket_count", string="Closed Ticket Count",
         help="Count of closed tickets in the team")
+    rating_avg = fields.Float(compute="_compute_rating_avg",
+                               string="Average Rating")
+    rating_count = fields.Integer(compute="_compute_rating_avg",
+                                   string="Rating Count")
 
     def _compute_open_helpdesk_ticket_count(self):
         tickets = self.env['helpdesk.ticket'].read_group(
@@ -161,7 +166,7 @@ class HelpDeskTeam(models.Model):
         one_week_back_date = datetime.now() - timedelta(
             days=6)
         tickets = self.env['helpdesk.ticket'].search_read(
-            [('closed_date', '>=', one_week_back_date)],
+            [('closed_date', '>=', one_week_back_date), ('team_id', '!=', False)],
             ['sla_flag', 'team_id', 'closed_date', 'sla_failed'])
         sorted_tickets = sorted(tickets, key=lambda x: x['team_id'])
         grouped_tickets = {}
@@ -202,3 +207,16 @@ class HelpDeskTeam(models.Model):
         action = self.env['ir.actions.actions']._for_xml_id(
             "cyllo_help_desk.helpdesk_team_successfully_solved_ticket_action")
         return action
+
+    def _compute_rating_avg(self):
+        for team in self:
+            ratings = self.env['rating.rating'].search([
+                ('helpdesk_team_id', '=', team.id),
+                ('consumed', '=', True),
+            ])
+            if ratings:
+                team.rating_avg = sum(ratings.mapped('rating')) / len(ratings)
+                team.rating_count = len(ratings)
+            else:
+                team.rating_avg = 0
+                team.rating_count = 0

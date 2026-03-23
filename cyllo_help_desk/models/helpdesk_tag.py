@@ -8,5 +8,6 @@ class HelpDeskTag(models.Model):
     name = fields.Char(string="Tag", ondelete='restrict',
                        help="Indicating from which the ticket generated")
     description = fields.Html(string="Description", help="Tag description")
+    color = fields.Integer(string='Color')
     sla_id = fields.Many2one('helpdesk.sla', string="SLA policy id")
 

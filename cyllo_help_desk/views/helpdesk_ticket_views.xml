@@ -158,13 +158,18 @@
                             <field name="sequence" invisible="1"/>
                             <field name="team_id"/>
                             <field name="priority" widget="priority"/>
-                            <field name="user_id"/>
+                            <field name="team_member_ids" invisible="1"/>
+                            <field name="user_id" domain="[('id', 'in', team_member_ids)]"/>
                             <field name="category_id"/>
                             <field name="tag_ids" widget="many2many_tags"/>
                             <field name="canned_response_id"/>
                             <field name="skill_ids" widget="many2many_tags"/>
                             <field name="parent_id" domain="[('id', '!=', active_id)]"/>
                             <field name="company_id"/>
+                            <field name="sale_order_line_id" domain="[
+                                ('state', '=', 'sale'),
+                                ('order_partner_id', 'child_of', customer_id)
+                            ]"/>
                         </group>
                     </group>
                     <notebook>
@@ -183,6 +188,7 @@
                                     <field name="ticket"/>
                                     <field name="name"/>
                                     <field name="user_id"/>
+                                    <field name="customer_id"/>
                                     <field name="stage_id"/>
                                 </tree>
                             </field>

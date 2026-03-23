@@ -14,6 +14,8 @@
                 <t t-set="title">Tickets</t>
                 <t t-set="url" t-value="'/my/tickets'"/>
                 <t t-set="placeholder_count" t-value="'ticket_count'"/>
+                <t t-set="icon" t-value="'/cyllo_help_desk/static/src/img/documents_file.svg'"/>
+                <t t-set="text">Follow, view or close your tickets</t>
             </t>
         </xpath>
     </template>
@@ -61,8 +63,8 @@
                                     <small class="text-muted"> (#<t t-esc="ticket.ticket"/>)</small>
                                 </h4>
                             </div>
-                            <div class="col-12 col-md-auto text-end" t-if="not ticket.stage_id.is_closed">
-                                <a role="button" class="btn btn-secondary" t-attf-href="/my/ticket/#{ticket.id}/close">
+                            <div class="col-12 col-md-auto text-end" t-if="not ticket.stage_id.is_closed and ticket.stage_id.id != env.ref('cyllo_help_desk.solved_ticket').id and ticket.stage_id.id != env.ref('cyllo_help_desk.canceled_ticket').id">
+                                <a role="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#closeTicketModal">
                                     <i class="fa fa-times"/> Close Ticket
                                 </a>
                             </div>
@@ -91,6 +93,31 @@
                     <t t-call="portal.message_thread">
                         <t t-set="object" t-value="ticket"/>
                     </t>
+                </div>
+            </div>
+
+            <!-- Close Ticket Confirmation Modal -->
+            <div class="modal fade" id="closeTicketModal" tabindex="-1" role="dialog" aria-labelledby="closeTicketModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <form t-attf-action="/my/ticket/#{ticket.id}/close" method="post">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" id="modal_solved" name="solved" value="1"/>
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="closeTicketModalLabel">Close Ticket</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Was the issue solved?</p>
+                                <textarea name="reason" class="form-control" placeholder="Reason for closing..." required="required"/>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary" onclick="document.getElementById('modal_solved').value='1'">Yes, it's solved</button>
+                                <button type="submit" class="btn btn-danger" onclick="document.getElementById('modal_solved').value='0'">No, cancel it</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go back</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </t>
