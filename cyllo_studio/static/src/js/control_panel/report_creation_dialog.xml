@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ReportCreationDialog">
+        <Dialog title="'Create New Report'" size="'md'">
+            <div class="o_form_view">
+                <div class="o_form_sheet border-0 p-0">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Report Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" t-model="state.name" placeholder="e.g. Custom Invoice" autofocus="autofocus"/>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Model</label>
+                        <div class="col-sm-8">
+                            <AutoComplete
+                                sources="autoCompleteSources"
+                                value="state.modelLabel"
+                                onSelect="(res) => this.onModelSelected(res)"
+                                placeholder="'Search a model...'"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary px-4" t-on-click="_onCreate">Create</button>
+                <button class="btn btn-light border px-4" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

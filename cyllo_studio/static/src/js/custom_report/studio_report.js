@@ -83,6 +83,7 @@ export class EditReport extends Component {
 
             this._template = template;
             this._resModel = resModel;
+            this._reportId = params.report_id || null;
 
             let arch = params.arch;
             if (!arch || arch === 'undefined') {
@@ -1475,6 +1476,41 @@ export class EditReport extends Component {
 
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
+
+                // ── CAPTURE THUMBNAIL ────
+                try {
+                    const iframeDoc = component.reportFrameRef.el.contentDocument;
+                    const iframeBody = iframeDoc.body;
+                    console.log("[Cyllo Studio] Attempting thumbnail capture. html2canvas present:", !!window.html2canvas);
+
+                    if (iframeBody && window.html2canvas) {
+                        // Target the main report page container for a cleaner screenshot if possible
+                        const targetEl = iframeDoc.querySelector('.page') || iframeBody;
+
+                        // Scroll to top to avoid capturing blank content
+                        iframeDoc.defaultView.scrollTo(0, 0);
+
+                        const canvas = await window.html2canvas(targetEl, {
+                            scale: 0.8,
+                            useCORS: true,
+                            logging: true,
+                            allowTaint: true,
+                            backgroundColor: '#ffffff'
+                        });
+
+                        console.log("[Cyllo Studio] Canvas generated. Width:", canvas.width, "Height:", canvas.height);
+                        const imgData = canvas.toDataURL('image/jpeg', 0.8);
+
+                        const rpcResult = await component.rpc('/cyllo_studio/save_report_thumbnail', {
+                            report_id: component._reportId,
+                            report_name: component._template,
+                            image_base64: imgData
+                        });
+                        console.log("[Cyllo Studio] Thumbnail RPC result:", rpcResult);
+                    }
+                } catch (e) {
+                    console.error("[Cyllo Studio] Critical failure in thumbnail capture:", e);
+                }
 
                 // ── PERSISTENT SAVE: Refresh local state instead of closing ────
                 const resArch = await component.rpc('/cyllo_studio/get_arch', {
