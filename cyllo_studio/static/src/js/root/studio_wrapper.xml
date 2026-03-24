@@ -50,24 +50,23 @@
                              class="position-relative">
 							<t t-if="props.info.Component" t-component="props.info.Component" className="'o_action'"
                                t-props="props.info.componentProps" t-key="props.info.id"/>
-                            <div class="cy-studio-overlay opacity-0 opacity-75-hover w-100">
-
-								<div class="text-center">
-									<i class="ri-lock-2-fill text-danger" style="font-size: 10rem;"/>
-                                    <h2 class="fw-bolder text-danger">
-										<t t-esc="props.info?.componentProps.action?.display_name"/>
-                                        Editing Restricted !
-									</h2>
-                                    <div t-if="props.info and props.info?.componentProps?.type == 'grid'" class="mt-3">
-                                        <div class="text-warning">
-                                            <i class="ri-tools-line me-2" style="font-size: 1.5rem;"/>
-                                            <h4 class="fw-bolder text-warning mb-1 d-inline">
-                                                Grid view functionality is under development in studio.
-                                            </h4>
-                                        </div>
-                                    </div>
-                                    </div>
-                                </div>
+<!--                            <div class="cy-studio-overlay opacity-0 opacity-75-hover w-100">-->
+<!--								<div class="text-center">-->
+<!--									<i class="ri-lock-2-fill text-danger" style="font-size: 10rem;"/>-->
+<!--                                    <h2 class="fw-bolder text-danger">-->
+<!--										<t t-esc="props.info?.componentProps.action?.display_name"/>-->
+<!--                                        Editing Restricted !-->
+<!--									</h2>-->
+<!--                                    <div t-if="props.info and props.info?.componentProps?.type == 'grid'" class="mt-3">-->
+<!--                                        <div class="text-warning">-->
+<!--                                            <i class="ri-tools-line me-2" style="font-size: 1.5rem;"/>-->
+<!--                                            <h4 class="fw-bolder text-warning mb-1 d-inline">-->
+<!--                                                Grid view functionality is under development in studio.-->
+<!--                                            </h4>-->
+<!--                                        </div>-->
+<!--                                    </div>-->
+<!--                                    </div>-->
+<!--                                </div>-->
 <!--                          <div t-if="props.info?.componentProps?.type == 'form' and state.isPreviewMode"-->
 <!--     class="cy-studio-overlay opacity-0 opacity-75-hover w-100" style="pointer-events: auto; cursor: not-allowed;">-->
 <!--    <div class="text-center">-->

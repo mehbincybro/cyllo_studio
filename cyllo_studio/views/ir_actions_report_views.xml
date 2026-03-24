@@ -13,11 +13,10 @@
                 <field name="report_thumbnail"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <t t-set="report_model" t-value="record.model.raw_value || ''"/>
                         <t t-set="record_name" t-value="record.name.raw_value || ''"/>
 
                         <!-- Clean, minimal SVG placeholder matching Cyllo Analytics aesthetic (with centered icon) -->
-                        <t t-set="placeholder_data_uri" t-value="'data:image/svg+xml;utf8,&lt;svg xmlns=\'http://www.w3.org/2000/svg\' width=\'170\' height=\'135\' viewBox=\'0 0 170 135\'&gt;&lt;rect width=\'170\' height=\'135\' fill=\'%23ffffff\'/&gt;&lt;rect x=\'40\' y=\'30\' width=\'90\' height=\'6\' fill=\'%23f1f5f9\' rx=\'3\'/&gt;&lt;rect x=\'40\' y=\'45\' width=\'60\' height=\'6\' fill=\'%23f1f5f9\' rx=\'3\'/&gt;&lt;path d=\'M75 65 h20 v30 h-20 z\' fill=\'%23f8fafc\' stroke=\'%23e2e8f0\'/&gt;&lt;path d=\'M78 70 h14 M78 75 h14 M78 80 h14\' stroke=\'%23cbd5e1\' stroke-width=\'1\'/&gt;&lt;/svg&gt;'"/>
+                        <t t-set="placeholder_data_uri" t-value="'data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNzAnIGhlaWdodD0nMTM1JyB2aWV3Qm94PScwIDAgMTcwIDEzNSc+PHJlY3Qgd2lkdGg9JzE3MCcgaGVpZ2h0PScxMzUnIGZpbGw9JyNmOGZhZmMnLz48cGF0aCBkPSdNNjAgNDAgaDUwIHY1NSBxMCA1IC01IDUgaC00MCBxLTUgMCAtNSAtNSB6JyBmaWxsPSd3aGl0ZScgc3Ryb2tlPScjZTJlOGYwJy8+PHJlY3QgeD0nNzAnIHk9JzUwJyB3aWR0aD0nMzAnIGhlaWdodD0nMicgZmlsbD0nI2YxZjVmOScgcng9JzEnLz48cmVjdCB4PSc3MCcgeT0nNTgnIHdpZHRoPScyMCcgaGVpZ2h0PScyJyBmaWxsPScjZjFmNWY5JyByeD0nMScvPjxyZWN0IHg9JzcwJyB5PSc2Nicgd2lkdGg9JzMwJyBoZWlnaHQ9JzInIGZpbGw9JyNmMWY1ZjknIHJ4PScxJy8+PHJlY3QgeD0nNzAnIHk9Jzc0JyB3aWR0aD0nMjUnIGhlaWdodD0nMicgZmlsbD0nI2YxZjVmOScgcng9JzEnLz48Y2lyY2xlIGN4PSc4NScgY3k9Jzg4JyByPSc2JyBmaWxsPScjZjhmYWZjJy8+PHBhdGggZD0nTTgzIDg2IGw0IDQgTTg3IDg2IGwtNCA0JyBzdHJva2U9JyM5NGEzYjgnIHN0cm9rZS13aWR0aD0nMScvPjwvc3ZnPg=='"/>
 
                         <!-- Cyllo Analytics Tile Card Layout -->
                         <div class="oe_kanban_global_click cyllo_report_card">

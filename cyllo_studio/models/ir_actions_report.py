@@ -36,6 +36,8 @@ class IrActionsReport(models.Model):
     """Extension of ir.actions.report to enhance rendering and PDF handling."""
     _inherit = 'ir.actions.report'
 
+    report_thumbnail = fields.Image("Report Thumbnail", max_width=1024, max_height=1024, attachment=True)
+
     def _get_report(self, report_ref):
         """Get the report (with sudo) from a reference
         report_ref: can be one of
@@ -160,8 +162,7 @@ class IrActionsReport(models.Model):
             additional_context = {'debug': False}
 
             html = \
-                self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[
-                    0]
+            self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[0]
 
             bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(
                 **additional_context)._prepare_html(html, report_model=report_sudo.model)
@@ -368,6 +369,7 @@ class IrActionsReport(models.Model):
             'type': 'ir.actions.client',
             'tag': 'edit_report',
             'params': {
+                'report_id': self.id,
                 'model_id': self.binding_model_id.id,
                 'res_model': self.model,
                 'template': report,
@@ -393,16 +395,18 @@ class IrActionsReport(models.Model):
             <t t-name="{xml_id}">
                 <t t-call="web.html_container">
                     <t t-call="web.external_layout">
-                        <div class="page">
-                            <div class="oe_structure"/>
-                            <div class="row">
-                                <div class="col-12">
-                                    <h2 class="text-center">{name}</h2>
-                                    <p class="text-muted text-center">New Report for {model_rec.name}</p>
+                        <t t-foreach="docs" t-as="doc">
+                            <div class="page">
+                                <div class="oe_structure"/>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h2 class="text-center">{name}</h2>
+                                        <p class="text-muted text-center">New Report for {model_rec.name}</p>
+                                    </div>
                                 </div>
+                                <div class="oe_structure"/>
                             </div>
-                            <div class="oe_structure"/>
-                        </div>
+                        </t>
                     </t>
                 </t>
             </t>
