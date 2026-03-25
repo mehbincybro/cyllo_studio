@@ -20,53 +20,91 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 0.6rem;
-    border: 1px solid #DFDFDF;
+    padding: 0;
+    /* Remove internal padding to allow full-width thumbnail */
+    border: 1px solid #E2E8F0;
     background: #FFF;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    height: 195px;
+    transition: all 0.25s ease;
+    height: 200px;
     width: 100%;
+    position: relative;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+    /* Ensure rounded corners for thumbnail */
 }
 
 .cyllo_report_card:hover {
     border-color: #9ea700;
+    box-shadow: 0 4px 12px rgba(158, 167, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.cyllo_report_delete {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent !important;
+    border: none !important;
+    color: #cbd5e1 !important;
+    padding: 4px 8px !important;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    font-size: 16px;
+}
+
+.cyllo_report_card:hover .cyllo_report_delete {
+    opacity: 1;
+}
+
+.cyllo_report_delete:hover {
+    color: #ef4444 !important;
 }
 
 .cyllo_report_thumbnail_wrapper {
     position: relative;
-    width: 170px;
-    height: 135px;
+    width: 100%;
+    height: 145px;
+    /* Slightly taller for better impact */
     overflow: hidden;
     display: flex;
     justify-content: center;
-    align-items: center;
-    margin-bottom: 8px;
-    background: #fff;
+    align-items: flex-start;
+    /* Align to top to show report headers */
+    background: #f8fafc;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .cyllo_report_thumbnail {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: 100%;
     object-fit: contain;
-    transition: transform 0.3s ease-in-out;
+    /* Ensure full report is visible */
+    object-position: center;
+    padding: 10px;
+    /* Small padding for a "floating" paper look */
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .cyllo_report_card:hover .cyllo_report_thumbnail {
-    transform: scale(1.1);
+    transform: scale(1.05);
 }
 
 .cyllo_report_title {
-    font-size: 14px;
-    color: #333;
+    font-size: 13px;
+    /* Slightly smaller to fit better */
+    color: #1e293b;
     font-weight: 500;
     text-align: center;
     width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0 5px;
+    padding: 12px 10px;
+    /* More padding for better spacing */
+    margin: 0;
 }
 
 /* Base override for Odoo Kanban list */

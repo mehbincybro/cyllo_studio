@@ -21,4 +21,5 @@
 #############################################################################
 from . import main
 from . import home
-
+from . import report
+from . import thumbnail
