@@ -1,6 +1,11 @@
 from odoo import fields, models
 
 
+class MailShortcode(models.Model):
+    _inherit = 'mail.shortcode'
+    _rec_name = 'source'
+
+
 class HelpdeskCannedResponse(models.Model):
     _name = "helpdesk.canned.response"
     _description = "Helpdesk Canned Response"

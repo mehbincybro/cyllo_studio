@@ -162,7 +162,7 @@
                             <field name="user_id" domain="[('id', 'in', team_member_ids)]"/>
                             <field name="category_id"/>
                             <field name="tag_ids" widget="many2many_tags"/>
-                            <field name="canned_response_id"/>
+                            <field name="canned_response_ids" widget="many2many_tags"/>
                             <field name="skill_ids" widget="many2many_tags"/>
                             <field name="parent_id" domain="[('id', '!=', active_id)]"/>
                             <field name="company_id"/>
