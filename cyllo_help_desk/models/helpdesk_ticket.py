@@ -80,6 +80,11 @@ class HelpDeskTicket(models.Model):
     parent_id = fields.Many2one('helpdesk.ticket', string='Parent Ticket', help='Reference to the main ticket')
     child_ids = fields.One2many('helpdesk.ticket', 'parent_id', string='Sub-tickets')
 
+    @api.constrains('parent_id')
+    def _check_parent_id_recursion(self):
+        if not self._check_recursion():
+            raise UserError(_('Error! You cannot create recursive ticket dependencies.'))
+
     # Dependencies
     dependency_ids = fields.Many2many('helpdesk.ticket', 'helpdesk_ticket_dependency_rel', 'ticket_id', 'dependency_id', string='Dependencies')
 
@@ -112,7 +117,7 @@ class HelpDeskTicket(models.Model):
     website_published = fields.Boolean(string='Visible in Portal', default=True)
 
     # Canned Response
-    canned_response_id = fields.Many2one('mail.shortcode', string='Canned Response')
+    canned_response_ids = fields.Many2many('mail.shortcode', string='Canned Response')
 
     @api.onchange('stage_id')
     def onchange_stage_id(self):
@@ -308,33 +313,33 @@ class HelpDeskTicket(models.Model):
 
     def write(self, vals):
         result = super(HelpDeskTicket, self).write(vals)
+        in_progress_stage = self.env.ref('cyllo_help_desk.in_progress_ticket').id
+        solved_stage = self.env.ref('cyllo_help_desk.solved_ticket').id
+        mail_template = self.env.ref('cyllo_help_desk.help_desk_mail_template', raise_if_not_found=False)
+        solved_mail_template = self.env.ref('cyllo_help_desk.help_desk_mail_template_issue_solved', raise_if_not_found=False)
+
         if 'stage_id' in vals:
             for ticket in self:
-                if ticket.child_ids:
-                    ticket.child_ids.write({'stage_id': vals['stage_id']})
-        if self.stage_id.id == self.env.ref(
-                'cyllo_help_desk.in_progress_ticket').id:
-            mail_template_exec = self.env.ref(
-                'cyllo_help_desk.help_desk_mail_template')
-            mail_template_exec['email_from'] = self.user_id.login
-            mail_template_exec['email_to'] = self.customer_id.email
-            mail_template_exec.sudo().send_mail(self._origin.id,
-                                                force_send=True)
-            # Adding a message in the chatter to inform that the mail
-            # sent or not
-            body = f"""Email sent to {self.customer_id.name}"""
-            self.message_post(body=body, subject="TICKET CREATED")
-        if self.stage_id.id == self.env.ref('cyllo_help_desk.solved_ticket').id:
-            mail_template_exec = self.env.ref(
-                'cyllo_help_desk.help_desk_mail_template_issue_solved')
-            mail_template_exec['email_from'] = self.user_id.login
-            mail_template_exec['email_to'] = self.customer_id.email
-            mail_template_exec.sudo().send_mail(self._origin.id,
-                                                force_send=True)
-            # Adding a message in the chatter to inform that the mail
-            # sent or not
-            body = f"""Work done mail sent to {self.customer_id.name}"""
-            self.message_post(body=body, subject="ISSUE SOLVED")
+                # Filter children to only those that actually need a stage update
+                # to prevent recursion and redundant writes.
+                children_to_update = ticket.child_ids.filtered(lambda t: t.stage_id.id != vals['stage_id'])
+                if children_to_update:
+                    children_to_update.write({'stage_id': vals['stage_id']})
+                
+                # Check stages for email notifications
+                if ticket.stage_id.id == in_progress_stage and mail_template:
+                    mail_template['email_from'] = ticket.user_id.login
+                    mail_template['email_to'] = ticket.customer_id.email
+                    mail_template.sudo().send_mail(ticket._origin.id or ticket.id, force_send=True)
+                    body = f"""Email sent to {ticket.customer_id.name}"""
+                    ticket.message_post(body=body, subject="TICKET CREATED")
+                
+                elif ticket.stage_id.id == solved_stage and solved_mail_template:
+                    solved_mail_template['email_from'] = ticket.user_id.login
+                    solved_mail_template['email_to'] = ticket.customer_id.email
+                    solved_mail_template.sudo().send_mail(ticket._origin.id or ticket.id, force_send=True)
+                    body = f"""Work done mail sent to {ticket.customer_id.name}"""
+                    ticket.message_post(body=body, subject="ISSUE SOLVED")
         return result
 
     @api.model
@@ -608,9 +613,8 @@ class HelpDeskTicket(models.Model):
                 ('write_date', '<', close_date)
             ])
             if tickets_to_close:
-                solved_stage = self.env.ref('cyllo_help_desk.solved_ticket')
+                solved_stage = team.auto_close_stage_id or self.env.ref('cyllo_help_desk.solved_ticket')
                 tickets_to_close.write({'stage_id': solved_stage.id})
-            
             # Send reminders
             if team.auto_close_reminder_days > 0:
                 reminder_date = datetime.now() - timedelta(days=team.auto_close_reminder_days)
@@ -706,19 +710,18 @@ class HelpDeskTicket(models.Model):
         }
         return action
 
-    @api.onchange('canned_response_id')
-    def onchange_canned_response_id(self):
+    @api.onchange('canned_response_ids')
+    def onchange_canned_response_ids(self):
         for ticket in self:
-            if not ticket.canned_response_id:
-                continue
-            canned_html = ticket.canned_response_id.substitution or ''
-            if canned_html:
-                ticket.description = (
-                    '%s<br/>%s' % (ticket.description, canned_html)
-                    if ticket.description else canned_html
-                )
-            ticket.canned_response_id = False
-
+            if ticket.canned_response_ids:
+                new_content = []
+                for response in ticket.canned_response_ids:
+                    if response.substitution:
+                        new_content.append(response.substitution)
+                if new_content:
+                    combined_content = '<br/>'.join(new_content)
+                    ticket.description = combined_content
+                
     def action_create_refund(self):
         self.ensure_one()
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_refund_type")

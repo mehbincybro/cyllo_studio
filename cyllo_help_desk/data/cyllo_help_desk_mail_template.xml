@@ -41,4 +41,21 @@
             </p>
         </field>
     </record>
+    <record id="help_desk_mail_template_auto_close_reminder" model="mail.template">
+        <field name="name">Help Desk: Auto-close Reminder</field>
+        <field name="model_id" ref="cyllo_help_desk.model_helpdesk_ticket"/>
+        <field name="subject">Reminder: Your ticket will be closed soon</field>
+        <field name="body_html" type="html">
+            <div>
+                <br/>
+                <h4>Dear <t t-out="object.customer_id.name"/>,</h4>
+                <p>We are following up on your ticket <strong><t t-out="object.name"/></strong> (No. <t t-out="object.ticket"/>).</p>
+                <p>Since we haven't heard from you in a while, we wanted to let you know that this ticket will be automatically closed soon if there is no further activity.</p>
+                <p>If the issue is still ongoing, please reply to this email or update the ticket on the portal.</p>
+                <br/>
+                <p>Best regards,<br/>
+                <t t-out="object.team_id.name"/> Support Team</p>
+            </div>
+        </field>
+    </record>
 </odoo>

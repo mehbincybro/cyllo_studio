@@ -25,7 +25,7 @@ class WebsiteForm(form.WebsiteForm):
     def _get_or_create_partner(self, values):
         email = tools.email_normalize(values.get("email"))
         phone = values.get("phone")
-        name = values.get("name") or email or _("Website Visitor")
+        name = values.get("partner_name") or email or _("Website Visitor")
 
         partner = request.env["res.partner"].sudo()
         if email:
@@ -53,7 +53,7 @@ class WebsiteForm(form.WebsiteForm):
             # Assign values
             values.update({
                 "team_id": team.id,
-                "partner_id": partner.id,
+                "customer_id": partner.id,
                 "email": values.get("email"),
                 "description": values.get("description") or _("No description"),
             })

@@ -39,4 +39,5 @@ class SLAStatus(models.Model):
                         self.create(
                             {'id': record.id, 'ticket_id': ticket.id,
                              'state': 'fail'})
+                        ticket.sla_failed = True
 

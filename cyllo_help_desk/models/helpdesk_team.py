@@ -79,6 +79,7 @@ class HelpDeskTeam(models.Model):
     # Auto-close settings
     auto_close_days = fields.Integer(string='Auto-close after (days)', default=0)
     auto_close_reminder_days = fields.Integer(string='Auto-close reminder after (days)', default=0)
+    auto_close_stage_id = fields.Many2one('helpdesk.stage', string='Auto-close Stage', help="Ticket will be moved to this stage once it is auto-closed.")
     closed_ticket_count = fields.Integer(
         compute="_compute_closed_ticket_count", string="Closed Ticket Count",
         help="Count of closed tickets in the team")

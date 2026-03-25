@@ -99,6 +99,7 @@
                                 <group>
                                     <separator string="Auto-close"/>
                                     <field name="auto_close_days"/>
+                                    <field name="auto_close_stage_id" invisible="auto_close_days == 0" required="auto_close_days &gt; 0"/>
                                     <field name="auto_close_reminder_days"/>
                                 </group>
                             </group>
