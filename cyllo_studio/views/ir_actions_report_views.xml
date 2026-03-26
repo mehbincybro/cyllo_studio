@@ -20,6 +20,11 @@
 
                         <!-- Cyllo Analytics Tile Card Layout -->
                         <div class="oe_kanban_global_click cyllo_report_card">
+                            <!-- Delete Button (Top Right) -->
+                            <button type="delete" name="unlink" class="btn btn-sm cyllo_report_delete" title="Delete Report">
+                                <i class="fa fa-trash-o"/>
+                            </button>
+
                             <div class="cyllo_report_thumbnail_wrapper">
                                 <t t-if="record.report_thumbnail.raw_value">
                                     <img t-att-src="'/web/image/ir.actions.report/' + record.id.raw_value + '/report_thumbnail'" class="cyllo_report_thumbnail" alt="Report Preview"/>

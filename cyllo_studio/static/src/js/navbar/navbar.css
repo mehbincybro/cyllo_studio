@@ -1,7 +1,7 @@
 :root {
     --body-bg: #363827;
     --navbar-bg: #25281a;
-    --new-app-color: #c9d200;
+    --new-app-color: #9ea700;
     --view-edits-bg: #9ea700;
     --view-edits-border: #9ea700;
     --view-edits-color: #ffffff;
@@ -23,7 +23,7 @@
     --body-bg: #fff;
     --navbar-bg: #e6e6e6;
     --navbar-title-color: #61720d;
-    --new-app-color: #61720d;
+    --new-app-color: #9ea700;
     --view-edits-bg: #9ea700;
     --view-edits-border: #9ea700;
     --view-edits-color: #2a2828;

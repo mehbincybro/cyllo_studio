@@ -54,6 +54,9 @@ export class EditReport extends Component {
             showTableModal: false,
             isSaving: false,
             tcm: this._getDefaultTcmState(),
+            // ── QR Wizard state ──
+            showQrWizard: false,
+            qr: this._getDefaultQrState(),
         });
 
         // Promise resolver for the table config modal
@@ -137,6 +140,18 @@ export class EditReport extends Component {
             subtree: true,
             characterData: true,
             attributes: true
+        });
+
+        // ── QR Block Internal Click Handler ──
+        editableArea.addEventListener("click", (e) => {
+            const qrBlock = e.target.closest('.s_qr_block');
+            if (qrBlock && e.target.classList.contains('qr-edit-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.openQrWizard(qrBlock, 'edit').then(config => {
+                    if (config) this.insertQrBlock(qrBlock, config, 'update');
+                });
+            }
         });
 
         const self = this;
@@ -745,27 +760,16 @@ export class EditReport extends Component {
                     item.style.cursor = 'default';
                     item.style.opacity = '1';
 
+                    // Internal delete handler
                     item.querySelector('.table-delete').onclick = (e) => {
                         e.stopPropagation();
                         self.dialog.add(ConfirmationDialog, {
-                            title: "Delete Table",
                             body: "Are you sure you want to delete this table?",
-                            confirm: async () => {
-                                // Remove orphaned <t> siblings BEFORE removing the wrapper
-                                // (HTML foster-parenting leaves them stranded in the zone).
-                                self._removeOrphanedQwebElements(item);
-                                item.remove();
-                                await self.save_changes(self);
-                            },
+                            confirm: () => item.remove(),
                             cancel: () => { },
                         });
                     };
-                }
 
-                // ── LIVE SYNC: UI -> Source ──────────────────────────────────
-                // If source editor is open, refresh its content to show the
-                // newly added element XML immediately.
-                if (self.state.showSourceEditor) {
                     const refreshRes = await self.rpc('/cyllo_studio/get_report_source', {
                         template: self._template,
                     });
@@ -775,6 +779,15 @@ export class EditReport extends Component {
                             self.aceEditor.setValue(refreshRes.arch, -1);
                         }
                     }
+                }
+
+                if (type === 'qr') {
+                    const config = await self.openQrWizard(item);
+                    if (!config) {
+                        item.remove();
+                        return;
+                    }
+                    self.insertQrBlock(item, config);
                 }
                 // Re-initialize drag handles for the new zone content
                 self._refreshDragHandles();
@@ -908,6 +921,190 @@ export class EditReport extends Component {
             availableModels: [],
             availableFields: [],
         };
+    }
+
+    _getDefaultQrState() {
+        return {
+            step: 1,
+            type: 'portal',
+            config: {
+                field: 'object.name',
+                baseUrl: window.location.origin,
+                portalPath: '',
+                tokenType: 'auto',
+                tokenExpr: '',
+                upiVpa: '',
+                amountField: 'amount_residual',
+                noteField: 'object.name',
+                expression: '',
+                size: 100,
+                align: 'center',
+                errorCorrection: 'M',
+                caption: '',
+            },
+            previewImgUrl: '',
+            previewLoading: false,
+            previewError: false,
+            previewStr: '',
+            qwebPreview: '',
+            validationResult: 'none',
+            validationError: '',
+            warnings: {},
+            errors: {
+                hasErrors: false,
+                upi_vpa: false,
+            }
+        };
+    }
+
+    async openQrWizard(placeholderEl, mode = 'insert') {
+        const self = this;
+        this.state.showQrWizard = true;
+
+        if (mode === 'edit' && placeholderEl.dataset.qrConfig) {
+            try {
+                const existing = JSON.parse(placeholderEl.dataset.qrConfig);
+                this.state.qr = this._getDefaultQrState();
+                this.state.qr.type = existing.type || 'portal';
+                Object.assign(this.state.qr.config, existing.config || {});
+                this.state.qr.step = 3;
+            } catch (e) {
+                this.state.qr = this._getDefaultQrState();
+            }
+        } else {
+            this.state.qr = this._getDefaultQrState();
+        }
+
+        const model = this.state.reportInfo.model;
+        if (model === 'account.move') {
+            this.state.qr.config.portalPath = '/my/invoices/';
+        } else if (model === 'sale.order') {
+            this.state.qr.config.portalPath = '/my/orders/';
+        }
+
+        this._updateQrPreviews();
+
+        return new Promise((resolve) => {
+            self._qrResolve = (config) => {
+                self.state.showQrWizard = false;
+                resolve(config);
+            };
+        });
+    }
+
+    onSelectQrType(type) {
+        this.state.qr.type = type;
+        this._updateQrPreviews();
+    }
+
+    updateQrConfig(key, value) {
+        this.state.qr.config[key] = value;
+        if (this.state.qr.type === 'upi') {
+            this.state.qr.errors.upi_vpa = !this.state.qr.config.upiVpa;
+            this.state.qr.errors.hasErrors = this.state.qr.errors.upi_vpa;
+        } else {
+            this.state.qr.errors.hasErrors = false;
+        }
+        this._updateQrPreviews();
+    }
+
+    qrNextStep() {
+        if (this.state.qr.step < 3) this.state.qr.step++;
+    }
+
+    qrPrevStep() {
+        if (this.state.qr.step > 1) this.state.qr.step--;
+    }
+
+    qrGoToStep(step) {
+        if (step < this.state.qr.step || !this.state.qr.errors.hasErrors) {
+            this.state.qr.step = step;
+        }
+    }
+
+    onQrWizardCancel() {
+        this.onQrCancel();
+    }
+
+    onQrCancel() {
+        this.state.showQrWizard = false;
+        if (this._qrResolve) this._qrResolve(null);
+    }
+
+    onQrWizardConfirm() {
+        if (this._qrResolve) {
+            this._qrResolve({
+                type: this.state.qr.type,
+                config: { ...this.state.qr.config }
+            });
+        }
+    }
+
+    async validateQrExpression() {
+        const expr = this.state.qr.config.expression;
+        if (!expr) return;
+        try {
+            const result = await this.rpc('/studio/report/validate_expr', {
+                expr: expr,
+                model: this.state.reportInfo.model
+            });
+            this.state.qr.validationResult = result.valid ? 'valid' : 'invalid';
+            this.state.qr.validationError = result.error || '';
+        } catch (e) {
+            this.state.qr.validationResult = 'invalid';
+            this.state.qr.validationError = e.message;
+        }
+    }
+
+    onQrPreviewError() {
+        this.state.qr.previewError = true;
+        this.state.qr.previewLoading = false;
+    }
+
+    _updateQrPreviews() {
+        if (!this.state.showQrWizard) return;
+        const expr = this._buildQrExpression();
+        this.state.qr.previewStr = expr;
+        this.state.qr.previewLoading = true;
+        this.state.qr.previewError = false;
+
+        const encoded = encodeURIComponent(expr.replace(/doc\./g, 'object.'));
+        this.state.qr.previewImgUrl = `/report/barcode/QR/${encoded}`;
+
+        const size = this.state.qr.config.size;
+        const align = this.state.qr.config.align;
+        const qwebExpr = this._buildQrExpression(true);
+
+        let html = `<div style="text-align:${align};">\n`;
+        html += `  <img t-att-src="'/report/barcode/QR/' + url_quote(${qwebExpr})" \n`;
+        html += `       style="width:${size}px; height:${size}px;"/>\n`;
+        if (this.state.qr.config.caption) {
+            html += `  <div style="font-size:8pt; margin-top:3px;">${this.state.qr.config.caption}</div>\n`;
+        }
+        html += `</div>`;
+        this.state.qr.qwebPreview = html;
+    }
+
+    _buildQrExpression(forQWeb = false) {
+        const type = this.state.qr.type;
+        const config = this.state.qr.config;
+        const obj = forQWeb ? 'object' : 'doc';
+
+        if (type === 'plain') return config.field.replace(/object\./g, obj + '.');
+        if (type === 'portal') {
+            const path = config.portalPath || '/my/view/';
+            let s = `str(${obj}.get_base_url()) + '${path}' + str(${obj}.id)`;
+            if (config.tokenType === 'auto') s += ` + '?' + ${obj}._get_share_url()`;
+            return s;
+        }
+        if (type === 'upi') {
+            const pa = config.upiVpa;
+            const am = `${obj}.${config.amountField}`;
+            const tn = config.noteField === 'custom' ? "'Payment'" : config.noteField.replace(/object\./g, obj + '.');
+            return `'upi://pay?pa=${pa}&am=' + str(${am}) + '&tn=' + str(${tn})`;
+        }
+        if (type === 'custom') return (config.expression || "''").replace(/object\./g, obj + '.');
+        return "''";
     }
 
     async openTableConfigModal(targetEl, resModel) {
@@ -1477,40 +1674,40 @@ export class EditReport extends Component {
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
 
-                // ── CAPTURE THUMBNAIL ────
-                try {
-                    const iframeDoc = component.reportFrameRef.el.contentDocument;
-                    const iframeBody = iframeDoc.body;
-                    console.log("[Cyllo Studio] Attempting thumbnail capture. html2canvas present:", !!window.html2canvas);
+                // ── CAPTURE THUMBNAIL (Non-blocking) ────
+                setTimeout(async () => {
+                    try {
+                        const reportEl = component.reportFrameRef.el;
+                        const containerEl = reportEl ? reportEl.closest('.cyllo-studio-report-container') : null;
 
-                    if (iframeBody && window.html2canvas) {
-                        // Target the main report page container for a cleaner screenshot if possible
-                        const targetEl = iframeDoc.querySelector('.page') || iframeBody;
+                        if (containerEl && window.html2canvas) {
+                            // Brief delay to ensure any final paint after RPC
+                            await new Promise(r => setTimeout(r, 400));
+                            containerEl.scrollTop = 0;
 
-                        // Scroll to top to avoid capturing blank content
-                        iframeDoc.defaultView.scrollTo(0, 0);
+                            const canvas = await window.html2canvas(containerEl, {
+                                scale: 1, // Standard resolution for maximum speed
+                                useCORS: true,
+                                logging: false,
+                                allowTaint: true,
+                                backgroundColor: '#ffffff',
+                                width: containerEl.scrollWidth,
+                                height: containerEl.scrollHeight
+                            });
 
-                        const canvas = await window.html2canvas(targetEl, {
-                            scale: 0.8,
-                            useCORS: true,
-                            logging: true,
-                            allowTaint: true,
-                            backgroundColor: '#ffffff'
-                        });
+                            const imgData = canvas.toDataURL('image/jpeg', 0.6); // Slightly lower quality for even faster save
 
-                        console.log("[Cyllo Studio] Canvas generated. Width:", canvas.width, "Height:", canvas.height);
-                        const imgData = canvas.toDataURL('image/jpeg', 0.8);
-
-                        const rpcResult = await component.rpc('/cyllo_studio/save_report_thumbnail', {
-                            report_id: component._reportId,
-                            report_name: component._template,
-                            image_base64: imgData
-                        });
-                        console.log("[Cyllo Studio] Thumbnail RPC result:", rpcResult);
+                            await component.rpc('/cyllo_studio/save_report_thumbnail', {
+                                report_id: component._reportId,
+                                report_name: component._template,
+                                image_base64: imgData
+                            });
+                            console.log("[Cyllo Studio] Lazy thumbnail saved.");
+                        }
+                    } catch (e) {
+                        console.error("[Cyllo Studio] Background thumbnail capture failure:", e);
                     }
-                } catch (e) {
-                    console.error("[Cyllo Studio] Critical failure in thumbnail capture:", e);
-                }
+                }, 100);
 
                 // ── PERSISTENT SAVE: Refresh local state instead of closing ────
                 const resArch = await component.rpc('/cyllo_studio/get_arch', {
@@ -1582,110 +1779,160 @@ export class EditReport extends Component {
         );
     }
 
-    _cleanStudioAttrs(el) {
+    insertQrBlock(placeholderEl, qrConfig, mode = 'insert') {
+        const type = qrConfig.type;
+        const config = qrConfig.config;
+        const align = config.align || 'center';
+        const size = config.size || 100;
+
+        placeholderEl.className = 's_qr_block c_new';
+        placeholderEl.style.textAlign = align;
+        placeholderEl.style.cursor = 'default';
+        placeholderEl.style.opacity = '1';
+        placeholderEl.setAttribute('cy-type', 'qr');
+        placeholderEl.dataset.qrConfig = JSON.stringify(qrConfig);
+
+        const previewImg = this._buildQrExpression().replace(/doc\./g, 'object.');
+        const encoded = encodeURIComponent(previewImg);
+
+        placeholderEl.innerHTML = `
+            <div class="qr-handle-container" contenteditable="false" style="position:absolute; top:-10px; left:10px; background:#9ea700; border-radius:4px; padding:0 4px; display:flex; gap:6px; z-index:100;">
+                <span class="fa fa-bars" style="color:white; font-size:10px; cursor:grab; padding:2px;"></span>
+                <span class="qr-edit-btn fa fa-edit" style="color:white; font-size:10px; cursor:pointer; padding:2px;" title="Edit QR"></span>
+                <span class="qr-delete fa fa-trash" style="color:#ffdce0; font-size:10px; cursor:pointer; padding:2px;" title="Delete QR"></span>
+            </div>
+            <div class="qr-content-wrapper" style="display:inline-block; position:relative;">
+                <img src="/report/barcode/QR/${encoded}" style="width:${size}px; height:${size}px; display:block; margin:0 auto;"/>
+                ${config.caption ? `<div class="qr-caption" style="font-size:8pt; margin-top:3px; text-align:center;">${config.caption}</div>` : ''}
+            </div>
+        `;
+
+        placeholderEl.querySelector('.qr-delete').onclick = (e) => {
+            e.stopPropagation();
+            if (confirm("Delete this QR code?")) placeholderEl.remove();
+        };
+
+        if (mode === 'insert') {
+            setTimeout(() => placeholderEl.classList.add('selected'), 0);
+        }
+        this._refreshDragHandles();
+    }
+
+    _cleanStudioAttrs(node) {
+        const self = this;
         const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-type', 'cy-config'];
-        const clean = (node) => {
-            studioAttrs.forEach(a => node.removeAttribute && node.removeAttribute(a));
-            if (node.removeAttribute) {
-                node.removeAttribute('onmouseover');
-                node.removeAttribute('onmouseout');
-                node.removeAttribute('onclick');
-                node.removeAttribute('contenteditable');
-            }
-            if (node.style) {
-                if (node.style.cursor) node.style.removeProperty('cursor');
-                if (node.style.outline) node.style.removeProperty('outline');
-                if (node.style.opacity) node.style.removeProperty('opacity');
-                if (node.getAttribute && node.getAttribute('style') === '') node.removeAttribute('style');
+        const clean = (el) => {
+            if (!el || !el.removeAttribute) return;
+
+            // ── QR Block Serialization ──
+            if (el.classList && el.classList.contains('s_qr_block')) {
+                const configStr = el.dataset.qrConfig;
+                if (configStr) {
+                    try {
+                        const qr = JSON.parse(configStr);
+                        const align = qr.config.align || 'center';
+                        const size = qr.config.size || 100;
+                        const qwebExpr = self._buildQrExpression(true);
+
+                        el.innerHTML = '';
+                        el.style.textAlign = align;
+                        el.style.cursor = '';
+                        el.style.opacity = '';
+
+                        const img = document.createElement('img');
+                        img.setAttribute('t-att-src', `'/report/barcode/QR/' + url_quote(${qwebExpr})`);
+                        img.style.width = size + 'px';
+                        img.style.height = size + 'px';
+                        el.appendChild(img);
+
+                        if (qr.config.caption) {
+                            const caption = document.createElement('div');
+                            caption.style.fontSize = '8pt';
+                            caption.style.marginTop = '3px';
+                            caption.style.textAlign = 'center';
+                            caption.innerText = qr.config.caption;
+                            el.appendChild(caption);
+                        }
+                    } catch (e) {
+                        console.error("[Cyllo Studio] QR Serialization failed", e);
+                    }
+                }
+                el.classList.remove('s_qr_block', 'c_new', 'selected');
+                el.removeAttribute('data-qr-config');
             }
 
-            // Remove handles!
-            const handles = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container')) : [];
+            studioAttrs.forEach(a => el.removeAttribute(a));
+            el.removeAttribute('onmouseover');
+            el.removeAttribute('onmouseout');
+            el.removeAttribute('onclick');
+            el.removeAttribute('contenteditable');
+            if (el.style) {
+                if (el.style.cursor) el.style.removeProperty('cursor');
+                if (el.style.outline) el.style.removeProperty('outline');
+                if (el.style.opacity) el.style.removeProperty('opacity');
+                if (el.getAttribute('style') === '') el.removeAttribute('style');
+            }
+
+            const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
             handles.forEach(h => h.remove());
 
-            // Unwrap wrappers if they are purely studio constructs
-            // We always unwrap these to keep the final XML clean and prevent redundant nesting.
-            const wrappers = node.querySelectorAll ? Array.from(node.querySelectorAll('.table-wrapper, .field-block, .field-container, .dynamic-field-wrapper, .table-handle-container, .field-handle-container')) : [];
-            wrappers.forEach(w => {
-                while (w.firstChild) {
-                    w.parentNode.insertBefore(w.firstChild, w);
+            // Unwrap wrappers
+            if (el.classList && el.classList.contains('table-wrapper')) {
+                const table = el.querySelector('table');
+                if (table) {
+                    el.parentNode.replaceChild(table, el);
+                    clean(table);
+                    return;
                 }
-                w.remove();
-            });
-
-            // Safety net: strip any residual empty structural <t>/<cy-qweb-t> nodes that
-            // survived foster-parenting and were not caught by _removeOrphanedQwebElements.
-            const structOrphans = node.querySelectorAll ? Array.from(node.querySelectorAll('t, cy-qweb-t')) : [];
-            structOrphans.forEach(el => {
-                if (!el.textContent.trim() && el.children.length === 0) el.remove();
-            });
-
-            // Remove remaining layout classes and attributes from logical blocks
-            if (node.classList) {
-                node.classList.remove('field-block', 'dynamic-field-wrapper', 'table-wrapper', 'c_new', 'bg-white', 'selected');
-                if (node.classList.length === 0) node.removeAttribute('class');
+            }
+            if (el.classList && el.classList.contains('box-wrapper')) {
+                const span = el.querySelector('span');
+                if (span) {
+                    el.parentNode.replaceChild(span, el);
+                    clean(span);
+                    return;
+                }
+            }
+            if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
+                const span = el.querySelector('span[t-field]');
+                if (span) {
+                    el.parentNode.replaceChild(span, el);
+                    clean(span);
+                    return;
+                }
             }
 
-            // Bug 2: Remove layout placeholders (Address block, etc.)
-            // These are injected by Odoo during rendering if content is empty.
-            // We should NOT save them back into the architecture.
-            const placeholders = node.querySelectorAll ? Array.from(node.querySelectorAll('.bg-light.border-1.rounded')) : [];
-            placeholders.forEach(p => {
-                if (p.textContent.includes('Address block') ||
-                    p.textContent.includes('Information block') ||
-                    p.textContent.includes('Company address block') ||
-                    p.textContent.includes('Company details block')) {
-                    p.remove();
-                }
-            });
-
-            // If the node ITSELF is a handle, remove its content or itself if possible
-            // but usually we are cleaning a branch.
-            if (node.classList && (node.classList.contains('table-handle') || node.classList.contains('box-handle') || node.classList.contains('field-handle') || node.classList.contains('text-handle') || node.classList.contains('resize-handle') || node.classList.contains('field-delete'))) {
-                node.innerHTML = '';
+            // Cleanup residual classes
+            if (el.classList) {
+                el.classList.remove('c_new', 'selected', 'bg-white');
+                if (el.classList.length === 0) el.removeAttribute('class');
             }
 
-            Array.from(node.children || []).forEach(clean);
+            if (el.children) {
+                Array.from(el.children).forEach(child => clean(child));
+            }
         };
-        clean(el);
+        clean(node);
     }
 
     _isStructuralNode(el) {
-        if (!el) return false;
+        if (!el || !el.hasAttribute) return false;
         const tagName = el.tagName ? el.tagName.toLowerCase() : '';
-        // Known structural tags
         if (tagName === 't' || tagName === 'cy-qweb-t') return true;
-        // Any node with QWeb control directives is structural
-        if (
-            el.hasAttribute('t-foreach') ||
-            el.hasAttribute('t-set') ||
-            el.hasAttribute('t-call') ||
-            el.hasAttribute('t-if') ||
-            el.hasAttribute('t-elif') ||
-            el.hasAttribute('t-else')
-        ) return true;
-        return false;
+        const qwebAttrs = ['t-foreach', 't-if', 't-elif', 't-else', 't-field', 't-esc', 't-out', 't-call'];
+        return qwebAttrs.some(attr => el.hasAttribute(attr));
     }
 
-    /**
-     * Finds existing tables and fields in the report and adds the necessary
-     * wrappers and handles for Studio manipulation.
-     */
     _enrichReportDOM(container) {
-        // 1. Wrap existing tables
         const tables = container.querySelectorAll('table:not(.table-wrapper table)');
         tables.forEach(table => {
             if (table.closest('.table-wrapper')) return;
-
-            // Check if table is wrapped in structural nodes (t-foreach, t-set, etc)
-            // We wrap ALL consecutive structural parents that only contain this table
             let targetNode = table;
             while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
                 targetNode.parentElement.children.length === 1 &&
                 !targetNode.parentElement.classList.contains('page')) {
                 targetNode = targetNode.parentElement;
             }
-
             const wrapper = document.createElement('div');
             wrapper.className = 'table-wrapper';
             wrapper.innerHTML = `
@@ -1695,21 +1942,12 @@ export class EditReport extends Component {
                 </div>`;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.appendChild(targetNode);
-
-            //            wrapper.querySelector('.table-delete').onclick = (e) => {
-            //                e.stopPropagation();
-            //                if (confirm("Delete this table?")) wrapper.remove();
-            //            };
             wrapper.querySelector('.table-delete').onclick = (e) => {
                 e.stopPropagation();
-
                 this.dialog.add(ConfirmationDialog, {
-                    title: "Delete Table",
                     body: "Are you sure you want to delete this table?",
                     confirm: async () => {
-                        // Remove orphaned <t> siblings BEFORE removing the wrapper
-                        // (HTML foster-parenting leaves them stranded in the zone).
-                        this._removeOrphanedQwebElements(wrapper);
+                        this._removeOrphanedQwebElements && this._removeOrphanedQwebElements(wrapper);
                         wrapper.remove();
                         await this.save_changes(this);
                     },
@@ -1718,21 +1956,15 @@ export class EditReport extends Component {
             };
         });
 
-        // 2. Wrap existing fields (t-field or t-esc with specific paths)
-        // We look for spans/divs with t-field, excluding those already wrapped or in tables
         const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]):not(.field-container [t-field]), [t-esc]:not(.field-block [t-esc]):not(.field-container [t-esc])');
         fields.forEach(field => {
             if (field.closest('.field-block') || field.closest('table')) return;
-
-            // Check if field is wrapped in structural nodes (t-foreach, etc)
             let targetNode = field;
             while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
                 targetNode.parentElement.children.length === 1 &&
                 !targetNode.parentElement.classList.contains('page')) {
                 targetNode = targetNode.parentElement;
             }
-
-            // For simple fields (like in an address block), wrap them
             const wrapper = document.createElement('div');
             wrapper.className = 'field-block dynamic-field-wrapper';
             wrapper.innerHTML = `
@@ -1744,106 +1976,51 @@ export class EditReport extends Component {
             `;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.querySelector('.field-container').appendChild(targetNode);
-
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
                 if (confirm("Delete this field?")) wrapper.remove();
             };
         });
 
-        // 3. Mark salvaged text nodes as ready
-        // (No handles needed, just ensure they are targetable)
-        const textNodes = container.querySelectorAll('.text-node');
-        textNodes.forEach(textNode => {
-            textNode.setAttribute('contenteditable', 'false');
-        });
+        container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
     }
 
     buildInheritanceXML(changes) {
         let new_inherits = [];
-
         for (const [key, items] of Object.entries(groupBy(changes, 'template'))) {
             let xpathBlock = "";
-
             items.forEach(change => {
                 const newNodes = Array.from(change.el.children)
                     .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
-                // ── STRUCTURAL CHANGE / DELETION DETECTION ──────────────────
-                // If the zone has structural changes (deletions or reorders),
-                // we MUST emit a zone-level 'replace' to reflect the final state.
-                // Partial inside/replace logic won't capture the absence of a node.
                 if (change.structChanged) {
                     const clonedZone = change.el.cloneNode(true);
                     this._cleanStudioAttrs(clonedZone);
-                    clonedZone.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
-                    if (clonedZone.classList.length === 0) clonedZone.removeAttribute('class');
-
-                    let content = new XMLSerializer()
-                        .serializeToString(clonedZone)
-                        .replace(/ xmlns="[^"]*"/g, "")
-                        .replace(/<br>/gi, '<br/>');
-
-                    xpathBlock += `
-                    <xpath expr="${change.xpath}" position="replace">
-                        ${content}
-                    </xpath>`;
+                    let content = new XMLSerializer().serializeToString(clonedZone).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                    xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
                     return;
                 }
 
-                // If only additions (no deletions/reorders), use relative "inside" XPath.
                 if (newNodes.length) {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
                         this._cleanStudioAttrs(cloned);
-                        cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
-                        if (cloned.classList.length === 0) cloned.removeAttribute('class');
-
-                        let content = new XMLSerializer()
-                            .serializeToString(cloned)
-                            .replace(/ xmlns="[^"]*"/g, "")
-                            .replace(/<br>/gi, '<br/>');
-
-                        xpathBlock += `
-                        <xpath expr="${change.xpath}" position="inside">
-                            ${content}
-                        </xpath>`;
+                        let content = new XMLSerializer().serializeToString(cloned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                        xpathBlock += `<xpath expr="${change.xpath}" position="inside">${content}</xpath>`;
                     });
                     return;
                 }
 
-                // Text-only edit or attribute edit: replace the element
-                // We skip replacing structural nodes (t-foreach, etc.) directly
-                // unless it is a structural change (handled above).
-                if (this._isStructuralNode(change.el)) {
-                    console.warn("[Cyllo Studio] Skipping replacement of structural node:", change.xpath);
-                    return;
-                }
-
+                if (this._isStructuralNode(change.el)) return;
                 const cloned = change.el.cloneNode(true);
                 this._cleanStudioAttrs(cloned);
-                cloned.classList.remove('selected', 'c_new', 'table-wrapper', 'box-wrapper', 'dynamic-field-wrapper', 'field-block');
-                cloned.querySelectorAll('[class=""]').forEach(el => el.removeAttribute('class'));
-
-                let content = new XMLSerializer()
-                    .serializeToString(cloned)
-                    .replace(/ xmlns="[^"]*"/g, "")
-                    .replace(/<br>/gi, '<br/>');
-
-                xpathBlock += `
-                <xpath expr="${change.xpath}" position="replace">
-                    ${content}
-                </xpath>`;
+                let content = new XMLSerializer().serializeToString(cloned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
             });
-
             if (xpathBlock.trim()) {
-                new_inherits.push({
-                    key,
-                    xpathBlocks: `<data>\n${xpathBlock}\n</data>`
-                });
+                new_inherits.push({ key, xpathBlocks: `<data>\n${xpathBlock}\n</data>` });
             }
         }
-
         return new_inherits;
     }
 
@@ -1851,11 +2028,8 @@ export class EditReport extends Component {
         document.querySelectorAll('.table-toolbar').forEach(t => t.remove());
     }
 
-    _setupTextNodeEvents(textNode) {
-        // No manual listeners needed anymore as we switched to MediumEditor-first interaction
-    }
+    _setupTextNodeEvents(textNode) { }
 }
 
 EditReport.template = "custom_report.edit_report";
-
 registry.category("actions").add("edit_report", EditReport);

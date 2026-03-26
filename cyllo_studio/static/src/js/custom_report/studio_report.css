@@ -1272,3 +1272,301 @@ select>option {
     outline: 1px solid #9ab83a;
     outline-offset: 2px;
 }
+
+/* ===================================================================
+   QR Code Wizard Styles
+   =================================================================== */
+
+.qr-wizard-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.qr-wizard-modal {
+    background: #ffffff;
+    width: 680px;
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.15);
+    display: flex;
+    flex-direction: column;
+}
+
+.qr-wizard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.qr-wizard-header h5 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.qr-wizard-close {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #9ca3af;
+    cursor: pointer;
+    line-height: 1;
+}
+
+.qr-type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 24px;
+}
+
+.qr-type-card {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.qr-type-card:hover {
+    border-color: #d1d5db;
+    background: #f3f4f6;
+    transform: translateY(-2px);
+}
+
+.qr-type-card.active {
+    border-color: #9ea700;
+    background: #fdfdf2;
+    box-shadow: 0 0 0 1px #9ea700;
+}
+
+.qr-card-icon {
+    font-size: 24px;
+    color: #9ea700;
+    margin-bottom: 4px;
+}
+
+.qr-card-title {
+    font-weight: 700;
+    font-size: 14px;
+    color: #111827;
+}
+
+.qr-card-desc {
+    font-size: 12px;
+    color: #6b7280;
+    line-height: 1.4;
+}
+
+.qr-card-preview {
+    font-size: 10px;
+    font-family: monospace;
+    color: #9ca3af;
+    background: rgba(0, 0, 0, 0.03);
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 4px;
+}
+
+.qr-config-panel {
+    padding: 24px;
+    min-height: 300px;
+}
+
+.qr-detected-info {
+    background: #eff6ff;
+    border: 1px solid #dbeafe;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.qr-preview-container {
+    display: flex;
+    gap: 24px;
+    padding: 0 24px 24px;
+}
+
+.qr-preview-left {
+    flex: 0 0 120px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.qr-image-box {
+    width: 110px;
+    height: 110px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    padding: 10px;
+}
+
+.qr-image-box img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.qr-preview-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.qr-style-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.qr-label-sm {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #6b7280;
+    letter-spacing: 0.5px;
+}
+
+.qr-align-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.qr-align-btn {
+    flex: 1;
+    height: 32px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.1s;
+}
+
+.qr-align-btn i {
+    font-size: 14px;
+}
+
+.qr-align-btn.active {
+    background: #9ea700;
+    border-color: #9ea700;
+    color: white;
+}
+
+.qr-field-inline {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.qr-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-top: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.qr-step-indicator {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.qr-nav-dots {
+    display: flex;
+    gap: 8px;
+}
+
+.qr-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #d1d5db;
+}
+
+.qr-dot.active {
+    background: #9ea700;
+}
+
+.qr-dot.completed {
+    background: #9ea700;
+    opacity: 0.5;
+}
+
+.qr-preview-str {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-family: monospace;
+    font-size: 11px;
+    word-break: break-all;
+    margin-top: 12px;
+}
+
+.qr-qweb-code {
+    background: #1e293b;
+    color: #cbd5e1;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 12px;
+    border-radius: 6px;
+    overflow-x: auto;
+    line-height: 1.4;
+}
+
+.qr-btn-primary {
+    background: #9ea700;
+    color: white;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.qr-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.qr-btn-secondary {
+    background: #e5e7eb;
+    color: #374151;
+    border: none;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+}
