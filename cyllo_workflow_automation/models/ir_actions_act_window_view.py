@@ -19,22 +19,17 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': "Cyllo CRM Project",
-    'description': 'This module is used to create Project from lead',
-    'summary': 'Cyllo Crm Project Creation',
-    'version': "1.0",
-    'author': "Cyllo",
-    'company': "Cyllo",
-    'maintainer': "Cyllo",
-    'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm', 'project'],
-    'data': [
-        'data/crm_project_data.xml',
-        'views/crm_lead_views.xml',
-    ],
-    'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': True,
-    'application': False,
-}
+from odoo import fields, models
+
+
+class IrActionsActWindowView(models.Model):
+    """workflow Action Window View Model"""
+    _inherit = 'ir.actions.act_window.view'
+
+    view_mode = fields.Selection(
+        selection_add=[
+            ("workflowCard",
+             "WorkflowCard")
+        ],
+        ondelete={"workflowCard": "cascade"}
+    )

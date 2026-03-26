@@ -19,22 +19,17 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': "Cyllo CRM Project",
-    'description': 'This module is used to create Project from lead',
-    'summary': 'Cyllo Crm Project Creation',
-    'version': "1.0",
-    'author': "Cyllo",
-    'company': "Cyllo",
-    'maintainer': "Cyllo",
-    'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm', 'project'],
-    'data': [
-        'data/crm_project_data.xml',
-        'views/crm_lead_views.xml',
-    ],
-    'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': True,
-    'application': False,
-}
+from odoo import Command
+from . import models
+from . import controller
+
+
+def _post_init_hook(env):
+    workflow_group_id = env.ref("cyllo_workflow_automation.group_workflow_automation_admin")
+    admin_group_id = env.ref("base.group_erp_manager")
+    users = admin_group_id.users.ids
+    workflow_group_id.write(
+        {
+        'users': [Command.link(user) for user in users],
+        }
+    )

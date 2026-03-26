@@ -1,0 +1,762 @@
+:root {
+            --dfBackgroundColor: rgba(255, 255, 255, 0);
+    --dfBackgroundSize: 30px 30px;
+    --dfBackgroundImage: linear-gradient(rgba(169, 169, 169, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(169, 169, 169, 0.4) 1px, transparent 1px);
+}
+
+.them-edit-link {
+    position: absolute;
+    top: 10px;
+    right: 100px;
+    color: black;
+    font-size: 40px;
+}
+
+.them-edit-link a {
+    text-decoration: none;
+}
+
+.github-link {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    color: black;
+}
+
+.wrapper {
+    width: 100%;
+    height: calc(100vh - 67px);
+    display: flex;
+}
+
+.gap-2 {
+    gap: 5px;
+}
+
+.toast-message {
+    position: absolute;
+    top: 25px;
+    right: -50px;
+    transform: translate(-50%, -50%);
+    background: #9EA700;
+    border-radius: 15px;
+    transition: 2s;
+    padding: 5px 5px;
+    font-size: 10px;
+}
+
+.variable-pill {
+    border-radius: 0px !important;
+    padding: 0 !important;
+    border: 1px solid #dedede;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.divider {
+    width: 1px;
+    height: 24px;
+    background-color: #dee2e6;
+    margin: 0 12px;
+}
+
+.copy-btn {
+    background-color: #e9ecef;
+    color: #343a40;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    transition: background-color 0.3s ease;
+}
+
+.copy-btn:hover {
+    background-color: #ced4da;
+    cursor: pointer;
+}
+
+.drag-drawflow {
+    line-height: 50px;
+    border-bottom: 1px solid var(--border-color);
+    padding-left: 20px;
+    cursor: move;
+    user-select: none;
+}
+
+.btn-export {
+    float: right;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #0e5ba3;
+    background: #4ea9ff;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.btn-clear {
+    float: right;
+    position: absolute;
+    top: 10px;
+    right: 85px;
+    color: white;
+    font-weight: bold;
+    border: 1px solid #96015b;
+    background: #e3195a;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.swal-wide {
+    width: 80% !important;
+}
+
+.bar-zoom {
+    float: right;
+    position: absolute;
+    bottom: 67px;
+    right: 40px;
+    display: flex;
+    font-size: 24px;
+    color: white;
+    background: #555555;
+    border-radius: 4px;
+    border-right: 1px solid var(--border-color);
+    z-index: 5;
+}
+
+#drawflow {
+    position: relative;
+    height: calc(100vh - 59px);
+    overflow-y: auto;
+    background-color: var(--dfBackgroundColor);
+    background-size: var(--dfBackgroundSize);
+    background: #f3f2f2;
+}
+
+@media only screen and (max-width: 768px) {
+    .col {
+        width: 50px;
+    }
+    .col .drag-drawflow span {
+        display: none;
+    }
+    #drawflow {
+        width: calc(100% - 1px);
+    }
+}
+
+/* Editing Drawflow */
+
+.drawflow .drawflow-node.selected {
+    background: white;
+    box-shadow: #9ea700cf 0 1px 12px 2px;
+}
+
+.drawflow .drawflow-node.Condition.selected {
+    background: white;
+}
+
+.drawflow .drawflow-node.selected .title-box {
+    color: #22598c;
+}
+
+.drawflow .connection .main-path {
+    stroke: #505050c7;
+    stroke-width: 3px;
+}
+
+.drawflow .drawflow-node .input, .drawflow .drawflow-node .output {
+    height: 15px;
+    width: 15px;
+    border: 1px solid var(--border-color) !important;
+}
+
+.drawflow .drawflow-node .input:hover, .drawflow .drawflow-node .output:hover {
+    background: #4ea9ff;
+}
+
+.drawflow .drawflow-node .output {
+    right: 10px;
+    background: #F44336;
+}
+
+.drawflow .drawflow-node .input {
+    left: -10px;
+    background: #4CAF50;
+}
+
+.drawflow > .drawflow-delete {
+    border: 2px solid #43b993;
+    background: white;
+    color: #43b993;
+    -webkit-box-shadow: 0 2px 20px 2px #43b993;
+    box-shadow: 0 2px 20px 2px #43b993;
+}
+
+.drawflow-delete {
+    border: 2px solid #4ea9ff;
+    background: white;
+    color: #4ea9ff;
+    -webkit-box-shadow: 0 2px 20px 2px #4ea9ff;
+    box-shadow: 0 2px 20px 2px #4ea9ff;
+}
+
+
+.drawflow-node .title-box {
+    height: 100%;
+    background: var(--background-box-title);
+    border-radius: 4px 4px 0px 0px;
+    padding-left: 10px;
+
+    .settings-icon {
+        margin-left: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .delete-icon {
+        margin-left: 10px;
+        cursor: pointer;
+        transition: transform 0.3s ease-in-out;
+
+        i {
+            transition: transform 0.3s ease-in-out;
+        }
+    }
+}
+
+.drawflow-node.Condition .title-box {
+    background: none;
+    border-bottom: none;
+}
+
+.drawflow .title-box svg {
+    position: initial;
+}
+
+.drawflow-node .box {
+    padding: 10px 20px 20px 20px;
+    font-size: 14px;
+    color: #555555;
+}
+
+.drawflow-node .box p {
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.drawflow-node.welcome {
+    width: 250px;
+}
+
+.drawflow-node.slack .title-box {
+    border-radius: 4px;
+}
+
+.drawflow-node input, .drawflow-node select, .drawflow-node textarea {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    height: 30px;
+    line-height: 30px;
+    font-size: 16px;
+    width: 158px;
+    color: #555555;
+}
+
+.drawflow-node textarea {
+    height: 100px;
+}
+
+
+.drawflow-node.personalized {
+    background: red;
+    height: 200px;
+    text-align: center;
+    color: white;
+}
+
+.drawflow-node.personalized .input {
+    background: yellow;
+}
+
+.drawflow-node.personalized .output {
+    background: green;
+}
+
+.drawflow-node.personalized.selected {
+    background: blue;
+}
+
+.drawflow .connection .point {
+    stroke: var(--border-color);
+    stroke-width: 2;
+    fill: white;
+    transform: translate(-9999px, -9999px);
+}
+
+.drawflow .connection .point.selected, .drawflow .connection .point:hover {
+    fill: #4ea9ff;
+}
+
+.accessible-variables .title span {
+    font-size: 0.9rem;
+    font-weight: bolder;
+}
+
+.work-auto-form .o_input {
+    padding: 5px 4px;
+}
+
+.modal-body .cy-variable-toggle button.dropdown-toggle {
+    all: unset;
+}
+
+.modal-body .dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.cy-work-auto-form .cy-variable-toggle button.dropdown-toggle {
+    width: 100%;
+}
+
+.cy-work-auto-search .o_input {
+    padding: 5px 4px;
+}
+
+.wd-50 {
+    width: 50%;
+}
+
+.wd-40 {
+    width: 40%;
+}
+
+.wd-60 {
+    width: 60%;
+}
+
+.cy-modal-form_label {
+    margin-bottom: 0.5rem;
+}
+
+.cy-flex-column {
+    flex-direction: column;
+}
+
+
+.cy-work-auto-form input.o_input {
+    border-radius: unset !important;
+}
+
+//mycss
+@keyframes archShakeVibrate {
+    0%, 100% {
+        transform: translate(0, 0);
+    }
+    10% {
+        transform: translate(-3px, -2px) rotate(-0.5deg);
+    }
+    20% {
+        transform: translate(3px, -4px) rotate(0.5deg);
+    }
+    30% {
+        transform: translate(-3px, -6px) rotate(-0.5deg);
+    }
+    40% {
+        transform: translate(3px, -4px) rotate(0.5deg);
+    }
+    50% {
+        transform: translate(-3px, -2px) rotate(-0.5deg);
+    }
+    60% {
+        transform: translate(3px, 0) rotate(0.5deg);
+    }
+    70% {
+        transform: translate(-3px, 0) rotate(-0.5deg);
+    }
+    80% {
+        transform: translate(3px, -1px) rotate(0.5deg);
+    }
+    90% {
+        transform: translate(-3px, 0) rotate(-0.5deg);
+    }
+}
+
+.cy-validation-tooltip {
+    position: absolute;
+    top: -53px;
+    left: 20px;
+    background-color: #ff4d4d;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+}
+
+.drawflow-node.Condition .cy-validation-tooltip {
+    top: -90px;
+    left: 10px;
+}
+
+.cy-flow-err {
+    border: 1.8px dashed #ff4d4d !important;
+}
+
+.drawflow .drawflow-node {
+    border: 1px solid #fff;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.drawflow-node.Condition .cy-flow-err {
+    all: unset !important;
+}
+
+.cy-validation-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 20px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: #ff4d4d transparent transparent transparent;
+}
+
+.cy-validation-tooltip .tooltip-text {
+    display: block;
+    white-space: nowrap;
+}
+
+/* Animation for smooth appearance, arch shaking, and vibration */
+.cy-validation-tooltip.show {
+    opacity: 1;
+    transform: translateY(0);
+    animation: archShakeVibrate 0.8s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+.work_auto_buttons {
+    margin-right: 250px;
+}
+
+.cy-w-save-btn {
+    display: flex;
+    background: #9ea70069;
+    color: #dadada;
+    align-items: center;
+    /* justify-content: center; */
+    padding: 0.3125rem 0.625rem;
+    border-radius: 5px;
+
+    &:hover {
+        cursor: pointer;
+        color: #FFFFFF;
+        background: #8e9600;
+    }
+}
+
+.input-container {
+    position: relative;
+    width: 300px;
+}
+
+.cy-w-o-input {
+    width: 100%;
+    border: 1px solid #0000002b;
+    font-size: 16px;
+    border-radius: 4px;
+    background-color: #fefdfa;
+    transition: all 0.3s ease;
+    height: 33px;
+    color: #3e3e3e;
+    padding: 0 0 0 10px;
+}
+
+.cy-w-o-input:focus {
+    border: 1px solid #9ea700bd;
+    box-shadow: 0 0 2px 0 #9EA700;
+    outline: none;
+    padding: 0 0 0 10px;
+}
+
+.cy-w-o-input::placeholder {
+    color: transparent;
+}
+
+.input-container label {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    background-color: #ffffff;
+    padding: 0 5px;
+    font-size: 13px;
+    color: #757575;
+    transition: all 0.3s ease;
+    pointer-events: none;
+    font-weight: 600;
+}
+
+.cy-w-o-input:focus + label,
+.cy-w-o-input:not(:placeholder-shown) + label {
+    top: 0;
+    font-size: 12px;
+    color: #9ea700;
+}
+
+.cy-flow-err .cy-w-o-input {
+    border-color: #ff3860;
+}
+
+.cy-flow-err label {
+    color: #ff3860;
+}
+
+.cy_w_auto_name-text {
+    height: 39px;
+}
+
+.cy-w-warning {
+    background-color: #fff3cd;
+    border-left: 5px solid #ffc107;
+    color: #856404;
+    padding: 15px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.cy-w-warning::before {
+    content: "\26A0";
+    font-size: 24px;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.cy-w-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+
+.node-container {
+    .success {
+        display: none;
+        top: -46px;
+        left: 63px;
+        font-size: 11px;
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .failed {
+        display: none;
+        top: 40px;
+        left: 114px;
+        font-size: 10px;
+        color: #FF8982;
+        font-weight: bold;
+    }
+
+    .default {
+        display: none;
+        left: 74px;
+        top: 83px;
+        font-size: 10px;
+        color: #b47706;
+        font-weight: bold;
+    }
+}
+
+.cy-w-modal-body .cy-variable-toggle button {
+    width: 100% !important;
+}
+
+.cy-w-modal-body .cy-w-follower-select select {
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
+
+//controls
+
+.cy-w-zoom-controls {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.cy-w-zoom-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border: none;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.cy-w-zoom-button:hover {
+    background-color: #f0f0f0;
+}
+
+.cy-w-zoom-button:active {
+    background-color: #e0e0e0;
+}
+
+.cy-w-divider {
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.btn-lock {
+    position: absolute;
+    bottom: 20px;
+    right: 40px;
+    background-color: white;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s;
+    border-radius: 4px;
+    cursor: pointer;
+    z-index: 909;
+
+    &.locked {
+        background-color: #f8d9d9;
+    }
+}
+
+.btn-lock:hover {
+    cursor: pointer;
+    background-color: #f0f0f0;
+}
+
+.btn-lock i {
+    font-size: 24px;
+    color: #333;
+}
+
+.canvas-locked {
+    display: flex;
+    gap: 3px;
+    position: absolute;
+    top: 85px;
+    right: 20px;
+    padding: 5px 10px;
+    background-color: white;
+    border-radius: 8px;
+
+    span {
+        font-weight: bold;
+        user-select: none;
+    }
+}
+
+//make variable
+.make-variable-container {
+    padding: 16px;
+    text-align: center;
+}
+
+.make-variable-btn {
+    background-color: #9ea700;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    padding: 12px 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(52, 152, 219, 0.2);
+
+    &:hover {
+        background-color: #b0b904;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    &:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 4px rgba(52, 152, 219, 0.2);
+    }
+
+    .icon-wrapper {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        margin-right: 8px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .ri-add-line {
+        font-size: 18px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-text {
+        position: relative;
+        z-index: 1;
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: all 0.5s ease;
+    }
+
+    &:hover {
+        .icon-wrapper {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: rotate(90deg);
+        }
+
+    &::before {
+        width: 300px;
+        height: 300px;
+        }
+    }
+}
+
+//variable usage
+.cy-find-usage {
+    border: solid 2px #f59509 !important;
+}

@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="WhatsAppNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="cy-work-auto-form">
+                <div t-if="!waState.isInstalled and !waState.checking"
+                     class="alert alert-warning d-flex align-items-center gap-2 mb-3">
+                    <i class="fa fa-exclamation-triangle"/>
+                    <span>
+                        <strong>cyllo_whatsapp is not installed.</strong>
+                        This node will be skipped at runtime. Install and configure the WhatsApp module first.
+                    </span>
+                </div>
+
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label cy-modal-form_label">Label</label>
+                        <TypeToggler
+                            options="getTogglerOptions"
+                            value="isTemplateMode"
+                            updateValue.bind="updateMode"
+                            width="18"
+                        />
+                    </div>
+                    <input
+                        type="text"
+                        class="o_input"
+                        autocomplete="off"
+                        placeholder="e.g. Send WhatsApp to customer"
+                        t-on-focusout="setLabel"
+                        t-att-value="getLabel"
+                    />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Source Record</label>
+                    <small class="text-muted d-block mb-1">
+                        Pick the workflow variable that holds the record you want to message.
+                    </small>
+                    <CustomDropdown
+                        options="getRecordVariables"
+                        defaultValue="getSelectedRecord"
+                        onChange="(val) => this.updateRecord(val)"
+                        placeholder="'Select record variable...'"
+                        searchable="true"
+                        width="''"
+                    />
+                </div>
+
+                <div class="mb-3" t-if="getSelectedRecord">
+                    <label class="form-label cy-modal-form_label">Partner Field Path</label>
+                    <small class="text-muted d-block mb-1">
+                        Choose whether to send to the current customer from the record or to another contact with a WhatsApp number.
+                    </small>
+                    <CustomDropdown
+                        options="getPartnerSourceOptions"
+                        defaultValue="getPartnerSource"
+                        onChange="(val) => this.updatePartnerSource(val)"
+                        placeholder="'Select recipient source...'"
+                        searchable="false"
+                        width="''"
+                    />
+                </div>
+
+                <div class="mb-3" t-if="getSelectedRecord and getPartnerSource === 'customer'">
+                    <label class="form-label cy-modal-form_label">Customer</label>
+                    <small class="text-muted d-block mb-1">
+                        The WhatsApp message will be sent to the customer on the current record using <code>partner_id</code>.
+                    </small>
+                </div>
+
+                <div class="mb-3" t-if="getSelectedRecord and getPartnerSource === 'other'">
+                    <label class="form-label cy-modal-form_label">Other Contact</label>
+                    <small class="text-muted d-block mb-1">
+                        Select a contact from <code>res.partner</code>. Only contacts with a WhatsApp number are shown.
+                    </small>
+                    <Many2XAutocomplete
+                        resModel="'res.partner'"
+                        getDomain.bind="getOtherPartnerDomain"
+                        fieldString="'WhatsApp Contacts'"
+                        activeActions="{}"
+                        update.bind="onSelectOtherPartner"
+                        value="getOtherPartnerName"
+                    />
+                </div>
+
+                <div t-if="isTemplateMode" class="mb-3">
+                    <label class="form-label cy-modal-form_label">WhatsApp Template</label>
+                    <small class="text-muted d-block mb-1">
+                        Only approved templates are shown. Templates are managed under WhatsApp -> Templates.
+                    </small>
+                    <Many2XAutocomplete
+                        resModel="'whatsapp.template'"
+                        getDomain.bind="getTemplateDomain"
+                        fieldString="'WhatsApp Templates'"
+                        activeActions="{}"
+                        update.bind="onSelectTemplate"
+                        value="getTemplateName"
+                    />
+                </div>
+
+                <div t-if="!isTemplateMode" class="mb-3">
+                    <label class="form-label cy-modal-form_label">Message</label>
+                    <small class="text-muted d-block mb-1">
+                        Free-form messages only work within Meta's 24-hour customer service window.
+                        Use templates for first-contact or marketing messages.
+                    </small>
+                    <textarea
+                        class="form-control"
+                        rows="4"
+                        placeholder="Type your message here..."
+                        t-on-focusout="setFreeMessage"
+                        t-att-value="getFreeMessage"
+                    />
+                </div>
+
+                <div t-if="waState.isInstalled" class="alert alert-info d-flex gap-2 mt-2 mb-0">
+                    <i class="fa fa-info-circle mt-1"/>
+                    <small>
+                        The sending user must have their WhatsApp account configured
+                        (Settings -> Users -> WhatsApp Account tab). If not configured,
+                        execution will raise a warning and halt the workflow.
+                    </small>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>

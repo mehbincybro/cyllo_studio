@@ -22,3 +22,7 @@
 
 
 from . import models
+
+
+def uninstall_hook(env):
+    env['ir.model.data'].sudo().search([('module', '=', 'cyllo_crm_project')]).unlink()
