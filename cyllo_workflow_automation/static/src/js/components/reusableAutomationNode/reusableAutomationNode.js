@@ -8,6 +8,13 @@ export class ReusableAutomationNode extends ConfigurationBase {
         super.setup();
         this.state = useState({
             automationOptions: [],
+            // metadata keyed by automation id — stores label, model, isGeneric,
+            // AND the automation's own triggerType (list of trigger_type strings).
+            // This is the critical piece: when we call _process() on the reused
+            // automation, we must pass ITS trigger_type(s), not the calling
+            // workflow's trigger_type. Otherwise the generated code guard
+            // `if trigger_type == 'create':` will never match when called from
+            // an On Write workflow.
             automationMetadata: {},
         });
     }
@@ -15,33 +22,75 @@ export class ReusableAutomationNode extends ConfigurationBase {
     async fetchData() {
         await super.fetchData();
         await this.loadAutomations();
+        this.syncNodeLabelFromSelection();
     }
 
     async loadAutomations() {
-        const domain = [
+        // Base filters: active + marked reusable.
+        // NOTE: we intentionally drop the ['trigger_function_ids', '!=', false]
+        // filter here so that generic reusables (no trigger nodes, no
+        // trigger_function_ids) also appear in the list.
+        const baseDomain = [
             ['active', '=', true],
             ['is_reusable', '=', true],
-            ['trigger_function_ids', '!=', false],
         ];
-        if (this.props.primary_model_id) {
-            domain.push(['model_id', '=', this.props.primary_model_id]);
-        }
         if (this.props.work_auto_id) {
-            domain.push(['id', '!=', this.props.work_auto_id]);
+            baseDomain.push(['id', '!=', this.props.work_auto_id]);
         }
-        const records = await this.orm.searchRead('work.auto', domain, ['id', 'name', 'model_id']);
-        const options = records.map(rec => {
+
+        // Fetch TWO groups:
+        //  1. Same-model automations (model_specific scope, matching primary model)
+        //  2. Generic automations (generic scope, any model - cross-model reuse)
+        const domains = [];
+
+        if (this.props.primary_model_id) {
+            // Group 1: model-specific reusables for this model
+            domains.push([...baseDomain,
+                ['reuse_scope', '=', 'model'],
+                ['model_id', '=', this.props.primary_model_id],
+            ]);
+        }
+
+        // Group 2: generic reusables (work with any model)
+        domains.push([...baseDomain, ['reuse_scope', '=', 'generic']]);
+
+        // Fetch both groups and merge (deduplicate by id).
+        // We now also fetch 'trigger_type' so generateCode() can pass the
+        // REUSED automation's own trigger type when calling _process().
+        const seen = new Set();
+        const allRecords = [];
+        for (const domain of domains) {
+            const recs = await this.orm.searchRead(
+                'work.auto',
+                domain,
+                ['id', 'name', 'model_id', 'reuse_scope', 'trigger_type']
+            );
+            for (const rec of recs) {
+                if (!seen.has(rec.id)) {
+                    seen.add(rec.id);
+                    allRecords.push(rec);
+                }
+            }
+        }
+
+        const options = allRecords.map(rec => {
             const modelName = rec.model_id?.[1] || '';
+            const isGeneric = rec.reuse_scope === 'generic';
+            const badge = isGeneric ? '[Generic] ' : '';
+            const modelPart = !isGeneric && modelName ? ` (${modelName})` : '';
             return {
                 value: rec.id,
-                label: modelName ? `${rec.name} (${modelName})` : rec.name,
+                label: `${badge}${rec.name}${modelPart}`,
                 model: modelName,
+                isGeneric,
+                // Store the automation's primary trigger_type (e.g. 'create',
+                // 'write', 'unlink', 'time', 'field_change', or '' for generic).
+                triggerType: rec.trigger_type || '',
             };
         });
+
         const metadata = {};
-        options.forEach(option => {
-            metadata[option.value] = option;
-        });
+        options.forEach(option => { metadata[option.value] = option; });
         this.state.automationOptions = options;
         this.state.automationMetadata = metadata;
     }
@@ -52,7 +101,28 @@ export class ReusableAutomationNode extends ConfigurationBase {
 
     get selectedAutomationModel() {
         const metadata = this.state.automationMetadata[this.fieldState.reused_work_auto_id];
-        return metadata?.model || '';
+        if (!metadata) return '';
+        if (metadata.isGeneric) return 'Generic (any model)';
+        return metadata.model || '';
+    }
+
+    get selectedAutomationTriggerType() {
+        const metadata = this.state.automationMetadata[this.fieldState.reused_work_auto_id];
+        return metadata?.triggerType || '';
+    }
+
+    getReusableNodeLabel(metadata) {
+        if (!metadata) {
+            return "Reuse Automation Rule";
+        }
+        return metadata.label;
+    }
+
+    syncNodeLabelFromSelection() {
+        const metadata = this.state.automationMetadata[this.fieldState.reused_work_auto_id];
+        if (metadata) {
+            this.setLabel(this.getReusableNodeLabel(metadata));
+        }
     }
 
     get recordVariableOptions() {
@@ -66,13 +136,11 @@ export class ReusableAutomationNode extends ConfigurationBase {
     }
 
     onSelectAutomation(value) {
-        this.fieldState.reused_work_auto_id = value;
+        // Store as integer so generateCode() and node.struct write receive a clean id.
+        this.fieldState.reused_work_auto_id = value ? parseInt(value, 10) : null;
         const metadata = this.state.automationMetadata[value];
         if (metadata) {
-            const label = metadata.label;
-            if (!this.fieldState?.label) {
-                this.setLabel(label);
-            }
+            this.setLabel(this.getReusableNodeLabel(metadata));
         }
     }
 
@@ -91,20 +159,64 @@ export class ReusableAutomationNode extends ConfigurationBase {
         this.env.bus.trigger("CHANGE-LABEL", { label: value, nodeId: this.props.id });
     }
 
+    async rewriteAutomationFlow() {
+        if (!this.fieldState.reused_work_auto_id || !this.props.onEditReusableFlow) {
+            return;
+        }
+        await this.props.onEditReusableFlow();
+        this.props.close();
+    }
+
     generateCode() {
-        const automationId = this.fieldState.reused_work_auto_id;
+        // Coerce to integer — CustomDropdown may return a number or a string.
+        const rawId = this.fieldState.reused_work_auto_id;
+        const automationId = rawId ? parseInt(rawId, 10) : null;
         const variable = this.fieldState.reused_variable;
-        if (!automationId || !variable) {
+        if (!automationId || isNaN(automationId)) {
             return "";
         }
+
         this.props.updateImports({
             parent: 'import logging\n_logger = logging.getLogger(__name__)',
             child: '',
             nodeId: this.props.id,
         });
+
         const parentId = Number(this.props.work_auto_id || 0);
         const stackLines = parentId > 0 ? [`    cy_w_stack.append(${parentId})`] : [];
-        const recordsExpr = this.getRecordsExpression(variable);
+
+        // Use the selected variable as the record source, or fall back to
+        // current_record (always available from the calling workflow's context).
+        const recordsExpr = variable ? this.getRecordsExpression(variable) : 'current_record';
+
+        // ── KEY FIX ──────────────────────────────────────────────────────────
+        // The reused automation's generated Python code wraps its logic in a
+        // trigger-type guard:
+        //
+        //   if trigger_type == 'create':   # Workflow A's guard
+        //       schedule_activity(...)
+        //
+        // If we naively pass the CALLING workflow's trigger_type (e.g. 'write'
+        // from Workflow B), the guard in Workflow A evaluates to False and
+        // nothing runs — the automation silently does nothing.
+        //
+        // Fix: pass the REUSED automation's OWN trigger_type as a literal
+        // string so its internal guard always matches.
+        //
+        // For generic reusables (reuse_scope='generic'), trigger_type is ''
+        // and their code is generated WITHOUT a trigger guard, so we pass
+        // the special sentinel '__reuse__'. The backend _process() will detect
+        // this and execute the code unconditionally (no guard to match).
+        // ─────────────────────────────────────────────────────────────────────
+        const reusedTriggerType = this.selectedAutomationTriggerType;
+
+        // If the reused automation has a known trigger type, pass it as a
+        // literal. If it has none (generic reusable), pass the special sentinel
+        // '__reuse__' so the backend knows to skip any trigger guard.
+        const triggerTypeLiteral = reusedTriggerType
+            ? `'${reusedTriggerType}'`
+            : `'__reuse__'`;
+
         const lines = [
             'try:',
             '    cy_w_stack = list(__workflow_stack__)',
@@ -112,9 +224,16 @@ export class ReusableAutomationNode extends ConfigurationBase {
             `    env["work.auto"].browse(${automationId})._process({`,
             `        'records': ${recordsExpr},`,
             `        '__workflow_stack__': cy_w_stack,`,
+            // Pass the reused automation's OWN trigger_type so its internal
+            // `if trigger_type == '...'` guard evaluates correctly.
+            `        'trigger_type': ${triggerTypeLiteral},`,
+            // Signal to the backend that this is a reuse call — the backend
+            // uses this to skip dedup and resolve the correct model context.
+            `        '__is_reuse_call__': True,`,
             '    })',
             'except Exception as e:',
-            `    _logger.error("Reusable automation node ${this.props.id} failed: %s", e)`
+            `    _logger.error("Reusable automation ${automationId} failed: %s", e)`,
+            '    raise'
         ];
         return lines.join('\n');
     }

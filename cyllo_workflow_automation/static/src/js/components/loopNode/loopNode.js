@@ -122,7 +122,7 @@ export class LoopNode extends ConfigurationBase {
 
     // ── Confirm ──────────────────────────────────────────────────────────────
 
-    async onConfirm() {
+    onConfirm() {
         const { isValid, errors } = this.validateForm();
         if (!isValid) {
             this.env.services.effect.add({
@@ -133,34 +133,6 @@ export class LoopNode extends ConfigurationBase {
                 notificationType: "warning",
             });
             return;
-        }
-
-        let modelId = null;
-        let modelName = null;
-
-        if (this.loopState.sourceType === 'variable') {
-            const variable = (this.props.variables || []).find(v => v.id === this.loopState.collection);
-            modelId = variable?.modelId;
-            modelName = variable?.modelName;
-        } else {
-            // sourceType === 'field' -> find the relation of this field
-            const fieldName = this.loopState.collection.trim();
-            const fields = await this.orm.searchRead(
-                "ir.model.fields",
-                [['model_id', '=', this.props.primaryModelId], ['name', '=', fieldName]],
-                ['relation']
-            );
-            if (fields && fields.length > 0) {
-                modelName = fields[0].relation;
-                const models = await this.orm.searchRead(
-                    "ir.model",
-                    [['model', '=', modelName]],
-                    ['id']
-                );
-                if (models && models.length > 0) {
-                    modelId = models[0].id;
-                }
-            }
         }
 
         // Persist loop config into fieldState so save_data writes it to node.struct
@@ -176,7 +148,7 @@ export class LoopNode extends ConfigurationBase {
             this.updateUsedVariables(this.loopState.collection);
         }
 
-        this.props.onConfirm(this.fieldState, code, this.state.used_variables, { modelId, modelName });
+        this.props.onConfirm(this.fieldState, code, this.state.used_variables);
         this.props.close();
     }
 }

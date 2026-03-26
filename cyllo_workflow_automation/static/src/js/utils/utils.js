@@ -28,6 +28,9 @@ export async function settingInitialContext() {
         const nodeStruct = codeArray.find(item => item.id === node.data.nodeId);
         const code = nodeStruct?.code || ""
         const else_setup_code = nodeStruct?.else_setup_code || null;
+        const type = nodeStruct?.type || node.data.type || "node";
+        const trigger_type = nodeStruct?.trigger_type || node.data.trigger_type || null;
+        const ttype = nodeStruct?.ttype || node.data.ttype || null;
         return {
             nodeId: node.data.nodeId,
             parent: null,
@@ -39,6 +42,9 @@ export async function settingInitialContext() {
             isLoop,
             code,
             else_setup_code,
+            type,
+            trigger_type,
+            ttype,
         }
     })
 
@@ -46,45 +52,25 @@ export async function settingInitialContext() {
     contextNodes.forEach(node => {
         const dNode = nodes.find(item => item.data.nodeId === node.nodeId);
         if (dNode.outputs) {
-            if (node.isParent) {
-                const child1 = dNode.outputs?.output_1
-                const child2 = dNode.outputs?.output_2
-                const right = dNode.outputs?.output_3
-                if (child1?.connections?.length > 0) {
-                    const childId = child1.connections[0].node
-                    const childNode = nodes.find(item => item.id == childId);
-                    if (childNode) {
-                        const ctxNode = contextNodes.find(item => item.nodeId == childNode.data.nodeId);
-                        node.child1 = ctxNode || null;
+            Object.entries(dNode.outputs).forEach(([outputName, output]) => {
+                const connections = output.connections || [];
+                if (connections.length > 0) {
+                    const outputIdx = outputName.split('_')[1];
+                    let propName = 'right';
+                    if (node.isParent) {
+                        propName = outputIdx === '3' ? 'right' : `child${outputIdx}`;
                     }
-                }
 
-                if (child2?.connections?.length > 0) {
-                    const childId = child2.connections[0].node
-                    const childNode = nodes.find(item => item.id == childId);
-                    if (childNode) {
-                        const ctxNode = contextNodes.find(item => item.nodeId == childNode.data.nodeId);
-                        node.child2 = ctxNode || null;
+                    const targets = connections.map(conn => {
+                        const targetDNode = nodes.find(item => item.id == conn.node);
+                        return targetDNode ? contextNodes.find(item => item.nodeId === targetDNode.data.nodeId) : null;
+                    }).filter(Boolean);
+
+                    if (targets.length > 0) {
+                        node[propName] = targets.length === 1 ? targets[0] : targets;
                     }
                 }
-                if (right?.connections?.length > 0) {
-                    const childId = right.connections[0].node
-                    const childNode = nodes.find(item => item.id == childId);
-                    if (childNode) {
-                        const ctxNode = contextNodes.find(item => item.nodeId == childNode.data.nodeId);
-                        node.right = ctxNode || null;
-                    }
-                }
-            } else {
-                if (dNode.outputs?.output_1?.connections?.length > 0) {
-                    const outputId = dNode.outputs.output_1.connections[0].node
-                    const outPutNode = nodes.find(item => item.id == outputId);
-                    if (outPutNode) {
-                        const outPutNodeCtx = contextNodes.find((item => item.nodeId === outPutNode.data.nodeId));
-                        node.right = outPutNodeCtx || null;
-                    }
-                }
-            }
+            });
         }
 
         if (dNode.inputs?.input_1?.connections?.length > 0) {

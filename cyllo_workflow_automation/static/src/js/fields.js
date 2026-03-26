@@ -20,6 +20,8 @@ export const mailFields = [{ name: 'model_id', type: "many2One" }, { name: 'mail
 
 export const smsFields = [{ name: 'model_id', type: "many2One" }, { name: 'sms_record', type: 'json' }, { name: 'sms_template', type: 'json' }, { name: 'sms_partner_ids', type: 'json' }, { name: 'sms_isTemplate', type: 'boolean' }, { name: 'sms_message', type: 'char' }, { name: 'label', type: "char" }]
 
+export const whatsappFields = [{ name: 'model_id', type: 'many2One' }, { name: 'wa_record', type: 'json' }, { name: 'wa_is_template', type: 'boolean' }, { name: 'wa_template', type: 'json' }, { name: 'wa_partner_path', type: 'json' }, { name: 'wa_partner_source', type: 'selection' }, { name: 'wa_other_partner', type: 'json' }, { name: 'wa_free_message', type: 'char' }, { name: 'label', type: 'char' }, { name: 'used_variables', type: 'json' }]
+
 export const FollowerFields = [{ name: 'model_id', type: "many2One" }, { name: 'followers', type: "json" }, { name: 'follower_record', type: 'char' }, { name: 'label', type: "char" }, { name: 'label', type: "char" }, { name: 'isRemoveFollower', type: "json" }]
 
 export const ActivityFields = [{ name: 'model_id', type: "many2One" }, { name: 'activity_summary', type: "char" }, { name: 'activity_user', type: "json" }, { name: 'activity_deadline', type: "json" }, { name: 'activity_type', type: "json" }, { name: 'activity_record', type: "json" }, { name: 'label', type: "char" }]

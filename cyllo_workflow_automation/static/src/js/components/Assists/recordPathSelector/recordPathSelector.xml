@@ -11,7 +11,7 @@
                 />
             </div>
             <span t-if="state.selectedRecord" style="width:2%">></span>
-            <div t-if="state.selectedRecord and state.model" style="width:50%">
+            <div t-if="state.selectedRecord" style="width:50%">
                 <ModelFieldSelector
                         readonly="false"
                         path="state.path"

@@ -1,8 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="WorkflowCard" owl="1">
-        <div t-on-click="openView" class="auto-card" style="cursor: pointer;">
+        <div t-on-click="openView"
+             t-att-class="'auto-card' + (!isActive ? ' auto-card-inactive' : '')"
+             style="cursor: pointer; position: relative;">
             <div class="auto-card-inner">
+                <div class="auto-card-more" t-on-click.stop="">
+                    <button class="auto-card-more-button"
+                            t-att-class="state.menuOpen ? 'auto-card-more-button auto-card-more-button-hidden' : 'auto-card-more-button'"
+                            t-on-click.prevent.stop="toggleMenu"
+                            title="More actions"
+                            aria-label="More actions">
+                        <i class="ri-more-2-fill"/>
+                    </button>
+                    <t t-if="state.menuOpen">
+                        <div class="auto-card-more-menu">
+                            <button class="auto-card-more-item"
+                                    t-on-click.prevent.stop="onClickRename">
+                                <i class="ri-edit-line"/>
+                                <span>Rename</span>
+                            </button>
+                            <button class="auto-card-more-item auto-card-more-item-danger"
+                                    t-on-click.prevent.stop="onClickDelete">
+                                <i class="ri-delete-bin-line"/>
+                                <span>Delete</span>
+                            </button>
+                            <button class="auto-card-more-item"
+                                    t-on-click.prevent.stop="toggleActive">
+                                <i t-att-class="isActive ? 'ri-pause-circle-line' : 'ri-play-circle-line'"/>
+                                <span>
+                                    <t t-if="isActive">Deactivate</t>
+                                    <t t-else="">Activate</t>
+                                </span>
+                            </button>
+                        </div>
+                    </t>
+                </div>
                <t t-if="WorkflowCard.is_record_saved">
                     <div class="auto-card-contents">
                         <div class="kanban-flow-container-vertical">
@@ -52,11 +85,18 @@
                     </div>
                 </t>
                 <div class="auto-card-content">
+                    <t t-if="isReusable">
+                        <div class="auto-card-reusable-badge"
+                             t-att-title="isGeneric ? 'Generic Reusable: works with any model' : 'Reusable: model-specific'">
+                            <span t-att-class="'reusable-pill ' + (isGeneric ? 'reusable-pill-generic' : 'reusable-pill-model')">
+                                <i t-att-class="isGeneric ? 'ri-global-line' : 'ri-repeat-line'"/>
+                                <t t-if="isGeneric"> Generic</t>
+                                <t t-else=""> Reusable</t>
+                            </span>
+                        </div>
+                    </t>
                     <h3 class="auto-card-title" t-out="WorkflowCard.name"/>
                 </div>
-                <button class="auto-card-delete" t-on-click.prevent.stop="onClickDelete" title="Delete">
-                    <i class="ri-delete-bin-line"/>
-                </button>
             </div>
         </div>
     </t>

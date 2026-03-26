@@ -20,7 +20,7 @@ export class RecordPathSelector extends Component {
             path: "",
         });
         onWillStart(async () => {
-            this.props.value?.record && await this.setState(this.props);
+            this.props.value?.record && await  this.setState(this.props);
         })
         onWillUpdateProps(async (p) => {
             if (typeof p.value === "object" && "record" in p.value) {
@@ -37,13 +37,8 @@ export class RecordPathSelector extends Component {
     async setState(props) {
         const selectedVariable = this.props.variables.find(item => item.id === props.value.record);
         if (selectedVariable) {
-            const modelId = selectedVariable.modelId || (Array.isArray(selectedVariable.model_id) ? selectedVariable.model_id[0] : selectedVariable.model_id);
-            if (modelId) {
-                const model = await this.orm.read("ir.model", [modelId], ["model"]);
-                this.state.model = model ? model[0] : undefined;
-            } else {
-                this.state.model = undefined;
-            }
+            const model = await this.orm.read("ir.model", [selectedVariable.modelId], []);
+            this.state.model = model? model[0] : undefined;
             this.state.selectedRecord = props.value.record;
             this.state.path = props.value.path;
         }
@@ -52,43 +47,16 @@ export class RecordPathSelector extends Component {
     get options() {
         return [[false, ""], ...this.props.variables.map(variable => [variable.id, variable.variable_name])];
     }
-    /**
-    * Handles the update of the selected record based on the user's choice.
-    * @param {String|Boolean} value - The selected variable's ID or false if none is selected.
-    */
+     /**
+     * Handles the update of the selected record based on the user's choice.
+     * @param {String|Boolean} value - The selected variable's ID or false if none is selected.
+     */
     async handleUpdateRecord(value) {
         if (value) {
             const selectedVariable = this.props.variables.find(item => item.id === value);
-            let modelId = selectedVariable?.modelId || (Array.isArray(selectedVariable?.model_id) ? selectedVariable?.model_id[0] : selectedVariable?.model_id);
-            let modelName = selectedVariable?.modelName || selectedVariable?.model_name;
-
-            if (selectedVariable && modelId) {
-                const model = await this.orm.read("ir.model", [modelId], ["model"]);
-                this.state.model = model ? model[0] : undefined;
-                if (this.state.model) {
-                    modelName = this.state.model.model;
-                }
-            } else {
-                this.state.model = undefined;
-            }
+            const model = await this.orm.read("ir.model", [selectedVariable.modelId], []);
+            this.state.model = model? model[0] : undefined;
             this.state.selectedRecord = value;
-
-            // Proactively notify parent about the model of this record/variable
-            // This is crucial for ValueSelector to know which model to use for Static record selection.
-            if (modelName) {
-                this.props.update({
-                    record: value,
-                    path: this.state.path,
-                    pathValue: this.state.path, // If path is empty, use variable itself
-                    info: {
-                        fieldDef: {
-                            type: 'record',
-                            relation: modelName
-                        },
-                        resModel: modelName
-                    }
-                });
-            }
         } else {
             this.state.selectedRecord = value;
             this.state.model = undefined;
@@ -122,24 +90,24 @@ export class RecordPathSelector extends Component {
         return pathVal;
     }
 
-    /**
-    * Filters fields based on the provided definitions and current path.
-    * @param {Object} defs - The field definitions to filter.
-    * @param {String} path - The current path used for filtering.
-    * @returns {Boolean} - True if the field matches the criteria, false otherwise.
-    */
+     /**
+     * Filters fields based on the provided definitions and current path.
+     * @param {Object} defs - The field definitions to filter.
+     * @param {String} path - The current path used for filtering.
+     * @returns {Boolean} - True if the field matches the criteria, false otherwise.
+     */
     filterFields(defs, path) {
         if (!this.props.fieldInfo) return true;
         const { fieldInfo: { fieldDef, resModel }, operator } = this.props
         if (["ilike", "not ilike"].includes(operator)) return defs.type === "char"
         if (defs.name === "id") return true
-        else if (fieldDef.type === "many2one" || fieldDef.type === "many2many" || fieldDef.type === "one2many") {
+        else if (fieldDef.type === "many2one" || fieldDef.type === "many2many" || fieldDef.type === "one2many"  ) {
             if (["in", "not in"].includes(operator) && fieldDef.type === "many2one") return fieldDef.relation === defs.relation
-            return fieldDef.type === defs.type && fieldDef.relation === defs.relation
+            return  fieldDef.type === defs.type && fieldDef.relation === defs.relation
         } else if (fieldDef.type === "binary") {
             return false
         } else if (fieldDef.type === "selection") {
-            return fieldDef.type === defs.type && this.state.model && resModel === this.state.model.model && fieldDef.name === defs.name
+            return fieldDef.type === defs.type && resModel === this.state.model.model && fieldDef.name === defs.name
         } else {
             if (fieldDef.type === "record") {
                 return fieldDef.relation === defs.relation
@@ -150,4 +118,4 @@ export class RecordPathSelector extends Component {
 }
 
 RecordPathSelector.template = "RecordPathSelector";
-RecordPathSelector.components = { Select, ModelFieldSelector };
+RecordPathSelector.components = { Select, ModelFieldSelector  };

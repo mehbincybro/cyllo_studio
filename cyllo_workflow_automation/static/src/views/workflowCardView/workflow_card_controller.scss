@@ -23,6 +23,90 @@
     flex-direction: column;
 }
 
+.auto-card-more {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 3;
+}
+
+.auto-card-more-button {
+    width: 24px;
+    height: 24px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+.auto-card-more-button:hover {
+    background: rgba(148, 163, 184, 0.12);
+    color: #0f172a;
+}
+
+.auto-card-more-button i {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.auto-card-more-button-hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.auto-card-more-menu {
+    margin-top: 6px;
+    min-width: 146px;
+    padding: 6px;
+    border-radius: 10px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.16);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auto-card-more-item {
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: left;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.auto-card-more-item:hover {
+    background: #f1f5f9;
+}
+
+.auto-card-more-item i {
+    font-size: 16px;
+    line-height: 1;
+}
+
+.auto-card-more-item-danger {
+    color: #b42318;
+}
+
+.auto-card-more-item-danger:hover {
+    background: #fef3f2;
+    color: #912018;
+}
+
 .auto-card-image {
     padding-top: 19px;
     height: 198px;
@@ -56,33 +140,6 @@
     font-size: 14px;
     font-weight: 400;
     color: #333;
-}
-
-.auto-card-delete {
-    position: absolute;
-    top: 5px;
-    right: 5px;
-    background-color: transparent;
-    border: none;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.auto-card-delete i {
-    color: #ff4d4d;
-    font-size: 16px;
-}
-
-.auto-card-delete i:hover {
-    color: #c10d0d;
-    font-size: 16px;
-    font-weight: 600;
 }
 
 .auto_card_container {
@@ -138,4 +195,40 @@
 
 .cy-w-create-record{
     cursor: pointer;
+}
+
+.cy-rename-automation-modal {
+    .modal-content {
+        border: none;
+        border-radius: 14px;
+        box-shadow: 0 20px 48px rgba(15, 23, 42, 0.18);
+    }
+
+    .modal-header,
+    .modal-footer {
+        border: none;
+    }
+
+    .modal-body {
+        padding-top: 8px !important;
+    }
+}
+
+.cy-rename-automation-label {
+    margin-bottom: 8px;
+    color: #334155;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.cy-rename-automation-input {
+    min-height: 42px;
+    border-radius: 10px;
+    border-color: rgba(148, 163, 184, 0.45);
+    box-shadow: none;
+}
+
+.cy-rename-automation-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }

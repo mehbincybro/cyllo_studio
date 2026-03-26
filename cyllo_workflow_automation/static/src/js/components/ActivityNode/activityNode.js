@@ -1,14 +1,14 @@
 /** @odoo-module */
-import {ConfigurationBase} from "../configurationBase/configurationBase";
-import {CustomDropdown} from "../Assists/dropdown/CustomDropdown";
-import {getValueEditorInfo} from "@web/core/tree_editor/tree_editor_value_editors";
-import {VariableSelector} from "../Assists/variableSelector/variableSelector"
-import {FieldTypeDropdown} from "../Assists/fieldTypeDropdown/fieldTypeDropDown";
-import {RecordPathSelector} from "../Assists/recordPathSelector/recordPathSelector";
-import {DateTimeInput} from "@web/core/datetime/datetime_input";
-import {deserializeDate, serializeDate} from "@web/core/l10n/dates";
-import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
-const {DateTime} = luxon;
+import { ConfigurationBase } from "../configurationBase/configurationBase";
+import { CustomDropdown } from "../Assists/dropdown/CustomDropdown";
+import { getValueEditorInfo } from "@web/core/tree_editor/tree_editor_value_editors";
+import { VariableSelector } from "../Assists/variableSelector/variableSelector"
+import { FieldTypeDropdown } from "../Assists/fieldTypeDropdown/fieldTypeDropDown";
+import { RecordPathSelector } from "../Assists/recordPathSelector/recordPathSelector";
+import { DateTimeInput } from "@web/core/datetime/datetime_input";
+import { deserializeDate, serializeDate } from "@web/core/l10n/dates";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+const { DateTime } = luxon;
 
 export class ActivityNode extends ConfigurationBase {
     /**
@@ -23,7 +23,7 @@ export class ActivityNode extends ConfigurationBase {
         this.fieldState.label = ev
         const label = ev
         const nodeId = this.props.id
-        this.env.bus.trigger("CHANGE-LABEL", {label, nodeId});
+        this.env.bus.trigger("CHANGE-LABEL", { label, nodeId });
     }
 
     get getRecords() {
@@ -50,22 +50,22 @@ export class ActivityNode extends ConfigurationBase {
         mail_to.value = value
         this.fieldState.activity_user = mail_to
     }
-     /**
-     * Retrieves component properties for specific fields like assignee or deadline.
-     * @param {Object} info - Information object to extract properties from.
-     * @param {String} field - The field type ('assignee' or 'deadline').
-     * @returns {Object} - Extracted properties for the component.
-     */
+    /**
+    * Retrieves component properties for specific fields like assignee or deadline.
+    * @param {Object} info - Information object to extract properties from.
+    * @param {String} field - The field type ('assignee' or 'deadline').
+    * @returns {Object} - Extracted properties for the component.
+    */
 
     getComponentProps(info, field) {
-        const {value, update} = field === "assignee" ? {
+        const { value, update } = field === "assignee" ? {
             value: this.fieldState.activity_user?.value || false,
             update: (value) => this.updateAssignee(value)
         } : {
             value: this.getDeadline.value || false,
             update: (value) => this.updateDeadline(value)
         }
-        return info.extractProps({value, update})
+        return info.extractProps({ value, update })
     }
 
     /**
@@ -85,7 +85,7 @@ export class ActivityNode extends ConfigurationBase {
                         type: "many2one",
                         relation: "res.users",
                     }
-                } : {fieldDef: {type: 'date'}}
+                } : { fieldDef: { type: 'date' } }
             };
         } else if (selectionType === 'record') {
             result = {
@@ -96,7 +96,7 @@ export class ActivityNode extends ConfigurationBase {
                         type: 'many2one',
                         relation: 'res.users',
                     }
-                } : {fieldDef: {type: 'date'}}
+                } : { fieldDef: { type: 'date' } }
             };
         } else {
             result = {
@@ -104,7 +104,7 @@ export class ActivityNode extends ConfigurationBase {
                     fieldDef: field === "assignee" ? {
                         type: "many2one",
                         relation: "res.users",
-                    } : {type: 'date'}
+                    } : { type: 'date' }
                 }
             };
         }
@@ -120,12 +120,12 @@ export class ActivityNode extends ConfigurationBase {
     getValueEditorInfo(field, type) {
         const selectionType = field.selectionType ? field.selectionType : ''
         const operator = '='
-        const {flVariables, fieldInfo} = this.getVariablesField(selectionType, type)
+        const { flVariables, fieldInfo } = this.getVariablesField(selectionType, type)
         let editorValue = getValueEditorInfo(fieldInfo.fieldDef, operator);
         if (selectionType === "variable") {
             return {
                 component: VariableSelector,
-                extractProps: ({value, update}) => {
+                extractProps: ({ value, update }) => {
                     return {
                         value,
                         update,
@@ -137,7 +137,7 @@ export class ActivityNode extends ConfigurationBase {
         } else if (selectionType === "record") {
             return {
                 component: RecordPathSelector,
-                extractProps: ({value, update}) => {
+                extractProps: ({ value, update }) => {
                     return {
                         value,
                         update,
@@ -162,11 +162,11 @@ export class ActivityNode extends ConfigurationBase {
     toggleIncludeVariable(value, field) {
         if (field === 'user') {
             if (![value, undefined].includes(this.fieldState.activity_user.selectionType)) {
-                this.fieldState.activity_user = {value: '', selectionType: value}
+                this.fieldState.activity_user = { value: '', selectionType: value }
             } else this.fieldState.activity_user.selectionType = value;
         } else {
             if (![value, undefined].includes(this.fieldState.activity_deadline.selectionType)) {
-                this.fieldState.activity_deadline = {value: false, selectionType: value}
+                this.fieldState.activity_deadline = { value: false, selectionType: value }
             } else this.fieldState.activity_deadline.selectionType = value;
         }
     }
@@ -209,15 +209,30 @@ export class ActivityNode extends ConfigurationBase {
     }
 
     generateCode() {
-        const {activity_type, activity_summary, activity_deadline, activity_user, activity_record} = this.fieldState
+        const { activity_type, activity_summary, activity_deadline, activity_user, activity_record } = this.fieldState
         const user_id = this.getUserId(activity_user)
         const deadline = this.getDeadLineValue(activity_deadline)
         const record = this.props.variables.find((variable) => variable.id === activity_record.value)
         let code = ''
+        const recordExpr = activity_record.label;
+        const scheduleArgs = `date_deadline = ${deadline},activity_type_id = ${activity_type.id},summary = """${activity_summary}""", user_id = ${user_id}`;
+        const logCall = `_logger.warning('Activity node skipped: %s', exc)`;
         if (record.variable_type === 'record') {
-            code = `${activity_record.label}.activity_schedule(date_deadline = ${deadline},activity_type_id = ${activity_type.id},summary = """${activity_summary}""", user_id = ${user_id})`
+            code = `
+try:
+    _act_target = ${recordExpr}
+    _safe_schedule_activity(_act_target, ${scheduleArgs})
+except Exception as exc:
+    ${logCall}
+`
         } else {
-            code = `for record in ${activity_record.label}:\n\trecord.activity_schedule(date_deadline = ${deadline},activity_type_id = ${activity_type.id},summary = """${activity_summary}""", user_id = ${user_id})`
+            code = `
+try:
+    _act_records = ${recordExpr}
+    _safe_schedule_activity(_act_records, ${scheduleArgs})
+except Exception as exc:
+    ${logCall}
+`
         }
         return code || "";
     }
@@ -254,12 +269,12 @@ export class ActivityNode extends ConfigurationBase {
         !user ? errors.activity_user = "Activity User must be a non-empty." : false
         // If there are errors, return or log them
         if (Object.keys(errors).length > 0) {
-            return {isValid: false, errors};
+            return { isValid: false, errors };
         }
         // If no errors, form is valid
-        return {isValid: true};
+        return { isValid: true };
     }
 }
 
 ActivityNode.template = "ActivityNode"
-ActivityNode.components = {...ConfigurationBase.components, CustomDropdown, FieldTypeDropdown, Many2XAutocomplete}
+ActivityNode.components = { ...ConfigurationBase.components, CustomDropdown, FieldTypeDropdown, Many2XAutocomplete }

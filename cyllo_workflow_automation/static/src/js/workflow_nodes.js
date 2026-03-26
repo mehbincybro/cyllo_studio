@@ -13,6 +13,7 @@ import {
     mailFields,
     FollowerFields,
     smsFields,
+    whatsappFields,
     ActivityFields,
     MappedFields,
     AssignmentFields,
@@ -33,6 +34,7 @@ import { WriteNode } from "./components/writeNode/writeNode";
 import { MailNode } from "./components/mailNode/mailNode";
 import { FollowerNode } from "./components/FollowerNode/followerNode";
 import { SmsNode } from "./components/xsmsNode/smsNode";
+import { WhatsAppNode } from "./components/whatsappNode/whatsappNode";
 import { ConditionNode } from "./components/xconditionNode/conditionNode";
 import { ActivityNode } from "./components/ActivityNode/activityNode";
 import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
@@ -77,6 +79,10 @@ const MODAL_CONFIGS = {
         component: SmsNode,
         fields: smsFields,
     },
+    'WhatsApp': {
+        component: WhatsAppNode,
+        fields: whatsappFields,
+    },
     'Follower': {
         component: FollowerNode,
         fields: FollowerFields,
@@ -97,6 +103,7 @@ const MODAL_CONFIGS = {
 
 export class ModelComponent extends Component {
     setup() {
+        this.action = useService("action");
         this.dialogService = useService("dialog");
         this.root = useRef("root");
         this.notification = useService("notification");
@@ -349,9 +356,17 @@ export class ModelComponent extends Component {
             } else if (this.props.name === 'Loop') {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Loop Node iterates over a recordset field or variable, executing child nodes for each record in turn.";
-                props.onConfirm = (fieldState, code, usedVariables, modelInfo) => {
+                props.onConfirm = (fieldState, code, usedVariables) => {
                     this.onConfirm(fieldState, code, usedVariables);
-                    this.updateLoopVariable(fieldState, modelInfo);
+                    this.updateLoopVariable(fieldState);
+                };
+            } else if (this.props.name === 'Reuse Automation') {
+                props.work_auto_id = this.props.work_auto_id;
+                props.primary_model_id = this.props.primary_model_id;
+                props.primary_model_name = this.props.primary_model_name;
+                props.display_name = "Select a reusable automation to call from this node. The selected automation will run using the record you choose and continue when it finishes.";
+                props.onEditReusableFlow = async () => {
+                    await this.editReusableAutomationFlow();
                 };
             }
             this.dialogService.add(component, props);
@@ -364,7 +379,7 @@ export class ModelComponent extends Component {
      * Registers the loop iteration variable into the frontend variable context
      * so nodes inside the loop body can select it from their variable dropdowns.
      */
-    updateLoopVariable(fieldState, modelInfo = {}) {
+    updateLoopVariable(fieldState) {
         const varName = fieldState.loop_variable_name;
         if (!varName) return;
         const existingVars = this.variableContext.variables;
@@ -379,10 +394,8 @@ export class ModelComponent extends Component {
                         id: varId,
                         variable_name: varName,
                         variable_type: 'record',
-                        modelId: modelInfo.modelId || null,
-                        modelName: modelInfo.modelName || null,
-                        model_id: modelInfo.modelId || null,
-                        model_name: modelInfo.modelName || null,
+                        modelId: null,
+                        modelName: null,
                         scopeId: nodeId,
                         usedIn: [],
                         class: this.buttonClass,
@@ -391,10 +404,6 @@ export class ModelComponent extends Component {
             });
         } else {
             alreadyRegistered.variable_name = varName;
-            alreadyRegistered.modelId = modelInfo.modelId || alreadyRegistered.modelId;
-            alreadyRegistered.modelName = modelInfo.modelName || alreadyRegistered.modelName;
-            alreadyRegistered.model_id = modelInfo.modelId || alreadyRegistered.model_id;
-            alreadyRegistered.model_name = modelInfo.modelName || alreadyRegistered.model_name;
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
@@ -427,26 +436,55 @@ export class ModelComponent extends Component {
     }
 
     updateVariable(fieldState) {
-        const { search_variable } = fieldState;
+        const { model_id, search_variable } = fieldState;
         const variable = this.variableContext.variables.find(item => item.id === search_variable.id);
         if (variable) {
-            variable.modelId = search_variable.modelId;
-            variable.modelName = search_variable.modelName;
-            variable.model_id = search_variable.model_id || search_variable.modelId;
-            variable.model_name = search_variable.model_name || search_variable.modelName;
+            variable.modelId = model_id;
             variable.variable_type = search_variable.variable_type;
             variable.variable_name = search_variable.variable_name;
         } else {
-            const reactiveVar = owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass });
-            reactiveVar.model_id = reactiveVar.model_id || reactiveVar.modelId;
-            reactiveVar.model_name = reactiveVar.model_name || reactiveVar.modelName;
-            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], reactiveVar] })
+            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass })] })
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
 
     async updateNode(fieldState, code) {
         await this.orm.call('node.struct', 'save_data', [this.props.nodeId, { ...fieldState, code }]);
+    }
+
+    async editReusableAutomationFlow() {
+        if (this.props.name !== 'Reuse Automation') {
+            return;
+        }
+        const result = await this.orm.call(
+            'node.struct',
+            'create_editable_reuse_copy',
+            [[this.props.nodeId]]
+        );
+
+        if (!result?.id) {
+            return;
+        }
+
+        this.state.label = result.label || result.name || this.state.label;
+
+        const currentNode = this.context.nodes.find(
+            (node) => node.nodeId === this.props.nodeId
+        );
+        if (currentNode) {
+            currentNode.reused_work_auto_id = result.id;
+            currentNode.code = result.code || currentNode.code;
+            currentNode.label = result.label || currentNode.label;
+        }
+
+        this.action.doAction({
+            type: "ir.actions.client",
+            tag: "automation_view",
+            target: "current",
+            context: {
+                rec_id: result.id,
+            },
+        });
     }
 
     raiseNotification(text, type) {
@@ -504,6 +542,31 @@ export class ModelComponent extends Component {
         }
 
         await this.updateNode(fieldState, code);
+
+        // Sync the newly saved fieldState back into the Drawflow editor's internal
+        // node data. This ensures that editor.export() (called by saveData) uses
+        // the latest configuration even if the flow hasn't been reloaded yet.
+        //
+        // Guard: this.env.editor is injected by WorkFlowAuto via useSubEnv as a
+        // getter function (() => this.editor). We call it safely here. If for any
+        // reason it is not available (e.g. component rendered outside the main
+        // automation view), we skip the sync gracefully instead of throwing.
+        try {
+            const editor = typeof this.env.editor === 'function' ? this.env.editor() : null;
+            const internalId = this.props.id; // Drawflow internal numeric ID passed as prop
+            if (editor && internalId) {
+                const node = editor.getNodeFromId(internalId);
+                if (node && node.data.nodeId === this.props.nodeId) {
+                    editor.updateNodeDataFromId(internalId, { ...node.data, ...fieldState, code });
+                }
+            }
+        } catch (editorSyncErr) {
+            // Non-critical: the data is already persisted to the DB via updateNode().
+            // A failure here only means the in-memory Drawflow state isn't patched,
+            // which will be corrected on the next reload.
+            console.warn('Could not sync fieldState into Drawflow editor:', editorSyncErr);
+        }
+
         this.updateVariableUsage(usedVariables);
         this.raiseNotification("Record Saved...!", "success");
     }

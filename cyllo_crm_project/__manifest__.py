@@ -33,10 +33,8 @@
         'data/crm_project_data.xml',
         'views/crm_lead_views.xml',
     ],
-    'uninstall_hook': 'uninstall_hook',
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': True,
     'application': False,
-    'uninstall_hook': 'uninstall_hook',
 }

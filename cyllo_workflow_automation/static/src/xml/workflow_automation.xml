@@ -74,6 +74,27 @@
 											Clear
 										</div>
 							</a>
+                            <!-- Reusable toggle: marks this automation as callable from Reuse Automation nodes -->
+                            <a t-att-class="'btn d-flex align-items-center gap-1 ' + (state.isReusable ? 'btn-success' : 'btn-outline-secondary')"
+                               t-on-click="toggleReusable"
+                               t-att-title="state.isReusable ? 'Marked as Reusable - click to disable' : 'Click to mark as Reusable'">
+                                <i t-att-class="'ri-loop-' + (state.isReusable ? 'right' : 'left') + '-line'"/>
+                                <div class="d-flex align-items-center">
+                                    <t t-if="state.isReusable">Reusable</t>
+                                    <t t-else="">Reusable</t>
+                                </div>
+                            </a>
+                            <!-- Generic toggle: only visible when Reusable is ON -->
+                            <a t-if="state.isReusable"
+                               t-att-class="'btn d-flex align-items-center gap-1 ' + (state.isGenericReusable ? 'btn-warning' : 'btn-outline-secondary')"
+                               t-on-click="toggleGenericReusable"
+                               t-att-title="state.isGenericReusable ? 'Generic mode: works with any model — click to restrict to this model' : 'Click to make this automation model-agnostic (Generic)'">
+                                <i class="ri-global-line"/>
+                                <div class="d-flex align-items-center">
+                                    <t t-if="state.isGenericReusable">Generic</t>
+                                    <t t-else="">Model</t>
+                                </div>
+                            </a>
                             <a class="btn btn-primary d-flex align-items-center gap-1"  data-hotkey="s" t-att-class="saveClass" t-on-click="onSave">
 								<i class="ri-save-3-line"/>
                                 <div class="d-flex align-items-center">Save</div>
@@ -102,7 +123,12 @@
 					</div>
                     <t t-if="state.block">
 						<div class="cy-w-tab-content" t-if="!state.customTrigger" t-ref="mainBlk" id="myTabContent">
-							<div class="form-group px-3 pt-3 mb-3"
+                        <!-- Generic Mode banner: shown when automation has no fixed model -->
+                        <div t-if="state.isGenericReusable" class="alert alert-warning mx-3 mt-3 mb-2 py-2 px-3 small">
+                            <strong><i class="ri-global-line me-1"/>Generic Mode</strong> &#x2014; No object required.
+                            This automation works with any model passed by the calling workflow.
+                        </div>
+							<div class="form-group px-3 pt-3 mb-3" t-if="!state.isGenericReusable"
                                  t-attf-class="#{model_blk? '': ' cy_w_disabled'}">
 								<label class="form-label  cy-modal-form_label">
 									<h6>Object</h6>
@@ -203,20 +229,26 @@
 										</div>
                                     <div class="collapse" id="orm-blocks">
 										<div class="card-body cy_w_sidebar_btn">
-											<t t-if="!isTimeTrigger and !isFieldChangeTrigger">
-											<div class="collapse_btn"
+                                            <t t-if="builtinTriggerActionIds.create and !isTimeTrigger and !isFieldChangeTrigger">
+                                            <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'create')"
-                                                 draggable="true" data-node="Create">
+                                                 draggable="true"
+                                                 data-node="Create"
+                                                 t-att-data-action="builtinTriggerActionIds.create"
+                                                 t-att-data-trigger_type="'create'">
 												<img draggable="false"
                                                      src="cyllo_workflow_automation/static/src/img/trigger/Vector (8).svg"
                                                      alt=""/>
                                                 <p>Create</p>
 											</div>
 											</t>
-                                            <t t-if="!isTimeTrigger">
+                                            <t t-if="builtinTriggerActionIds.write and !isTimeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'write')"
-                                                 draggable="true" data-node="Write">
+                                                 draggable="true"
+                                                 data-node="Write"
+                                                 t-att-data-action="builtinTriggerActionIds.write"
+                                                 t-att-data-trigger_type="'write'">
 												<img draggable="false"
                                                      src="cyllo_workflow_automation/static/src/img/on-write.svg"
                                                      alt=""/>
@@ -345,6 +377,16 @@
                                                      src="cyllo_workflow_automation/static/src/img/sms.svg"
                                                      alt=""/>
                                                 <p>SMS</p>
+                                            </div>
+                                            </t>
+                                            <t t-if="state.hasWhatsappModule and !isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'whatsapp')"
+                                                 draggable="true" data-node="WhatsApp">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/whatsapp.svg"
+                                                     alt=""/>
+                                                <p>WhatsApp</p>
                                             </div>
                                             </t>
                                             <t t-if="!isFieldChangeTrigger">

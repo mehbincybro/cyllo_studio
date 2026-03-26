@@ -13,6 +13,7 @@ export const icons = {
     'Follower': 'cyllo_workflow_automation/static/src/img/node-icons/follower.svg',
     'Mail': 'cyllo_workflow_automation/static/src/img/node-icons/mail.svg',
     'SMS': 'cyllo_workflow_automation/static/src/img/node-icons/sms.svg',
+    'WhatsApp': 'cyllo_workflow_automation/static/src/img/node-icons/whatsapp.svg',
     'Warning': 'cyllo_workflow_automation/static/src/img/node-icons/warning.svg',
     'Action': 'cyllo_workflow_automation/static/src/img/node-icons/trigger.svg',
     'Activity': 'cyllo_workflow_automation/static/src/img/routine-cl.svg',
