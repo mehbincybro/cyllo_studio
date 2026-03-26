@@ -127,6 +127,10 @@
                             <field name="crm_lead_count" widget="statinfo" string="CRM Leads"/>
                         </button>
                     </div>
+                    <div class="alert alert-warning text-center o_form_header" role="alert" invisible="not has_duplicates">
+                        <strong>Warning!</strong> Potential duplicate tickets found for this customer.
+                        <button name="action_view_duplicates" type="object" class="btn btn-link py-0" string="View Duplicates"/>
+                    </div>
                     <group>
                         <field name="name" placeholder="Eg: Product arrived damaged"/>
                         <field name="sla_flag" invisible="1"/>
@@ -135,6 +139,7 @@
                         <field name="sla_ids" widget="many2many_tags" invisible="not sla_flag"/>
                         <field name="sla_progress" widget="progressbar" invisible="not sla_flag or stage_name == 'Solved'"/>
                         <field name="sla_failed" invisible="1"/>
+                        <field name="has_duplicates" invisible="1"/>
                     </group>
                     <group invisible="1">
                         <field name="sale_order_ids"/>
