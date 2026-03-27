@@ -19,6 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import mimetypes
 import requests
 
 from odoo import _, api, fields, models
@@ -58,6 +59,16 @@ class WhatsappMessage(models.Model):
          ('video', 'Video'), ('sticker', 'Sticker'),
          ('document', 'Document')], help='Choose the message template',
         default='text')
+
+    def _resolve_attachment_mimetype(self, attachment):
+        """
+        Normalise attachment mimetype before WhatsApp validation/upload.
+        """
+        mimetype = attachment.mimetype or ''
+        if mimetype and mimetype != 'application/octet-stream':
+            return mimetype
+        guessed_type, _encoding = mimetypes.guess_type(attachment.name or '')
+        return guessed_type or mimetype or 'application/octet-stream'
     is_voice = fields.Boolean(help='Is voice')
     is_template = fields.Boolean(string='Template',
                                  help='Check this field if message is template')
@@ -228,7 +239,7 @@ class WhatsappMessage(models.Model):
         fname = attachment.store_fname
         file_path = attachment._full_path(fname)
         file_name = attachment.name
-        file_type = attachment.mimetype
+        file_type = self._resolve_attachment_mimetype(attachment)
         files = {"file": (file_name, open(file_path, "rb"), file_type, {})}
         url = f"https://graph.facebook.com/v18.0/{whatsapp_no}/media"
         response = requests.post(url, data=payload, files=files, headers=token)
@@ -271,16 +282,24 @@ class WhatsappMessage(models.Model):
                 ',') if image_info else False
             video_datas = video_info['videoContent'].split(
                 ',') if video_info else False
+            attachment_id = False
+            if isinstance(document, models.BaseModel):
+                attachment_id = document.id
+            elif isinstance(document, (list, tuple)):
+                attachment_id = document[0] if document else False
+            else:
+                attachment_id = document or False
             attachment = self.env['ir.attachment'].browse(
-                document[0]) if document else False
+                attachment_id) if attachment_id else False
             if message or image_info or video_info or document:
+                attachment_mimetype = self._resolve_attachment_mimetype(attachment) if attachment else False
                 message_values = {
                     'channel_id': channel['id'],
                     'message': message or False,
                     'flag': True,
                     'image': datas[1] if datas else False,
                     'video': video_datas[1] if video_datas else False,
-                    'attachment_id': document[0] if document else False
+                    'attachment_id': attachment_id or False
                 }
                 headers = {'Authorization': f'Bearer {cloud_token}',
                            'Content-Type': 'application/json'}
@@ -341,14 +360,14 @@ class WhatsappMessage(models.Model):
                     supported_document_types = [value for group_values in
                                                 self._COMPATIBLE_ATTACHMENT_TYPE.values()
                                                 for value in group_values]
-                    if attachment.mimetype not in supported_document_types:
+                    if attachment_mimetype not in supported_document_types:
                         raise ValidationError(
                             _("Attachment mimetype '%s' is not supported by WhatsApp.",
-                              attachment.mimetype))
+                              attachment_mimetype))
                     media_id = self.generate_media_id(attachment, token,
                                                       payload,
                                                       phone_uid) if attachment else False
-                    if attachment.mimetype.startswith("audio/"):
+                    if attachment_mimetype.startswith("audio/"):
                         message_values['message_type'] = 'audio'
                         if media_id:
                             payload['type'] = 'audio'
@@ -357,7 +376,7 @@ class WhatsappMessage(models.Model):
                             }
                             message_values['is_voice'] = False
                             try:
-                                if attachment.mimetype == 'audio/ogg; codecs=opus':
+                                if attachment_mimetype == 'audio/ogg; codecs=opus':
                                     payload['audio']['voice'] = True
                                     message_values['is_voice'] = True
                             except Exception as e:
@@ -367,8 +386,12 @@ class WhatsappMessage(models.Model):
                         message_values['message_type'] = 'document'
                         if media_id:
                             payload['type'] = 'document'
-                            payload['document'] = {'id': media_id,
-                                                   'filename': attachment.name}
+                            payload['document'] = {
+                                'id': media_id,
+                                'filename': attachment.name,
+                            }
+                            if message:
+                                payload['document']['caption'] = message
                 else:
                     payload['type'] = 'text'
                     payload['text'] = {'body': message}

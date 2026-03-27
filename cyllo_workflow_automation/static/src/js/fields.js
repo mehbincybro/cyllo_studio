@@ -20,7 +20,7 @@ export const mailFields = [{ name: 'model_id', type: "many2One" }, { name: 'mail
 
 export const smsFields = [{ name: 'model_id', type: "many2One" }, { name: 'sms_record', type: 'json' }, { name: 'sms_template', type: 'json' }, { name: 'sms_partner_ids', type: 'json' }, { name: 'sms_isTemplate', type: 'boolean' }, { name: 'sms_message', type: 'char' }, { name: 'label', type: "char" }]
 
-export const whatsappFields = [{ name: 'model_id', type: 'many2One' }, { name: 'wa_record', type: 'json' }, { name: 'wa_is_template', type: 'boolean' }, { name: 'wa_template', type: 'json' }, { name: 'wa_partner_path', type: 'json' }, { name: 'wa_partner_source', type: 'selection' }, { name: 'wa_other_partner', type: 'json' }, { name: 'wa_free_message', type: 'char' }, { name: 'label', type: 'char' }, { name: 'used_variables', type: 'json' }]
+export const whatsappFields = [{ name: 'model_id', type: 'many2One' }, { name: 'wa_record', type: 'json' }, { name: 'wa_is_template', type: 'boolean' }, { name: 'wa_template', type: 'json' }, { name: 'wa_partner_path', type: 'json' }, { name: 'wa_partner_source', type: 'selection' }, { name: 'wa_other_partner', type: 'json' }, { name: 'wa_free_message', type: 'char' }, { name: 'wa_attachment_mode', type: 'selection' }, { name: 'wa_static_attachment_ids', type: 'many2many' }, { name: 'wa_auto_report_id', type: 'many2One' }, { name: 'label', type: 'char' }, { name: 'used_variables', type: 'json' }]
 
 export const FollowerFields = [{ name: 'model_id', type: "many2One" }, { name: 'followers', type: "json" }, { name: 'follower_record', type: 'char' }, { name: 'label', type: "char" }, { name: 'label', type: "char" }, { name: 'isRemoveFollower', type: "json" }]
 

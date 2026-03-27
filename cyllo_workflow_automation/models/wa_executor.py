@@ -69,7 +69,17 @@ class WaWorkflowExecutor(models.AbstractModel):
         return bool(user.token and user.account_uid and user.phone_uid and user.app_uid)
 
     @api.model
-    def send_workflow_whatsapp(self, record, partner_path=None, template_id=None, free_message=None, partner_id=None):
+    def send_workflow_whatsapp(
+        self,
+        record,
+        partner_path=None,
+        template_id=None,
+        free_message=None,
+        partner_id=None,
+        attachment_mode='none',
+        static_attachment_ids=None,
+        auto_report_id=None,
+    ):
         """
             Send a WhatsApp message as part of a workflow execution.
 
@@ -94,6 +104,9 @@ class WaWorkflowExecutor(models.AbstractModel):
                 template_id (int, optional): ID of the WhatsApp template to use.
                 free_message (str, optional): Message content for free-form sending.
                 partner_id (int, optional): Explicit res.partner ID to use as recipient.
+                attachment_mode (str, optional): Attachment mode: none/static/auto.
+                static_attachment_ids (list, optional): Stored ir.attachment IDs.
+                auto_report_id (int, optional): ir.actions.report ID to render at runtime.
 
             Returns:
                 bool: True if the message was successfully sent, False if skipped.
@@ -112,6 +125,9 @@ class WaWorkflowExecutor(models.AbstractModel):
                 "Go to Settings -> Users -> your user -> WhatsApp Account tab "
                 "and fill in Token, Account UID, Phone UID, and App UID."
             ))
+
+        if getattr(record, '_name', None) and len(record) > 1:
+            record = record[:1]
 
         if partner_id:
             partner = self.env['res.partner'].browse(partner_id)
@@ -138,6 +154,47 @@ class WaWorkflowExecutor(models.AbstractModel):
             )
             return False
 
+        resolved_attachment = False
+        if attachment_mode == 'static' and static_attachment_ids:
+            resolved_attachment = self.env['ir.attachment'].sudo().browse(
+                static_attachment_ids
+            ).exists()[:1]
+            if static_attachment_ids and len(static_attachment_ids) > 1:
+                _logger.info(
+                    "WA workflow: multiple static attachments configured for %s; only the first is supported.",
+                    record,
+                )
+        elif attachment_mode == 'auto' and auto_report_id and record:
+            report = self.env['ir.actions.report'].sudo().browse(auto_report_id)
+            if report.exists():
+                if report.report_type != 'qweb-pdf':
+                    _logger.warning(
+                        "WA workflow: report %s is not a PDF report; skipping attachment generation.",
+                        report.display_name,
+                    )
+                else:
+                    try:
+                        pdf_content, _content_type = report._render_qweb_pdf(report, [record.id])
+                        resolved_attachment = self.env['ir.attachment'].sudo().create({
+                            'name': '%s_%s.pdf' % (report.name, record.id),
+                            'type': 'binary',
+                            'datas': base64.b64encode(pdf_content),
+                            'res_model': record._name,
+                            'res_id': record.id,
+                            'mimetype': 'application/pdf',
+                        })
+                    except Exception as exc:
+                        _logger.error(
+                            "WA workflow: failed to render auto report %s for %s - %s",
+                            report.display_name, record, exc,
+                        )
+        if attachment_mode != 'none' and not resolved_attachment:
+            _logger.warning(
+                "WA workflow: attachment mode '%s' configured for %s but no attachment was resolved.",
+                attachment_mode,
+                record,
+            )
+
         channel = self.env['whatsapp.channel'].search([
             ('partner_id', '=', partner.id),
             ('user_id', '=', self.env.user.id),
@@ -156,7 +213,7 @@ class WaWorkflowExecutor(models.AbstractModel):
                 attachment = None
                 if template.report_id:
                     report = template.report_id
-                    pdf_content, _content_type = report._render_qweb_pdf([record.id])
+                    pdf_content, _content_type = report._render_qweb_pdf(report, [record.id])
                     attachment = self.env['ir.attachment'].sudo().create({
                         'name': '%s.pdf' % report.name,
                         'type': 'binary',
@@ -164,7 +221,13 @@ class WaWorkflowExecutor(models.AbstractModel):
                         'res_model': record._name,
                         'res_id': record.id,
                     })
-                template.action_send_template(record, attachment, partner)
+                final_attachment = attachment or resolved_attachment
+                if attachment and resolved_attachment and attachment != resolved_attachment:
+                    _logger.info(
+                        "WA workflow: template %s already provides an attachment; custom attachment was ignored.",
+                        template.display_name,
+                    )
+                template.action_send_template(record, final_attachment, partner)
                 _logger.info(
                     "WA workflow: sent template %s to partner %s (%s)",
                     template.display_name, partner.name, partner.whatsapp_number,
@@ -173,7 +236,7 @@ class WaWorkflowExecutor(models.AbstractModel):
                 self.env['whatsapp.message'].send_whatsapp_message({
                     'channel': {'id': channel.id},
                     'message': free_message or '',
-                    'attachment': False,
+                    'attachment': resolved_attachment.ids if resolved_attachment else False,
                     'image': False,
                     'video': False,
                 })

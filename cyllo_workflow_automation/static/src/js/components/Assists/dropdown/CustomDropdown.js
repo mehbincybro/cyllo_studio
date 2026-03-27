@@ -30,6 +30,7 @@ export class CustomDropdown extends Component {
             searchTerm: "",
         });
         this.dropdown = useRef("dropdown");
+        this.triggerRef = useRef("trigger");
         onMounted(() => {
             document.addEventListener('click', this.handleOutsideClick);
         });
@@ -49,7 +50,7 @@ export class CustomDropdown extends Component {
     }
 
     get targetDropdown() {
-        return this.inputRef.el;
+        return this.inputRef.el || this.triggerRef.el;
     }
 
     get dropdownOptions() {

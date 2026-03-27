@@ -1,27 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <template id="cy_portal_record_sidebar" name="My Portal Record Sidebar">
-        <div t-attf-class="#{classes}">
-            <div class="o_cy_portal_sidebar_content o_cy_portal_border border sticky-lg-top d-lg-inline-block mb-4 mb-lg-0 p-3 p-lg-0"
-                 id="sidebar_content">
-                <div class="mb-4 p-3 sticky-top">
-                    <div t-if="title"
-                         class="position-relative d-flex align-items-center justify-content-md-center justify-content-lg-between flex-wrap gap-2">
-                        <t t-out="title"/>
-                    </div>
-                    <t t-if="entries" t-out="entries"/>
-                    <div class="d-none d-lg-block mt-5 small text-center text-muted">
-                        Powered by
-                        <a target="_blank" href="http://www.cyllo.com"
-                           title="cyllo">
-                            <img src="/cyllo_base/static/src/img/cyllo-logo-png.png"
-                                 style="width: 70px; height:50px; object-fit: contain; margin-left: 8px"
-                                 alt="Cyllo Logo"/>
-                        </a>
+    <record id="cy_portal_record_sidebar" model="ir.ui.view">
+        <field name="name">My Portal Record Sidebar</field>
+        <field name="type">qweb</field>
+        <field name="key">cyllo_portal.cy_portal_record_sidebar</field>
+        <field name="inherit_id" eval="False"/>
+        <field name="arch" type="xml">
+            <t t-name="cyllo_portal.cy_portal_record_sidebar">
+                <div t-attf-class="#{classes}">
+                    <div class="o_cy_portal_sidebar_content sticky-lg-top d-lg-inline-block mb-4 mb-lg-0"
+                         id="sidebar_content">
+                        <div class="mb-4 sticky-top">
+                            <div t-if="title"
+                                 class="position-relative d-flex align-items-center justify-content-md-center justify-content-lg-between flex-wrap gap-2">
+                                <t t-out="title"/>
+                            </div>
+                            <t t-if="entries" t-out="entries"/>
+                            <div class="d-none d-lg-block mt-5 small text-center text-muted cy-portal-powered-by">
+                                Powered by
+                                <a target="_blank" href="https://www.cyllo.com/"
+                                   title="cyllo">
+                                    <img src="/cyllo_base/static/src/img/cyllo-logo-png.png"
+                                         style="width: 70px; height:50px; object-fit: contain; margin-left: 8px"
+                                         alt="Cyllo Logo"/>
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
+            </t>
+        </field>
+    </record>
+    <template id="cy_portal_record_sidebar_branding"
+              inherit_id="portal.portal_record_sidebar"
+              priority="50">
+        <xpath expr="//div[hasclass('o_portal_sidebar_content')]"
+               position="attributes">
+            <attribute name="class"
+                       add="o_cy_portal_sidebar_content sticky-lg-top"
+                       separator=" "/>
+        </xpath>
+        <xpath expr="//div[hasclass('o_portal_sidebar_content')]/div[hasclass('d-none') and hasclass('d-lg-block') and hasclass('small') and hasclass('text-center') and hasclass('text-muted')]"
+               position="replace">
+            <div class="d-none d-lg-block mt-5 small text-center text-muted cy-portal-powered-by">
+                Powered by
+                <a target="_blank" href="https://www.cyllo.com/" title="cyllo">
+                    <img src="/cyllo_base/static/src/img/cyllo-logo-png.png"
+                         style="width: 70px; height:50px; object-fit: contain; margin-left: 8px"
+                         alt="Cyllo Logo"/>
+                </a>
             </div>
-        </div>
+        </xpath>
     </template>
     <!-- Replace the existing portal wrapper -->
     <template id="custom_portal_layout" inherit_id="portal.portal_layout">
