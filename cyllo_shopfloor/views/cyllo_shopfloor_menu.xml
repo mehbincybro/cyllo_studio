@@ -1,0 +1,16 @@
+<odoo>
+
+    <!-- Client Action -->
+    <record id="action_shopfloor" model="ir.actions.client">
+        <field name="name">Shopfloor</field>
+        <field name="tag">shopfloor_screen</field>
+        <field name="target">fullscreen</field>
+    </record>
+
+    <!-- Main Menu -->
+    <menuitem id="menu_shopfloor_root"
+              name="Shopfloor"
+              sequence="10"
+              action="action_shopfloor"/>
+
+</odoo>

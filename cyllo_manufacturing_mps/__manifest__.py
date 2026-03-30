@@ -30,7 +30,13 @@
     'depends': ['mrp'],
 
     'data': [
-        'views/mrp_mps_schedule_views.xml'
+        'security/ir.model.access.csv',
+        'security/mps_group.xml',
+        'views/mrp_mps_schedule_client_action.xml',
+        'views/mrp_mps_schedule_views.xml',
+        'views/res_config_settings_views.xml',
+        'data/mps_cron.xml',
+
     ],
     'assets': {
         'web.assets_backend': [
@@ -42,6 +48,6 @@
 
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': False,
+    'auto_install': True,
     'application': False,
 }
