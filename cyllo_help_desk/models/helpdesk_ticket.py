@@ -116,6 +116,10 @@ class HelpDeskTicket(models.Model):
     # Portal
     website_published = fields.Boolean(string='Visible in Portal', default=True)
 
+    # Duplicate Detection
+    duplicate_ticket_ids = fields.Many2many('helpdesk.ticket', compute='_compute_duplicate_tickets', string='Duplicate Tickets')
+    has_duplicates = fields.Boolean(compute='_compute_duplicate_tickets', string='Has Duplicates')
+
     # Canned Response
     canned_response_ids = fields.Many2many('mail.shortcode', string='Canned Response')
 
@@ -219,6 +223,43 @@ class HelpDeskTicket(models.Model):
             progress = (elapsed / earliest_sla) * 100
             ticket.sla_progress = min(max(progress, 0), 100)
 
+    @api.depends('name', 'customer_id', 'description', 'create_date', 'category_id', 'canned_response_ids')
+    def _compute_duplicate_tickets(self):
+        for ticket in self:
+            if not ticket.customer_id:
+                ticket.duplicate_ticket_ids = [(5, 0, 0)]
+                ticket.has_duplicates = False
+                continue
+            # Mandatory criteria: Same customer and Same day
+            ticket_date = (ticket.create_date or fields.Datetime.now()).date()
+            date_start = datetime.combine(ticket_date, datetime.min.time())
+            date_end = datetime.combine(ticket_date, datetime.max.time())
+            domain = [
+                ('customer_id', '=', ticket.customer_id.id),
+                ('create_date', '>=', date_start),
+                ('create_date', '<=', date_end),
+                ('stage_id.is_closed', '=', False),
+            ]
+            if ticket.id:
+                domain.append(('id', '!=', ticket._origin.id))
+            potential_matches = self.search(domain)
+            duplicate_ids = []
+            for match in potential_matches:
+                score = 0
+                if ticket.name and match.name == ticket.name:
+                    score += 1
+                if ticket.category_id and match.category_id == ticket.category_id:
+                    score += 1
+                if ticket.description and match.description == ticket.description:
+                    score += 1
+                # Comparing many2many field (only if not empty)
+                if ticket.canned_response_ids and set(match.canned_response_ids.ids) == set(ticket.canned_response_ids.ids):
+                    score += 1
+                if score >= 2:
+                    duplicate_ids.append(match.id)
+            ticket.duplicate_ticket_ids = [(6, 0, duplicate_ids)]
+            ticket.has_duplicates = bool(duplicate_ids)
+
     @api.depends('sale_order_ids', 'refund_ids', 'task_ids', 'repair_ids', 'crm_lead_ids', 'coupon_ids', 'picking_ids')
     def _compute_integration_counts(self):
         for ticket in self:
@@ -245,7 +286,6 @@ class HelpDeskTicket(models.Model):
         self.ensure_one()
         if self.user_id or not self.team_id or self.team_id.assignment_method == 'manual':
             return
-        
         team = self.team_id
         if team.assignment_method == 'random':
             members = self.env['res.users'].search([('groups_id', 'in', self.env.ref('cyllo_help_desk.cyllo_help_desk_user').id)])
@@ -271,7 +311,6 @@ class HelpDeskTicket(models.Model):
                     'matches': match_count,
                     'tickets': ticket_count
                 })
-            
             if member_data:
                 best_candidates = sorted(member_data, key=lambda x: (-x['matches'], x['tickets']))
                 self.user_id = best_candidates[0]['user_id']
@@ -317,7 +356,6 @@ class HelpDeskTicket(models.Model):
         solved_stage = self.env.ref('cyllo_help_desk.solved_ticket').id
         mail_template = self.env.ref('cyllo_help_desk.help_desk_mail_template', raise_if_not_found=False)
         solved_mail_template = self.env.ref('cyllo_help_desk.help_desk_mail_template_issue_solved', raise_if_not_found=False)
-
         if 'stage_id' in vals:
             for ticket in self:
                 # Filter children to only those that actually need a stage update
@@ -325,7 +363,6 @@ class HelpDeskTicket(models.Model):
                 children_to_update = ticket.child_ids.filtered(lambda t: t.stage_id.id != vals['stage_id'])
                 if children_to_update:
                     children_to_update.write({'stage_id': vals['stage_id']})
-                
                 # Check stages for email notifications
                 if ticket.stage_id.id == in_progress_stage and mail_template:
                     mail_template['email_from'] = ticket.user_id.login
@@ -333,7 +370,6 @@ class HelpDeskTicket(models.Model):
                     mail_template.sudo().send_mail(ticket._origin.id or ticket.id, force_send=True)
                     body = f"""Email sent to {ticket.customer_id.name}"""
                     ticket.message_post(body=body, subject="TICKET CREATED")
-                
                 elif ticket.stage_id.id == solved_stage and solved_mail_template:
                     solved_mail_template['email_from'] = ticket.user_id.login
                     solved_mail_template['email_to'] = ticket.customer_id.email
@@ -362,7 +398,6 @@ class HelpDeskTicket(models.Model):
             'my_last_seven_days_closed_ticket_count': 0,
             'my_last_seven_days_success_rate': 0,
             'my_last_seven_days_average_rating': 0,
-
         }
         # Taking the count of tickets in priority base
         all_tickets = self.search_count([])
@@ -407,7 +442,6 @@ class HelpDeskTicket(models.Model):
             self.high_priority_ticket_average_hours = high_priority_average_open_hour
         else:
             high_priority_average_open_hour = 0
-
         # Calculating the open average hours of the urgent tickets of
         # current user
         max_urgent_within_hour_values = []
@@ -427,7 +461,6 @@ class HelpDeskTicket(models.Model):
                 max_urgent_within_hour_values)
         else:
             urgent_average_open_hour = 0
-
         # Calculating the number of failed tickets of the current user
         failed_ticket_count = self.search_count(
             [('user_id', '=', self.env.user.id), ('sla_flag', '=', True), (
@@ -766,6 +799,17 @@ class HelpDeskTicket(models.Model):
             'default_helpdesk_ticket_id': self.id,
         }
         return action
+
+    def action_view_duplicates(self):
+        self.ensure_one()
+        return {
+            'name': _('Duplicate Tickets'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'helpdesk.ticket',
+            'view_mode': 'tree,form',
+            'domain': [('id', 'in', self.duplicate_ticket_ids.ids)],
+            'target': 'current',
+        }
 
     def action_view_sale_orders(self):
         self.ensure_one()
