@@ -385,6 +385,25 @@ class IrActionsReport(models.Model):
         if not model_rec:
             return {'success': False, 'error': 'Model not found'}
 
+        # Nuclear Cleanup: Remove any inherited views that might be blocking the system
+        # (specifically those targeting the Studio editor or common layouts that are broken)
+        broken_xpaths = ['/t/div[1]/div[3]/div/ul/div[1]/div', '/t/div[1]/div[3]/div/ul']
+        for xpath in broken_xpaths:
+            bad_views = self.env['ir.ui.view'].search([('arch_db', 'like', xpath)])
+            if bad_views:
+                print(f"[Cyllo Studio] Purging {len(bad_views)} broken views containing XPath: {xpath}")
+                bad_views.sudo().unlink()
+
+        # Also purge anything inheriting from the Studio editor itself, just in case
+        editor_view = self.env.ref('cyllo_studio.edit_report', raise_if_not_found=False)
+        if not editor_view:
+             editor_view = self.env['ir.ui.view'].search([('name', '=', 'edit_report')], limit=1)
+        if editor_view:
+            orphans = self.env['ir.ui.view'].search([('inherit_id', '=', editor_view.id)])
+            if orphans:
+                print(f"[Cyllo Studio] Purging {len(orphans)} orphan views inheriting from edit_report")
+                orphans.sudo().unlink()
+
         # Unique identifier using timestamp
         identifier = str(fields.Datetime.now().timestamp()).replace('.', '_')
         report_key = f"studio_report_{identifier}"

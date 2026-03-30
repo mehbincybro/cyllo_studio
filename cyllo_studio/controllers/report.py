@@ -172,8 +172,25 @@ class StudioReportController(Controller):
             view = request.env.ref(template)
             if not view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
-            arch = view.get_iframe_rendered_template(template, show_placeholders=show_placeholders)
-            return {'success': True, 'arch': arch}
+            
+            try:
+                arch = view.get_iframe_rendered_template(template, show_placeholders=show_placeholders)
+                return {'success': True, 'arch': arch}
+            except ValueError as ve:
+                # If inheritance is broken, try to purge Custom_ views and retry once
+                if "cannot be located in parent view" in str(ve):
+                    print(f"[Cyllo Studio] Broken inheritance detected for {template}. Purging Custom_ views.")
+                    custom_views = request.env['ir.ui.view'].search([
+                        ('inherit_id', '=', view.id),
+                        ('name', 'like', 'Custom_'),
+                    ])
+                    if custom_views:
+                        custom_views.unlink()
+                        # Retry once
+                        arch = view.get_iframe_rendered_template(template, show_placeholders=show_placeholders)
+                        return {'success': True, 'arch': arch}
+                raise ve
+
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
