@@ -136,6 +136,27 @@ class NodeStruct(models.Model):
     )
     wa_other_partner = fields.Json(string="WA Other Partner")
     wa_free_message = fields.Char(string="WA Free-form Message")
+    wa_attachment_mode = fields.Selection(
+        [
+            ('none', 'No Attachment'),
+            ('static', 'Static File(s)'),
+            ('auto', 'Auto-generate from Record'),
+        ],
+        string="WA Attachment Mode",
+        default='none',
+    )
+    wa_static_attachment_ids = fields.Many2many(
+        'ir.attachment',
+        'node_struct_wa_attachment_rel',
+        'node_struct_id',
+        'attachment_id',
+        string="WA Static Attachments",
+    )
+    wa_auto_report_id = fields.Many2one(
+        'ir.actions.report',
+        string="WA Auto Report",
+        ondelete='set null',
+    )
 
     # FollowersNode block fields
     isRemoveFollower = fields.Json()
@@ -163,6 +184,23 @@ class NodeStruct(models.Model):
             int: The ID of the saved or updated record.
         """
         struct_node_id = self or False
+        if 'wa_static_attachment_ids' in data:
+            raw_attachments = data.get('wa_static_attachment_ids') or []
+            attachment_ids = []
+            for item in raw_attachments:
+                if isinstance(item, dict):
+                    attachment_id = item.get('id')
+                elif isinstance(item, (list, tuple)):
+                    attachment_id = item[0] if item else False
+                else:
+                    attachment_id = item
+                if attachment_id:
+                    attachment_ids.append(attachment_id)
+            data['wa_static_attachment_ids'] = [(6, 0, attachment_ids)]
+
+        if 'wa_auto_report_id' in data and isinstance(data['wa_auto_report_id'], dict):
+            data['wa_auto_report_id'] = data['wa_auto_report_id'].get('id') or False
+
         if not self:
             struct_node_id = self.create(data)
         else:

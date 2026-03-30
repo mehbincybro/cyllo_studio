@@ -7,7 +7,7 @@
     <t t-name="CustomDropdown">
         <div class="custom-dropdown o-autocomplete" t-attf-class="{ state.isOpen? 'dropdown':'' }" t-ref="dropdown"
              t-att-style="'width: ' + props.width">
-            <div t-on-click.stop="toggleDropdown" class="d-flex">
+            <div t-on-click.stop="toggleDropdown" class="d-flex" t-ref="trigger">
                 <t t-if="props.searchable">
                     <input
                         t-if="props.searchable"

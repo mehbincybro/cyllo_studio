@@ -114,6 +114,84 @@
                     />
                 </div>
 
+                <div class="mb-3 mt-3">
+                    <label class="form-label cy-modal-form_label">Attachments</label>
+                    <CustomDropdown
+                        options="getAttachmentModeOptions"
+                        defaultValue="getAttachmentMode"
+                        onChange="(val) => this.updateAttachmentMode(val)"
+                        placeholder="'No Attachment'"
+                        searchable="false"
+                        width="''"
+                    />
+                </div>
+
+                <div class="mb-3" t-if="getAttachmentMode === 'static'">
+                    <label class="form-label cy-modal-form_label">Upload Files</label>
+                    <small class="text-muted d-block mb-2">
+                        Files uploaded here are stored in Odoo and sent whenever this node runs.
+                    </small>
+
+                    <div t-if="getStaticAttachments.length" class="mb-2">
+                        <div
+                            t-foreach="getStaticAttachments"
+                            t-as="att"
+                            t-key="att.id"
+                            class="d-flex align-items-center justify-content-between border rounded px-2 py-1 mb-1 bg-light"
+                        >
+                            <span class="text-truncate me-2">
+                                <i class="fa fa-paperclip me-1 text-muted"/>
+                                <t t-esc="att.name"/>
+                            </span>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-link text-danger p-0"
+                                t-on-click="() => this.removeStaticAttachment(att.id)"
+                            >
+                                <i class="fa fa-times"/>
+                            </button>
+                        </div>
+                    </div>
+
+                    <input
+                        type="file"
+                        class="d-none"
+                        t-ref="wa_file_input"
+                        t-on-change="onFileInputChange"
+                    />
+                    <button
+                        t-if="!waState.uploadingFile"
+                        type="button"
+                        class="btn btn-sm btn-outline-primary"
+                        t-on-click="openFilePicker"
+                    >
+                        <i class="fa fa-upload me-1"/> Add File
+                    </button>
+                    <span t-if="waState.uploadingFile" class="text-muted">
+                        <i class="fa fa-spinner fa-spin me-1"/> Uploading...
+                    </span>
+                </div>
+
+                <div class="mb-3" t-if="getAttachmentMode === 'auto'">
+                    <label class="form-label cy-modal-form_label">Report / Document Type</label>
+                    <small class="text-muted d-block mb-1">
+                        Render a PDF from the selected record each time this workflow runs.
+                    </small>
+                    <div t-if="!getSelectedRecord" class="alert alert-warning py-2 px-3 mb-0">
+                        <i class="fa fa-exclamation-circle me-1"/>
+                        Select a <strong>Source Record</strong> above to filter reports.
+                    </div>
+                    <Many2XAutocomplete
+                        t-if="getSelectedRecord"
+                        resModel="'ir.actions.report'"
+                        getDomain.bind="getAutoReportDomain"
+                        fieldString="'Reports'"
+                        activeActions="{}"
+                        update.bind="onSelectAutoReport"
+                        value="getAutoReportName"
+                    />
+                </div>
+
                 <div t-if="waState.isInstalled" class="alert alert-info d-flex gap-2 mt-2 mb-0">
                     <i class="fa fa-info-circle mt-1"/>
                     <small>

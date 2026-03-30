@@ -19,6 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import mimetypes
 import inspect
 
 from odoo import http
@@ -60,3 +61,41 @@ class CylloAutoWorkController(http.Controller):
                     methods.append(method_info)
 
         return methods
+
+    @http.route(
+        '/cyllo_workflow/upload_wa_attachment',
+        type='json',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
+    def upload_wa_attachment(self, name, data, mimetype=None, node_struct_id=None):
+        """
+            Create an attachment from the WhatsApp node file uploader.
+
+            Args:
+                name (str): Original filename.
+                data (str): Base64-encoded file contents.
+                mimetype (str, optional): Browser-reported mimetype.
+                node_struct_id (int, optional): Persist link immediately when editing an existing node.
+
+            Returns:
+                dict: The created attachment's id and display name.
+            """
+        guessed_mimetype, _encoding = mimetypes.guess_type(name or '')
+        attachment = request.env['ir.attachment'].sudo().create({
+            'name': name,
+            'type': 'binary',
+            'datas': data,
+            'mimetype': mimetype or guessed_mimetype or 'application/octet-stream',
+        })
+        if node_struct_id:
+            node = request.env['node.struct'].sudo().browse(node_struct_id)
+            if node.exists():
+                node.write({
+                    'wa_static_attachment_ids': [(4, attachment.id)],
+                })
+        return {
+            'id': attachment.id,
+            'name': attachment.name,
+        }
