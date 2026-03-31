@@ -840,6 +840,8 @@ class WorkAuto(models.Model):
             'time': tools.safe_eval.time,
             'datetime': tools.safe_eval.datetime,
             'dateutil': tools.safe_eval.dateutil,
+            'relativedelta': relativedelta,
+            'fields': fields,
             '_logger': _logger,
         }
 

@@ -24,7 +24,27 @@ export const whatsappFields = [{ name: 'model_id', type: 'many2One' }, { name: '
 
 export const FollowerFields = [{ name: 'model_id', type: "many2One" }, { name: 'followers', type: "json" }, { name: 'follower_record', type: 'char' }, { name: 'label', type: "char" }, { name: 'label', type: "char" }, { name: 'isRemoveFollower', type: "json" }]
 
-export const ActivityFields = [{ name: 'model_id', type: "many2One" }, { name: 'activity_summary', type: "char" }, { name: 'activity_user', type: "json" }, { name: 'activity_deadline', type: "json" }, { name: 'activity_type', type: "json" }, { name: 'activity_record', type: "json" }, { name: 'label', type: "char" }]
+export const ActivityFields = [
+    { name: 'model_id', type: "many2One" },
+    { name: 'activity_summary', type: "char" },
+    { name: 'activity_user', type: "json" },
+    { name: 'activity_deadline', type: "json" },
+    { name: 'activity_type', type: "json" },
+    { name: 'activity_record', type: "json" },
+    { name: 'label', type: "char" },
+    // Google Meet
+    { name: 'activity_is_google_meet', type: "boolean" },
+    { name: 'activity_meet_offset_hours', type: "float" },
+    { name: 'activity_meet_duration_hours', type: "float" },
+    { name: 'activity_meet_summary', type: "char" },
+    { name: 'activity_also_schedule_activity', type: "boolean" },
+    // Zoom Meet
+    { name: 'activity_is_zoom_meet', type: "boolean" },
+    { name: 'activity_zoom_offset_hours', type: "float" },
+    { name: 'activity_zoom_duration_hours', type: "float" },
+    { name: 'activity_zoom_summary', type: "char" },
+    { name: 'activity_also_schedule_activity_zoom', type: "boolean" },
+]
 
 export const loopFields = [
     { name: 'loop_source_type', type: 'selection' },
