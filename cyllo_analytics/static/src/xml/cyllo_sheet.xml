@@ -96,6 +96,16 @@
                             <FieldList t-if="state.models.length"
                                        mode="'measure'" data="measures"
                                        limit="5"/>
+                            <div t-if="state.models.length" class="mt-2 text-center">
+                                <button class="cy-new-chat-button w-100" t-on-click="onAddPreset">
+                                    <i class="ri-add-line me-1"/>Add Preset
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-2 pt-0 presets-sidebar-section" t-if="presets.length">
+                            <FieldList t-if="state.models.length"
+                                       mode="'presets'" data="presets"
+                                       limit="5"/>
                         </div>
                         <div class="p-2" t-if="state.models.length">
                             <div class="col-12" style="position: relative;">
@@ -435,7 +445,7 @@
                             </t>
                             <t t-if="props.mode == 'measure'">
                                 <li style="font-size: 0.8rem; font-weight: 400;">
-                                    A measure in an Cyllo database represents a
+                                    A measure in a Cyllo database represents a
                                     quantitative, numeric value that can be
                                     subjected to mathematical operations or
                                     statistical analysis. Measures are fields
@@ -445,6 +455,16 @@
                                     Examples of measures in Cyllo may include
                                     "Total Sales Amount," "Quantity Sold," or
                                     "Average Unit Price."
+                                </li>
+                            </t>
+                            <t t-if="props.mode == 'presets'">
+                                <li style="font-size: 0.8rem; font-weight: 400;">
+                                    Presets are custom-defined formulas and
+                                    calculations that can be reused across your
+                                    analysis. They allow for complex math,
+                                    combining multiple fields, and defining
+                                    specific logic that isn't directly available
+                                    as a standard field in the database.
                                 </li>
                             </t>
                         </ul>
@@ -465,11 +485,21 @@
             <div class="cy-sheet-selection_box">
                 <t t-foreach="state.data" t-as="field" t-key="field_index">
                     <t t-set="column"
-                       t-value="field.model.table + '.' + field.name"/>
+                       t-value="field.column || (field.model.table + '.' + field.name)"/>
                     <DragItem is_json="field.is_json" column="column"
-                              draggable="'true'" type="props.mode"
+                               draggable="'true'" type="props.mode == 'presets' ? 'measure' : props.mode"
                               value="field.label"
-                              field_type="field.field_type"/>
+                               field_type="field.field_type"
+                                relation="field.model.relation"
+                               isPreset="field.isPreset"
+                               rawFormula="field.rawFormula"
+                               variables="field.variables"
+                               variable_configs="field.variable_configs"
+                               calculation_type="field.calculation_type"
+                               aggregate_func="field.aggregate_func"
+                               preset_id="field.preset_id"
+                               monetaryInBase="field.monetaryInBase"
+                               alias="field.name"/>
                 </t>
             </div>
         </div>

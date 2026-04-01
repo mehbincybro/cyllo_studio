@@ -1,6 +1,6 @@
 /** @odoo-module **/
-import {worldMapChart} from "./charts/world_map";
-import {loadingChart} from "./charts/loadingChart"
+import { worldMapChart } from "./charts/world_map";
+import { loadingChart } from "./charts/loadingChart"
 
 
 /**
@@ -55,20 +55,20 @@ export class ChartMaker {
     getDefaultZoom() {
         const length = this.data.length * this.measures.length
         const START_VALUES = [
-            {threshold: 4500, value: 90},
-            {threshold: 3500, value: 88},
-            {threshold: 2500, value: 86},
-            {threshold: 1500, value: 84},
-            {threshold: 1000, value: 82},
-            {threshold: 500, value: 80},
-            {threshold: 400, value: 75},
-            {threshold: 350, value: 70},
-            {threshold: 100, value: 50},
-            {threshold: 15, value: 30},
-            {threshold: 0, value: 0},
+            { threshold: 4500, value: 90 },
+            { threshold: 3500, value: 88 },
+            { threshold: 2500, value: 86 },
+            { threshold: 1500, value: 84 },
+            { threshold: 1000, value: 82 },
+            { threshold: 500, value: 80 },
+            { threshold: 400, value: 75 },
+            { threshold: 350, value: 70 },
+            { threshold: 100, value: 50 },
+            { threshold: 15, value: 30 },
+            { threshold: 0, value: 0 },
         ];
         const getStartValue = () => {
-            for (const {threshold, value} of START_VALUES) {
+            for (const { threshold, value } of START_VALUES) {
                 if (length > threshold) {
                     return value + getChartZoom(this.type) + this.measures.length;
                 }
@@ -124,13 +124,15 @@ export class ChartMaker {
                 data: []
             }
             this.measures.forEach((key) => {
-                legends.data.push(convertToTitleCase(key))
+                const label = this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key);
+                legends.data.push(label)
             })
         }
         var series = []
         this.measures.forEach((key) => {
+            const label = this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key);
             series.push({
-                name: convertToTitleCase(key),
+                name: label,
                 type: this.type,
                 data: [],
                 emphasis: {
@@ -363,7 +365,7 @@ export class ChartMaker {
 
     heatmapChart(val) {
         const length = this.data.length
-        var AxisIndex = this.dimension_axis === "x" ? {xAxisIndex: 0} : {yAxisIndex: 0}
+        var AxisIndex = this.dimension_axis === "x" ? { xAxisIndex: 0 } : { yAxisIndex: 0 }
         var dataZoom = [{
             type: 'inside',
             id: this.dimension_axis === "x" ? "insideX" : "insideY",
@@ -454,10 +456,10 @@ export class ChartMaker {
             const source = this.data.map(item => {
                 return [axisData.findIndex(data => data == item[this.dimension]), item[measure]]
             })
-            return {source}
+            return { source }
         })
         if (!data.length) {
-            data = [{source: [[0, 0]]}]
+            data = [{ source: [[0, 0]] }]
         }
         var option = {
             dataset: [
@@ -497,25 +499,25 @@ export class ChartMaker {
                 type: 'scatter',
                 datasetIndex: 0
             },
-                {
-                    name: 'line',
-                    type: 'line',
-                    smooth: true,
-                    datasetIndex: 1,
-                    symbolSize: 0.1,
-                    symbol: 'circle',
-                    label: {
-                        show: true,
-                        fontSize: 16
-                    },
-                    labelLayout: {
-                        dx: -20
-                    },
-                    encode: {
-                        label: 2,
-                        tooltip: 1
-                    }
+            {
+                name: 'line',
+                type: 'line',
+                smooth: true,
+                datasetIndex: 1,
+                symbolSize: 0.1,
+                symbol: 'circle',
+                label: {
+                    show: true,
+                    fontSize: 16
+                },
+                labelLayout: {
+                    dx: -20
+                },
+                encode: {
+                    label: 2,
+                    tooltip: 1
                 }
+            }
             ],
             dataZoom,
         };
@@ -629,60 +631,60 @@ export class ChartMaker {
                     symbolSize: 15,
                     data: lineSeriesData
                 },
-                    {
-                        name: convertToTitleCase(this.measures[0]),
-                        type: 'bar',
-                        barWidth: 10,
-                        itemStyle: {
-                            borderRadius: 5,
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: this.params.themeColor?.length > 3 ? this.params.themeColor[1] : '#14c8d4'
-                            },
-                                {
-                                    offset: 1,
-                                    color: this.params.themeColor?.length > 3 ? this.params.themeColor[2] : '#43eec6'
-                                }
-                            ])
+                {
+                    name: convertToTitleCase(this.measures[0]),
+                    type: 'bar',
+                    barWidth: 10,
+                    itemStyle: {
+                        borderRadius: 5,
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: this.params.themeColor?.length > 3 ? this.params.themeColor[1] : '#14c8d4'
                         },
-                        data: barSeriesData
+                        {
+                            offset: 1,
+                            color: this.params.themeColor?.length > 3 ? this.params.themeColor[2] : '#43eec6'
+                        }
+                        ])
                     },
-                    {
-                        name: convertToTitleCase(this.measures[1]),
-                        type: 'bar',
-                        barGap: '-100%',
-                        barWidth: 10,
-                        itemStyle: {
-                            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-                                offset: 0,
-                                color: 'rgba(20,200,212,0.5)'
-                            },
-                                {
-                                    offset: 0.2,
-                                    color: 'rgba(20,200,212,0.2)'
-                                },
-                                {
-                                    offset: 1,
-                                    color: 'rgba(20,200,212,0)'
-                                }
-                            ])
+                    data: barSeriesData
+                },
+                {
+                    name: convertToTitleCase(this.measures[1]),
+                    type: 'bar',
+                    barGap: '-100%',
+                    barWidth: 10,
+                    itemStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
+                            offset: 0,
+                            color: 'rgba(20,200,212,0.5)'
                         },
-                        z: -12,
-                        data: lineSeriesData
+                        {
+                            offset: 0.2,
+                            color: 'rgba(20,200,212,0.2)'
+                        },
+                        {
+                            offset: 1,
+                            color: 'rgba(20,200,212,0)'
+                        }
+                        ])
                     },
-                    {
-                        name: convertToTitleCase(this.measures[1]),
-                        type: 'pictorialBar',
-                        symbol: 'rect',
-                        itemStyle: {
-                            color: '#0f375f'
-                        },
-                        symbolRepeat: true,
-                        symbolSize: [12, 4],
-                        symbolMargin: 1,
-                        z: -10,
-                        data: lineSeriesData
-                    }
+                    z: -12,
+                    data: lineSeriesData
+                },
+                {
+                    name: convertToTitleCase(this.measures[1]),
+                    type: 'pictorialBar',
+                    symbol: 'rect',
+                    itemStyle: {
+                        color: '#0f375f'
+                    },
+                    symbolRepeat: true,
+                    symbolSize: [12, 4],
+                    symbolMargin: 1,
+                    z: -10,
+                    data: lineSeriesData
+                }
                 ]
             };
             var xAxis = {
@@ -715,7 +717,7 @@ export class ChartMaker {
     }
 
     regenGraphOptions(params) {
-        this.params = {...this.params, ...params};
+        this.params = { ...this.params, ...params };
         return this.makeGraphOptions()
     }
 }

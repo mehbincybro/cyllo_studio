@@ -7,9 +7,23 @@
              t-att-value="props.value"
              t-att-data-field_type="props.field_type"
              t-att-data-column="props.column"
+             t-att-data-is_preset="props.isPreset ? 'true' : 'false'"
+             t-att-data-raw_formula="props.rawFormula"
+             t-att-data-variables="props.variables"
+             t-att-data-variable_configs="props.variable_configs"
+             t-att-data-calculation_type="props.calculationType || props.calculation_type"
+             t-att-data-aggregate_func="props.aggregate_func"
+             t-att-data-preset_id="props.preset_id"
+             t-att-data-monetary_in_base="props.monetaryInBase"
+             t-att-data-alias="props.alias"
              t-on-dragstart="e => this.setDragging(e, true)"
              t-on-dragend="e => this.setDragging(e, false)">
             <t t-esc="props.value"/>
+            <button t-if="props.onEditPreset" class="btn btn-secondary"
+                    t-on-click="props.onEditPreset"
+                    title="Edit Preset">
+                <i class="ri-pencil-line"/>
+            </button>
             <button t-if="props.onRemove" class="btn btn-secondary"
                     t-on-click="props.onRemove">
             <i t-if="props.onRemove" class="ri-close-line"/></button>
@@ -46,7 +60,8 @@
                         <DragItem t-props="dropItem"
                                   draggable="false"
                                   onRemove="() => this.onItemRemove(dropItem_index, state.type)"
-                                  options="true"
+                                  onEditPreset="dropItem.isPreset ? () => this.editPreset(dropItem_index) : undefined"
+                                  options="!dropItem.calculation_type || dropItem.calculation_type !== 'aggregate'"
                                   setOptionValue.bind="(val, mode) => this.setFunctions(val, mode, dropItem_index)"/>
                     </t>
                     <!-- Date/datetime dimension items on X axis: show Day/Month/Year grouping -->

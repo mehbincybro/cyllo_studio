@@ -94,7 +94,6 @@ export class MenuDialog extends Component {
         this.state.isDragging = true;
         // --- Custom Drag Ghost Image (Smaller Size) ---
         const dragIcon = ev.currentTarget.cloneNode(true);
-        // Style it to be smaller
         dragIcon.style.position = "absolute";
         dragIcon.style.top = "-1000px";
         dragIcon.style.left = "-1000px";
@@ -103,13 +102,9 @@ export class MenuDialog extends Component {
         dragIcon.style.opacity = "0.9";
         dragIcon.style.boxShadow = "none";
         document.body.appendChild(dragIcon);
-        // Set the custom image
-        // (xOffset, yOffset) sets where the cursor grabs the ghost.
         ev.dataTransfer.setDragImage(dragIcon, 10, 10);
-        // Remove the temporary clone from the DOM shortly after capture
         setTimeout(() => document.body.removeChild(dragIcon), 10);
-        // ----------------------------------------------
-        // Apply soft dotted borders and expand height to show possible drop zones
+        // Show drop zone indicators
         document.querySelectorAll('.drop-zone-indicator').forEach(el => {
             el.style.border = '2px dashed #dee2e6';
             el.style.height = '18px';
@@ -121,7 +116,6 @@ export class MenuDialog extends Component {
     }
     onDragEndNewMenu(ev) {
         this.state.isDragging = false;
-        // Clear all drag styling and collapse drop zones
         document.querySelectorAll('.drop-zone-indicator').forEach(el => {
             el.style.border = 'none';
             el.style.backgroundColor = 'transparent';
@@ -130,7 +124,7 @@ export class MenuDialog extends Component {
         });
         document.querySelectorAll('.drop-into-zone').forEach(el => {
             el.style.backgroundColor = 'white';
-            el.style.border = '1px solid #dee2e6'; // Standard bootstrap border
+            el.style.border = '1px solid #dee2e6';
         });
     }
     onDragOver(ev) {
@@ -217,7 +211,7 @@ export class MenuDialog extends Component {
             newSeq = parseFloat(afterSeq) + 10;
         }
          this.state.targetParentId = parentId;
-        this.state.targetSequence = Math.round(newSeq); // Send rounded to backend later, but use decimal for accurate UI sorting
+        this.state.targetSequence = Math.round(newSeq);
         this.state.targetBeforeId = beforeId ? parseInt(beforeId) : null;
         this.state.targetAfterId = afterId ? parseInt(afterId) : null;
         // Find parent name for display
@@ -313,7 +307,7 @@ export class MenuDialog extends Component {
               parent_id: this.state.targetParentId,
             action: `ir.actions.client,${action}`,
             is_cyllo_analytic_menu: true,
-              sequence: this.state.targetSequence, // initial UI estimate, backend re-sequences
+            sequence: this.state.targetSequence,
         };
         const newMenuId = await this.orm.call("dashboard.config", "create_menu_with_sequence", [
             menuData,
@@ -344,4 +338,3 @@ export class MenuDialog extends Component {
 // Define the template for the MenuDialog component
 MenuDialog.template = "cyllo_analytics.MenuDialog"
 MenuDialog.components = { Dialog, Record, CharField, MenuTreeNode, Dropdown, DropdownItem };
-

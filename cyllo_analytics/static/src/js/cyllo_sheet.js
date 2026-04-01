@@ -1,25 +1,27 @@
 /** @odoo-module **/
-import {registry} from "@web/core/registry";
-import {useService} from "@web/core/utils/hooks";
-import { session } from "@web/session";
-import {ModelViewer} from "./model_viewer";
-import {Many2XAutocomplete} from "@web/views/fields/relational_utils";
-import {DragItem, DropZone} from "./drag_n_drop"
-import {GraphTile} from "@cyllo_analytics/js/presentation/components/graph_tile";
-import {SQLEditor} from "./editor/SQLEditor";
-import {browser} from "@web/core/browser/browser";
-import {useSaveContext} from "@cyllo_analytics/js/useSaveContext";
-import {SQLQueryParser} from "./query/query_manager"
-import {FieldAutoComplete} from "@cyllo_analytics/js/sheet_filter/field_auto_complete"
-import {FieldAutoCompleteGlobal} from "@cyllo_analytics/js/sheet_filter/field_auto_complete_global"
-import {KpiSheet} from "@cyllo_analytics/js/KpiSheet";
-import {Table} from "@cyllo_analytics/js/table/table";
-import {Number} from "@cyllo_analytics/js/fields/number";
-import {DeleteDialog} from "./delete_dialog_box";
-import {standardActionServiceProps} from "@web/webclient/actions/action_service";
-import {_t} from "@web/core/l10n/translation";
-import {SheetFilterDomain} from "./sheet_filter/sheetFilterDomain";
-const {Component, useState, onWillStart, useEffect, onWillDestroy, useRef} = owl
+import { registry } from "@web/core/registry";
+import { useService, useBus } from "@web/core/utils/hooks";
+import { ModelViewer } from "./model_viewer";
+import { Many2XAutocomplete } from "@web/views/fields/relational_utils";
+import { DragItem, DropZone } from "./drag_n_drop"
+import { GraphTile } from "@cyllo_analytics/js/presentation/components/graph_tile";
+import { SQLEditor } from "./editor/SQLEditor";
+import { browser } from "@web/core/browser/browser";
+import { useSaveContext } from "@cyllo_analytics/js/useSaveContext";
+import { SQLQueryParser } from "./query/query_manager"
+import { FieldAutoComplete } from "@cyllo_analytics/js/sheet_filter/field_auto_complete"
+import { FieldAutoCompleteGlobal } from "@cyllo_analytics/js/sheet_filter/field_auto_complete_global"
+import { KpiSheet } from "@cyllo_analytics/js/KpiSheet";
+import { Table } from "@cyllo_analytics/js/table/table";
+import { Number } from "@cyllo_analytics/js/fields/number";
+import { DeleteDialog } from "./delete_dialog_box";
+import { standardActionServiceProps } from "@web/webclient/actions/action_service";
+import { _t } from "@web/core/l10n/translation";
+import { SheetFilterDomain } from "./sheet_filter/sheetFilterDomain";
+import { PresetApplyDialog } from "@cyllo_analytics/js/presets/preset_apply_dialog";
+import { FieldTraversalDialog } from "./FieldTraversalDialog";
+import { generateSqlAlias } from "@cyllo_analytics/js/utils";
+const { Component, useState, onWillStart, useEffect, onWillDestroy, useRef } = owl
 
 
 export class SheetDeleteDialog extends DeleteDialog {
@@ -67,12 +69,12 @@ class FieldList extends Component {
 }
 
 FieldList.template = "FieldList"
-FieldList.components = {DragItem}
+FieldList.components = { DragItem }
 
 export class CylloSheet extends Component {
     /** Class for creating a CylloSheet component. */
     setup() {
-        const {id, saveManually, removeManually} = useSaveContext()
+        const { id, saveManually, removeManually } = useSaveContext()
         this.id = id
         this.hasMonetary = false //multi
         this.isNewSheet = false;
@@ -87,7 +89,7 @@ export class CylloSheet extends Component {
         this.notification = useService("notification")
         this.avoid_fields = []
         this.action = useService("action")
-        this.ChartData = useState({data: {}, generate: false})
+        this.ChartData = useState({ data: {}, generate: false })
         this.measures_field_types = ["float", "monetary", "integer"]
         this.avoid_field_types = ["many2many", "one2many"]
         this.unlinkList = {
@@ -144,7 +146,7 @@ export class CylloSheet extends Component {
             }
             if (this.props.action.context?.dashboard_id) {
                 const context = this.props.action.context
-                this.state.configs.push({id: context.dashboard_id, display_name: context.display_name})
+                this.state.configs.push({ id: context.dashboard_id, display_name: context.display_name })
             }
             const res = await this.orm.call(this.model, 'get_config_data', [])
             this.state.sheetTypes = res.sheet_types
@@ -152,18 +154,15 @@ export class CylloSheet extends Component {
                 is_enable: res.is_enable,
                 limit: res.limit
             }
-            //fetch current company currency
-            const companyData = await this.orm.read("res.company", [this.company.currentCompany?.id || 1], ["currency_id"])
-            const currency = await this.orm.read("res.currency", [companyData[0].currency_id[0]], ["id", "display_name"])
-            this.state.currency = currency[0]
+            this.state.currency = res.currency
         })
-        this.env.bus.addEventListener("CY:UPDATE_UNLINKS", (ev) => {
-            var {type, id} = ev.detail
+        useBus(this.env.bus, "CY:UPDATE_UNLINKS", (ev) => {
+            var { type, id } = ev.detail
             this.unlinkList[type].push(id)
         })
-        this.env.bus.addEventListener("CY:UPDATE_QUERY", (ev) => {
+        useBus(this.env.bus, "CY:UPDATE_QUERY", (ev) => {
             this.state.false_linking = false
-            var {type, data} = ev.detail
+            var { type, data } = ev.detail
 
             if (type === 'groupBy') {
                 // Detect which date groupBy items were just removed
@@ -222,7 +221,7 @@ export class CylloSheet extends Component {
             this.genQuery()
         })
         // Add / replace a date group-by tag in the Group By zone
-        this.env.bus.addEventListener("CY:ADD_DATE_GROUPBY", (ev) => {
+        useBus(this.env.bus, "CY:ADD_DATE_GROUPBY", (ev) => {
             const { groupByItem } = ev.detail
             let existingId = null
             // Remove any existing date_group entry for the same source column
@@ -251,19 +250,32 @@ export class CylloSheet extends Component {
             this.query_data.groupBy.push(groupByItem)
             this.genQuery()
         })
+        useBus(this.env.bus, "CY:REBUILD_PRESET", this._onRebuildPreset.bind(this));
+        useBus(this.env.bus, "CY:RELATIONAL_FIELD_DROPPED", this.onRelationalFieldDropped.bind(this));
         useEffect(() => {
             (async () => await this.updateSheet())()
         }, () => [this.id])
 
+        this.onAddPreset = () => {
+            this.dialog.add(PresetApplyDialog, {
+                fields: this.state.fields || [],
+                models: this.state.models || [],
+                sheet_id: this.id,
+                onApply: (measureObj) => {
+                    this.env.bus.trigger("CY:APPLY_PRESET", { measureObj });
+                },
+            });
+        };
+
         useEffect(() => {
-                this.calculateLimit()
-                this.genQuery()
-            },
+            this.calculateLimit()
+            this.genQuery()
+        },
             () => [...Object.keys(this.query_data), this.state.limit])
         useEffect(() => {
-                this.calculateLimit()
-                this.state.need_save = true
-            },
+            this.calculateLimit()
+            this.state.need_save = true
+        },
             () => [this.state.selectedType[0]])
         useEffect(() => {
             this.generateChart()
@@ -271,6 +283,65 @@ export class CylloSheet extends Component {
         useEffect((event) => {
             this.setTableSave()
         }, () => [this.state.models, this.state.limit])
+        // ── Preset apply handler ────────────────────────────────────────────
+        useBus(this.env.bus, "CY:APPLY_PRESET", (ev) => {
+            const { measureObj, type = 'measure' } = ev.detail;
+            const alias = measureObj.alias;
+            const oldAlias = measureObj.oldAlias;
+
+            // Remove existing preset item if editing or if alias conflicts
+            this.query_data[type] = this.query_data[type].filter(
+                m => m.alias !== alias && (oldAlias ? m.alias !== oldAlias : true)
+            );
+            this.query_data[type].push(measureObj);
+
+            // Update the available fields list so it stays in sync
+            const fieldIndex = this.state.fields.findIndex(
+                f => f.name === alias || (oldAlias && f.name === oldAlias)
+            );
+            const fieldData = {
+                label: measureObj.value,
+                name: measureObj.alias,
+                column: measureObj.column,
+                type: type,
+                isPreset: true,
+                rawFormula: measureObj.rawFormula,
+                variables: measureObj.variables,
+                variable_configs: measureObj.variable_configs,
+                calculation_type: measureObj.calculation_type,
+                aggregate_func: measureObj.aggregate_func,
+                monetaryInBase: measureObj.monetaryInBase,
+                preset_id: measureObj.preset_id,
+                model: { name: 'Calculated' }
+            };
+
+            if (fieldIndex !== -1) {
+                this.state.fields[fieldIndex] = fieldData;
+            } else {
+                this.state.fields.push(fieldData);
+            }
+
+            this.genQuery();
+            this.showMessage(`Formula for "${measureObj.value}" updated`, "success");
+        });
+
+        useBus(this.env.bus, "CY:EDIT_PRESET_FORMULA", (ev) => {
+            const { index, type } = ev.detail;
+            const measureObj = this.query_data[type][index];
+            this.dialog.add(PresetApplyDialog, {
+                fields: this.state.fields || [],
+                models: this.state.models || [],
+                sheet_id: this.id,
+                editMeasure: measureObj,
+                onApply: (updatedMeasureObj) => {
+                    this.env.bus.trigger("CY:APPLY_PRESET", {
+                        measureObj: updatedMeasureObj,
+                        type
+                    });
+                },
+            });
+        });
+
         useEffect(() => {
             const navBar = document.body.querySelector('.o_navbar');
             navBar.style.display = "none";
@@ -278,6 +349,86 @@ export class CylloSheet extends Component {
                 navBar.style.display = "flex";
             }
         });
+    }
+
+    // ── Preset reconstruction handler ──────────────────────────────────
+    async _onRebuildPreset(ev) {
+        const { targetType, presetData } = ev.detail;
+        const {
+            value, rawFormula, calculation_type, variables,
+            variable_configs, preset_id, monetaryInBase, alias
+        } = presetData;
+
+        try {
+            const varConfigList = typeof variable_configs === 'string'
+                ? JSON.parse(variable_configs) : (variable_configs || []);
+
+            // 1. Ensure all required models are present in the sheet
+            // Use original_column if available to get the clean 'table.field' string
+            const requiredTables = [...new Set(varConfigList.map(vc => (vc.original_column || vc.column).split('.')[0]))];
+            for (const table of requiredTables) {
+                if (!this.state.models.some(m => m.table === table)) {
+                    await this.setModelFromTable({ model: table });
+                }
+            }
+
+            // 2. Re-translate formula via RPC to get fresh SQL
+            const tablesStr = requiredTables.join(', ');
+            const freshColumnExpr = await this.orm.call(
+                "calculation.preset",
+                "translate_to_sql_advanced",
+                [rawFormula, varConfigList, tablesStr, calculation_type]
+            );
+
+            // 3. Reconstruct measure object
+            const measureObj = {
+                type: 'measure',
+                isPreset: true,
+                rawFormula,
+                calculation_type,
+                aggregate_func: presetData.aggregate_func || false,
+                variables: typeof variables === 'string' ? variables : JSON.stringify(variables),
+                variable_configs: typeof variable_configs === 'string' ? variable_configs : JSON.stringify(varConfigList),
+                value,
+                original_label: value,
+                alias: alias || generateSqlAlias(value, true),
+                column: freshColumnExpr,
+                query: `${freshColumnExpr} AS ${alias || generateSqlAlias(value, true)}`,
+                preset_id: preset_id ? parseInt(preset_id) : false,
+                monetaryInBase: monetaryInBase && monetaryInBase !== 'false' ? freshColumnExpr : false,
+            };
+
+            // 4. Update query_data
+            this.query_data[targetType] = this.query_data[targetType].filter(m => m.alias !== measureObj.alias);
+            this.query_data[targetType].push(measureObj);
+
+            // Update fields list in sidebar to keep it in sync with latest metadata
+            const fieldIndex = this.state.fields.findIndex(f => f.name === measureObj.alias || f.column === measureObj.column);
+            if (fieldIndex !== -1) {
+                this.state.fields[fieldIndex] = {
+                    ...this.state.fields[fieldIndex],
+                    ...measureObj,
+                    name: measureObj.alias,
+                    label: measureObj.value,
+                    type: targetType,
+                };
+            } else {
+                this.state.fields.push({
+                    ...measureObj,
+                    name: measureObj.alias,
+                    label: measureObj.value,
+                    type: targetType,
+                    model: { name: 'Calculated' }
+                });
+            }
+
+            this.genQuery();
+            this.env.bus.trigger("CY:SYNC_CHILDREN", { targetType, children: this.query_data[targetType] });
+            this.showMessage(`Preset "${value}" re-initialized`, "success");
+        } catch (e) {
+            this.showMessage(`Failed to re-initialize preset: ${e.message || 'Check logs'}`, "danger");
+            console.error(e);
+        }
     }
 
     get yZoneInfo() {
@@ -311,104 +462,167 @@ export class CylloSheet extends Component {
     }
 
     genQuery() {
-        var query_data = this.query_data
-        this.hasMonetary = false
+        const query_data = this.query_data;
+        this.hasMonetary = false;
+
         if (!query_data.measure.length) {
-            this.state.query = ''
-            this.ChartData.generate = false
-            return
+            this.state.query = '';
+            this.ChartData.generate = false;
+            return;
         }
-        query_data.measure.forEach(measure => {
-            if (measure.monetaryInBase) {
-                this.hasMonetary = true
-                // modify the query here for changing currency
-                const substring = measure.query.substring(measure.query.indexOf('ROUND'), measure.query.lastIndexOf('2)') + 2)
-                const replaceString = measure.monetaryInBase.replaceAll('{selectedCurrency}', `${this.state.currency?.id}`)
-                measure.query = measure.query.replaceAll(substring, replaceString)
-            }
-        });
-        var columns = [...query_data.dimension, ...query_data.measure]
-        // Defensive: if a dimension still has a TO_CHAR query but its Group By tag was removed,
-        // revert it to the plain column reference for this query (source of truth: query_data.groupBy)
-        const activeGroupCols = new Set(
-            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
-        )
-        columns = columns.map(col => {
-            if (col.type === 'dimension' && /^TO_CHAR\s*\(/i.test(col.query) &&
-                !activeGroupCols.has(col.column)) {
-                // Keep the stored alias so the chart data lookup still matches its key
-                return { ...col, query: `${col.column} AS ${col.alias}` }
-            }
-            return col
-        })
-        var tableNames = columns.map(col => col.column.split('.')[0]);
-        var uniqueTableNames = new Set(tableNames);
-        if (this.state.models.length > uniqueTableNames.size) {
-            this.state.false_linking = true
-        } else {
-            this.state.false_linking = false
-        }
-        var join = query_data.join.join(' \n')
-        // ── GROUP BY construction ─────────────────────────────────────────────
-        // Only dimension-type items belong in GROUP BY.
-        // Measures (including monetary ROUND) must never appear there.
-        const dateGroupedCols = new Set(
-            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
-        )
-        var groupColumn = columns
-            .filter(item => item.type === 'dimension')            // only dimensions
-            .filter(item => !dateGroupedCols.has(item.column))    // skip date-grouped ones
-            .map(item => item.alias)
-        var groupByQuery = query_data.groupBy.length ? query_data.groupBy.map(item => item.column) : []
-        var hasAggregates = columns.some(item => /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query))
-        var totalGroupBy = groupByQuery.length || hasAggregates
-            ? [...groupByQuery, ...groupColumn] : []
-        totalGroupBy = [...new Set(totalGroupBy)]
-        // When GROUP BY is active, auto-wrap non-aggregate measure queries in SUM()
-        // so PostgreSQL doesn't error with "column must appear in GROUP BY or aggregate"
-        if (totalGroupBy.length > 0) {
-            columns = columns.map(item => {
-                if (item.type === 'measure' && !/(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query)) {
-                    const alias = item.alias
-                    // monetaryInBase retains '{selectedCurrency}' placeholder — resolve it
-                    const rawExpr = item.monetaryInBase
-                        ? item.monetaryInBase.trim().replaceAll('{selectedCurrency}', `${this.state.currency?.id}`)
-                        : item.column
-                    return { ...item, query: `SUM(${rawExpr}) AS ${alias}` }
-                }
-                return item
-            })
-        }
-        var columnStr = columns.length ? columns.map(item => item.query).join(', ') : ''
-        var groupBy = totalGroupBy.length ? '\n GROUP BY ' + totalGroupBy.join(', ') : ''
-        var orderBy = query_data.orderBy.length ? '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ') : ''
-        var whereData = query_data.where.filter(item => item.active).map(item => item.domain)
-        var where = whereData.length ? '\n WHERE ' + whereData.join(' AND ') : ''
-        var limit = this.state.limit ? ` LIMIT ${this.state.limit}` : ''
-        this.state.query = `SELECT ${columnStr}
-                            FROM ${join} ${where} ${groupBy} ${orderBy}${limit}`
+
+        let columns = this._prepareQueryColumns();
+        const { totalGroupBy, aggregate, isGrouping } = this._getGroupByTerms(columns);
+
+        // Always call _applyMeasureAggregates if we have measures, even without grouping (e.g. KPIs)
+        columns = this._applyMeasureAggregates(columns, totalGroupBy, aggregate, isGrouping);
+
+        const join = query_data.join.join(' \n');
+        const columnStr = columns.length ? columns.map(item => item.query).join(', ') : '';
+        const groupBy = totalGroupBy.length ? '\n GROUP BY ' + totalGroupBy.join(', ') : '';
+        const orderBy = query_data.orderBy.length ? '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ') : '';
+        const whereData = query_data.where.filter(item => item.active).map(item => item.domain);
+        const where = whereData.length ? '\n WHERE ' + whereData.join(' AND ') : '';
+
+        let limit = this.state.limit ? ` LIMIT ${this.state.limit}` : '';
+        this.state.query = `SELECT ${columnStr} FROM ${join} ${where} ${groupBy} ${orderBy}${limit}`;
+
         if (this.previewLimit.is_enable) {
-            limit = limit && this.state.limit < parseInt(this.previewLimit.limit) ? limit : ` LIMIT ${this.previewLimit.limit}`
-            if (this.state.limit > parseInt(this.previewLimit.limit) || !this.state.limit) {
-                let message = `The data shown in the preview graph is not accurate.
-                    The data is limited to ${this.previewLimit.limit} rows or groups. If
-                    you want more data to be shown please change the limit in settings`
-                this.showMessage(message, "warning")
-            }
-        }
-        this.state.previewQuery = `SELECT ${columnStr}
-                                   FROM ${join} ${where} ${groupBy} ${orderBy}${limit}`
-        if (!columns.length) {
-            this.ChartData.data = false
-            this.ChartData.generate = false
+            this._applyPreviewLimit(limit, columnStr, join, where, groupBy, orderBy);
+        } else {
+            this.state.previewQuery = this.state.query;
         }
     }
 
+    _prepareQueryColumns() {
+        const query_data = this.query_data;
+        let columns = [...query_data.dimension, ...query_data.measure].map(item => {
+            let col = { ...item };
+            if (col.monetaryInBase) {
+                this.hasMonetary = true;
+                const replaceString = col.monetaryInBase.replaceAll('{selectedCurrency}', `${this.state.currency?.id}`);
+                col.query = `${replaceString} AS ${col.alias}`;
+            }
+            return col;
+        });
+
+        const activeGroupCols = new Set(
+            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
+        );
+
+        columns = columns.map(col => {
+            if (col.type === 'dimension' && /^TO_CHAR\s*\(/i.test(col.query) && !activeGroupCols.has(col.column)) {
+                return { ...col, query: `${col.column} AS ${col.alias}` };
+            }
+            return col;
+        });
+        return columns;
+    }
+
+    _getGroupByTerms(columns) {
+        const query_data = this.query_data;
+        const dateGroupedCols = new Set(
+            query_data.groupBy.filter(g => g.source_column).map(g => g.source_column)
+        );
+
+        const groupColumn = columns
+            .filter(item => item.type === 'dimension')
+            .filter(item => !dateGroupedCols.has(item.column))
+            .map(item => {
+                // If it's a relational field, group by ID as well to ensure distinct records
+                if (item.relational && item.relational.table) {
+                    return [`${item.relational.table}.id`, item.alias];
+                }
+                return item.alias;
+            })
+            .flat();
+
+        const groupByQuery = query_data.groupBy.length ? query_data.groupBy.map(item => item.column) : [];
+        // hasAggregates: true only when at least one measure column already carries an aggregate function
+        const hasAggregates = columns.some(
+            item => item.type === 'measure' && /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query)
+        );
+        // hasExplicitAggFunc: true when a user explicitly chose an AGG from the dropdown on any measure
+        const hasExplicitAggFunc = columns.some(
+            item => item.type === 'measure' && (item.aggregate_func || item.AGG)
+        );
+
+        const totalGroupBy = [...new Set([...groupByQuery, ...groupColumn])];
+        // Only activate GROUP BY when there is an explicit group-by tag OR real aggregation is present
+        const isGrouping = groupByQuery.length > 0 || hasAggregates || hasExplicitAggFunc;
+
+        return {
+            totalGroupBy: isGrouping ? totalGroupBy : [],
+            aggregate: 'SUM', // Default aggregate (used as fallback when grouping is active)
+            isGrouping,
+        };
+    }
+
+    _applyMeasureAggregates(columns, totalGroupBy, aggregate, isGrouping) {
+        return columns.map(item => {
+            if (item.type === 'measure' && !/(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(item.query)) {
+                const alias = item.alias;
+                let rawExpr;
+                // Use the user's explicit choice, or fall back to the default
+                // aggregate when grouping is active.
+                const itemAggregate = item.aggregate_func || item.AGG || null;
+
+                // No aggregation selected AND no grouping active → raw column.
+                if (!itemAggregate && !isGrouping) {
+                    return item;
+                }
+
+                // Effective aggregate: user choice first, then default (SUM)
+                const effectiveAgg = itemAggregate || aggregate;
+
+                if (item.monetaryInBase) {
+                    rawExpr = item.monetaryInBase.trim().replaceAll('{aggregate}', effectiveAgg);
+                } else {
+                    const rawCol = item.raw_column || item.column;
+                    rawExpr = rawCol.replaceAll('{aggregate}', effectiveAgg);
+                }
+
+                // Universally replace {selectedCurrency} in the evaluated raw expression to avoid PostgreSQL errors.
+                if (rawExpr.includes('{selectedCurrency}')) {
+                    rawExpr = rawExpr.replaceAll('{selectedCurrency}', `${this.state.currency?.id}`);
+                }
+
+                if (item.calculation_type === 'aggregate') {
+                    // Aggregated presets: the formula expression is already fully built
+                    // (contains subqueries or AGG() calls from translate_to_sql_advanced).
+                    return { ...item, query: `${rawExpr} AS ${alias}` };
+                }
+
+                // If rawExpr already contains an aggregate and it's NOT a row-level preset,
+                // return as-is to avoid double-wrapping.
+                if (item.calculation_type !== 'row' && /(\bSUM\b|\bAVG\b|\bCOUNT\b|\bMIN\b|\bMAX\b)/i.test(rawExpr)) {
+                    return { ...item, query: `${rawExpr} AS ${alias}` };
+                }
+
+                return { ...item, query: `${effectiveAgg}(${rawExpr}) AS ${alias}` };
+            }
+            return item;
+        });
+    }
+
+    _applyPreviewLimit(limit, columnStr, join, where, groupBy, orderBy) {
+        let previewLimit = limit && this.state.limit < parseInt(this.previewLimit.limit)
+            ? limit
+            : ` LIMIT ${this.previewLimit.limit}`;
+
+        if (this.state.limit > parseInt(this.previewLimit.limit) || !this.state.limit) {
+            let message = `The data shown in the preview graph is not accurate.
+                The data is limited to ${this.previewLimit.limit} rows or groups. If
+                you want more data to be shown please change the limit in settings`;
+            this.showMessage(message, "warning");
+        }
+        this.state.previewQuery = `SELECT ${columnStr} FROM ${join} ${where} ${groupBy} ${orderBy}${previewLimit}`;
+    }
     /**
-     * Check weather there is at least one column and one table
+     * Check whether there is at least one column and one table
      */
     get isGoodQuery() {
-        return this.query_data.measure.length && this.query_data.join.length
+        return this.query_data.measure.length && this.query_data.join.length;
     }
 
     /**
@@ -424,16 +638,22 @@ export class CylloSheet extends Component {
                         data,
                         name: this.state.name || '',
                         measures: this.query_data.measure.map(item => item.alias),
+                        measureNames: this.query_data.measure.reduce((acc, m) => {
+                            if (m.isPreset) {
+                                acc[m.alias] = m.value;
+                            }
+                            return acc;
+                        }, {}),
                         dimension: this.query_data.dimension.map(item => item.alias),
                         dimension_axis: this.query_data.dimension_axis,
                         type: this.state.selectedType[1],
-                    }
-                    this.ChartData.generate = true
-                })
+                    };
+                    this.ChartData.generate = true;
+                });
             }
         } catch (error) {
-            this.ChartData.data = false
-            this.ChartData.generate = false
+            this.ChartData.data = false;
+            this.ChartData.generate = false;
         }
     }
 
@@ -451,7 +671,7 @@ export class CylloSheet extends Component {
      * Set the currency for monetary measures in sheet.
      * @param {Array} currency - id and display_name of currency.
      */
-    setCurrency(currency){
+    setCurrency(currency) {
         this.state.currency = currency
         this.genQuery()
     }
@@ -488,20 +708,32 @@ export class CylloSheet extends Component {
         for (var model of this.state.models) {
             Object.values(model.fields).forEach(field => {
                 if (!this.avoid_fields.includes(field.name) && !this.avoid_field_types.includes(field.type)) {
-                    fields.push({
+                    const baseField = {
                         model: {
                             id: field.model.id,
                             name: field.model.name,
                             table: field.model.table,
                             relation: field.relation
                         },
-                        type: this.measures_field_types.includes(field.type) ? 'measure' : 'dimension',
                         name: field.name,
                         label: `${field.model.name} > ${field.string}`,
+                        column: `${field.model.table}.${field.name}`,
                         field_type: field.type,
                         selection: field.selection || false,
                         is_json: field.type == 'char' && field.translate ? true : false
-                    })
+                    };
+
+                    if (field.name === 'id') {
+                        // Push as dimension
+                        fields.push({ ...baseField, type: 'dimension' });
+                        // Push as measure (ID is numeric so it naturally works with aggregations)
+                        fields.push({ ...baseField, type: 'measure' });
+                    } else {
+                        fields.push({
+                            ...baseField,
+                            type: this.measures_field_types.includes(field.type) ? 'measure' : 'dimension'
+                        });
+                    }
                 }
             })
         }
@@ -513,7 +745,15 @@ export class CylloSheet extends Component {
      * @returns {Array} - The list of measures.
      */
     get measures() {
-        return this.state.fields.filter(field => field.type == 'measure')
+        return this.state.fields.filter(field => field.type == 'measure' && !field.isPreset)
+    }
+
+    /**
+     * Get the list of presets.
+     * @returns {Array} - The list of presets.
+     */
+    get presets() {
+        return this.state.fields.filter(field => field.isPreset)
     }
 
     /**
@@ -702,6 +942,13 @@ export class CylloSheet extends Component {
                     this.query_data.where.find(where => where.name === item.name).id = item.id
                 })
                 this.navState.allRecords = await this.orm.search('dashboard.sheet', [])
+                // Refresh axis state from DB so every item has the correct DB id.
+                // Without this, groupBy/dimension/measure items stay id-less and
+                // the backend creates duplicate records on the next save.
+                await this.updateData()
+                // Reset unlinkList after a successful save so already-unlinked
+                // ids are not sent again on the next save.
+                this.unlinkList = { axis: [], tables: [], where: [], configs: [] }
             }
             catch {
                 this.showMessage(`There was an error while saving the record`, "warning")
@@ -773,9 +1020,17 @@ export class CylloSheet extends Component {
                 dim.DATE_GROUP = dateGroup.date_group
                 dim.original_value = dim.value
             }
+            // Map backend snake_case to frontend camelCase for presets
+            dim.isPreset = dim.is_preset;
+            dim.rawFormula = dim.raw_formula;
             return dim
         })
-        this.query_data.measure = data.measure
+        this.query_data.measure = data.measure.map(msr => {
+            // Map backend snake_case to frontend camelCase for presets
+            msr.isPreset = msr.is_preset;
+            msr.rawFormula = msr.raw_formula;
+            return msr;
+        });
         this.query_data.groupBy = data.groupBy
         this.query_data.orderBy = data.orderBy
         this.query_data.dimension_axis = data.dimension_axis
@@ -798,6 +1053,7 @@ export class CylloSheet extends Component {
         this.dialog.add(SheetFilterDomain, {
             confirm: this.addWhere.bind(this),
             models: this.state.models,
+            fields: this.state.fields,
             where,
             isEdit: false
         })
@@ -1137,6 +1393,137 @@ export class CylloSheet extends Component {
         }
     }
 
+    async onRelationalFieldDropped(ev) {
+        const { type, field, axis } = ev.detail;
+        if (type === 'dimension' && axis) {
+            this.env.bus.trigger("CY:UPDATE_QUERY", { type: 'dimension_axis', data: axis });
+        }
+        const model = await this.orm.searchRead('ir.model', [['model', '=', field.relation]], ['id', 'name', 'model']);
+        if (!model.length) {
+            return;
+        }
+        this.dialog.add(FieldTraversalDialog, {
+            title: `Select field from ${field.label}`,
+            model_id: model[0].id,
+            base_label: field.label,
+            targetType: type,
+            onConfirm: async (selection) => {
+                const selectedField = selection.field;
+                const rootModel = selection.rootModel;
+                const path = selection.path || [];
+
+                const mainFieldColumn = field.column;
+                const [mainTable, mainFieldName] = mainFieldColumn.split('.');
+
+                const joinSteps = [];
+                if (rootModel && rootModel.table) {
+                    joinSteps.push({
+                        fromTable: mainTable,
+                        fieldName: mainFieldName,
+                        toTable: rootModel.table,
+                        toModelName: rootModel.name,
+                        toModelId: rootModel.id,
+                    });
+                }
+                path.forEach(step => {
+                    joinSteps.push({
+                        fromTable: step.fromTable,
+                        fieldName: step.fieldName,
+                        toTable: step.toTable,
+                        toModelName: step.toModelName,
+                        toModelId: step.toModelId,
+                    });
+                });
+
+                for (const step of joinSteps) {
+                    const joinStr = `JOIN ${step.toTable} ON ${step.toTable}.id = ${step.fromTable}.${step.fieldName}`;
+                    const existingModel = this.state.models.find(m => m.table === step.toTable);
+                    if (existingModel) {
+                        if (existingModel.linked_by?.join && this._normalizeJoin(existingModel.linked_by.join) !== this._normalizeJoin(joinStr)) {
+                            this.showMessage(`"${existingModel.name}" is already linked via a different path.`, "warning");
+                        }
+                        continue;
+                    }
+                    await this.setModelFromTable({
+                        name: step.toModelName,
+                        model: step.toTable,
+                        join: joinStr,
+                        linked: true,
+                        field: step.fieldName,
+                        model_id: step.toModelId,
+                    });
+                }
+
+                const relModelTable = selectedField.table;
+                const column = `${relModelTable}.${selectedField.name}`;
+                const alias = column.replace('.', '_');
+                const { query, monetaryInBase } = this._buildFieldQuery(column, alias, selectedField);
+
+                const labelParts = [
+                    field.label,
+                    ...path.map(p => p.fieldLabel),
+                    selectedField.label,
+                ].filter(Boolean);
+                const val = {
+                    type,
+                    value: labelParts.join(" > "),
+                    alias,
+                    query,
+                    column,
+                    field_type: selectedField.type,
+                    is_json: selectedField.is_json || false,
+                    monetaryInBase,
+                    relational: {
+                        table: relModelTable,
+                        field: selectedField.name,
+                    }
+                };
+
+                if (!this.query_data[type].filter(item => item.query == val.query).length) {
+                    this.query_data[type].push(val);
+                }
+                this.env.bus.trigger("CY:SYNC_CHILDREN", {
+                    targetType: type,
+                    children: this.query_data[type],
+                    axis: axis || false,
+                });
+                this.genQuery();
+            }
+        });
+    }
+
+    _normalizeJoin(joinStr) {
+        return (joinStr || "").replace(/\s+/g, ' ').trim().toLowerCase();
+    }
+
+    _buildFieldQuery(column, alias, field) {
+        const companyId = this.company.currentCompany?.id;
+        let query = `${column} AS ${alias}`;
+        let monetaryInBase = false;
+        if (field.is_json) {
+            query = `${column} ->> 'en_US' AS ${alias}`;
+        } else if (field.type === "monetary") {
+            const modelName = column.split(".")[0];
+            const currency_rate = `COALESCE((
+                    SELECT rate FROM res_currency_rate
+                    WHERE currency_id = ${modelName}.currency_id
+                    AND company_id = ${companyId}
+                    ORDER BY name DESC
+                    LIMIT 1
+                ), 1) * COALESCE((
+                    SELECT rate
+                    FROM res_currency_rate
+                    WHERE currency_id = {selectedCurrency}
+                    AND company_id = ${companyId}
+                    ORDER BY name DESC
+                    LIMIT 1
+                ), 1)`;
+            monetaryInBase = `ROUND(${column} / ${currency_rate}, 2)`;
+            query = `${monetaryInBase} AS ${alias}`;
+        }
+        return { query, monetaryInBase };
+    }
+
     async setModelFromTable(join) {
         await this.orm.call('ir.model', 'get_model_from_table', [join.model]).then(model => {
             if (!this.state.models.map(mdl => mdl.id).includes(model.id)) {
@@ -1188,7 +1575,8 @@ export class CylloSheet extends Component {
             where,
             isEdit: true,
             confirm: this.addWhere.bind(this),
-            models: this.state.models
+            models: this.state.models,
+            fields: this.state.fields
         })
     }
 
@@ -1256,7 +1644,7 @@ export class CylloSheet extends Component {
         })
     }
 
-    static props = {...standardActionServiceProps}
+    static props = { ...standardActionServiceProps }
 }
 
 // Define the template for the CylloSheet component
@@ -1272,6 +1660,7 @@ CylloSheet.components = {
     FieldAutoCompleteGlobal,
     KpiSheet,
     Table,
-    Number
+    Number,
+    FieldTraversalDialog,
 }
 registry.category("actions").add("cy_analytic_sheet", CylloSheet);

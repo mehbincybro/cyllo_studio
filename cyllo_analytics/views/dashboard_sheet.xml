@@ -21,5 +21,14 @@
               name="Sheets"
               parent="menu_cyllo_analytics_root"
               action="action_view_sheets"
-              groups="cyllo_analytics.group_cyllo_analytics_admin"/>
+              groups="cyllo_analytics.group_cyllo_analytics_admin"
+              sequence="10"/>
+
+    <!-- Menu: Preset Management under Cyllo Analytics -->
+    <menuitem id="menu_presets"
+              name="Preset Management"
+              parent="menu_cyllo_analytics_root"
+              action="action_calculation_preset"
+              groups="cyllo_analytics.group_cyllo_analytics_admin"
+              sequence="20"/>
 </odoo>

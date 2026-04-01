@@ -15,7 +15,6 @@ export class ModelViewer extends Component {
         this.orm = useService("orm")
         this.dialog = useService("dialog")
         this.limit = 5
-        this.fieldNames = []
         this.state = useState({
             models: this.props.models,
             can_select: true

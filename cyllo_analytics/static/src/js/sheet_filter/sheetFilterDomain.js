@@ -65,10 +65,30 @@ export class SheetFilterDomain extends Component {
             }
             modifiedArray.forEach(item => {
                 const [lhs, opr, rhs] = item;
-                const field = model.fields[lhs]
-                const {type} = field
-                const [possibleVals, groupRhs, isvalid] = getPsqlOperatorsAndValues({type, operator: opr, value: rhs})
-                conditions.push(`${table}.${lhs} ${groupRhs}`);
+                // Check if this is a virtual preset field
+                const virtualField = (this.props.fields || []).find(f => f.name === lhs && f.is_preset);
+
+                let fieldExpr;
+                let fieldType;
+
+                if (virtualField) {
+                    fieldExpr = `(${virtualField.raw_formula})`;
+                    fieldType = virtualField.type;
+                } else {
+                    const field = model.fields[lhs];
+                    fieldExpr = `${table}.${lhs}`;
+                    fieldType = field.type;
+                }
+
+                const [possibleVals, groupRhs, isvalid] = getPsqlOperatorsAndValues({
+                    type: fieldType,
+                    operator: opr,
+                    value: rhs
+                });
+
+                // Replace {field} placeholder for period operators that reference field twice
+                const resolvedRhs = groupRhs.replace(/\{field\}/g, fieldExpr);
+                conditions.push(`${fieldExpr} ${resolvedRhs}`);
                 if (isValidDomain) {
                     isValidDomain = Boolean(isvalid)
                 }
