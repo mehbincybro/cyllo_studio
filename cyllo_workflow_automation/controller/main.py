@@ -99,3 +99,58 @@ class CylloAutoWorkController(http.Controller):
             'id': attachment.id,
             'name': attachment.name,
         }
+
+    @http.route(
+        '/cyllo_workflow/check_google_meet_installed',
+        type='json',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
+    def check_google_meet_installed(self, **kwargs):
+        """
+            Return whether the cyllo_google_meet module is installed and configured.
+
+            Used by the Activity node dialog to decide whether to show the
+            Google Meet section and whether the OAuth credentials are ready.
+        """
+        installed = request.env['ir.module.module'].sudo().search_count([
+            ('name', '=', 'cyllo_google_meet'),
+            ('state', '=', 'installed'),
+        ]) > 0
+        params = request.env['ir.config_parameter'].sudo()
+        configured = all([
+            params.get_param('cyllo_google.client_id'),
+            params.get_param('cyllo_google.client_secret'),
+            params.get_param('cyllo_google.refresh_token'),
+        ])
+        return {
+            'installed': installed,
+            'configured': bool(installed and configured),
+        }
+
+    @http.route(
+        '/cyllo_workflow/check_zoom_installed',
+        type='json',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
+    def check_zoom_installed(self, **kwargs):
+        """
+            Return whether the cyllo_zoom module is installed and configured.
+
+            Used by the Activity node dialog to decide whether to show the
+            Zoom Meet section and whether the access token is ready.
+        """
+        installed = request.env['ir.module.module'].sudo().search_count([
+            ('name', '=', 'cyllo_zoom'),
+            ('state', '=', 'installed'),
+        ]) > 0
+        token = request.env['ir.config_parameter'].sudo().get_param(
+            'cyllo_zoom.zoom_token',
+        )
+        return {
+            'installed': installed,
+            'configured': bool(installed and token),
+        }

@@ -169,6 +169,56 @@ class NodeStruct(models.Model):
     activity_user = fields.Json()
     activity_deadline = fields.Json()
     activity_type = fields.Json()
+    activity_is_google_meet = fields.Boolean(
+        string="Create as Google Meet",
+        default=False,
+        help="When enabled and cyllo_google_meet is installed, a Google Meet "
+             "calendar event is created automatically.",
+    )
+    activity_meet_offset_hours = fields.Float(
+        string="Schedule After (hours)",
+        default=1.0,
+        help="Number of hours after the workflow trigger to schedule the meeting start.",
+    )
+    activity_meet_duration_hours = fields.Float(
+        string="Meeting Duration (hours)",
+        default=1.0,
+        help="Duration of the meeting in hours.",
+    )
+    activity_meet_summary = fields.Char(
+        string="Meeting Name",
+        help="Meeting title for the calendar event. Defaults to the activity summary.",
+    )
+    activity_also_schedule_activity = fields.Boolean(
+        string="Also Schedule Activity Reminder",
+        default=True,
+        help="When enabled, the workflow also creates the regular chatter activity reminder.",
+    )
+    activity_is_zoom_meet = fields.Boolean(
+        string="Create as Zoom Meet",
+        default=False,
+        help="When enabled and cyllo_zoom is installed, a Zoom meeting calendar "
+             "event is created automatically.",
+    )
+    activity_zoom_offset_hours = fields.Float(
+        string="Schedule After (hours)",
+        default=1.0,
+        help="Number of hours after the workflow trigger to schedule the meeting start.",
+    )
+    activity_zoom_duration_hours = fields.Float(
+        string="Meeting Duration (hours)",
+        default=1.0,
+        help="Duration of the Zoom meeting in hours.",
+    )
+    activity_zoom_summary = fields.Char(
+        string="Meeting Name",
+        help="Meeting title for the Zoom calendar event. Defaults to the activity summary.",
+    )
+    activity_also_schedule_activity_zoom = fields.Boolean(
+        string="Also Schedule Activity Reminder",
+        default=True,
+        help="When enabled, the workflow also creates the regular chatter activity reminder.",
+    )
 
     def save_data(self, data):
         """
