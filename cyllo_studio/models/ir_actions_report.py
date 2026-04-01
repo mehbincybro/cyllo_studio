@@ -82,6 +82,7 @@ class IrActionsReport(models.Model):
             user=user,
             res_company=self.env.company,
             web_base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
+            url_quote=werkzeug.urls.url_quote,
         )
         return view_obj._render_template(template, values).encode()
 
