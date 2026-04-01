@@ -1,11 +1,34 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from datetime import datetime, timedelta
 from itertools import groupby
-from odoo import fields, models
+import ast
+from odoo import fields, models, api, _
 
 
 class HelpDeskTeam(models.Model):
     _name = "helpdesk.team"
     _description = "HelpDesk Team"
+    _inherit = ['mail.alias.mixin']
 
     name = fields.Char(string="Name", help="Team name")
     description = fields.Html(string="Description", help="Description about the team")
@@ -65,20 +88,29 @@ class HelpDeskTeam(models.Model):
         string="LiveChat Ticket Creation",
         help="Allow this team to receive tickets created from the livechat /ticket command.",
     )
-    
+    use_email_alias = fields.Boolean(
+        string="Email Alias",
+        help="Allow this team to receive tickets from an email alias.",
+    )
+
     # Assignment Settings
     assignment_method = fields.Selection([
         ('manual', 'Manual'),
         ('random', 'Random'),
         ('round_robin', 'Round Robin'),
         ('skill', 'Skill-based')
-    ], string='Assignment Method', default='manual')
+    ], string='Assignment Method', default='manual',
+        help="Method used to assign tickets to team members:\n"
+             "- Manual: Tickets are not assigned automatically.\n"
+             "- Random: Tickets are assigned to a random team member.\n"
+             "- Round Robin: Tickets are assigned to team members in turn.\n"
+             "- Skill-based: Tickets are assigned based on matching skills.")
     last_assigned_user_id = fields.Many2one('res.users', string='Last Assigned User', help="Used for Round Robin assignment")
     member_ids = fields.Many2many('res.users', string='Team Members', help="Users who can be assigned to tickets in this team")
     
     # Auto-close settings
-    auto_close_days = fields.Integer(string='Auto-close after (days)', default=0)
-    auto_close_reminder_days = fields.Integer(string='Auto-close reminder after (days)', default=0)
+    auto_close_days = fields.Integer(string='Auto-close after (days)', default=0, help="Tickets will be automatically closed after this many days of inactivity.")
+    auto_close_reminder_days = fields.Integer(string='Auto-close reminder after (days)', default=0, help="A reminder will be sent this many days before the ticket is auto-closed.")
     auto_close_stage_id = fields.Many2one('helpdesk.stage', string='Auto-close Stage', help="Ticket will be moved to this stage once it is auto-closed.")
     closed_ticket_count = fields.Integer(
         compute="_compute_closed_ticket_count", string="Closed Ticket Count",
@@ -87,6 +119,18 @@ class HelpDeskTeam(models.Model):
                                string="Average Rating")
     rating_count = fields.Integer(compute="_compute_rating_avg",
                                    string="Rating Count")
+    all_ticket_count = fields.Integer(compute="_compute_all_ticket_count", string="Total Tickets")
+    sla_policy_count = fields.Integer(compute="_compute_sla_policy_count", string="SLA Policies")
+    return_count = fields.Integer(compute="_compute_return_count", string="Returns")
+
+    def _alias_get_creation_values(self):
+        values = super()._alias_get_creation_values()
+        values['alias_model_id'] = self.env['ir.model']._get('helpdesk.ticket').id
+        if self.id:
+            values['alias_defaults'] = defaults = ast.literal_eval(self.alias_defaults or "{}")
+            defaults['team_id'] = self.id
+            values['alias_defaults'] = repr(defaults)
+        return values
 
     def _compute_open_helpdesk_ticket_count(self):
         tickets = self.env['helpdesk.ticket'].read_group(
@@ -221,3 +265,52 @@ class HelpDeskTeam(models.Model):
             else:
                 team.rating_avg = 0
                 team.rating_count = 0
+
+    def _compute_all_ticket_count(self):
+        for team in self:
+            team.all_ticket_count = self.env['helpdesk.ticket'].search_count([('team_id', '=', team.id)])
+
+    def _compute_sla_policy_count(self):
+        for team in self:
+            team.sla_policy_count = self.env['helpdesk.sla'].search_count([('team_id', '=', team.id)])
+
+    def _compute_return_count(self):
+        for team in self:
+            # Count pickings linked to tickets of this team
+            team.return_count = self.env['stock.picking'].search_count([
+                ('helpdesk_ticket_id.team_id', '=', team.id),
+                ('picking_type_code', '=', 'outgoing'),
+            ])
+
+    def action_view_team_sla_policies(self):
+        self.ensure_one()
+        return {
+            'name': _('SLA Policies'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'helpdesk.sla',
+            'view_mode': 'tree,form',
+            'domain': [('team_id', '=', self.id)],
+            'target': 'current',
+        }
+
+    def action_view_team_returns(self):
+        self.ensure_one()
+        return {
+            'name': _('Returns'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'stock.picking',
+            'view_mode': 'tree,form',
+            'domain': [('helpdesk_ticket_id.team_id', '=', self.id), ('picking_type_code', '=', 'outgoing')],
+            'target': 'current',
+        }
+
+    def action_view_team_rating(self):
+        self.ensure_one()
+        return {
+            'name': _('Average Rating'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'rating.rating',
+            'view_mode': 'tree,form,pivot,graph',
+            'domain': [('helpdesk_team_id', '=', self.id), ('consumed', '=', True)],
+            'target': 'current',
+        }

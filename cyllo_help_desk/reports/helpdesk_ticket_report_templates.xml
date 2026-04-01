@@ -62,7 +62,7 @@
                                         <span>Ticket Description</span>
                                     </td>
                                     <td>
-                                        <span t-esc="o.description"/>
+                                        <span t-field="o.description"/>
                                     </td>
                                 </tr>
                             </table>

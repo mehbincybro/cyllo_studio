@@ -29,7 +29,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base', 'mail', 'im_livechat', 'sale', 'hr_timesheet', 'rating', 'crm', 'repair', 'stock', 'sale_loyalty', 'project', 'portal', 'website', 'hr', 'hr_skills'],
+    'depends': ['base', 'mail', 'im_livechat', 'sale', 'hr_timesheet', 'rating', 'crm', 'repair', 'stock', 'sale_loyalty', 'project', 'portal', 'website', 'hr', 'hr_skills', 'cyllo_field_service'],
     'data': [
         'security/cyllo_help_desk_security_group.xml',
         'security/ir.model.access.csv',
@@ -44,6 +44,7 @@
         'reports/helpdesk_ticket_pdf_report_templates.xml',
         'wizard/helpdesk_report_views.xml',
         'wizard/helpdesk_ticket_merge_wizard_views.xml',
+        'wizard/helpdesk_ticket_return_wizard_views.xml',
         'data/helpdesk_ticket_cron.xml',
         'views/helpdesk_portal_templates.xml',
         'views/helpdesk_overview_views.xml',

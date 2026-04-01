@@ -24,7 +24,11 @@ FormEditorRegistry.add('create_ticket', {
         type: 'text',
         required: true,
         name: 'description',
-        string: _t('Your Question'),
+        string: _t('Your question'),
+    }, {
+        type: 'binary',
+        name: 'attachment_ids',
+        string: _t('Attachments'),
     }],
     fields: [{
         name: 'team_id',

@@ -1,3 +1,24 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import datetime
 import io
 import json
@@ -10,6 +31,7 @@ try:
     from odoo.tools.misc import xlsxwriter
 except ImportError:
     import xlsxwriter
+from odoo.tools import html2plaintext
 
 
 class HelpDeskReport(models.TransientModel):
@@ -29,7 +51,7 @@ class HelpDeskReport(models.TransientModel):
     current_date = fields.Date(default=fields.Date.today())
 
     def get_helpdesk_ticket(self):
-        query = """select helpdesk_ticket.name, helpdesk_category.name as 
+        query = """select helpdesk_ticket.id, helpdesk_ticket.name, helpdesk_category.name as 
                     category, res_partner.name as customer,
                     helpdesk_stage.name as stage, helpdesk_team.name as team, 
                     helpdesk_ticket.date, helpdesk_ticket.description from 
@@ -201,7 +223,7 @@ class HelpDeskReport(models.TransientModel):
             sheet.write(row, 4, data['stage'])
             sheet.write(row, 5, data['team'])
             sheet.write(row, 6, str(data['date']))
-            sheet.write(row, 7, data['description'])
+            sheet.write(row, 7, html2plaintext(data['description'] or ""))
             number += 1
             row += 1
         workbook.close()
