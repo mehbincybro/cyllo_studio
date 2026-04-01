@@ -111,6 +111,7 @@ class MrpScheduleMps(models.Model):
                 "target_qty": schedule.forcast_target_quantity,
                 "replenishment_mode": schedule.replenishment_mode,
                 "forecasted_qty": product.virtual_available or 0,
+                "outgoing_qty": product.outgoing_qty or 0,  # Added to fetch confirmed sales orders
                 "bom_components": bom_components,
                 "saved_demand": self._safe_json_load(schedule.saved_demand),
                 "saved_replenishment": self._safe_json_load(schedule.saved_replenishment),
@@ -234,11 +235,11 @@ class MrpScheduleMps(models.Model):
         for vendor, lines in purchase_map.items():
             order_lines = [
                 (0, 0, {
-                    'product_id': p.id,
+                    'product_id': product.id,
                     'product_qty': qty,
-                    'product_uom': p.uom_po_id.id or p.uom_id.id,
-                    'name': p.display_name,
-                }) for p, qty in lines
+                    'product_uom': product.uom_po_id.id or product.uom_id.id,
+                    'name': product.display_name,
+                }) for product, qty in lines
             ]
 
             purchase_order.create({
