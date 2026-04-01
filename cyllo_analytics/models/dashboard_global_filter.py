@@ -29,4 +29,13 @@ class DashboardGlobalFilter(models.Model):
     _description = 'Dashboard Global Filter'
 
     name = fields.Char()
-    dashboard_config_id = fields.Many2one('dashboard.config')
+    type = fields.Char()
+    dashboard_config_id = fields.Many2one("dashboard.config")
+    relation = fields.Char()
+    code = fields.Char()
+    operator = fields.Selection([
+        ("=", "="),
+        (">=", ">="),
+        ("<=", "<="),
+        ("in", "in")
+    ])

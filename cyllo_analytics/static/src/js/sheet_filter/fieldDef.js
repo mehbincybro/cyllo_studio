@@ -1,4 +1,23 @@
 /* @odoo-module */
+
+/**
+ * Returns a SQL fragment for a date-period operator.
+ * The returned string is appended after "field_name " to form the WHERE clause.
+ */
+function _getPeriodSql(operator) {
+    const periodMap = {
+        "this_week": `>= DATE_TRUNC('week', CURRENT_DATE) AND {field} < DATE_TRUNC('week', CURRENT_DATE) + INTERVAL '1 week'`,
+        "last_week": `>= DATE_TRUNC('week', CURRENT_DATE) - INTERVAL '1 week' AND {field} < DATE_TRUNC('week', CURRENT_DATE)`,
+        "this_month": `>= DATE_TRUNC('month', CURRENT_DATE) AND {field} < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'`,
+        "last_month": `>= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '1 month' AND {field} < DATE_TRUNC('month', CURRENT_DATE)`,
+        "this_quarter": `>= DATE_TRUNC('quarter', CURRENT_DATE) AND {field} < DATE_TRUNC('quarter', CURRENT_DATE) + INTERVAL '3 months'`,
+        "last_quarter": `>= DATE_TRUNC('quarter', CURRENT_DATE) - INTERVAL '3 months' AND {field} < DATE_TRUNC('quarter', CURRENT_DATE)`,
+        "this_year": `>= DATE_TRUNC('year', CURRENT_DATE) AND {field} < DATE_TRUNC('year', CURRENT_DATE) + INTERVAL '1 year'`,
+        "last_year": `>= DATE_TRUNC('year', CURRENT_DATE) - INTERVAL '1 year' AND {field} < DATE_TRUNC('year', CURRENT_DATE)`,
+    };
+    return periodMap[operator] || '= CURRENT_DATE';
+}
+
 export function getPsqlOperatorsAndValues(fieldDef) {
     const operatorsMapping = {
         "many2many": {
@@ -68,6 +87,8 @@ export function getPsqlOperatorsAndValues(fieldDef) {
             ">=": {type: 'date', operator: '>='},
             "<": {type: 'date', operator: '<'},
             "<=": {type: 'date', operator: '<='},
+            "in_period": { type: 'period', operator: 'IN_PERIOD' },
+            "between": { type: 'date_range', operator: 'BETWEEN' },
             "set": {type: 'boolean', operator: 'IS NOT NULL'},
             "not_set": {type: 'boolean', operator: 'IS NULL'}
         },
@@ -78,6 +99,8 @@ export function getPsqlOperatorsAndValues(fieldDef) {
             ">=": {type: 'datetime', operator: '>='},
             "<": {type: 'datetime', operator: '<'},
             "<=": {type: 'datetime', operator: '<='},
+            "in_period": { type: 'period', operator: 'IN_PERIOD' },
+            "between": { type: 'date_range', operator: 'BETWEEN' },
             "set": {type: 'boolean', operator: 'IS NOT NULL'},
             "not_set": {type: 'boolean', operator: 'IS NULL'}
         },
@@ -155,6 +178,21 @@ export function getPsqlOperatorsAndValues(fieldDef) {
 
     const field = operatorsMapping[type] || operatorsMapping["default"]
     const returnValue = field[operator]
+
+    // Handle "in period" operator — value is the period name (e.g. "this_month")
+    if (returnValue && returnValue.type === 'period') {
+        const periodSql = _getPeriodSql(value);
+        return [returnValue, periodSql, true];
+    }
+
+    // Handle date range (between) for date/datetime fields
+    if (returnValue && returnValue.type === 'date_range') {
+        if (Array.isArray(value) && value.length === 2) {
+            const [start, end] = value;
+            return [returnValue, `BETWEEN '${start}' AND '${end}'`, true];
+        }
+        return [returnValue, `BETWEEN '' AND ''`, false];
+    }
     let groupRhs = ''
     if (typeof value === "boolean") {
         if (operator === "=" && value) {

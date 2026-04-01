@@ -1,7 +1,427 @@
+/* =====================================================================
+   ⭐ CALCULATION PRESETS – styles (green-beige theme preserved)
+   ===================================================================== */
+
+/* --- Sidebar preset panel container --- */
+.cy-preset-manager {
+    width: 100%;
+    border-top: 1px solid #DFDFDF;
+    margin-top: 6px;
+    padding-top: 4px;
+}
+
+/* --- Preset list --- */
+.cy-preset-list {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0 4px;
+}
+
+.cy-preset-empty-msg {
+    font-size: 11px;
+    color: #888;
+    padding: 6px 8px;
+    font-style: italic;
+}
+
+.cy-preset-item {
+    padding: 5px 8px;
+    border-radius: 5px;
+    margin-bottom: 3px;
+    background: #f7f7f7;
+    transition: background 0.15s;
+}
+
+.cy-preset-item:hover {
+    background: #ebedb7;
+    cursor: pointer;
+}
+
+.cy-preset-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #0E3A5D;
+    flex: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+}
+
+.cy-preset-actions button {
+    padding: 1px 5px;
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+.cy-preset-func-badge {
+    font-size: 9px;
+    background: #9ea700;
+    color: #fff;
+    border-radius: 3px;
+    padding: 1px 4px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* --- Create Preset button (inherits .cy-new-chat-button) --- */
+.cy-create-preset-btn {
+    font-size: 12px !important;
+    padding: 0.5rem 1rem !important;
+    margin-top: 6px !important;
+}
+
+/* --- Slide panel overlay --- */
+.cy-preset-panel-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25);
+    z-index: 1040;
+    animation: cy-fade-in 0.15s ease;
+}
+
+@keyframes cy-fade-in {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- Slide panel itself --- */
+.cy-preset-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 400px;
+    max-width: 95vw;
+    height: 100vh;
+    background: #fff;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    animation: cy-slide-in 0.22s ease;
+    border-left: 3px solid #ebedb7;
+}
+
+@keyframes cy-slide-in {
+    from {
+        transform: translateX(100%);
+    }
+
+    to {
+        transform: translateX(0);
+    }
+}
+
+.cy-preset-panel-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #DFDFDF;
+    background: #f9f9f0;
+}
+
+.cy-preset-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.cy-preset-panel-footer {
+    padding: 12px 16px;
+    border-top: 1px solid #DFDFDF;
+    background: #f9f9f0;
+}
+
+/* --- Save button in preset panel --- */
+.cy-preset-save-btn {
+    background-color: #9ea700;
+    color: #fff;
+    border: none;
+    padding: 0.45rem 1.2rem;
+    border-radius: 5px;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.cy-preset-save-btn:hover:not(:disabled) {
+    background-color: #849600;
+    color: #fff;
+}
+
+.cy-preset-save-btn:disabled {
+    opacity: 0.55;
+}
+
+/* --- Formula builder area --- */
+.cy-formula-textarea {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    resize: vertical;
+    min-height: 70px;
+}
+
+.cy-formula-info,
+.cy-preset-vars-info,
+.cy-preset-no-vars {
+    font-size: 11px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.cy-formula-tokens {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.cy-formula-token-label {
+    font-size: 11px;
+    color: #888;
+    white-space: nowrap;
+}
+
+.cy-formula-token-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.cy-formula-token-btn {
+    background: #ebedb7;
+    border: 1px solid #d4d600;
+    color: #555;
+    border-radius: 4px;
+    padding: 2px 9px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    line-height: 1.5;
+    transition: background 0.15s;
+}
+
+.cy-formula-token-btn:hover {
+    background: #d4d600;
+    color: #fff;
+}
+
+/* --- Variable definition rows --- */
+.cy-preset-var-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cy-preset-var-row {
+    gap: 6px;
+}
+
+.cy-preset-var-placeholder {
+    min-width: 90px;
+    font-size: 11px;
+}
+
+.cy-preset-var-label {
+    max-width: 120px;
+}
+
+.cy-preset-var-type {
+    max-width: 130px;
+    font-size: 12px;
+}
+
+/* --- Apply dialog --- */
+.cy-preset-apply-body {
+    padding: 4px 0;
+}
+
+.cy-preset-apply-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #0E3A5D;
+}
+
+.cy-preset-apply-desc {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+.cy-preset-apply-formula {
+    margin-top: 4px;
+}
+
+.cy-preset-formula-display {
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    background: #f3f3e0;
+    border-radius: 3px;
+    padding: 2px 6px;
+    word-break: break-all;
+}
+
+.cy-preset-apply-subtitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: #505050;
+}
+
+.cy-preset-apply-var-row label {
+    font-size: 12px;
+}
+
+.cy-preset-var-type-badge {
+    font-size: 9px;
+    background: #ebedb7;
+    color: #555;
+    border: 1px solid #d4d600;
+    border-radius: 3px;
+    padding: 0 4px;
+    letter-spacing: 0.03em;
+}
+
+.cy-preset-apply-confirm-btn {
+    background-color: #9ea700;
+    color: #fff;
+    border: none;
+    padding: 0.45rem 1.4rem;
+    border-radius: 5px;
+    font-size: 13px;
+    transition: background 0.2s;
+}
+
+.cy-preset-apply-confirm-btn:hover {
+    background-color: #849600;
+    color: #fff;
+}
+
+.cy-preset-no-vars-msg {
+    font-size: 12px;
+}
+
+/* --- Enhanced Searchable Dropdown --- */
+.cy-preset-search-container .o-autocomplete--input {
+    padding-right: 30px !important;
+    border-radius: 6px !important;
+    border: 1px solid #DFDFDF !important;
+    font-size: 13px !important;
+    height: 38px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+.cy-preset-search-container .o-autocomplete--input:focus {
+    border-color: #9ea700 !important;
+    background: #fdfdf5 !important;
+}
+
+.cy-preset-search-container i.ri-arrow-down-s-line {
+    font-size: 16px;
+    z-index: 5;
+}
+
+/* Dropdown menu styling (aligned with search container width) */
+.cy-preset-search-container .o-autocomplete--dropdown-menu {
+    width: 100% !important;
+    min-width: 280px;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #DFDFDF !important;
+    padding: 8px 0 !important;
+    margin-top: 2px !important;
+    overflow-y: auto !important;
+    max-height: 250px !important;
+    background: #fff !important;
+}
+
+.cy-preset-search-container .o-autocomplete--dropdown-item {
+    padding: 4px 16px !important;
+    font-size: 13.5px !important;
+    color: #444 !important;
+    transition: background 0.2s ease, color 0.2s ease !important;
+    border-bottom: 1px solid #f2f2f2;
+}
+
+.cy-preset-search-container .o-autocomplete--dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.cy-preset-search-container .o-autocomplete--dropdown-item.focus,
+.cy-preset-search-container .o-autocomplete--dropdown-item:hover {
+    background-color: #f9f9f0 !important;
+    color: #9ea700 !important;
+    cursor: pointer;
+}
+
+.cy-preset-search-container .o-autocomplete--dropdown-item.selected {
+    background-color: #ebedb7 !important;
+    color: #0E3A5D !important;
+    font-weight: 600;
+}
+
+/* Variable selection autocomplete styling */
+.cy-variable-autocomplete-container .o-autocomplete--input {
+    padding-right: 30px !important;
+    border-radius: 6px !important;
+    border: 1px solid #DFDFDF !important;
+    font-size: 13px !important;
+    height: 38px !important;
+    background: #fff !important;
+    box-shadow: none !important;
+}
+
+.cy-variable-autocomplete-container .o-autocomplete--input:focus {
+    border-color: #9ea700 !important;
+    background: #fdfdf5 !important;
+}
+
+.cy-variable-autocomplete-container .o-autocomplete--dropdown-menu {
+    width: 100% !important;
+    min-width: 280px;
+    border-radius: 8px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+    border: 1px solid #DFDFDF !important;
+    padding: 8px 0 !important;
+    margin-top: 2px !important;
+    overflow-y: auto !important;
+    max-height: 250px !important;
+    background: #fff !important;
+}
+
+/* --- Preset chip on Y-axis drop zone --- */
+.draggable-item.preset-chip {
+    background-color: #ebedb7 !important;
+    border: 1px solid #9ea700;
+    color: #555;
+    font-size: 11px;
+}
+
+/* --- Tooltip for preset manager --- */
+.cy-preset-manager .field-tooltip,
+.cy-preset-manager .tooltip-content {
+    position: relative;
+}
+
+.cy-preset-tooltip {
+    min-width: 180px;
+    left: auto;
+    right: 0;
+}
+
+.presets-sidebar-section .cy-sheet-selection_box {
+    height: 150px !important;
+}
+
+/* --- End Presets --- */
+
 .scroll i,
 .scroll button {
     color: var(--dashboard-primary-color) !important;
 }
+
 
 .scroll input {
     color: var(--dashboard-primary-color);
@@ -29,7 +449,8 @@
     font-size: 18px;
 }
 
-.scroll .cy_sheet_table .cy-churn_tile-text, .cy_presentation .cy_sheet_table .cy-churn_tile-text {
+.scroll .cy_sheet_table .cy-churn_tile-text,
+.cy_presentation .cy_sheet_table .cy-churn_tile-text {
     font-size: 17px;
     font-weight: normal;
 }
@@ -46,15 +467,18 @@
     padding-top: 15px;
 }
 
-.scroll .cy_sheet_table .cy-churn_tile-text, .cy_presentation .cy_sheet_table .cy-churn_tile-text {
+.scroll .cy_sheet_table .cy-churn_tile-text,
+.cy_presentation .cy_sheet_table .cy-churn_tile-text {
     color: var(--dashboard-text-color);
 }
 
-.cy_presentation .cy-table-header-pad, .scroll .cy-table-header-pad {
+.cy_presentation .cy-table-header-pad,
+.scroll .cy-table-header-pad {
     padding: 7px;
 }
 
-.stack-item .cy_presentation .cy-table-header-pad, .scroll .cy-table-header-pad {
+.stack-item .cy_presentation .cy-table-header-pad,
+.scroll .cy-table-header-pad {
     padding: 10px !important;
 }
 
@@ -295,6 +719,34 @@
     display: flex;
 }
 
+/* --- Field Traversal Dialog Styles --- */
+.field-selection-list .field-item {
+    transition: all 0.15s ease;
+    border-left: 3px solid transparent;
+}
+
+.field-selection-list .field-item:hover {
+    background-color: #f9f9f0;
+    border-left: 3px solid #ebedb7;
+    padding-left: 12px !important;
+}
+
+.field-selection-list .field-item.cy-field-selected {
+    background-color: #ebedb7 !important;
+    border-left: 3px solid #9ea700;
+    font-weight: 500;
+}
+
+.cy-traversal-nav-btn {
+    transition: transform 0.2s;
+}
+
+.cy-traversal-nav-btn:hover {
+    transform: translateX(3px);
+    background-color: #9ea700 !important;
+    color: white !important;
+}
+
 .cy_dashboard_sheet {
     display: flex;
     flex-direction: column;
@@ -335,12 +787,12 @@
 }
 
 .cy_dashboard_sheet .sidebar input.cy-button-stroke {
-    padding:6px 10px !important;
+    padding: 6px 10px !important;
     border-radius: 6px !important;
 }
 
 .cy_dashboard_sheet .sidebar .input_tags.table_input_tags {
-    padding:6px 10px !important;
+    padding: 6px 10px !important;
 }
 
 .cy_dashboard_sheet .sidebar input.o-autocomplete--input {
@@ -704,7 +1156,7 @@
 
 .cy-template_search-bar {
     background-color: #f1f1f1;
-    border: none!important;
+    border: none !important;
     padding-left: 0px;
     border-radius: 0 6px 6px 0 !important;
 }
@@ -829,18 +1281,19 @@
     z-index: -1;
 }
 
-.cy_kpi_icon, {
-    border: none;
-    background: transparent;
-    font-size: 1.4rem;
-    color: black;
-    display: -webkit-box;
-    display: -ms-flexbox;
-    display: flex;
-    -webkit-box-pack: end;
-    -ms-flex-pack: end;
-    justify-content: flex-end;
-    position: relative;
+.cy_kpi_icon,
+{
+border: none;
+background: transparent;
+font-size: 1.4rem;
+color: black;
+display: -webkit-box;
+display: -ms-flexbox;
+display: flex;
+-webkit-box-pack: end;
+-ms-flex-pack: end;
+justify-content: flex-end;
+position: relative;
 }
 
 .kpi-info-content {
@@ -1029,7 +1482,7 @@
     background: transparent;
 }
 
-.grid-stack-item > .ui-resizable-se {
+.grid-stack-item>.ui-resizable-se {
     right: 17px !important;
     bottom: 15px !important;
 }
@@ -1070,7 +1523,7 @@
     transform: scale(1.1);
 }
 
-.cy_tile_card_box:hover{
+.cy_tile_card_box:hover {
     border-color: #9ea700;
 }
 
@@ -1847,14 +2300,23 @@
 }
 
 @keyframes jump {
-    0%, 20%, 50%, 80%, 100% {
+
+    0%,
+    20%,
+    50%,
+    80%,
+    100% {
         transform: translateY(2px);
     }
+
     40% {
-        transform: translateY(-10px); /* Adjust the jump height here */
+        transform: translateY(-10px);
+        /* Adjust the jump height here */
     }
+
     60% {
-        transform: translateY(-5px); /* Adjust the jump height here */
+        transform: translateY(-5px);
+        /* Adjust the jump height here */
     }
 }
 
@@ -2357,11 +2819,11 @@
     top: -8px;
 }
 
-.field-tooltip:hover + .tooltip-content {
+.field-tooltip:hover+.tooltip-content {
     display: block;
 }
 
-.presentation-tooltip:hover + .tooltip-content {
+.presentation-tooltip:hover+.tooltip-content {
     display: block;
 }
 
@@ -2695,7 +3157,8 @@
     padding: 24px 13%;
 }
 
-.cy_dashboard_sheet .cy-custom-search, .cy_dashboard_sheet .cy-custom-search {
+.cy_dashboard_sheet .cy-custom-search,
+.cy_dashboard_sheet .cy-custom-search {
     padding-left: 6px;
 }
 
@@ -2847,7 +3310,8 @@
     font-size: 18px;
 }
 
-.align-items-stretch.cy_tile canvas, .edit_elem.grid-stack-item canvas {
+.align-items-stretch.cy_tile canvas,
+.edit_elem.grid-stack-item canvas {
     border-radius: 6px;
 }
 
@@ -2952,15 +3416,15 @@ img.presentation_helper {
     transition: .4s;
 }
 
-.slider-container input:checked + .slider {
+.slider-container input:checked+.slider {
     background-color: var(--dashboard-primary-color);
 }
 
-.slider-container input:focus + .slider {
+.slider-container input:focus+.slider {
     box-shadow: 0 0 1px var(--dashboard-primary-color);
 }
 
-.slider-container input:checked + .slider:before {
+.slider-container input:checked+.slider:before {
     -webkit-transform: translateX(13px);
     -ms-transform: translateX(13px);
     transform: translateX(13px);
@@ -3034,7 +3498,7 @@ img.presentation_helper {
     font-weight: 500;
 }
 
-.redirect-to-record .slider-container input:checked + .slider {
+.redirect-to-record .slider-container input:checked+.slider {
     background-color: rgb(158, 167, 0)
 }
 
@@ -3428,4 +3892,22 @@ img.presentation_helper {
     .ai-chat-mode-text {
         height: 65vh;
     }
+}
+
+/* Unified Filter Time Range Section */
+.cy-time-range-section {
+    background-color: #f8f9fa;
+}
+
+.cy-time-range-section .form-select-sm {
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.cy-condition-container .w-100.p-2.border.rounded-3.bg-white {
+    transition: box-shadow 0.2s ease;
+}
+
+.cy-condition-container .w-100.p-2.border.rounded-3.bg-white:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }

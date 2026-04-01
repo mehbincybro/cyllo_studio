@@ -5,7 +5,7 @@ const { Component, useState } = owl;
 export class LinkSelectDialog extends Component {
     /** Class for selecting linked fields in a dialog */
 
-    setup(){
+    setup() {
         this.state = useState({
             index: false,
             field: false,

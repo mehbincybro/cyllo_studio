@@ -32,3 +32,4 @@ from . import test_ir_actions_act_window_view
 from . import test_ir_model
 from . import test_ir_ui_menu
 from . import test_res_config_settings
+from . import test_calculation_preset

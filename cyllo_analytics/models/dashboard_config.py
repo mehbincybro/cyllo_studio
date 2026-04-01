@@ -31,12 +31,6 @@ class DashboardConfig(models.Model):
     _description = 'Dashboard Configuration'
     _inherit = ['image.mixin']
 
-    def _get_placeholder_filename(self, field):
-        image_fields = ["image_%s" % size for size in [1920, 1024, 512, 256, 128]] + ["image"]
-        if field in image_fields:
-            return "cyllo_analytics/static/src/img/demo_dashboard_bw.png"
-        return super()._get_placeholder_filename(field)
-
     def _get_default_user_ids(self):
         """Returns the default admin user ids"""
         return self._get_default_users().ids
@@ -139,11 +133,73 @@ class DashboardConfig(models.Model):
                 rec.banner_id.read(['name', 'image_1920'])]
 
     def get_data(self, field_list=None):
-        """Method to get data for the specified fields from associated sheets."""
+        """Method to get data for the specified fields from associated sheets (optimized)."""
         if not field_list:
             field_list = []
-        data = [rec.fetch_data(field_list, self.id) for rec in self.sheet_ids]
-        return data
+
+        # Batch read sheets metadata
+        sheets_data = self.sheet_ids.read(field_list)
+        sheets_map = {s['id']: s for s in sheets_data}
+
+        # Batch fetch all related data to avoid N+1 performance issues
+        # Options (attributes for position/size)
+        options = self.env['dashboard.sheet.option'].search([
+            ('dashboard_sheet_id', 'in', self.sheet_ids.ids),
+            ('dashboard_config_id', '=', self.id)
+        ])
+        options_read = options.read(['attributes', 'dashboard_sheet_id'])
+        options_map = {}
+        for opt in options_read:
+            options_map.setdefault(opt['dashboard_sheet_id'][0], []).append(opt)
+
+        # Parallel read for main related models
+        all_filters = self.sheet_ids.mapped('filter_ids').read(
+            ["name", "domain", "is_active", "sheet_id", "domain_py_expression"]
+        )
+        all_tables = self.sheet_ids.mapped('table_ids').read()
+        all_axes = self.sheet_ids.mapped('axis_ids').read()
+
+        filters_map = {}
+        for f in all_filters: filters_map.setdefault(f['sheet_id'][0], []).append(f)
+        tables_map = {}
+        for t in all_tables: tables_map.setdefault(t['sheet_id'][0], []).append(t)
+        axes_map = {}
+        for a in all_axes: axes_map.setdefault(a['sheet_id'][0], []).append(a)
+
+        # Global Filters (sheet_filter_ids) - requires deeper batch fetch
+        global_filters = self.env['dashboard.sheet.global'].search([
+            ('sheet_id', 'in', self.sheet_ids.ids),
+            ('global_filter_id.dashboard_config_id', '=', self.id)
+        ])
+        gf_read = global_filters.read(["field", "name", "sheet_id", "global_filter_id"])
+        g_filter_ids = [gf['global_filter_id'][0] for gf in gf_read if gf['global_filter_id']]
+        g_filters_read = self.env['dashboard.global.filter'].browse(g_filter_ids).read(
+            ["name", "type", "dashboard_config_id", "relation", "code", "operator"]
+        )
+        g_filters_map = {f['id']: f for f in g_filters_read}
+
+        global_filters_processed_map = {}
+        for gf in gf_read:
+            res_gf = {
+                "id": gf["id"],
+                "field": gf["field"],
+                "name": gf["name"],
+                "sheet_id": gf["sheet_id"],
+                "global_filter_id": g_filters_map.get(gf["global_filter_id"][0]) if gf["global_filter_id"] else False
+            }
+            global_filters_processed_map.setdefault(gf['sheet_id'][0], []).append(res_gf)
+
+        results = []
+        for sheet in self.sheet_ids:
+            res = sheets_map.get(sheet.id, {}).copy()
+            res["dashboard_sheet_option_ids"] = sorted(options_map.get(sheet.id, []), key=lambda x: x['id'])
+            res["filter_ids"] = filters_map.get(sheet.id, [])
+            res["table_ids"] = tables_map.get(sheet.id, [])
+            res["axis_ids"] = axes_map.get(sheet.id, [])
+            res["sheet_filter_ids"] = global_filters_processed_map.get(sheet.id, [])
+            results.append(res)
+
+        return results
 
     @api.model
     def sql_execute(self, sql):
@@ -195,23 +251,33 @@ class DashboardConfig(models.Model):
             return False
 
     def save_position(self, vals):
-        """Save the position of the graph in the dashboard"""
+        """Save the position of the graph in the dashboard (optimized)."""
+        sheet_ids = [val["id"] for val in vals["children"]]
+        options = self.env['dashboard.sheet.option'].search([
+            ('dashboard_sheet_id', 'in', sheet_ids),
+            ('dashboard_config_id', "=", self.id)
+        ])
+        options_map = {opt.dashboard_sheet_id.id: opt for opt in options}
+
+        to_create = []
         for val in vals["children"]:
-            sheet_option = self.env['dashboard.sheet.option'].search(
-                [('dashboard_sheet_id', '=', val["id"]),
-                 ('dashboard_config_id', "=", self.id)])
-            if not sheet_option:
-                sheet_option = self.env['dashboard.sheet.option'].create({
-                    "dashboard_sheet_id": val["id"],
-                    "dashboard_config_id": self.id})
-            sheet_option.write({
-                "attributes": {
+            attributes = {
                     "x": val["x"],
                     "y": val["y"],
-                    "graph_height": val["h"] if 'h' in val.keys() else 1,
-                    "graph_width": val["w"] if 'w' in val.keys() else 1,
+                "graph_height": val.get("h", 1),
+                "graph_width": val.get("w", 1),
                 }
+            sheet_option = options_map.get(val["id"])
+            if sheet_option:
+                sheet_option.write({"attributes": attributes})
+            else:
+                to_create.append({
+                    "dashboard_sheet_id": val["id"],
+                    "dashboard_config_id": self.id,
+                    "attributes": attributes
             })
+        if to_create:
+            self.env['dashboard.sheet.option'].create(to_create)
 
     def get_dashboard_data(self):
         """Get the dashboard data for json export"""
@@ -433,7 +499,10 @@ class DashboardConfig(models.Model):
         new_menu = IrUiMenu.create(menu_vals)
         
         # Fetch siblings
-        siblings = IrUiMenu.search([('parent_id', '=', parent_id), ('id', '!=', new_menu.id)], order='sequence, id')
+        siblings = IrUiMenu.search(
+            [('parent_id', '=', parent_id), ('id', '!=', new_menu.id)],
+            order='sequence, id'
+        )
         sibling_list = list(siblings)
         
         # Find exact insertion index

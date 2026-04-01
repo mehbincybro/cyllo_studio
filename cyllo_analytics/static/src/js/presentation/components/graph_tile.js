@@ -2,7 +2,7 @@
 import {registry} from "@web/core/registry";
 import {useState, useEffect, Component, useRef, onWillStart, onMounted, onWillUpdateProps, status} from "@odoo/owl";
 import {ChartMaker} from "../../chart_maker"
-import {useService} from "@web/core/utils/hooks";
+import { useService, useBus } from "@web/core/utils/hooks";
 
 export const RE_RENDER_GRAPHS = ['map', 'heatmap', 'pictorialBar']
 export const NO_ZOOM_CHARTS = ["map", "gauge", "doughnut", "radar", "pie", "funnel"]
@@ -35,7 +35,7 @@ export class GraphTile extends Component {
         this.is_init = true
         this.rootRef = useRef('root')
 
-        this.env.bus.addEventListener("REFRESH_GRAPH", async () => {
+        useBus(this.env.bus, "REFRESH_GRAPH", async () => {
             this.setStyle()
             await this.reRender()
         })
@@ -72,7 +72,7 @@ export class GraphTile extends Component {
                 var params = this.props.themeColor ? {themeColor: this.props.themeColor} : {};
                 this.options = await this.maker.regenGraphOptions(params)
             } else {
-                this.setOptions(this.props)
+                this.setOptions(this.props.value || this.props.item)
             }
             this.eChart.dispose()
             this.addElement()
@@ -131,6 +131,7 @@ export class GraphTile extends Component {
     setOptions(props) {
         var params = {
             toolFeatures: {},
+            measureNames: props.measureNames || {},
         }
         if (this.props.themeColor) {
             params.themeColor = this.props.themeColor
@@ -180,10 +181,27 @@ export class GraphTile extends Component {
         var sql = item.query.replace(/\n/g, ' ');
         this.orm.call("dashboard.config", "sql_execute", [sql]).then(async (res) => {
             this.state.rec_id = res.id
+            let measuresList = item.measure;
+            if (typeof measuresList === 'string') {
+                try {
+                    measuresList = JSON.parse(measuresList);
+                } catch (e) {
+                    measuresList = JSON.parse(measuresList.replaceAll("'", '"'));
+                }
+            }
+            const measureAliases = measuresList.map(m => typeof m === 'object' ? m.alias : m);
+            const measureNames = measuresList.reduce((acc, m) => {
+                if (typeof m === 'object' && m.isPreset) {
+                    acc[m.alias] = m.value;
+                }
+                return acc;
+            }, {});
+
             let props = {
                 data: res,
                 name: item.name,
-                measures: eval(item.measure),
+                measures: measureAliases,
+                measureNames: measureNames,
                 dimension: item.dimension,
                 dimension_axis: item.dimension_axis,
                 type: item.type,
