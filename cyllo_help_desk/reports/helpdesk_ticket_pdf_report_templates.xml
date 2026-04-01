@@ -69,7 +69,7 @@
                                         <t t-esc="i['date']"/>
                                     </td>
                                     <td>
-                                        <t t-esc="i['description']"/>
+                                        <t t-out="env['helpdesk.ticket'].browse(i['id']).description"/>
                                     </td>
                                 </tr>
                             </t>

@@ -96,7 +96,7 @@
                     <button name="action_create_sale_order" type="object" string="Create Sales Order" invisible="not customer_id"/>
                     <button name="action_create_refund" type="object" string="Create Refund" invisible="not customer_id"/>
                     <button name="action_create_coupon" type="object" string="Create Coupon" invisible="not customer_id"/>
-                    <button name="action_create_fsm_task" type="object" string="Create FSM Task" invisible="not customer_id"/>
+                    <button name="action_create_field_service_request" type="object" string="Create Field Service" invisible="not customer_id or not use_field_service"/>
                     <button name="action_create_repair" type="object" string="Create Repair Order" invisible="not customer_id"/>
                     <button name="action_create_return" type="object" string="Create Return / Replacement" invisible="not customer_id"/>
                     <button name="action_create_crm_lead" type="object" string="Create CRM Lead" invisible="not customer_id"/>
@@ -114,8 +114,8 @@
                         <button name="action_view_coupons" type="object" class="oe_stat_button" icon="fa-ticket" invisible="coupon_count == 0">
                             <field name="coupon_count" widget="statinfo" string="Coupons"/>
                         </button>
-                        <button name="action_view_tasks" type="object" class="oe_stat_button" icon="fa-tasks" invisible="task_count == 0">
-                            <field name="task_count" widget="statinfo" string="FSM Tasks"/>
+                        <button name="action_view_field_service_requests" type="object" class="oe_stat_button" icon="fa-tasks" invisible="not use_field_service and field_service_request_count == 0">
+                            <field name="field_service_request_count" widget="statinfo" string="Field Service"/>
                         </button>
                         <button name="action_view_repairs" type="object" class="oe_stat_button" icon="fa-wrench" invisible="repair_count == 0">
                             <field name="repair_count" widget="statinfo" string="Repairs"/>
@@ -142,12 +142,14 @@
                         <field name="has_duplicates" invisible="1"/>
                     </group>
                     <group invisible="1">
+                        <field name="use_field_service"/>
+                        <field name="timesheet_bool"/>
                         <field name="sale_order_ids"/>
                         <field name="refund_ids"/>
+                        <field name="field_service_request_ids"/>
                         <field name="task_ids"/>
                         <field name="repair_ids"/>
                         <field name="crm_lead_ids"/>
-                        <field name="timesheet_bool"/>
                     </group>
                     <group col="2">
                         <group>
@@ -157,6 +159,17 @@
                             <field name="customer_id"/>
                             <field name="email"/>
                             <field name="phone"/>
+                            <field name="company_id"/>
+                            <field name="invoice_id" domain="[
+                                ('move_type', '=', 'out_invoice'),
+                                ('partner_id', 'child_of', customer_id),
+                                ('state', 'not in', ('draft', 'cancel'))
+                            ]"/>
+                            <field name="invoice_line_ids" widget="many2many_tags" domain="[('move_id', '=', invoice_id), ('display_type', '=', 'product')]"/>
+                            <field name="sale_order_id" domain="[
+                                ('partner_id', 'child_of', customer_id),
+                                ('state', 'in', ['sale', 'done'])
+                            ]"/>
                         </group>
                         <group>
                             <separator string="Ticket Details"/>
@@ -170,11 +183,7 @@
                             <field name="canned_response_ids" widget="many2many_tags"/>
                             <field name="skill_ids" widget="many2many_tags"/>
                             <field name="parent_id" domain="[('id', '!=', active_id)]"/>
-                            <field name="company_id"/>
-                            <field name="sale_order_line_id" domain="[
-                                ('state', '=', 'sale'),
-                                ('order_partner_id', 'child_of', customer_id)
-                            ]"/>
+
                         </group>
                     </group>
                     <notebook>
@@ -207,6 +216,9 @@
                                 </tree>
                             </field>
                         </page>
+                        <page string="Attachments">
+                            <field name="attachment_ids" widget="many2many_binary" string="Attach Files"/>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -238,7 +250,7 @@
                         domain="[('sla_failed','=', False)]"/>
                 <separator/>
                 <filter string="Team Tickets" name="team"
-                        domain="[('team_id','=', active_id)]"/>
+                            domain="[('team_member_ids', 'in', [uid])]"/>
                 <separator/>
                 <filter string="Unassigned Tickets" name="unassigned"
                         domain="[('user_id','=', False)]"/>

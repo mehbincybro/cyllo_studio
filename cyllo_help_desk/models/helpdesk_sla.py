@@ -1,4 +1,25 @@
-from odoo import fields, models
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import fields, models, _
 
 
 class HelpDeskSLAPolicy(models.Model):
@@ -21,4 +42,20 @@ class HelpDeskSLAPolicy(models.Model):
                                    help="The stage in which the ticket reach to satisfy this SLA")
     within_hour = fields.Float(string="Within",
                                help="Maximum number of working hours that a ticket should take to reach the target stage")
+    ticket_count = fields.Integer(compute="_compute_ticket_count", string="Tickets")
+
+    def _compute_ticket_count(self):
+        for record in self:
+            record.ticket_count = self.env['helpdesk.ticket'].search_count([('sla_ids', 'in', record.ids)])
+
+    def action_view_sla_tickets(self):
+        self.ensure_one()
+        return {
+            'name': _('Tickets'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'helpdesk.ticket',
+            'view_mode': 'tree,form',
+            'domain': [('sla_ids', 'in', self.ids)],
+            'target': 'current',
+        }
 

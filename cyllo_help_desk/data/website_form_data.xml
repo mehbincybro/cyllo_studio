@@ -16,6 +16,7 @@
                 'email',
                 'phone',
                 'team_id',
+                'attachment_ids',
             ]"/>
         </function>
     </data>

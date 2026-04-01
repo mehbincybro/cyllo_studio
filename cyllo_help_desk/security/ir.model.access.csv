@@ -35,3 +35,4 @@ access_helpdesk_skill_manager,access.helpdesk.skill,model_helpdesk_skill,cyllo_h
 access_helpdesk_canned_response_user,access.helpdesk.canned.response,model_helpdesk_canned_response,cyllo_help_desk_user,1,0,0,0
 access_helpdesk_canned_response_manager,access.helpdesk.canned.response,model_helpdesk_canned_response,cyllo_help_desk_manager,1,1,1,1
 access_helpdesk_ticket_merge_wizard,access.helpdesk.ticket.merge.wizard,model_helpdesk_ticket_merge_wizard,cyllo_help_desk_user,1,1,1,1
+access_helpdesk_ticket_return_wizard,access.helpdesk.ticket.return.wizard,model_helpdesk_ticket_return_wizard,cyllo_help_desk_user,1,1,1,1

@@ -1,8 +1,30 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import random
 from datetime import datetime, timedelta
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
+from odoo.tools import email_split
 from odoo.addons.web.controllers.utils import clean_action
 class HelpDeskTicket(models.Model):
     _name = "helpdesk.ticket"
@@ -34,10 +56,20 @@ class HelpDeskTicket(models.Model):
                                  required=True,
                                  default=lambda self: self.env.company,
                                  help="Company for the helpdesk ticket")
-    sale_order_line_id = fields.Many2one(
-        'sale.order.line',
-        string="Sales Order Item",
-        help="Sales order line linked to this ticket (filtered by the selected customer).",
+    invoice_id = fields.Many2one(
+        'account.move',
+        string="Invoice",
+        help="Invoice linked to this ticket (filtered by the selected customer).",
+    )
+    invoice_line_ids = fields.Many2many(
+        'account.move.line',
+        string="Invoice line Items",
+        help="Items belonging to the selected invoice.",
+    )
+    sale_order_id = fields.Many2one(
+        'sale.order',
+        string="Sale Order",
+        help="Sale Order linked to this ticket (filtered by the selected customer).",
     )
     description = fields.Html(string="Description",
                               help="Description about the issue or question")
@@ -47,6 +79,7 @@ class HelpDeskTicket(models.Model):
                                     string="Timesheet",
                                     help="Time spent by the employee for this ticket")
     timesheet_bool = fields.Boolean(related='team_id.timesheet')
+    use_field_service = fields.Boolean(related='team_id.use_field_service')
     sla_ids = fields.Many2many('helpdesk.sla', string="SLA policy",
                                help="SLA policy for this ticket")
     sla_flag = fields.Boolean(default=False,
@@ -65,7 +98,7 @@ class HelpDeskTicket(models.Model):
     stage_name = fields.Char(related='stage_id.name')
     sequence = fields.Integer(related='stage_id.sequence', string="Sequence",
                               help="Stage sequence number")
-    date = fields.Datetime(default=datetime.now())
+    date = fields.Datetime(default=fields.Datetime.now)
     closed_date = fields.Datetime()
     sla_status_ids = fields.One2many('sla.status', 'ticket_id',
                                      string="SLA Status",
@@ -105,6 +138,7 @@ class HelpDeskTicket(models.Model):
     refund_ids = fields.One2many('account.move', 'helpdesk_ticket_id', string='Refund/Credit Notes')
     coupon_ids = fields.Many2many('loyalty.card', string='Coupons')
     picking_ids = fields.Many2many('stock.picking', string='Returns/Replacements')
+    field_service_request_ids = fields.One2many('field.service.request', 'helpdesk_ticket_id', string='Field Service Requests')
     sale_order_count = fields.Integer(compute='_compute_integration_counts')
     refund_count = fields.Integer(compute='_compute_integration_counts')
     task_count = fields.Integer(compute='_compute_integration_counts')
@@ -112,6 +146,7 @@ class HelpDeskTicket(models.Model):
     crm_lead_count = fields.Integer(compute='_compute_integration_counts')
     coupon_count = fields.Integer(compute='_compute_integration_counts')
     picking_count = fields.Integer(compute='_compute_integration_counts')
+    field_service_request_count = fields.Integer(compute='_compute_integration_counts')
 
     # Portal
     website_published = fields.Boolean(string='Visible in Portal', default=True)
@@ -122,6 +157,8 @@ class HelpDeskTicket(models.Model):
 
     # Canned Response
     canned_response_ids = fields.Many2many('mail.shortcode', string='Canned Response')
+
+    attachment_ids = fields.Many2many('ir.attachment', string='Attachments', help='Attach files to this ticket')
 
     @api.onchange('stage_id')
     def onchange_stage_id(self):
@@ -193,21 +230,41 @@ class HelpDeskTicket(models.Model):
                 self.user_id = best_candidates[0]['user_id']
 
     @api.onchange('customer_id')
-    def _onchange_customer_id_clear_sale_line(self):
-        """Keep the selected SO line consistent with the chosen customer."""
-        domain = [('id', '=', False)]
+    def _onchange_customer_id_clear_invoice(self):
+        """Keep the selected Invoice and Sale Order consistent with the chosen customer."""
+        invoice_domain = [('id', '=', False)]
+        so_domain = [('id', '=', False)]
         if self.customer_id:
             commercial = self.customer_id.commercial_partner_id
-            domain = [
-                ('state', '=', 'sale'),
-                ('order_partner_id', 'child_of', commercial.id),
+            invoice_domain = [
+                ('move_type', '=', 'out_invoice'),
+                ('partner_id', 'child_of', commercial.id),
+                ('state', '=', 'posted'),
+                ('payment_state', 'in', ('paid', 'in_payment')),
             ]
-            if self.sale_order_line_id and self.sale_order_line_id.order_partner_id.commercial_partner_id != commercial:
-                self.sale_order_line_id = False
+            so_domain = [
+                ('partner_id', 'child_of', commercial.id),
+                ('state', 'in', ['sale', 'done']),
+            ]
+            if self.invoice_id and self.invoice_id.partner_id.commercial_partner_id != commercial:
+                self.invoice_id = False
+                self.invoice_line_ids = [(5, 0, 0)]
+            if self.sale_order_id and self.sale_order_id.partner_id.commercial_partner_id != commercial:
+                self.sale_order_id = False
         else:
-            self.sale_order_line_id = False
+            self.invoice_id = False
+            self.invoice_line_ids = [(5, 0, 0)]
+            self.sale_order_id = False
 
-        return {'domain': {'sale_order_line_id': domain}}
+        return {'domain': {
+            'invoice_id': invoice_domain,
+            'sale_order_id': so_domain,
+        }}
+
+    @api.onchange('invoice_id')
+    def _onchange_invoice_id_clear_items(self):
+        """Clear invoice items when the invoice is changed."""
+        self.invoice_line_ids = [(5, 0, 0)]
 
     @api.depends('create_date', 'sla_ids', 'stage_id', 'sla_paused')
     def _compute_sla_progress(self):
@@ -260,7 +317,7 @@ class HelpDeskTicket(models.Model):
             ticket.duplicate_ticket_ids = [(6, 0, duplicate_ids)]
             ticket.has_duplicates = bool(duplicate_ids)
 
-    @api.depends('sale_order_ids', 'refund_ids', 'task_ids', 'repair_ids', 'crm_lead_ids', 'coupon_ids', 'picking_ids')
+    @api.depends('sale_order_ids', 'refund_ids', 'task_ids', 'repair_ids', 'crm_lead_ids', 'coupon_ids', 'picking_ids', 'field_service_request_ids')
     def _compute_integration_counts(self):
         for ticket in self:
             ticket.sale_order_count = len(ticket.sale_order_ids)
@@ -270,6 +327,7 @@ class HelpDeskTicket(models.Model):
             ticket.crm_lead_count = len(ticket.crm_lead_ids)
             ticket.coupon_count = len(ticket.coupon_ids)
             ticket.picking_count = len(ticket.picking_ids)
+            ticket.field_service_request_count = len(ticket.field_service_request_ids)
 
     @api.model_create_multi
     def create(self, vals):
@@ -281,6 +339,35 @@ class HelpDeskTicket(models.Model):
         for ticket in res:
             ticket._assign_ticket()
         return res
+
+    @api.model
+    def message_new(self, msg_dict, custom_values=None):
+        """ Overriding to set custom values when creating a ticket from an email. """
+        if custom_values is None:
+            custom_values = {}
+        email_from = msg_dict.get('from')
+        if email_from:
+            custom_values['email'] = email_from
+        # Search for partner by email if not provided
+        if not custom_values.get('customer_id') and email_from:
+            email_list = email_split(email_from)
+            if email_list:
+                cleaned_email = email_list[0]
+                partner = self.env['res.partner'].search([('email', '=', cleaned_email)], limit=1)
+                if partner:
+                    custom_values['customer_id'] = partner.id
+        custom_values.update({
+            'name': msg_dict.get('subject', _('No Subject')),
+            'description': msg_dict.get('body', ''),
+        })
+        return super().message_new(msg_dict, custom_values=custom_values)
+
+    def message_post(self, **kwargs):
+        """ Link attachments from incoming messages to the ticket's attachment_ids field. """
+        message = super(HelpDeskTicket, self).message_post(**kwargs)
+        if message.attachment_ids:
+            self.attachment_ids = [(4, att.id) for att in message.attachment_ids]
+        return message
 
     def _assign_ticket(self):
         self.ensure_one()
@@ -399,68 +486,26 @@ class HelpDeskTicket(models.Model):
             'my_last_seven_days_success_rate': 0,
             'my_last_seven_days_average_rating': 0,
         }
-        # Taking the count of tickets in priority base
-        all_tickets = self.search_count([])
-        high_priority = self.search_count([('priority', '=', '2')])
-        urgent = self.search_count([('priority', '=', '3')])
-        # Calculating the open average hours of the tickets of current user
-        max_within_hour_values = []
-        open_sla_tickets = self.search(
-            [('user_id', '=', self.env.user.id), ('sla_flag', '=', True), (
-                'stage_id.is_closed', '=', False)])
-        within_hour_values = open_sla_tickets.mapped(
-            lambda open_ticket: open_ticket.sla_ids.mapped('within_hour'))
-        if within_hour_values:
-            for hours in within_hour_values:
-                if hours:
-                    max_within_hour_values.append(max(hours))
-        if len(max_within_hour_values):
-            average_open_hour = sum(max_within_hour_values) / len(
-                max_within_hour_values)
-            self.open_ticket_average_hours = average_open_hour
-        else:
-            average_open_hour = 0
-            self.open_ticket_average_hours = 0
-        # Calculating the open average hours of the high priority tickets of
-        # current user
-        max_high_priority_within_hour_values = []
-        high_priority_open_sla_tickets = self.search(
-            [('user_id', '=', self.env.user.id), ('sla_flag', '=', True), (
-                'stage_id.is_closed', '=', False),
-             ('priority', '=', '2')])
-        high_priority_within_hour_values = high_priority_open_sla_tickets.mapped(
-            lambda high_priority_ticket: high_priority_ticket.sla_ids.mapped(
-                'within_hour'))
-        if high_priority_within_hour_values:
-            for hours in high_priority_within_hour_values:
-                if hours:
-                    max_high_priority_within_hour_values.append(max(hours))
-        if len(max_high_priority_within_hour_values):
-            high_priority_average_open_hour = sum(
-                max_high_priority_within_hour_values) / len(
-                max_high_priority_within_hour_values)
-            self.high_priority_ticket_average_hours = high_priority_average_open_hour
-        else:
-            high_priority_average_open_hour = 0
-        # Calculating the open average hours of the urgent tickets of
-        # current user
-        max_urgent_within_hour_values = []
-        urgent_open_sla_tickets = self.search(
-            [('user_id', '=', self.env.user.id), ('sla_flag', '=', True), (
-                'stage_id.is_closed', '=', False),
-             ('priority', '=', '3')])
-        urgent_within_hour_values = urgent_open_sla_tickets.mapped(
-            lambda urgent_ticket: urgent_ticket.sla_ids.mapped('within_hour'))
-        if urgent_within_hour_values:
-            for hours in urgent_within_hour_values:
-                if hours:
-                    max_urgent_within_hour_values.append(max(hours))
-        if len(max_urgent_within_hour_values):
-            urgent_average_open_hour = sum(
-                max_urgent_within_hour_values) / len(
-                max_urgent_within_hour_values)
-        else:
-            urgent_average_open_hour = 0
+        # Taking the count of tickets in priority base (filtered by my open tickets)
+        my_open_tickets = self.search([
+            ('user_id', '=', self.env.user.id),
+            ('stage_id.is_closed', '=', False)
+        ])
+        all_tickets = len(my_open_tickets)
+        high_priority = len(my_open_tickets.filtered(lambda t: t.priority == '2'))
+        urgent = len(my_open_tickets.filtered(lambda t: t.priority == '3'))
+
+        # Calculating the actual average open hours of the tickets (age)
+        def compute_avg_age(tickets):
+            if not tickets:
+                return 0
+            now = datetime.now()
+            total_hours = sum((now - t.create_date).total_seconds() / 3600.0 for t in tickets if t.create_date)
+            return total_hours / len(tickets)
+
+        average_open_hour = compute_avg_age(my_open_tickets)
+        high_priority_average_open_hour = compute_avg_age(my_open_tickets.filtered(lambda t: t.priority == '2'))
+        urgent_average_open_hour = compute_avg_age(my_open_tickets.filtered(lambda t: t.priority == '3'))
         # Calculating the number of failed tickets of the current user
         failed_ticket_count = self.search_count(
             [('user_id', '=', self.env.user.id), ('sla_flag', '=', True), (
@@ -559,9 +604,9 @@ class HelpDeskTicket(models.Model):
     @api.onchange('stage_id')
     def _onchange_ticket_stage_id(self):
         if self.stage_id.is_closed:
-            self.closed_date = fields.datetime.today()
+            self.closed_date = fields.Datetime.now()
         else:
-            self.closed_date = ''
+            self.closed_date = False
 
     def _compute_last_seven_days(self):
         self.last_seven_days = datetime.now() - timedelta(days=6)
@@ -672,9 +717,11 @@ class HelpDeskTicket(models.Model):
                 # Calculate how long it was paused and adjust deadline (conceptual)
                 # In a real system, you'd store pause durations
                 record.sla_paused = False
+                record.message_post(body=_("SLA policy resumed."))
             else:
                 record.sla_paused = True
                 record.sla_pause_date = datetime.now()
+                record.message_post(body=_("SLA policy paused."))
 
     def _escalate_ticket(self):
         """ Escalate ticket to manager if SLA fails """
@@ -698,6 +745,7 @@ class HelpDeskTicket(models.Model):
             'default_partner_id': self.customer_id.id,
             'default_helpdesk_ticket_id': self.id,
         }
+        self.message_post(body=_("Sale Order creation initiated."))
         return action
 
     def action_create_repair(self):
@@ -712,21 +760,32 @@ class HelpDeskTicket(models.Model):
             'default_ticket_id': self.id,
             'default_helpdesk_ticket_id': self.id,
         }
+        self.message_post(body=_("Repair Order creation initiated."))
         return action
 
-    def action_create_fsm_task(self):
+
+
+    def action_create_field_service_request(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("project.action_view_task")
-        action['res_model'] = 'project.task'
+        action = self.env["ir.actions.actions"]._for_xml_id("cyllo_field_service.action_view_all_requests")
         action['view_mode'] = 'form'
-        action['views'] = [(self.env.ref('project.view_task_form2').id, 'form')]
+        action['views'] = [(self.env.ref('cyllo_field_service.view_field_service_request_form').id, 'form')]
         action['target'] = 'current'
+        # Priority mapping
+        priority_map = {
+            '0': 'b', # Normal -> Medium
+            '1': 'a', # Low -> Low
+            '2': 'c', # High -> High
+            '3': 'd', # Very High -> Very High
+        }
         action['context'] = {
             'default_partner_id': self.customer_id.id,
-            'default_name': self.name,
             'default_description': self.description,
             'default_helpdesk_ticket_id': self.id,
+            'default_priority': priority_map.get(self.priority, 'a'),
+            'default_sale_order_id': self.sale_order_id.id,
         }
+        self.message_post(body=_("Field Service Request creation initiated."))
         return action
 
     def action_create_crm_lead(self):
@@ -741,6 +800,7 @@ class HelpDeskTicket(models.Model):
             'default_name': self.name,
             'default_helpdesk_ticket_id': self.id,
         }
+        self.message_post(body=_("CRM Lead creation initiated."))
         return action
 
     @api.onchange('canned_response_ids')
@@ -757,16 +817,15 @@ class HelpDeskTicket(models.Model):
                 
     def action_create_refund(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_refund_type")
-        action['res_model'] = 'account.move'
-        action['view_mode'] = 'form'
-        action['views'] = [(self.env.ref('account.view_move_form').id, 'form')]
-        action['target'] = 'current'
+        if not self.invoice_id:
+            raise UserError(_("Please select an invoice first."))
+
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_view_account_move_reversal")
         action['context'] = {
-            'default_move_type': 'out_refund',
-            'default_partner_id': self.customer_id.id,
-            'default_helpdesk_ticket_id': self.id,
+            'active_model': 'account.move',
+            'active_ids': [self.invoice_id.id],
         }
+        self.message_post(body=_("Refund/Credit Note creation initiated."))
         return action
 
     def action_create_coupon(self):
@@ -784,21 +843,47 @@ class HelpDeskTicket(models.Model):
             'default_coupon_qty': 1,
             'default_helpdesk_ticket_id': self.id,
         }
+        self.message_post(body=_("Coupon generation initiated."))
         return action
 
     def action_create_return(self):
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("stock.action_picking_tree_all")
-        action['res_model'] = 'stock.picking'
-        action['view_mode'] = 'form'
-        action['views'] = [(self.env.ref('stock.view_picking_form').id, 'form')]
-        action['target'] = 'current'
-        action['context'] = {
-            'default_partner_id': self.customer_id.id,
-            'default_picking_type_id': self.env['stock.picking.type'].search([('code', '=', 'incoming')], limit=1).id,
-            'default_helpdesk_ticket_id': self.id,
+        if not self.sale_order_id:
+             raise UserError(_("Please select a Sale Order first."))
+
+        pickings = self.env['stock.picking'].search([
+            ('sale_id', '=', self.sale_order_id.id),
+            ('state', '=', 'done'),
+            ('picking_type_code', '=', 'outgoing'),
+        ])
+
+        if not pickings:
+            raise UserError(_("No completed delivery available for return."))
+
+        if len(pickings) == 1:
+            action = self.env.ref('stock.act_stock_return_picking').read()[0]
+            action['context'] = {
+                'active_id': pickings.id,
+                'active_ids': [pickings.id],
+                'active_model': 'stock.picking',
+                'default_helpdesk_ticket_id': self.id,
+            }
+            self.message_post(body=_("Return process initiated."))
+            return action
+
+        self.message_post(body=_("Return process initiated."))
+        return {
+            'name': _('Select Delivery to Return'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'helpdesk.ticket.return.wizard',
+            'view_mode': 'form',
+            'view_id': self.env.ref('cyllo_help_desk.helpdesk_ticket_return_wizard_view_form').id,
+            'target': 'new',
+            'context': {
+                'default_ticket_id': self.id,
+                'default_sale_order_id': self.sale_order_id.id,
+            }
         }
-        return action
 
     def action_view_duplicates(self):
         self.ensure_one()
@@ -823,13 +908,6 @@ class HelpDeskTicket(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_refund_type")
         action['view_mode'] = 'list,form'
         action['domain'] = [('helpdesk_ticket_id', '=', self.id), ('move_type', '=', 'out_refund')]
-        return action
-
-    def action_view_tasks(self):
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("project.action_view_task")
-        action['view_mode'] = 'list,form'
-        action['domain'] = [('helpdesk_ticket_id', '=', self.id)]
         return action
 
     def action_view_repairs(self):
@@ -858,4 +936,11 @@ class HelpDeskTicket(models.Model):
         action = self.env["ir.actions.actions"]._for_xml_id("stock.action_picking_tree_all")
         action['view_mode'] = 'list,form'
         action['domain'] = [('id', 'in', self.picking_ids.ids)]
+        return action
+
+    def action_view_field_service_requests(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("cyllo_field_service.action_view_all_requests")
+        action['view_mode'] = 'list,form'
+        action['domain'] = [('helpdesk_ticket_id', '=', self.id)]
         return action
