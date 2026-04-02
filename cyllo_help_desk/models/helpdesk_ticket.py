@@ -418,7 +418,7 @@ class HelpDeskTicket(models.Model):
 
     @api.onchange('customer_id', 'team_id')
     def _onchange_customer_id(self):
-        if self.customer_id or self.team_id:
+        if (self.customer_id or self.team_id) and self.team_id.use_sla:
             sla_record = self.env['helpdesk.sla'].search(
                 ['|', ('customer_ids', '=', self.customer_id.id),
                  ('team_id', '=', self.team_id.id)]).ids
@@ -427,6 +427,9 @@ class HelpDeskTicket(models.Model):
                 self.sla_ids = [(6, 0, sla_record)]
             else:
                 self.sla_ids = [(5,)]
+        else:
+            self.sla_flag = False
+            self.sla_ids = [(5,)]
 
     @api.onchange('tag_id')
     def _onchange_tag_id(self):

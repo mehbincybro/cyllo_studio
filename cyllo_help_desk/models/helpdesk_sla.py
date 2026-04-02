@@ -30,6 +30,7 @@ class HelpDeskSLAPolicy(models.Model):
     description = fields.Html(string="Description",
                               help="Description for SLA policy")
     team_id = fields.Many2one('helpdesk.team', string="Team",
+                              domain="[('use_sla', '=', True)]",
                               help="Helpdesk team")
     category_ids = fields.Many2many('helpdesk.category', string="Category",
                                     help="Helpdesk categories")

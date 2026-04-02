@@ -33,6 +33,9 @@ class SLAStatus(models.Model):
     def status_update(self):
         all_tickets = self.env['helpdesk.ticket'].search([('sla_flag', '=', True)])
         for ticket in all_tickets:
+            work_hours = ticket.team_id.working_hour_id or ticket.company_id.resource_calendar_id
+            if not work_hours:
+                continue
             sorted_records = sorted(ticket.sla_ids,
                                     key=lambda x: x['within_hour'])
             for record in sorted_records:
@@ -41,7 +44,6 @@ class SLAStatus(models.Model):
                 created_date = datetime.strptime(str(ticket.create_date),
                                                  "%Y-%m-%d %H:%M:%S.%f")
                 # Calculating the SLA deadline
-                work_hours = ticket.team_id.working_hour_id
                 average_work_hours = work_hours.hours_per_day or 8
                 deadline = record.within_hour / average_work_hours
                 deadline_in_hours = deadline * average_work_hours

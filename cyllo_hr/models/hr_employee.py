@@ -55,23 +55,24 @@ class HrEmployee(models.Model):
         total_employees = self.search_count([('active', '=', True)])
 
         # Attendance Rate (Average for the period)
-        attendance_domain = [
-            ('check_in', '>=', start_date),
-            ('check_in', '<=', end_date)
-        ]
-
-        # For 'today', we look at all unique employees who checked in today
-        if date_filter == 'today':
-            attended_employees = self.env['hr.attendance'].read_group(
-                [('check_in', '>=', today)], ['employee_id'], ['employee_id']
-            )
-            attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
-        else:
-            # For Month/Year, calculate unique employees attended in the period
-            attended_employees = self.env['hr.attendance'].read_group(
-                attendance_domain, ['employee_id'], ['employee_id']
-            )
-            attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
+        attendance_rate = 0
+        if 'hr.attendance' in self.env:
+            # For 'today', we look at all unique employees who checked in today
+            if date_filter == 'today':
+                attended_employees = self.env['hr.attendance'].read_group(
+                    [('check_in', '>=', today)], ['employee_id'], ['employee_id']
+                )
+                attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
+            else:
+                # For Month/Year, calculate unique employees attended in the period
+                attendance_domain = [
+                    ('check_in', '>=', start_date),
+                    ('check_in', '<=', end_date)
+                ]
+                attended_employees = self.env['hr.attendance'].read_group(
+                    attendance_domain, ['employee_id'], ['employee_id']
+                )
+                attendance_rate = (len(attended_employees) / total_employees * 100) if total_employees > 0 else 0
 
         # Total Job Applied (Recruitment)
         job_applied_count = 0
@@ -92,66 +93,69 @@ class HrEmployee(models.Model):
         # Monthly Attendance Trend (Last 6 Months) - Static trend
         attendance_trend_labels = []
         attendance_trend_data = []
-        for month in range(5, -1, -1):
-            month_date = today - relativedelta(months=month)
-            month_label = month_date.strftime('%b')
-            attendance_trend_labels.append(month_label)
-            month_start = month_date.replace(day=1)
-            month_end = month_start + relativedelta(months=1)
-            attendance_count = self.env['hr.attendance'].search_count([
-                ('check_in', '>=', month_start),
-                ('check_in', '<', month_end),
-            ])
-            attendance_trend_data.append(attendance_count)
+        if 'hr.attendance' in self.env:
+            for month in range(5, -1, -1):
+                month_date = today - relativedelta(months=month)
+                month_label = month_date.strftime('%b')
+                attendance_trend_labels.append(month_label)
+                month_start = month_date.replace(day=1)
+                month_end = month_start + relativedelta(months=1)
+                attendance_count = self.env['hr.attendance'].search_count([
+                    ('check_in', '>=', month_start),
+                    ('check_in', '<', month_end),
+                ])
+                attendance_trend_data.append(attendance_count)
 
         # Pending Payslips
-        payslip_domain = [('state', '=', 'waiting')]
-        if date_filter == 'today':
-            # For today, show payslips active in the current month
-            month_start = today.replace(day=1)
-            month_end = month_start + relativedelta(months=1, days=-1)
-            payslip_domain += [('start_date', '<=', month_end), ('to_date', '>=', month_start)]
-        elif date_filter == 'month':
-            payslip_domain += [('start_date', '>=', start_date), ('to_date', '<=', end_date)]
-
-        pending_payslips = self.env['employee.payslip'].search_read(
-            payslip_domain,
-            ['employee_id', 'payslip_name', 'start_date', 'to_date']
-        )
-
         pending_payslips_list = []
-        for payslip in pending_payslips:
-            employee = self.browse(payslip['employee_id'][0])
-            pending_payslips_list.append({
-                'id': payslip['id'],
-                'employee_name': payslip['employee_id'][1],
-                'department': employee.department_id.name or 'N/A',
-                'name': payslip['payslip_name'],
-                'date_start': payslip['start_date'],
-                'date_end': payslip['to_date'],
-            })
+        if 'employee.payslip' in self.env:
+            payslip_domain = [('state', '=', 'waiting')]
+            if date_filter == 'today':
+                # For today, show payslips active in the current month
+                month_start = today.replace(day=1)
+                month_end = month_start + relativedelta(months=1, days=-1)
+                payslip_domain += [('start_date', '<=', month_end), ('to_date', '>=', month_start)]
+            elif date_filter == 'month':
+                payslip_domain += [('start_date', '>=', start_date), ('to_date', '<=', end_date)]
+
+            pending_payslips = self.env['employee.payslip'].search_read(
+                payslip_domain,
+                ['employee_id', 'payslip_name', 'start_date', 'to_date']
+            )
+
+            for payslip in pending_payslips:
+                employee = self.browse(payslip['employee_id'][0])
+                pending_payslips_list.append({
+                    'id': payslip['id'],
+                    'employee_name': payslip['employee_id'][1],
+                    'department': employee.department_id.name or 'N/A',
+                    'name': payslip['payslip_name'],
+                    'date_start': payslip['start_date'],
+                    'date_end': payslip['to_date'],
+                })
 
         # Ending Contracts
-        contract_domain = [('state', '=', 'open'), ('date_end', '!=', False)]
-        if date_filter == 'today':
-            contract_domain += [('date_end', '=', today)]
-        else:
-            contract_domain += [('date_end', '>=', start_date), ('date_end', '<=', end_date)]
-
-        ending_contracts = self.env['hr.contract'].search_read(
-            contract_domain,
-            ['employee_id', 'name', 'date_end']
-        )
         ending_contracts_list = []
-        for contract in ending_contracts:
-            employee = self.browse(contract['employee_id'][0])
-            ending_contracts_list.append({
-                'id': contract['id'],
-                'employee_name': contract['employee_id'][1],
-                'job_title': employee.job_id.name or 'N/A',
-                'name': contract['name'],
-                'date_end': contract['date_end'],
-            })
+        if 'hr.contract' in self.env:
+            contract_domain = [('state', '=', 'open'), ('date_end', '!=', False)]
+            if date_filter == 'today':
+                contract_domain += [('date_end', '=', today)]
+            else:
+                contract_domain += [('date_end', '>=', start_date), ('date_end', '<=', end_date)]
+
+            ending_contracts = self.env['hr.contract'].search_read(
+                contract_domain,
+                ['employee_id', 'name', 'date_end']
+            )
+            for contract in ending_contracts:
+                employee = self.browse(contract['employee_id'][0])
+                ending_contracts_list.append({
+                    'id': contract['id'],
+                    'employee_name': contract['employee_id'][1],
+                    'job_title': employee.job_id.name or 'N/A',
+                    'name': contract['name'],
+                    'date_end': contract['date_end'],
+                })
 
         # Leaderboard Data (Commissions)
         leaderboard_data = []
@@ -180,7 +184,7 @@ class HrEmployee(models.Model):
         # Recruitment Stages Data (Chart) - Affected by date filter
         recruitment_stages_labels = []
         recruitment_stages_counts = []
-        if 'hr.recruitment.stage' in self.env:
+        if 'hr.recruitment.stage' in self.env and 'hr.applicant' in self.env:
             stages = self.env['hr.recruitment.stage'].search([], order='sequence asc')
             for stage in stages:
                 count = self.env['hr.applicant'].search_count([
@@ -195,7 +199,7 @@ class HrEmployee(models.Model):
         # Contract Type Data (Chart) - Not usually filtered by date, but by active status
         contract_type_labels = []
         contract_type_counts = []
-        if 'hr.contract.type' in self.env:
+        if 'hr.contract.type' in self.env and 'hr.contract' in self.env:
             types = self.env['hr.contract.type'].search([])
             for ctype in types:
                 count = self.env['hr.contract'].search_count([
@@ -209,67 +213,71 @@ class HrEmployee(models.Model):
         # Contract Status Data (Chart) - Not affected by date filter
         contract_status_labels = []
         contract_status_counts = []
-        # Get all selection values for the 'state' field in hr.contract
-        contract_states = dict(self.env['hr.contract']._fields['state'].selection)
-        for state_key, state_label in contract_states.items():
-            count = self.env['hr.contract'].search_count([('state', '=', state_key)])
-            if count > 0:
-                contract_status_labels.append(state_label)
-                contract_status_counts.append(count)
+        if 'hr.contract' in self.env:
+            # Get all selection values for the 'state' field in hr.contract
+            contract_states = dict(self.env['hr.contract']._fields['state'].selection)
+            for state_key, state_label in contract_states.items():
+                count = self.env['hr.contract'].search_count([('state', '=', state_key)])
+                if count > 0:
+                    contract_status_labels.append(state_label)
+                    contract_status_counts.append(count)
 
         # Time Off and Allocations - Affected by date filter
         timeoff_records = []
-        leave_domain = [('request_date_from', '>=', start_date), ('request_date_to', '<=', end_date)]
-        leaves = self.env['hr.leave'].search_read(
-            leave_domain,
-            ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'number_of_days', 'state']
-        )
-        for leave in leaves:
-            timeoff_records.append({
-                'id': leave['id'],
-                'employee_name': leave['employee_id'][1],
-                'leave_type': leave['holiday_status_id'][1],
-                'request_type': 'leave',
-                'date_from': leave['request_date_from'],
-                'date_to': leave['request_date_to'],
-                'days': leave['number_of_days'],
-                'state': leave['state'],
-            })
+        if 'hr.leave' in self.env:
+            leave_domain = [('request_date_from', '>=', start_date), ('request_date_to', '<=', end_date)]
+            leaves = self.env['hr.leave'].search_read(
+                leave_domain,
+                ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to', 'number_of_days', 'state']
+            )
+            for leave in leaves:
+                timeoff_records.append({
+                    'id': leave['id'],
+                    'employee_name': leave['employee_id'][1],
+                    'leave_type': leave['holiday_status_id'][1],
+                    'request_type': 'leave',
+                    'date_from': leave['request_date_from'],
+                    'date_to': leave['request_date_to'],
+                    'days': leave['number_of_days'],
+                    'state': leave['state'],
+                })
 
-        alloc_domain = [('date_from', '>=', start_date)] # Allocation dates are simpler
-        allocations = self.env['hr.leave.allocation'].search_read(
-            alloc_domain,
-            ['employee_id', 'holiday_status_id', 'date_from', 'date_to', 'number_of_days_display', 'state']
-        )
-        for alloc in allocations:
-            timeoff_records.append({
-                'id': alloc['id'],
-                'employee_name': alloc['employee_id'][1],
-                'leave_type': alloc['holiday_status_id'][1],
-                'request_type': 'allocation',
-                'date_from': alloc['date_from'],
-                'date_to': alloc['date_to'],
-                'days': alloc['number_of_days_display'],
-                'state': alloc['state'],
-            })
+        if 'hr.leave.allocation' in self.env:
+            alloc_domain = [('date_from', '>=', start_date)] # Allocation dates are simpler
+            allocations = self.env['hr.leave.allocation'].search_read(
+                alloc_domain,
+                ['employee_id', 'holiday_status_id', 'date_from', 'date_to', 'number_of_days_display', 'state']
+            )
+            for alloc in allocations:
+                timeoff_records.append({
+                    'id': alloc['id'],
+                    'employee_name': alloc['employee_id'][1],
+                    'leave_type': alloc['holiday_status_id'][1],
+                    'request_type': 'allocation',
+                    'date_from': alloc['date_from'],
+                    'date_to': alloc['date_to'],
+                    'days': alloc['number_of_days_display'],
+                    'state': alloc['state'],
+                })
 
         # Upcoming Leaves for Card - Always from 'today' onwards
-        upcoming_leaves_raw = self.env['hr.leave'].search_read(
-            [('state', '=', 'validate'), ('request_date_from', '>=', today)],
-            ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to'],
-            limit=3,
-            order='request_date_from asc'
-        )
         upcoming_leaves = []
-        for leave in upcoming_leaves_raw:
-            d_from = leave['request_date_from']
-            d_to = leave['request_date_to']
-            date_str = d_from.strftime('%a') if d_from == d_to else f"{d_from.strftime('%a')}-{d_to.strftime('%a')}"
-            upcoming_leaves.append({
-                'employee_name': leave['employee_id'][1],
-                'leave_type': leave['holiday_status_id'][1],
-                'date_range': f"({date_str})",
-            })
+        if 'hr.leave' in self.env:
+            upcoming_leaves_raw = self.env['hr.leave'].search_read(
+                [('state', '=', 'validate'), ('request_date_from', '>=', today)],
+                ['employee_id', 'holiday_status_id', 'request_date_from', 'request_date_to'],
+                limit=3,
+                order='request_date_from asc'
+            )
+            for leave in upcoming_leaves_raw:
+                d_from = leave['request_date_from']
+                d_to = leave['request_date_to']
+                date_str = d_from.strftime('%a') if d_from == d_to else f"{d_from.strftime('%a')}-{d_to.strftime('%a')}"
+                upcoming_leaves.append({
+                    'employee_name': leave['employee_id'][1],
+                    'leave_type': leave['holiday_status_id'][1],
+                    'date_range': f"({date_str})",
+                })
 
 
         return {
