@@ -27,7 +27,7 @@
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
-    'depends': ['mrp'],
+    'depends': ['mrp','purchase','sale_management'],
 
     'data': [
         'security/ir.model.access.csv',

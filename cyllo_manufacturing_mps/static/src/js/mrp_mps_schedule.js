@@ -44,8 +44,10 @@ export class MPSClientAction extends Component {
 
         this.state.products = data.map((product) => {
             const demand = product.saved_demand || {};
+            const confirmedSales = parseFloat(product.outgoing_qty) || 0;
+
             if (Object.keys(demand).length === 0 && firstColLabel) {
-                demand[firstColLabel] = (parseFloat(product.forecasted_qty) * -1) || 0;
+                demand[firstColLabel] = confirmedSales;
             }
 
             return {
@@ -129,12 +131,10 @@ export class MPSClientAction extends Component {
                 ? null
                 : periodColumns[periodIndex - 1].label;
 
-            // Reset indirect demand for this period
             for (let productIndex = 0; productIndex < totalProducts; productIndex++) {
                 productList[productIndex].indirect_demand[currentPeriodLabel] = 0;
             }
 
-            // Iterate multiple times to propagate BOM demand
             for (let propagationRound = 0; propagationRound < 3; propagationRound++) {
                 for (let productIndex = 0; productIndex < totalProducts; productIndex++) {
                     const currentProduct = productList[productIndex];
@@ -171,7 +171,6 @@ export class MPSClientAction extends Component {
 
                     currentProduct.stock[currentPeriodLabel] = stockAfterDemand + appliedReplenishmentQty;
 
-                    // Propagate demand to BOM components
                     if (appliedReplenishmentQty > 0 && currentProduct.bom_components) {
                         const bomComponents = currentProduct.bom_components;
 
