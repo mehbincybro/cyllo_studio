@@ -19,5 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import models
-from . import wizards
+from . import mrp_add_component_wizard
+from . import mrp_scrap_component_wizard
+from . import mrp_reroute_wizard
+from . import mrp_add_workorder_wizard
