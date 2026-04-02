@@ -31,3 +31,4 @@ from . import ir_qweb
 from . import ir_rule
 from . import ir_ui_menu
 from . import ir_ui_view
+from . import qr_pdf

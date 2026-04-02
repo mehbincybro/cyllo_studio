@@ -473,6 +473,13 @@
                                     <div class="qr-card-desc">Write your own field path or URL. For developers.</div>
                                     <div class="qr-card-preview">object.name + '-' + object.id</div>
                                 </div>
+                                <div t-att-class="'qr-type-card' + (state.qr.type === 'pdf_link' ? ' active' : '')"
+                                     t-on-click="() => this.onSelectQrType('pdf_link')">
+                                    <i class="fa fa-file-pdf-o qr-card-icon"/>
+                                    <div class="qr-card-title">Link to PDF Report</div>
+                                    <div class="qr-card-desc">Customer scans → downloads PDF version of this report.</div>
+                                    <div class="qr-card-preview">yoursite.com/report/pdf/...</div>
+                                </div>
                             </div>
                         </div>
 
@@ -579,6 +586,49 @@
                                 </div>
                             </div>
 
+                            <!-- PDF Link Config -->
+                            <div t-if="state.qr.type === 'pdf_link'">
+                                <div class="mb-3">
+                                    <div class="qr-label-sm mb-2 d-block">PDF Download Options</div>
+                                    <div class="border rounded p-3 bg-light" style="border-color: #dee2e6 !important;">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" checked="1" disabled="1" id="qrPdfGen"/>
+                                            <label class="form-check-label small" for="qrPdfGen">Generate PDF when scanned</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="qrRequireAuth"
+                                                   t-att-checked="state.qr.config.requireAuth"
+                                                   t-on-change="(ev) => this.updateQrConfig('requireAuth', ev.target.checked)"/>
+                                            <label class="form-check-label small" for="qrRequireAuth">Require login to download</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" id="qrTrackAnalytics"
+                                                   t-att-checked="state.qr.config.trackAnalytics"
+                                                   t-on-change="(ev) => this.updateQrConfig('trackAnalytics', ev.target.checked)"/>
+                                            <label class="form-check-label small" for="qrTrackAnalytics">Track scan analytics</label>
+                                        </div>
+                                        <div class="form-check d-flex align-items-center mb-0">
+                                            <input class="form-check-input me-2 mt-0" type="checkbox" id="qrExpireCheck"
+                                                   t-att-checked="state.qr.config.hasExpiry"
+                                                   t-on-change="(ev) => this.updateQrConfig('hasExpiry', ev.target.checked)"/>
+                                            <label class="form-check-label small me-2" for="qrExpireCheck" style="margin-bottom: 0;">Expire after:</label>
+                                            <input type="number" class="form-control form-control-sm" style="width: 60px; padding: 2px 5px;" min="1"
+                                                   t-att-disabled="!state.qr.config.hasExpiry"
+                                                   t-att-value="state.qr.config.expiresDays"
+                                                   t-on-change="(ev) => this.updateQrConfig('expiresDays', ev.target.value || 30)"/>
+                                            <span class="small ms-2">days</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="qr-label-sm mb-2 d-block">Filename format</label>
+                                    <input type="text" class="form-control form-control-sm bg-white" readonly="1" value="Report_{doc.name}.pdf"/>
+                                </div>
+                                <div class="alert alert-info py-2 small mb-0">
+                                    <i class="fa fa-info-circle me-1"/> When printed, the QR will point to this specific report instance.
+                                </div>
+                            </div>
+
                             <div class="qr-preview-str mt-auto">
                                 <div class="qr-label-sm mb-1" style="font-size: 9px; opacity: 0.7;">Built string preview</div>
                                 <div class="text-break"><t t-out="state.qr.previewStr"/></div>
@@ -607,7 +657,7 @@
                                         <label class="qr-label-sm">Size</label>
                                         <input type="range" class="form-range" min="40" max="200" step="10"
                                                t-att-value="state.qr.config.size"
-                                               t-on-input="(ev) => this.updateQrConfig('size', parseInt(ev.target.value))"/>
+                                               t-on-input="(ev) => this.updateQrConfig('size', ev.target.value)"/>
                                     </div>
                                     <div class="qr-style-row">
                                         <label class="qr-label-sm">Alignment</label>

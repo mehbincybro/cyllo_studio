@@ -57,6 +57,7 @@ export class EditReport extends Component {
             // ── QR Wizard state ──
             showQrWizard: false,
             qr: this._getDefaultQrState(),
+            hasThumbnail: this.props.action.params.has_thumbnail || false,
         });
 
         // Promise resolver for the table config modal
@@ -941,6 +942,10 @@ export class EditReport extends Component {
                 align: 'center',
                 errorCorrection: 'M',
                 caption: '',
+                requireAuth: false,
+                trackAnalytics: true,
+                hasExpiry: false,
+                expiresDays: 30,
             },
             previewImgUrl: '',
             previewLoading: false,
@@ -998,6 +1003,9 @@ export class EditReport extends Component {
     }
 
     updateQrConfig(key, value) {
+        if (key === 'size') {
+            value = parseInt(value, 10) || 100;
+        }
         this.state.qr.config[key] = value;
         if (this.state.qr.type === 'upi') {
             this.state.qr.errors.upi_vpa = !this.state.qr.config.upiVpa;
@@ -1031,7 +1039,33 @@ export class EditReport extends Component {
         if (this._qrResolve) this._qrResolve(null);
     }
 
-    onQrWizardConfirm() {
+    async onQrWizardConfirm() {
+        if (this.state.qr.type === 'pdf_link' && !this.state.qr.config.token) {
+            console.log('entered',this.state.reportInfo.report_name,this)
+            try {
+                this.state.qr.previewLoading = true;
+                const res = await this.rpc('/cyllo_studio/generate_qr_token', {
+                    template: this.state.reportInfo.report_name,
+                    options: {
+                        requireAuth: this.state.qr.config.requireAuth,
+                        trackAnalytics: this.state.qr.config.trackAnalytics,
+                        expiresDays: this.state.qr.config.hasExpiry ? this.state.qr.config.expiresDays : null,
+                    }
+                });
+                if (res.success) {
+                    this.state.qr.config.token = res.token;
+                } else {
+                    this.notification.add(res.error || "Failed to generate token", { type: "danger" });
+                    this.state.qr.previewLoading = false;
+                    return;
+                }
+            } catch (e) {
+                this.notification.add("Could not connect to server", { type: "danger" });
+                this.state.qr.previewLoading = false;
+                return;
+            }
+        }
+
         if (this._qrResolve) {
             this._qrResolve({
                 type: this.state.qr.type,
@@ -1069,14 +1103,14 @@ export class EditReport extends Component {
         this.state.qr.previewError = false;
 
         const encoded = encodeURIComponent(expr.replace(/doc\./g, 'object.'));
-        this.state.qr.previewImgUrl = `/report/barcode/QR/${encoded}`;
+        const size = this.state.qr.config.size || 100;
+        this.state.qr.previewImgUrl = `/report/barcode/?barcode_type=QR&value=${encoded}&width=${size}&height=${size}`;
 
-        const size = this.state.qr.config.size;
         const align = this.state.qr.config.align;
         const qwebExpr = this._buildQrExpression(true);
 
         let html = `<div style="text-align:${align};">\n`;
-        html += `  <img t-att-src="'/report/barcode/QR/' + url_quote(${qwebExpr})" \n`;
+        html += `  <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=${size}&amp;height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')" \n`;
         html += `       style="width:${size}px; height:${size}px;"/>\n`;
         if (this.state.qr.config.caption) {
             html += `  <div style="font-size:8pt; margin-top:3px;">${this.state.qr.config.caption}</div>\n`;
@@ -1088,13 +1122,24 @@ export class EditReport extends Component {
     _buildQrExpression(forQWeb = false) {
         const type = this.state.qr.type;
         const config = this.state.qr.config;
-        const obj = forQWeb ? 'object' : 'doc';
+        const obj = 'doc'; // Always use 'doc' to match the blank report iterator
 
         if (type === 'plain') return config.field.replace(/object\./g, obj + '.');
         if (type === 'portal') {
             const path = config.portalPath || '/my/view/';
-            let s = `str(${obj}.get_base_url()) + '${path}' + str(${obj}.id)`;
-            if (config.tokenType === 'auto') s += ` + '?' + ${obj}._get_share_url()`;
+            // Ensure no double slashes between base_url and path
+            //            const normalizedPath = path.startsWith('/') ? path : '/' + path;
+            //            console.log('hnjkkjj',normalizedPath)
+
+            // Check if the user entered a custom Base URL that overrides the server origin
+            let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
+            if (config.baseUrl && config.baseUrl !== window.location.origin) {
+                const safeUrl = config.baseUrl.replace(/'/g, "\\'").replace(/\/$/, '');
+                baseUrlStr = `'${safeUrl}'`;
+            }
+
+            const s = `${baseUrlStr} `;
+            if (config.tokenType === 'auto') return s + ` + '?' + ${obj}._get_share_url()`;
             return s;
         }
         if (type === 'upi') {
@@ -1104,6 +1149,10 @@ export class EditReport extends Component {
             return `'upi://pay?pa=${pa}&am=' + str(${am}) + '&tn=' + str(${tn})`;
         }
         if (type === 'custom') return (config.expression || "''").replace(/object\./g, obj + '.');
+        if (type === 'pdf_link') {
+            let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
+            return `${baseUrlStr} + '/report/pdf/${this.state.reportInfo.id}/' + str(${obj}.id) + '?token=${config.token || "PENDING"}'`;
+        }
         return "''";
     }
 
@@ -1298,24 +1347,20 @@ export class EditReport extends Component {
                     <tr class="table-active section-header" style="background-color: #f2f2f2; font-weight: bold; border-top: 2px solid #333;">
                         <td colspan="${colCount}">${(section.label || 'Section').toUpperCase()}</td>
                     </tr>`;
-                // Data rows — use t-foreach with the model
+                // Data rows — use t-foreach with the model on the tr directly
                 html += `
-                    <t t-set="section_records" t-value="docs.filtered(lambda r: r.account_type in ${this._pythonDomainValues(section.domain)})"/>
-                    <t t-foreach="section_records" t-as="rec">
-                        <tr class="data-row" style="border-bottom: 1px solid #eee;">`;
+                    <tr t-foreach="docs.filtered(lambda r: r.account_type in ${this._pythonDomainValues(section.domain)})" t-as="doc" class="data-row" style="border-bottom: 1px solid #eee;">`;
                 cols.forEach(col => {
                     const align = isNumeric(col.fieldType) ? 'right' : 'left';
                     if (col.fieldType === 'many2one') {
-                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                        html += `<td style="${colStyle(col, align)}"><span t-field="doc.${col.field}"/></td>`;
                     } else if (isNumeric(col.fieldType)) {
-                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}" t-att-class="rec.${col.field} &lt; 0 and 'text-danger' or ''"/></td>`;
+                        html += `<td style="${colStyle(col, align)}"><span t-field="doc.${col.field}" t-att-class="doc.${col.field} &lt; 0 and 'text-danger' or ''"/></td>`;
                     } else {
-                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                        html += `<td style="${colStyle(col, align)}"><span t-field="doc.${col.field}"/></td>`;
                     }
                 });
-                html += `
-                        </tr>
-                    </t>`;
+                html += `</tr>`;
                 // Section subtotal
                 if (section.subtotal) {
                     html += `
@@ -1337,11 +1382,11 @@ export class EditReport extends Component {
             // ── Preset: Invoice ───────────────────────────────────────────
         } else if (config.preset === 'invoice') {
             html += `
-                <t t-foreach="doc.invoice_line_ids" t-as="line">
-                    <tr style="border-bottom: 1px solid #f8f9fa;">`;
+                    <t t-foreach="doc.invoice_line_ids" t-as="line">
+                        <tr style="border-bottom: 1px solid #f8f9fa;">`;
             cols.forEach(col => {
                 const align = isNumeric(col.fieldType) ? 'right' : 'left';
-                html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}"/></td>`;
+                html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}" /></td>`;
             });
             html += `
                     </tr>
@@ -1358,14 +1403,14 @@ export class EditReport extends Component {
                         <tr class="data-row" style="border-bottom: 1px solid #eee;">`;
                 cols.forEach(col => {
                     const align = isNumeric(col.fieldType) ? 'right' : 'left';
-                    html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}"/></td>`;
+                    html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}" /></td>`;
                 });
                 html += `
                         </tr>
                     </t>`;
                 if (section.subtotal) {
                     html += `
-                    <tr class="total-row" style="border-top: 1px solid #333; font-weight: bold; background-color: #fafafa;">`;
+                        <tr class="total-row" style="border-top: 1px solid #333; font-weight: bold; background-color: #fafafa;">`;
                     cols.forEach((col, ci) => {
                         if (ci === 0) {
                             html += `<td>Total ${section.label || ''}</td>`;
@@ -1393,19 +1438,16 @@ export class EditReport extends Component {
             } else if (config.model && cols.length > 0) {
                 // Dynamic with model — t-foreach over docs
                 html += `
-                <t t-foreach="docs" t-as="rec">
-                    <tr style="border-bottom: 1px solid #f8f9fa;">`;
+                <tr t-foreach="docs" t-as="doc" style="border-bottom: 1px solid #f8f9fa;">`;
                 cols.forEach(col => {
                     const align = isNumeric(col.fieldType) ? 'right' : 'left';
                     if (col.field) {
-                        html += `<td style="${colStyle(col, align)}"><span t-field="rec.${col.field}"/></td>`;
+                        html += `<td style="${colStyle(col, align)}"><span t-field="doc.${col.field}"/></td>`;
                     } else {
                         html += `<td style="padding: 8px;">${col.label || ''}</td>`;
                     }
                 });
-                html += `
-                    </tr>
-                </t>`;
+                html += `</tr>`;
             } else {
                 // Fallback — empty placeholder rows
                 for (let r = 0; r < 3; r++) {
@@ -1674,40 +1716,43 @@ export class EditReport extends Component {
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
 
-                // ── CAPTURE THUMBNAIL (Non-blocking) ────
-                setTimeout(async () => {
-                    try {
-                        const reportEl = component.reportFrameRef.el;
-                        const containerEl = reportEl ? reportEl.closest('.cyllo-studio-report-container') : null;
+                // ── CAPTURE THUMBNAIL (Non-blocking, Only if missing) ────
+                if (!component.state.hasThumbnail) {
+                    setTimeout(async () => {
+                        try {
+                            const reportEl = component.reportFrameRef.el;
+                            const containerEl = reportEl ? reportEl.closest('.cyllo-studio-report-container') : null;
 
-                        if (containerEl && window.html2canvas) {
-                            // Brief delay to ensure any final paint after RPC
-                            await new Promise(r => setTimeout(r, 400));
-                            containerEl.scrollTop = 0;
+                            if (containerEl && window.html2canvas) {
+                                // Brief delay to ensure any final paint after RPC
+                                await new Promise(r => setTimeout(r, 400));
+                                containerEl.scrollTop = 0;
 
-                            const canvas = await window.html2canvas(containerEl, {
-                                scale: 1, // Standard resolution for maximum speed
-                                useCORS: true,
-                                logging: false,
-                                allowTaint: true,
-                                backgroundColor: '#ffffff',
-                                width: containerEl.scrollWidth,
-                                height: containerEl.scrollHeight
-                            });
+                                const canvas = await window.html2canvas(containerEl, {
+                                    scale: 0.5, // Reduced scale for faster processing and smaller size
+                                    useCORS: true,
+                                    logging: false,
+                                    allowTaint: true,
+                                    backgroundColor: '#ffffff',
+                                    width: containerEl.clientWidth,
+                                    height: Math.min(containerEl.scrollHeight, 1200) // Limit height to capture only the relevant top part
+                                });
 
-                            const imgData = canvas.toDataURL('image/jpeg', 0.6); // Slightly lower quality for even faster save
+                                const imgData = canvas.toDataURL('image/jpeg', 0.6); // Slightly lower quality for even faster save
 
-                            await component.rpc('/cyllo_studio/save_report_thumbnail', {
-                                report_id: component._reportId,
-                                report_name: component._template,
-                                image_base64: imgData
-                            });
-                            console.log("[Cyllo Studio] Lazy thumbnail saved.");
+                                await component.rpc('/cyllo_studio/save_report_thumbnail', {
+                                    report_id: component._reportId,
+                                    report_name: component._template,
+                                    image_base64: imgData
+                                });
+                                console.log("[Cyllo Studio] Lazy thumbnail saved.");
+                                component.state.hasThumbnail = true;
+                            }
+                        } catch (e) {
+                            console.error("[Cyllo Studio] Background thumbnail capture failure:", e);
                         }
-                    } catch (e) {
-                        console.error("[Cyllo Studio] Background thumbnail capture failure:", e);
-                    }
-                }, 100);
+                    }, 100);
+                }
 
                 // ── PERSISTENT SAVE: Refresh local state instead of closing ────
                 const resArch = await component.rpc('/cyllo_studio/get_arch', {
@@ -1802,7 +1847,7 @@ export class EditReport extends Component {
                 <span class="qr-delete fa fa-trash" style="color:#ffdce0; font-size:10px; cursor:pointer; padding:2px;" title="Delete QR"></span>
             </div>
             <div class="qr-content-wrapper" style="display:inline-block; position:relative;">
-                <img src="/report/barcode/QR/${encoded}" style="width:${size}px; height:${size}px; display:block; margin:0 auto;"/>
+                <img src="/report/barcode/?barcode_type=QR&value=${encoded}&width=${size}&height=${size}" style="width:${size}px; height:${size}px; display:block; margin:0 auto;"/>
                 ${config.caption ? `<div class="qr-caption" style="font-size:8pt; margin-top:3px; text-align:center;">${config.caption}</div>` : ''}
             </div>
         `;
@@ -1819,7 +1864,14 @@ export class EditReport extends Component {
     }
 
     _cleanStudioAttrs(node) {
+        if (!node) return;
         const self = this;
+        // Wrap in a temporary span to allow unwrapping the root itself
+        const temp = document.createElement('span');
+        const parent = node.parentNode;
+        const next = node.nextSibling;
+        temp.appendChild(node);
+
         const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-type', 'cy-config'];
         const clean = (el) => {
             if (!el || !el.removeAttribute) return;
@@ -1840,7 +1892,8 @@ export class EditReport extends Component {
                         el.style.opacity = '';
 
                         const img = document.createElement('img');
-                        img.setAttribute('t-att-src', `'/report/barcode/QR/' + url_quote(${qwebExpr})`);
+                        // Use url_quote (now provided in the backend context) for safe path encoding
+                        img.setAttribute('t-att-src', `'/report/barcode/?barcode_type=QR&value=%s&width=${size}&height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')`);
                         img.style.width = size + 'px';
                         img.style.height = size + 'px';
                         el.appendChild(img);
@@ -1879,7 +1932,7 @@ export class EditReport extends Component {
             // Unwrap wrappers
             if (el.classList && el.classList.contains('table-wrapper')) {
                 const table = el.querySelector('table');
-                if (table) {
+                if (table && el.parentNode) {
                     el.parentNode.replaceChild(table, el);
                     clean(table);
                     return;
@@ -1887,7 +1940,7 @@ export class EditReport extends Component {
             }
             if (el.classList && el.classList.contains('box-wrapper')) {
                 const span = el.querySelector('span');
-                if (span) {
+                if (span && el.parentNode) {
                     el.parentNode.replaceChild(span, el);
                     clean(span);
                     return;
@@ -1895,7 +1948,7 @@ export class EditReport extends Component {
             }
             if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
                 const span = el.querySelector('span[t-field]');
-                if (span) {
+                if (span && el.parentNode) {
                     el.parentNode.replaceChild(span, el);
                     clean(span);
                     return;
@@ -1913,6 +1966,12 @@ export class EditReport extends Component {
             }
         };
         clean(node);
+
+        // Return to original position if it had one
+        if (parent) {
+            parent.insertBefore(temp.firstChild, next);
+        }
+        return temp.firstChild;
     }
 
     _isStructuralNode(el) {
@@ -1995,8 +2054,8 @@ export class EditReport extends Component {
 
                 if (change.structChanged) {
                     const clonedZone = change.el.cloneNode(true);
-                    this._cleanStudioAttrs(clonedZone);
-                    let content = new XMLSerializer().serializeToString(clonedZone).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                    const cleaned = this._cleanStudioAttrs(clonedZone);
+                    let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
                     xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
                     return;
                 }
@@ -2004,8 +2063,8 @@ export class EditReport extends Component {
                 if (newNodes.length) {
                     newNodes.forEach(node => {
                         const cloned = node.cloneNode(true);
-                        this._cleanStudioAttrs(cloned);
-                        let content = new XMLSerializer().serializeToString(cloned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                        const cleaned = this._cleanStudioAttrs(cloned);
+                        let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
                         xpathBlock += `<xpath expr="${change.xpath}" position="inside">${content}</xpath>`;
                     });
                     return;
@@ -2013,8 +2072,8 @@ export class EditReport extends Component {
 
                 if (this._isStructuralNode(change.el)) return;
                 const cloned = change.el.cloneNode(true);
-                this._cleanStudioAttrs(cloned);
-                let content = new XMLSerializer().serializeToString(cloned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                const cleaned = this._cleanStudioAttrs(cloned);
+                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
                 xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
             });
             if (xpathBlock.trim()) {
