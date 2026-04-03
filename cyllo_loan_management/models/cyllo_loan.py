@@ -500,7 +500,7 @@ class CylloLoan(models.Model):
             emi = principal / num_installments
         else:
             emi = principal * periodic_rate * (1 + periodic_rate) ** num_installments / (
-                (1 + periodic_rate) ** num_installments - 1
+                    (1 + periodic_rate) ** num_installments - 1
             )
         emi = round(emi, 2)
 
