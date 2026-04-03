@@ -183,6 +183,110 @@
                         <div t-else="" id="studio_report" t-ref="report_frame" class="editable-area w-100 h-100 text-dark" style="padding: 20mm;"/>
                     </div>
                 </div>
+
+                <!-- ── Box Properties Panel (right sidebar) ────────────────── -->
+                <div t-if="state.showBoxProps and !state.previewMode" class="box-props-panel">
+                    <!-- Header -->
+                    <div class="box-props-header">
+                        <span><i class="fa fa-object-group me-2"/>Section Properties</span>
+                        <button class="box-props-close" t-on-click="closeBoxProps">✕</button>
+                    </div>
+
+                    <div class="box-props-body">
+                        <!-- Label -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Identity</div>
+                            <div class="box-props-row">
+                                <label>Label</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.label"
+                                       t-on-change="(ev) => this.onBoxConfigChange('label', ev.target.value)"
+                                       placeholder="Section name"/>
+                            </div>
+                        </div>
+
+                        <!-- Size -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Size</div>
+                            <div class="box-props-row">
+                                <label>Width (px)</label>
+                                <input type="number" min="80"
+                                       t-att-value="state.boxConfig.width"
+                                       t-on-change="(ev) => this.onBoxConfigChange('width', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Height (px)</label>
+                                <input type="number" min="80"
+                                       t-att-value="state.boxConfig.height"
+                                       t-on-change="(ev) => this.onBoxConfigChange('height', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Layout Mode -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Layout Mode</div>
+                            <div class="box-props-row">
+                                <label>Mode</label>
+                                <div class="box-layout-toggle">
+                                    <button t-att-class="state.boxConfig.layoutMode === 'free' ? 'active' : ''"
+                                            t-on-click="() => this.onBoxLayoutModeChange('free')">
+                                        <i class="fa fa-arrows me-1"/>Free
+                                    </button>
+                                    <button t-att-class="state.boxConfig.layoutMode === 'flow' ? 'active' : ''"
+                                            t-on-click="() => this.onBoxLayoutModeChange('flow')">
+                                        <i class="fa fa-bars me-1"/>Flow
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Background -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Background</div>
+                            <div class="box-props-row">
+                                <label>Color</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.backgroundColor"
+                                       t-on-change="(ev) => this.onBoxConfigChange('backgroundColor', ev.target.value)"
+                                       placeholder="transparent or #rrggbb"/>
+                            </div>
+                        </div>
+
+                        <!-- Border -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Border</div>
+                            <div class="box-props-row">
+                                <label>Border</label>
+                                <input type="text"
+                                       t-att-value="state.boxConfig.border"
+                                       t-on-change="(ev) => this.onBoxConfigChange('border', ev.target.value)"
+                                       placeholder="1px solid #ccc"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Radius (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.borderRadius"
+                                       t-on-change="(ev) => this.onBoxConfigChange('borderRadius', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Padding -->
+                        <div class="box-props-section">
+                            <div class="box-props-section-label">Spacing</div>
+                            <div class="box-props-row">
+                                <label>Padding (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.padding"
+                                       t-on-change="(ev) => this.onBoxConfigChange('padding', ev.target.value)"/>
+                            </div>
+                        </div>
+
+                        <!-- Delete -->
+                        <button class="box-props-delete-btn" t-on-click="deleteSelectedBox">
+                            <i class="fa fa-trash me-1"/>Delete Section
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <!-- Branch Selector Popup -->
