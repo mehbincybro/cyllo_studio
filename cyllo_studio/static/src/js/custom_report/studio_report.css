@@ -358,6 +358,351 @@
     font-weight: 700;
 }
 
+/* ════════════════════════════════════════════════════════════
+   BOX SECTION CONTAINER – full redesign
+   ════════════════════════════════════════════════════════════ */
+
+/* ── Outer wrapper ──────────────────────────────────────── */
+.box-section-wrapper {
+    position: relative;
+    display: inline-block;
+    min-width: 80px;
+    min-height: 80px;
+    box-sizing: border-box;
+    margin-top: 28px;
+    vertical-align: top;
+}
+
+.box-section-wrapper.selected>.box-dropzone {
+    outline: 2px solid #5b8dee !important;
+    outline-offset: 2px;
+}
+
+/* ── Box Toolbar (drag, label, delete) ──────────────────── */
+.box-toolbar {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    height: 22px;
+    background: #9ea700;
+    border-radius: 4px 4px 0 0;
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    z-index: 200;
+    white-space: nowrap;
+    font-size: 10px;
+    color: white;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.box-section-wrapper:hover>.box-toolbar,
+.box-section-wrapper.selected>.box-toolbar {
+    display: flex;
+}
+
+.box-toolbar .box-drag-handle {
+    cursor: grab;
+    padding: 2px;
+    opacity: 0.9;
+}
+
+.box-toolbar .box-drag-handle:active {
+    cursor: grabbing;
+}
+
+.box-toolbar .box-label-text {
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.box-toolbar .box-layout-badge {
+    font-size: 9px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+    padding: 0 4px;
+    line-height: 16px;
+}
+
+.box-toolbar .box-delete-btn {
+    color: #ffdce0;
+    cursor: pointer;
+    padding: 2px;
+    margin-left: 4px;
+    transition: color 0.15s;
+}
+
+.box-toolbar .box-delete-btn:hover {
+    color: #fff;
+}
+
+/* ── 8-Point Resize Handles ─────────────────────────────── */
+.box-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #5b8dee;
+    border: 2px solid #fff;
+    border-radius: 50%;
+    z-index: 200;
+    display: none;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.box-section-wrapper:hover .box-resize-handle,
+.box-section-wrapper.selected .box-resize-handle {
+    display: block;
+}
+
+/* Corners */
+.box-resize-handle.nw {
+    top: -5px;
+    left: -5px;
+    cursor: nw-resize;
+}
+
+.box-resize-handle.ne {
+    top: -5px;
+    right: -5px;
+    cursor: ne-resize;
+}
+
+.box-resize-handle.sw {
+    bottom: -5px;
+    left: -5px;
+    cursor: sw-resize;
+}
+
+.box-resize-handle.se {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+/* Edges */
+.box-resize-handle.n {
+    top: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: n-resize;
+}
+
+.box-resize-handle.s {
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    cursor: s-resize;
+}
+
+.box-resize-handle.w {
+    left: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: w-resize;
+}
+
+.box-resize-handle.e {
+    right: -5px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: e-resize;
+}
+
+/* ── Drop Zone ──────────────────────────────────────────── */
+.box-dropzone {
+    width: 100%;
+    height: 100%;
+    min-height: inherit;
+    box-sizing: border-box;
+    position: relative;
+}
+
+.box-dropzone.layout-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.box-dropzone.layout-free {
+    position: relative;
+}
+
+/* Drag-over highlight */
+.box-dropzone.drag-over {
+    outline: 2px dashed #43a047 !important;
+    outline-offset: 3px;
+    background: rgba(67, 160, 71, 0.04) !important;
+}
+
+/* ── Empty box placeholder ──────────────────────────────── */
+.box-dropzone:empty::after {
+    content: 'Drop elements here';
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    min-height: 60px;
+    color: #aaa;
+    font-size: 11px;
+    font-style: italic;
+    pointer-events: none;
+    border: 1.5px dashed #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+/* ── Preview mode – hide resize/toolbar ── */
+.previewing .box-toolbar,
+.previewing .box-resize-handle {
+    display: none !important;
+}
+
+.previewing .box-section-wrapper.selected>.box-dropzone {
+    outline: none !important;
+}
+
+/* ── Box Properties Panel Sidebar ───────────────────────── */
+.box-props-panel {
+    width: 260px;
+    background: #ffffff;
+    border-left: 1px solid #e5e7eb;
+    overflow-y: auto;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.06);
+}
+
+.box-props-header {
+    padding: 12px 16px;
+    background: #9ea700;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.box-props-close {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+}
+
+.box-props-close:hover {
+    color: white;
+}
+
+.box-props-body {
+    padding: 16px;
+    flex: 1;
+}
+
+.box-props-section {
+    margin-bottom: 16px;
+}
+
+.box-props-section-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.box-props-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.box-props-row label {
+    font-size: 11px;
+    color: #374151;
+    min-width: 70px;
+    flex-shrink: 0;
+}
+
+.box-props-row input,
+.box-props-row select {
+    flex: 1;
+    font-size: 12px;
+    padding: 3px 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    color: #111;
+    background: #fff;
+}
+
+.box-props-row input:focus,
+.box-props-row select:focus {
+    outline: none;
+    border-color: #9ea700;
+    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.15);
+}
+
+.box-layout-toggle {
+    display: flex;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    overflow: hidden;
+    flex: 1;
+}
+
+.box-layout-toggle button {
+    flex: 1;
+    border: none;
+    background: #f9fafb;
+    color: #374151;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 0;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.box-layout-toggle button.active {
+    background: #9ea700;
+    color: white;
+}
+
+.box-props-delete-btn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 7px;
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.box-props-delete-btn:hover {
+    background: #fca5a5;
+    color: #7f1d1d;
+}
+
+/* ── Legacy box-wrapper compat ──────────────────────────── */
 .box-wrapper {
     position: relative;
 }
