@@ -291,7 +291,7 @@ class DashboardSheet(models.Model):
             is_graph_before_now_kpi = rec.type != "kpi" and vals.get("type") == "kpi"
             is_kpi_before_now_graph = rec.type == "kpi" and vals.get("type") != "kpi"
             rec.write(vals)
-
+            
             configs = [c["id"] for c in data.get("configs", [])]
             sheet_option_ids = rec.dashboard_sheet_option_ids.filtered(
                 lambda x: x.dashboard_config_id.id in configs

@@ -53,7 +53,9 @@
         'data/theme/dashboard_theme_purple_passion.xml',
         'data/theme/dashboard_theme_shine.xml',
         'data/sheet/dashboard_line_sheet_data.xml',
+        'wizard/import_xlsx_wizard_views.xml',
         'views/dashboard_config_views.xml',
+        'views/custom_imported_table_views.xml',
         'views/calculation_preset_views.xml',
         'views/dashboard_sheet.xml',
         'views/cyllo_dashboard_templates.xml',
@@ -62,7 +64,7 @@
     'uninstall_hook': 'cyllo_d_uninstall_hook',
     'post_init_hook': 'cyllo_d_post_init_hook',
     "external_dependencies": {
-        'python': ['openai', 'tiktoken']
+        'python': ['openai', 'tiktoken', 'openpyxl']
     },
     'assets': {
         'web.assets_backend': [
@@ -105,6 +107,8 @@
             'cyllo_analytics/static/src/js/fields/*',
             'cyllo_analytics/static/src/js/presets/preset_apply_dialog.js',
             'cyllo_analytics/static/src/xml/presets/preset_apply_dialog.xml',
+            'cyllo_analytics/static/src/js/imported_table_list_view.js',
+            'cyllo_analytics/static/src/xml/imported_table_list_view.xml',
             'cyllo_analytics/static/src/tests/tours/dashboard_onboarding.js',
         ],
         "web.qunit_suite_tests": [

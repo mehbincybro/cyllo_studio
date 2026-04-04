@@ -8,7 +8,6 @@
             <field name="variables">[{"name": "current"}, {"name": "previous"}]</field>
             <field name="calculation_type">aggregate</field>
             <field name="category">Common Formulas</field>
-            <field name="is_system" eval="True"/>
         </record>
 
         <record id="preset_profit_margin_percentage" model="calculation.preset">
@@ -18,7 +17,6 @@
             <field name="variables">[{"name": "unit_price"}, {"name": "product.cost"}]</field>
             <field name="calculation_type">row</field>
             <field name="category">Common Formulas</field>
-            <field name="is_system" eval="True"/>
         </record>
     </data>
 </odoo>

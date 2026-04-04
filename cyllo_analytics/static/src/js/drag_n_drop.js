@@ -149,24 +149,26 @@ export class DropZone extends Component {
         // Handle relational field drop (Many2one)
         if (field_type === 'many2one' && relation) {
             const item = document.querySelector('.dragging');
-            const targetType = this.state.type === 'both' ? type : this.state.type;
-
+            // 1. Update the Zone's type and limit first
+            var is_core = Object.keys(this.types).includes(this.state.type) || this.state.type == "both";
             if (this.state.type == "both" && this.props.axis) {
                 const axis = {
                     "dimension": this.props.axis,
                     "measure": this.props.axis == 'x' ? 'y' : 'x',
-                }
-                const data = axis[type]
-                this.env.bus.trigger("CY:UPDATE_QUERY", { type: 'dimension_axis', data })
+                };
+                const data = axis[type];
+                this.env.bus.trigger("CY:UPDATE_QUERY", { type: 'dimension_axis', data });
             }
 
-            const is_core = Object.keys(this.types).includes(this.state.type) || this.state.type == "both"
             if (is_core) {
-                const category = this.props.category
-                this.changeType(category, type)
-                this.env.bus.trigger("CY:DROPZONE_CHANGE_TYPE", { category, type: this.types[type] })
+                const category = this.props.category;
+                this.changeType(category, type);
+                this.env.bus.trigger("CY:DROPZONE_CHANGE_TYPE", { category, type: this.types[type] });
             }
 
+            // 2. Validate against types and strict limits BEFORE proceeding
+            if ((type == this.state.type || !is_core) && this.state.children.length < this.state.limit) {
+                const targetType = this.state.type === 'both' ? type : this.state.type;
             this.env.bus.trigger("CY:RELATIONAL_FIELD_DROPPED", {
                 type: targetType,
                 axis: this.props.axis || false,
@@ -177,9 +179,11 @@ export class DropZone extends Component {
                     field_type: field_type,
                 }
             });
+            }
             this.ref.el.classList.remove('can-drop');
             return;
         }
+
         // 1. Handle axis/dimension logic (keep same)
         if (is_json && type) {
             if (this.state.type == "both" && this.props.axis) {

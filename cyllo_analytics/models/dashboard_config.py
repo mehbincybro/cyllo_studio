@@ -233,11 +233,15 @@ class DashboardConfig(models.Model):
                             # Reconstruct with ir.rule
                             after = f"{before_where} {join_clause} WHERE ({where_clause}) AND {after_where}" if where_clause else f"{before_where} {join_clause} WHERE {after_where}"
                     else:
-                        # No WHERE clause - add one
+                        # No WHERE clause - add one if ir.rules exist
+                        if where_clause:
+                            replacement = rf'\1{join_clause} WHERE {where_clause} \2'
+                        else:
+                            replacement = rf'\1{join_clause} \2'
                         # Find position after FROM clause(s)
                         after = re.sub(
                             r'(FROM\b[\s\S]*?)(\bORDER BY\b|\bGROUP BY\b|\bLIMIT\b|$)',
-                            rf'\1{join_clause} WHERE {where_clause} \2',
+                            replacement,
                             after,
                             count=1,
                             flags=re.IGNORECASE,
@@ -262,11 +266,11 @@ class DashboardConfig(models.Model):
         to_create = []
         for val in vals["children"]:
             attributes = {
-                    "x": val["x"],
-                    "y": val["y"],
+                "x": val["x"],
+                "y": val["y"],
                 "graph_height": val.get("h", 1),
                 "graph_width": val.get("w", 1),
-                }
+            }
             sheet_option = options_map.get(val["id"])
             if sheet_option:
                 sheet_option.write({"attributes": attributes})
@@ -275,7 +279,7 @@ class DashboardConfig(models.Model):
                     "dashboard_sheet_id": val["id"],
                     "dashboard_config_id": self.id,
                     "attributes": attributes
-            })
+                })
         if to_create:
             self.env['dashboard.sheet.option'].create(to_create)
 
@@ -494,10 +498,10 @@ class DashboardConfig(models.Model):
         """
         IrUiMenu = self.env['ir.ui.menu'].sudo()
         parent_id = menu_vals.get('parent_id')
-        
+
         # Create the new menu initially
         new_menu = IrUiMenu.create(menu_vals)
-        
+
         # Fetch siblings
         siblings = IrUiMenu.search(
             [('parent_id', '=', parent_id), ('id', '!=', new_menu.id)],
@@ -518,5 +522,5 @@ class DashboardConfig(models.Model):
         # Resequence safely with gaps of 10
         for i, menu in enumerate(sibling_list):
             menu.sequence = (i + 1) * 10
-            
+
         return new_menu.id

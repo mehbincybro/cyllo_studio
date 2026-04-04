@@ -188,19 +188,14 @@ class CalculationPreset(models.Model):
     ], string='Calculation Type', default='aggregate', required=True)
     model_id = fields.Many2one('ir.model', string='Model Reference')
     category = fields.Char(string='Category', default='Common Formulas')
-    is_system = fields.Boolean(string='Is System', default=False)
     sheet_id = fields.Many2one('dashboard.sheet', string='Linked Sheet', ondelete='cascade')
     active = fields.Boolean(default=True)
 
     def unlink(self):
-        if any(rec.is_system for rec in self):
-            raise UserError('System-defined presets cannot be deleted.')
         return super(CalculationPreset, self).unlink()
 
     def copy(self, default=None):
         default = dict(default or {})
-        if 'is_system' not in default:
-            default['is_system'] = False
         return super(CalculationPreset, self).copy(default)
 
     # -----------------------------------------------------------------------
