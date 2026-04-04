@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -32,11 +32,11 @@ class MrpScheduleMps(models.Model):
     # -------------------------------------------------------------------------
     # FIELDS
     # -------------------------------------------------------------------------
-    is_mps = fields.Boolean(string='Master Production Scheduler')
+    is_mps = fields.Boolean(string='Master Production Scheduler', default=False)
 
     mps_default_timerange = fields.Selection(
         [('Yearly', 'year'), ('Monthly', 'month'), ('weekly', 'week'), ('Daily', 'days')],
-        string='Default Time Range'
+        string='Default Time Range', default='Month',
     )
 
     product_id = fields.Many2one('product.product', string='Product')
@@ -111,7 +111,7 @@ class MrpScheduleMps(models.Model):
                 "target_qty": schedule.forcast_target_quantity,
                 "replenishment_mode": schedule.replenishment_mode,
                 "forecasted_qty": product.virtual_available or 0,
-                "outgoing_qty": product.outgoing_qty or 0,  # Added to fetch confirmed sales orders
+                "outgoing_qty": product.outgoing_qty or 0,
                 "bom_components": bom_components,
                 "saved_demand": self._safe_json_load(schedule.saved_demand),
                 "saved_replenishment": self._safe_json_load(schedule.saved_replenishment),
