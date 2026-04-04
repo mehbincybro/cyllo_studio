@@ -19,7 +19,10 @@
                     <label for="quantity"/>
 
                     <div class="o_row">
-                        <field name="quantity" class="oe_inline"/>
+                        <field name="quantity" class="oe_inline"
+                               decoration-danger="quantity &gt; needed_quantity"
+                               decoration-warning="quantity &lt; needed_quantity"
+                        />
 
                         <span invisible="not product_id"
                               class="mx-2 fw-bold text-muted"

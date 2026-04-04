@@ -28,6 +28,7 @@
     'data': [
         'security/ir.model.access.csv',
         'views/cyllo_shopfloor_menu.xml',
+        'views/mrp_production_views.xml',
         'wizards/mrp_add_component_wizard_views.xml',
         'wizards/mrp_scrap_component_wizard_views.xml',
         'wizards/mrp_reroute_wizard_views.xml',

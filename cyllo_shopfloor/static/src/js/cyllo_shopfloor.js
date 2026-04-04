@@ -1,14 +1,14 @@
 /** @odoo-module **/
-
-import { registry } from "@web/core/registry";
-import { useService } from "@web/core/utils/hooks";
-import { Component, useState, onWillStart, onWillDestroy } from "@odoo/owl";
+import {registry} from "@web/core/registry";
+import {useService} from "@web/core/utils/hooks";
+import {Component, useState, onWillStart, onWillDestroy} from "@odoo/owl";
 
 class ShopFloorScreen extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.busService = this.env.services.bus_service;
+        this.userService = useService("user");
 
         this.state = useState({
             workcenters: [],
@@ -16,11 +16,14 @@ class ShopFloorScreen extends Component {
             selectedProduction: null,
             groupedWorkOrders: [],
             currentFilter: "ready",
+            employees: [],
+            selectedEmployee: null,
         });
 
         this.lastSyncTime = Date.now();
 
         onWillStart(async () => {
+            await this.fetchEmployees();
             await this.fetchWorkcenters();
             this.busService.addChannel("shopfloor_channel");
             this._onBusNotification = this._onBusNotification.bind(this);
@@ -46,8 +49,8 @@ class ShopFloorScreen extends Component {
         });
     }
 
-    _onBusNotification({ detail: notifications }) {
-        for (const { type, payload } of notifications) {
+    _onBusNotification({detail: notifications}) {
+        for (const {type, payload} of notifications) {
             if (type === "workorder_updated") {
                 this.fetchWorkcenters();
                 if (this.state.selectedWorkcenter && payload.workcenter_id === this.state.selectedWorkcenter.id) {
@@ -57,12 +60,45 @@ class ShopFloorScreen extends Component {
         }
     }
 
+    async fetchEmployees() {
+        this.state.employees = await this.orm.searchRead(
+            "hr.employee",
+            [],
+            ["id", "name", "user_id"]
+        );
+    }
+
+    selectEmployee(employee) {
+        this.state.selectedEmployee = employee;
+    }
+
+    getShopfloorContext() {
+        const ctx = {from_shopfloor: true};
+        if (this.state.selectedEmployee) {
+            ctx.employee_id = this.state.selectedEmployee.id;
+        }
+        return ctx;
+    }
+
     async fetchWorkcenters() {
-        this.state.workcenters = await this.orm.searchRead(
+        const fetchedWorkcenters = await this.orm.searchRead(
             "mrp.workcenter",
             [],
-            ["id", "name", "code", "working_state"]
+            ["id", "name", "code", "working_state", "oee", "blocked_time"]
         );
+
+        const metrics = await this.orm.call("mrp.workcenter", "get_shopfloor_dashboard_metrics", []);
+
+        for (const wc of fetchedWorkcenters) {
+            wc.metrics = metrics[wc.id] || {
+                in_progress: 0,
+                completed: 0,
+                canceled: 0,
+                total: 0,
+            };
+        }
+
+        this.state.workcenters = fetchedWorkcenters;
 
         if (this.state.selectedWorkcenter) {
             const updatedWorkcenter = this.state.workcenters.find(
@@ -100,11 +136,40 @@ class ShopFloorScreen extends Component {
             domain,
             [
                 "id", "name", "production_id", "state", "duration", "is_user_working",
-                "working_state", "product_id", "qty_production", "production_state"
+                "working_state", "product_id", "qty_production", "production_state",
+                "shopfloor_blocking_wo_id", "time_ids"
             ]
         );
 
         this.lastSyncTime = Date.now();
+
+        let allTimeIds = [];
+        rawWorkOrders.forEach(wo => {
+            if (wo.time_ids) allTimeIds.push(...wo.time_ids);
+        });
+
+        const activeTimers = {};
+        if (allTimeIds.length > 0) {
+            const timers = await this.orm.searchRead(
+                "mrp.workcenter.productivity",
+                [["id", "in", allTimeIds], ["date_end", "=", false]],
+                ["workorder_id", "date_start"]
+            );
+
+            timers.forEach(t => {
+                if (t.date_start && t.workorder_id) {
+                    const dateStr = t.date_start.replace(" ", "T") + "Z";
+                    const startTime = new Date(dateStr).getTime();
+                    const elapsedMinutes = (Date.now() - startTime) / 60000;
+
+                    const woId = t.workorder_id[0];
+                    if (!activeTimers[woId]) activeTimers[woId] = 0;
+
+                    activeTimers[woId] += Math.max(0, elapsedMinutes);
+                }
+            });
+        }
+
         const grouped = {};
 
         for (const workOrder of rawWorkOrders) {
@@ -114,7 +179,9 @@ class ShopFloorScreen extends Component {
             const rawProductName = workOrder.product_id ? workOrder.product_id[1] : "Unknown Product";
             const cleanProductName = rawProductName.replace(/^\[.*?\]\s*/, "");
 
-            workOrder.base_duration = workOrder.duration || 0;
+            // Add the live elapsed time from active timers to the saved base duration
+            const liveElapsed = activeTimers[workOrder.id] || 0;
+            workOrder.base_duration = (workOrder.duration || 0) + liveElapsed;
             workOrder.display_duration = workOrder.base_duration;
 
             if (!grouped[productionId]) {
@@ -131,6 +198,39 @@ class ShopFloorScreen extends Component {
         }
 
         this.state.groupedWorkOrders = Object.values(grouped);
+
+        const productionIds = this.state.groupedWorkOrders.map(g => g.production_id).filter(id => id);
+
+        if (productionIds.length > 0) {
+            const missingData = await this.orm.call(
+                "mrp.production",
+                "get_shopfloor_missing_components",
+                [productionIds]
+            );
+
+            const moData = await this.orm.searchRead(
+                "mrp.production",
+                [["id", "in", productionIds]],
+                ["id", "employee_ids"]
+            );
+
+            for (const group of this.state.groupedWorkOrders) {
+                group.missingComponents = missingData[group.production_id] || [];
+
+                group.mo_employees = [];
+                const mo = moData.find(m => m.id === group.production_id);
+
+                if (mo && mo.employee_ids && Array.isArray(mo.employee_ids)) {
+                    for (const empId of mo.employee_ids) {
+                        const emp = this.state.employees.find(e => e.id === empId);
+                        group.mo_employees.push({
+                            id: empId,
+                            name: emp ? emp.name : "Operator"
+                        });
+                    }
+                }
+            }
+        }
     }
 
     selectProduction(productionId) {
@@ -155,7 +255,7 @@ class ShopFloorScreen extends Component {
     async blockWorkcenter(workcenterId, ev) {
         if (ev) ev.stopPropagation();
         this.action.doAction("mrp.act_mrp_block_workcenter_wo", {
-            additionalContext: { default_workcenter_id: workcenterId },
+            additionalContext: {default_workcenter_id: workcenterId},
             onClose: () => {
                 this.fetchWorkcenters();
             },
@@ -164,20 +264,44 @@ class ShopFloorScreen extends Component {
 
     async unblockWorkcenter(workcenterId, ev) {
         if (ev) ev.stopPropagation();
-        await this.orm.call("mrp.workcenter", "unblock", [workcenterId]);
+        await this.orm.call("mrp.workcenter", "unblock", [workcenterId], {
+            context: {from_shopfloor: true}
+        });
         await this.fetchWorkcenters();
     }
 
     async startWorkOrder(workOrderId) {
-        await this.orm.call("mrp.workorder", "button_start", [[workOrderId]]);
+        if (!this.state.selectedEmployee) {
+            this.state.selectedEmployee = this.state.employees.find(
+                (e) => e.user_id && e.user_id[0] === this.userService.userId
+            );
+
+            if (!this.state.selectedEmployee) {
+                this.env.services.notification.add("Your user account has no linked employee.", {type: "warning"});
+                return;
+            }
+        }
+
+        await this.orm.call("mrp.workorder", "button_start", [[workOrderId]], {
+            context: this.getShopfloorContext()
+        });
     }
 
     async pauseWorkOrder(workOrderId) {
-        await this.orm.call("mrp.workorder", "button_pending", [[workOrderId]]);
+        await this.orm.call("mrp.workorder", "button_pending", [[workOrderId]], {
+            context: this.getShopfloorContext()
+        });
     }
 
     async finishWorkOrder(workOrderId) {
-        const action = await this.orm.call("mrp.workorder", "button_finish", [[workOrderId]]);
+        if (!this.state.selectedEmployee) {
+            this.env.services.notification.add("Please select an operator first.", {type: "warning"});
+            return;
+        }
+
+        const action = await this.orm.call("mrp.workorder", "button_finish", [[workOrderId]], {
+            context: this.getShopfloorContext()
+        });
 
         if (action && action.type === "trigger_close_production") {
             await this.closeProduction(action.mo_id);
@@ -196,6 +320,35 @@ class ShopFloorScreen extends Component {
 
         this.loadWorkOrders();
         this.fetchWorkcenters();
+    }
+
+    async openBlockingWorkOrder(workOrderId, ev) {
+        if (ev) ev.stopPropagation();
+        if (!workOrderId) return;
+
+        const targetData = await this.orm.read(
+            "mrp.workorder",
+            [workOrderId],
+            ["workcenter_id", "production_id"]
+        );
+
+        if (targetData.length > 0) {
+            const targetWcId = targetData[0].workcenter_id[0];
+            const targetMoId = targetData[0].production_id[0];
+
+            const targetWorkcenter = this.state.workcenters.find((wc) => wc.id === targetWcId);
+
+            if (targetWorkcenter) {
+                this.state.currentFilter = "ready";
+                await this.selectWorkcenter(targetWorkcenter);
+                this.selectProduction(targetMoId);
+            } else {
+                this.env.services.notification.add(
+                    "Cannot navigate: target workcenter not found.",
+                    {type: "warning"}
+                );
+            }
+        }
     }
 
     formatDuration(minutes) {
@@ -221,7 +374,7 @@ class ShopFloorScreen extends Component {
     async actionOpenProductCatalog(productionId) {
         if (!productionId) return;
         this.action.doAction("cyllo_shopfloor.action_mrp_add_component_wizard", {
-            additionalContext: { default_production_id: productionId },
+            additionalContext: {default_production_id: productionId},
             onClose: () => {
                 this.loadWorkOrders();
             },
@@ -231,7 +384,7 @@ class ShopFloorScreen extends Component {
     async actionScrapComponent(productionId) {
         if (!productionId) return;
         this.action.doAction("cyllo_shopfloor.action_mrp_scrap_component_wizard", {
-            additionalContext: { default_production_id: productionId },
+            additionalContext: {default_production_id: productionId},
             onClose: () => {
                 this.loadWorkOrders();
             },
