@@ -19,7 +19,12 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import mrp_workorder
-from . import mrp_production
-from . import mrp_workcenter
-from . import mrp_bom
+from odoo import fields, models
+
+class MrpBom(models.Model):
+    _inherit = 'mrp.bom'
+
+    is_automated = fields.Boolean(
+        string="Automated Operations",
+        help="If enabled, work orders will automatically finish when their allocated time ends."
+    )

@@ -19,7 +19,6 @@
 #   If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
 from odoo import models, fields, api
 
 
@@ -34,6 +33,7 @@ class MrpWorkorder(models.Model):
 
     @api.depends('state', 'blocked_by_workorder_ids.state')
     def _compute_shopfloor_blocking_wo_id(self):
+        """Get work order that is blocking the current WO if blocked """
         for wo in self:
             if wo.state == 'pending' and wo.blocked_by_workorder_ids:
                 blocking_wos = wo.blocked_by_workorder_ids.filtered(
@@ -44,6 +44,7 @@ class MrpWorkorder(models.Model):
                 wo.shopfloor_blocking_wo_id = False
 
     def _notify_shopfloor_view(self):
+        """For notifying the backend for state changes from shop floor"""
         for record in self:
             is_from_shopfloor = self.env.context.get('from_shopfloor', False)
             self.env['bus.bus']._sendone(
@@ -56,6 +57,7 @@ class MrpWorkorder(models.Model):
             )
 
     def button_start(self):
+        """Override of button_start for assigning operator for work order from shop floor"""
         res = super().button_start()
 
         employee_id = self.env.context.get('employee_id')
@@ -68,11 +70,21 @@ class MrpWorkorder(models.Model):
         return res
 
     def button_pending(self):
+        for wo in self:
+            if getattr(wo.production_id, 'is_automated', False):
+                active_timers = wo.time_ids.filtered(lambda t: not t.date_end)
+                if active_timers:
+                    active_timers.write({'date_end': fields.Datetime.now()})
+
         res = super().button_pending()
         self._notify_shopfloor_view()
         return res
 
     def button_finish(self):
+        """
+        Extends workorder finish to notify shop floor and auto-close the MO when all operations are completed,
+        especially when triggered from shop floor.
+        """
         res = super().button_finish()
 
         for workorder in self:
@@ -107,6 +119,7 @@ class MrpWorkorder(models.Model):
         return res
 
     def action_show_shopfloor_worksheet(self):
+        """For showing worksheet view on shop floor."""
         self.ensure_one()
         worksheet_view_id = self.env.ref('cyllo_shopfloor.view_shopfloor_worksheet_popup').id
         return {
@@ -118,54 +131,62 @@ class MrpWorkorder(models.Model):
             'views': [(worksheet_view_id, 'form')],
             'target': 'new',
         }
+
+    def _compute_working_users(self):
+        """
+        Override of _compute_working_users for setting working users to WO started by cron job.
+        so it will update the ui
+        """
+        super()._compute_working_users()
+
+        for wo in self:
+            if getattr(wo.production_id, 'is_automated', False) and wo.state == 'progress':
+                has_active_timer = any(not t.date_end for t in wo.time_ids)
+                wo.is_user_working = has_active_timer
+
     @api.model
     def _cron_finish_automated_workorders(self):
         """
         Evaluates running work orders. If an order belongs to an automated MO
         and has exceeded its expected duration, it is marked as finished.
-        It then automatically starts the next available work order if one exists.
         """
         running_wos = self.search([
-            ('state', 'in', ['progress','ready']),
+            ('state', 'in', ['progress', 'ready']),
             ('production_id.is_automated', '=', True),
             ('duration_expected', '>', 0)
         ])
 
-        print(running_wos)
-
         now = fields.Datetime.now()
 
         for wo in running_wos:
-            print(wo.name)
-            if wo.state == 'ready':
+            if wo.state == 'ready' and wo.production_id.date_start < now:
                 wo.button_start()
-            else:
-                print(wo.name)
-                # 1. Manually calculate the exact elapsed time in minutes
-                current_duration = 0.0
+
+                self.env['bus.bus']._sendone(
+                    'shopfloor_channel',
+                    'workorder_updated',
+                    {'workcenter_id': wo.workcenter_id.id}
+                )
+                continue
+
+            if wo.state == 'progress':
+                real_duration = 0.0
+
                 for time_line in wo.time_ids:
                     if time_line.date_end:
-                        # Add fully completed time blocks (e.g., if it was paused previously)
-                        current_duration += time_line.duration
+                        real_duration += time_line.duration
                     elif time_line.date_start:
-                        # Calculate active running time: Now - Start Time
                         elapsed = now - time_line.date_start
-                        current_duration += elapsed.total_seconds() / 60.0
-                    print(current_duration)
+                        real_duration += elapsed.total_seconds() / 60.0
 
-                # 2. Compare the real-time duration against the expected duration
-                if current_duration >= wo.duration_expected:
+                if real_duration >= wo.duration_expected:
                     wo.button_finish()
 
                     mo = wo.production_id
-                    if mo.state not in ('done', 'cancel'):
-                        incomplete_wos = mo.workorder_ids.filtered(
-                            lambda w: w.state not in ('done', 'cancel')
-                        )
-
-                        if not incomplete_wos:
-                            mo.action_shopfloor_close_mo()
-                        else:
-                            next_wo = incomplete_wos.filtered(lambda w: w.state == 'ready')
-                            if next_wo:
-                                next_wo[0].button_start()
+                    if mo.state == 'to_close':
+                        mo.move_raw_ids.write({'picked': True})
+                        if mo.product_id.tracking in ['lot', 'serial'] and not mo.lot_producing_id:
+                            mo.action_generate_serial()
+                        mo.button_mark_done()
+                    elif mo.state == 'progress':
+                        mo.workorder_ids.filtered(lambda w: w.state == 'ready')[:1].button_start()

@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-
     <t t-name="cyllo_shopfloor.ShopfloorTemplate" owl="1">
         <div class="o_shopfloor_screen h-100 w-100 d-flex flex-column bg-100">
-
             <div class="d-flex justify-content-between align-items-center p-3 bg-white border-bottom shadow-sm">
                 <h1 class="m-0 fs-3 text-dark">
                     <t t-if="!state.selectedWorkcenter">
@@ -21,19 +19,18 @@
                         <button t-if="activeGroup?.production_state == 'to_close'"
                                 class="btn btn-success fw-bold ms-4 shadow-sm"
                                 t-on-click="() => this.closeProduction(activeGroup.production_id)">
-                            <i class="fa fa-check-circle me-1"></i>
+                            <i class="fa fa-check-circle me-1"/>
                             Close Production
                         </button>
                     </t>
                 </h1>
 
                 <div class="d-flex align-items-center">
-
                     <div class="dropdown me-3 shadow-sm rounded">
                         <button class="btn btn-outline-secondary dropdown-toggle fw-bold d-flex align-items-center bg-white"
                                 type="button" data-bs-toggle="dropdown" aria-expanded="false"
                                 style="font-size: 0.85rem; border-color: #dee2e6;">
-                            <i class="fa fa-user-circle me-2 fs-5 text-primary"></i>
+                            <i class="fa fa-user-circle me-2 fs-5 text-primary"/>
                             <t t-if="state.selectedEmployee">
                                 <span class="text-dark"><t t-esc="state.selectedEmployee.name"/></span>
                             </t>
@@ -46,7 +43,7 @@
                             <li>
                                 <button class="dropdown-item py-2 fw-bold text-danger"
                                         t-on-click="() => this.selectEmployee(null)">
-                                    <i class="fa fa-user-times me-2"></i>
+                                    <i class="fa fa-user-times me-2"/>
                                     Clear Operator
                                 </button>
                             </li>
@@ -55,7 +52,7 @@
                                 <li>
                                     <button class="dropdown-item py-2 fw-bold"
                                             t-on-click="() => this.selectEmployee(employee)">
-                                        <i class="fa fa-user text-muted me-2"></i>
+                                        <i class="fa fa-user text-muted me-2"/>
                                         <t t-esc="employee.name"/>
                                     </button>
                                 </li>
@@ -66,7 +63,7 @@
                     <div t-if="state.selectedWorkcenter" class="me-3 d-flex align-items-center shadow-sm rounded">
                         <span class="bg-primary text-white px-2 py-1 rounded-start fw-bold d-flex align-items-center"
                               style="font-size: 0.8rem;">
-                            <i class="fa fa-filter me-1"></i>
+                            <i class="fa fa-filter me-1"/>
                             Filter
                         </span>
                         <select class="form-select form-select-sm border-primary fw-bold text-dark shadow-none"
@@ -81,12 +78,12 @@
                     <button t-if="state.selectedProduction"
                             class="btn btn-sm btn-outline-secondary me-2 fw-bold shadow-sm"
                             t-on-click="clearProductionSelection">
-                        <i class="fa fa-arrow-left me-1"></i>
+                        <i class="fa fa-arrow-left me-1"/>
                         Back
                     </button>
                     <button t-if="state.selectedWorkcenter" class="btn btn-sm btn-secondary fw-bold shadow-sm"
                             t-on-click="clearSelection">
-                        <i class="fa fa-home me-1"></i>
+                        <i class="fa fa-home me-1"/>
                         <t t-if="state.selectedProduction">Home</t>
                         <t t-else="">Workcenters</t>
                     </button>
@@ -95,94 +92,89 @@
 
             <div class="flex-grow-1 overflow-auto p-4">
                 <t t-if="!state.selectedWorkcenter">
-    <div t-if="state.workcenters.length > 0" class="row g-3">
-        <t t-foreach="state.workcenters" t-as="workcenter" t-key="workcenter.id">
-            <div class="col-md-4 col-lg-3 col-xl-3">
-                <div t-attf-class="card h-100 shadow-sm border #{workcenter.working_state == 'blocked' ? 'border-danger border-2 bg-danger bg-opacity-10' : 'border-0'}"
-                     t-on-click="() => this.selectWorkcenter(workcenter)"
-                     style="cursor: pointer; transition: transform 0.2s; hover:transform: translateY(-2px);">
+                    <div t-if="state.workcenters.length > 0" class="row g-3">
+                        <t t-foreach="state.workcenters" t-as="workcenter" t-key="workcenter.id">
+                            <div class="col-md-4 col-lg-3 col-xl-3">
+                                <div t-attf-class="card h-100 shadow-sm border #{workcenter.working_state == 'blocked' ? 'border-danger border-2 bg-danger bg-opacity-10' : 'border-0'}"
+                                     t-on-click="() => this.selectWorkcenter(workcenter)"
+                                     style="cursor: pointer; transition: transform 0.2s; hover:transform: translateY(-2px);">
+                                    <div class="card-body d-flex flex-column p-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-3">
+                                            <div class="d-flex flex-column pe-2 overflow-hidden">
+                                                <h5 class="card-title text-primary fw-bold mb-1 text-truncate">
+                                                    <t t-esc="workcenter.name"/>
+                                                </h5>
+                                                <div class="fw-bold d-flex align-items-center flex-wrap"
+                                                     style="font-size: 0.8rem;">
+                                                    <div class="me-3">
+                                                        <span class="text-muted me-1">OEE:</span>
+                                                        <t t-set="oee_val" t-value="Math.round(workcenter.oee || 0)"/>
+                                                        <span t-attf-class="#{oee_val >= 80 ? 'text-success' : (oee_val >= 50 ? 'text-warning' : 'text-danger')}">
+                                                            <t t-esc="oee_val"/>%
+                                                        </span>
+                                                    </div>
+                                                    <div title="Lifetime Downtime">
+                                                        <span class="text-muted me-1"><i class="fa fa-wrench"/></span>
+                                                        <span class="text-danger">
+                                                            <t t-esc="this.formatDuration(workcenter.blocked_time * 60)"/>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="text-end flex-shrink-0 ms-2">
+                                                <button t-if="workcenter.working_state == 'blocked'"
+                                                        class="btn btn-sm btn-danger fw-bold shadow-sm py-1 px-2"
+                                                        t-on-click="(ev) => this.unblockWorkcenter(workcenter.id, ev)"
+                                                        title="Unblock Workcenter">
+                                                    <i class="fa fa-unlock"/>
+                                                </button>
+                                                <button t-else=""
+                                                        class="btn btn-sm btn-outline-danger fw-bold border-0 py-1 px-2"
+                                                        t-on-click="(ev) => this.blockWorkcenter(workcenter.id, ev)"
+                                                        title="Block Workcenter">
+                                                    <i class="fa fa-lock"/>
+                                                </button>
+                                            </div>
+                                        </div>
 
-                    <div class="card-body d-flex flex-column p-3">
+                                        <div class="row text-center g-2 mt-auto">
+                                            <div class="col-6">
+                                                <div class="p-2 rounded bg-info bg-opacity-10 border border-info border-opacity-25 h-100 d-flex flex-column justify-content-center">
+                                                    <div class="fw-bold text-info fs-4" style="line-height: 1;"><t t-esc="workcenter.metrics.in_progress"/></div>
+                                                    <div class="text-muted fw-semibold mt-1"
+                                                         style="font-size: 0.65rem; text-transform: uppercase;">Active</div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="p-2 rounded bg-success bg-opacity-10 border border-success border-opacity-25 h-100 d-flex flex-column justify-content-center">
+                                                    <div class="fw-bold text-success fs-4" style="line-height: 1;"><t t-esc="workcenter.metrics.completed"/></div>
+                                                    <div class="text-muted fw-semibold mt-1"
+                                                         style="font-size: 0.65rem; text-transform: uppercase;">Done</div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                        <div class="d-flex justify-content-between align-items-start mb-3">
-                            <div class="d-flex flex-column pe-2 overflow-hidden">
-        <h5 class="card-title text-primary fw-bold mb-1 text-truncate">
-            <t t-esc="workcenter.name"/>
-        </h5>
-
-                                <div class="fw-bold d-flex align-items-center flex-wrap" style="font-size: 0.8rem;">
-            <div class="me-3">
-                <span class="text-muted me-1">OEE:</span>
-                <t t-set="oee_val" t-value="Math.round(workcenter.oee || 0)"/>
-                <span t-attf-class="#{oee_val >= 80 ? 'text-success' : (oee_val >= 50 ? 'text-warning' : 'text-danger')}">
-                    <t t-esc="oee_val"/>%
-                </span>
-            </div>
-                                    <div title="Lifetime Downtime">
-                <span class="text-muted me-1"><i class="fa fa-wrench"/></span>
-                                        <span class="text-danger">
-                    <t t-esc="this.formatDuration(workcenter.blocked_time * 60)"/>
-                </span>
-            </div>
-        </div>
-    </div>
-
-                            <div class="text-end flex-shrink-0 ms-2">
-        <button t-if="workcenter.working_state == 'blocked'"
-                class="btn btn-sm btn-danger fw-bold shadow-sm py-1 px-2"
-                t-on-click="(ev) => this.unblockWorkcenter(workcenter.id, ev)"
-                title="Unblock Workcenter">
-            <i class="fa fa-unlock"></i>
-        </button>
-                                <button t-else=""
-                                        class="btn btn-sm btn-outline-danger fw-bold border-0 py-1 px-2"
-                                        t-on-click="(ev) => this.blockWorkcenter(workcenter.id, ev)"
-                                        title="Block Workcenter">
-            <i class="fa fa-lock"></i>
-        </button>
-    </div>
-</div>
-
-                        <div class="row text-center g-2 mt-auto">
-                            <div class="col-6">
-                                <div class="p-2 rounded bg-info bg-opacity-10 border border-info border-opacity-25 h-100 d-flex flex-column justify-content-center">
-                                    <div class="fw-bold text-info fs-4" style="line-height: 1;"><t t-esc="workcenter.metrics.in_progress"/></div>
-                                    <div class="text-muted fw-semibold mt-1"
-                                         style="font-size: 0.65rem; text-transform: uppercase;">Active</div>
+                                        <t t-set="total_active"
+                                           t-value="workcenter.metrics.in_progress + workcenter.metrics.completed"/>
+                                        <t t-if="total_active > 0">
+                                            <div class="progress mt-3" style="height: 6px;">
+                                                <div class="progress-bar bg-success"
+                                                     role="progressbar"
+                                                     t-attf-style="width: #{(workcenter.metrics.completed / total_active) * 100}%;"
+                                                     t-att-aria-valuenow="workcenter.metrics.completed"
+                                                     aria-valuemin="0"
+                                                     t-att-aria-valuemax="total_active"/>
+                                            </div>
+                                        </t>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="p-2 rounded bg-success bg-opacity-10 border border-success border-opacity-25 h-100 d-flex flex-column justify-content-center">
-                                    <div class="fw-bold text-success fs-4" style="line-height: 1;"><t t-esc="workcenter.metrics.completed"/></div>
-                                    <div class="text-muted fw-semibold mt-1"
-                                         style="font-size: 0.65rem; text-transform: uppercase;">Done</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <t t-set="total_active"
-                           t-value="workcenter.metrics.in_progress + workcenter.metrics.completed"/>
-                        <t t-if="total_active > 0">
-                            <div class="progress mt-3" style="height: 6px;">
-                                <div class="progress-bar bg-success"
-                                     role="progressbar"
-                                     t-attf-style="width: #{(workcenter.metrics.completed / total_active) * 100}%;"
-                                     t-att-aria-valuenow="workcenter.metrics.completed"
-                                     aria-valuemin="0"
-                                     t-att-aria-valuemax="total_active"></div>
                             </div>
                         </t>
-
                     </div>
-                </div>
-            </div>
-        </t>
-    </div>
-</t>
+                </t>
 
                 <t t-else="">
                     <div t-if="state.groupedWorkOrders.length > 0" class="w-100">
-
                         <t t-if="!state.selectedProduction">
                             <div class="row g-3">
                                 <t t-foreach="state.groupedWorkOrders" t-as="group" t-key="group.production_id">
@@ -190,15 +182,12 @@
                                         <div class="card h-100 border shadow-sm d-flex flex-column"
                                              style="cursor: pointer;"
                                              t-on-click="() => this.selectProduction(group.production_id)">
-
                                             <div class="card-body p-3 bg-white pb-2">
-
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                                     <div class="d-flex flex-column overflow-hidden pe-2">
                                                         <h6 class="fw-bold text-dark mb-1 text-truncate">
                                                             <t t-esc="group.production_name"/>
                                                         </h6>
-
                                                         <div class="d-flex align-items-center mt-1"
                                                              t-if="group.mo_employees and group.mo_employees.length > 0">
                                                             <t t-foreach="group.mo_employees.slice(0, 3)"
@@ -209,7 +198,6 @@
                                                                      t-att-title="operator.name"
                                                                      alt="Operator"/>
                                                             </t>
-
                                                             <t t-if="group.mo_employees.length > 3">
                                                                 <span class="badge rounded-circle bg-secondary text-white shadow-sm border border-1 border-white d-flex align-items-center justify-content-center"
                                                                       style="width: 22px; height: 22px; font-size: 0.6rem; margin-left: 2px; z-index: 0; padding: 0;">
@@ -218,21 +206,18 @@
                                                             </t>
                                                         </div>
                                                     </div>
-
                                                     <span class="badge rounded-pill border px-2 py-1 flex-shrink-0"
                                                           style="font-size: 0.75rem;"
                                                           t-attf-class="#{['confirmed', 'progress'].includes(group.production_state || '') ? 'border-info text-info' : 'border-success text-success'}">
                                                         <t t-esc="group.production_state ? group.production_state.toUpperCase() : 'DRAFT'"/>
                                                     </span>
                                                 </div>
-
                                                 <div class="d-flex justify-content-between align-items-end mb-1">
                                                     <span class="text-truncate small text-muted pe-2"><t t-esc="group.product_name"/></span>
                                                     <span class="fw-bold text-dark small text-nowrap"><t t-esc="group.qty"/>
                                                         Unit(s)</span>
                                                 </div>
                                             </div>
-
                                             <div class="flex-grow-1 bg-light border-top">
                                                 <ul class="list-group list-group-flush">
                                                     <t t-foreach="group.workOrders" t-as="workOrder"
@@ -251,106 +236,94 @@
                                                 </ul>
                                             </div>
                                             <div class="card-footer bg-white p-3 border-top d-flex justify-content-between align-items-center">
-    <div style="min-width: 100px;">
-        <button t-if="group.production_state == 'to_close'"
-                class="btn btn-primary fw-bold shadow-sm px-3"
-                t-on-click.stop="() => this.closeProduction(group.production_id)">
-            <i class="fa fa-check me-1"></i>
-            Close
-        </button>
-    </div>
-
+                                                <div style="min-width: 100px;">
+                                                    <button t-if="group.production_state == 'to_close'"
+                                                            class="btn btn-primary fw-bold shadow-sm px-3"
+                                                            t-on-click.stop="() => this.closeProduction(group.production_id)">
+                                                        <i class="fa fa-check me-1"/>
+                                                        Close
+                                                    </button>
+                                                </div>
                                                 <div class="flex-grow-1 text-end mx-2 overflow-hidden"
                                                      t-if="group.missingComponents?.length > 0">
-        <button class="btn btn-sm btn-light border rounded-pill px-3 py-1 d-inline-block text-truncate w-100 shadow-sm"
-                style="font-size: 0.8rem; max-width: 260px; line-height: 1.5;"
-                t-att-title="group.missingComponents.map(c => c.needed_qty + ' ' + c.uom + ' ' + c.product_name).join('\n')"
-                t-on-click.stop="() => this.actionOpenProductCatalog(group.production_id)">
-
-            <i class="fa fa-exclamation-triangle text-warning opacity-75 me-1"></i>
-            <span class="text-muted me-1">Missing:</span>
-
-            <t t-set="first_comp" t-value="group.missingComponents[0]"/>
-            <span class="fw-bold text-dark"><t t-esc="first_comp.needed_qty"/></span>
-            <span class="text-dark ms-1"><t t-esc="first_comp.product_name"/></span>
-
-            <t t-if="group.missingComponents.length > 1">
-                <span class="badge border border-secondary text-secondary rounded-pill ms-1"
-                      style="font-size: 0.65rem; padding: 0.25em 0.5em;">
-                    +<t t-esc="group.missingComponents.length - 1"/>
-                </span>
-            </t>
-        </button>
-    </div>
-
-                                                <div class="flex-grow-1 mx-3" t-else=""></div>
-
+                                                    <button class="btn btn-sm btn-light border rounded-pill px-3 py-1 d-inline-block text-truncate w-100 shadow-sm"
+                                                            style="font-size: 0.8rem; max-width: 260px; line-height: 1.5;"
+                                                            t-att-title="group.missingComponents.map(c => c.needed_qty + ' ' + c.uom + ' ' + c.product_name).join('\n')"
+                                                            t-on-click.stop="() => this.actionOpenProductCatalog(group.production_id)">
+                                                        <i class="fa fa-exclamation-triangle text-warning opacity-75 me-1"/>
+                                                        <span class="text-muted me-1">Missing:</span>
+                                                        <t t-set="first_comp" t-value="group.missingComponents[0]"/>
+                                                        <span class="fw-bold text-dark"><t t-esc="first_comp.needed_qty"/></span>
+                                                        <span class="text-dark ms-1"><t t-esc="first_comp.product_name"/></span>
+                                                        <t t-if="group.missingComponents.length > 1">
+                                                            <span class="badge border border-secondary text-secondary rounded-pill ms-1"
+                                                                  style="font-size: 0.65rem; padding: 0.25em 0.5em;">
+                                                                +<t t-esc="group.missingComponents.length - 1"/>
+                                                            </span>
+                                                        </t>
+                                                    </button>
+                                                </div>
+                                                <div class="flex-grow-1 mx-3" t-else=""/>
                                                 <div class="dropdown flex-shrink-0" t-on-click.stop="">
-        <button class="btn btn-outline-secondary shadow-sm px-3 py-1"
-                type="button" data-bs-toggle="dropdown"
-                aria-expanded="false" title="Options">
-            <i class="fa fa-ellipsis-v fs-5"></i>
-        </button>
+                                                    <button class="btn btn-outline-secondary shadow-sm px-3 py-1"
+                                                            type="button" data-bs-toggle="dropdown"
+                                                            aria-expanded="false" title="Options">
+                                                        <i class="fa fa-ellipsis-v fs-5"/>
+                                                    </button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
                                                         <li>
                                                             <button class="dropdown-item py-2"
                                                                     t-on-click="() => this.actionOpenProduction(group.production_id)">
-                                                                <i class="fa fa-external-link-square me-2 text-primary"></i>
+                                                                <i class="fa fa-external-link-square me-2 text-primary"/>
                                                                 Open MO
                                                             </button>
                                                         </li>
                                                         <li t-if="!['done', 'cancel'].includes(group.production_state)">
                                                             <button class="dropdown-item py-2"
                                                                     t-on-click="() => this.actionOpenProductCatalog(group.production_id)">
-                                                                <i class="fa fa-plus me-2 text-success"></i>
+                                                                <i class="fa fa-plus me-2 text-success"/>
                                                                 Add Component
                                                             </button>
                                                         </li>
                                                         <li t-if="!['done', 'cancel'].includes(group.production_state)">
                                                             <button class="dropdown-item py-2 text-danger"
                                                                     t-on-click="() => this.actionScrapComponent(group.production_id)">
-                                                                <i class="fa fa-trash me-2 text-danger"></i>
+                                                                <i class="fa fa-trash me-2 text-danger"/>
                                                                 Scrap Component
                                                             </button>
                                                         </li>
                                                         <li t-if="!['done', 'cancel'].includes(group.production_state)">
                                                             <button class="dropdown-item py-2"
                                                                     t-on-click="() => this.actionAddWorkOrder(group.production_id)">
-                                                                <i class="fa fa-plus-circle me-2 text-info"></i>
+                                                                <i class="fa fa-plus-circle me-2 text-info"/>
                                                                 Add Work Order
                                                             </button>
                                                         </li>
                                                         <li t-if="!['done', 'cancel'].includes(group.production_state)">
                                                             <button class="dropdown-item py-2"
                                                                     t-on-click="() => this.actionRerouteWorkOrder(group.production_id)">
-                                                                <i class="fa fa-exchange me-2 text-warning"></i>
+                                                                <i class="fa fa-exchange me-2 text-warning"/>
                                                                 Reroute Work Order
                                                             </button>
                                                         </li>
                                                     </ul>
-
-        </div>
-</div>
-
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </t>
                             </div>
                         </t>
+
                         <t t-else="">
                             <t t-set="activeGroup"
                                t-value="state.groupedWorkOrders.find(g => g.production_id === state.selectedProduction)"/>
-
                             <div t-if="activeGroup" class="row g-3">
                                 <t t-foreach="activeGroup.workOrders" t-as="workOrder" t-key="workOrder.id">
                                     <div class="col-md-6 col-lg-4 col-xl-3">
-
                                         <div t-attf-class="card h-100 border shadow-sm #{state.selectedWorkcenter.working_state == 'blocked' ? 'border-danger border-2' : (workOrder.is_user_working ? 'border-success border-2' : (workOrder.state == 'pending' ? 'border-warning border-2' : ''))}">
-
                                             <div class="card-body d-flex flex-column p-3 bg-white">
-
                                                 <div class="d-flex justify-content-between align-items-start mb-2">
-
                                                     <div class="d-flex flex-column align-items-start pe-2">
                                                         <h6 class="card-title fw-bold text-dark mb-0"
                                                             style="font-size: 0.95rem; line-height: 1.4;"
@@ -361,11 +334,10 @@
                                                                 title="View Worksheet"
                                                                 style="font-size: 0.75rem; border-radius: 0.5rem;"
                                                                 t-on-click.stop="() => this.viewWorksheet(workOrder.id)">
-                                                            <i class="fa fa-file-text me-1"></i>
+                                                            <i class="fa fa-file-text me-1"/>
                                                             Worksheet
                                                         </button>
                                                     </div>
-
                                                     <div class="d-flex flex-column align-items-end"
                                                          style="min-width: 85px;">
                                                         <span t-attf-class="badge w-100 py-1 mb-1 rounded-pill #{state.selectedWorkcenter.working_state == 'blocked' ? 'bg-danger' : (workOrder.state == 'progress' ? 'bg-info text-dark' : (workOrder.state == 'done' ? 'bg-success' : (workOrder.state == 'pending' ? 'bg-warning text-dark' : 'bg-secondary')))}">
@@ -374,79 +346,69 @@
                                                             <t t-elif="workOrder.state == 'waiting'">WAITING PARTS</t>
                                                             <t t-else=""><t t-esc="workOrder.state ? workOrder.state.toUpperCase() : 'READY'"/></t>
                                                         </span>
-
                                                         <span class="badge bg-light text-dark border font-monospace w-100 py-1 shadow-sm"
                                                               style="font-size: 0.85rem;">
                                                             <t t-esc="this.formatDuration(workOrder.display_duration)"/>
                                                         </span>
                                                     </div>
                                                 </div>
-
-                                                <div class="flex-grow-1"></div>
-
+                                                <div class="flex-grow-1"/>
                                                 <div class="btn-group w-100 shadow-sm mt-3" role="group">
-
                                                     <t t-if="state.selectedWorkcenter.working_state == 'blocked'">
                                                         <button class="btn btn-outline-danger fw-bold disabled py-2"
                                                                 style="opacity: 0.8;">
-                                                            <i class="fa fa-lock me-2"></i>
+                                                            <i class="fa fa-lock me-2"/>
                                                             Workcenter Blocked
                                                         </button>
                                                     </t>
                                                     <t t-elif="workOrder.state == 'pending'">
-    <t t-if="workOrder.shopfloor_blocking_wo_id">
-        <button class="btn btn-outline-warning text-dark fw-bold py-2 shadow-sm"
-                t-on-click="(ev) => this.openBlockingWorkOrder(workOrder.shopfloor_blocking_wo_id[0], ev)"
-                t-att-title="'Open Dependency: ' + workOrder.shopfloor_blocking_wo_id[1]">
-            <i class="fa fa-external-link me-2"></i>
-            Waiting:
-            <t t-esc="workOrder.shopfloor_blocking_wo_id[1]"/>
-        </button>
-    </t>
-
+                                                        <t t-if="workOrder.shopfloor_blocking_wo_id">
+                                                            <button class="btn btn-outline-warning text-dark fw-bold py-2 shadow-sm"
+                                                                    t-on-click="(ev) => this.openBlockingWorkOrder(workOrder.shopfloor_blocking_wo_id[0], ev)"
+                                                                    t-att-title="'Open Dependency: ' + workOrder.shopfloor_blocking_wo_id[1]">
+                                                                <i class="fa fa-external-link me-2"/>
+                                                                Waiting:
+                                                                <t t-esc="workOrder.shopfloor_blocking_wo_id[1]"/>
+                                                            </button>
+                                                        </t>
                                                         <t t-else="">
-        <button class="btn btn-outline-warning text-dark fw-bold disabled py-2"
-                style="opacity: 0.8;">
-            <i class="fa fa-hourglass-half me-2"></i>
-            Waiting on Dependency
-        </button>
-    </t>
-</t>
-
+                                                            <button class="btn btn-outline-warning text-dark fw-bold disabled py-2"
+                                                                    style="opacity: 0.8;">
+                                                                <i class="fa fa-hourglass-half me-2"/>
+                                                                Waiting on Dependency
+                                                            </button>
+                                                        </t>
+                                                    </t>
                                                     <t t-else="">
                                                         <t t-if="workOrder.state != 'done'">
-
                                                             <button t-if="!workOrder.is_user_working"
                                                                     class="btn btn-sm btn-success fw-bold py-2"
                                                                     t-on-click="() => this.startWorkOrder(workOrder.id)">
-                                                                <i class="fa fa-play me-1"></i>
+                                                                <i class="fa fa-play me-1"/>
                                                                 <t t-if="workOrder.display_duration > 0">Resume</t>
                                                                 <t t-else="">Start</t>
                                                             </button>
-
                                                             <t t-if="workOrder.is_user_working">
                                                                 <button class="btn btn-sm btn-warning fw-bold text-dark py-2"
                                                                         title="Pause"
                                                                         t-on-click="() => this.pauseWorkOrder(workOrder.id)">
-                                                                    <i class="fa fa-pause me-1"></i>
+                                                                    <i class="fa fa-pause me-1"/>
                                                                     Pause
                                                                 </button>
                                                                 <button class="btn btn-sm btn-primary fw-bold py-2"
                                                                         title="Done"
                                                                         t-on-click="() => this.finishWorkOrder(workOrder.id)">
-                                                                    <i class="fa fa-check me-1"></i>
+                                                                    <i class="fa fa-check me-1"/>
                                                                     Done
                                                                 </button>
                                                             </t>
                                                         </t>
-
                                                         <button t-if="workOrder.state == 'done'"
                                                                 class="btn btn-sm btn-success fw-bold disabled py-2">
-                                                            <i class="fa fa-check-circle me-1"></i>
+                                                            <i class="fa fa-check-circle me-1"/>
                                                             Completed
                                                         </button>
                                                     </t>
-
                                                 </div>
                                             </div>
                                         </div>
@@ -454,14 +416,12 @@
                                 </t>
                             </div>
                         </t>
-
                     </div>
 
                     <div t-else="" class="alert alert-warning">
                         No active work orders found for this workcenter under the current filter.
                     </div>
                 </t>
-
             </div>
         </div>
     </t>

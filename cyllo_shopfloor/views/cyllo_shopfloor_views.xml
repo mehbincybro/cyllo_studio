@@ -7,19 +7,15 @@
             <form string="Operation Worksheet" create="false" edit="false">
                 <sheet>
                     <field name="worksheet_type" invisible="1"/>
-
                     <div invisible="worksheet_type != 'text'">
                         <field name="operation_note" widget="html" readonly="1" nolabel="1"/>
                     </div>
-
                     <div invisible="worksheet_type != 'pdf'">
                         <field name="worksheet" widget="pdf_viewer" readonly="1" nolabel="1"/>
                     </div>
-
                     <div invisible="worksheet_type != 'google_slide'">
                         <field name="worksheet_google_slide" widget="video_preview" readonly="1" nolabel="1"/>
                     </div>
-
                     <div invisible="worksheet_type != False" class="alert alert-info text-center">
                         No worksheet attached to this operation.
                     </div>

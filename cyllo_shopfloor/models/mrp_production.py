@@ -19,7 +19,6 @@
 #   If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
 from odoo import models, api, fields
 
 class MrpProduction(models.Model):
@@ -27,9 +26,27 @@ class MrpProduction(models.Model):
 
     employee_ids = fields.Many2many("hr.employee", string="Operators", readonly=True)
 
-    def action_shopfloor_close_mo(self):
-        self.ensure_one()
+    is_automated = fields.Boolean(
+        string="Automated Operations",
+        compute='_compute_is_automated',
+        store=True,
+        readonly=False,
+        help="If enabled, work orders will automatically finish when their allocated time ends."
+    )
 
+    @api.depends('bom_id')
+    def _compute_is_automated(self):
+        """ Pull the default automated state from the BOM, but allow manual overrides per MO. """
+        for mo in self:
+            if mo.bom_id:
+                mo.is_automated = mo.bom_id.is_automated
+            else:
+                mo.is_automated = mo.is_automated or False
+
+    def action_shopfloor_close_mo(self):
+        """Automatically completes pending production data (tracking, quantities,
+        and consumption) and closes the MO from the shopfloor."""
+        self.ensure_one()
         if self.product_id.tracking in ['lot', 'serial'] and not self.lot_producing_id:
             self.action_generate_serial()
 
@@ -48,18 +65,9 @@ class MrpProduction(models.Model):
 
         return self.button_mark_done()
 
-    @api.depends('bom_id')
-    def _compute_is_automated(self):
-        """ Pull the default automated state from the BOM, but allow manual overrides per MO. """
-        for mo in self:
-            if mo.bom_id:
-                mo.is_automated = mo.bom_id.is_automated
-            else:
-                # Retain whatever the user manually selected if there is no BOM
-                mo.is_automated = mo.is_automated or False
-
     @api.model
     def get_shopfloor_missing_components(self, production_ids):
+        """Calculate missing product and its required quantity for shop floor"""
         productions = self.browse(production_ids)
         res = {}
 

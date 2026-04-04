@@ -27,7 +27,7 @@ class MrpWorkcenter(models.Model):
 
     @api.model
     def get_shopfloor_dashboard_metrics(self):
-        """ Returns workorder counts grouped by workcenter and state. """
+        """ Returns workorder counts grouped by workcenter and state. (Work center card view)"""
         workorders = self.env['mrp.workorder'].read_group(
             [('state', '!=', 'draft'), ('production_state', '!=', 'draft')],
             ['workcenter_id', 'state'],
