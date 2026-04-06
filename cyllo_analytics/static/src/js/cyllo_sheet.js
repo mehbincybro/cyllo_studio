@@ -850,7 +850,7 @@ export class CylloSheet extends Component {
             };
         }
 
-        if (this.query_data.measure.length) {
+        if (this.query_data.dimension.length || this.query_data.measure.length) {
             type = "measure";
             yType = "dimension";
         }

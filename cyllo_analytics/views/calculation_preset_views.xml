@@ -11,7 +11,6 @@
                 <field name="calculation_type"/>
                 <field name="category"/>
                 <field name="active" widget="boolean_toggle"/>
-                <field name="is_system" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -36,7 +35,6 @@
                         <group name="meta_group" string="Information">
                             <field name="category"/>
                             <field name="model_id"/>
-                            <field name="is_system" readonly="1"/>
                             <field name="description"/>
                         </group>
                     </group>

@@ -17,3 +17,7 @@ access_dashboard_sheet_option,access.dashboard.sheet.option,model_dashboard_shee
 access_dashboard_banner,access.dashboard.banner,model_dashboard_banner,base.group_user,1,1,1,1
 access_calculation_preset_user,access.calculation.preset.user,model_calculation_preset,cyllo_analytics.group_cyllo_analytics_user,1,0,0,0
 access_calculation_preset_admin,access.calculation.preset.admin,model_calculation_preset,cyllo_analytics.group_cyllo_analytics_admin,1,1,1,1
+access_import_xlsx_wizard,access.import.xlsx.wizard,model_import_xlsx_wizard,cyllo_analytics.group_cyllo_analytics_user,1,1,1,1
+access_import_xlsx_wizard_line,access.import.xlsx.wizard.line,model_import_xlsx_wizard_line,cyllo_analytics.group_cyllo_analytics_user,1,1,1,1
+access_custom_imported_table,access.custom.imported.table,model_custom_imported_table,cyllo_analytics.group_cyllo_analytics_user,1,1,1,1
+access_import_xlsx_wizard_sheet,access.import.xlsx.wizard.sheet,model_import_xlsx_wizard_sheet,cyllo_analytics.group_cyllo_analytics_user,1,1,1,1

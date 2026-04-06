@@ -24,9 +24,9 @@ from odoo import fields, models
 
 
 class DashboardGlobalFilter(models.Model):
-    """This module defines the DashboardGlobalFilter model."""
-    _name = 'dashboard.global.filter'
-    _description = 'Dashboard Global Filter'
+    """Model representing global filters used in dashboards."""
+    _name = "dashboard.global.filter"
+    _description = "Dashboard Global Filter"
 
     name = fields.Char()
     type = fields.Char()
