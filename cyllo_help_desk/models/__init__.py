@@ -36,3 +36,4 @@ from . import helpdesk_integration
 from . import onboarding_onboading
 from . import onboarding_onboarding_step
 from . import sla_status
+from . import helpdesk_stage_history

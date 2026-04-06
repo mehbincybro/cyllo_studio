@@ -31,6 +31,9 @@
                        decoration-info="stage_name == 'New'"
                        decoration-primary="stage_name == 'In Progress'"
                        decoration-muted="stage_name == 'Canceled'"/>
+                <field name="sla_failed" invisible="1"/>
+                <field name="sla_status_label" widget="badge" decoration-danger="sla_failed"
+                       invisible="not sla_failed" string="SLA Status"/>
             </tree>
         </field>
     </record>
@@ -48,6 +51,7 @@
                 <field name="customer_id"/>
                 <field name="user_id"/>
                 <field name="stage_id"/>
+                <field name="sla_failed"/>
                 <progressbar field="activity_state"
                              colors='{"planned": "success", "today": "warning", "overdue": "danger"}'/>
                 <templates>
@@ -57,6 +61,7 @@
                                 <div>
                                     <h3>
                                         <field name="name"/>
+                                        <span t-if="record.sla_failed.raw_value" class="badge rounded-pill text-bg-danger float-end" style="font-size: 10px;">SLA Failed</span>
                                     </h3>
                                 </div>
                             </div>
@@ -104,6 +109,7 @@
                            options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
+                    <widget name="web_ribbon" title="SLA Failed" bg_color="bg-danger" invisible="not sla_failed"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="sale_order_count == 0">
                             <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
@@ -126,6 +132,18 @@
                         <button name="action_view_crm_leads" type="object" class="oe_stat_button" icon="fa-bullseye" invisible="crm_lead_count == 0">
                             <field name="crm_lead_count" widget="statinfo" string="CRM Leads"/>
                         </button>
+                        <button name="action_view_customer_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="customer_sale_order_count == 0">
+                            <field name="customer_sale_order_count" widget="statinfo" string="Customer Sales"/>
+                        </button>
+                        <button name="action_view_customer_purchase_orders" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="customer_purchase_order_count == 0">
+                            <field name="customer_purchase_order_count" widget="statinfo" string="Customer Purchases"/>
+                        </button>
+                        <button name="action_view_customer_invoices" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="customer_invoice_count == 0">
+                            <field name="customer_invoice_count" widget="statinfo" string="Customer Invoices"/>
+                        </button>
+                        <button name="action_view_customer_subscriptions" type="object" class="oe_stat_button" icon="fa-refresh" invisible="customer_subscription_count == 0">
+                            <field name="customer_subscription_count" widget="statinfo" string="Customer Subscriptions"/>
+                        </button>
                     </div>
                     <div class="alert alert-warning text-center o_form_header" role="alert" invisible="not has_duplicates">
                         <strong>Warning!</strong> Potential duplicate tickets found for this customer.
@@ -138,6 +156,8 @@
                         <field name="stage_name" invisible="1"/>
                         <field name="sla_ids" widget="many2many_tags" invisible="not sla_flag"/>
                         <field name="sla_progress" widget="progressbar" invisible="not sla_flag or stage_name == 'Solved'"/>
+                        <field name="sla_deadline" invisible="not sla_flag or not sla_ids"/>
+                        <field name="sla_reached_date" invisible="not sla_flag or not sla_reached_date"/>
                         <field name="sla_failed" invisible="1"/>
                         <field name="has_duplicates" invisible="1"/>
                     </group>

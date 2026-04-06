@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_sale_res_config_settings_form_product_warranty"
+            model="ir.ui.view">
+        <field name="name">view.sale.res.config.settings.form.product.warranty
+        </field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='stock_packaging']" position="after">
+                <setting id="enable_product_warranty_sale"
+                         help="Enable product warranty management in Sales.">
+                    <field name="module_cyllo_product_warranty"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
+</odoo>

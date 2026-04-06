@@ -43,6 +43,8 @@ class HelpDeskSLAPolicy(models.Model):
                                    help="The stage in which the ticket reach to satisfy this SLA")
     within_hour = fields.Float(string="Within",
                                help="Maximum number of working hours that a ticket should take to reach the target stage")
+    excluded_stage_ids = fields.Many2many('helpdesk.stage', string="Excluding Stages",
+                                          help="Stages to be excluded from SLA calculation")
     ticket_count = fields.Integer(compute="_compute_ticket_count", string="Tickets")
 
     def _compute_ticket_count(self):

@@ -86,6 +86,8 @@ class HelpDeskTicket(models.Model):
                               help="To check SLA policy set or not")
     sla_failed = fields.Boolean(string="SLA failed ticket", default=False,
                                 help="Ticket that failed SLA policy")
+    sla_deadline = fields.Datetime(compute='_compute_sla_deadline', string="SLA Deadline", store=True)
+    sla_reached_date = fields.Datetime(compute='_compute_sla_deadline', string="SLA Reached Date", store=True)
     activity_ids = fields.One2many('mail.activity', string="Activity")
     stage_id = fields.Many2one('helpdesk.stage', string="Status",
                                default=lambda self: self.env.ref(
@@ -108,6 +110,11 @@ class HelpDeskTicket(models.Model):
     high_priority_ticket_average_hours = fields.Float(string="High Priority Open Hours", compute="_compute_high_priority_average_open_hours", store=True)
     urgent_ticket_average_hours = fields.Float(string="Urgent Ticket Open Hours", compute="_compute_urgent_ticket_average_open_hours", store=True)
     is_closed_today = fields.Boolean(string='Closed Today', compute='_compute_is_closed_today')
+    sla_status_label = fields.Char(compute='_compute_sla_status_label', string="SLA Status")
+
+    def _compute_sla_status_label(self):
+        for ticket in self:
+            ticket.sla_status_label = _("Failed") if ticket.sla_failed else False
 
     # Parent-Child Linking
     parent_id = fields.Many2one('helpdesk.ticket', string='Parent Ticket', help='Reference to the main ticket')
@@ -147,6 +154,10 @@ class HelpDeskTicket(models.Model):
     coupon_count = fields.Integer(compute='_compute_integration_counts')
     picking_count = fields.Integer(compute='_compute_integration_counts')
     field_service_request_count = fields.Integer(compute='_compute_integration_counts')
+    customer_sale_order_count = fields.Integer(compute='_compute_customer_record_counts')
+    customer_purchase_order_count = fields.Integer(compute='_compute_customer_record_counts')
+    customer_invoice_count = fields.Integer(compute='_compute_customer_record_counts')
+    customer_subscription_count = fields.Integer(compute='_compute_customer_record_counts')
 
     # Portal
     website_published = fields.Boolean(string='Visible in Portal', default=True)
@@ -273,12 +284,29 @@ class HelpDeskTicket(models.Model):
                 ticket.sla_progress = 0
                 continue
             
-            # Simple linear progress estimate for demo purposes
-            # In a real system, you'd find the earliest deadline
-            elapsed = (datetime.now() - ticket.create_date).total_seconds() / 3600.0
-            earliest_sla = min(ticket.sla_ids.mapped('within_hour')) or 1
-            progress = (elapsed / earliest_sla) * 100
+            # Simple linear progress estimate based on earliest deadline
+            statuses = ticket.sla_status_ids.filtered(lambda s: s.state == 'ongoing')
+            if not statuses:
+                ticket.sla_progress = 100 if ticket.sla_failed else 0
+                continue
+            earliest_status = min(statuses, key=lambda s: s.deadline or fields.Datetime.now())
+            if not earliest_status.deadline:
+                ticket.sla_progress = 0
+                continue
+
+            elapsed_raw = (fields.Datetime.now() - ticket.create_date).total_seconds() / 3600.0
+            excluded_hours = ticket._get_excluded_duration(earliest_status.sla_id)
+            effective_elapsed = max(elapsed_raw - excluded_hours, 0)
+            progress = (effective_elapsed / (earliest_status.sla_id.within_hour or 1)) * 100
             ticket.sla_progress = min(max(progress, 0), 100)
+
+    @api.depends('sla_status_ids.deadline', 'sla_status_ids.reached_datetime', 'sla_status_ids.state')
+    def _compute_sla_deadline(self):
+        for ticket in self:
+            ongoing = ticket.sla_status_ids.filtered(lambda s: s.state == 'ongoing')
+            ticket.sla_deadline = min(ongoing.mapped('deadline')) if ongoing else False
+            reached = ticket.sla_status_ids.filtered(lambda s: s.state == 'pass' and s.reached_datetime)
+            ticket.sla_reached_date = max(reached.mapped('reached_datetime')) if reached else False
 
     @api.depends('name', 'customer_id', 'description', 'create_date', 'category_id', 'canned_response_ids')
     def _compute_duplicate_tickets(self):
@@ -329,15 +357,93 @@ class HelpDeskTicket(models.Model):
             ticket.picking_count = len(ticket.picking_ids)
             ticket.field_service_request_count = len(ticket.field_service_request_ids)
 
+    @api.depends('customer_id')
+    def _compute_customer_record_counts(self):
+        for ticket in self:
+            if not ticket.customer_id:
+                ticket.customer_sale_order_count = 0
+                ticket.customer_purchase_order_count = 0
+                ticket.customer_invoice_count = 0
+                ticket.customer_subscription_count = 0
+                continue
+            commercial_partner = ticket.customer_id.commercial_partner_id
+            domain = [('partner_id', 'child_of', commercial_partner.id)]
+            ticket.customer_sale_order_count = self.env['sale.order'].search_count(domain)
+            ticket.customer_purchase_order_count = self.env['purchase.order'].search_count(domain)
+            ticket.customer_invoice_count = self.env['account.move'].search_count(domain + [('move_type', 'in', ('out_invoice', 'out_refund'))])
+            ticket.customer_subscription_count = self.env['subscription.order'].search_count(domain)
+
+    def action_view_customer_sale_orders(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("sale.action_orders")
+        action['domain'] = [('partner_id', 'child_of', self.customer_id.commercial_partner_id.id)]
+        action['context'] = {'create': False, 'edit': False, 'delete': False}
+        action['view_mode'] = 'tree'
+        action['views'] = [(self.env.ref('sale.view_quotation_tree').id, 'tree')]
+        return action
+
+    def action_view_customer_purchase_orders(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("purchase.purchase_form_action")
+        action['domain'] = [('partner_id', 'child_of', self.customer_id.commercial_partner_id.id)]
+        action['context'] = {'create': False, 'edit': False, 'delete': False}
+        action['view_mode'] = 'tree'
+        action['views'] = [(self.env.ref('purchase.purchase_order_view_tree').id, 'tree')]
+        return action
+
+    def action_view_customer_invoices(self):
+        self.ensure_one()
+        action = self.env["ir.actions.actions"]._for_xml_id("account.action_move_out_invoice_type")
+        action['domain'] = [
+            ('partner_id', 'child_of', self.customer_id.commercial_partner_id.id),
+            ('move_type', 'in', ('out_invoice', 'out_refund'))
+        ]
+        action['context'] = {'create': False, 'edit': False, 'delete': False}
+        action['view_mode'] = 'tree'
+        action['views'] = [(self.env.ref('account.view_out_invoice_tree').id, 'tree')]
+        return action
+
+    def action_view_customer_subscriptions(self):
+        self.ensure_one()
+        # Assuming the action exists in cyllo_subscription
+        try:
+            action = self.env["ir.actions.actions"]._for_xml_id("cyllo_subscription.subscription_order_action")
+        except ValueError:
+            # Fallback if the XML ID is different
+            action = {
+                'type': 'ir.actions.act_window',
+                'name': _('Subscriptions'),
+                'res_model': 'subscription.order',
+                'view_mode': 'tree',
+                'target': 'current',
+            }
+        action['domain'] = [('partner_id', 'child_of', self.customer_id.commercial_partner_id.id)]
+        action['context'] = {'create': False, 'edit': False, 'delete': False}
+        action['view_mode'] = 'tree'
+        # Try to find a tree view for subscription.order
+        subscription_tree = self.env.ref('cyllo_subscription.subscription_order_view_tree', raise_if_not_found=False)
+        if subscription_tree:
+            action['views'] = [(subscription_tree.id, 'tree')]
+        else:
+            action['views'] = [(False, 'tree')]
+        return action
+
     @api.model_create_multi
-    def create(self, vals):
-        """ Sequence for helpdesk tickets """
-        if vals[0].get('ticket', _('New')) == _('New'):
-            vals[0]['ticket'] = self.env['ir.sequence'].next_by_code(
-                'helpdesk.ticket') or 'New'
-        res = super(HelpDeskTicket, self).create(vals)
+    def create(self, vals_list):
+        """ Sequence for helpdesk tickets and stage history """
+        for vals in vals_list:
+            if vals.get('ticket', _('New')) == _('New'):
+                vals['ticket'] = self.env['ir.sequence'].next_by_code(
+                    'helpdesk.ticket') or 'New'
+        res = super(HelpDeskTicket, self).create(vals_list)
         for ticket in res:
             ticket._assign_ticket()
+            if ticket.stage_id:
+                self.env['helpdesk.stage.history'].create({
+                    'ticket_id': ticket.id,
+                    'stage_id': ticket.stage_id.id,
+                    'start_date': fields.Datetime.now(),
+                })
         return res
 
     @api.model
@@ -441,6 +547,22 @@ class HelpDeskTicket(models.Model):
         return self.env['helpdesk.stage'].search([])
 
     def write(self, vals):
+        if 'stage_id' in vals:
+            for ticket in self:
+                if ticket.stage_id.id != vals['stage_id']:
+                    # Close current history
+                    last_history = self.env['helpdesk.stage.history'].search([
+                        ('ticket_id', '=', ticket.id),
+                        ('end_date', '=', False)
+                    ], limit=1)
+                    if last_history:
+                        last_history.end_date = fields.Datetime.now()
+                    # Create new history
+                    self.env['helpdesk.stage.history'].create({
+                        'ticket_id': ticket.id,
+                        'stage_id': vals['stage_id'],
+                        'start_date': fields.Datetime.now()
+                    })
         result = super(HelpDeskTicket, self).write(vals)
         in_progress_stage = self.env.ref('cyllo_help_desk.in_progress_ticket').id
         solved_stage = self.env.ref('cyllo_help_desk.solved_ticket').id
@@ -466,7 +588,32 @@ class HelpDeskTicket(models.Model):
                     solved_mail_template.sudo().send_mail(ticket._origin.id or ticket.id, force_send=True)
                     body = f"""Work done mail sent to {ticket.customer_id.name}"""
                     ticket.message_post(body=body, subject="ISSUE SOLVED")
+        # SLA Status Sync and Reach Logic
+        if 'sla_ids' in vals:
+            self._update_sla_statuses()
+        if 'stage_id' in vals:
+            for ticket in self:
+                for status in ticket.sla_status_ids.filtered(lambda s: s.state == 'ongoing'):
+                    if ticket.stage_id.sequence >= status.sla_id.target_stage.sequence:
+                        status.reached_datetime = fields.Datetime.now()
+                        status.state = 'pass' if status.reached_datetime <= status.deadline else 'fail'
+                        if status.state == 'fail':
+                            ticket.sla_failed = True
         return result
+
+    def _update_sla_statuses(self):
+        """ Ensure every SLA policy on the ticket has a status record """
+        for ticket in self:
+            if not ticket.create_date:
+                continue
+            for sla in ticket.sla_ids:
+                existing = ticket.sla_status_ids.filtered(lambda s: s.sla_id == sla)
+                if not existing:
+                    self.env['sla.status'].create({
+                        'ticket_id': ticket.id,
+                        'sla_id': sla.id,
+                        'state': 'ongoing',
+                    })
 
     @api.model
     def get_overview(self):
@@ -765,6 +912,25 @@ class HelpDeskTicket(models.Model):
         }
         self.message_post(body=_("Repair Order creation initiated."))
         return action
+
+    def _get_excluded_duration(self, sla_policy):
+        """ Calculate total duration spent in excluded stages for a given SLA policy """
+        self.ensure_one()
+        if not sla_policy.excluded_stage_ids:
+            return 0.0
+        history = self.env['helpdesk.stage.history'].search([
+            ('ticket_id', '=', self.id),
+            ('stage_id', 'in', sla_policy.excluded_stage_ids.ids)
+        ])
+        total_duration = 0.0
+        for record in history:
+            if record.end_date:
+                total_duration += record.duration
+            else:
+                # Still in an excluded stage, calculate duration up until now
+                diff = fields.Datetime.now() - record.start_date
+                total_duration += diff.total_seconds() / 3600.0
+        return total_duration
 
 
 

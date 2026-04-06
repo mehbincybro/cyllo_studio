@@ -18,4 +18,18 @@
             </xpath>
         </field>
     </record>
+
+    <record id="view_purchase_res_config_settings_form_product_warranty" model="ir.ui.view">
+        <field name="name">view.purchase.res.config.settings.form.product.warranty</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="purchase.res_config_settings_view_form_purchase"/>
+        <field name="arch" type="xml">
+            <xpath expr="//setting[@id='stock_packaging_purchase']" position="after">
+                <setting id="enable_product_warranty_purchase"
+                         help="Enable product warranty management in Purchase.">
+                    <field name="module_cyllo_product_warranty"/>
+                </setting>
+            </xpath>
+        </field>
+    </record>
 </odoo>
