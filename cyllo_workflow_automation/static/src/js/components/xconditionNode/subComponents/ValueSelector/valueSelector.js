@@ -125,10 +125,11 @@ export class ValueSelector extends Component {
 
     handleVariableFieldType(field, operator) {
         const variable = this.props.variables.find(v => v.id === field.selectedVariable);
+        const fallbackModel = this.env.globalContext ? this.env.globalContext().modelName : null;
         const info = {
             fieldDef: {
                 type: variable?.variable_type,    //TODO:Temporarily added ternary function to avoid error
-                relation: variable?.modelName,
+                relation: variable?.modelName || variable?.model_name || this.varModelDefs.get(variable?.id) || fallbackModel,
             }
         }
         const handlers = {

@@ -82,6 +82,35 @@ class ProcessArg(models.Model):
 
 
 class WorkFunction(models.Model):
+    """
+        A model representing a function within a workflow automation system.
+
+        The `WorkFunction` class is responsible for defining a specific function that
+        can be linked with arguments (`work.function.arg`), processes (`work.process.arg`),
+        and other properties like decorators, return types, and triggers. It can be set to run
+        in 'manual' or 'auto' mode, and generates the function code automatically if required.
+
+        Fields:
+            name (Char): A human-readable name for the function.
+            func_name (Char): The internal name of the function (used in function generation).
+            decorator (Char): The name of the Odoo decorator (e.g., `@api.model`, `@api.multi`, etc.).
+            model_id (Many2one): A reference to the `ir.model` the function belongs to.
+            make_function (Text): Optional field for manually providing the function code.
+            arg_ids (One2many): Arguments associated with this function, linked to `work.function.arg`.
+            process_ids (One2many): Processes associated with this function, linked to `work.process.arg`.
+            has_return (Boolean): Whether the function has a return statement (default: True).
+            c_make_function (Text): The generated or provided function code (computed field).
+            mode (Selection): Mode of the function, either 'manual' or 'auto' (computed field).
+            trigger_type (Selection): When the function will be triggered, e.g., on record creation, time-based triggers, etc.
+            company_id (Many2one): The company associated with the function.
+            icon (Binary): An optional SVG icon representing the function.
+
+        Methods:
+            _check_icon_file_type: Validates that the uploaded icon is a valid SVG file by checking its content.
+
+            compute_c_make_function: Automatically generates the function code based on the function's name, arguments,
+                                     processes, and whether it has a return statement, unless the `make_function` field is provided.
+    """
     _name = "work.function"
 
     name = fields.Char('Name')

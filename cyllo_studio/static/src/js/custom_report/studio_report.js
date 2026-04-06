@@ -525,6 +525,7 @@ export class EditReport extends Component {
     }
 
     onPrintReport() {
+        console.log('this.state.reportInfo', this.state.reportInfo)
         const report = this.state.reportInfo;
         const activeId = this.state.records[this.state.currentIndex];
         if (!report.id || !activeId) return;
@@ -1252,7 +1253,7 @@ export class EditReport extends Component {
 
     async onQrWizardConfirm() {
         if (this.state.qr.type === 'pdf_link' && !this.state.qr.config.token) {
-            console.log('entered',this.state.reportInfo.report_name,this)
+            console.log('entered', this.state.reportInfo.report_name, this)
             try {
                 this.state.qr.previewLoading = true;
                 const res = await this.rpc('/cyllo_studio/generate_qr_token', {
@@ -1364,11 +1365,6 @@ export class EditReport extends Component {
         if (type === 'plain') return _quoteIfStatic(config.field);
         if (type === 'portal') {
             const path = config.portalPath || '/my/view/';
-            // Ensure no double slashes between base_url and path
-            //            const normalizedPath = path.startsWith('/') ? path : '/' + path;
-            //            console.log('hnjkkjj',normalizedPath)
-
-            // Check if the user entered a custom Base URL that overrides the server origin
             let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
             if (config.baseUrl && config.baseUrl !== window.location.origin) {
                 const safeUrl = config.baseUrl.replace(/'/g, "\\'").replace(/\/$/, '');
@@ -1875,7 +1871,7 @@ export class EditReport extends Component {
         zoneSortables.forEach(s => { try { s.destroy(); } catch (_) { } });
         this._sortableInstances = panelSortable ? [panelSortable] : [];
 
-        // Recreate for every cy-template zone
+        // Recreate for every cy-template zone (main canvas zones)
         this._reportFrame.querySelectorAll('[cy-template]').forEach(zone => {
             this._createZoneSortable(zone);
         });

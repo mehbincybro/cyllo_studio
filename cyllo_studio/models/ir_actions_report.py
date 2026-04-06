@@ -375,6 +375,7 @@ class IrActionsReport(models.Model):
                 'res_model': self.model,
                 'template': report,
                 'arch': arch,
+                'has_thumbnail': bool(self.report_thumbnail),
             }
         }
 
