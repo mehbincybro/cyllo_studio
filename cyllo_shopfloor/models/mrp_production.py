@@ -44,8 +44,10 @@ class MrpProduction(models.Model):
                 mo.is_automated = mo.is_automated or False
 
     def action_shopfloor_close_mo(self):
-        """Automatically completes pending production data (tracking, quantities,
-        and consumption) and closes the MO from the shopfloor."""
+        """
+        Automatically completes pending production data (tracking, quantities,
+        and consumption) and closes the MO from the shopfloor.
+        """
         self.ensure_one()
         if self.product_id.tracking in ['lot', 'serial'] and not self.lot_producing_id:
             self.action_generate_serial()

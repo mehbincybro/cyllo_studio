@@ -76,7 +76,6 @@ class MrpAddComponentWizard(models.TransientModel):
                     lambda move: move.product_id == wizard.product_id
                 )
 
-                # Safely sum the quantities to prevent a Singleton Error if multiple moves exist for the same product
                 total_uom_qty = sum(component_moves.mapped('product_uom_qty'))
                 total_qty = sum(component_moves.mapped('quantity'))
 

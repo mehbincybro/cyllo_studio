@@ -65,7 +65,6 @@ class MrpWorkorder(models.Model):
             for wo in self:
                 if wo.production_id:
                     wo.production_id.write({'employee_ids': [(4, employee_id)]})
-
         self._notify_shopfloor_view()
         return res
 
@@ -100,7 +99,6 @@ class MrpWorkorder(models.Model):
                             'type': 'trigger_close_production',
                             'mo_id': production.id
                         }
-
         self._notify_shopfloor_view()
         if self.env.context.get('from_shopfloor') and isinstance(res, dict) and res.get(
                 'type') == 'ir.actions.act_window_close':
@@ -161,7 +159,6 @@ class MrpWorkorder(models.Model):
         for wo in running_wos:
             if wo.state == 'ready' and wo.production_id.date_start < now:
                 wo.button_start()
-
                 self.env['bus.bus']._sendone(
                     'shopfloor_channel',
                     'workorder_updated',
@@ -181,7 +178,6 @@ class MrpWorkorder(models.Model):
 
                 if real_duration >= wo.duration_expected:
                     wo.button_finish()
-
                     mo = wo.production_id
                     if mo.state == 'to_close':
                         mo.move_raw_ids.write({'picked': True})

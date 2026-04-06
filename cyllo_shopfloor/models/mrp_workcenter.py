@@ -41,7 +41,6 @@ class MrpWorkcenter(models.Model):
             if not wc_id:
                 continue
             wc_id = wc_id[0]
-
             state = wo.get('state')
             count = wo.get('__count', 0)
 
@@ -54,7 +53,6 @@ class MrpWorkcenter(models.Model):
                 }
 
             metrics[wc_id]['total'] += count
-
             if state in ('ready', 'progress', 'pending', 'waiting'):
                 metrics[wc_id]['in_progress'] += count
             elif state == 'done':
