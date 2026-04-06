@@ -10,19 +10,20 @@ export const shopFloorBackendListener = {
 
         bus_service.addEventListener("notification", ({ detail: notifications }) => {
             for (const { type, payload } of notifications) {
-                if (type === "workorder_updated") {
-                    notification.add(
-                        "A work order timer was just updated.",
-                        {
-                            title: "Shop Floor Activity",
-                            type: "warning",
-                            sticky: false,
-                        }
-                    );
+                if (type === "workorder_updated" && payload.source === 'shopfloor') {
+                    if (!document.querySelector('.o_shopfloor_screen')) {
+                        notification.add(
+                            "An operator just updated a work order on the Shop Floor.",
+                            {
+                                title: "Shop Floor Activity",
+                                type: "info",
+                                sticky: false,
+                            }
+                        );
+                    }
                 }
             }
         });
     }
 };
-
 registry.category("services").add("shopfloor_backend_listener", shopFloorBackendListener);

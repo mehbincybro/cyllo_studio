@@ -9,7 +9,6 @@
                     <group>
                         <field name="production_id" invisible="1"/>
                         <field name="component_ids" invisible="1"/>
-
                         <field name="product_id" domain="[('id', 'in', component_ids)]" options="{'no_create': True}"/>
                         <field name="quantity"/>
                         <field name="reason" placeholder="e.g., Damaged during assembly"/>

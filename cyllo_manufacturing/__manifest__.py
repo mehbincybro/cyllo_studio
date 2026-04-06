@@ -19,7 +19,15 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import mrp_workorder
-from . import mrp_production
-from . import mrp_workcenter
-from . import mrp_bom
+{
+    'name': 'Cyllo Manufacturing',
+    'version': '1.0',
+    'summary': 'Central Module for MRP features',
+    'depends': ['mrp'],
+    'data': [
+        'views/res_config_settings_views.xml',
+    ],
+    'installable': True,
+    'auto_install': True,
+    'application': False,
+}

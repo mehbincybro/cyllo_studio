@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -26,7 +26,6 @@ class ResConfigSettings(models.TransientModel):
 
     is_mps = fields.Boolean(
         config_parameter='cyllo_manufacturing_mps.is_mps',
-        default=False,
     )
 
     mps_default_timerange = fields.Selection(
@@ -36,7 +35,6 @@ class ResConfigSettings(models.TransientModel):
             ('Month', 'Monthly'),
             ('Year', 'Yearly')
         ],
-        default='Month',
         config_parameter='cyllo_manufacturing_mps.default_timerange'
     )
 

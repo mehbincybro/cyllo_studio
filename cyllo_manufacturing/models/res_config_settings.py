@@ -19,7 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import mrp_workorder
-from . import mrp_production
-from . import mrp_workcenter
-from . import mrp_bom
+from odoo import models, fields
+
+class ResConfigSettings(models.TransientModel):
+    _inherit = 'res.config.settings'
+
+    module_cyllo_shopfloor = fields.Boolean(
+        string="Shopfloor"
+    )
