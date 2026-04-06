@@ -4,6 +4,8 @@ from lxml import etree
 import base64
 
 from odoo.http import Controller, route, request
+from odoo import fields
+from datetime import timedelta
 
 
 class StudioReportController(Controller):
@@ -243,6 +245,80 @@ class StudioReportController(Controller):
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+    @route('/cyllo_studio/generate_qr_token', auth='user', type='json')
+    def generate_qr_token(self, template, options):
+        """
+        Generate a reusable token for a report template.
+        """
+        try:
+            report = request.env['ir.actions.report'].search([('report_name', '=', template)], limit=1)
+            if not report:
+                return {'success': False, 'error': 'Report not found'}
+
+            token_vals = {
+                'report_id': report.id,
+                'require_auth': options.get('requireAuth', False),
+                'track_analytics': options.get('trackAnalytics', True),
+            }
+            if options.get('expiresDays'):
+                token_vals['expires_at'] = fields.Datetime.now() + timedelta(days=int(options['expiresDays']))
+
+            token_record = request.env['qr.download.token'].create(token_vals)
+            return {'success': True, 'token': token_record.token}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/report/pdf/<int:report_id>/<int:record_id>', auth='public', methods=['GET'])
+    def download_report_pdf(self, report_id, record_id, token=None, **kwargs):
+        """
+        Download the PDF for a specific report and record using a token.
+        """
+        if not token:
+            return request.make_response("Missing token", status=403)
+
+        token_record = request.env['qr.download.token'].sudo().search([
+            ('token', '=', token),
+            ('report_id', '=', report_id)
+        ], limit=1)
+
+        if not token_record or not token_record.is_valid():
+            return request.make_response("Invalid or expired link", status=403)
+
+        if token_record.require_auth and not request.session.uid:
+            # Redirect to login if auth is required
+            return request.redirect(f'/web/login?redirect=/report/pdf/{report_id}/{record_id}?token={token}')
+
+        report = request.env['ir.actions.report'].sudo().browse(report_id)
+        if not report.exists():
+            return request.make_response("Report not found", status=404)
+
+        # Track analytics
+        if token_record.track_analytics:
+            request.env['qr.scan.event'].sudo().create({
+                'token_id': token_record.id,
+                'record_id': record_id,
+                'ip_address': request.httprequest.remote_addr,
+                'user_agent': request.httprequest.user_agent.string,
+            })
+            token_record.sudo().scan_count += 1
+
+        try:
+            pdf_content, _ = report._render_qweb_pdf(report_id, [record_id])
+
+            # Fetch record to build filename
+            record = request.env[report.model].sudo().browse(record_id)
+            doc_name = record.display_name.replace('/', '_') if record.exists() else str(record_id)
+            filename = f"Report_{doc_name}.pdf"
+
+            pdfhttpheaders = [
+                ('Content-Type', 'application/pdf'),
+                ('Content-Length', len(pdf_content)),
+                ('Content-Disposition', f'attachment; filename="{filename}"')
+            ]
+            return request.make_response(pdf_content, headers=pdfhttpheaders)
+        except Exception as e:
+            return request.make_response(f"Error generating PDF: {str(e)}", status=500)
+
     # These are layout wrappers – we skip them when searching for the document template
     _LAYOUT_CALLS = {
         'web.html_container', 'web.external_layout', 'web.external_layout_standard',
@@ -370,18 +446,43 @@ class StudioReportController(Controller):
             if not doc_view or not doc_view.exists():
                 return {'success': False, 'error': f'View {template!r} not found'}
 
-            # Hard-reset: restores arch from the module XML file on disk
-            doc_view.sudo().reset_arch(mode='hard')
+            if doc_view.key and doc_view.key.startswith('cyllo_studio_custom.'):
+                # This is a custom report created by Cyllo Studio. It has no arch_fs, so reset_arch does nothing.
+                # We manually restore the blank skeleton.
+                model_name = request.env['ir.model'].sudo().search([('model', '=', doc_view.model)], limit=1).name or doc_view.model
+                blank_arch = f"""
+            <t t-name="{doc_view.key}">
+                <t t-call="web.html_container">
+                    <t t-call="web.external_layout">
+                        <t t-foreach="docs" t-as="doc">
+                            <div class="page">
+                                <div class="oe_structure"/>
+                                <div class="row">
+                                    <div class="col-12">
+                                        <h2 class="text-center">{doc_view.name}</h2>
+                                        <p class="text-muted text-center">New Report for {model_name}</p>
+                                    </div>
+                                </div>
+                                <div class="oe_structure"/>
+                            </div>
+                        </t>
+                    </t>
+                </t>
+            </t>"""
+                doc_view.sudo().write({'arch_base': blank_arch})
+            else:
+                # Hard-reset: restores arch from the module XML file on disk
+                doc_view.sudo().reset_arch(mode='hard')
+
+            # Unconditionally delete any custom inherited views on top of the doc template
+            custom_views = request.env['ir.ui.view'].search([
+                ('inherit_id', '=', doc_view.id),
+                '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+            ])
+            if custom_views:
+                custom_views.sudo().unlink()
 
             if include_header_footer:
-                # Delete any custom inherited views on top of the doc template
-                custom_views = request.env['ir.ui.view'].search([
-                    ('inherit_id', '=', doc_view.id),
-                    ('name', 'like', 'Custom_'),
-                ])
-                if custom_views:
-                    custom_views.sudo().unlink()
-
                 # Also reset the outer wrapper if it has an arch_fs
                 wrapper_view = request.env.ref(template, raise_if_not_found=False)
                 if wrapper_view and wrapper_view.exists() and wrapper_view.arch_fs:

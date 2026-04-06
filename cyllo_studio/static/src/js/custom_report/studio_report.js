@@ -58,6 +58,18 @@ export class EditReport extends Component {
             showQrWizard: false,
             qr: this._getDefaultQrState(),
             hasThumbnail: this.props.action.params.has_thumbnail || false,
+            // ── Box Properties Panel state ──
+            showBoxProps: false,
+            boxConfig: {
+                label: 'Section',
+                width: 300,
+                height: 200,
+                backgroundColor: 'transparent',
+                border: '1px solid #ccc',
+                borderRadius: 4,
+                padding: 8,
+                layoutMode: 'free',
+            },
         });
 
         // Promise resolver for the table config modal
@@ -164,7 +176,38 @@ export class EditReport extends Component {
             if (el.classList.contains('page')) {
                 $('.selected').removeClass('selected');
                 if (self.editor) self.editor.destroy();
+                // Close box props when clicking canvas background
+                self.closeBoxProps();
                 return;
+            }
+
+            // ── Box toolbar / resize handle – ignore for selection ──
+            if (el.closest('.box-toolbar') || el.closest('.box-resize-handles')) {
+                return;
+            }
+
+            // ── Box drop zone click logic ──
+            // If the click target is INSIDE a box dropzone, select the child element
+            // (not the box wrapper) unless the click is directly on the dropzone itself.
+            const boxWrapper = el.closest('.box-section-wrapper');
+            const boxDropzone = el.closest('.box-dropzone');
+            if (boxWrapper) {
+                if (el === boxWrapper || el === boxDropzone) {
+                    // Clicked the box itself (not a child) – select box
+                    e.stopPropagation();
+                    $('.selected').removeClass('selected');
+                    boxWrapper.classList.add('selected');
+                    self.openBoxProps(boxWrapper);
+                    return;
+                } else {
+                    // Clicked a child inside the box – close box props, let normal selection flow
+                    e.stopPropagation();
+                    self.closeBoxProps();
+                    // Fall through to normal selection logic below with el unchanged
+                }
+            } else {
+                // Clicked outside any box – close box props panel
+                self.closeBoxProps();
             }
 
             // If we clicked something inside a table, we might want to select the cell OR the whole table.
@@ -220,7 +263,7 @@ export class EditReport extends Component {
             // "Select then Edit" strategy:
             // Only trigger the editor if the element was ALREADY selected.
             // And DON'T trigger MediumEditor for the whole table wrapper or field block.
-            if (!wasSelected || el.classList.contains('table-wrapper') || el.classList.contains('field-block')) {
+            if (!wasSelected || el.classList.contains('table-wrapper') || el.classList.contains('field-block') || el.classList.contains('box-section-wrapper')) {
                 if (self.editor) {
                     const prevEl = self.editor.elements[0];
                     self.editor.destroy();
@@ -614,7 +657,6 @@ export class EditReport extends Component {
                 $('.selected').removeClass('selected');
             },
             onEnd: () => {
-                console.log('njnjnjnjnj')
                 this._isDragging = false;
                 this._justDragged = true;
                 setTimeout(() => { this._justDragged = false; }, 300);
@@ -631,6 +673,141 @@ export class EditReport extends Component {
         this._reportFrame.querySelectorAll('[cy-template]').forEach(zone => {
             this._createZoneSortable(zone);
         });
+    }
+
+    /**
+     * Build the inner HTML string for a box section wrapper.
+     */
+    _buildBoxInnerHTML(cfg) {
+        const layoutMode = cfg.layoutMode || 'free';
+        const label = cfg.label || 'Section';
+        return `
+            <div class="box-toolbar" contenteditable="false">
+                <span class="box-drag-handle fa fa-bars" title="Drag to move"></span>
+                <span class="box-label-text">${label}</span>
+                <span class="box-layout-badge">${layoutMode}</span>
+                <span class="box-delete-btn fa fa-trash" title="Delete Section"></span>
+            </div>
+            <div class="box-dropzone layout-${layoutMode}"></div>
+            <div class="box-resize-handles" contenteditable="false">
+                <div class="box-resize-handle nw" data-dir="nw"></div>
+                <div class="box-resize-handle n"  data-dir="n"></div>
+                <div class="box-resize-handle ne" data-dir="ne"></div>
+                <div class="box-resize-handle e"  data-dir="e"></div>
+                <div class="box-resize-handle se" data-dir="se"></div>
+                <div class="box-resize-handle s"  data-dir="s"></div>
+                <div class="box-resize-handle sw" data-dir="sw"></div>
+                <div class="box-resize-handle w"  data-dir="w"></div>
+            </div>`;
+    }
+
+    /**
+     * Create a SortableJS instance for a box inner drop zone.
+     * Accepts all element types and stops propagation so the parent canvas
+     * does not also receive the drop.
+     */
+    _createBoxDropzoneSortable(dropzone) {
+        const self = this;
+        const instance = Sortable.create(dropzone, {
+            group: { name: 'studio', pull: true, put: true },
+            animation: 150,
+            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]:not(.dynamic-field-wrapper *)',
+            handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node',
+            onStart() {
+                self._isDragging = true;
+                if (self.editor) { self.editor.destroy(); self.editor = null; }
+                $('.selected').removeClass('selected');
+            },
+            onEnd() { self._isDragging = false; },
+            async onAdd(evt) {
+                evt.originalEvent && evt.originalEvent.stopPropagation && evt.originalEvent.stopPropagation();
+                const item = evt.item;
+                const fromPanel = item.dataset._fromPanel === '1';
+                if (!fromPanel) return;
+
+                const type = item.dataset.type;
+                delete item.dataset._fromPanel;
+                item.style.opacity = '0.4';
+
+                if (type === 'text') {
+                    item.className = 'text-node c_new';
+                    item.setAttribute('contenteditable', 'false');
+                    item.innerHTML = 'Click to select, click again to edit';
+                    item.style.opacity = '1';
+                    self._refreshDragHandles();
+                    return;
+                }
+
+                if (type === 'field') {
+                    const resModel = self._resModel || '';
+                    const { fieldPath, fieldInfo } = await self.openFieldSelectorPopover(dropzone, resModel, (f) => !['one2many', 'many2many'].includes(f.type));
+                    if (!fieldPath) { item.remove(); return; }
+                    item.className = 'field-block c_new dynamic-field-wrapper';
+                    item.innerHTML = `
+                        <div class="field-handle-container" contenteditable="false">
+                            <span class="field-handle fa fa-bars" title="Drag to move"></span>
+                            <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                        </div>
+                        <div class="field-container d-inline-flex gap-1">
+                            <strong class="field-label">${fieldInfo.string}: </strong>
+                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
+                        </div>`;
+                    item.setAttribute('cy-type', 'dynamic');
+                    item.style.opacity = '1';
+                    item.querySelector('.field-delete').onclick = (e) => { e.stopPropagation(); if (confirm('Delete this field?')) item.remove(); };
+                }
+
+                if (type === 'box') {
+                    const boxId = 'box_' + Math.random().toString(36).slice(2, 10);
+                    const cfg = { id: boxId, label: 'Section', style: { width: 280, height: 160, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8 }, layoutMode: 'free', children: [] };
+                    item.className = 'box-section-wrapper c_new';
+                    item.setAttribute('cy-type', 'box');
+                    item.setAttribute('data-box-id', boxId);
+                    item.setAttribute('data-box-config', JSON.stringify(cfg));
+                    item.style.width = cfg.style.width + 'px';
+                    item.style.height = cfg.style.height + 'px';
+                    item.style.opacity = '1';
+                    item.innerHTML = self._buildBoxInnerHTML(cfg);
+                    item.querySelector('.box-delete-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, { body: 'Delete this section?', confirm: () => item.remove(), cancel: () => { } });
+                    };
+                    self._setupBoxResizeHandles(item);
+                    const inner = item.querySelector('.box-dropzone');
+                    if (inner) self._createBoxDropzoneSortable(inner);
+                }
+
+                if (type === 'table') {
+                    const resModel = self._resModel || '';
+                    const config = await self.openTableConfigModal(dropzone, resModel);
+                    if (!config) { item.remove(); return; }
+                    const tableHtml = self._generateTableHtml(config);
+                    item.className = 'c_new table-wrapper';
+                    item.innerHTML = `
+                        <div class="table-handle-container" contenteditable="false">
+                            <div class="table-handle fa fa-bars" title="Drag to move"></div>
+                            <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                        </div>
+                        ${tableHtml}`;
+                    item.setAttribute('cy-type', 'table');
+                    item.setAttribute('cy-config', JSON.stringify(config));
+                    item.style.opacity = '1';
+                    item.querySelector('.table-delete').onclick = (e) => {
+                        e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, { body: 'Delete this table?', confirm: () => item.remove(), cancel: () => { } });
+                    };
+                }
+
+                if (type === 'qr') {
+                    const config = await self.openQrWizard(item);
+                    if (!config) { item.remove(); return; }
+                    self.insertQrBlock(item, config);
+                }
+
+                self._refreshDragHandles();
+            }
+        });
+        this._sortableInstances.push(instance);
     }
 
     /** Create (or re-create) a SortableJS instance for a single drop zone. */
@@ -729,13 +906,47 @@ export class EditReport extends Component {
                 }
 
                 if (type === 'box') {
-                    item.className = 'box rounded-2 c_new box-wrapper';
-                    item.innerHTML = '<div class="box-handle" contenteditable="false"></div><span>New box</span>';
+                    const boxId = 'box_' + Math.random().toString(36).slice(2, 10);
+                    const defaultCfg = {
+                        id: boxId,
+                        label: 'Section',
+                        style: { width: 300, height: 200, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8 },
+                        layoutMode: 'free',
+                        children: [],
+                    };
+                    item.className = 'box-section-wrapper c_new';
                     item.setAttribute('cy-type', 'box');
-                    item.style.border = '1px solid #000';
-                    item.style.padding = '10px';
-                    item.style.cursor = 'default';
+                    item.setAttribute('data-box-id', boxId);
+                    item.setAttribute('data-box-config', JSON.stringify(defaultCfg));
+                    item.style.width = defaultCfg.style.width + 'px';
+                    item.style.height = defaultCfg.style.height + 'px';
                     item.style.opacity = '1';
+                    item.style.cursor = 'default';
+                    item.innerHTML = self._buildBoxInnerHTML(defaultCfg);
+
+                    // Wire box toolbar delete
+                    item.querySelector('.box-delete-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, {
+                            body: 'Delete this section container and all its contents?',
+                            confirm: () => {
+                                if (self.state.showBoxProps && self._selectedBoxEl === item) {
+                                    self.closeBoxProps();
+                                }
+                                item.remove();
+                            },
+                            cancel: () => { },
+                        });
+                    };
+
+                    // Wire resize handles
+                    self._setupBoxResizeHandles(item);
+
+                    // Register inner dropzone as sortable zone
+                    const dropzone = item.querySelector('.box-dropzone');
+                    if (dropzone) {
+                        self._createBoxDropzoneSortable(dropzone);
+                    }
                 }
 
                 if (type === 'table') {
@@ -1045,7 +1256,7 @@ export class EditReport extends Component {
             try {
                 this.state.qr.previewLoading = true;
                 const res = await this.rpc('/cyllo_studio/generate_qr_token', {
-                    template: this.state.reportInfo.report_name,
+                    template: this.state.reportInfo.report_name || this._template,
                     options: {
                         requireAuth: this.state.qr.config.requireAuth,
                         trackAnalytics: this.state.qr.config.trackAnalytics,
@@ -1119,12 +1330,38 @@ export class EditReport extends Component {
         this.state.qr.qwebPreview = html;
     }
 
-    _buildQrExpression(forQWeb = false) {
-        const type = this.state.qr.type;
-        const config = this.state.qr.config;
+    _buildQrExpression(forQWeb = false, qrState = null) {
+        const type = qrState ? qrState.type : this.state.qr.type;
+        const config = qrState ? qrState.config : this.state.qr.config;
         const obj = 'doc'; // Always use 'doc' to match the blank report iterator
 
-        if (type === 'plain') return config.field.replace(/object\./g, obj + '.');
+        /**
+         * Determine whether a string value looks like a Python field expression
+         * (e.g. "doc.partner_id.name") or a static literal that must be quoted.
+         * A static value = anything that:
+         *   - contains '://' (URLs like https://...)
+         *   - starts with a digit or special char that isn't a valid Python identifier start
+         *   - contains spaces
+         *   - is NOT prefixed with a known Python variable name
+         */
+        const _quoteIfStatic = (val) => {
+            if (!val) return "''";
+            // Already a quoted string in the expression (starts/ends with quote)
+            if ((val.startsWith("'") && val.endsWith("'")) ||
+                (val.startsWith('"') && val.endsWith('"'))) {
+                return val;
+            }
+            // Looks like a field path: starts with a word char and contains only
+            // word chars, dots, underscores (e.g. doc.partner_id.name)
+            if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(val)) {
+                return val.replace(/object\./g, obj + '.');
+            }
+            // Static value — escape single quotes and wrap
+            const escaped = val.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            return `'${escaped}'`;
+        };
+
+        if (type === 'plain') return _quoteIfStatic(config.field);
         if (type === 'portal') {
             const path = config.portalPath || '/my/view/';
             // Ensure no double slashes between base_url and path
@@ -1148,8 +1385,9 @@ export class EditReport extends Component {
             const tn = config.noteField === 'custom' ? "'Payment'" : config.noteField.replace(/object\./g, obj + '.');
             return `'upi://pay?pa=${pa}&am=' + str(${am}) + '&tn=' + str(${tn})`;
         }
-        if (type === 'custom') return (config.expression || "''").replace(/object\./g, obj + '.');
+        if (type === 'custom') return _quoteIfStatic(config.expression || "''");
         if (type === 'pdf_link') {
+            const reportId = this.state.reportInfo?.id || this._reportId || 'REPORT_ID';
             let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
             return `${baseUrlStr} + '/report/pdf/${this.state.reportInfo.id}/' + str(${obj}.id) + '?token=${config.token || "PENDING"}'`;
         }
@@ -1389,7 +1627,7 @@ export class EditReport extends Component {
                 html += `<td style="${colStyle(col, align)}"><span t-field="line.${col.field}" /></td>`;
             });
             html += `
-                    </tr>
+                        </tr>
                 </t>`;
 
             // ── Preset: P&L ───────────────────────────────────────
@@ -1641,6 +1879,16 @@ export class EditReport extends Component {
         this._reportFrame.querySelectorAll('[cy-template]').forEach(zone => {
             this._createZoneSortable(zone);
         });
+
+        // Also register every box dropzone as a sortable target
+        this._reportFrame.querySelectorAll('.box-dropzone').forEach(dz => {
+            this._createBoxDropzoneSortable(dz);
+        });
+
+        // Re-wire resize handles for all box wrappers
+        this._reportFrame.querySelectorAll('.box-section-wrapper').forEach(bw => {
+            this._setupBoxResizeHandles(bw);
+        });
     }
 
     /** Kept for compatibility. */
@@ -1884,7 +2132,7 @@ export class EditReport extends Component {
                         const qr = JSON.parse(configStr);
                         const align = qr.config.align || 'center';
                         const size = qr.config.size || 100;
-                        const qwebExpr = self._buildQrExpression(true);
+                        const qwebExpr = self._buildQrExpression(true, qr);
 
                         el.innerHTML = '';
                         el.style.textAlign = align;
@@ -1926,7 +2174,7 @@ export class EditReport extends Component {
                 if (el.getAttribute('style') === '') el.removeAttribute('style');
             }
 
-            const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
+            const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .box-toolbar, .box-resize-handles, .box-resize-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
             handles.forEach(h => h.remove());
 
             // Unwrap wrappers
@@ -1938,6 +2186,48 @@ export class EditReport extends Component {
                     return;
                 }
             }
+            // ── Box Section Container Serialization ──
+            if (el.classList && el.classList.contains('box-section-wrapper')) {
+                let cfg = {};
+                try { cfg = JSON.parse(el.dataset.boxConfig || '{}'); } catch (ex) { }
+                const s = cfg.style || {};
+                const layoutMode = cfg.layoutMode || 'free';
+
+                // Build the output <div class="report-section">
+                const section = document.createElement('div');
+                section.className = 'report-section';
+                section.setAttribute('data-box-id', cfg.id || '');
+                section.setAttribute('data-layout-mode', layoutMode);
+
+                let styleStr = 'position:relative;';
+                styleStr += 'box-sizing:border-box;';
+                if (s.width) styleStr += `width:${s.width}px;`;
+                if (s.height) styleStr += `height:${s.height}px;`;
+                styleStr += `background-color:${s.backgroundColor || 'transparent'};`;
+                if (s.border && s.border !== 'none') styleStr += `border:${s.border};`;
+                if (s.borderRadius) styleStr += `border-radius:${s.borderRadius}px;`;
+                if (s.padding) styleStr += `padding:${s.padding}px;`;
+                if (layoutMode === 'flow') styleStr += 'display:flex;flex-direction:column;gap:8px;align-items:flex-start;';
+                section.setAttribute('style', styleStr);
+
+                // Move children from the dropzone into the section
+                const dropzone = el.querySelector('.box-dropzone');
+                if (dropzone) {
+                    Array.from(dropzone.children).forEach(child => {
+                        const childClone = child.cloneNode(true);
+                        section.appendChild(childClone);
+                    });
+                }
+
+                if (el.parentNode) {
+                    el.parentNode.replaceChild(section, el);
+                    // Recursively clean the children inside the new section
+                    Array.from(section.children).forEach(child => clean(child));
+                }
+                return;
+            }
+
+            // Legacy box-wrapper (old format) compat
             if (el.classList && el.classList.contains('box-wrapper')) {
                 const span = el.querySelector('span');
                 if (span && el.parentNode) {
@@ -1983,6 +2273,63 @@ export class EditReport extends Component {
     }
 
     _enrichReportDOM(container) {
+        // ── Enrich existing report-section boxes saved from previous edits ──
+        container.querySelectorAll('div.report-section:not(.box-section-wrapper *)').forEach(section => {
+            if (section.closest('.box-section-wrapper')) return;
+            // Extract stored config from data attrs or build default
+            let cfg;
+            try { cfg = section.dataset.boxConfig ? JSON.parse(section.dataset.boxConfig) : null; } catch (e) { cfg = null; }
+            if (!cfg) {
+                const boxId = section.dataset.boxId || ('box_' + Math.random().toString(36).slice(2, 10));
+                cfg = {
+                    id: boxId, label: section.dataset.boxLabel || 'Section',
+                    style: {
+                        width: section.offsetWidth || 300,
+                        height: section.offsetHeight || 200,
+                        backgroundColor: section.style.backgroundColor || 'transparent',
+                        border: section.style.border || '1px solid #ccc',
+                        borderRadius: parseInt(section.style.borderRadius) || 4,
+                        padding: parseInt(section.style.padding) || 8,
+                    },
+                    layoutMode: section.dataset.layoutMode || 'free',
+                    children: [],
+                };
+            }
+
+            // Grab all children before replace
+            const childNodes = Array.from(section.children);
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'box-section-wrapper';
+            wrapper.setAttribute('cy-type', 'box');
+            wrapper.setAttribute('data-box-id', cfg.id);
+            wrapper.setAttribute('data-box-config', JSON.stringify(cfg));
+            wrapper.style.width = (cfg.style.width || 300) + 'px';
+            wrapper.style.height = (cfg.style.height || 200) + 'px';
+            wrapper.innerHTML = this._buildBoxInnerHTML(cfg);
+
+            section.parentNode.insertBefore(wrapper, section);
+            section.remove();
+
+            // Move original children into the new dropzone
+            const dropzone = wrapper.querySelector('.box-dropzone');
+            childNodes.forEach(child => dropzone.appendChild(child));
+
+            // Wire delete
+            wrapper.querySelector('.box-delete-btn').onclick = (e) => {
+                e.stopPropagation();
+                this.dialog.add(ConfirmationDialog, {
+                    body: 'Delete this section container and all its contents?',
+                    confirm: () => {
+                        if (this._selectedBoxEl === wrapper) this.closeBoxProps();
+                        wrapper.remove();
+                    },
+                    cancel: () => { },
+                });
+            };
+            this._setupBoxResizeHandles(wrapper);
+        });
+
         const tables = container.querySelectorAll('table:not(.table-wrapper table)');
         tables.forEach(table => {
             if (table.closest('.table-wrapper')) return;
@@ -2042,6 +2389,179 @@ export class EditReport extends Component {
         });
 
         container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Box Section: Resize Handles
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Wire up pointer-based resize logic for all 8 handles on a box wrapper.
+     * Stores result back into data-box-config.
+     */
+    _setupBoxResizeHandles(boxEl) {
+        // Remove previous listeners by replacing handle container
+        const oldHandles = boxEl.querySelectorAll('.box-resize-handle');
+        oldHandles.forEach(h => {
+            // Clone replaces to remove old listeners
+            const clone = h.cloneNode(true);
+            h.parentNode && h.parentNode.replaceChild(clone, h);
+        });
+
+        const self = this;
+        boxEl.querySelectorAll('.box-resize-handle').forEach(handle => {
+            const dir = handle.dataset.dir;
+            let startX, startY, startW, startH;
+
+            const onMove = (e) => {
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                let newW = startW;
+                let newH = startH;
+
+                if (dir.includes('e')) newW = Math.max(80, startW + dx);
+                if (dir.includes('w')) newW = Math.max(80, startW - dx);
+                if (dir.includes('s')) newH = Math.max(80, startH + dy);
+                if (dir.includes('n')) newH = Math.max(80, startH - dy);
+
+                boxEl.style.width = newW + 'px';
+                boxEl.style.height = newH + 'px';
+
+                // Live-update config
+                try {
+                    const cfg = JSON.parse(boxEl.dataset.boxConfig || '{}');
+                    cfg.style = cfg.style || {};
+                    cfg.style.width = Math.round(newW);
+                    cfg.style.height = Math.round(newH);
+                    boxEl.dataset.boxConfig = JSON.stringify(cfg);
+                    // Update props panel if this box is selected
+                    if (self._selectedBoxEl === boxEl) {
+                        self.state.boxConfig.width = cfg.style.width;
+                        self.state.boxConfig.height = cfg.style.height;
+                    }
+                } catch (ex) { }
+            };
+
+            const onUp = () => {
+                document.removeEventListener('pointermove', onMove);
+                document.removeEventListener('pointerup', onUp);
+            };
+
+            handle.addEventListener('pointerdown', (e) => {
+                if (self.state.previewMode) return;
+                e.stopPropagation();
+                e.preventDefault();
+                startX = e.clientX;
+                startY = e.clientY;
+                startW = boxEl.offsetWidth;
+                startH = boxEl.offsetHeight;
+                document.addEventListener('pointermove', onMove);
+                document.addEventListener('pointerup', onUp);
+            });
+        });
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Box Properties Panel – OWL event handlers
+    // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Open the box properties panel for a given box wrapper element.
+     */
+    openBoxProps(boxEl) {
+        this._selectedBoxEl = boxEl;
+        let cfg = {};
+        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
+        const s = cfg.style || {};
+        this.state.boxConfig = {
+            label: cfg.label || 'Section',
+            width: s.width || boxEl.offsetWidth || 300,
+            height: s.height || boxEl.offsetHeight || 200,
+            backgroundColor: s.backgroundColor || 'transparent',
+            border: s.border || '1px solid #ccc',
+            borderRadius: s.borderRadius !== undefined ? s.borderRadius : 4,
+            padding: s.padding !== undefined ? s.padding : 8,
+            layoutMode: cfg.layoutMode || 'free',
+        };
+        this.state.showBoxProps = true;
+    }
+
+    closeBoxProps() {
+        this._selectedBoxEl = null;
+        this.state.showBoxProps = false;
+    }
+
+    /**
+     * Called when any box property input changes.
+     */
+    onBoxConfigChange(field, value) {
+        const boxEl = this._selectedBoxEl;
+        if (!boxEl) return;
+        this.state.boxConfig[field] = value;
+
+        let cfg = {};
+        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
+        cfg.style = cfg.style || {};
+
+        if (field === 'label') {
+            cfg.label = value;
+            const labelEl = boxEl.querySelector('.box-label-text');
+            if (labelEl) labelEl.textContent = value;
+        } else if (field === 'width') {
+            const v = Math.max(80, parseInt(value) || 80);
+            cfg.style.width = v;
+            boxEl.style.width = v + 'px';
+        } else if (field === 'height') {
+            const v = Math.max(80, parseInt(value) || 80);
+            cfg.style.height = v;
+            boxEl.style.height = v + 'px';
+        } else if (field === 'backgroundColor') {
+            cfg.style.backgroundColor = value;
+            const dz = boxEl.querySelector('.box-dropzone');
+            if (dz) dz.style.backgroundColor = value;
+        } else if (field === 'border') {
+            cfg.style.border = value;
+            const dz = boxEl.querySelector('.box-dropzone');
+            if (dz) dz.style.border = value;
+        } else if (field === 'borderRadius') {
+            const v = parseInt(value) || 0;
+            cfg.style.borderRadius = v;
+            const dz = boxEl.querySelector('.box-dropzone');
+            if (dz) dz.style.borderRadius = v + 'px';
+        } else if (field === 'padding') {
+            const v = parseInt(value) || 0;
+            cfg.style.padding = v;
+            const dz = boxEl.querySelector('.box-dropzone');
+            if (dz) dz.style.padding = v + 'px';
+        }
+
+        boxEl.dataset.boxConfig = JSON.stringify(cfg);
+    }
+
+    onBoxLayoutModeChange(mode) {
+        const boxEl = this._selectedBoxEl;
+        if (!boxEl) return;
+        this.state.boxConfig.layoutMode = mode;
+
+        let cfg = {};
+        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
+        cfg.layoutMode = mode;
+        boxEl.dataset.boxConfig = JSON.stringify(cfg);
+
+        const dz = boxEl.querySelector('.box-dropzone');
+        if (dz) {
+            dz.classList.remove('layout-free', 'layout-flow');
+            dz.classList.add('layout-' + mode);
+        }
+        const badge = boxEl.querySelector('.box-layout-badge');
+        if (badge) badge.textContent = mode;
+    }
+
+    deleteSelectedBox() {
+        const boxEl = this._selectedBoxEl;
+        if (!boxEl) return;
+        this.closeBoxProps();
+        boxEl.remove();
     }
 
     buildInheritanceXML(changes) {
