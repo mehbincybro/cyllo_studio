@@ -154,3 +154,32 @@ class CylloAutoWorkController(http.Controller):
             'installed': installed,
             'configured': bool(installed and token),
         }
+
+    @http.route(
+        '/cyllo_workflow/test_run',
+        type='json',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
+    def test_run_workflow(self, work_auto_id, **kwargs):
+        """
+            Validate a workflow in dry-run mode and return node-level results.
+        """
+        automation = request.env['work.auto'].browse(int(work_auto_id))
+        if not automation.exists():
+            return {
+                'ok': False,
+                'error': 'Workflow not found.',
+            }
+        try:
+            payload = automation.dry_run()
+        except Exception as exc:
+            return {
+                'ok': False,
+                'error': str(exc),
+            }
+        return {
+            'ok': True,
+            **payload,
+        }

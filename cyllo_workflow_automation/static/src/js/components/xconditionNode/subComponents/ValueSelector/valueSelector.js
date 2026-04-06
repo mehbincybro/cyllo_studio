@@ -116,20 +116,68 @@ export class ValueSelector extends Component {
     handleRecordFieldType(field, operator) {
         const { info: { fieldDef } } = field;
         const handlers = {
-            static: () => getValueEditorInfo(fieldDef, operator),
+            static: () => this.getStaticRecordEditorInfo(fieldDef, operator),
             variable: () => this.getVariableSelectorInfo(operator, fieldDef),
             record: () => this.getRecordPathSelectorInfo(operator, field.info)
         };
         return handlers[this.state.fieldType]?.();
     }
 
+    getStaticRecordEditorInfo(fieldDef, operator) {
+        if (!fieldDef) {
+            return false;
+        }
+        if (fieldDef.type === "record") {
+            if (["set", "not_set"].includes(operator)) {
+                return false;
+            }
+            if (["in", "not in"].includes(operator)) {
+                return {
+                    component: DomainSelectorAutocomplete,
+                    extractProps: ({ value, update }) => ({
+                        resIds: value || [],
+                        update,
+                        resModel: fieldDef.relation || "",
+                        placeholder: "Select records here..."
+                    }),
+                };
+            }
+            if (["=", "!="].includes(operator)) {
+                return {
+                    component: DomainSelectorSingleAutocomplete,
+                    extractProps: ({ value, update }) => ({
+                        resId: value || false,
+                        update,
+                        resModel: fieldDef.relation || "",
+                        placeholder: "Select record here..."
+                    }),
+                };
+            }
+            return false;
+        }
+        if (fieldDef.type === "recordset") {
+            if (["set", "not_set"].includes(operator)) {
+                return false;
+            }
+            return {
+                component: DomainSelectorAutocomplete,
+                extractProps: ({ value, update }) => ({
+                    resIds: value || [],
+                    update,
+                    resModel: fieldDef.relation || "",
+                    placeholder: "Select records here..."
+                }),
+            };
+        }
+        return getValueEditorInfo(fieldDef, operator);
+    }
+
     handleVariableFieldType(field, operator) {
         const variable = this.props.variables.find(v => v.id === field.selectedVariable);
-        const fallbackModel = this.env.globalContext ? this.env.globalContext().modelName : null;
         const info = {
             fieldDef: {
                 type: variable?.variable_type,    //TODO:Temporarily added ternary function to avoid error
-                relation: variable?.modelName || variable?.model_name || this.varModelDefs.get(variable?.id) || fallbackModel,
+                relation: variable?.modelName,
             }
         }
         const handlers = {
@@ -271,7 +319,7 @@ export class ValueSelector extends Component {
                     return {
                         resId: value || false,
                         update,
-                        resModel: this.varModelDefs.get(variableId),
+                        resModel: this.varModelDefs.get(variableId) || "",
                         placeholder: "Select record here..."
                     }
                 },

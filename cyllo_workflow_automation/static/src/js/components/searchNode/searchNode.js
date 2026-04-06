@@ -58,23 +58,25 @@ export class SearchNode extends ConfigurationBase {
         }, () => [this.fieldState.search_limit, this.modelState.model_name,]);
     }
     async fetchData() {
-        await this.setModelState();
         await super.fetchData();
+        await this.setModelState();
     }
 
     async setModelState() {
-        const model_res = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
-        if (model_res.length > 0) {
-            let { display_name, id } = model_res[0];
-            const struct_res = await this.orm.read("node.struct", [this.props.id], ['model_id']);
-            if (struct_res.length > 0 && struct_res[0].model_id) {
-                const updated_model_res = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name']);
-                if (updated_model_res.length > 0) {
-                    display_name = updated_model_res[0].display_name;
-                    id = updated_model_res[0].id;
-                }
+        const selectedModelId = this.fieldState.model_id;
+        if (selectedModelId) {
+            const selectedModel = await this.orm.read("ir.model", [selectedModelId], ["display_name", "model"]);
+            if (selectedModel.length > 0) {
+                const { display_name, model, id } = selectedModel[0];
+                this.updateModelState({ display_name, model, id });
+                return;
             }
-            this.updateModelState({ display_name, model: this.props.resModel, id })
+        }
+
+        const model_res = await this.orm.searchRead("ir.model", [['model', '=', this.props.resModel]], ['display_name', 'model']);
+        if (model_res.length > 0) {
+            const { display_name, model, id } = model_res[0];
+            this.updateModelState({ display_name, model, id })
         }
     }
 

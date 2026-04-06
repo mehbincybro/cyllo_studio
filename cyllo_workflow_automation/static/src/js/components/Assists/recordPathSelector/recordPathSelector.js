@@ -37,26 +37,59 @@ export class RecordPathSelector extends Component {
     async setState(props) {
         const selectedVariable = this.props.variables.find(item => item.id === props.value.record);
         if (selectedVariable) {
-            const model = await this.orm.read("ir.model", [selectedVariable.modelId], []);
-            this.state.model = model? model[0] : undefined;
+            const modelId = selectedVariable.modelId || (Array.isArray(selectedVariable.model_id) ? selectedVariable.model_id[0] : selectedVariable.model_id);
+            if (modelId) {
+                const model = await this.orm.read("ir.model", [modelId], ["model"]);
+                this.state.model = model ? model[0] : undefined;
+            } else {
+                this.state.model = undefined;
+            }
             this.state.selectedRecord = props.value.record;
             this.state.path = props.value.path;
         }
     }
 
     get options() {
-        return [[false, ""], ...this.props.variables.map(variable => [variable.id, variable.variable_name])];
+        const variables = this.props.variables || [];
+        return [[false, ""], ...variables.map(variable => [variable.id, variable.variable_name])];
     }
-     /**
-     * Handles the update of the selected record based on the user's choice.
-     * @param {String|Boolean} value - The selected variable's ID or false if none is selected.
-     */
+    /**
+    * Handles the update of the selected record based on the user's choice.
+    * @param {String|Boolean} value - The selected variable's ID or false if none is selected.
+    */
     async handleUpdateRecord(value) {
         if (value) {
             const selectedVariable = this.props.variables.find(item => item.id === value);
-            const model = await this.orm.read("ir.model", [selectedVariable.modelId], []);
-            this.state.model = model? model[0] : undefined;
+            let modelId = selectedVariable?.modelId || (Array.isArray(selectedVariable?.model_id) ? selectedVariable?.model_id[0] : selectedVariable?.model_id);
+            let modelName = selectedVariable?.modelName || selectedVariable?.model_name;
+
+            if (selectedVariable && modelId) {
+                const model = await this.orm.read("ir.model", [modelId], ["model"]);
+                this.state.model = model ? model[0] : undefined;
+                if (this.state.model) {
+                    modelName = this.state.model.model;
+                }
+            } else {
+                this.state.model = undefined;
+            }
             this.state.selectedRecord = value;
+
+            // Proactively notify parent about the model of this record/variable
+            // This is crucial for ValueSelector to know which model to use for Static record selection.
+            if (modelName) {
+                this.props.update({
+                    record: value,
+                    path: this.state.path,
+                    pathValue: this.state.path, // If path is empty, use variable itself
+                    info: {
+                        fieldDef: {
+                            type: 'record',
+                            relation: modelName
+                        },
+                        resModel: modelName
+                    }
+                });
+            }
         } else {
             this.state.selectedRecord = value;
             this.state.model = undefined;

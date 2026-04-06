@@ -21,6 +21,7 @@
 #############################################################################
 import base64
 import os
+import time
 import types
 from collections import defaultdict
 import logging
@@ -38,6 +39,33 @@ _logger = logging.getLogger(__name__)
 
 
 class WorkFunctionArg(models.Model):
+    """
+        A model representing an argument for a specific work function.
+
+        This class defines an argument (`WorkArg`) that can be associated with
+        a work function (`work.function`). It specifies the name and type of the argument,
+        along with a reference to the function it belongs to.
+
+        Fields:
+            name (Char): The name of the argument (default: 'arg').
+            ttype (Selection): The data type of the argument, which can be one of the following:
+                - 'dict': Dictionary
+                - 'list': List
+                - 'tuple': Tuple
+                - 'str': String (default)
+                - 'int': Integer
+                - 'float': Float
+                - 'None': None
+                - 'set': Set
+                - 'bool': Boolean
+                - 'record': Record
+                - 'recordset': Record set
+                - 'other': Other (custom type)
+            function_id (Many2one): A reference to the associated work function (`work.function`).
+
+        Model:
+            _name: 'work.function.arg'
+        """
     _name = "work.function.arg"
 
     name = fields.Char('Arg name', default='arg')
@@ -57,6 +85,25 @@ class WorkFunctionArg(models.Model):
 
 
 class ProcessArg(models.Model):
+    """
+        A model representing an argument for a specific work process, inheriting from 'work.function.arg'.
+
+        This class extends the `WorkArg` model by adding additional fields to specify
+        whether the argument is related to the 'before' or 'after' stages of a process.
+        It also introduces a value field to store the argument's content.
+
+        Fields:
+            value (Char): The value or content of the argument.
+            is_before (Boolean): A flag indicating whether the argument is used before a process (default: False).
+            is_after (Boolean): A flag indicating whether the argument is used after a process (default: False).
+
+        Methods:
+            check_is_before: Validates that either `is_before` or `is_after` is set to True.
+
+        Model:
+            _name: 'work.process.arg'
+            _inherit: 'work.function.arg'
+        """
     _name = "work.process.arg"
     _inherit = "work.function.arg"
 
@@ -460,6 +507,322 @@ class WorkAuto(models.Model):
 
         return list(dict.fromkeys(function_ids))
 
+    def _get_test_node_order(self):
+        """
+            Return workflow nodes in execution-like traversal order.
+
+            Uses the persisted drawflow graph to walk from root nodes through
+            outgoing connections in output order, then appends any disconnected
+            nodes that were not reached.
+        """
+        self.ensure_one()
+        flow_data = self.flow_data or {}
+        drawflow = flow_data.get('drawflow', {}) or {}
+        home = drawflow.get('Home', {}) or {}
+        nodes = home.get('data', {}) or {}
+        if not nodes:
+            return self.env['node.struct']
+
+        node_by_struct_id = {}
+        incoming_counts = defaultdict(int)
+        adjacency = defaultdict(list)
+
+        def _output_sort_key(item):
+            label = item[0] or ''
+            if '_' in label:
+                try:
+                    return int(label.split('_')[-1])
+                except ValueError:
+                    return label
+            return label
+
+        for draw_node_id, draw_node in nodes.items():
+            node_data = draw_node.get('data') or {}
+            struct_id = node_data.get('nodeId')
+            if struct_id:
+                node_by_struct_id[int(struct_id)] = draw_node
+            outputs = draw_node.get('outputs', {}) or {}
+            for _output_name, output in sorted(outputs.items(), key=_output_sort_key):
+                for connection in output.get('connections', []) or []:
+                    target_draw_id = str(connection.get('node'))
+                    if target_draw_id in nodes:
+                        adjacency[str(draw_node_id)].append(target_draw_id)
+                        incoming_counts[target_draw_id] += 1
+
+        root_ids = []
+        for draw_node_id, draw_node in nodes.items():
+            if incoming_counts.get(str(draw_node_id), 0) == 0:
+                root_ids.append(str(draw_node_id))
+        if not root_ids:
+            root_ids = list(nodes.keys())
+
+        ordered_struct_ids = []
+        visited_draw_ids = set()
+
+        def _visit(draw_node_id):
+            key = str(draw_node_id)
+            if key in visited_draw_ids:
+                return
+            visited_draw_ids.add(key)
+            draw_node = nodes.get(key) or {}
+            struct_id = (draw_node.get('data') or {}).get('nodeId')
+            if struct_id:
+                ordered_struct_ids.append(int(struct_id))
+            for child_id in adjacency.get(key, []):
+                _visit(child_id)
+
+        for root_id in root_ids:
+            _visit(root_id)
+        for draw_node_id in nodes.keys():
+            _visit(draw_node_id)
+
+        if not ordered_struct_ids:
+            return self.node_struct_ids.sorted('id')
+
+        node_map = {node.id: node for node in self.node_struct_ids}
+        return self.env['node.struct'].browse(
+            [node_id for node_id in ordered_struct_ids if node_id in node_map]
+        )
+
+    def dry_run(self):
+        """
+            Validate workflow nodes without executing side effects.
+
+            Returns:
+                dict: Summary payload with node-level validation results.
+        """
+        self.ensure_one()
+        if not self.is_record_saved:
+            raise exceptions.ValidationError(
+                _("Save the workflow before running a test.")
+            )
+        if not self.reuse_scope == 'generic' and not self.model_id:
+            raise exceptions.ValidationError(
+                _("Select an object before running a test.")
+            )
+
+        results = []
+        counts = {
+            'success': 0,
+            'error': 0,
+            'warning': 0,
+        }
+        flow_nodes = {}
+        drawflow = (self.flow_data or {}).get('drawflow', {}) or {}
+        home = drawflow.get('Home', {}) or {}
+        for draw_node in (home.get('data', {}) or {}).values():
+            node_data = draw_node.get('data') or {}
+            struct_id = node_data.get('nodeId')
+            if struct_id:
+                flow_nodes[int(struct_id)] = node_data
+
+        external_nodes = {'Mail', 'SMS', 'WhatsApp'}
+        trigger_labels = {'On Create', 'On Write', 'On Unlink', 'On Field Change', 'On Time'}
+
+        def _is_empty(value):
+            if value in (False, None):
+                return True
+            if isinstance(value, str):
+                return not value.strip()
+            if isinstance(value, (list, tuple, dict, set)):
+                return len(value) == 0
+            return False
+
+        def _has_configured_create_value(entry):
+            if not isinstance(entry, dict):
+                return not _is_empty(entry)
+            value_key = 'field_value' if 'field_value' in entry else 'value'
+            if value_key not in entry:
+                return False
+            value = entry.get(value_key)
+            field_type = entry.get('type')
+            if field_type == 'boolean':
+                return True
+            if field_type in ('integer', 'float', 'monetary'):
+                return value not in (None, False, '')
+            return not _is_empty(value)
+
+        def _get_create_validation(node):
+            required_fields = node.create_required_field or []
+            provided = node.create_req_fields_values or []
+            tree_values = node.create_tree_fields_values or []
+
+            if not node.model_id:
+                return 'error', _("Select a model to create records.")
+
+            if not required_fields:
+                if provided or tree_values:
+                    return 'success', _("Create values configured.")
+                return 'error', _("Add at least one field to create.")
+
+            filled_names = set()
+            for entry in provided:
+                if not isinstance(entry, dict):
+                    continue
+                field_name = (
+                    entry.get('name') or entry.get('field_name') or
+                    entry.get('technical_name') or entry.get('value')
+                )
+                if field_name and _has_configured_create_value(entry):
+                    filled_names.add(field_name)
+
+            for field in required_fields:
+                if not isinstance(field, dict):
+                    continue
+                field_name = (
+                    field.get('name') or field.get('field_name') or
+                    field.get('technical_name')
+                )
+                if field_name and _has_configured_create_value(field):
+                    filled_names.add(field_name)
+
+            missing = []
+            for field in required_fields:
+                if isinstance(field, dict):
+                    field_name = (
+                        field.get('name') or field.get('field_name') or
+                        field.get('technical_name')
+                    )
+                else:
+                    field_name = field
+                if field_name and field_name not in filled_names:
+                    missing.append(field_name)
+            if not missing:
+                return 'success', _("Create values configured.")
+
+            if tree_values:
+                return (
+                    'warning',
+                    _("Required create fields are missing in test input: %s. Node was simulated without creating data.") % ', '.join(missing)
+                )
+
+            return (
+                'warning',
+                _("Mandatory create fields are not mapped for test mode: %s. Add sample values to fully validate this node.") % ', '.join(missing)
+            )
+
+        def _validate_node(node):
+            label = node.label or node.name or _("Node")
+            node_name = node.name or ''
+            flow_node = flow_nodes.get(node.id, {})
+            flow_node_type = flow_node.get('type')
+
+            if node.type == 'model':
+                return 'success', _("Object selected.")
+            if node.type in ('action', 'trigger') or flow_node_type == 'action':
+                trigger_type = node.trigger_type or flow_node.get('trigger_type')
+                trigger_label = node.ttype or flow_node.get('ttype') or node_name
+                model_info = flow_node.get('model')
+                has_function_link = (
+                    isinstance(model_info, (list, tuple)) and bool(model_info and model_info[0])
+                ) or (
+                    isinstance(model_info, dict) and bool(model_info.get('id'))
+                )
+                if trigger_type or trigger_label in trigger_labels or has_function_link:
+                    return 'success', _("Trigger configured.")
+                return 'error', _("Select a trigger type.")
+            if node_name in external_nodes:
+                return 'success', _("Validated in test mode. It will execute during real workflow runtime.")
+            if node_name == 'Condition':
+                if not _is_empty(node.condition_tree_value):
+                    return 'success', _("Condition configured.")
+                return 'error', _("Add a condition before testing.")
+            if node_name == 'Loop':
+                if not _is_empty(node.loop_collection):
+                    return 'success', _("Loop source configured.")
+                return 'error', _("Choose a loop collection.")
+            if node_name == 'Create':
+                return _get_create_validation(node)
+            if node_name == 'Write':
+                if not _is_empty(node.write_selected_record) and not _is_empty(node.write_field_value):
+                    return 'success', _("Write target configured.")
+                return 'error', _("Choose a record and at least one field to write.")
+            if node_name == 'Variable':
+                if node.variable_name and not _is_empty(node.variable_value):
+                    return 'success', _("Variable configured.")
+                return 'error', _("Set both variable name and value.")
+            if node_name == 'Activity':
+                if not _is_empty(node.activity_type) and not _is_empty(node.activity_user):
+                    return 'success', _("Activity configured.")
+                return 'error', _("Select an activity type and responsible user.")
+            if node_name == 'Warning':
+                if node.warning_type and node.warning_text:
+                    return 'success', _("Warning configured.")
+                return 'error', _("Add a warning type and message.")
+            if node_name == 'Search':
+                has_tree_domain = (
+                    isinstance(node.search_domain_tree, dict)
+                    and bool(node.search_domain_tree.get('children'))
+                )
+                if not _is_empty(node.search_domain) or has_tree_domain:
+                    return 'success', _("Search domain configured.")
+                return 'error', _("Define a search domain.")
+            if node_name == 'Code':
+                if _is_empty(node.code_code):
+                    return 'error', _("Add Python code to validate.")
+                try:
+                    compile(node.code_code.strip(), '<workflow_test>', 'exec')
+                except Exception as exc:
+                    return 'error', _("Code syntax error: %s") % exc
+                return 'success', _("Code syntax is valid.")
+            if node_name == 'Button Click':
+                if not _is_empty(node.function_name):
+                    return 'success', _("Function configured.")
+                return 'error', _("Select a function to call.")
+            if node_name == 'Reuse Automation':
+                reused = node.reused_work_auto_id
+                if reused and reused.active:
+                    return 'success', _("Reusable automation is available.")
+                return 'error', _("Select an active reusable automation.")
+            if node_name == 'Follower':
+                if not _is_empty(node.followers):
+                    return 'success', _("Followers configured.")
+                return 'error', _("Select at least one follower.")
+            if node.code and node.code.strip():
+                return 'success', _("%s configured.") % label
+            return 'error', _("%s is not configured.") % label
+
+        node_order = self._get_test_node_order()
+        record_info = False
+
+        try:
+            with self.env.cr.savepoint():
+                recordset = self.env[self.model_id.model].search([], limit=1) if self.model_id else self.env['res.partner'].browse()
+                if recordset:
+                    record_info = {
+                        'id': recordset.id,
+                        'display_name': recordset.display_name,
+                    }
+
+                for node in node_order:
+                    start_time = time.perf_counter()
+                    status, message = _validate_node(node)
+                    duration_ms = int((time.perf_counter() - start_time) * 1000)
+                    counts[status] = counts.get(status, 0) + 1
+                    results.append({
+                        'node_id': node.id,
+                        'name': node.name,
+                        'label': node.label or node.name,
+                        'status': status,
+                        'message': message,
+                        'duration_ms': duration_ms,
+                    })
+                raise exceptions.UserError("__cyllo_test_workflow_rollback__")
+        except exceptions.UserError as exc:
+            if exc.args and exc.args[0] != "__cyllo_test_workflow_rollback__":
+                raise
+
+        return {
+            'results': results,
+            'summary': {
+                'total': len(results),
+                'success': counts.get('success', 0),
+                'error': counts.get('error', 0),
+                'warning': counts.get('warning', 0),
+            },
+            'record': record_info,
+        }
+
     @api.depends('flow_data')
     def _compute_trigger_functions(self):
         """
@@ -732,6 +1095,15 @@ class WorkAuto(models.Model):
 
         incoming_trigger = args.get('trigger_type', '')
         records = args.get('records', False)
+
+        # ── Normalise time-trigger args ───────────────────────────────────────
+        # Scheduled workflows are attached to a model but don't receive an
+        # incoming recordset from ir.cron. Resolve the workflow model records so
+        # downstream nodes such as Activity can operate on actual records.
+        if incoming_trigger == 'time' and not records and self.model_id:
+            model_name = self.model_id.sudo().model
+            records = self.env[model_name].search([])
+            args = dict(args, records=records, current_record=records)
 
         # ── Transaction-level dedup (create / write / unlink only) ────────────
         # Prevents N duplicate actions when Odoo calls write() multiple times

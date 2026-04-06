@@ -12,6 +12,7 @@ import { variableFields } from "./fields.js";
 import { VariableNode } from "./components/variableNode/variableNode.js";
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { _t } from "@web/core/l10n/translation";
+import { jsonrpc } from "@web/core/network/rpc_service";
 import { ConfirmationPopup } from "@cyllo_web/js/popups/popups";
 import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
 import { FoldOut } from "./automationComponents/FoldOut/FoldOut";
@@ -21,6 +22,7 @@ import { removeNodeIdFromVariables, settingInitialContext } from "./utils/utils"
 import { CustomTrigger } from "./components/customTriggers/customTriggers";
 import { WorkPager } from "./components/Assists/workPager/workPager";
 import { SaveLoading } from "./components/Assists/effect/saveLoading/saveLoading";
+import { TestResultPanel } from "./components/testResultPanel/testResultPanel";
 import { HistoryManager } from "./utils/historyManager";
 import { cloneState } from "./utils/stateClone";
 
@@ -118,12 +120,6 @@ export class WorkFlowAuto extends Component {
                         variable_value: "records",
                         variable_type: "record"
                     }),
-                    owl.reactive({
-                        id: "global/variable/workflow/stack",
-                        variable_name: "__workflow_stack__",
-                        variable_value: "[]",
-                        variable_type: "list"
-                    }),
                 ]
             })
         })
@@ -180,6 +176,8 @@ export class WorkFlowAuto extends Component {
             canUndo: false,
             canRedo: false,
             hasWhatsappModule: false,
+            testRunning: false,
+            testResult: null,
         })
 
         this.branchInputMap = {};
@@ -192,6 +190,16 @@ export class WorkFlowAuto extends Component {
         };
 
         this.initialLoad = true;
+        this.testResetTimer = null;
+        this.testAnimationRunId = 0;
+        this.activeTestConnections = new Set();
+        this.completedTestConnections = new Set();
+        this.canvasPanFrame = null;
+        this.pendingCanvasPan = { x: 0, y: 0 };
+        this.canvasFocusFrame = null;
+        this.initialViewport = null;
+        this.handleWindowClickForTestReset = this.onWindowClickForTestReset.bind(this);
+        this.handleCanvasWheel = this.onCanvasWheel.bind(this);
         const saveContext = useSaveContext();
         this.saveManually = saveContext.saveManually;
         this.id = saveContext.id;
@@ -304,6 +312,19 @@ export class WorkFlowAuto extends Component {
         onWillUnmount(() => {
             window.removeEventListener('keydown', this.onKeyDown.bind(this));
             window.removeEventListener('focus', this.refreshWhatsappModuleVisibility);
+            window.removeEventListener('click', this.handleWindowClickForTestReset);
+            if (this.drawBoard?.el) {
+                this.drawBoard.el.removeEventListener('wheel', this.handleCanvasWheel);
+            }
+            if (this.testResetTimer) {
+                clearTimeout(this.testResetTimer);
+            }
+            if (this.canvasPanFrame) {
+                cancelAnimationFrame(this.canvasPanFrame);
+            }
+            if (this.canvasFocusFrame) {
+                cancelAnimationFrame(this.canvasFocusFrame);
+            }
         });
 
         onMounted(async () => {
@@ -324,13 +345,14 @@ export class WorkFlowAuto extends Component {
                 };
             };
 
-            const renderFunc = (obj, ref) => {
-                const { component, props, options } = obj;
-                this.state.nodeDetails.push({ ...obj, ref });
-                this.data = { ...obj, ref };
-            };
-            const owlC = { version: 3, h: preRender, render: renderFunc };
-            this.editor = new Drawflow(this.drawBoard.el, owlC);
+        const renderFunc = (obj, ref) => {
+            const { component, props, options } = obj;
+            this.state.nodeDetails.push({ ...obj, ref });
+            this.data = { ...obj, ref };
+        };
+        const owlC = { version: 3, h: preRender, render: renderFunc };
+        this.editor = new Drawflow(this.drawBoard.el, owlC);
+        this.drawBoard.el.addEventListener('wheel', this.handleCanvasWheel, { passive: false });
 
             this.editor.contextmenu = (e) => {
                 if (
@@ -1064,9 +1086,199 @@ export class WorkFlowAuto extends Component {
             this.editor.canvas_x = targetX;
             this.editor.canvas_y = targetY;
             this.editor.precanvas.style.transform = `translate(${targetX}px, ${targetY}px) scale(${this.editor.zoom})`;
+            this.initialViewport = {
+                canvas_x: this.editor.canvas_x,
+                canvas_y: this.editor.canvas_y,
+                zoom: this.editor.zoom,
+            };
         };
 
         requestAnimationFrame(() => requestAnimationFrame(applyPosition));
+    }
+
+    restoreInitialViewport() {
+        if (!this.initialViewport || !this.editor?.precanvas) {
+            return false;
+        }
+        if (this.canvasFocusFrame) {
+            cancelAnimationFrame(this.canvasFocusFrame);
+            this.canvasFocusFrame = null;
+        }
+        this.editor.canvas_x = this.initialViewport.canvas_x;
+        this.editor.canvas_y = this.initialViewport.canvas_y;
+        this.editor.zoom = this.initialViewport.zoom;
+        this.editor.zoom_last_value = this.initialViewport.zoom;
+        this.applyCanvasTransform();
+        return true;
+    }
+
+    getViewportBoundsForNodes(nodes) {
+        if (!nodes?.length || !this.drawBoard?.el || !this.editor?.precanvas) {
+            return null;
+        }
+        const isSingleElement = nodes.length === 1;
+        const bounds = nodes.reduce((acc, node) => {
+            const nodeBounds = this.getNodeCanvasBounds(node);
+            if (!nodeBounds) {
+                return acc;
+            }
+            return {
+                minX: Math.min(acc.minX, nodeBounds.left),
+                minY: Math.min(acc.minY, nodeBounds.top),
+                maxX: Math.max(acc.maxX, nodeBounds.right),
+                maxY: Math.max(acc.maxY, nodeBounds.bottom),
+            };
+        }, {
+            minX: Infinity,
+            minY: Infinity,
+            maxX: -Infinity,
+            maxY: -Infinity,
+        });
+
+        if (!Number.isFinite(bounds.minX)) {
+            return null;
+        }
+
+        const viewportWidth = this.drawBoard.el.clientWidth;
+        const viewportHeight = this.drawBoard.el.clientHeight;
+        const drawBoardRect = this.drawBoard.el.getBoundingClientRect();
+        const sidebar = this.root.el?.querySelector('.cy_w_sidebar');
+        const zoomControls = this.root.el?.querySelector('.bar-zoom');
+        const sidebarRect = sidebar?.getBoundingClientRect();
+        const zoomRect = zoomControls?.getBoundingClientRect();
+        const leftOcclusion = sidebarRect
+            ? Math.max(0, Math.min(drawBoardRect.right, sidebarRect.right) - drawBoardRect.left)
+            : 0;
+        const rightOcclusion = zoomRect
+            ? Math.max(0, drawBoardRect.right - Math.max(drawBoardRect.left, zoomRect.left))
+            : 0;
+        const width = Math.max(1, bounds.maxX - bounds.minX);
+        const height = Math.max(1, bounds.maxY - bounds.minY);
+        const basePaddingX = isSingleElement ? Math.max(56, viewportWidth * 0.08) : Math.max(72, viewportWidth * 0.12);
+        const basePaddingY = isSingleElement ? Math.max(48, viewportHeight * 0.08) : Math.max(56, viewportHeight * 0.12);
+        const paddingLeft = basePaddingX + leftOcclusion;
+        const paddingRight = basePaddingX + Math.max(20, rightOcclusion * 0.5);
+        const paddingY = basePaddingY;
+        const availableWidth = Math.max(160, viewportWidth - paddingLeft - paddingRight);
+        const availableHeight = Math.max(120, viewportHeight - paddingY * 2);
+        const fittedZoom = Math.min(
+            this.editor.zoom_max,
+            Math.max(
+                isSingleElement ? Math.max(this.editor.zoom_min, 1.15) : Math.max(this.editor.zoom_min, 0.95),
+                Math.min(
+                    availableWidth / width,
+                    availableHeight / height
+                )
+            )
+        );
+
+        const centerX = bounds.minX + width / 2;
+        const centerY = bounds.minY + height / 2;
+        const visibleCenterX = paddingLeft + availableWidth / 2;
+        const visibleCenterY = paddingY + availableHeight / 2;
+        const targetX = visibleCenterX - centerX * fittedZoom;
+        const targetY = visibleCenterY - centerY * fittedZoom;
+        return { targetX, targetY, targetZoom: fittedZoom };
+    }
+
+    animateCanvasFocus(targetX, targetY, targetZoom, duration = 320) {
+        if (!this.editor?.precanvas) {
+            return;
+        }
+        if (this.canvasFocusFrame) {
+            cancelAnimationFrame(this.canvasFocusFrame);
+        }
+        const startX = this.editor.canvas_x;
+        const startY = this.editor.canvas_y;
+        const startZoom = this.editor.zoom;
+        const startedAt = performance.now();
+        const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+        const step = (now) => {
+            const progress = Math.min(1, (now - startedAt) / duration);
+            const eased = easeOutCubic(progress);
+            this.editor.canvas_x = startX + (targetX - startX) * eased;
+            this.editor.canvas_y = startY + (targetY - startY) * eased;
+            this.editor.zoom = startZoom + (targetZoom - startZoom) * eased;
+            this.editor.zoom_last_value = this.editor.zoom;
+            this.applyCanvasTransform();
+            if (progress < 1) {
+                this.canvasFocusFrame = requestAnimationFrame(step);
+            } else {
+                this.canvasFocusFrame = null;
+            }
+        };
+
+        this.canvasFocusFrame = requestAnimationFrame(step);
+    }
+
+    focusCanvasOnNodes(nodes) {
+        const viewport = this.getViewportBoundsForNodes(nodes);
+        if (!viewport) {
+            return false;
+        }
+        this.animateCanvasFocus(viewport.targetX, viewport.targetY, viewport.targetZoom);
+        return true;
+    }
+
+    focusSelectedNode() {
+        if (!this.state.selectedNodeID) {
+            return false;
+        }
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const selectedNode = Object.values(flowData).find(
+            (node) => Number(node.id) === Number(this.state.selectedNodeID)
+        );
+        if (!selectedNode) {
+            return false;
+        }
+        return this.focusCanvasOnNodes([selectedNode]);
+    }
+
+    focusWorkflowContent() {
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const nodes = Object.values(flowData);
+        if (!nodes.length) {
+            return false;
+        }
+        return this.focusCanvasOnNodes(nodes);
+    }
+
+    applyCanvasTransform() {
+        if (!this.editor?.precanvas) {
+            return;
+        }
+        this.editor.precanvas.style.transform =
+            `translate(${this.editor.canvas_x}px, ${this.editor.canvas_y}px) scale(${this.editor.zoom})`;
+    }
+
+    flushCanvasPan() {
+        this.canvasPanFrame = null;
+        if (!this.editor) {
+            this.pendingCanvasPan = { x: 0, y: 0 };
+            return;
+        }
+        this.editor.canvas_x -= this.pendingCanvasPan.x;
+        this.editor.canvas_y -= this.pendingCanvasPan.y;
+        this.pendingCanvasPan = { x: 0, y: 0 };
+        this.applyCanvasTransform();
+    }
+
+    onCanvasWheel(ev) {
+        if (!this.editor || ev.ctrlKey) {
+            return;
+        }
+        const deltaX = ev.deltaX || (ev.shiftKey ? ev.deltaY : 0);
+        const deltaY = ev.deltaY;
+        if (!deltaX && !deltaY) {
+            return;
+        }
+        ev.preventDefault();
+        this.pendingCanvasPan.x += deltaX;
+        this.pendingCanvasPan.y += deltaY;
+        if (!this.canvasPanFrame) {
+            this.canvasPanFrame = requestAnimationFrame(() => this.flushCanvasPan());
+        }
     }
 
     async loadData() {
@@ -1084,11 +1296,44 @@ export class WorkFlowAuto extends Component {
         this.editor.import(data)
     }
 
+    getNodeCanvasBounds(node) {
+        if (!this.editor?.precanvas || !node) {
+            return null;
+        }
+        const nodeElement = this.editor.precanvas.querySelector(`#node-${node.id}`);
+        if (nodeElement) {
+            const left = Number(nodeElement.offsetLeft || 0);
+            const top = Number(nodeElement.offsetTop || 0);
+            const width = Number(nodeElement.offsetWidth || 180);
+            const height = Number(nodeElement.offsetHeight || 72);
+            return {
+                left,
+                top,
+                right: left + width,
+                bottom: top + height,
+            };
+        }
+
+        const left = Number(node.pos_x ?? 0);
+        const top = Number(node.pos_y ?? 0);
+        const width = 180;
+        const height = 72;
+        return {
+            left,
+            top,
+            right: left + width,
+            bottom: top + height,
+        };
+    }
+
     zoomOut() {
         this.editor.zoom_out();
     }
 
     zoomReset() {
+        if (this.restoreInitialViewport()) {
+            return;
+        }
         this.editor.zoom_reset();
     }
 
@@ -1297,6 +1542,54 @@ export class WorkFlowAuto extends Component {
         }
     }
 
+    get canShowSaveButton() {
+        const summary = this.state.testResult?.summary;
+        return Boolean(summary) && (summary.error || 0) === 0;
+    }
+
+    async onTestWorkflow() {
+        if (this.state.testRunning) {
+            return;
+        }
+        const { isValid, error, nodeIds } = this.validateFlow();
+        const nameValidation = this.validateName();
+        if (!isValid || !nameValidation.isValid) {
+            this.handleValidationErrors(isValid, nameValidation, nodeIds, error);
+            return;
+        }
+
+        this.resetTestVisuals();
+        this.state.testRunning = true;
+
+        let response;
+        try {
+            await this.saveData();
+            response = await jsonrpc('/cyllo_workflow/test_run', {
+                work_auto_id: this.id,
+            });
+        } catch (error) {
+            this.state.testRunning = false;
+            this.showErrorMessage(error.message || error);
+            return;
+        }
+
+        if (!response?.ok) {
+            this.state.testRunning = false;
+            this.showErrorMessage(response?.error || _t("Workflow test failed."));
+            return;
+        }
+
+        const payload = {
+            results: response.results || [],
+            summary: response.summary || {},
+            record: response.record || null,
+        };
+        this.state.testResult = payload;
+        await this.playTestResults(payload.results);
+        this.state.testRunning = false;
+        this.scheduleTestReset();
+    }
+
     get saveClass() {
         return (this.state.model || this.state.isGenericReusable) ? 'btn btn-primary' : 'btn btn-secondary'
     }
@@ -1415,8 +1708,144 @@ export class WorkFlowAuto extends Component {
         errorVibration();
     }
 
+    async playTestResults(results) {
+        const runId = ++this.testAnimationRunId;
+        let previousNodeId = null;
+        this.enableTestFlowCanvas();
+        for (const item of results) {
+            if (runId !== this.testAnimationRunId) {
+                return;
+            }
+            this.activateTestConnection(previousNodeId, item.node_id);
+            this.env.bus.trigger("FLOW:TEST:RESULT", {
+                node_id: item.node_id,
+                status: 'running',
+                message: _t("Running test..."),
+            });
+            await new Promise(resolve => setTimeout(resolve, 180));
+            if (runId !== this.testAnimationRunId) {
+                return;
+            }
+            this.env.bus.trigger("FLOW:TEST:RESULT", item);
+            previousNodeId = item.node_id;
+            await new Promise(resolve => setTimeout(resolve, 220));
+        }
+    }
+
+    resetTestVisuals() {
+        this.testAnimationRunId += 1;
+        this.resetTestConnections();
+        if (this.testResetTimer) {
+            clearTimeout(this.testResetTimer);
+            this.testResetTimer = null;
+        }
+        this.env.bus.trigger("FLOW:TEST:RESET");
+    }
+
+    clearTestHighlights() {
+        this.resetTestVisuals();
+        this.state.testResult = null;
+    }
+
+    getDrawflowNodeIdByStructId(structId) {
+        const flowData = this.editor?.drawflow?.drawflow?.Home?.data || {};
+        const match = Object.values(flowData).find(
+            (node) => Number(node?.data?.nodeId) === Number(structId)
+        );
+        return match?.id || null;
+    }
+
+    getTestConnectionElement(fromStructId, toStructId) {
+        const fromDrawflowId = this.getDrawflowNodeIdByStructId(fromStructId);
+        const toDrawflowId = this.getDrawflowNodeIdByStructId(toStructId);
+        if (!fromDrawflowId || !toDrawflowId || !this.editor?.precanvas) {
+            return [];
+        }
+        return Array.from(this.editor.precanvas.querySelectorAll(
+            `.connection.node_out_node-${fromDrawflowId}.node_in_node-${toDrawflowId}`
+        ));
+    }
+
+    clearActiveTestConnection() {
+        if (this.activeTestConnections.size) {
+            for (const connection of this.activeTestConnections) {
+                connection.classList.remove('cy-test-flow-active');
+                connection.classList.add('cy-test-flow-complete');
+                this.completedTestConnections.add(connection);
+            }
+            this.activeTestConnections.clear();
+        }
+    }
+
+    enableTestFlowCanvas() {
+        if (this.editor?.precanvas) {
+            this.editor.precanvas.classList.add('cy-test-flow-mode');
+        }
+    }
+
+    disableTestFlowCanvas() {
+        if (this.editor?.precanvas) {
+            this.editor.precanvas.classList.remove('cy-test-flow-mode');
+        }
+    }
+
+    resetTestConnections() {
+        this.clearActiveTestConnection();
+        for (const connection of this.completedTestConnections) {
+            connection.classList.remove('cy-test-flow-complete');
+        }
+        this.completedTestConnections.clear();
+        this.activeTestConnections.clear();
+        if (this.editor?.precanvas) {
+            this.editor.precanvas
+                .querySelectorAll('.connection.cy-test-flow-active, .connection.cy-test-flow-complete')
+                .forEach((connection) => {
+                    connection.classList.remove('cy-test-flow-active', 'cy-test-flow-complete');
+                });
+        }
+        this.disableTestFlowCanvas();
+    }
+
+    activateTestConnection(fromStructId, toStructId) {
+        this.clearActiveTestConnection();
+        if (!fromStructId || !toStructId) {
+            return;
+        }
+        const connections = this.getTestConnectionElement(fromStructId, toStructId);
+        for (const connection of connections) {
+            connection.classList.remove('cy-test-flow-complete');
+            connection.classList.add('cy-test-flow-active');
+            this.completedTestConnections.delete(connection);
+            this.activeTestConnections.add(connection);
+        }
+    }
+
+    scheduleTestReset() {
+        if (this.testResetTimer) {
+            clearTimeout(this.testResetTimer);
+        }
+        window.removeEventListener('click', this.handleWindowClickForTestReset);
+        setTimeout(() => {
+            if (owl.status(this) !== 'destroyed' && this.state.testResult) {
+                window.addEventListener('click', this.handleWindowClickForTestReset, { once: true });
+            }
+        }, 0);
+        this.testResetTimer = setTimeout(() => {
+            if (owl.status(this) !== 'destroyed') {
+                this.resetTestVisuals();
+            }
+        }, 10000);
+    }
+
+    onWindowClickForTestReset() {
+        if (!this.state.testRunning && this.state.testResult) {
+            this.resetTestVisuals();
+        }
+    }
+
     updateName(newName) {
         this.state.name = newName;
+        this.resetTestVisuals();
         // You might also want to save this to the server here
     }
 
@@ -1766,6 +2195,7 @@ export class WorkFlowAuto extends Component {
     async autoSaveDrawFlow(values) {
         const flow_data = this.editor.export();
         this.editorState.value[0].flow_data = flow_data
+        this.resetTestVisuals();
         await this.write({ flow_data });
     }
 
@@ -2234,7 +2664,8 @@ export class WorkFlowAuto extends Component {
         VariableDetails,
         CustomTrigger,
         WorkPager,
-        SaveLoading
+        SaveLoading,
+        TestResultPanel,
     }
 }
 
