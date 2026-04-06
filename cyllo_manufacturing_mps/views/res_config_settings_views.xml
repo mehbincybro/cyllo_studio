@@ -9,7 +9,8 @@
 
                 <xpath expr="//setting[@id='mrp_mps']" position="after">
 
-                    <setting id="custom_mps_setting" string="Master Production Scheduler" help="Enable and configuration for MPS" groups="mrp.group_mrp_manager">
+                    <setting id="custom_mps_setting" string="Master Production Scheduler"
+                             help="Enable and configuration for MPS" groups="mrp.group_mrp_manager">
                         <field name="is_mps"/>
 
                         <div class="content-group" invisible="not is_mps">

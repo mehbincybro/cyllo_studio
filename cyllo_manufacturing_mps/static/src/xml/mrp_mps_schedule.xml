@@ -18,10 +18,10 @@
                                 <t t-esc="state.period"/>
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('Day')">Day</a></li>
-                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('Week')">Week</a></li>
-                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('Month')">Month</a></li>
-                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('Year')">Year</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('day')">Day</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('week')">Week</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('month')">Month</a></li>
+                                <li><a class="dropdown-item" t-on-click="() => this.setPeriod('year')">Year</a></li>
                             </ul>
                         </div>
                     </div>

@@ -35,8 +35,14 @@ class MrpScheduleMps(models.Model):
     is_mps = fields.Boolean(string='Master Production Scheduler', default=False)
 
     mps_default_timerange = fields.Selection(
-        [('Yearly', 'year'), ('Monthly', 'month'), ('weekly', 'week'), ('Daily', 'days')],
-        string='Default Time Range', default='Month',
+        [
+            ('year', 'Yearly'),
+            ('month', 'Monthly'),
+            ('week', 'Weekly'),
+            ('day', 'Daily'),
+        ],
+        string='Default Time Range',
+        default='month',
     )
 
     product_id = fields.Many2one('product.product', string='Product')
@@ -253,7 +259,7 @@ class MrpScheduleMps(models.Model):
     @api.model
     def get_mps_config(self):
         period = self.env['ir.config_parameter'].sudo().get_param(
-            'cyllo_manufacturing_mps.default_timerange', 'Month'
+            'cyllo_manufacturing_mps.default_timerange', 'month'
         )
         return {'period': period}
 
@@ -263,10 +269,10 @@ class MrpScheduleMps(models.Model):
         today = date.today()
 
         label_map = {
-            'Month': today.strftime('%b %Y'),
-            'Week': f"W{today.isocalendar()[1]} {today.year}",
-            'Day': f"{today.month}/{today.day}/{today.year}",
-            'Year': str(today.year),
+            'month': today.strftime('%b %Y'),
+            'week': f"W{today.isocalendar()[1]} {today.year}",
+            'day': f"{today.month}/{today.day}/{today.year}",
+            'year': str(today.year),
         }
 
         current_label = label_map.get(period, "")
