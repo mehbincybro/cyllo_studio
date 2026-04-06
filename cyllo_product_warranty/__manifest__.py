@@ -20,24 +20,25 @@
 #
 #############################################################################
 {
-    'name': 'Merge Quotation',
+    'name': 'Product Warranty',
     'version': '1.0.0',
-    'category': 'Sales ',
-    'summary': """This module merge two or more Quotation""",
-    'description': """Cyllo Merge Quotation is a module that allows users to 
-     merge multiple quotations into a single one by deleting the others""",
+    'category': 'Inventory',
+    'summary': "Track warranty periods on products, sales, purchases, and stock moves",
+    'description': """Adds product warranty configuration and computes warranty
+expiration dates for sale order lines, purchase order lines, and stock move lines.""",
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['sale_management'],
+    'depends': ['product', 'sale_stock', 'purchase_stock'],
     'data': [
-        'data/ir_actions_server_data.xml',
-        'views/sale_order_discount_views.xml',
-        'views/res_config_settings_view.xml',
+        'views/product_views.xml',
+        'views/sale_order_line_views.xml',
+        'views/purchase_order_line_views.xml',
+        'views/stock_move_line_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
-    'auto_install': True,
     'application': False,
+    'auto_install': False,
 }

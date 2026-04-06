@@ -27,5 +27,7 @@ class ResConfigSettings(models.TransientModel):
     the budget management in settings is checked """
     _inherit = 'res.config.settings'
 
-    module_cyllo_purchase_digitization = fields.Boolean(
-        string="Purchase Digitization")
+    module_cyllo_product_warranty = fields.Boolean(
+        string="Enable Product Warranty")
+    module_cyllo_purchase_digitization = fields.Boolean(string="Purchase Digitization")
+

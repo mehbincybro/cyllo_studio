@@ -19,25 +19,25 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': 'Merge Quotation',
-    'version': '1.0.0',
-    'category': 'Sales ',
-    'summary': """This module merge two or more Quotation""",
-    'description': """Cyllo Merge Quotation is a module that allows users to 
-     merge multiple quotations into a single one by deleting the others""",
-    'author': "Cyllo",
-    'company': "Cyllo",
-    'maintainer': "Cyllo",
-    'website': "https://www.cyllo.com",
-    'depends': ['sale_management'],
-    'data': [
-        'data/ir_actions_server_data.xml',
-        'views/sale_order_discount_views.xml',
-        'views/res_config_settings_view.xml',
-    ],
-    'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': True,
-    'application': False,
-}
+from odoo import api, fields, models
+
+
+class StockMoveLine(models.Model):
+    _inherit = 'stock.move.line'
+
+    warranty_expiration_date = fields.Date(
+        string="Warranty Expiration Date",
+        compute='_compute_warranty_expiration_date',
+        store=True,
+    )
+
+    @api.depends(
+        'move_id.sale_line_id.warranty_expiration_date',
+        'move_id.purchase_line_id.warranty_expiration_date',
+    )
+    def _compute_warranty_expiration_date(self):
+        for line in self:
+            line.warranty_expiration_date = (
+                line.move_id.sale_line_id.warranty_expiration_date
+                or line.move_id.purchase_line_id.warranty_expiration_date
+            )

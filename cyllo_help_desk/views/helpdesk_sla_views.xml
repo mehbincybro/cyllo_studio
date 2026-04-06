@@ -46,6 +46,7 @@
                             <field name="customer_ids" widget="many2many_tags"/>
                             <field name="target_stage"/>
                             <field name="within_hour" widget="float_time"/>
+                            <field name="excluded_stage_ids" widget="many2many_tags"/>
                         </group>
                     </group>
                 </sheet>

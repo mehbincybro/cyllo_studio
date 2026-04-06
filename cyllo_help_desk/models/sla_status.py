@@ -27,39 +27,62 @@ class SLAStatus(models.Model):
     _name = "sla.status"
     _description = "Helpdesk SLA Status"
 
-    ticket_id = fields.Many2one('helpdesk.ticket', string="Ticket", help="Helpdesk tickets")
-    state = fields.Selection([('pass', 'Pass'), ('fail', 'Fail')], string="Status")
+    ticket_id = fields.Many2one('helpdesk.ticket', string="Ticket", help="Helpdesk tickets", ondelete='cascade')
+    sla_id = fields.Many2one('helpdesk.sla', string="SLA Policy", help="SLA policy", ondelete='cascade')
+    deadline = fields.Datetime(string="Deadline", help="Calculated SLA deadline")
+    reached_datetime = fields.Datetime(string="Reached Datetime", help="When the target stage was reached")
+    state = fields.Selection([
+        ('ongoing', 'Ongoing'),
+        ('pass', 'Pass'),
+        ('fail', 'Fail')], string="Status", default='ongoing')
 
     def status_update(self):
+        """ Update SLA statuses for all active tickets """
         all_tickets = self.env['helpdesk.ticket'].search([('sla_flag', '=', True)])
+        now = datetime.now()
         for ticket in all_tickets:
             work_hours = ticket.team_id.working_hour_id or ticket.company_id.resource_calendar_id
-            if not work_hours:
+            if not (work_hours and ticket.create_date):
                 continue
-            sorted_records = sorted(ticket.sla_ids,
-                                    key=lambda x: x['within_hour'])
-            for record in sorted_records:
-                # Calculating the time difference between created datetime and
-                # current datetime
-                created_date = datetime.strptime(str(ticket.create_date),
-                                                 "%Y-%m-%d %H:%M:%S.%f")
-                # Calculating the SLA deadline
-                average_work_hours = work_hours.hours_per_day or 8
-                deadline = record.within_hour / average_work_hours
-                deadline_in_hours = deadline * average_work_hours
-                deadline_date = work_hours.plan_hours(deadline_in_hours,
-                                                      created_date,
-                                                      compute_leaves=True)
-                if record.target_stage.sequence >= ticket.stage_id.sequence and deadline_date >= datetime.now():
-                    if record.target_stage.sequence >= ticket.stage_id.sequence:
-                        self.create(
-                            {'id': record.id, 'ticket_id': ticket.id,
-                             'state': 'pass'})
-                else:
-                    if record.target_stage.sequence == ticket.sequence or (
-                            record.target_stage.sequence >= ticket.stage_id.sequence and deadline_date <= datetime.now()):
-                        self.create(
-                            {'id': record.id, 'ticket_id': ticket.id,
-                             'state': 'fail'})
+            for sla in ticket.sla_ids:
+                # 1. Find existing status or create one
+                status = self.search([
+                    ('ticket_id', '=', ticket.id),
+                    ('sla_id', '=', sla.id)
+                ], limit=1)
+                if not status:
+                    status = self.create({
+                        'ticket_id': ticket.id,
+                        'sla_id': sla.id,
+                        'state': 'ongoing'
+                    })
+                # If already passed or failed, skip logic unless we want to allow re-evaluation
+                if status.state != 'ongoing':
+                    continue
+
+                # 2. Update Deadline (accounts for excluded stages)
+                excluded_hours = ticket._get_excluded_duration(sla)
+                deadline_in_hours = sla.within_hour + excluded_hours
+                status.deadline = work_hours.plan_hours(
+                    deadline_in_hours,
+                    ticket.create_date,
+                    compute_leaves=True
+                )
+                # 3. Check if reached
+                if ticket.stage_id.sequence >= sla.target_stage.sequence:
+                    # Find first reach date in history
+                    reach_history = self.env['helpdesk.stage.history'].search([
+                        ('ticket_id', '=', ticket.id),
+                        ('stage_id.sequence', '>=', sla.target_stage.sequence)
+                    ], order='start_date asc', limit=1)
+                    status.reached_datetime = reach_history.start_date if reach_history else now
+                    status.state = 'pass' if status.reached_datetime <= status.deadline else 'fail'
+                    if status.state == 'fail':
                         ticket.sla_failed = True
+                    continue
+
+                # 4. Check if failed (not reached but deadline passed)
+                if status.deadline and now > status.deadline:
+                    status.state = 'fail'
+                    ticket.sla_failed = True
 
