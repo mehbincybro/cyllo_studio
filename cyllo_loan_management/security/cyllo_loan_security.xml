@@ -20,6 +20,8 @@
             <field name="name">Manager</field>
             <field name="category_id" ref="module_category_cyllo_loan"/>
             <field name="implied_ids" eval="[(4, ref('group_cyllo_loan_user'))]"/>
+            <field name="users"
+               eval="[Command.link(ref('base.user_root')), Command.link(ref('base.user_admin'))]"/>
         </record>
 
         <!-- Multi-company record rule for cyllo.loan -->
