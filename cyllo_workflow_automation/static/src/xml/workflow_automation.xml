@@ -95,7 +95,12 @@
                                     <t t-else="">Model</t>
                                 </div>
                             </a>
-                            <a class="btn btn-primary d-flex align-items-center gap-1"  data-hotkey="s" t-att-class="saveClass" t-on-click="onSave">
+                            <a t-att-class="'btn d-flex align-items-center gap-1 cy-test-trigger ' + (state.testRunning ? 'btn-secondary disabled' : 'btn-outline-primary')"
+                               t-on-click="onTestWorkflow">
+                                <i class="ri-flask-line"/>
+                                <div class="d-flex align-items-center">Test Workflow</div>
+                            </a>
+                            <a t-if="canShowSaveButton" class="btn btn-primary d-flex align-items-center gap-1" data-hotkey="s" t-att-class="saveClass" t-on-click="onSave">
 								<i class="ri-save-3-line"/>
                                 <div class="d-flex align-items-center">Save</div>
 							</a>
@@ -591,6 +596,12 @@
                     <div t-on-drop="drop" t-on-dragover="allowDrop">
 						<div t-ref="drawBoard" id="drawflow"
                              t-attf-style="pointer-events:{{this.drawBoardState.edit? 'all' : 'none'}};"/>
+                        <div t-if="state.testRunning" class="cy-test-overlay">
+                            <div class="cy-test-overlay__card">
+                                <i class="ri-loader-4-line cy-test-overlay__spinner"/>
+                                <span>Running test...</span>
+                            </div>
+                        </div>
                         <div t-if="!drawBoardState.edit" class="canvas-locked">
 							<i class="ri-lock-fill"/>
                             <span>Locked!</span>
@@ -607,6 +618,11 @@
                             <div class="cy-w-divider"/>
                             <button class="cy-w-zoom-button" t-on-click="zoomReset"><i style="color:#111;" class="ri-fullscreen-line"/></button>
 						</div>
+                        <TestResultPanel
+                            visible="state.testResult ? true : false"
+                            summary="state.testResult ? state.testResult.summary : {}"
+                            results="state.testResult ? state.testResult.results : []"
+                        />
 					</div>
 				</div>
 			</div>

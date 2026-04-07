@@ -109,7 +109,7 @@ export class ConditionComponent extends Component {
             extractProps: ({value, update}) => ({
                 value,
                 update,
-                options,
+                options: options || this.getDefaultOperators(),
             }),
         };
     }

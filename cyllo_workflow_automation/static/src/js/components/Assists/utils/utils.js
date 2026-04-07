@@ -76,6 +76,22 @@ export const PYTHON_KEYWORDS = [
 ]
 
 export const OPERATORS = {
+    record: [
+        ["=", "equal to"],
+        ["!=", "not equal to"],
+        ["in", "in"],
+        ["not in", "not in"],
+        ["set", "is set"],
+        ["not_set", "is not set"]
+    ],
+    recordset: [
+        ["=", "equal to"],
+        ["!=", "not equal to"],
+        ["in", "in"],
+        ["not in", "not in"],
+        ["set", "is set"],
+        ["not_set", "is not set"]
+    ],
     char: [
         ["=", "equal to"],
         ["!=", "not equal to"],

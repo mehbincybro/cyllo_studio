@@ -107,27 +107,26 @@ export class ModelComponent extends Component {
         this.dialogService = useService("dialog");
         this.root = useRef("root");
         this.notification = useService("notification");
-        this.env.context.addEventListener("UPDATE-ME", this.updateMe.bind(this))
-        this.env.bus.addEventListener("UPDT-PRIMARY", ({ detail }) => {
+        this.handleUpdateMe = this.updateMe.bind(this);
+        this.handlePrimaryUpdate = ({ detail }) => {
             this.props.primary_model_id = detail.model_id
-        });
-        this.env.bus.addEventListener("UPDATE-VARIABLE-USAGE", ({ detail: { variable, node } }) => {
+        };
+        this.handleVariableUsage = ({ detail: { variable, node } }) => {
             const updatedVariable = this.env.variables.context.variables.find(item => item.id === variable);
             !updatedVariable.usedIn.includes(node) && updatedVariable.usedIn.push(node);
             this.env.bus.trigger("UPDATE-VARIABLE-STATE");
-        });
-        this.env.bus.addEventListener("CHANGE-LABEL", ({ detail: { label, nodeId } }) => {
+        };
+        this.handleChangeLabel = ({ detail: { label, nodeId } }) => {
             if (this.props.nodeId === nodeId) {
                 this.state.label = label
             }
-        })
-        this.env.bus.addEventListener("OPEN:MODAL", ({ detail }) => {
+        };
+        this.handleOpenModal = ({ detail }) => {
             if (this.props.nodeId === detail.nodeId) {
                 this.openConfigModal()
             }
-        })
-        this.env.bus.addEventListener("FIND:NODE:VARIABLE:USED", this.handleFindNodeVariableUsed.bind(this))
-        this.env.bus.addEventListener("FLOW:VALIDATION", ({ detail: { nodeIds } }) => {
+        };
+        this.handleFlowValidation = ({ detail: { nodeIds } }) => {
             if (nodeIds.includes(this.props.nodeId)) {
                 this.state.error = true;
             }
@@ -136,7 +135,29 @@ export class ModelComponent extends Component {
                     this.state.error = false;
                 }
             }, 5000)
-        });
+        };
+        this.handleTestResult = ({ detail }) => {
+            if (detail.node_id !== this.props.nodeId) {
+                return;
+            }
+            this.state.testStatus = detail.status || 'pending';
+            this.state.testMessage = detail.message || "";
+            this.applyTestStatusToParent();
+        };
+        this.handleTestReset = () => {
+            this.state.testStatus = 'pending';
+            this.state.testMessage = "";
+            this.applyTestStatusToParent();
+        };
+        this.env.context.addEventListener("UPDATE-ME", this.handleUpdateMe)
+        this.env.bus.addEventListener("UPDT-PRIMARY", this.handlePrimaryUpdate);
+        this.env.bus.addEventListener("UPDATE-VARIABLE-USAGE", this.handleVariableUsage);
+        this.env.bus.addEventListener("CHANGE-LABEL", this.handleChangeLabel)
+        this.env.bus.addEventListener("OPEN:MODAL", this.handleOpenModal)
+        this.env.bus.addEventListener("FIND:NODE:VARIABLE:USED", this.handleFindNodeVariableUsed)
+        this.env.bus.addEventListener("FLOW:VALIDATION", this.handleFlowValidation);
+        this.env.bus.addEventListener("FLOW:TEST:RESULT", this.handleTestResult);
+        this.env.bus.addEventListener("FLOW:TEST:RESET", this.handleTestReset);
         this.state = useState({
             model: {},
             resId: 0,
@@ -144,6 +165,8 @@ export class ModelComponent extends Component {
             error: false,
             label: "",
             findUsage: false,
+            testStatus: 'pending',
+            testMessage: "",
         })
         this.orm = useService("orm");
         onWillStart(this.manageNodeData);
@@ -155,7 +178,15 @@ export class ModelComponent extends Component {
             this.state.context = this.context;
         })
         onWillUnmount(() => {
-            this.env.bus.removeEventListener("FIND:NODE:VARIABLE:USED", this.handleFindNodeVariableUsed.bind(this));
+            this.env.context.removeEventListener("UPDATE-ME", this.handleUpdateMe);
+            this.env.bus.removeEventListener("UPDT-PRIMARY", this.handlePrimaryUpdate);
+            this.env.bus.removeEventListener("UPDATE-VARIABLE-USAGE", this.handleVariableUsage);
+            this.env.bus.removeEventListener("CHANGE-LABEL", this.handleChangeLabel);
+            this.env.bus.removeEventListener("OPEN:MODAL", this.handleOpenModal);
+            this.env.bus.removeEventListener("FIND:NODE:VARIABLE:USED", this.handleFindNodeVariableUsed);
+            this.env.bus.removeEventListener("FLOW:VALIDATION", this.handleFlowValidation);
+            this.env.bus.removeEventListener("FLOW:TEST:RESULT", this.handleTestResult);
+            this.env.bus.removeEventListener("FLOW:TEST:RESET", this.handleTestReset);
         })
     }
 
@@ -175,7 +206,7 @@ export class ModelComponent extends Component {
         }
     }
     getParentDiv() {
-        return this.root.el?.offsetParent?.offsetParent;
+        return this.root.el?.closest('.drawflow-node') || null;
     }
     toggleParentClass(parentDiv, add) {
         if (parentDiv) {
@@ -189,6 +220,20 @@ export class ModelComponent extends Component {
                 this.toggleParentClass(parentDiv, false);
             }
         }, 5000);
+    }
+
+    applyTestStatusToParent() {
+        const parentDiv = this.getParentDiv();
+        if (!parentDiv) {
+            return;
+        }
+        ['cy-test-running', 'cy-test-success', 'cy-test-warning', 'cy-test-error'].forEach(className => {
+            parentDiv.classList.remove(className);
+        });
+        const className = this.testStatusClass;
+        if (className) {
+            parentDiv.classList.add(className);
+        }
     }
 
     async nameGet() {
@@ -379,7 +424,7 @@ export class ModelComponent extends Component {
      * Registers the loop iteration variable into the frontend variable context
      * so nodes inside the loop body can select it from their variable dropdowns.
      */
-    updateLoopVariable(fieldState) {
+    updateLoopVariable(fieldState, modelInfo = {}) {
         const varName = fieldState.loop_variable_name;
         if (!varName) return;
         const existingVars = this.variableContext.variables;
@@ -626,6 +671,16 @@ export class ModelComponent extends Component {
         return this.env.variables.context;
     }
 
+    get testStatusClass() {
+        return {
+            pending: '',
+            running: 'cy-test-running',
+            success: 'cy-test-success',
+            error: 'cy-test-error',
+            warning: 'cy-test-warning',
+        }[this.state.testStatus] || '';
+    }
+
     static template = xml`
         <div t-ref="root" t-attf-class="node-container {{this.state.findUsage ? 'cy-find-usage' : ''}}" style="position: relative">
             <t t-if="this.state.label">
@@ -660,6 +715,11 @@ export class ModelComponent extends Component {
             <div t-attf-class="cy-validation-tooltip {{this.state.error ? 'show' : ''}}">
                 <span class="tooltip-text">
                     Not configured!
+                </span>
+            </div>
+            <div t-if="this.state.testMessage" t-attf-class="cy-test-tooltip {{this.state.testStatus !== 'pending' ? 'show' : ''}}">
+                <span class="tooltip-text">
+                    <t t-esc="this.state.testMessage"/>
                 </span>
             </div>
             <t t-if="state.model.display_name === 'Condition'">

@@ -293,7 +293,7 @@ export class CustomSearchTreeEditor extends Component {
         node.path = path;
         node.negate = false;
         node.operator = this.props.getDefaultOperator(fieldDef);
-        node.value = getDefaultValue(fieldDef, node.operator);
+        node.value = this.getDefaultNodeValue(node, fieldDef, node.operator);
         this.notifyChanges();
     }
 
@@ -302,7 +302,7 @@ export class CustomSearchTreeEditor extends Component {
         const fieldDef = this.getFieldDef(node.path);
         node.negate = negate;
         node.operator = operator;
-        node.value = getDefaultValue(fieldDef, operator, node.value);
+        node.value = this.getDefaultNodeValue(node, fieldDef, operator, node.value);
         if (deepEqual(removeVirtualOperators(node), removeVirtualOperators(previousNode))) {
             // no interesting changes for parent
             // this means that parent might not render the domain selector
@@ -322,10 +322,28 @@ export class CustomSearchTreeEditor extends Component {
         nodeEl.classList.toggle("o_hovered_button");
     }
 
+    getDefaultNodeValue(node, fieldDef, operator, currentValue = undefined) {
+        if (node.selectionType === "variable") {
+            return {
+                selectedVariable: currentValue?.selectedVariable || false,
+                pathValue: currentValue?.pathValue || false,
+                isVariable: true,
+            };
+        }
+        if (node.selectionType === "record") {
+            return {
+                record: currentValue?.record || false,
+                path: currentValue?.path || "",
+                pathValue: currentValue?.pathValue || false,
+            };
+        }
+        return getDefaultValue(fieldDef, operator, currentValue);
+    }
+
     toggleIncludeVariable(value,node) {
         const fieldDef = this.getFieldDef(node.path);
-        node.value = getDefaultValue(fieldDef, node.operator, node.value);
         node.selectionType = value;
+        node.value = this.getDefaultNodeValue(node, fieldDef, node.operator, node.value);
         this.notifyChanges();
     }
 

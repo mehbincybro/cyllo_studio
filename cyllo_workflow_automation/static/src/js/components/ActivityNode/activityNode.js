@@ -31,6 +31,8 @@ export class ActivityNode extends ConfigurationBase {
 
     async fetchData() {
         await super.fetchData();
+        this._ensureSelectionFieldShape('activity_user', '');
+        this._ensureSelectionFieldShape('activity_deadline', false);
         await this._checkGoogleMeetInstalled();
         if (this.fieldState.activity_is_google_meet === null || this.fieldState.activity_is_google_meet === undefined) {
             this.fieldState.activity_is_google_meet = false;
@@ -269,21 +271,44 @@ export class ActivityNode extends ConfigurationBase {
         return labels[selectionType] || 'Fixed';
     }
 
+    _ensureSelectionFieldShape(fieldName, defaultValue) {
+        const currentValue = this.fieldState[fieldName];
+        if (!currentValue || typeof currentValue !== 'object' || Array.isArray(currentValue)) {
+            this.fieldState[fieldName] = {
+                value: defaultValue,
+                selectionType: 'static',
+            };
+            return this.fieldState[fieldName];
+        }
+        if (!Object.prototype.hasOwnProperty.call(currentValue, 'selectionType')) {
+            currentValue.selectionType = 'static';
+        }
+        if (!Object.prototype.hasOwnProperty.call(currentValue, 'value')) {
+            currentValue.value = defaultValue;
+        }
+        return currentValue;
+    }
+
     toggleIncludeVariable(value, field) {
         if (field === 'user') {
-            if (![value, undefined].includes(this.fieldState.activity_user.selectionType)) {
+            const activityUser = this._ensureSelectionFieldShape('activity_user', '');
+            if (![value, undefined].includes(activityUser.selectionType)) {
                 this.fieldState.activity_user = { value: '', selectionType: value }
-            } else this.fieldState.activity_user.selectionType = value;
+            } else {
+                activityUser.selectionType = value;
+            }
         } else {
-            if (![value, undefined].includes(this.fieldState.activity_deadline.selectionType)) {
+            const activityDeadline = this._ensureSelectionFieldShape('activity_deadline', false);
+            if (![value, undefined].includes(activityDeadline.selectionType)) {
                 this.fieldState.activity_deadline = { value: false, selectionType: value }
-            } else this.fieldState.activity_deadline.selectionType = value;
+            } else {
+                activityDeadline.selectionType = value;
+            }
         }
     }
 
     get getDeadline() {
-        !this.fieldState.activity_deadline ? this.fieldState.activity_deadline = {} : false
-        return this.fieldState.activity_deadline
+        return this._ensureSelectionFieldShape('activity_deadline', false)
     }
 
     updateDeadline(value) {
