@@ -65,6 +65,9 @@ class MrpProduction(models.Model):
                 if consumed_qty < raw_move.product_uom_qty:
                     setattr(raw_move, quantity_field, raw_move.product_uom_qty)
 
+        if 'picked' in self.move_raw_ids._fields:
+            self.move_raw_ids.write({'picked': True})
+
         return self.button_mark_done()
 
     @api.model
@@ -91,7 +94,15 @@ class MrpProduction(models.Model):
                         'needed_qty': round(needed, 2),
                         'uom': move.product_uom.name
                     })
-
             res[mo.id] = missing
-
         return res
+
+    def action_open_cyllo_shopfloor(self):
+        """ Opens the custom Cyllo Shopfloor client action from the MO smart button. """
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'shopfloor_screen',
+            'name': 'Shopfloor',
+            'context': {'default_production_id': self.id},
+        }

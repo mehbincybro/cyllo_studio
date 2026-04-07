@@ -28,6 +28,25 @@ class ShopFloorScreen extends Component {
             this.busService.addChannel("shopfloor_channel");
             this._onBusNotification = this._onBusNotification.bind(this);
             this.busService.addEventListener("notification", this._onBusNotification);
+            const context = this.props.action?.context || {};
+            if (context.default_production_id) {
+                const targetMoId = context.default_production_id;
+
+                const targetData = await this.orm.searchRead(
+                    "mrp.workorder",
+                    [["production_id", "=", targetMoId], ["state", "!=", "cancel"]],
+                    ["workcenter_id"],
+                    {limit: 1}
+                );
+
+                if (targetData.length > 0) {
+                    const targetWcId = targetData[0].workcenter_id[0];
+                    this.state.selectedWorkcenter = this.state.workcenters.find((wc) => wc.id === targetWcId);
+                    this.state.currentFilter = "all";
+                    this.state.selectedProduction = targetMoId;
+                    await this.loadWorkOrders();
+                }
+            }
         });
 
         this.timerInterval = setInterval(() => {
@@ -142,7 +161,6 @@ class ShopFloorScreen extends Component {
         );
 
         this.lastSyncTime = Date.now();
-
         let allTimeIds = [];
         rawWorkOrders.forEach(wo => {
             if (wo.time_ids) allTimeIds.push(...wo.time_ids);
@@ -171,7 +189,6 @@ class ShopFloorScreen extends Component {
         }
 
         const grouped = {};
-
         for (const workOrder of rawWorkOrders) {
             const productionId = workOrder.production_id ? workOrder.production_id[0] : 0;
             const productionName = workOrder.production_id ? workOrder.production_id[1] : "Unknown MO";
@@ -179,7 +196,6 @@ class ShopFloorScreen extends Component {
             const rawProductName = workOrder.product_id ? workOrder.product_id[1] : "Unknown Product";
             const cleanProductName = rawProductName.replace(/^\[.*?\]\s*/, "");
 
-            // Add the live elapsed time from active timers to the saved base duration
             const liveElapsed = activeTimers[workOrder.id] || 0;
             workOrder.base_duration = (workOrder.duration || 0) + liveElapsed;
             workOrder.display_duration = workOrder.base_duration;

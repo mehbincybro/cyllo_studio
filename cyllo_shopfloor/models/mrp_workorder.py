@@ -74,7 +74,6 @@ class MrpWorkorder(models.Model):
                 active_timers = wo.time_ids.filtered(lambda t: not t.date_end)
                 if active_timers:
                     active_timers.write({'date_end': fields.Datetime.now()})
-
         res = super().button_pending()
         self._notify_shopfloor_view()
         return res
@@ -153,9 +152,7 @@ class MrpWorkorder(models.Model):
             ('production_id.is_automated', '=', True),
             ('duration_expected', '>', 0)
         ])
-
         now = fields.Datetime.now()
-
         for wo in running_wos:
             if wo.state == 'ready' and wo.production_id.date_start < now:
                 wo.button_start()
