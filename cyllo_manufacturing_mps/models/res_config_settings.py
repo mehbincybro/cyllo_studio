@@ -30,12 +30,14 @@ class ResConfigSettings(models.TransientModel):
 
     mps_default_timerange = fields.Selection(
         [
-            ('Day', 'Daily'),
-            ('Week', 'Weekly'),
-            ('Month', 'Monthly'),
-            ('Year', 'Yearly')
+            ('day', 'Daily'),
+            ('week', 'Weekly'),
+            ('month', 'Monthly'),
+            ('year', 'Yearly')
         ],
-        config_parameter='cyllo_manufacturing_mps.default_timerange'
+        config_parameter='cyllo_manufacturing_mps.default_timerange',
+        default='month'
+
     )
 
     def set_values(self):
@@ -52,10 +54,10 @@ class ResConfigSettings(models.TransientModel):
         cron.active = self.is_mps
 
         interval_map = {
-            'Day': ('days', 1),
-            'Week': ('weeks', 1),
-            'Month': ('months', 1),
-            'Year': ('months', 12),
+            'day': ('days', 1),
+            'week': ('weeks', 1),
+            'month': ('months', 1),
+            'year': ('months', 12),
         }
 
         if self.mps_default_timerange in interval_map:

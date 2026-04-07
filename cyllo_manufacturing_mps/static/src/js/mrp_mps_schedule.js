@@ -13,7 +13,7 @@ export class MPSClientAction extends Component {
         this.dialog = useService("dialog");
 
         this.state = useState({
-            period: "Month",
+            period: "month",
             search: "",
             columns: [],
             products: [],
@@ -79,13 +79,13 @@ export class MPSClientAction extends Component {
             let label;
             const date = new Date(today);
 
-            if (this.state.period === "Month") {
+            if (this.state.period === "month") {
                 date.setMonth(today.getMonth() + i);
                 label = date.toLocaleString("default", { month: "short", year: "numeric" });
-            } else if (this.state.period === "Week") {
+            } else if (this.state.period === "week") {
                 date.setDate(today.getDate() + i * 7);
                 label = `W${this.getWeekNumber(date)} ${date.getFullYear()}`;
-            } else if (this.state.period === "Day") {
+            } else if (this.state.period === "day") {
                 date.setDate(today.getDate() + i);
                 label = date.toLocaleDateString("en-US");
             } else {
