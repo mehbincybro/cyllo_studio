@@ -39,6 +39,8 @@
                 </group>
                 <footer>
                     <button name="action_add_component" type="object" string="Add Component" class="btn-primary"/>
+                    <button name="action_remove_component" type="object" string="Remove Component" class="btn-danger"
+                            icon="fa-trash"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

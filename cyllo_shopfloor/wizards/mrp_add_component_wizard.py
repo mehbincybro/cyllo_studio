@@ -75,14 +75,11 @@ class MrpAddComponentWizard(models.TransientModel):
                 component_moves = wizard.production_id.move_raw_ids.filtered(
                     lambda move: move.product_id == wizard.product_id
                 )
-
                 total_uom_qty = sum(component_moves.mapped('product_uom_qty'))
                 total_qty = sum(component_moves.mapped('quantity'))
-
                 wizard.needed_quantity = total_uom_qty - total_qty
             else:
                 wizard.needed_quantity = 0.0
-
 
     @api.onchange('allow_any_product')
     def _onchange_allow_any_product(self):
@@ -95,7 +92,6 @@ class MrpAddComponentWizard(models.TransientModel):
     def action_add_component(self):
         """Creates or updates the component line on the Manufacturing Order."""
         self.ensure_one()
-
         existing_move = self.production_id.move_raw_ids.filtered(
             lambda m: m.product_id == self.product_id and m.state not in ('done', 'cancel')
         )
@@ -120,7 +116,6 @@ class MrpAddComponentWizard(models.TransientModel):
     def action_remove_component(self):
         """Removes the specified component from the Manufacturing Order."""
         self.ensure_one()
-
         existing_move = self.production_id.move_raw_ids.filtered(
             lambda m: m.product_id == self.product_id and m.state not in ('done', 'cancel')
         )
