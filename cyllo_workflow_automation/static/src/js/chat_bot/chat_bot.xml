@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="client_action.chat_bot">
+    <!-- AI Chat Icon -->
+    <div t-on-click="openAiChat"
+         style="position: fixed; bottom: 20px; right: 100px; background: #9EA700; color: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 999;">
+        <i class="ri-robot-2-line"></i>
+    </div>
+
+    <!-- AI Chat Box -->
+    <div t-attf-style="position: fixed; bottom: 80px; right: 100px; width: 300px; max-height: 400px; background: white; border: 1px solid #ccc; border-radius: 8px; display: {{ this.state.aiChatOpen ? 'flex' : 'none' }}; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 999;">
+        <!-- Chat Output -->
+        <div style="flex:1; overflow-y:auto; padding:10px;" t-ref="aiChatOutput">
+            <t t-foreach="this.state.aiMessages" t-as="msg" t-key="msg.id">
+                <div t-attf-class="message #{msg.sender}" style="margin-bottom:6px;">
+                    <span><t t-esc="msg.text"/></span>
+                </div>
+            </t>
+        </div>
+
+        <!-- Chat Input -->
+        <div style="display:flex; border-top:1px solid #ccc;">
+            <input t-model="this.state.aiInput" placeholder="Type your message..." style="flex:1; border:none; padding:8px; outline:none;"/>
+            <button t-on-click="sendAiMessage" style="background:#4b8bf5; color:white; border:none; padding:0 12px; cursor:pointer;">
+                Send
+            </button>
+        </div>
+    </div>
+</t>
+
+</templates>

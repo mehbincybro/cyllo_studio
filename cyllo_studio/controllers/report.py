@@ -476,7 +476,7 @@ class StudioReportController(Controller):
 
             # Unconditionally delete any custom inherited views on top of the doc template
             custom_views = request.env['ir.ui.view'].search([
-                ('inherit_id', '=', doc_view.id),
+                ('inherit_id', 'child_of', doc_view.id),
                 '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
             ])
             if custom_views:
@@ -485,8 +485,16 @@ class StudioReportController(Controller):
             if include_header_footer:
                 # Also reset the outer wrapper if it has an arch_fs
                 wrapper_view = request.env.ref(template, raise_if_not_found=False)
-                if wrapper_view and wrapper_view.exists() and wrapper_view.arch_fs:
-                    wrapper_view.sudo().reset_arch(mode='hard')
+                if wrapper_view and wrapper_view.exists():
+                    if wrapper_view.arch_fs:
+                        wrapper_view.sudo().reset_arch(mode='hard')
+
+                    wrapper_custom_views = request.env['ir.ui.view'].search([
+                        ('inherit_id', 'child_of', wrapper_view.id),
+                        '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+                    ])
+                    if wrapper_custom_views:
+                        wrapper_custom_views.sudo().unlink()
 
             fresh_arch = doc_view.arch_base
             return {'success': True, 'arch': fresh_arch}

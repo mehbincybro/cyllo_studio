@@ -59,6 +59,8 @@
             'cyllo_workflow_automation/static/src/lib/*',
             'cyllo_workflow_automation/static/src/views/workflowCardView/**/*',
             'cyllo_workflow_automation/static/src/js/field/**/*',
+            'cyllo_workflow_automation/static/src/js/chat_bot/chat_bot.js',
+            'cyllo_workflow_automation/static/src/js/chat_bot/chat_bot.xml',
         ],
     },
     'license': "LGPL-3",

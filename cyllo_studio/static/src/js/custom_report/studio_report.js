@@ -2233,11 +2233,18 @@ export class EditReport extends Component {
                 }
             }
             if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
-                const span = el.querySelector('span[t-field]');
-                if (span && el.parentNode) {
-                    el.parentNode.replaceChild(span, el);
-                    clean(span);
+                const fieldContainer = el.querySelector('.field-container');
+                if (fieldContainer && el.parentNode) {
+                    el.parentNode.replaceChild(fieldContainer, el);
+                    clean(fieldContainer);
                     return;
+                } else {
+                    const span = el.querySelector('span[t-field]');
+                    if (span && el.parentNode) {
+                        el.parentNode.replaceChild(span, el);
+                        clean(span);
+                        return;
+                    }
                 }
             }
 
@@ -2378,6 +2385,31 @@ export class EditReport extends Component {
             `;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.querySelector('.field-container').appendChild(targetNode);
+            wrapper.querySelector('.field-delete').onclick = (e) => {
+                e.stopPropagation();
+                if (confirm("Delete this field?")) wrapper.remove();
+            };
+        });
+
+        const fieldContainers = container.querySelectorAll('.field-container:not(.field-block .field-container)');
+        fieldContainers.forEach(fc => {
+            if (fc.closest('.field-block') || fc.closest('table')) return;
+            let targetNode = fc;
+            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                targetNode.parentElement.children.length === 1 &&
+                !targetNode.parentElement.classList.contains('page')) {
+                targetNode = targetNode.parentElement;
+            }
+            const wrapper = document.createElement('div');
+            wrapper.className = 'field-block dynamic-field-wrapper';
+            wrapper.innerHTML = `
+                <div class="field-handle-container" contenteditable="false">
+                    <span class="field-handle fa fa-bars" title="Drag to move"></span>
+                    <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                </div>
+            `;
+            targetNode.parentNode.insertBefore(wrapper, targetNode);
+            wrapper.appendChild(targetNode);
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
                 if (confirm("Delete this field?")) wrapper.remove();
