@@ -139,9 +139,9 @@ export class LoopNode extends ConfigurationBase {
         let modelName = null;
 
         if (this.loopState.sourceType === 'variable') {
-            const variable = (this.props.variables || []).find(v => v.id === this.loopState.collection);
-            modelId = variable?.modelId;
-            modelName = variable?.modelName;
+            const variable = (this.props.variables || []).find(v => String(v.id) === String(this.loopState.collection));
+            modelId = variable?.modelId || variable?.model_id;
+            modelName = variable?.modelName || variable?.model_name;
         } else {
             // sourceType === 'field' -> find the relation of this field
             const fieldName = this.loopState.collection.trim();

@@ -1509,25 +1509,44 @@ class WorkAuto(models.Model):
         model_name = model.model
         views = self.env['ir.ui.view'].sudo().search([('model', '=', model_name)])
         for view in views:
-            view_arch = etree.fromstring(view.arch_db)
-            for button in view_arch.xpath("//button[@type='object'][not(ancestor::tree)]"):
+            try:
+                # Wrap in <root> tag because Studio views are often rootless XPath fragments
+                view_arch = etree.fromstring(f"<root>{view.arch_db}</root>")
+            except Exception as e:
+                _logger.warning(f"Failed to parse XML for view {view.id}: {e}")
+                continue
+            
+            # Search for buttons in the arch
+            buttons = view_arch.xpath("//button[@type='object' or @type='workflow']")
+                
+            for button in buttons:
+                # Check if it's in a tree view (skip those)
+                if button.xpath("ancestor::tree"):
+                    continue
+                    
                 button_name = button.attrib.get('name')
-                if button_name:
+                button_type = button.attrib.get('type')
+                if button_name or button_type == 'workflow':
                     button_string = (
                         button.attrib.get('string', button_name) or
-                        button.attrib.get('title', button_name)
+                        button.attrib.get('title', button_name) or
+                        "Workflow Button"
                     )
                     field_in_button = button.xpath(".//field[@string]")
                     if field_in_button:
                         button_string = field_in_button[0].attrib.get('string', button_name)
-                    unique_key = f"{button_name}_{button_string}"
-                    button_context = button.attrib.get('context', button_name)
-                    if button_context == button_name:
+
+                    # For workflow buttons, if name is missing, use a placeholder
+                    eff_button_name = button_name or f"workflow_{button_string.lower().replace(' ', '_')}"
+
+                    unique_key = f"{eff_button_name}_{button_string}"
+                    button_context = button.attrib.get('context', eff_button_name)
+                    if button_context == eff_button_name or button_type == 'workflow':
                         words = button_string.split('_')
                         formatted_name = " ".join(words).capitalize()
                         button_functions[unique_key] = {
                             'model': model_name,
-                            'button_function': button_name,
+                            'button_function': eff_button_name,
                             'button_string': formatted_name,
                             'button_val': unique_key,
                         }
