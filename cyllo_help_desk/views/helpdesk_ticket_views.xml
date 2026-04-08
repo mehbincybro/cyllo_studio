@@ -97,13 +97,13 @@
             <form>
                 <header>
                     <button name="action_toggle_sla_pause" type="object" string="Pause SLA" class="btn-warning" invisible="not sla_flag or sla_paused"/>
-                    <button name="action_toggle_sla_pause" type="object" string="Resume SLA" class="btn-success" invisible="not sla_flag or not sla_paused"/>
-                    <button name="action_create_sale_order" type="object" string="Create Sales Order" invisible="not customer_id"/>
-                    <button name="action_create_refund" type="object" string="Create Refund" invisible="not customer_id"/>
-                    <button name="action_create_coupon" type="object" string="Create Coupon" invisible="not customer_id"/>
+                    <button name="action_toggle_sla_pause" type="object" string="Resume SLA" class="oe_highlight" invisible="not sla_flag or not sla_paused"/>
+                    <button name="action_create_sale_order" type="object" string="Create Sales Order" invisible="not customer_id or not use_sale_order"/>
+                    <button name="action_create_refund" type="object" string="Create Refund" invisible="not customer_id or not use_credit_notes"/>
+                    <button name="action_create_coupon" type="object" string="Create Coupon" invisible="not customer_id or not use_coupons"/>
                     <button name="action_create_field_service_request" type="object" string="Create Field Service" invisible="not customer_id or not use_field_service"/>
-                    <button name="action_create_repair" type="object" string="Create Repair Order" invisible="not customer_id"/>
-                    <button name="action_create_return" type="object" string="Create Return / Replacement" invisible="not customer_id"/>
+                    <button name="action_create_repair" type="object" string="Create Repair Order" invisible="not customer_id or not use_repairs"/>
+                    <button name="action_create_return" type="object" string="Create Return / Replacement" invisible="not customer_id or (not use_returns and not use_replacements)"/>
                     <button name="action_create_crm_lead" type="object" string="Create CRM Lead" invisible="not customer_id"/>
                     <field name="stage_id" widget="statusbar"
                            options="{'clickable': '1'}"/>
@@ -111,28 +111,28 @@
                 <sheet>
                     <widget name="web_ribbon" title="SLA Failed" bg_color="bg-danger" invisible="not sla_failed"/>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="sale_order_count == 0">
+                        <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="not use_sale_order or sale_order_count == 0">
                             <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
                         </button>
-                        <button name="action_view_refunds" type="object" class="oe_stat_button" icon="fa-reply" invisible="refund_count == 0">
+                        <button name="action_view_refunds" type="object" class="oe_stat_button" icon="fa-reply" invisible="not use_credit_notes or refund_count == 0">
                             <field name="refund_count" widget="statinfo" string="Refunds"/>
                         </button>
-                        <button name="action_view_coupons" type="object" class="oe_stat_button" icon="fa-ticket" invisible="coupon_count == 0">
+                        <button name="action_view_coupons" type="object" class="oe_stat_button" icon="fa-ticket" invisible="not use_coupons or coupon_count == 0">
                             <field name="coupon_count" widget="statinfo" string="Coupons"/>
                         </button>
                         <button name="action_view_field_service_requests" type="object" class="oe_stat_button" icon="fa-tasks" invisible="not use_field_service and field_service_request_count == 0">
                             <field name="field_service_request_count" widget="statinfo" string="Field Service"/>
                         </button>
-                        <button name="action_view_repairs" type="object" class="oe_stat_button" icon="fa-wrench" invisible="repair_count == 0">
+                        <button name="action_view_repairs" type="object" class="oe_stat_button" icon="fa-wrench" invisible="not use_repairs or repair_count == 0">
                             <field name="repair_count" widget="statinfo" string="Repairs"/>
                         </button>
-                        <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck" invisible="picking_count == 0">
+                        <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck" invisible="not use_returns or picking_count == 0">
                             <field name="picking_count" widget="statinfo" string="Returns"/>
                         </button>
                         <button name="action_view_crm_leads" type="object" class="oe_stat_button" icon="fa-bullseye" invisible="crm_lead_count == 0">
                             <field name="crm_lead_count" widget="statinfo" string="CRM Leads"/>
                         </button>
-                        <button name="action_view_customer_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="customer_sale_order_count == 0">
+                        <button name="action_view_customer_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="not use_sale_order or customer_sale_order_count == 0">
                             <field name="customer_sale_order_count" widget="statinfo" string="Customer Sales"/>
                         </button>
                         <button name="action_view_customer_purchase_orders" type="object" class="oe_stat_button" icon="fa-shopping-cart" invisible="customer_purchase_order_count == 0">
@@ -160,6 +160,14 @@
                         <field name="sla_reached_date" invisible="not sla_flag or not sla_reached_date"/>
                         <field name="sla_failed" invisible="1"/>
                         <field name="has_duplicates" invisible="1"/>
+                        <field name="use_sale_order" invisible="1"/>
+                        <field name="use_sla" invisible="1"/>
+                        <field name="use_credit_notes" invisible="1"/>
+                        <field name="use_coupons" invisible="1"/>
+                        <field name="use_returns" invisible="1"/>
+                        <field name="use_replacements" invisible="1"/>
+                        <field name="use_repairs" invisible="1"/>
+                        <field name="use_timesheet" invisible="1"/>
                     </group>
                     <group invisible="1">
                         <field name="use_field_service"/>
@@ -213,7 +221,7 @@
                         <page string="Internal Notes" groups="cyllo_help_desk.cyllo_help_desk_user">
                             <field name="internal_notes"/>
                         </page>
-                        <page string="Timesheet" invisible="not timesheet_bool">
+                        <page string="Timesheet" invisible="not timesheet_bool or not use_timesheet">
                             <field name="timesheet_ids"/>
                         </page>
                         <page string="Sub-tickets">

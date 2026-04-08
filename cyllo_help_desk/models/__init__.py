@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -37,3 +37,4 @@ from . import onboarding_onboading
 from . import onboarding_onboarding_step
 from . import sla_status
 from . import helpdesk_stage_history
+from . import res_users

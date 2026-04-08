@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -61,6 +61,7 @@
         'views/helpdesk_skill_views.xml',
         'views/helpdesk_canned_response_views.xml',
         'views/customer_rating_view.xml',
+        'data/default_group_data.xml',
         'views/cyllo_help_desk_menu.xml',
     ],
     'assets': {

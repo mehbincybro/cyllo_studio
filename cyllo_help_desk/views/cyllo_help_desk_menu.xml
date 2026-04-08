@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <menuitem id="cyllo_help_desk_menu_root" name="Help Desk"/>
+    <menuitem id="cyllo_help_desk_menu_root" name="Help Desk" groups="cyllo_help_desk_user"/>
     <menuitem id="cyllo_helpdesk_overview_menu" name="Overview"
               action="helpdesk_overview_team_action"
               parent="cyllo_help_desk_menu_root"/>

@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -38,6 +38,6 @@ class StockMoveLine(models.Model):
     def _compute_warranty_expiration_date(self):
         for line in self:
             line.warranty_expiration_date = (
-                line.move_id.sale_line_id.warranty_expiration_date
-                or line.move_id.purchase_line_id.warranty_expiration_date
+                    line.move_id.sale_line_id.warranty_expiration_date
+                    or line.move_id.purchase_line_id.warranty_expiration_date
             )

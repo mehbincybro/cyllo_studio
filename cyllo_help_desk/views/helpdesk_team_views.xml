@@ -58,7 +58,6 @@
                         <group>
                             <separator string="Core Features"/>
                             <field name="timesheet"/>
-                            <field name="sla_policy"/>
                             <field name="customer_rating"/>
                             <field name="use_sla"/>
                             <field name="use_timesheet"/>
@@ -92,6 +91,7 @@
                                     <field name="use_credit_notes"/>
                                     <field name="use_coupons"/>
                                     <field name="use_gift_cards"/>
+                                    <field name="use_sale_order"/>
                                 </group>
                                 <group>
                                     <separator string="Operations"/>
@@ -150,7 +150,7 @@
                 <field name="color"/>
                 <field name="sla_failed" invisible="1"/>
                 <field name="success_rate" invisible="1"/>
-                <field name="sla_policy" invisible="1"/>
+                <field name="use_sla" invisible="1"/>
                 <field name="rating_avg" invisible="1"/>
                 <field name="rating_count" invisible="1"/>
                 <templates>
@@ -176,7 +176,7 @@
                                             </span>
                                         </a>
                                     </div>
-                                    <div invisible="not sla_policy">
+                                    <div invisible="not use_sla">
                                         <a class="justify-content-between flex-nowrap"
                                            name="get_team_solved_tickets"
                                            type="object"
@@ -235,7 +235,7 @@
                                     </a>
                                 </div>
                                 <div class="col border-start"
-                                     invisible="not sla_policy">
+                                     invisible="not use_sla">
                                     <a class="d-flex flex-column align-item-center"
                                        name="get_team_failed_tickets"
                                        type="object">
