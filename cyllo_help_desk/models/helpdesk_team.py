@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -67,8 +67,6 @@ class HelpDeskTeam(models.Model):
     working_hour_id = fields.Many2one('resource.calendar',
                                       string="Working Hours",
                                       help="Working time of the team")
-    sla_policy = fields.Boolean(string="SLA Policies",
-                                help="To make sure the tickets are managed on time")
     customer_rating = fields.Boolean(string="Customer Rating",
                                      help="Know the customer rating about the service")
     use_sla = fields.Boolean(string="Use SLA", default=True)
@@ -91,6 +89,10 @@ class HelpDeskTeam(models.Model):
     use_email_alias = fields.Boolean(
         string="Email Alias",
         help="Allow this team to receive tickets from an email alias.",
+    )
+    use_sale_order = fields.Boolean(
+        string="Enable Sale Order Features",
+        help="Allow this team to use Sale Order related features.",
     )
 
     # Assignment Settings
@@ -314,3 +316,14 @@ class HelpDeskTeam(models.Model):
             'domain': [('helpdesk_team_id', '=', self.id), ('consumed', '=', True)],
             'target': 'current',
         }
+
+    @api.constrains('use_sla')
+    def _check_use_sla(self):
+        for team in self:
+            if not team.use_sla:
+                policies = self.env['helpdesk.sla'].search_count([('team_id', '=', team.id)])
+                if policies > 0:
+                    raise models.ValidationError(_(
+                        "You cannot disable SLA for team '%s' because it has active SLA policies. "
+                        "Please remove or reassign the SLA policies first."
+                    ) % team.name)

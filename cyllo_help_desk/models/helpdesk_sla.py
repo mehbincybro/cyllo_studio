@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 
 
 class HelpDeskSLAPolicy(models.Model):
@@ -61,4 +61,13 @@ class HelpDeskSLAPolicy(models.Model):
             'domain': [('sla_ids', 'in', self.ids)],
             'target': 'current',
         }
+
+    @api.constrains('team_id')
+    def _check_team_id(self):
+        for policy in self:
+            if policy.team_id and not policy.team_id.use_sla:
+                raise models.ValidationError(_(
+                    "The selected team '%s' does not have SLA enabled. "
+                    "Please enable 'Use SLA' on the team first."
+                ) % policy.team_id.name)
 
