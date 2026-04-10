@@ -2704,6 +2704,10 @@ class StudioMode(Controller):
                 request.env['res.groups'].browse(
                     group_ids).get_external_id().values())
 
+        if button_properties.get('type') == 'workflow' and not button_properties.get('name'):
+            button_string = button_properties.get('string', 'button')
+            button_properties['name'] = f"studio_wf_{button_string.lower().replace(' ', '_')}"
+
         button_string = button_properties.get('string', '')
         if view_type == 'tree' or view_type == 'list':
             # For tree views, buttons are added directly to <tree>
@@ -2803,6 +2807,10 @@ class StudioMode(Controller):
             )
         else:
             button_properties['groups'] = ""
+
+        if button_properties.get('type') == 'workflow' and not button_properties.get('name'):
+            button_string = button_properties.get('string', 'button')
+            button_properties['name'] = f"studio_wf_{button_string.lower().replace(' ', '_')}"
 
         xpath_patches = []
 

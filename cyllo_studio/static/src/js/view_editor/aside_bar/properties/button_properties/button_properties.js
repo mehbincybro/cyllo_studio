@@ -389,7 +389,7 @@ export class ButtonProperties extends Component {
             style: "button",
             validation: true,
             newButton: this.props.newButton || false,
-            elementInfo:this.props.elementInfo || {},
+            elementInfo: this.props.elementInfo || {},
         });
         this.buttonProperties = useState({
             string: this.props.string || "",
@@ -407,46 +407,46 @@ export class ButtonProperties extends Component {
             field_info: this.props.field_info || {},
             item_type: this.props.item_type || "",
             spanxpath: this.props.spanxpath || "",
-            path:this.props.path,
+            path: this.props.path,
         });
 
         onWillUpdateProps(async (nextProps) => {
-            this.state.elementInfo=nextProps.elementInfo;
+            this.state.elementInfo = nextProps.elementInfo;
             this.state.newButton = this.props.newButton || false,
-            this.buttonProperties.string = nextProps.string
+                this.buttonProperties.string = nextProps.string
             this.buttonProperties.type = nextProps.function_type
             this.buttonProperties.class = nextProps.class_name || "btn-secondary"
 
             this.buttonProperties.icon = nextProps.icon
             this.buttonProperties.invisible = nextProps.invisible || "false"
             if (nextProps.function_type == 'action') {
-                this.buttonProperties.name =  parseInt(nextProps.function_name, 10);
+                this.buttonProperties.name = parseInt(nextProps.function_name, 10);
                 this.getInputValue(nextProps.function_name)
             }
-            else{
+            else {
                 this.buttonProperties.name = nextProps.function_name
                 this.actionName.value = ""
             }
-             if (nextProps.class_name?.startsWith('btn-')){
+            if (nextProps.class_name?.startsWith('btn-')) {
                 this.state.style = 'button'
             }
-            else if(nextProps.class_name?.startsWith('text-')){
+            else if (nextProps.class_name?.startsWith('text-')) {
                 this.state.style = 'link'
             }
-             this.buttonProperties.groupIds = (nextProps.groupIds && nextProps.groupIds.length > 0)
-            ? nextProps.groupIds : [];
+            this.buttonProperties.groupIds = (nextProps.groupIds && nextProps.groupIds.length > 0)
+                ? nextProps.groupIds : [];
 
 
         });
 
         onWillStart(async () => {
-            if (this.state.viewDetails.viewType === ["form"]) {
-                    sessionStorage.removeItem("CyStudioRelationModel");
-                }
+             if (this.state.viewDetails.viewType === ["form"]) {
+                     sessionStorage.removeItem("CyStudioRelationModel");
+                 }
             if (this.buttonProperties.type == 'action') {
                 this.getInputValue(this.buttonProperties.name)
             }
-            else{
+            else {
                 this.actionName.value = ""
             }
             if (this.props.groupIds && this.props.groupIds.length > 0) {
@@ -454,10 +454,10 @@ export class ButtonProperties extends Component {
             } else {
                 this.buttonProperties.groupIds = [];
             }
-            if (this.buttonProperties.class?.startsWith('btn-')){
+            if (this.buttonProperties.class?.startsWith('btn-')) {
                 this.state.style = 'button'
             }
-            else if(this.buttonProperties.class?.startsWith('text-')){
+            else if (this.buttonProperties.class?.startsWith('text-')) {
                 this.state.style = 'link'
             }
             this.modelName = await this.getCorrectModel();
@@ -468,7 +468,7 @@ export class ButtonProperties extends Component {
     }
 
     async getInputValue(id) {
-         const response = await this.orm.read(
+        const response = await this.orm.read(
             "ir.actions.actions",
             [parseInt(id)], ['name']
         )
@@ -476,13 +476,13 @@ export class ButtonProperties extends Component {
     }
     get onStyleChange() {
         return [{
-                value: "button",
-                label: "Button"
-            },
-            {
-                value: "link",
-                label: "Link"
-            },
+            value: "button",
+            label: "Button"
+        },
+        {
+            value: "link",
+            label: "Link"
+        },
         ];
     }
     get IconClass() {
@@ -509,7 +509,12 @@ export class ButtonProperties extends Component {
     }
     handleOnTypeChange(value) {
         this.buttonProperties.type = value;
-        this.buttonProperties.name = false;
+        if (value === 'workflow') {
+            const label = this.buttonProperties.string || 'button';
+            this.buttonProperties.name = `studio_wf_${label.toLowerCase().replace(/\s+/g, '_')}`;
+        } else {
+            this.buttonProperties.name = false;
+        }
     }
     get getActionName() {
         const id = parseInt(this.buttonProperties.name);
@@ -517,74 +522,79 @@ export class ButtonProperties extends Component {
     }
     get onTypeChange() {
         return [{
-                value: "object",
-                label: "Object"
-            },
-            {
-                value: "action",
-                label: "Action"
-            },
+            value: "object",
+            label: "Object"
+        },
+        {
+            value: "action",
+            label: "Action"
+        },
+        {
+            value: "workflow",
+            label: "Workflow"
+        },
+
         ];
     }
 
-async getCorrectModel() {
-    const viewType = this.state.viewDetails?.viewType || "";
-    const currentModel = this.props.model || this.state.viewDetails.model;
+    async getCorrectModel() {
+        const viewType = this.state.viewDetails?.viewType || "";
+        const currentModel = this.props.model || this.state.viewDetails.model;
 
-    // 1. If we have field_info with a relation, and we are on a One2Many field, use the relation
-    if (this.buttonProperties.field_info?.relation && this.props.path) {
-        return this.buttonProperties.field_info.relation;
-    }
-
-    // 2. If sessionStorage has CyStudioRelationModel (set when navigating One2Many), and we are inside a One2Many click
-    const relationModel = sessionStorage.getItem('CyStudioRelationModel');
-    if (relationModel && relationModel !== 'null' && relationModel !== 'undefined') {
-        return relationModel;
-    }
-
-    // 3. If PrevForm has RelationModel (set when clicking One2Many)
-    const prevFormData = sessionStorage.getItem('PrevForm');
-    if (prevFormData) {
-        try {
-            const parsedData = JSON.parse(prevFormData);
-            if (parsedData.RelationModel) {
-                return parsedData.RelationModel;
-            }
-        } catch (e) {
-            console.error("Error parsing PrevForm:", e);
-        }
-    }
-    return currentModel;
-}
-
-async RemoveButton() {
-    this.state.isEditingButton = false;
-    if (!this.state.newButton && this.props.path) {
-        const response = await this.rpc("cyllo_studio/delete/button", {
-            method: 'delete_button',
-            kwargs: {
-                path: this.props.path,
-                model: this.modelName, // USE CORRECT MODEL
-                view_id: this.state.viewDetails.viewId,
-                viewType: this.state.viewDetails.viewType,
-            }
-        })
-
-        if (response) {
-            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-            let cleanedStr = response.replace(/\s+/g, ' ').trim();
-            storedArray.push(cleanedStr)
-            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-            sessionStorage.setItem('ReDO', JSON.stringify([]));
+        // 1. If we have field_info with a relation, and we are on a One2Many field, use the relation
+        if (this.buttonProperties.field_info?.relation && this.props.path) {
+            return this.buttonProperties.field_info.relation;
         }
 
-        this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
-    } else {
-        this.env.bus.trigger('REMOVE_BUTTON_PROPERTIES');
-        this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
+        // 2. If sessionStorage has CyStudioRelationModel (set when navigating One2Many), and we are inside a One2Many click
+        const relationModel = sessionStorage.getItem('CyStudioRelationModel');
+        if (relationModel && relationModel !== 'null' && relationModel !== 'undefined') {
+            return relationModel;
+        }
+
+        // 3. If PrevForm has RelationModel (set when clicking One2Many)
+        const prevFormData = sessionStorage.getItem('PrevForm');
+        if (prevFormData) {
+            try {
+                const parsedData = JSON.parse(prevFormData);
+                if (parsedData.RelationModel) {
+                    return parsedData.RelationModel;
+                }
+            } catch (e) {
+                console.error("Error parsing PrevForm:", e);
+            }
+        }
+        return currentModel;
     }
-    this.action.doAction('studio_reload')
-}
+
+    async RemoveButton() {
+        this.state.isEditingButton = false;
+        if (!this.state.newButton && this.props.path) {
+            const response = await this.rpc("cyllo_studio/delete/button", {
+                method: 'delete_button',
+                kwargs: {
+                    path: this.props.path,
+                    model: this.modelName, // USE CORRECT MODEL
+                    view_id: this.state.viewDetails.viewId,
+                    viewType: this.state.viewDetails.viewType,
+                }
+            })
+
+            if (response) {
+                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                let cleanedStr = response.replace(/\s+/g, ' ').trim();
+                storedArray.push(cleanedStr)
+                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                sessionStorage.setItem('ReDO', JSON.stringify([]));
+            }
+
+            this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
+        } else {
+            this.env.bus.trigger('REMOVE_BUTTON_PROPERTIES');
+            this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
+        }
+        this.action.doAction('studio_reload')
+    }
     handleButtonFunctionChange(value) {
         const functionInfo = document.querySelector(".functionInfo");
         if (functionInfo) {
@@ -607,7 +617,7 @@ async RemoveButton() {
         this.buttonProperties[target.name] = ["false", "undefined"].includes(this.buttonProperties[target.name]) ? "true" : "false";
     }
 
-    onDomainClick({target}) {
+    onDomainClick({ target }) {
         this.state.validation = false
         let button = target.closest(".cy-basedOn");
         let attribute = button.getAttribute("data-attribute");
@@ -628,19 +638,22 @@ async RemoveButton() {
         this.state.isEditingButton = false;
 
         const validations = [{
-                field: 'name',
-                message: "Please provide a function name for the button.",
-            },
-            {
-                field: 'string',
-                message: "Please provide a label for the button.",
-            },
-            {
-                field: 'type',
-                message: "Please provide a valid button type.",
-            },
+            field: 'name',
+            message: "Please provide a function name for the button.",
+        },
+        {
+            field: 'string',
+            message: "Please provide a label for the button.",
+        },
+        {
+            field: 'type',
+            message: "Please provide a valid button type.",
+        },
         ];
         for (const { field, message } of validations) {
+            if (field === 'name' && this.buttonProperties.type === 'workflow') {
+                continue;
+            }
             if (!this.buttonProperties[field]) {
                 this.warningCount += 1;
                 return this.notification.add({
@@ -662,18 +675,18 @@ async RemoveButton() {
             hotKey: this.buttonProperties.hotKey,
         };
         if (!this.buttonProperties.path) {
-        let cyxpath = this.el?.getAttribute("cyxpath");
-        if (!cyxpath) {
-            const parentButton = document.querySelector("button[cyxpath]");
-            if (parentButton) {
-                cyxpath = parentButton.getAttribute("cyxpath");
+            let cyxpath = this.el?.getAttribute("cyxpath");
+            if (!cyxpath) {
+                const parentButton = document.querySelector("button[cyxpath]");
+                if (parentButton) {
+                    cyxpath = parentButton.getAttribute("cyxpath");
+                }
+            }
+
+            if (cyxpath) {
+                this.buttonProperties.path = cyxpath;
             }
         }
-
-        if (cyxpath) {
-            this.buttonProperties.path = cyxpath;
-        }
-    }
         try {
             if (this.buttonProperties.newButton) {
                 const x2many = sessionStorage.getItem("CyX2ManyPath");
@@ -724,7 +737,7 @@ async RemoveButton() {
             }
 
         } finally {
-                this.action.doAction("studio_reload");
+            this.action.doAction("studio_reload");
         }
     }
 
@@ -759,15 +772,18 @@ async RemoveButton() {
         this.action.doAction('studio_reload')
     }
     handleLabelChange({ target }) {
-            const value = target.value;
-            this.buttonProperties.string = value;
-            this.state.string = value;
-
-            const newButton = document.getElementById('newButtonLabel');
-            if (newButton) {
-                newButton.textContent = value;
-            }
+        const value = target.value;
+        this.buttonProperties.string = value;
+        this.state.string = value;
+        if (this.buttonProperties.type === 'workflow') {
+            this.buttonProperties.name = `studio_wf_${value.toLowerCase().replace(/\s+/g, '_')}`;
         }
+
+        const newButton = document.getElementById('newButtonLabel');
+        if (newButton) {
+            newButton.textContent = value;
+        }
+    }
 }
 ButtonProperties.components = {
     CustomSelection,
