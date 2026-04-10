@@ -24,6 +24,7 @@
                 <field name="team_id"/>
                 <field name="customer_id"/>
                 <field name="date"/>
+                <field name="source"/>
                 <field name="user_id"/>
                 <field name="company_id"/>
                 <field name="stage_id" widget="badge"
@@ -110,6 +111,9 @@
                 </header>
                 <sheet>
                     <widget name="web_ribbon" title="SLA Failed" bg_color="bg-danger" invisible="not sla_failed"/>
+                    <widget name="web_ribbon" title="Under Warranty" bg_color="bg-success" invisible="warranty_status != 'under_warranty'"/>
+                    <widget name="web_ribbon" title="Warranty Expired" bg_color="bg-danger" invisible="warranty_status != 'expired'"/>
+                    <widget name="web_ribbon" title="No Warranty" bg_color="bg-info" invisible="warranty_status != 'none'"/>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_view_sale_orders" type="object" class="oe_stat_button" icon="fa-usd" invisible="not use_sale_order or sale_order_count == 0">
                             <field name="sale_order_count" widget="statinfo" string="Sales Orders"/>
@@ -187,6 +191,7 @@
                             <field name="customer_id"/>
                             <field name="email"/>
                             <field name="phone"/>
+                            <field name="source" readonly="1"/>
                             <field name="company_id"/>
                             <field name="invoice_id" domain="[
                                 ('move_type', '=', 'out_invoice'),
@@ -198,6 +203,11 @@
                                 ('partner_id', 'child_of', customer_id),
                                 ('state', 'in', ['sale', 'done'])
                             ]"/>
+                            <field name="sale_order_line_id"
+                                   domain="[('order_id', '=', sale_order_id)]"
+                                   invisible="not sale_order_id or not use_product_warranty"/>
+                            <field name="use_product_warranty" invisible="1"/>
+                            <field name="warranty_status" invisible="1"/>
                         </group>
                         <group>
                             <separator string="Ticket Details"/>
@@ -289,6 +299,13 @@
                         domain="[('closed_date','>', (datetime.datetime.now() - datetime.timedelta(days=6)))]"/>
 <!--                <filter string="Closed Today" name="closed_today"-->
 <!--                        domain="[('is_closed_today','=', True)]"/>-->
+                <group expand="0" string="Group By">
+                    <filter string="Team" name="group_by_team" context="{'group_by': 'team_id'}"/>
+                    <filter string="User" name="group_by_user" context="{'group_by': 'user_id'}"/>
+                    <filter string="Stage" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
+                    <filter string="Source" name="group_by_source" context="{'group_by': 'source'}"/>
+                    <filter string="Priority" name="group_by_priority" context="{'group_by': 'priority'}"/>
+                </group>
             </search>
         </field>
     </record>
