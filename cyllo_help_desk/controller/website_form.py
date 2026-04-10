@@ -99,6 +99,7 @@ class WebsiteForm(form.WebsiteForm):
                 "customer_id": partner.id,
                 "email": values.get("email"),
                 "description": values.get("description") or _("No description"),
+                "source": "website",
             })
 
             # Ensure subject exists

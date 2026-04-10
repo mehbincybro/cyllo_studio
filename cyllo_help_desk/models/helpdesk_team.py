@@ -78,6 +78,7 @@ class HelpDeskTeam(models.Model):
     use_gift_cards = fields.Boolean(string="Use Gift Cards")
     use_returns = fields.Boolean(string="Use Returns")
     use_repairs = fields.Boolean(string="Use Repairs")
+    use_product_warranty = fields.Boolean(string="Use Product Warranty")
     use_website_ticket_creation = fields.Boolean(
         string="Website Ticket Creation",
         help="Allow this team to receive tickets created from the website form.",
@@ -94,6 +95,11 @@ class HelpDeskTeam(models.Model):
         string="Enable Sale Order Features",
         help="Allow this team to use Sale Order related features.",
     )
+    use_confirmation_email = fields.Boolean(
+        string="Confirmation Email",
+        help="Send an automated confirmation email to the customer when a ticket is created via email.",
+    )
+
 
     # Assignment Settings
     assignment_method = fields.Selection([

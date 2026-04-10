@@ -113,6 +113,7 @@ class DiscussChannel(models.Model):
         ticket_vals = {
             "name": ticket_name,
             "description": transcript,
+            "source": "livechat",
         }
         if ticket_team:
             ticket_vals["team_id"] = ticket_team.id

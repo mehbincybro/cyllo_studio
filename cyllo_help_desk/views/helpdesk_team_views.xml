@@ -92,6 +92,7 @@
                                     <field name="use_coupons"/>
                                     <field name="use_gift_cards"/>
                                     <field name="use_sale_order"/>
+                                    <field name="use_product_warranty"/>
                                 </group>
                                 <group>
                                     <separator string="Operations"/>
@@ -107,7 +108,9 @@
                                     <field name="use_website_ticket_creation"/>
                                     <field name="use_livechat_ticket_creation"/>
                                     <field name="use_email_alias"/>
+                                    <field name="use_confirmation_email" invisible="not use_email_alias"/>
                                     <label for="alias_id" string="Email Alias" invisible="not use_email_alias"/>
+
                                     <div name="alias_def" invisible="not use_email_alias">
                                         <field name="alias_id" class="oe_read_only" string="Email Alias" required="0"/>
                                         <div class="oe_edit_only" name="edit_alias">

@@ -136,31 +136,33 @@ class HelpDeskTicket(models.Model):
                                 help='Reference to the main ticket')
     child_ids = fields.One2many('helpdesk.ticket', 'parent_id',
                                 string='Sub-tickets')
+    source = fields.Selection([
+        ('manual', 'Manual'),
+        ('website', 'Website'),
+        ('livechat', 'Livechat'),
+        ('email', 'Email'),
+    ], string='Source', default='manual', help='The source from which the ticket was created.')
 
     @api.constrains('parent_id')
     def _check_parent_id_recursion(self):
         if not self._check_recursion():
             raise UserError(
                 _('Error! You cannot create recursive ticket dependencies.'))
-
     # Dependencies
     dependency_ids = fields.Many2many('helpdesk.ticket',
                                       'helpdesk_ticket_dependency_rel',
                                       'ticket_id', 'dependency_id',
                                       string='Dependencies')
-
     # Skills and Assignment
     skill_ids = fields.Many2many('hr.skill', string='Required Skills')
     team_member_ids = fields.Many2many('res.users',
                                        related='team_id.member_ids')
-
     # SLA Pause
     sla_paused = fields.Boolean(string='SLA Paused', default=False)
     sla_pause_date = fields.Datetime()
     sla_progress = fields.Float(string='SLA Progress',
                                 compute='_compute_sla_progress',
                                 help="Progress towards the next SLA deadline")
-
     use_sla = fields.Boolean(related='team_id.use_sla', string="Use SLA")
     use_credit_notes = fields.Boolean(related='team_id.use_credit_notes', string="Use Credit Notes")
     use_coupons = fields.Boolean(related='team_id.use_coupons', string="Use Coupons")
@@ -170,7 +172,6 @@ class HelpDeskTicket(models.Model):
     use_timesheet = fields.Boolean(related='team_id.use_timesheet', string="Use Timesheets")
     use_sale_order = fields.Boolean(related='team_id.use_sale_order',
                                     string="Use Sale Order")
-
     # Integrations
     sale_order_ids = fields.One2many('sale.order', 'helpdesk_ticket_id',
                                      string='Sales Orders')
@@ -205,21 +206,44 @@ class HelpDeskTicket(models.Model):
         compute='_compute_customer_record_counts')
     customer_subscription_count = fields.Integer(
         compute='_compute_customer_record_counts')
+    sale_order_line_id = fields.Many2one(
+        'sale.order.line',
+        string="Sale Order Line",
+        help="Sale Order Line linked to this ticket (filtered by the selected sale order).",
+    )
+    use_product_warranty = fields.Boolean(related='team_id.use_product_warranty', string="Use Product Warranty")
+    warranty_status = fields.Selection([
+        ('under_warranty', 'Under Warranty'),
+        ('expired', 'Warranty Expired'),
+        ('none', 'No Warranty')
+    ], compute='_compute_warranty_status', string="Warranty Status Evaluation")
 
+    @api.depends('sale_order_line_id', 'use_product_warranty')
+    def _compute_warranty_status(self):
+        today = fields.Date.today()
+        for ticket in self:
+            if not ticket.use_product_warranty or not ticket.sale_order_line_id:
+                # ticket.warranty_status_label = False
+                ticket.warranty_status = False
+                continue
+            expiration_date = ticket.sale_order_line_id.warranty_expiration_date
+            if not expiration_date:
+                ticket.warranty_status = 'none'
+            elif expiration_date > today:
+                ticket.warranty_status = 'under_warranty'
+            else:
+                ticket.warranty_status = 'expired'
     # Portal
     website_published = fields.Boolean(string='Visible in Portal', default=True)
-
     # Duplicate Detection
     duplicate_ticket_ids = fields.Many2many('helpdesk.ticket',
                                             compute='_compute_duplicate_tickets',
                                             string='Duplicate Tickets')
     has_duplicates = fields.Boolean(compute='_compute_duplicate_tickets',
                                     string='Has Duplicates')
-
     # Canned Response
     canned_response_ids = fields.Many2many('mail.shortcode',
                                            string='Canned Response')
-
     attachment_ids = fields.Many2many('ir.attachment', string='Attachments',
                                       help='Attach files to this ticket')
 
@@ -266,12 +290,10 @@ class HelpDeskTicket(models.Model):
         elif method == 'skill' and members:
             # Unified Best Match assignment (HR Skills)
             required_skill_ids = self.skill_ids.ids
-
             # Fetch employees for all team members
             employees = self.env['hr.employee'].search([
                 ('user_id', 'in', members.ids)
             ])
-
             member_data = []
             for emp in employees:
                 emp_skill_ids = emp.employee_skill_ids.mapped('skill_id.id')
@@ -289,7 +311,6 @@ class HelpDeskTicket(models.Model):
                     'matches': match_count,
                     'tickets': ticket_count
                 })
-
             if member_data:
                 # Primary: Most matches | Secondary: Least tickets
                 best_candidates = sorted(member_data,
@@ -323,7 +344,6 @@ class HelpDeskTicket(models.Model):
             self.invoice_id = False
             self.invoice_line_ids = [(5, 0, 0)]
             self.sale_order_id = False
-
         return {'domain': {
             'invoice_id': invoice_domain,
             'sale_order_id': so_domain,
@@ -340,7 +360,6 @@ class HelpDeskTicket(models.Model):
             if not ticket.sla_ids or not ticket.create_date or ticket.stage_id.is_closed:
                 ticket.sla_progress = 0
                 continue
-
             # Simple linear progress estimate based on earliest deadline
             statuses = ticket.sla_status_ids.filtered(
                 lambda s: s.state == 'ongoing')
@@ -352,7 +371,6 @@ class HelpDeskTicket(models.Model):
             if not earliest_status.deadline:
                 ticket.sla_progress = 0
                 continue
-
             elapsed_raw = (
                                       fields.Datetime.now() - ticket.create_date).total_seconds() / 3600.0
             excluded_hours = ticket._get_excluded_duration(
@@ -544,7 +562,15 @@ class HelpDeskTicket(models.Model):
                     'stage_id': ticket.stage_id.id,
                     'start_date': fields.Datetime.now(),
                 })
+
+            # Auto-response for email-created tickets
+            if ticket.source == 'email' and ticket.team_id.use_confirmation_email:
+                mail_template = self.env.ref('cyllo_help_desk.help_desk_mail_template', raise_if_not_found=False)
+                if mail_template:
+                    mail_template.sudo().send_mail(ticket.id, force_send=True)
+                    ticket.message_post(body=_("Automated confirmation email sent to %s", ticket.customer_id.name or ticket.email))
         return res
+
 
     @api.model
     def message_new(self, msg_dict, custom_values=None):
@@ -566,6 +592,7 @@ class HelpDeskTicket(models.Model):
         custom_values.update({
             'name': msg_dict.get('subject', _('No Subject')),
             'description': msg_dict.get('body', ''),
+            'source': 'email',
         })
         return super().message_new(msg_dict, custom_values=custom_values)
 
