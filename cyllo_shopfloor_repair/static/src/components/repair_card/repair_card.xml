@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="repair_floor.RepairCard" owl="1">
+        <div class="card shadow-sm border-0 rounded-3 bg-white cursor-pointer h-100 hover-shadow transition-base">
+            <div class="card-body p-3 d-flex flex-column">
+
+                <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                    <h5 class="card-title fw-bolder m-0 text-dark text-truncate">
+                        <i class="fa fa-ticket me-2 fs-6"/>
+                        <t t-esc="props.record.name"/>
+                    </h5>
+                    <div class="dropdown">
+                        <button class="btn btn-sm text-muted p-0 border-0" type="button" data-bs-toggle="dropdown" t-on-click.stop="">
+                            <i class="fa fa-ellipsis-v fs-5 px-2"/>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            <li>
+                                <button class="dropdown-item py-2 fw-bold text-primary" t-on-click.stop="openRepairOrder">
+                                    <i class="fa fa-external-link-square me-2"/> Open Repair Order
+                                </button>
+                            </li>
+                            <li><hr class="dropdown-divider"/></li>
+                            <li>
+                                <button class="dropdown-item py-2 fw-bold text-success" t-on-click.stop="editRepairLine">
+                                    <i class="fa fa-plus me-2"/> Edit Repair Line
+                                </button>
+                            </li>
+                            <li>
+                                <button class="dropdown-item py-2 fw-bold text-info" t-on-click.stop="editNotes">
+                                    <i class="fa fa-sticky-note me-2"/> Notes
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="small mb-2 text-truncate fw-bold">
+                    <i class="fa fa-box text-muted me-2"/>
+                    <t t-esc="props.record.product_id[1]"/>
+                </div>
+
+                <div class="small mb-3 text-truncate text-muted">
+                    <i class="fa fa-user-circle me-2"/>
+                    <t t-esc="props.record.partner_id ? props.record.partner_id[1] : 'Internal'"/>
+                </div>
+
+                <t t-if="props.record.state === 'under_repair' and props.record.repair_start_time">
+                    <div class="small mb-3 text-primary fw-bold">
+                        <i class="fa fa-clock-o me-2"/> Started: <t t-esc="props.record.repair_start_time"/>
+                    </div>
+                </t>
+
+                <t t-if="props.record.state !== 'done'">
+                    <div class="d-flex justify-content-center mt-auto pt-2">
+                        <button t-if="props.record.state === 'confirmed'" class="btn btn-success w-100 btn-sm rounded-pill fw-bold shadow-sm" t-on-click.stop="startRepair">
+                            <i class="fa fa-play me-1"/> Start Repair
+                        </button>
+                        <button t-if="props.record.state === 'under_repair'" class="btn btn-warning w-100 btn-sm rounded-pill fw-bold shadow-sm text-dark" t-on-click.stop="stopRepair">
+                            <i class="fa fa-stop me-1"/> End Repair
+                        </button>
+                    </div>
+                </t>
+
+            </div>
+        </div>
+    </t>
+</templates>

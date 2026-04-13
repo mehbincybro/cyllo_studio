@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_repair_order_form_inherit_time" model="ir.ui.view">
+        <field name="name">repair.order.form.inherit.time</field>
+        <field name="model">repair.order</field>
+        <field name="inherit_id" ref="repair.view_repair_order_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="repair_start_time" readonly="1" invisible="state not in ['under_repair', 'done']"/>
+                <field name="repair_end_time" readonly="1" invisible="state != 'done'"/>
+                <field name="actual_duration" invisible="state != 'done'" widget="float_time"/>
+                <field name="operator_ids" invisible="state != 'done'" widget="many2many_tags"
+                       options="{'no_create': True}"/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
