@@ -40,9 +40,6 @@
                         <button name="action_view_team_sla_policies" type="object" class="oe_stat_button" icon="fa-clock-o" invisible="not use_sla">
                             <field name="sla_policy_count" widget="statinfo" string="SLA Policies"/>
                         </button>
-                        <button name="action_view_team_returns" type="object" class="oe_stat_button" icon="fa-truck" invisible="not use_returns">
-                            <field name="return_count" widget="statinfo" string="Returns"/>
-                        </button>
                     </div>
                     <group>
                         <field name="name" placeholder="Support Team"/>

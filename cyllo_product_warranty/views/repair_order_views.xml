@@ -16,8 +16,8 @@
             
             <!-- Add Sale Order fields -->
             <xpath expr="//field[@name='partner_id']" position="after">
-                <field name="sale_order_id" domain="[('partner_id', 'child_of', partner_id), ('state', 'in', ['sale', 'done'])]"/>
-                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]" invisible="not sale_order_id"/>
+                <field name="sale_order_id" domain="[('partner_id', 'child_of', partner_id), ('state', 'in', ['sale', 'done'])]" readonly="0"/>
+                <field name="sale_order_line_id" domain="[('order_id', '=', sale_order_id)]" invisible="not sale_order_id" required="sale_order_id" readonly="0"/>
             </xpath>
 
         </field>

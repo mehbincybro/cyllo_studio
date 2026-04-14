@@ -68,11 +68,17 @@ class RepairOrder(models.Model):
     @api.onchange('sale_order_id')
     def _onchange_sale_order_id(self):
         if self.sale_order_id:
-            self.partner_id = self.sale_order_id.partner_id
-            self.sale_order_line_id = False
+            # Only update partner if currently blank.
+            # If already set (manual creation), keep it unless it's a completely different commercial entity.
+            if not self.partner_id or self.partner_id.commercial_partner_id != self.sale_order_id.partner_id.commercial_partner_id:
+                self.partner_id = self.sale_order_id.partner_id
+
+            # ONLY clear if the line is not part of this newly selected SO
+            if self.sale_order_line_id and self.sale_order_line_id.order_id != self.sale_order_id:
+                self.sale_order_line_id = False
         else:
-            # If SO is cleared, we don't necessarily clear the partner,
-            # but we definitely clear the line.
+            # When SO is cleared, we definitely clear the line,
+            # but we DON'T clear the partner_id to avoid clearing manual selections.
             self.sale_order_line_id = False
 
     @api.onchange('sale_order_line_id')

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_account" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.account</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_help_desk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="before">
+                <button name="action_create_refund" type="object" string="Create Refund" invisible="not customer_id or not use_credit_notes"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_refunds" type="object" class="oe_stat_button" icon="fa-reply" invisible="not use_credit_notes or refund_count == 0">
+                    <field name="refund_count" widget="statinfo" string="Refunds"/>
+                </button>
+                <button name="action_view_customer_invoices" type="object" class="oe_stat_button" icon="fa-file-text-o" invisible="customer_invoice_count == 0">
+                    <field name="customer_invoice_count" widget="statinfo" string="Customer Invoices"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='company_id']" position="after">
+                <field name="invoice_id" domain="[
+                    ('move_type', '=', 'out_invoice'),
+                    ('partner_id', 'child_of', customer_id),
+                    ('state', 'not in', ('draft', 'cancel'))
+                ]" invisible="not use_credit_notes"/>
+                <field name="invoice_line_ids" widget="many2many_tags" domain="[('move_id', '=', invoice_id), ('display_type', '=', 'product')]" invisible="not invoice_id"/>
+            </xpath>
+            <xpath expr="//group[@invisible='1']" position="inside">
+                <field name="refund_ids" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

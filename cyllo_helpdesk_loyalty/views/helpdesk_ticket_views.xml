@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="helpdesk_ticket_view_form_inherit_loyalty" model="ir.ui.view">
+        <field name="name">helpdesk.ticket.view.form.inherit.loyalty</field>
+        <field name="model">helpdesk.ticket</field>
+        <field name="inherit_id" ref="cyllo_help_desk.helpdesk_ticket_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='stage_id']" position="before">
+                <button name="action_create_coupon" type="object" string="Create Coupon" invisible="not customer_id or not use_coupons"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_coupons" type="object" class="oe_stat_button" icon="fa-ticket" invisible="not use_coupons or coupon_count == 0">
+                    <field name="coupon_count" widget="statinfo" string="Coupons"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+</odoo>
