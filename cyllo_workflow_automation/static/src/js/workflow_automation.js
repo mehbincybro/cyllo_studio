@@ -178,6 +178,7 @@ export class WorkFlowAuto extends Component {
             hasWhatsappModule: false,
             testRunning: false,
             testResult: null,
+            zoomPercent: 100,
         })
 
         this.branchInputMap = {};
@@ -233,9 +234,9 @@ export class WorkFlowAuto extends Component {
 
         useEffect((nodeId) => {
             this.state.block = true;
-            if (nodeId) {
-                if (this.currentNode.data.type === "action_to_do") this.state.block = false;
-            }
+//            if (nodeId) {
+//                if (this.currentNode.data.type === "action_to_do") this.state.block = false;
+//            }
         }, () => [this.state.selectedNodeID])
 
         useEffect(() => {
@@ -345,14 +346,14 @@ export class WorkFlowAuto extends Component {
                 };
             };
 
-        const renderFunc = (obj, ref) => {
-            const { component, props, options } = obj;
-            this.state.nodeDetails.push({ ...obj, ref });
-            this.data = { ...obj, ref };
-        };
-        const owlC = { version: 3, h: preRender, render: renderFunc };
-        this.editor = new Drawflow(this.drawBoard.el, owlC);
-        this.drawBoard.el.addEventListener('wheel', this.handleCanvasWheel, { passive: false });
+            const renderFunc = (obj, ref) => {
+                const { component, props, options } = obj;
+                this.state.nodeDetails.push({ ...obj, ref });
+                this.data = { ...obj, ref };
+            };
+            const owlC = { version: 3, h: preRender, render: renderFunc };
+            this.editor = new Drawflow(this.drawBoard.el, owlC);
+            this.drawBoard.el.addEventListener('wheel', this.handleCanvasWheel, { passive: false });
 
             this.editor.contextmenu = (e) => {
                 if (
@@ -702,6 +703,13 @@ export class WorkFlowAuto extends Component {
             }
         });
         return ids;
+    }
+
+    get triggerActions() {
+        return (this.state.actions || []).filter(action => {
+            const funcName = (action?.func_name || "").toLowerCase();
+            return funcName !== 'loop';
+        });
     }
 
     get usedTriggerNames() {
@@ -1296,38 +1304,14 @@ export class WorkFlowAuto extends Component {
         this.editor.import(data)
     }
 
-    getNodeCanvasBounds(node) {
-        if (!this.editor?.precanvas || !node) {
-            return null;
-        }
-        const nodeElement = this.editor.precanvas.querySelector(`#node-${node.id}`);
-        if (nodeElement) {
-            const left = Number(nodeElement.offsetLeft || 0);
-            const top = Number(nodeElement.offsetTop || 0);
-            const width = Number(nodeElement.offsetWidth || 180);
-            const height = Number(nodeElement.offsetHeight || 72);
-            return {
-                left,
-                top,
-                right: left + width,
-                bottom: top + height,
-            };
-        }
-
-        const left = Number(node.pos_x ?? 0);
-        const top = Number(node.pos_y ?? 0);
-        const width = 180;
-        const height = 72;
-        return {
-            left,
-            top,
-            right: left + width,
-            bottom: top + height,
-        };
+    _updateZoomPercent() {
+        const zoom = this.editor && this.editor.zoom ? this.editor.zoom : 1;
+        this.state.zoomPercent = Math.round(zoom * 100);
     }
 
     zoomOut() {
         this.editor.zoom_out();
+        this._updateZoomPercent();
     }
 
     zoomReset() {
@@ -1335,10 +1319,12 @@ export class WorkFlowAuto extends Component {
             return;
         }
         this.editor.zoom_reset();
+        this._updateZoomPercent();
     }
 
     zoomIn() {
         this.editor.zoom_in();
+        this._updateZoomPercent();
     }
 
     changeMode() {

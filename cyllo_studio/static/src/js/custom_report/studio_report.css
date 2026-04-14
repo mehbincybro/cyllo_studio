@@ -750,6 +750,139 @@
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
 }
 
+/* ── Modern Preview Sidebar Styling (Light Theme) ──────────────────────── */
+.modern-preview-sidebar {
+    background: #ffffff;
+    color: #334155;
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.05);
+    /* Soft shadow on the left */
+    border-right: 1px solid #e2e8f0;
+}
+
+.modern-preview-sidebar .tracking-wider {
+    letter-spacing: 1px;
+}
+
+.modern-preview-sidebar .fs-7 {
+    font-size: 13px;
+    color: #1e293b;
+}
+
+.modern-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+}
+
+.modern-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.modern-input-wrapper .input-icon {
+    position: absolute;
+    left: 12px;
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.modern-preview-sidebar .modern-input,
+.modern-preview-sidebar .modern-select {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    font-size: 13px;
+    padding: 10px 12px 10px 36px;
+    border-radius: 8px;
+    transition: all 0.2s ease-in-out;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.modern-preview-sidebar .modern-input:focus,
+.modern-preview-sidebar .modern-select:focus {
+    background: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    outline: none;
+}
+
+.modern-preview-sidebar .modern-select {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200.svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 14px;
+}
+
+
+
+.modern-toggle-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+}
+
+.modern-toggle-card:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.custom-switch {
+    width: 36px !important;
+    height: 20px !important;
+    cursor: pointer;
+    background-color: #cbd5e1;
+    border: none;
+}
+
+.custom-switch:checked {
+    background-color: #3b82f6;
+}
+
+.modern-action-btn {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.modern-action-btn.primary-action {
+    background: #9ea700;
+    border: none;
+    color: #ffffff;
+}
+
+.modern-action-btn.primary-action:hover {
+    background: #8b9300;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(158, 167, 0, 0.25);
+}
+
+.modern-action-btn.danger-action {
+    background: #e85e6a;
+    border: none;
+    color: #ffffff;
+}
+
+.modern-action-btn.danger-action:hover {
+    background: #d45561;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(232, 94, 106, 0.25);
+}
+
 .cyllo-studio-report-container.shadow-lg {
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3) !important;
 }
@@ -997,9 +1130,19 @@
     color: white;
 }
 
+.btn-edit:hover {
+    background: #8b9300;
+    color: white;
+}
+
 /* Reset Report */
 .btn-reset {
-    background: #e35d6a;
+    background: #e85e6a;
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #d45561;
     color: white;
 }
 
