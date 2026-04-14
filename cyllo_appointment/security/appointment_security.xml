@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Appointment Pro Security Groups -->
+    <record id="module_category_appointment" model="ir.module.category">
+        <field name="name">Appointment Pro</field>
+        <field name="description">Manage appointments, resources, and staff</field>
+        <field name="sequence">100</field>
+    </record>
+
+    <!-- User Group -->
+    <record id="group_appointment_user" model="res.groups">
+        <field name="name">User</field>
+        <field name="category_id" ref="module_category_appointment"/>
+        <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- Manager Group -->
+    <record id="group_appointment_manager" model="res.groups">
+        <field name="name">Manager</field>
+        <field name="category_id" ref="module_category_appointment"/>
+        <field name="implied_ids" eval="[(4, ref('group_appointment_user'))]"/>
+        <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+</odoo>
