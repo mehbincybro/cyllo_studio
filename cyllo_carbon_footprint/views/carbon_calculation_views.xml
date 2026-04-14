@@ -18,9 +18,23 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="%(action_carbon_compute_wizard)d" type="action" string="Compute Emissions" class="btn-primary"/>
-                    <button name="action_mark_done" type="object" string="Mark Done" class="btn-secondary"/>
-                    <field name="state" widget="statusbar"/>
+                    <button name="%(action_carbon_compute_wizard)d" type="action" string="Compute Emissions" class="btn-primary" invisible="state != 'draft'"/>
+                    
+                    <button name="action_submit" type="object" string="Submit" class="btn-primary" invisible="state != 'draft'"/>
+                    
+                    <button name="action_approve" type="object" string="Approve" class="btn-primary" 
+                            groups="cyllo_green_metrics.group_carbon_manager" 
+                            invisible="state != 'submitted'"/>
+                    
+                    <button name="action_done" type="object" string="Mark Done" class="btn-primary" 
+                            groups="cyllo_green_metrics.group_carbon_manager" 
+                            invisible="state != 'approved'"/>
+                            
+                    <button name="action_draft" type="object" string="Reset to Draft" class="btn-secondary" 
+                            groups="cyllo_green_metrics.group_carbon_manager" 
+                            invisible="state not in ['submitted', 'approved']"/>
+
+                    <field name="state" widget="statusbar" statusbar_visible="draft,submitted,approved,done"/>
                 </header>
                 <sheet>
                     <group>

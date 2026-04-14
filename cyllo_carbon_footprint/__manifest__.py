@@ -20,7 +20,7 @@
 #
 #############################################################################
 {
-    'name': 'Carbon Footprint',
+    'name': 'Green Metrics',
     'version': '1.0.0',
     'category': 'Sustainability',
     'summary': 'Carbon emission sources, factors, and assignment rules',
@@ -28,9 +28,10 @@
     'company': 'Cyllo',
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
-    'depends': ['base'],
-    'icon': '/cyllo_carbon_footprint/static/description/cyllo_carbon_footprint.svg',
+    'depends': ['base', 'project', 'mrp', 'fleet'],
+    'icon': '/cyllo_green_metrics/static/description/cyllo_carbon_footprint.svg',
     'data': [
+        'data/project_data.xml',
         'security/ir.model.access.csv',
         'views/carbon_gas_views.xml',
         'views/carbon_scope_views.xml',
@@ -40,8 +41,16 @@
         'views/carbon_activity_views.xml',
         'views/carbon_wizard_views.xml',
         'views/carbon_calculation_views.xml',
+        'views/mrp_routing_workcenter_views.xml',
+        'views/mrp_workorder_views.xml',
+        'views/project_task_views.xml',
+        'views/carbon_dashboard_action.xml',
+        'views/res_config_settings_views.xml',
         'views/carbon_menu.xml',
+        'views/res_company_views.xml',
+        'views/fleet_vehicle_views.xml',
         'reports/carbon_report.xml',
+        'data/fleet_cron.xml',
     ],
     'demo': [
         'demo/carbon_demo.xml',
@@ -49,5 +58,12 @@
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_green_metrics/static/src/css/green_dashboard.scss',
+            'cyllo_green_metrics/static/src/js/green_dashboard.js',
+            'cyllo_green_metrics/static/src/xml/green_dashboard.xml',
+        ],
+    },
     'application': True,
 }

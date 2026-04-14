@@ -17,30 +17,59 @@
 
     <record id="carbon_unit_kwh" model="carbon.unit">
         <field name="name">kWh</field>
+        <field name="full_name">Kilowatt-hour</field>
     </record>
     <record id="carbon_unit_l" model="carbon.unit">
         <field name="name">L</field>
+        <field name="full_name">Liter</field>
     </record>
     <record id="carbon_unit_km" model="carbon.unit">
         <field name="name">km</field>
+        <field name="full_name">Kilometer</field>
     </record>
     <record id="carbon_unit_kg" model="carbon.unit">
         <field name="name">kg</field>
+        <field name="full_name">Kilogram</field>
     </record>
     <record id="carbon_unit_kg_co2e" model="carbon.unit">
         <field name="name">kg CO2e</field>
+        <field name="full_name">Kilograms of Carbon Dioxide Equivalent</field>
     </record>
     <record id="carbon_unit_kg_co2e_kwh" model="carbon.unit">
         <field name="name">kg CO2e/kWh</field>
+        <field name="full_name">Emission Factor</field>
     </record>
     <record id="carbon_unit_kg_co2e_l" model="carbon.unit">
         <field name="name">kg CO2e/L</field>
+        <field name="full_name">Kilograms of equivalent per Liter</field>
     </record>
     <record id="carbon_unit_kg_co2e_km" model="carbon.unit">
         <field name="name">kg CO2e/km</field>
+        <field name="full_name">Kilograms of equivalent per Kilometer</field>
     </record>
     <record id="carbon_unit_kg_co2e_kg" model="carbon.unit">
         <field name="name">kg CO2e/kg</field>
+        <field name="full_name">Kilograms of equivalent per Kilogram</field>
+    </record>
+        <record id="noise_unit_db" model="carbon.unit">
+        <field name="name">dB</field>
+        <field name="full_name">decibel</field>
+    </record>
+        <record id="noise_unit_dbA" model="carbon.unit">
+        <field name="name">dB(A)</field>
+        <field name="full_name">decibel(A)</field>
+    </record>
+        <record id="noise_unit_dbC" model="carbon.unit">
+        <field name="name">dB(C)</field>
+        <field name="full_name">decibel(C)</field>
+    </record>
+        <record id="water_unit_mgl" model="carbon.unit">
+        <field name="name">mg/L</field>
+        <field name="full_name">milligrams per liter</field>
+    </record>
+        <record id="water_unit_ppm" model="carbon.unit">
+        <field name="name">ppm</field>
+        <field name="full_name">parts per million</field>
     </record>
 
     <record id="carbon_gas_co2" model="carbon.gas">
@@ -95,6 +124,7 @@
         <field name="source_id" ref="carbon_source_electricity"/>
         <field name="gas_id" ref="carbon_gas_co2"/>
         <field name="factor_value">0.70</field>
+        <field name="type">air</field>
         <field name="unit_name" ref="carbon_unit_kg_co2e_kwh"/>
         <field name="region">Default</field>
         <field name="provider">Demo</field>
@@ -104,6 +134,7 @@
         <field name="source_id" ref="carbon_source_fuel"/>
         <field name="gas_id" ref="carbon_gas_co2"/>
         <field name="factor_value">2.68</field>
+        <field name="type">air</field>
         <field name="unit_name" ref="carbon_unit_kg_co2e_l"/>
         <field name="region">Default</field>
         <field name="provider">Demo</field>
@@ -113,6 +144,7 @@
         <field name="source_id" ref="carbon_source_travel"/>
         <field name="gas_id" ref="carbon_gas_co2"/>
         <field name="factor_value">0.18</field>
+        <field name="type">air</field>
         <field name="unit_name" ref="carbon_unit_kg_co2e_km"/>
         <field name="region">Default</field>
         <field name="provider">Demo</field>
@@ -122,6 +154,7 @@
         <field name="source_id" ref="carbon_source_waste"/>
         <field name="gas_id" ref="carbon_gas_co2"/>
         <field name="factor_value">1.20</field>
+        <field name="type">air</field>
         <field name="unit_name" ref="carbon_unit_kg_co2e_kg"/>
         <field name="region">Default</field>
         <field name="provider">Demo</field>
@@ -129,7 +162,7 @@
 
     <record id="carbon_rule_electricity" model="carbon.assign.rule">
         <field name="name">Electricity Activities</field>
-        <field name="model_id" ref="cyllo_carbon_footprint.model_carbon_activity"/>
+        <field name="model_id" ref="cyllo_green_metrics.model_carbon_activity"/>
         <field name="domain">[('name', 'ilike', 'Electricity')]</field>
         <field name="source_id" ref="carbon_source_electricity"/>
         <field name="factor_id" ref="carbon_factor_electricity_co2"/>
@@ -138,7 +171,7 @@
     </record>
     <record id="carbon_rule_fuel" model="carbon.assign.rule">
         <field name="name">Fuel Activities</field>
-        <field name="model_id" ref="cyllo_carbon_footprint.model_carbon_activity"/>
+        <field name="model_id" ref="cyllo_green_metrics.model_carbon_activity"/>
         <field name="domain">[('name', 'ilike', 'Fuel')]</field>
         <field name="source_id" ref="carbon_source_fuel"/>
         <field name="factor_id" ref="carbon_factor_fuel_co2"/>

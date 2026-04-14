@@ -1,0 +1,46 @@
+.o_action_manager {
+    .bg-light {
+        background-color: #f8f9fa !important;
+    }
+    .shadow-sm {
+        box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+    }
+    .rounded-3 {
+        border-radius: .5rem !important;
+    }
+    .card-title {
+        font-weight: 600;
+        color: #344767;
+    }
+    .text-primary {
+        color: #0d6efd !important;
+    }
+
+    .custom-scope-dropdown {
+        .btn-white {
+            background-color: #fff;
+            border-color: #dee2e6;
+            &:hover {
+                background-color: #f8f9fa;
+            }
+        }
+        .dropdown-item {
+            padding: 0.5rem 1rem;
+            transition: background-color 0.2s;
+            cursor: pointer;
+            
+            &:hover {
+                background-color: rgba(13, 110, 253, 0.1) !important;
+            }
+            
+            &.selected-item {
+                background-color: rgba(13, 110, 253, 0.2);
+                font-weight: 600;
+            }
+            
+            .form-check-input, label {
+                cursor: pointer;
+            }
+        }
+    }
+}

@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_green_metrics.GreenDashboard">
+        <div class="o_action_manager overflow-auto">
+            <div class="container-fluid py-4 bg-light">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="text-dark fw-bold">Environment Metrics Overview</h2>
+                    </div>
+                </div>
+
+                <!-- Allocations Section -->
+                <div class="row mb-4 g-4" t-if="state.dashboardData">
+                    <!-- Carbon Cap vs Usage Section -->
+                    <div t-attf-class="{{ state.dashboardData.water_cap_data ? 'col-lg-6 col-md-12' : 'col-12' }}">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-body d-flex flex-column">
+                                <h4 class="card-title text-dark">🌍 Carbon Emission Allocations (<t t-esc="state.dashboardData.cap_data.duration" />)</h4>
+                                <hr/>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                    <div class="mb-2">
+                                        <h5 class="text-muted mb-1">Allocated Cap</h5>
+                                        <h3 class="fw-bold"><t t-esc="state.dashboardData.cap_data.cap" /> <span class="fs-5 text-muted"><t t-esc="state.dashboardData.cap_data.unit" /></span></h3>
+                                    </div>
+                                    <div class="mb-2">
+                                        <h5 class="text-muted mb-1">Used Amount</h5>
+                                        <h3 t-attf-class="fw-bold {{ state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap ? 'text-danger' : 'text-success' }}">
+                                            <t t-esc="state.dashboardData.cap_data.used" /> 
+                                            <span class="fs-5 text-muted"><t t-esc="state.dashboardData.cap_data.unit" /></span>
+                                        </h3>
+                                    </div>
+                                    <t t-if="state.dashboardData.cap_data.show_available_credit">
+                                        <div class="mb-2">
+                                            <h5 class="text-muted mb-1">Available Credit</h5>
+                                            <h3 class="fw-bold text-success">
+                                                <t t-esc="state.dashboardData.cap_data.available_credit" /> 
+                                                <span class="fs-5 text-muted"><t t-esc="state.dashboardData.cap_data.unit" /></span>
+                                            </h3>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.dashboardData.cap_data.used > state.dashboardData.cap_data.cap">
+                                        <div class="alert alert-danger mb-0 p-2 d-flex align-items-center mt-2">
+                                            <i class="ri-alert-line fs-4 me-2"></i>
+                                            <strong>Warning:</strong> Usage amount exceeds allocated cap!
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Water Cap vs Usage Section -->
+                    <div class="col-lg-6 col-md-12" t-if="state.dashboardData and state.dashboardData.water_cap_data">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-body d-flex flex-column">
+                                <h4 class="card-title text-dark">💧 Water Allocations (<t t-esc="state.dashboardData.water_cap_data.duration" />)</h4>
+                                <hr/>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                    <div class="mb-2">
+                                        <h5 class="text-muted mb-1">Allocated Water</h5>
+                                        <h3 class="fw-bold"><t t-esc="state.dashboardData.water_cap_data.cap" /> <span class="fs-5 text-muted"><t t-esc="state.dashboardData.water_cap_data.unit" /></span></h3>
+                                    </div>
+                                    <div class="mb-2">
+                                        <h5 class="text-muted mb-1">Used Water</h5>
+                                        <h3 t-attf-class="fw-bold {{ state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap ? 'text-danger' : 'text-primary' }}">
+                                            <t t-esc="state.dashboardData.water_cap_data.used" /> 
+                                            <span class="fs-5 text-muted"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
+                                        </h3>
+                                    </div>
+                                    <t t-if="state.dashboardData.water_cap_data.show_available_credit">
+                                        <div class="mb-2">
+                                            <h5 class="text-muted mb-1">Net Recovered Water</h5>
+                                            <h3 class="fw-bold text-primary">
+                                                <t t-esc="state.dashboardData.water_cap_data.available_credit" /> 
+                                                <span class="fs-5 text-muted"><t t-esc="state.dashboardData.water_cap_data.unit" /></span>
+                                            </h3>
+                                        </div>
+                                    </t>
+                                    <t t-if="state.dashboardData.water_cap_data.used > state.dashboardData.water_cap_data.cap">
+                                        <div class="alert alert-danger mb-0 p-2 d-flex align-items-center mt-2">
+                                            <i class="ri-alert-line fs-4 me-2"></i>
+                                            <strong>Warning:</strong> Water usage exceeds allocated amount!
+                                        </div>
+                                    </t>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Water Filters Outside Card -->
+                        <div class="mt-3 d-flex flex-column align-items-end">
+                            <div class="d-flex gap-3 align-items-center flex-wrap justify-content-end">
+                                <label class="fw-bold fs-5 text-dark mb-0">Filters:</label>
+                                <select class="form-select fs-5 w-auto fw-bold" t-on-change="onWaterDateFilterChange" t-att-value="state.waterDateFilter">
+                                    <option value="today">Today</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="yearly">Yearly</option>
+                                    <option value="range">Date Range</option>
+                                </select>
+                                
+                                <!-- Multi-select Scope Dropdown -->
+                                <div class="dropdown custom-scope-dropdown">
+                                    <button class="btn btn-white dropdown-toggle fs-5 fw-bold border shadow-sm" type="button" id="scopeDropdown" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                        <t t-esc="getSelectedScopesText()"/>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-lg p-2" aria-labelledby="scopeDropdown" style="min-width: 220px;">
+                                        <li>
+                                            <div class="dropdown-item d-flex align-items-center gap-2 rounded">
+                                                <input type="checkbox" id="scope_all" class="form-check-input" t-att-checked="isAllSelected()" t-on-change="toggleScopeAll"/>
+                                                <label class="mb-0 fw-bold flex-grow-1 cursor-pointer" for="scope_all">Select All</label>
+                                            </div>
+                                        </li>
+                                        <li><hr class="dropdown-divider"/></li>
+                                        <t t-foreach="state.dashboardData.scopes or []" t-as="scope" t-key="scope.id">
+                                            <li>
+                                                <div t-attf-class="dropdown-item d-flex align-items-center gap-2 rounded {{ isScopeSelected(scope.id) ? 'selected-item' : '' }}">
+                                                    <input type="checkbox" t-att-id="'scope_' + scope.id" class="form-check-input" t-att-checked="isScopeSelected(scope.id)" t-on-change="(ev) => this.toggleScope(scope.id, ev)"/>
+                                                    <label class="mb-0 flex-grow-1 cursor-pointer" t-att-for="'scope_' + scope.id"><t t-esc="scope.name"/></label>
+                                                </div>
+                                            </li>
+                                        </t>
+                                        <li>
+                                            <div t-attf-class="dropdown-item d-flex align-items-center gap-2 rounded {{ isScopeSelected('no_scope') ? 'selected-item' : '' }}">
+                                                <input type="checkbox" id="scope_none" class="form-check-input" t-att-checked="isScopeSelected('no_scope')" t-on-change="(ev) => this.toggleScope('no_scope', ev)"/>
+                                                <label class="mb-0 flex-grow-1 cursor-pointer" for="scope_none">No Scope</label>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div t-if="state.waterDateFilter == 'range'" class="d-flex gap-2 mt-2 align-items-center justify-content-end">
+                                <input type="date" class="form-control fs-5 w-auto fw-bold" t-model="state.waterStartDate" t-on-change="onWaterDateRangeChange"/>
+                                <span class="text-muted fw-bold fs-5">to</span>
+                                <input type="date" class="form-control fs-5 w-auto fw-bold" t-model="state.waterEndDate" t-on-change="onWaterDateRangeChange"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row g-4" t-if="state.dashboardData">
+                    <!-- Overall Gas Emissions (Donut) -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Overall Gas Emissions</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas t-ref="gasChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Sound Analysis (Bar) -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Sound Analysis (4 Months)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas t-ref="soundChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Water Pollution (Bar) -->
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Water Pollution (Latest 3m)</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="chart-container" style="position: relative; height:300px; width:100%">
+                                    <canvas t-ref="waterChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="card shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Green Projects</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column" t-if="state.dashboardData and state.dashboardData.projects">
+                                <div class="mb-4">
+                                    <button class="btn" style="background-color: #6a2a5f; color: white;" t-on-click="() => this.createInitiative('green')">
+                                        Create Initiative
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between text-center mt-auto pb-3">
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('green', state.dashboardData.projects.idea_stage_id)">
+                                        <h3 class="text-primary fw-bold mb-1"><t t-esc="state.dashboardData.projects.ideas_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Ideas 🌱</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('green', state.dashboardData.projects.prog_stage_id)">
+                                        <h3 class="text-success fw-bold mb-1"><t t-esc="state.dashboardData.projects.prog_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">In Progress 🌳</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('green', state.dashboardData.projects.done_stage_id)">
+                                        <h3 class="text-info fw-bold mb-1"><t t-esc="state.dashboardData.projects.done_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Done 🌲</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('green', false)">
+                                        <h3 class="text-dark fw-bold mb-1"><t t-esc="state.dashboardData.projects.total_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Total</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Water Initiatives Card -->
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="card h-100 shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Water Initiatives</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column" t-if="state.dashboardData and state.dashboardData.water_projects">
+                                <div class="mb-4">
+                                    <button class="btn" style="background-color: #00bcd4; color: white;" t-on-click="() => this.createInitiative('water')">
+                                        Create Initiative
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between text-center mt-auto pb-3">
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('water', state.dashboardData.water_projects.idea_stage_id)">
+                                        <h3 class="text-primary fw-bold mb-1"><t t-esc="state.dashboardData.water_projects.ideas_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Ideas 💧</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('water', state.dashboardData.water_projects.prog_stage_id)">
+                                        <h3 class="text-success fw-bold mb-1"><t t-esc="state.dashboardData.water_projects.prog_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">In Progress 🌊</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('water', state.dashboardData.water_projects.done_stage_id)">
+                                        <h3 class="text-info fw-bold mb-1"><t t-esc="state.dashboardData.water_projects.done_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Done ✅</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('water', false)">
+                                        <h3 class="text-dark fw-bold mb-1"><t t-esc="state.dashboardData.water_projects.total_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Total</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Sound Initiatives Card -->
+                    <div class="col-lg-4 col-md-12 mb-4">
+                        <div class="card h-100 shadow-sm border-0 rounded-3">
+                            <div class="card-header bg-white border-bottom-0 pb-0">
+                                <h5 class="card-title text-dark">Sound Initiatives</h5>
+                            </div>
+                            <div class="card-body d-flex flex-column" t-if="state.dashboardData and state.dashboardData.sound_projects">
+                                <div class="mb-4">
+                                    <button class="btn" style="background-color: #ff9800; color: white;" t-on-click="() => this.createInitiative('sound')">
+                                        Create Initiative
+                                    </button>
+                                </div>
+                                <div class="d-flex justify-content-between text-center mt-auto pb-3">
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('sound', state.dashboardData.sound_projects.idea_stage_id)">
+                                        <h3 class="text-primary fw-bold mb-1"><t t-esc="state.dashboardData.sound_projects.ideas_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Ideas 📢</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('sound', state.dashboardData.sound_projects.prog_stage_id)">
+                                        <h3 class="text-success fw-bold mb-1"><t t-esc="state.dashboardData.sound_projects.prog_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">In Progress 🔊</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('sound', state.dashboardData.sound_projects.done_stage_id)">
+                                        <h3 class="text-info fw-bold mb-1"><t t-esc="state.dashboardData.sound_projects.done_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Done ✅</h6>
+                                    </div>
+                                    <div class="cursor-pointer" t-on-click="() => this.openTasks('sound', false)">
+                                        <h3 class="text-dark fw-bold mb-1"><t t-esc="state.dashboardData.sound_projects.total_cnt"/></h3>
+                                        <h6 class="text-muted mb-0">Total</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

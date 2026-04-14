@@ -9,7 +9,7 @@
                 <field name="source_id"/>
                 <field name="scope_id"/>
                 <field name="quantity"/>
-                <field name="uom_name"/>
+                <field name="uom_name" readonly="1" force_save="1"/>
                 <field name="factor_id" domain="[('source_id', '=', source_id)]"/>
                 <field name="emission_total"/>
                 <field name="state"/>
@@ -37,7 +37,7 @@
                     </group>
                     <group>
                         <field name="quantity"/>
-                        <field name="uom_name"/>
+                        <field name="uom_name" readonly="1" force_save="1"/>
                         <field name="factor_id" domain="[('source_id', '=', source_id)]"/>
                         <field name="gas_id"/>
                         <field name="factor_value"/>
