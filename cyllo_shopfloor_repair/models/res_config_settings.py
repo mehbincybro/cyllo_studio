@@ -19,6 +19,13 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from odoo import models, fields
 
-from . import repair_order
-from . import res_config_settings
+
+class ResConfigSettings(models.TransientModel):
+    """Add configuration setting for maximum active repair orders."""
+    _inherit = 'res.config.settings'
+
+    repair_max_active_orders = fields.Integer(string="Max Active Repairs per Operator",
+                                              config_parameter='repair.max_active_orders', default=0,
+                                              help="Maximum number of repairs an operator can have running at the same time. Set to 0 for unlimited.")

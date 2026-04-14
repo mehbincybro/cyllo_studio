@@ -19,6 +19,15 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-
-from . import repair_order
-from . import res_config_settings
+{
+    'name': 'Cyllo Repair',
+    'version': '1.0',
+    'summary': 'Central Module for Repair features',
+    'depends': ['repair'],
+    'data': [
+        'views/res_config_settings_views.xml',
+    ],
+    'installable': True,
+    'auto_install': True,
+    'application': False,
+}
