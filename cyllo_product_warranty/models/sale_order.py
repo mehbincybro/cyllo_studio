@@ -19,9 +19,21 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import product_warranty
-from . import sale_order_line
-from . import purchase_order_line
-from . import sale_order
-from . import stock_move_line
-from . import repair_order
+from odoo import models
+
+
+class SaleOrder(models.Model):
+    _inherit = 'sale.order'
+
+    def action_extend_warranty(self):
+        self.ensure_one()
+        return {
+            'name': 'Extend Warranty',
+            'type': 'ir.actions.act_window',
+            'res_model': 'warranty.extension.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_order_id': self.id,
+            }
+        }

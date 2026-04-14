@@ -5,6 +5,13 @@
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_extend_warranty"
+                        string="Extend Warranty"
+                        type="object"
+                        class="btn-primary"
+                        invisible="state not in ['sale', 'done']"/>
+            </xpath>
             <xpath expr="//field[@name='order_line']/tree/field[@name='qty_delivered']"
                    position="after">
                 <field name="warranty_expiration_date"

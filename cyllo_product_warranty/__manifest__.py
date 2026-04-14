@@ -32,6 +32,8 @@ expiration dates for sale order lines, purchase order lines, and stock move line
     'website': "https://www.cyllo.com",
     'depends': ['product', 'sale_stock', 'purchase_stock', 'repair'],
     'data': [
+        'security/ir.model.access.csv',
+        'wizard/warranty_extension_wizard_views.xml',
         'views/product_views.xml',
         'views/sale_order_line_views.xml',
         'views/purchase_order_line_views.xml',
