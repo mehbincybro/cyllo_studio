@@ -177,7 +177,7 @@
                                             <div class="text-muted small mb-2" t-if="usedTriggerNames.length">
                                                 Added triggers: <t t-esc="usedTriggerNames.join(', ')"/>
                                             </div>
-                                            <t t-foreach="state.actions" t-as="action" t-key="action.id">
+                                            <t t-foreach="triggerActions" t-as="action" t-key="action.id">
 												<t t-if="!action.model_id || action.model_id[0] === state.model_id">
                                             <div t-att-class="'collapse_btn' + (isTriggerUsed(action) ? ' cy_w_disabled' : '')"
                                                  t-on-dragstart="(ev) => this.dragStartTrigger(ev, action)"

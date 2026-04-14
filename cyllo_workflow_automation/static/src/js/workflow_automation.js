@@ -704,6 +704,13 @@ export class WorkFlowAuto extends Component {
         return ids;
     }
 
+    get triggerActions() {
+        return (this.state.actions || []).filter(action => {
+            const funcName = (action?.func_name || "").toLowerCase();
+            return funcName !== 'loop';
+        });
+    }
+
     get usedTriggerNames() {
         const ids = this.usedTriggerFunctionIds;
         if (!ids.length) {
@@ -2436,18 +2443,6 @@ export class WorkFlowAuto extends Component {
 
     async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type, trigger_type) {
         if (this.editor.editor_mode === 'fixed') return false;
-
-        if (name === 'model' && record && !this.state.model_id) {
-            const modelData = await this.orm.searchRead('ir.model', [["id", "=", parseInt(record)]], ['model', 'display_name']);
-            if (modelData && modelData.length) {
-                this.state.model_id = parseInt(record);
-                this.state.model_name = modelData[0].model;
-                this.state.model = modelData[0].display_name;
-                this.settingModelState(this.state.model_id);
-                await this.updatePrimaryModel(this.state.model_id);
-            }
-        }
-
         // Calculate position
         pos_x = pos_x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)));
         pos_y = pos_y * (this.editor.precanvas.clientHeight / (this.editor.precanvas.clientHeight * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().y * (this.editor.precanvas.clientHeight / (this.editor.precanvas.clientHeight * this.editor.zoom)));

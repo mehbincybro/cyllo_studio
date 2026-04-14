@@ -186,6 +186,7 @@ class WorkFunction(models.Model):
             ('new_action', 'New Action'),
             ('field_change', 'On change'),
             ('other', 'Other functions'),
+            ('button_click', 'Button Click (Studio)'),
         ],
         default='other'
     )
@@ -195,6 +196,17 @@ class WorkFunction(models.Model):
         default=lambda self: self.env.company
     )
     icon = fields.Binary()
+
+    @api.model
+    def _is_studio_workflow_func_name(self, func_name):
+        return bool(func_name and str(func_name).startswith('studio_wf_'))
+
+    @api.model
+    def _normalize_button_click_vals(self, vals):
+        vals = dict(vals or {})
+        if self._is_studio_workflow_func_name(vals.get('func_name')):
+            vals['trigger_type'] = 'button_click'
+        return vals
 
     @api.constrains('icon')
     def _check_icon_file_type(self):
@@ -244,6 +256,26 @@ class WorkFunction(models.Model):
             process_payload = f"{{'records': self, 'trigger_type': {trigger_value}}}"
             process_before = process_after = process_payload
             decorator = f'@api.{rec.decorator}' if rec.decorator else ''
+            if rec.trigger_type == 'button_click' or self._is_studio_workflow_func_name(rec.func_name):
+                make_function = f'''
+                def make_{rec.func_name}():
+                    {decorator}
+                    def {rec.func_name}(self{',' if args else ''}{args}):
+                        guard_key = '_workflow_{rec.func_name}_running_' + self._name
+                        if self.env.context.get(guard_key):
+                            return False
+                        automation_ids = self.env['work.auto']._get_actions(self, '{rec.func_name}')
+                        before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+                        for automation in before_ids.with_context(old_values=None):
+                            automation._process({process_before})
+                        after_ids = automation_ids - before_ids
+                        for automation in after_ids.with_context(old_values=None):
+                            automation._process({process_after})
+                        return False
+                    return {rec.func_name}
+                '''
+                rec.c_make_function = make_function.strip()
+                continue
             make_function = f'''
             def make_{rec.func_name}():
                 {decorator}
@@ -265,6 +297,40 @@ class WorkFunction(models.Model):
                 return {rec.func_name}
             '''
             rec.c_make_function = make_function.strip()
+
+    @api.model
+    def _ensure_button_trigger(self, model_name, func_name):
+        if not model_name or not func_name:
+            return self.browse()
+        model_id = self.env['ir.model'].sudo().search(
+            [('model', '=', model_name)], limit=1
+        )
+        if not model_id:
+            return self.browse()
+        existing = self.sudo().search([
+            ('func_name', '=', func_name),
+            ('model_id', '=', model_id.id),
+            ('trigger_type', '=', 'button_click'),
+        ], limit=1)
+        if not existing:
+            existing = self.sudo().create({
+                'name': func_name.replace('studio_wf_', '').replace('_', ' ').title() or 'Button Click (Studio)',
+                'func_name': func_name,
+                'model_id': model_id.id,
+                'trigger_type': 'button_click',
+            })
+        if self.env.registry.ready:
+            self.env['work.auto']._update_registry()
+        return existing
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        vals_list = [self._normalize_button_click_vals(vals) for vals in vals_list]
+        return super().create(vals_list)
+
+    def write(self, vals):
+        vals = self._normalize_button_click_vals(vals)
+        return super().write(vals)
 
 
 class WorkAuto(models.Model):
@@ -913,14 +979,34 @@ class WorkAuto(models.Model):
         On Create / Write / Unlink — patch the ORM method on ModelClass.
         """
         patched_models = defaultdict(set)
+        patched_function_ids = set()
 
         def patch(model, name, method):
             """Patch method `name` on `model` unless already patched."""
             if model not in patched_models[name]:
                 patched_models[name].add(model)
                 ModelClass = type(model)
-                method.origin = getattr(ModelClass, name)
+                method.origin = getattr(ModelClass, name, None)
                 setattr(ModelClass, name, method)
+
+        def make_button_click_method(function):
+            func_name = function.func_name
+
+            def button_click(self, *args, **kwargs):
+                guard_key = f'_workflow_{func_name}_running_' + self._name
+                if self.env.context.get(guard_key):
+                    return False
+                automation_ids = self.env['work.auto']._get_actions(self, func_name)
+                before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+                for automation in before_ids.with_context(old_values=None):
+                    automation._process({'records': self, 'trigger_type': 'button_click'})
+                after_ids = automation_ids - before_ids
+                for automation in after_ids.with_context(old_values=None):
+                    automation._process({'records': self, 'trigger_type': 'button_click'})
+                return False
+
+            button_click.__name__ = func_name
+            return button_click
 
         for auto in self.with_context(active_test=False).search([('active', '=', True)]):
             functions = auto.trigger_function_ids
@@ -1000,13 +1086,31 @@ class WorkAuto(models.Model):
             for function in functions.filtered(
                 lambda f: f.trigger_type not in ('field_change', 'time')
             ):
-                if not function.c_make_function:
-                    continue
-                code_obj = compile(function.c_make_function, '<string>', 'exec')
-                func = types.FunctionType(
-                    code_obj.co_consts[0], globals(), function.func_name
-                )()
+                if function.trigger_type == 'button_click' or self.env['work.function']._is_studio_workflow_func_name(function.func_name):
+                    func = make_button_click_method(function)
+                else:
+                    if not function.c_make_function:
+                        continue
+                    code_obj = compile(function.c_make_function, '<string>', 'exec')
+                    func = types.FunctionType(
+                        code_obj.co_consts[0], globals(), function.func_name
+                    )()
                 patch(Model, function.func_name, func)
+                patched_function_ids.add(function.id)
+
+        for function in self.env['work.function'].with_context(active_test=False).search([]):
+            if function.id in patched_function_ids or not function.model_id:
+                continue
+            if not (
+                function.trigger_type == 'button_click'
+                or self.env['work.function']._is_studio_workflow_func_name(function.func_name)
+            ):
+                continue
+            Model = self.env.get(function.model_id.model)
+            if Model is None:
+                continue
+            func = make_button_click_method(function)
+            patch(Model, function.func_name, func)
 
         return super()._register_hook()
 
@@ -1208,6 +1312,17 @@ class WorkAuto(models.Model):
                         self.name
                     )
                     return
+                if isinstance(
+                    e,
+                    (
+                        exceptions.UserError,
+                        exceptions.ValidationError,
+                        exceptions.AccessError,
+                        exceptions.AccessDenied,
+                        exceptions.MissingError,
+                    ),
+                ):
+                    raise
                 raise exceptions.ValidationError(e)
 
     def get_context(self, records=None):
@@ -1493,10 +1608,10 @@ class WorkAuto(models.Model):
     @api.model
     def parse_view_and_fetch_functions(self, model_id):
         """
-            Extract object button functions from model views.
+            Extract triggerable button functions from model views.
 
-            Parses XML views to identify button elements with type 'object'
-            and collects their metadata.
+            Parses XML views to identify regular object buttons and Studio
+            workflow buttons and collects their metadata.
 
             Args:
                 model_id (int): ID of the model.
@@ -1509,44 +1624,39 @@ class WorkAuto(models.Model):
         model_name = model.model
         views = self.env['ir.ui.view'].sudo().search([('model', '=', model_name)])
         for view in views:
-            try:
-                # Wrap in <root> tag because Studio views are often rootless XPath fragments
-                view_arch = etree.fromstring(f"<root>{view.arch_db}</root>")
-            except Exception as e:
-                _logger.warning(f"Failed to parse XML for view {view.id}: {e}")
+            arch = view.arch_base or view.arch_db
+            if not arch:
                 continue
-            
-            # Search for buttons in the arch
-            buttons = view_arch.xpath("//button[@type='object' or @type='workflow']")
-                
-            for button in buttons:
-                # Check if it's in a tree view (skip those)
-                if button.xpath("ancestor::tree"):
-                    continue
-                    
+            try:
+                view_arch = etree.fromstring(arch.encode('utf-8'))
+            except Exception:
+                continue
+            # Include:
+            # 1. regular object buttons
+            # 2. legacy workflow buttons saved as type='workflow'
+            # 3. normalized Studio workflow buttons identified by studio_wf_ name prefix
+            button_nodes = view_arch.xpath(
+                "//button[@type='object' or @type='workflow' or starts-with(@name, 'studio_wf_')]"
+            )
+            for button in button_nodes:
                 button_name = button.attrib.get('name')
-                button_type = button.attrib.get('type')
-                if button_name or button_type == 'workflow':
+                if button_name:
                     button_string = (
                         button.attrib.get('string', button_name) or
-                        button.attrib.get('title', button_name) or
-                        "Workflow Button"
+                        button.attrib.get('title', button_name)
                     )
                     field_in_button = button.xpath(".//field[@string]")
                     if field_in_button:
                         button_string = field_in_button[0].attrib.get('string', button_name)
-
-                    # For workflow buttons, if name is missing, use a placeholder
-                    eff_button_name = button_name or f"workflow_{button_string.lower().replace(' ', '_')}"
-
-                    unique_key = f"{eff_button_name}_{button_string}"
-                    button_context = button.attrib.get('context', eff_button_name)
-                    if button_context == eff_button_name or button_type == 'workflow':
+                    unique_key = f"{button_name}_{button_string}"
+                    button_context = button.attrib.get('context', button_name)
+                    is_studio_workflow_button = button_name.startswith('studio_wf_')
+                    if button_context == button_name or is_studio_workflow_button:
                         words = button_string.split('_')
                         formatted_name = " ".join(words).capitalize()
                         button_functions[unique_key] = {
                             'model': model_name,
-                            'button_function': eff_button_name,
+                            'button_function': button_name,
                             'button_string': formatted_name,
                             'button_val': unique_key,
                         }

@@ -38,7 +38,6 @@ export class CustomTrigger extends Component {
     }
 
     onBack() {
-        this.props.back();
     }
 
     updateBtnFn(value) {
@@ -106,7 +105,8 @@ export class CustomTrigger extends Component {
                 name: trigger_name,
                 func_name: trigger_value,
                 model_id: this.props.model,
-                icon
+                icon,
+                trigger_type: String(trigger_value || "").startsWith("studio_wf_") ? "button_click" : "other",
             }
             await this.orm.create('work.function', [action]);
             await this.props.updateActions(action);
