@@ -40,12 +40,17 @@ class CarbonEmissionSource(models.Model):
     scope_id = fields.Many2one('carbon.scope', ondelete='restrict')
     active = fields.Boolean(default=True)
     description = fields.Text()
+    air_factor_ids = fields.One2many('carbon.factor', 'source_id',domain=[('type', '=', 'air')], context={'default_type': 'air'}, string="Air Factors")
+    sound_factor_ids = fields.One2many('carbon.factor', 'source_id', domain=[('type', '=', 'sound')], context={'default_type': 'sound'}, string="Sound Factors")
+    water_factor_ids = fields.One2many('carbon.factor', 'source_id', domain=[('type', '=', 'water')], context={'default_type': 'water'}, string="Water Factors")
+    factor_count = fields.Integer(compute='_compute_factor_count', string='Factor Count')
 
-    factor_ids = fields.One2many('carbon.factor', 'source_id', string='Factors')
-
-    @api.depends('factor_ids')
+    @api.depends('air_factor_ids', 'sound_factor_ids','water_factor_ids')
     def _compute_factor_count(self):
         for rec in self:
-            rec.factor_count = len(rec.factor_ids)
+            air_factor_count=len(rec.air_factor_ids)
+            sound_factor_count=len(rec.sound_factor_ids)
+            water_factor_count=len(rec.water_factor_ids)
+            rec.factor_count = air_factor_count+sound_factor_count+water_factor_count
 
-    factor_count = fields.Integer(compute='_compute_factor_count', string='Factor Count')
+

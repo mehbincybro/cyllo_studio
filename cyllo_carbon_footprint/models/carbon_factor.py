@@ -30,7 +30,7 @@ class CarbonEmissionFactor(models.Model):
 
     name = fields.Char(required=True)
     source_id = fields.Many2one('carbon.source', required=True, ondelete='restrict')
-    gas_id = fields.Many2one('carbon.gas', required=True, ondelete='restrict')
+    gas_id = fields.Many2one('carbon.gas', ondelete='restrict')
     factor_value = fields.Float(required=True)
     unit_name = fields.Many2one('carbon.unit', string='Unit')
     region = fields.Char()
@@ -39,9 +39,17 @@ class CarbonEmissionFactor(models.Model):
     valid_to = fields.Date()
     active = fields.Boolean(default=True)
     note = fields.Text()
+    type = fields.Selection([('air', 'Air'),('sound', 'Sound'),('water', 'Water')], required=True)
 
     @api.constrains('valid_from', 'valid_to')
     def _check_valid_dates(self):
         for rec in self:
             if rec.valid_from and rec.valid_to and rec.valid_to < rec.valid_from:
                 raise ValidationError('Valid To must be after Valid From.')
+
+    @api.model
+    def create(self, vals):
+        if not vals.get('type'):
+            if self.env.context.get('default_type'):
+                vals['type'] = self.env.context.get('default_type')
+        return super().create(vals)

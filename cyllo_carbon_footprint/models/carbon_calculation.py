@@ -33,6 +33,8 @@ class CarbonCalculation(models.Model):
     total_emissions = fields.Float(compute='_compute_totals', string='Total Emissions')
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('approved', 'Approved'),
         ('done', 'Done'),
     ], default='draft', required=True)
     note = fields.Text()
@@ -42,6 +44,20 @@ class CarbonCalculation(models.Model):
         for rec in self:
             rec.total_emissions = sum(rec.activity_ids.mapped('emission_total'))
 
-    def action_mark_done(self):
-        for rec in self:
-            rec.state = 'done'
+    def action_draft(self):
+        self.write({'state': 'draft'})
+
+    def action_submit(self):
+        self.write({'state': 'submitted'})
+
+    def action_approve(self):
+        if not self.env.user.has_group('cyllo_green_metrics.group_carbon_manager'):
+            from odoo.exceptions import ValidationError
+            raise ValidationError("Only a Green Metrics Manager can approve this calculation.")
+        self.write({'state': 'approved'})
+
+    def action_done(self):
+        if not self.env.user.has_group('cyllo_green_metrics.group_carbon_manager'):
+            from odoo.exceptions import ValidationError
+            raise ValidationError("Only a Green Metrics Manager can move this calculation to Done state.")
+        self.write({'state': 'done'})

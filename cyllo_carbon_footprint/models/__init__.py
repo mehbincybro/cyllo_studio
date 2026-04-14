@@ -27,3 +27,10 @@ from . import carbon_factor
 from . import carbon_rule
 from . import carbon_activity
 from . import carbon_calculation
+from . import res_company
+from . import res_config_settings
+from . import mrp_workcenter_carbon
+from . import mrp_routing_workcenter
+from . import project_task
+from . import mrp_workorder
+from . import fleet_vehicle

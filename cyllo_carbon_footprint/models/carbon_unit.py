@@ -28,6 +28,7 @@ class CarbonUnit(models.Model):
     _order = 'name'
 
     name = fields.Char(required=True)
+    full_name = fields.Char()
     symbol = fields.Char()
     active = fields.Boolean(default=True)
 

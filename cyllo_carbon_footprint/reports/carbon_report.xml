@@ -1,5 +1,5 @@
 <odoo>
-    <template id="report_carbon_calc_document">
+    <template id="report_carbon_calc_document_green">
         <t t-call="web.external_layout">
             <div class="page">
                 <h2>Carbon Calculation</h2>
@@ -41,8 +41,8 @@
         model="carbon.calc"
         string="Carbon Calculation"
         report_type="qweb-pdf"
-        name="cyllo_carbon_footprint.report_carbon_calc_document"
-        file="cyllo_carbon_footprint.report_carbon_calc_document"
+        name="cyllo_green_metrics.report_carbon_calc_document_green"
+        file="cyllo_green_metrics.report_carbon_calc_document_green"
         print_report_name="'Carbon - %s' % (object.name)"
     />
 </odoo>
