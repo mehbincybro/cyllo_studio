@@ -100,8 +100,36 @@ class HelpDeskTeam(models.Model):
         help="Send an automated confirmation email to the customer when a ticket is created via email.",
     )
 
+    # Toggle-to-module mapping for auto-installation
+    TOGGLE_MODULE_MAP = {
+        'use_repairs': 'cyllo_helpdesk_repair',
+        'use_timesheet': 'cyllo_helpdesk_timesheet',
+        'use_returns': 'cyllo_helpdesk_stock',
+        'use_replacements': 'cyllo_helpdesk_stock',
+        'use_coupons': 'cyllo_helpdesk_loyalty',
+        'use_gift_cards': 'cyllo_helpdesk_loyalty',
+        'use_field_service': 'cyllo_helpdesk_field_service',
+        'use_product_warranty': 'cyllo_helpdesk_warranty',
+        'use_website_ticket_creation': 'cyllo_helpdesk_website',
+        'use_livechat_ticket_creation': 'cyllo_helpdesk_livechat',
+        'use_sale_order': 'cyllo_helpdesk_sale',
+        'use_credit_notes': 'cyllo_helpdesk_account',
+    }
 
-    # Assignment Settings
+    def write(self, vals):
+        res = super().write(vals)
+        modules_to_install = set()
+        for toggle, module_name in self.TOGGLE_MODULE_MAP.items():
+            if vals.get(toggle):
+                modules_to_install.add(module_name)
+        if modules_to_install:
+            modules = self.env['ir.module.module'].sudo().search([
+                ('name', 'in', list(modules_to_install)),
+                ('state', '=', 'uninstalled'),
+            ])
+            if modules:
+                modules.button_immediate_install()
+        return res
     assignment_method = fields.Selection([
         ('manual', 'Manual'),
         ('random', 'Random'),
@@ -129,7 +157,6 @@ class HelpDeskTeam(models.Model):
                                    string="Rating Count")
     all_ticket_count = fields.Integer(compute="_compute_all_ticket_count", string="Total Tickets")
     sla_policy_count = fields.Integer(compute="_compute_sla_policy_count", string="SLA Policies")
-    return_count = fields.Integer(compute="_compute_return_count", string="Returns")
 
     def _alias_get_creation_values(self):
         values = super()._alias_get_creation_values()
@@ -282,14 +309,6 @@ class HelpDeskTeam(models.Model):
         for team in self:
             team.sla_policy_count = self.env['helpdesk.sla'].search_count([('team_id', '=', team.id)])
 
-    def _compute_return_count(self):
-        for team in self:
-            # Count pickings linked to tickets of this team
-            team.return_count = self.env['stock.picking'].search_count([
-                ('helpdesk_ticket_id.team_id', '=', team.id),
-                ('picking_type_code', '=', 'outgoing'),
-            ])
-
     def action_view_team_sla_policies(self):
         self.ensure_one()
         return {
@@ -298,17 +317,6 @@ class HelpDeskTeam(models.Model):
             'res_model': 'helpdesk.sla',
             'view_mode': 'tree,form',
             'domain': [('team_id', '=', self.id)],
-            'target': 'current',
-        }
-
-    def action_view_team_returns(self):
-        self.ensure_one()
-        return {
-            'name': _('Returns'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'stock.picking',
-            'view_mode': 'tree,form',
-            'domain': [('helpdesk_ticket_id.team_id', '=', self.id), ('picking_type_code', '=', 'outgoing')],
             'target': 'current',
         }
 
