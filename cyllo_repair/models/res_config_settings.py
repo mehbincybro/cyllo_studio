@@ -19,6 +19,12 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from odoo import models, fields
 
-from . import repair_order
-from . import res_config_settings
+
+class ResConfigSettings(models.TransientModel):
+    _inherit = 'res.config.settings'
+
+    module_cyllo_shopfloor_repair = fields.Boolean(
+        string="Shopfloor"
+    )

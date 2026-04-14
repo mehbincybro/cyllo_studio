@@ -1,7 +1,7 @@
 /** @odoo-module */
 
-import { Component } from "@odoo/owl";
-import { useService } from "@web/core/utils/hooks";
+import {Component} from "@odoo/owl";
+import {useService} from "@web/core/utils/hooks";
 
 export class RepairCard extends Component {
     setup() {
@@ -10,12 +10,21 @@ export class RepairCard extends Component {
     }
 
     async startRepair() {
+        let kwargs = {};
+
         if (this.props.activeEmployeeId) {
             await this.orm.write("repair.order", [this.props.record.id], {
                 operator_ids: [[4, this.props.activeEmployeeId]]
             });
+            kwargs = { context: { active_operator_id: this.props.activeEmployeeId } };
         }
-        await this.orm.call("repair.order", "action_repair_start", [this.props.record.id]);
+
+        await this.orm.call("repair.order", "action_repair_start", [this.props.record.id], kwargs);
+        this.props.onUpdate();
+    }
+
+    async pauseRepair() {
+        await this.orm.call("repair.order", "action_repair_pause", [this.props.record.id]);
         this.props.onUpdate();
     }
 
@@ -34,7 +43,7 @@ export class RepairCard extends Component {
 
     async editRepairLine() {
         this.action.doAction("cyllo_shopfloor_repair.action_edit_repair_line_wizard", {
-            additionalContext: { default_repair_id: this.props.record.id },
+            additionalContext: {default_repair_id: this.props.record.id},
             onClose: () => {
                 this.props.onUpdate();
             },
@@ -59,11 +68,22 @@ export class RepairCard extends Component {
             target: "current",
         });
     }
+
+    async createQuotation() {
+        console.log(`[TEST] Creating quotation for repair order: ${this.props.record.name} (ID: ${this.props.record.id})`);
+
+        const action = await this.orm.call("repair.order", "action_create_sale_order", [this.props.record.id]);
+
+        if (action) {
+            this.env.services.action.doAction(action);
+        }
+    }
 }
 
 RepairCard.template = "repair_floor.RepairCard";
 RepairCard.props = {
     record: Object,
     onUpdate: Function,
-    activeEmployeeId: { type: Number, optional: true },
+    activeEmployeeId: {type: Number, optional: true},
+    isManager: {type: Boolean, optional: true},
 };

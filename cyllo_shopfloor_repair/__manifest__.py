@@ -24,12 +24,13 @@
     'name': 'Repair Floor',
     'version': '1.0',
     'summary': 'Tablet-friendly interface for Repair Technicians',
-    'depends': ['repair','hr'],
+    'depends': ['repair', 'hr'],
     'data': [
         'security/ir.model.access.csv',
         'views/repair_floor_action.xml',
         'views/repair_order_views.xml',
         'views/repair_notes_views.xml',
+        'views/res_config_settings_views.xml',
 
         'wizard/edit_repair_line_views_wizard.xml',
     ],
