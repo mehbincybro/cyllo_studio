@@ -30,7 +30,11 @@ class HelpDeskTeam(models.Model):
     _description = "HelpDesk Team"
     _inherit = ['mail.alias.mixin']
 
-    name = fields.Char(string="Name", help="Team name")
+    _sql_constraints = [
+        ('name_unique', 'unique(name)', 'Helpdesk Team name must be unique!'),
+    ]
+
+    name = fields.Char(string="Name", help="Team name", required=1)
     description = fields.Html(string="Description", help="Description about the team")
     timesheet = fields.Boolean(string="Timesheet",
                                help="Can add timesheet for the ticket")
@@ -73,7 +77,7 @@ class HelpDeskTeam(models.Model):
     use_timesheet = fields.Boolean(string="Use Timesheets", default=True)
     use_credit_notes = fields.Boolean(string="Use Credit Notes")
     use_coupons = fields.Boolean(string="Use Coupons")
-    use_replacements = fields.Boolean(string="Use Replacements")
+    # use_replacements = fields.Boolean(string="Use Replacements")
     use_field_service = fields.Boolean(string="Use Field Service")
     use_gift_cards = fields.Boolean(string="Use Gift Cards")
     use_returns = fields.Boolean(string="Use Returns")
@@ -105,7 +109,7 @@ class HelpDeskTeam(models.Model):
         'use_repairs': 'cyllo_helpdesk_repair',
         'use_timesheet': 'cyllo_helpdesk_timesheet',
         'use_returns': 'cyllo_helpdesk_stock',
-        'use_replacements': 'cyllo_helpdesk_stock',
+
         'use_coupons': 'cyllo_helpdesk_loyalty',
         'use_gift_cards': 'cyllo_helpdesk_loyalty',
         'use_field_service': 'cyllo_helpdesk_field_service',
@@ -116,20 +120,45 @@ class HelpDeskTeam(models.Model):
         'use_credit_notes': 'cyllo_helpdesk_account',
     }
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        teams = super(HelpDeskTeam, self).create(vals_list)
+        all_modules = set()
+        for vals in vals_list:
+            for toggle, module_name in self.TOGGLE_MODULE_MAP.items():
+                if vals.get(toggle):
+                    all_modules.add(module_name)
+        if all_modules:
+            modules = self.env['ir.module.module'].sudo().search([
+                ('name', 'in', list(all_modules)),
+                ('state', '=', 'uninstalled'),
+            ])
+            if modules:
+                return modules.button_immediate_install()
+        return teams
+
     def write(self, vals):
-        res = super().write(vals)
+        res = super(HelpDeskTeam, self).write(vals)
+        install_action = self._install_modules_from_toggles(vals)
+        if install_action:
+            return install_action
+        return res
+
+    def _install_modules_from_toggles(self, vals):
+        """Install modules based on enabled toggles in vals."""
         modules_to_install = set()
         for toggle, module_name in self.TOGGLE_MODULE_MAP.items():
             if vals.get(toggle):
                 modules_to_install.add(module_name)
+
         if modules_to_install:
             modules = self.env['ir.module.module'].sudo().search([
                 ('name', 'in', list(modules_to_install)),
                 ('state', '=', 'uninstalled'),
             ])
             if modules:
-                modules.button_immediate_install()
-        return res
+                return modules.button_immediate_install()
+        return False
     assignment_method = fields.Selection([
         ('manual', 'Manual'),
         ('random', 'Random'),

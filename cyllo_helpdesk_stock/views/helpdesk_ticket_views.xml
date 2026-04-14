@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="cyllo_help_desk.helpdesk_ticket_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//header/field[@name='stage_id']" position="before">
-                <button name="action_create_return" type="object" string="Create Return / Replacement" invisible="not customer_id or (not use_returns and not use_replacements)"/>
+                <button name="action_create_return" type="object" string="Create Return" invisible="not customer_id or not use_returns "/>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_pickings" type="object" class="oe_stat_button" icon="fa-truck" invisible="not use_returns or picking_count == 0">

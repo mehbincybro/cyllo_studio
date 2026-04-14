@@ -29,7 +29,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['mrp', 'hr'],
+    'depends': ['hr', 'stock'],
     'icon': '/cyllo_quality/static/description/quality-control-white.svg',
     'data': [
         'data/ir_sequenece_data.xml',
@@ -49,7 +49,6 @@
         'views/product_template_views.xml',
         'views/stock_lot_views.xml',
         'views/stock_picking_views.xml',
-        'views/mrp_production_views.xml',
         'wizards/alert_warning_views.xml',
         'wizards/quality_check_instruction_views.xml',
 

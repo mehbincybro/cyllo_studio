@@ -13,6 +13,12 @@
                              groups="mrp.group_mrp_manager">
                         <field name="module_cyllo_shopfloor"/>
                     </setting>
+                    <setting id="cyllo_quality_setting"
+                             string="Quality Checks"
+                             help="Enable or disable Quality checks module"
+                             groups="mrp.group_mrp_manager">
+                        <field name="module_cyllo_quality_mrp"/>
+                    </setting>
                 </xpath>
             </field>
         </record>

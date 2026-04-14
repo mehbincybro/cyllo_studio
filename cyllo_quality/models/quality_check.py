@@ -35,7 +35,6 @@ class QualityCheck(models.Model):
     user_id = fields.Many2one('res.users', string='Responsible', related='quality_control_id.user_id', tracking=True, store=True, readonly=False, default=lambda self: self.env.user)
     quality_team_id = fields.Many2one('quality.team', string='Team', tracking=True)
     qc_alert_count = fields.Integer(compute='_compute_qc_alert')
-    mo_id = fields.Many2one('mrp.production', string='Manufacturing Order')
     picking_id = fields.Many2one('stock.picking', string='Picking')
     control_type = fields.Selection([
         ('operation', 'Operation'),

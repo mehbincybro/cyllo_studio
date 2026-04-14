@@ -27,3 +27,6 @@ class ResConfigSettings(models.TransientModel):
     module_cyllo_shopfloor = fields.Boolean(
         string="Shopfloor"
     )
+    module_cyllo_quality_mrp = fields.Boolean(
+        string="Quality Checks"
+    )
