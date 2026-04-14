@@ -354,8 +354,9 @@ class CarbonActivity(models.Model):
         green_t = round(float(total_reduced_kg) / 1000.0, 3)
         cap_val = float(cap_amount)
 
-        # Available Credit = Allocated Cap - Used Amount + Reduced Emissions
-        credit = cap_val - original_used + green_t
+        # Available Credit = Allocated Cap - Used Amount + Reduced Emissions + Transfer Credits
+        total_transfer_credits = self.env['account.move']._get_available_credits()
+        credit = cap_val - original_used + green_t + total_transfer_credits
         cap_data['available_credit'] = round(credit, 3)
 
         # Visibility logic for available credit
@@ -429,7 +430,8 @@ class CarbonActivity(models.Model):
             'water': {
                 'labels': water_labels,
                 'values': water_values
-            }
+            },
+            'transfer_credits': self.env['account.move']._get_available_credits(),
         }
 
 
