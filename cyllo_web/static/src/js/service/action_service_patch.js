@@ -2,6 +2,7 @@
 
 import { actionService } from "@web/webclient/actions/action_service";
 import { registry } from "@web/core/registry";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * Global Support for 'workflow' Button Type
@@ -22,6 +23,30 @@ const patchedActionService = {
         actionManager.doActionButton = async function (params) {
             console.log("Cyllo Workflow: Global Intercept", params);
             if (params.type === "workflow") {
+                console.log("Cyllo Workflow: Validating workflow button link");
+                try {
+                    const count = await env.services.rpc("/web/dataset/call_kw", {
+                        model: 'work.auto',
+                        method: 'search_count',
+                        args: [[
+                            ['model_id.model', '=', params.resModel],
+                            ['active', '=', true],
+                            ['trigger_function_ids.func_name', '=', params.name]
+                        ]],
+                        kwargs: {},
+                    });
+
+                    if (count === 0) {
+                        env.services.notification.add(_t("Workflow Not Linked"), {
+                            message: _t("This button is not yet linked to any active workflow automation."),
+                            type: "warning",
+                        });
+                        return;
+                    }
+                } catch (e) {
+                    console.warn("Cyllo Workflow: Link validation failed (module might not be installed or access denied)", e);
+                }
+
                 console.log("Cyllo Workflow: Executing workflow button click as object action");
                 params = { ...params, type: "object" };
             }
