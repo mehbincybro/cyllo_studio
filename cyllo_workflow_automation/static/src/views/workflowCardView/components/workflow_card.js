@@ -85,10 +85,6 @@ export class WorkflowCard extends Component {
         return this.WorkflowCard.is_reusable === true;
     }
 
-    get isGeneric() {
-        return this.WorkflowCard.reuse_scope === 'generic';
-    }
-
     toggleMenu(ev) {
         ev.stopPropagation();
         this.state.menuOpen = !this.state.menuOpen;

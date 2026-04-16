@@ -87,11 +87,10 @@
                 <div class="auto-card-content">
                     <t t-if="isReusable">
                         <div class="auto-card-reusable-badge"
-                             t-att-title="isGeneric ? 'Generic Reusable: works with any model' : 'Reusable: model-specific'">
-                            <span t-att-class="'reusable-pill ' + (isGeneric ? 'reusable-pill-generic' : 'reusable-pill-model')">
-                                <i t-att-class="isGeneric ? 'ri-global-line' : 'ri-repeat-line'"/>
-                                <t t-if="isGeneric"> Generic</t>
-                                <t t-else=""> Reusable</t>
+                             t-att-title="'Generic Reusable: works with any model'">
+                            <span class="reusable-pill reusable-pill-generic">
+                                <i class="ri-global-line"/>
+                                Generic
                             </span>
                         </div>
                     </t>

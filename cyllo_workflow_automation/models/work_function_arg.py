@@ -375,14 +375,12 @@ class WorkAuto(models.Model):
         copy=False,
     )
     is_reusable = fields.Boolean(string="Reusable", default=False)
-    # When is_reusable=True and reuse_scope='generic', the automation has no
-    # fixed model — it accepts any record passed in by the calling workflow.
-    # When reuse_scope='model', the automation only accepts records of its own
-    # model_id (the original behaviour).
+    # Reusable automations are always generic: they accept whatever record is
+    # passed in by the calling workflow.
     reuse_scope = fields.Selection(
-        [('model', 'Model-specific'), ('generic', 'Generic (any model)')],
+        [('generic', 'Generic (any model)')],
         string='Reuse Scope',
-        default='model',
+        default='generic',
     )
     node_struct_ids = fields.One2many('node.struct', 'work_auto_id')
     image_1920 = fields.Binary(
@@ -456,6 +454,8 @@ class WorkAuto(models.Model):
                 'model_id': kwargs.get('model_id', False),
                 'code': kwargs.get('code', False),
                 'variables': kwargs.get('variables', []),
+                'is_reusable': kwargs.get('is_reusable', False),
+                'reuse_scope': kwargs.get('reuse_scope', False),
                 'ttype': t_ttype,
                 'is_record_saved': True,
             }
@@ -471,6 +471,8 @@ class WorkAuto(models.Model):
                 'model_id': kwargs.get('model_id', False),
                 'code': kwargs.get('code', False),
                 'variables': kwargs.get('variables', []),
+                'is_reusable': kwargs.get('is_reusable', self.is_reusable),
+                'reuse_scope': kwargs.get('reuse_scope', self.reuse_scope),
                 'ttype': t_ttype,
                 'is_record_saved': True,
             }
@@ -495,6 +497,11 @@ class WorkAuto(models.Model):
             automation.write({
                 'trigger_function_ids': [(6, 0, trigger_function_ids)],
                 'function_id': target_function,
+            })
+        else:
+            automation.write({
+                'trigger_function_ids': [(5, 0, 0)],
+                'function_id': False,
             })
 
         return automation.id
@@ -650,6 +657,152 @@ class WorkAuto(models.Model):
             [node_id for node_id in ordered_struct_ids if node_id in node_map]
         )
 
+    def _get_test_graph_issues(self):
+        """
+            Detect disconnected workflow branches for test mode.
+
+            Returns:
+                dict: Mapping of node.struct id -> validation error message.
+        """
+        self.ensure_one()
+        flow_data = self.flow_data or {}
+        drawflow = flow_data.get('drawflow', {}) or {}
+        home = drawflow.get('Home', {}) or {}
+        nodes = home.get('data', {}) or {}
+        if not nodes:
+            return {}
+
+        is_generic_reusable = bool(self.is_reusable and self.reuse_scope == 'generic')
+        executable_nodes = {}
+        trigger_draw_ids = []
+        adjacency = defaultdict(list)
+        incoming_counts = defaultdict(int)
+        model_reuse_roots = set()
+
+        for draw_node_id, draw_node in nodes.items():
+            node_data = draw_node.get('data') or {}
+            if node_data.get('type') == 'model':
+                continue
+            draw_key = str(draw_node_id)
+            executable_nodes[draw_key] = node_data
+            adjacency.setdefault(draw_key, [])
+            if node_data.get('type') == 'action':
+                trigger_draw_ids.append(draw_key)
+
+        if not executable_nodes:
+            issues = {}
+            for node_data in (draw_node.get('data') or {} for draw_node in nodes.values()):
+                struct_id = node_data.get('nodeId')
+                if struct_id:
+                    issues[int(struct_id)] = _(
+                        "Add at least one trigger and connect it to a workflow step before testing."
+                    )
+            return issues
+
+        for draw_node_id, draw_node in nodes.items():
+            node_data = draw_node.get('data') or {}
+            if node_data.get('type') == 'model':
+                outputs = draw_node.get('outputs', {}) or {}
+                for output in outputs.values():
+                    for connection in output.get('connections', []) or []:
+                        target_id = str(connection.get('node'))
+                        target_node = nodes.get(target_id, {}) or {}
+                        target_data = target_node.get('data') or {}
+                        if (
+                            target_data.get('type') == 'action_to_do' and
+                            target_data.get('name') == 'Reuse Automation'
+                        ):
+                            model_reuse_roots.add(target_id)
+                continue
+            draw_key = str(draw_node_id)
+            outputs = draw_node.get('outputs', {}) or {}
+            for output in outputs.values():
+                for connection in output.get('connections', []) or []:
+                    target_id = str(connection.get('node'))
+                    target_node = nodes.get(target_id, {}) or {}
+                    target_data = target_node.get('data') or {}
+                    if target_data.get('type') == 'model' or target_id not in executable_nodes:
+                        continue
+                    adjacency[draw_key].append(target_id)
+                    incoming_counts[target_id] += 1
+
+        issues = {}
+        direct_reuse_root_ids = [
+            draw_node_id for draw_node_id, node_data in executable_nodes.items()
+            if (
+                node_data.get('type') == 'action_to_do' and
+                node_data.get('name') == 'Reuse Automation' and
+                draw_node_id in model_reuse_roots
+            )
+        ]
+
+        if not trigger_draw_ids and not direct_reuse_root_ids and not is_generic_reusable:
+            for node_data in executable_nodes.values():
+                struct_id = node_data.get('nodeId')
+                if struct_id:
+                    issues[int(struct_id)] = _("Add at least one trigger before testing the workflow.")
+            return issues
+
+        if is_generic_reusable:
+            root_draw_ids = [
+                draw_node_id for draw_node_id in executable_nodes
+                if incoming_counts.get(draw_node_id, 0) == 0
+            ]
+            if not root_draw_ids and executable_nodes:
+                root_draw_ids = [next(iter(executable_nodes))]
+            if len(root_draw_ids) > 1:
+                for draw_node_id in root_draw_ids:
+                    node_data = executable_nodes[draw_node_id]
+                    struct_id = node_data.get('nodeId')
+                    label = node_data.get('label') or node_data.get('name') or _("Node")
+                    if struct_id:
+                        issues[int(struct_id)] = _(
+                            "%s is disconnected from the reusable workflow. Connect it before testing."
+                        ) % label
+                return issues
+        else:
+            root_draw_ids = list(dict.fromkeys(trigger_draw_ids + direct_reuse_root_ids))
+
+        reachable = set()
+
+        def _visit(draw_node_id):
+            draw_key = str(draw_node_id)
+            if draw_key in reachable:
+                return
+            reachable.add(draw_key)
+            for child_id in adjacency.get(draw_key, []):
+                _visit(child_id)
+
+        for root_draw_id in root_draw_ids:
+            _visit(root_draw_id)
+
+        if not is_generic_reusable:
+            for trigger_draw_id in trigger_draw_ids:
+                if adjacency.get(trigger_draw_id):
+                    continue
+                struct_id = executable_nodes[trigger_draw_id].get('nodeId')
+                label = (
+                    executable_nodes[trigger_draw_id].get('label')
+                    or executable_nodes[trigger_draw_id].get('name')
+                    or _("Trigger")
+                )
+                if struct_id:
+                    issues[int(struct_id)] = _("%s is not connected to any workflow step.") % label
+
+        for draw_node_id, node_data in executable_nodes.items():
+            if node_data.get('type') == 'action':
+                continue
+            if draw_node_id in reachable:
+                continue
+            struct_id = node_data.get('nodeId')
+            label = node_data.get('label') or node_data.get('name') or _("Node")
+            if struct_id:
+                issues[int(struct_id)] = _(
+                    "%s is disconnected from the workflow. Connect it to a trigger path before testing."
+                ) % label
+
+        return issues
+
     def dry_run(self):
         """
             Validate workflow nodes without executing side effects.
@@ -658,11 +811,12 @@ class WorkAuto(models.Model):
                 dict: Summary payload with node-level validation results.
         """
         self.ensure_one()
+        is_generic_reusable = bool(self.is_reusable and self.reuse_scope == 'generic')
         if not self.is_record_saved:
             raise exceptions.ValidationError(
                 _("Save the workflow before running a test.")
             )
-        if not self.reuse_scope == 'generic' and not self.model_id:
+        if not is_generic_reusable and not self.model_id:
             raise exceptions.ValidationError(
                 _("Select an object before running a test.")
             )
@@ -676,11 +830,16 @@ class WorkAuto(models.Model):
         flow_nodes = {}
         drawflow = (self.flow_data or {}).get('drawflow', {}) or {}
         home = drawflow.get('Home', {}) or {}
+        if not (home.get('data') or {}):
+            raise exceptions.ValidationError(
+                _("Add at least one trigger and connect it to a workflow step before testing.")
+            )
         for draw_node in (home.get('data', {}) or {}).values():
             node_data = draw_node.get('data') or {}
             struct_id = node_data.get('nodeId')
             if struct_id:
                 flow_nodes[int(struct_id)] = node_data
+        graph_issues = self._get_test_graph_issues()
 
         external_nodes = {'Mail', 'SMS', 'WhatsApp'}
         trigger_labels = {'On Create', 'On Write', 'On Unlink', 'On Field Change', 'On Time'}
@@ -772,6 +931,9 @@ class WorkAuto(models.Model):
             node_name = node.name or ''
             flow_node = flow_nodes.get(node.id, {})
             flow_node_type = flow_node.get('type')
+
+            if node.id in graph_issues:
+                return 'error', graph_issues[node.id]
 
             if node.type == 'model':
                 return 'success', _("Object selected.")
@@ -1340,7 +1502,7 @@ class WorkAuto(models.Model):
             """
         # For generic reusable automations (no fixed model), resolve the model
         # from the records that were passed in by the calling workflow.
-        if self.reuse_scope == 'generic' and records:
+        if self.is_reusable and self.reuse_scope == 'generic' and records:
             model = records
         elif self.model_id:
             model = self.env[self.model_id.sudo().model]

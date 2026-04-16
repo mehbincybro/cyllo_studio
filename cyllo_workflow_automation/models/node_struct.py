@@ -324,7 +324,7 @@ class NodeStruct(models.Model):
 
         copied_automation = self.reused_work_auto_id.copy()
         copied_automation.write({
-            'is_reusable': False,
+            'active': False,
         })
 
         updated_code = self.code or ''
