@@ -63,6 +63,44 @@ class IrActionsReport(models.Model):
             return report.sudo()
         raise ValueError("Fetching report %r: report not found" % report_ref)
 
+    # Protected layout template keys — Custom_ XPath overrides on these break
+    # the t-if/t-else sibling chain and cause QWebException at compile time.
+    _PROTECTED_LAYOUT_KEYS = [
+        'web.external_layout_standard',
+        'web.external_layout_boxed',
+        'web.external_layout_bold',
+        'web.external_layout_striped',
+        'web.external_layout',
+        'web.html_container',
+        'web.basic_layout',
+        'web.internal_layout',
+        'web.address_layout',
+    ]
+
+    def _purge_broken_layout_views(self):
+        """Remove any Custom_ inherited views on protected layout templates.
+        These cause QWebException: t-elif must be preceded by t-if/t-elif.
+        Returns number of views removed."""
+        removed = 0
+        for key in self._PROTECTED_LAYOUT_KEYS:
+            base_view = self.env.ref(key, raise_if_not_found=False)
+            if not base_view:
+                continue
+            broken = self.env['ir.ui.view'].sudo().search([
+                ('inherit_id', '=', base_view.id),
+                '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+            ])
+            if broken:
+                import logging
+                _logger = logging.getLogger(__name__)
+                _logger.warning(
+                    "[Cyllo Studio] Purging %d broken Custom_ view(s) on protected layout %r: %s",
+                    len(broken), key, broken.mapped('name')
+                )
+                broken.sudo().unlink()
+                removed += len(broken)
+        return removed
+
     def _render_template(self, template, values=None):
         """Allow to render a QWeb template python-side. This function returns the 'ir.ui.view'
         render but embellish it with some variables/methods used in reports.
@@ -84,7 +122,22 @@ class IrActionsReport(models.Model):
             web_base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
             url_quote=werkzeug.urls.url_quote,
         )
-        return view_obj._render_template(template, values).encode()
+        try:
+            return view_obj._render_template(template, values).encode()
+        except Exception as e:
+            # Self-healing: if the error looks like a broken t-if/t-else chain caused by
+            # a Custom_ view being injected into a protected layout template, purge those
+            # broken views and retry once.
+            err_str = str(e)
+            if ('t-elif directive must be preceded by t-if' in err_str
+                    or 't-else directive must be preceded by t-if' in err_str):
+                removed = self._purge_broken_layout_views()
+                if removed:
+                    # Invalidate QWeb cache so the purged views are not reused
+                    self.env['ir.qweb'].sudo().clear_caches()
+                    return view_obj._render_template(template, values).encode()
+            raise
+
 
     def _render_qweb_html(self, report_ref, docids, data=None):
         """Render QWeb report to HTML."""
@@ -421,7 +474,9 @@ class IrActionsReport(models.Model):
                                 <div class="oe_structure"/>
                                 <div class="row">
                                     <div class="col-12">
-                                        <h2 class="text-center">{name}</h2>
+                                        <h2 class="text-center mt-4">
+                                            <span t-esc="doc.name or doc.display_name or ''"/>
+                                        </h2>
                                         <p class="text-muted text-center">New Report for {model_rec.name}</p>
                                     </div>
                                 </div>

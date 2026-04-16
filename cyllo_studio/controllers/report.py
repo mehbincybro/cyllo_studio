@@ -49,6 +49,23 @@ class StudioReportController(Controller):
         try:
             for arch in all_arch:
                 key = arch['key']
+
+                # Guard: never create/modify XPath overrides on protected layout templates.
+                # These templates contain t-if/t-else sibling chains that QWeb requires to stay
+                # adjacent; any inserted element breaks compilation with:
+                #   SyntaxError: t-elif directive must be preceded by t-if or t-elif directive
+                if key in self._PROTECTED_LAYOUT_KEYS:
+                    print(f"[Cyllo Studio] Skipping protected layout template: {key}")
+                    # Also clean up any accidentally created Custom_ views for this key
+                    base_view = request.env.ref(key, raise_if_not_found=False)
+                    if base_view:
+                        stale = request.env['ir.ui.view'].sudo().search([
+                            ('inherit_id', '=', base_view.id),
+                            '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+                        ])
+                        if stale:
+                            stale.unlink()
+                    continue
                 xpath_blocks = re.sub(r'<br\s*>', '<br/>', arch['xpathBlocks'])
 
                 # Fix void HTML elements that XMLSerializer may not self-close
@@ -326,6 +343,44 @@ class StudioReportController(Controller):
         'web.basic_layout',
     }
 
+    # Layout templates that must NEVER be overridden via custom XPath inheritance.
+    # Modifying these breaks the t-if/t-else/t-elif sibling chains in QWeb compilation.
+    _PROTECTED_LAYOUT_KEYS = {
+        'web.external_layout_standard',
+        'web.external_layout_boxed',
+        'web.external_layout_bold',
+        'web.external_layout_striped',
+        'web.external_layout',
+        'web.html_container',
+        'web.basic_layout',
+        'web.internal_layout',
+        'web.address_layout',
+    }
+
+    @route('/cyllo_studio/cleanup_broken_layout_views', auth='user', csrf=False, type='json')
+    def cleanup_broken_layout_views(self):
+        """
+        Clean up any Custom_ inherited views that target protected layout templates.
+        These cause QWeb SyntaxErrors like 't-elif must be preceded by t-if'.
+        Call this to repair the database after such an error occurs.
+        """
+        removed = []
+        try:
+            for key in self._PROTECTED_LAYOUT_KEYS:
+                base_view = request.env.ref(key, raise_if_not_found=False)
+                if not base_view:
+                    continue
+                custom_views = request.env['ir.ui.view'].sudo().search([
+                    ('inherit_id', '=', base_view.id),
+                    '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+                ])
+                if custom_views:
+                    removed.extend(custom_views.mapped('name'))
+                    custom_views.unlink()
+            return {'success': True, 'removed': removed}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
     def _resolve_doc_template(self, template):
         """
         Given a wrapper template name (e.g. ``sale.report_saleorder_zew``), walk its
@@ -459,7 +514,9 @@ class StudioReportController(Controller):
                                 <div class="oe_structure"/>
                                 <div class="row">
                                     <div class="col-12">
-                                        <h2 class="text-center">{doc_view.name}</h2>
+                                        <h2 class="text-center mt-4">
+                                            <span t-esc="doc.name or doc.display_name or ''"/>
+                                        </h2>
                                         <p class="text-muted text-center">New Report for {model_name}</p>
                                     </div>
                                 </div>
@@ -474,7 +531,7 @@ class StudioReportController(Controller):
                 # Hard-reset: restores arch from the module XML file on disk
                 doc_view.sudo().reset_arch(mode='hard')
 
-            # Unconditionally delete any custom inherited views on top of the doc template
+            # Unconditionally delete any custom inherited views on top of the doc template or its children
             custom_views = request.env['ir.ui.view'].search([
                 ('inherit_id', 'child_of', doc_view.id),
                 '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
