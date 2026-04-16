@@ -1,0 +1,407 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError, UserError
+from datetime import timedelta
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
+class Appointment(models.Model):
+    _name = 'appointment.appointment'
+    _description = 'Appointment'
+    _inherit = ['mail.thread', 'mail.activity.mixin']
+    _order = 'start_datetime desc'
+
+    # Identity
+    name = fields.Char(string='Reference', required=True, copy=False, readonly=True,
+        default=lambda self: _('New'))
+    display_name = fields.Char(string='Title', compute='_compute_display_name', store=True)
+    # Type & Classification
+    appointment_type_id = fields.Many2one(
+        'appointment.type', string='Appointment Type',
+        required=True, tracking=True, ondelete='restrict'
+    )
+    category = fields.Selection(
+        related='appointment_type_id.category', string='Category', store=True
+    )
+    # Scheduling
+    start_datetime = fields.Datetime(string='Start', required=True, tracking=True)
+    end_datetime = fields.Datetime(string='End', required=True, tracking=True)
+    duration = fields.Float(string='Duration (hours)', compute='_compute_duration', store=True)
+    slot_id = fields.Many2one('appointment.slot', string='Time Slot')
+    timezone = fields.Selection(
+        '_tz_get', string='Timezone',
+        default=lambda self: self.env.user.tz or 'UTC'
+    )
+    # Customer / Attendee
+    partner_id = fields.Many2one('res.partner', string='Customer', required=True, tracking=True)
+    attendee_ids = fields.Many2many('res.partner', string='Additional Attendees')
+    attendee_count = fields.Integer(string='Number of Attendees', default=1)
+    customer_notes = fields.Text(string='Customer Notes')
+    # Staff & Resources
+    staff_id = fields.Many2one('appointment.staff', string='Staff Member', tracking=True)
+    resource_id = fields.Many2one('appointment.resource', string='Resource', tracking=True)
+    # Location
+    location_type = fields.Selection(
+        related='appointment_type_id.location_type', string='Location Type', store=True
+    )
+    location = fields.Char(string='Location')
+    meeting_url = fields.Char(string='Meeting URL')
+    # Status
+    state = fields.Selection([
+        ('draft', 'Draft'),
+        ('confirmed', 'Confirmed'),
+        ('in_progress', 'In Progress'),
+        ('done', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('rejected', 'Rejected'),
+        ('no_show', 'No Show'),
+    ], string='Status', default='draft', required=True, tracking=True)
+    # Rescheduling
+    is_rescheduled = fields.Boolean(string='Was Rescheduled', default=False)
+    original_start_datetime = fields.Datetime(string='Original Start')
+    reschedule_count = fields.Integer(string='Reschedule Count', default=0)
+    reschedule_reason = fields.Text(string='Reschedule Reason')
+    # Cancellation
+    cancellation_reason = fields.Text(string='Cancellation Reason')
+    cancelled_by = fields.Selection([
+        ('customer', 'Customer'),
+        ('staff', 'Staff'),
+        ('system', 'System'),
+    ], string='Cancelled By')
+    # Notifications
+    confirmation_sent = fields.Boolean(string='Confirmation Sent', default=False)
+    reminder_sent = fields.Boolean(string='Reminders Sent', default=False)
+    followup_sent = fields.Boolean(string='Follow-up Sent', default=False)
+    # Internal
+    internal_notes = fields.Html(string='Internal Notes')
+    priority = fields.Selection([
+        ('0', 'Normal'),
+        ('1', 'Important'),
+        ('2', 'Very Important'),
+    ], string='Priority', default='0')
+    color = fields.Integer(string='Color', compute='_compute_color')
+    company_id = fields.Many2one(
+        'res.company', string='Company',
+        default=lambda self: self.env.company
+    )
+
+    @api.model
+    def _tz_get(self):
+        return [(tz, tz) for tz in sorted(
+            __import__('pytz').all_timezones,
+            key=lambda tz: tz if not tz.startswith('Etc/') else '_'
+        )]
+
+    @api.depends('appointment_type_id', 'partner_id', 'start_datetime')
+    def _compute_display_name(self):
+        for rec in self:
+            parts = []
+            if rec.appointment_type_id:
+                parts.append(rec.appointment_type_id.name)
+            if rec.partner_id:
+                parts.append(rec.partner_id.name)
+            rec.display_name = ' - '.join(parts) if parts else _('Appointment')
+
+    @api.depends('start_datetime', 'end_datetime')
+    def _compute_duration(self):
+        for rec in self:
+            if rec.start_datetime and rec.end_datetime:
+                delta = rec.end_datetime - rec.start_datetime
+                rec.duration = delta.total_seconds() / 3600
+            else:
+                rec.duration = 0.0
+
+    @api.depends('state')
+    def _compute_color(self):
+        color_map = {
+            'draft': 0,
+            'confirmed': 1,
+            'in_progress': 2,
+            'done': 10,
+            'cancelled': 9,
+            'rejected': 9,
+            'no_show': 6,
+        }
+        for rec in self:
+            rec.color = color_map.get(rec.state, 0)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            if vals.get('name', _('New')) == _('New'):
+                vals['name'] = self.env['ir.sequence'].next_by_code('appointment.appointment') or _('New')
+        records = super().create(vals_list)
+        for record in records:
+            if record.appointment_type_id.send_confirmation:
+                record._send_confirmation_email()
+        return records
+
+    @api.onchange('appointment_type_id')
+    def _onchange_appointment_type_id(self):
+        if self.appointment_type_id:
+            atype = self.appointment_type_id
+            if self.start_datetime and not self.end_datetime:
+                self.end_datetime = self.start_datetime + timedelta(hours=atype.duration)
+            if atype.location:
+                self.location = atype.location
+
+    @api.onchange('slot_id')
+    def _onchange_slot_id(self):
+        if self.slot_id:
+            slot = self.slot_id
+            self.appointment_type_id = slot.appointment_type_id
+            self.start_datetime = slot.start_datetime
+            self.end_datetime = slot.end_datetime
+            if slot.staff_id:
+                self.staff_id = slot.staff_id
+            if slot.resource_id:
+                self.resource_id = slot.resource_id
+
+
+    @api.onchange('start_datetime', 'appointment_type_id')
+    def _onchange_start_datetime(self):
+        if self.start_datetime and self.appointment_type_id:
+            self.end_datetime = self.start_datetime + timedelta(
+                hours=self.appointment_type_id.duration
+            )
+
+    @api.constrains('start_datetime', 'end_datetime')
+    def _check_dates(self):
+        for rec in self:
+            if rec.start_datetime and rec.end_datetime:
+                if rec.end_datetime <= rec.start_datetime:
+                    raise ValidationError(_('End time must be after start time.'))
+
+    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id', 'state', 'slot_id')
+    def _check_overlap(self):
+        for rec in self:
+            if rec.state in ('cancelled', 'rejected'):
+                continue
+            if not rec.start_datetime or not rec.end_datetime:
+                continue
+
+            our_buffer = getattr(rec.appointment_type_id, 'buffer_time', 0.0) or 0.0
+            our_eff_end = rec.end_datetime + timedelta(minutes=our_buffer)
+            search_start = rec.start_datetime - timedelta(days=1)
+            search_end = our_eff_end + timedelta(days=1)
+            appt_domain = [
+                ('id', '!=', rec.id),
+                ('state', 'not in', ('cancelled', 'rejected')),
+                ('start_datetime', '<', search_end),
+                ('end_datetime', '>', search_start),
+            ]
+            # Check overlap with defined time slots
+            slot_domain = [
+                ('start_datetime', '<', our_eff_end),
+                ('end_datetime', '>', rec.start_datetime),
+            ]
+            if rec.slot_id:
+                slot_domain.append(('id', '!=', rec.slot_id.id))
+            if rec.staff_id:
+                # 1. Overlap with other appointments
+                staff_appts = self.search(appt_domain + [('staff_id', '=', rec.staff_id.id)])
+                if rec.slot_id:
+                    staff_appts = staff_appts.filtered(lambda a: a.slot_id != rec.slot_id)
+                for appt in staff_appts:
+                    their_buffer = getattr(appt.appointment_type_id, 'buffer_time', 0.0) or 0.0
+                    their_eff_end = appt.end_datetime + timedelta(minutes=their_buffer)
+                    if appt.start_datetime < our_eff_end and their_eff_end > rec.start_datetime:
+                        raise ValidationError(_('Staff member "%s" is already booked by another appointment during this time.') % rec.staff_id.name)
+                # 2. Overlap with predefined slots
+                staff_slots = self.env['appointment.slot'].search(slot_domain + [('staff_id', '=', rec.staff_id.id)], limit=1)
+                if staff_slots:
+                    raise ValidationError(_('Staff member "%s" is already scheduled for a "%s" slot during this time.') % (rec.staff_id.name, staff_slots.appointment_type_id.name))
+            if rec.resource_id:
+                # 1. Overlap with other appointments
+                res_appts = self.search(appt_domain + [('resource_id', '=', rec.resource_id.id)])
+                if rec.slot_id:
+                    res_appts = res_appts.filtered(lambda a: a.slot_id != rec.slot_id)
+                for appt in res_appts:
+                    their_buffer = getattr(appt.appointment_type_id, 'buffer_time', 0.0) or 0.0
+                    their_eff_end = appt.end_datetime + timedelta(minutes=their_buffer)
+                    if appt.start_datetime < our_eff_end and their_eff_end > rec.start_datetime:
+                        raise ValidationError(_('Resource "%s" is already booked by another appointment during this time.') % rec.resource_id.name)
+                # 2. Overlap with predefined slots
+                res_slots = self.env['appointment.slot'].search(slot_domain + [('resource_id', '=', rec.resource_id.id)], limit=1)
+                if res_slots:
+                    raise ValidationError(_('Resource "%s" is already scheduled for a "%s" slot during this time.') % (rec.resource_id.name, res_slots.appointment_type_id.name))
+
+    @api.constrains('slot_id', 'attendee_count', 'state')
+    def _check_slot_capacity(self):
+        for rec in self:
+            if rec.slot_id and rec.state not in ('cancelled', 'rejected'):
+                active_appts = rec.slot_id.appointment_ids.filtered(
+                    lambda a: a.state not in ('cancelled', 'rejected')
+                )
+                total_attendees = sum(active_appts.mapped('attendee_count'))
+                if total_attendees > rec.slot_id.max_attendees:
+                    # Calculate spots before this appointment to show accurate error
+                    spots_before_this = rec.slot_id.max_attendees - (total_attendees - rec.attendee_count)
+                    raise ValidationError(_(
+                        'The selected slot "%s" does not have enough capacity for %s attendee(s). Only %s spot(s) remaining.'
+                    ) % (rec.slot_id.name, rec.attendee_count, max(0, spots_before_this)))
+
+    @api.constrains('start_datetime', 'appointment_type_id')
+    def _check_min_booking_notice(self):
+        for rec in self:
+            if rec.appointment_type_id and rec.start_datetime:
+                min_notice = rec.appointment_type_id.min_booking_notice
+                if min_notice > 0:
+                    min_start = fields.Datetime.now() + timedelta(hours=min_notice)
+                    if rec.start_datetime < min_start:
+                        raise ValidationError(_(
+                            'This appointment type requires at least %s hour(s) advance notice.'
+                        ) % min_notice)
+
+    @api.constrains('appointment_type_id', 'staff_id', 'resource_id', 'state')
+    def _check_required_assignments(self):
+        for rec in self:
+            if rec.state in ('cancelled', 'rejected'):
+                continue
+            if rec.appointment_type_id.require_staff and not rec.staff_id:
+                raise ValidationError(_('A staff member must be assigned for this appointment type.'))
+            if rec.appointment_type_id.require_resource and not rec.resource_id:
+                raise ValidationError(_('A resource must be assigned for this appointment type.'))
+
+    def action_confirm(self):
+        for rec in self:
+            rec.state = 'confirmed'
+            if rec.appointment_type_id.send_confirmation and not rec.confirmation_sent:
+                rec._send_confirmation_email()
+            # Send Staff Confirmation Email
+            if rec.staff_id and rec.staff_id.notify_on_new_appointment and rec.staff_id.email:
+                staff_tmpl = self.env.ref('cyllo_appointment.email_template_appointment_confirmed_staff', raise_if_not_found=False)
+                if staff_tmpl:
+                    try:
+                        staff_tmpl.send_mail(rec.id, force_send=True)
+                    except Exception as e:
+                        logging.getLogger(__name__).warning("Failed to send staff confirmation email for %s: %s", rec.name, str(e))
+
+    def action_start(self):
+        for rec in self:
+            rec.state = 'in_progress'
+
+    def action_done(self):
+        for rec in self:
+            rec.state = 'done'
+            if rec.appointment_type_id.send_followup and not rec.followup_sent:
+                rec._send_followup_email()
+
+    def action_cancel(self):
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Cancel Appointment'),
+            'res_model': 'appointment.cancel.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_appointment_id': self.id},
+        }
+
+    def action_reschedule(self):
+        self.ensure_one()
+        atype = self.appointment_type_id
+        if not atype.allow_reschedule:
+            raise UserError(_('Rescheduling is not allowed for this appointment type.'))
+        deadline_hours = atype.reschedule_deadline_hours
+        if deadline_hours > 0:
+            deadline = self.start_datetime - timedelta(hours=deadline_hours)
+            if fields.Datetime.now() > deadline:
+                raise UserError(_(
+                    'Rescheduling is no longer allowed within %s hours of the appointment.'
+                ) % deadline_hours)
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Reschedule Appointment'),
+            'res_model': 'appointment.reschedule.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_appointment_id': self.id},
+        }
+
+    def action_no_show(self):
+        now = fields.Datetime.now()
+        for rec in self:
+            if rec.start_datetime and rec.start_datetime > now:
+                raise UserError(_(
+                    'Cannot mark "%s" as No Show because the appointment has not started yet.'
+                ) % rec.display_name)
+            rec.state = 'no_show'
+
+    def _send_confirmation_email(self):
+        self.ensure_one()
+        template = self.appointment_type_id.confirmation_template_id
+        if template:
+            try:
+                template.send_mail(self.id, force_send=True)
+                self.confirmation_sent = True
+                _logger.info('Confirmation email sent for appointment %s', self.name)
+            except Exception as e:
+                _logger.warning('Failed to send confirmation email for %s: %s', self.name, str(e))
+
+    def _send_reminder_emails(self):
+        """Called by scheduled action to send reminders."""
+        now = fields.Datetime.now()
+        appointments = self.search([
+            ('state', 'in', ['confirmed']),
+            ('reminder_sent', '=', False),
+        ])
+        for appt in appointments:
+            atype = appt.appointment_type_id
+            if not atype.send_reminder or not atype.reminder_template_id:
+                continue
+            reminder_times_str = atype.reminder_hours_before or '24'
+            reminder_hours = [float(h.strip()) for h in reminder_times_str.split(',') if h.strip()]
+            for hours in reminder_hours:
+                reminder_time = appt.start_datetime - timedelta(hours=hours)
+                if reminder_time <= now < reminder_time + timedelta(minutes=30):
+                    try:
+                        atype.reminder_template_id.send_mail(appt.id, force_send=True)
+                        appt.reminder_sent = True
+                        if atype.send_sms_reminder and atype.sms_reminder_template_id:
+                            appt._send_sms_reminder()
+                        break
+                    except Exception as e:
+                        _logger.warning('Failed to send reminder for %s: %s', appt.name, str(e))
+
+    def _send_sms_reminder(self):
+        self.ensure_one()
+        if not self.partner_id.mobile and not self.partner_id.phone:
+            return
+        template = self.appointment_type_id.sms_reminder_template_id
+        if template:
+            try:
+                template.send_sms(self.id)
+            except Exception as e:
+                _logger.warning('Failed to send SMS for %s: %s', self.name, str(e))
+
+    def _send_followup_email(self):
+        self.ensure_one()
+        template = self.appointment_type_id.followup_template_id
+        if template:
+            try:
+                template.send_mail(self.id, force_send=True)
+                self.followup_sent = True
+            except Exception as e:
+                _logger.warning('Failed to send follow-up for %s: %s', self.name, str(e))
