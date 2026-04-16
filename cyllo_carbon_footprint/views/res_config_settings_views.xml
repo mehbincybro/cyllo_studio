@@ -17,24 +17,45 @@
                         <setting string="Fleet Integration" help="Integrate fleet odometer readings with green metrics.">
                             <field name="fleet_integration"/>
                         </setting>
-                    </block>
-                    <block title="Water Metrics Allocation" name="water_allocation_setting_block">
-                        <setting string="Water Cap" help="Max allowed water usage for the selected duration." company_dependent="1">
-                            <div class="content-group">
-                                <div class="row mt16">
-                                    <label for="water_duration" class="col-lg-3 o_light_label"/>
-                                    <field name="water_duration" class="oe_inline"/>
-                                </div>
-                                <div class="row mt8">
-                                    <label for="water_cap" class="col-lg-3 o_light_label"/>
-                                    <field name="water_cap" class="oe_inline"/>
-                                </div>
-                                <div class="row mt8">
-                                    <label for="water_unit" class="col-lg-3 o_light_label"/>
-                                    <field name="water_unit" class="oe_inline"/>
-                                </div>
-                            </div>
+                        <setting string="Credit Transfer" help="Enable buying and selling environmental credits.">
+                            <field name="enable_credit_transfer"/>
                         </setting>
+                    </block>
+                    <block title="Allocation" name="allocation_setting_block">
+                        <div class="row">
+                            <setting string="Carbon Cap" help="Max allowed carbon emissions for the selected duration." class="col-lg-6">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="carbon_duration" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_duration" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="carbon_cap" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_cap" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="carbon_unit" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="carbon_unit" class="oe_inline"/>
+                                    </div>
+                                </div>
+                            </setting>
+                            <setting string="Water Cap" help="Max allowed water usage for the selected duration." class="col-lg-6">
+                                <div class="content-group">
+                                    <div class="row mt16">
+                                        <label for="water_duration" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_duration" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="water_cap" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_cap" class="oe_inline"/>
+                                    </div>
+                                    <div class="row mt8">
+                                        <label for="water_unit" class="col-lg-4 o_light_label text-nowrap"/>
+                                        <field name="water_unit" class="oe_inline"/>
+                                    </div>
+                                </div>
+                            </setting>
+                        </div>
                     </block>
                 </app>
             </xpath>

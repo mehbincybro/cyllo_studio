@@ -117,3 +117,25 @@ class ResConfigSettings(models.TransientModel):
         readonly=False,
         string='Duration'
     )
+
+    carbon_cap = fields.Float(
+        related='company_id.carbon_cap',
+        readonly=False,
+        string='Carbon Cap',
+        help='Maximum allowed carbon emissions'
+    )
+    carbon_unit = fields.Selection(
+        related='company_id.carbon_unit',
+        readonly=False,
+        string='Unit'
+    )
+    carbon_duration = fields.Selection(
+        related='company_id.carbon_duration',
+        readonly=False,
+        string='Duration'
+    )
+
+    enable_credit_transfer = fields.Boolean(
+        config_parameter='cyllo_green_metrics.enable_credit_transfer',
+        string='Credit Transfer'
+    )

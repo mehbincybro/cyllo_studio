@@ -34,3 +34,5 @@ from . import mrp_routing_workcenter
 from . import project_task
 from . import mrp_workorder
 from . import fleet_vehicle
+from . import account_move
+from . import product
