@@ -38,51 +38,19 @@ export class ReusableAutomationNode extends ConfigurationBase {
             baseDomain.push(['id', '!=', this.props.work_auto_id]);
         }
 
-        // Fetch TWO groups:
-        //  1. Same-model automations (model_specific scope, matching primary model)
-        //  2. Generic automations (generic scope, any model - cross-model reuse)
-        const domains = [];
-
-        if (this.props.primary_model_id) {
-            // Group 1: model-specific reusables for this model
-            domains.push([...baseDomain,
-                ['reuse_scope', '=', 'model'],
-                ['model_id', '=', this.props.primary_model_id],
-            ]);
-        }
-
-        // Group 2: generic reusables (work with any model)
-        domains.push([...baseDomain, ['reuse_scope', '=', 'generic']]);
-
-        // Fetch both groups and merge (deduplicate by id).
-        // We now also fetch 'trigger_type' so generateCode() can pass the
-        // REUSED automation's own trigger type when calling _process().
-        const seen = new Set();
-        const allRecords = [];
-        for (const domain of domains) {
-            const recs = await this.orm.searchRead(
-                'work.auto',
-                domain,
-                ['id', 'name', 'model_id', 'reuse_scope', 'trigger_type']
-            );
-            for (const rec of recs) {
-                if (!seen.has(rec.id)) {
-                    seen.add(rec.id);
-                    allRecords.push(rec);
-                }
-            }
-        }
+        const allRecords = await this.orm.searchRead(
+            'work.auto',
+            [...baseDomain, ['reuse_scope', '=', 'generic']],
+            ['id', 'name', 'model_id', 'reuse_scope', 'trigger_type']
+        );
 
         const options = allRecords.map(rec => {
             const modelName = rec.model_id?.[1] || '';
-            const isGeneric = rec.reuse_scope === 'generic';
-            const badge = isGeneric ? '[Generic] ' : '';
-            const modelPart = !isGeneric && modelName ? ` (${modelName})` : '';
             return {
                 value: rec.id,
-                label: `${badge}${rec.name}${modelPart}`,
+                label: `[Generic] ${rec.name}`,
                 model: modelName,
-                isGeneric,
+                isGeneric: true,
                 // Store the automation's primary trigger_type (e.g. 'create',
                 // 'write', 'unlink', 'time', 'field_change', or '' for generic).
                 triggerType: rec.trigger_type || '',

@@ -53,14 +53,14 @@
                     </div>
                     <div class="work-auto-buttons work-save-container d-flex gap-1">
                         <div class="d-flex gap-2">
-                             <a class="btn btn-secondary d-flex align-items-center gap-1"
-                                t-att-disabled="!state.canUndo"
+                             <a t-if="state.canUndo"
+                                class="btn btn-secondary d-flex align-items-center gap-1"
                                 t-on-click="undo"
                                 title="Undo (Ctrl+Z)">
                                 <i class="ri-arrow-go-back-line"/>
                             </a>
-                            <a class="btn btn-secondary d-flex align-items-center gap-1"
-                                t-att-disabled="!state.canRedo"
+                            <a t-if="state.canRedo"
+                                class="btn btn-secondary d-flex align-items-center gap-1"
                                 t-on-click="redo"
                                 title="Redo (Ctrl+Shift+Z)">
                                 <i class="ri-arrow-go-forward-line"/>
@@ -82,17 +82,6 @@
                                 <div class="d-flex align-items-center">
                                     <t t-if="state.isReusable">Reusable</t>
                                     <t t-else="">Reusable</t>
-                                </div>
-                            </a>
-                            <!-- Generic toggle: only visible when Reusable is ON -->
-                            <a t-if="state.isReusable"
-                               t-att-class="'btn d-flex align-items-center gap-1 ' + (state.isGenericReusable ? 'btn-warning' : 'btn-outline-secondary')"
-                               t-on-click="toggleGenericReusable"
-                               t-att-title="state.isGenericReusable ? 'Generic mode: works with any model — click to restrict to this model' : 'Click to make this automation model-agnostic (Generic)'">
-                                <i class="ri-global-line"/>
-                                <div class="d-flex align-items-center">
-                                    <t t-if="state.isGenericReusable">Generic</t>
-                                    <t t-else="">Model</t>
                                 </div>
                             </a>
                             <a t-att-class="'btn d-flex align-items-center gap-1 cy-test-trigger ' + (state.testRunning ? 'btn-secondary disabled' : 'btn-outline-primary')"
@@ -602,29 +591,29 @@
                                 <span>Running test...</span>
                             </div>
                         </div>
-                        <div t-if="!drawBoardState.edit" class="canvas-locked">
+                        <div t-if="!drawBoardState.edit &amp;&amp; (!state.testResult || state.testResultMinimized)" class="canvas-locked">
 							<i class="ri-lock-fill"/>
                             <span>Locked!</span>
 						</div>
-                        <div t-attf-class="btn-lock position-fixed {{drawBoardState.edit ? '' : 'locked'}}"
+                        <div t-if="!state.testResult || state.testResultMinimized"
+                             t-attf-class="btn-lock position-fixed {{drawBoardState.edit ? '' : 'locked'}}"
                              t-on-click="changeMode">
 							<i t-if="drawBoardState.edit" class="ri-lock-fill"/>
                             <i t-else="" class="ri-lock-unlock-fill"/>
 						</div>
                         <div class="cy-w-zoom-controls bar-zoom position-fixed">
-                            <button class="cy-w-zoom-button" title="Zoom In" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>
+							<button class="cy-w-zoom-button" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>
                             <div class="cy-w-divider"/>
-                            <span class="cy-w-zoom-percent" t-esc="state.zoomPercent or 100 + '%'"/>
+                            <button class="cy-w-zoom-button" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>
                             <div class="cy-w-divider"/>
-                            <button class="cy-w-zoom-button" title="Zoom Out" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>
-                            <div class="cy-w-divider"/>
-                            <button class="cy-w-zoom-button" title="Fit to Screen" t-on-click="zoomReset"><i style="color:#111;" class="ri-focus-3-line"/></button>
-                        </div>
-                        <t t-call="client_action.chat_bot"/>
+                            <button class="cy-w-zoom-button" t-on-click="zoomReset"><i style="color:#111;" class="ri-fullscreen-line"/></button>
+						</div>
                         <TestResultPanel
                             visible="state.testResult ? true : false"
+                            minimized="state.testResultMinimized"
                             summary="state.testResult ? state.testResult.summary : {}"
                             results="state.testResult ? state.testResult.results : []"
+                            onToggleMinimize.bind="toggleTestResultPanel"
                         />
 					</div>
 				</div>

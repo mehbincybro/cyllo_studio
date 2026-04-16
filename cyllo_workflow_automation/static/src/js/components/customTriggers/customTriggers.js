@@ -1,8 +1,8 @@
 /** @odoo-module */
-import { Component, useState, onWillStart, useRef } from "@odoo/owl";
-import { CustomDropdown } from "../Assists/dropdown/CustomDropdown";
-import { useService } from "@web/core/utils/hooks";
-import { triggerCache } from "../../cache";
+import {Component, useState, onWillStart, useRef} from "@odoo/owl";
+import {CustomDropdown} from "../Assists/dropdown/CustomDropdown";
+import {useService} from "@web/core/utils/hooks";
+import {triggerCache} from "../../cache";
 
 export class CustomTrigger extends Component {
     setup() {
@@ -38,6 +38,7 @@ export class CustomTrigger extends Component {
     }
 
     onBack() {
+        this.props.back();
     }
 
     updateBtnFn(value) {
@@ -89,7 +90,7 @@ export class CustomTrigger extends Component {
     }
 
     async onSave() {
-        const {trigger_name, trigger_value, icon,iconType} = this.state;
+        const {trigger_name, trigger_value, icon} = this.state;
         const isValue = await this.orm.searchRead("work.function", [["name", "=", trigger_name], ["model_id.id", "=", this.props.model]])
         if (!trigger_name || !trigger_value) {
             this.showError(trigger_name ? 'Please Select a function' : 'Please fill the Name');
@@ -97,10 +98,6 @@ export class CustomTrigger extends Component {
         }
         if (isValue.length) {
             this.showError("Trigger name already exists For This model");
-            return;
-        }
-        if (iconType == 'image/png'){
-            this.showError('Unable to verify the file. Please ensure its a valid SVG');
             return;
         }
 
