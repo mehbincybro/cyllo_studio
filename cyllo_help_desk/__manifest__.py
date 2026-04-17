@@ -29,7 +29,7 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['base', 'mail', 'crm', 'rating'],
+    'depends': ['base', 'mail', 'crm', 'rating','portal'],
     'data': [
         'security/cyllo_help_desk_security_group.xml',
         'security/ir.model.access.csv',
@@ -44,6 +44,7 @@
         'wizard/helpdesk_report_views.xml',
         'wizard/helpdesk_ticket_merge_wizard_views.xml',
         'data/helpdesk_ticket_cron.xml',
+        'views/helpdesk_portal_templates.xml',
         'views/helpdesk_overview_views.xml',
         'views/helpdesk_ticket_views.xml',
         'views/helpdesk_my_ticket_views.xml',

@@ -21,7 +21,6 @@
 #############################################################################
 import random
 from datetime import datetime, timedelta
-
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 from odoo.tools import email_split
@@ -147,7 +146,7 @@ class HelpDeskTicket(models.Model):
     use_credit_notes = fields.Boolean(related='team_id.use_credit_notes', string="Use Credit Notes")
     use_coupons = fields.Boolean(related='team_id.use_coupons', string="Use Coupons")
     use_returns = fields.Boolean(related='team_id.use_returns', string="Use Returns")
-    use_replacements = fields.Boolean(related='team_id.use_replacements', string="Use Replacements")
+    # use_replacements = fields.Boolean(related='team_id.use_replacements', string="Use Replacements")
     use_repairs = fields.Boolean(related='team_id.use_repairs', string="Use Repairs")
     use_timesheet = fields.Boolean(related='team_id.use_timesheet', string="Use Timesheets")
     use_sale_order = fields.Boolean(related='team_id.use_sale_order',

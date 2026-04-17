@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -19,14 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import inspection_action
-from . import inspection_type
-from . import quality_alert
-from . import quality_alert_stage
-from . import quality_check
-from . import quality_check_line
-from . import quality_control_point
-from . import quality_inspection
-from . import quality_team
-from . import stock_picking
-from . import product_template
+from odoo import fields, models
+
+
+class QualityCheck(models.Model):
+    _inherit = 'quality.check'
+
+    mo_id = fields.Many2one('mrp.production', string='Manufacturing Order')

@@ -53,15 +53,19 @@ class WebsiteForm(form.WebsiteForm):
     def _get_or_create_partner(self, values):
         """Retrieve or create a customer (res.partner) from website ticket data.
 
-    This method attempts to find an existing partner using the normalized
-    email address provided in the values dictionary.
-    - If a partner exists, their name and phone are updated.
-    - If no partner is found, a new partner record is created.
+        This method attempts to find an existing partner:
+        - If a user is logged in, it uses their partner record.
+        - If not logged in, it searches for a partner by email.
+        - If no partner is found, a new partner record is created.
 
-    :param dict values: Dictionary containing website form data
-        (email, phone, partner_name).
-    :return: Partner record associated with the ticket.
-    :rtype: recordset(res.partner)"""
+        :param dict values: Dictionary containing website form data
+            (email, phone, partner_name).
+        :return: Partner record associated with the ticket.
+        :rtype: recordset(res.partner)"""
+        # Prioritize logged-in user
+        if not request.env.user._is_public():
+            return request.env.user.partner_id
+
         email = tools.email_normalize(values.get("email"))
         phone = values.get("phone")
         name = values.get("partner_name") or email or _("Website Visitor")

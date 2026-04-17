@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -19,14 +19,24 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import inspection_action
-from . import inspection_type
-from . import quality_alert
-from . import quality_alert_stage
-from . import quality_check
-from . import quality_check_line
-from . import quality_control_point
-from . import quality_inspection
-from . import quality_team
-from . import stock_picking
-from . import product_template
+
+{
+    'name': 'Cyllo Quality Manufacturing',
+    'version': '1.0',
+    'summary': 'Bridge module for Quality Checks in Manufacturing',
+    'description': "Integrates Quality management with Manufacturing to enable quality checks and control during production operations.",
+    'category': 'Manufacturing',
+    'author': 'Cyllo',
+    'company': 'Cyllo',
+    'maintainer': 'Cyllo',
+    'website': 'https://www.cyllo.com',
+    'depends': ['cyllo_quality', 'mrp'],
+    'data': [
+        'views/mrp_production_views.xml',
+        'views/quality_check_views.xml',
+    ],
+    'installable': True,
+    'auto_install': True,
+    'application': False,
+    'license': 'LGPL-3',
+}

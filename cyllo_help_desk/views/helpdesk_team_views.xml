@@ -93,7 +93,7 @@
                                 </group>
                                 <group>
                                     <separator string="Operations"/>
-                                    <field name="use_replacements"/>
+<!--                                    <field name="use_replacements"/>-->
                                     <field name="use_returns"/>
                                     <field name="use_repairs"/>
                                     <field name="use_field_service"/>

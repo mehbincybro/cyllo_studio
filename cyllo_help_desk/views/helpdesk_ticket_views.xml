@@ -130,7 +130,7 @@
                         <field name="use_credit_notes" invisible="1"/>
                         <field name="use_coupons" invisible="1"/>
                         <field name="use_returns" invisible="1"/>
-                        <field name="use_replacements" invisible="1"/>
+<!--                        <field name="use_replacements" invisible="1"/>-->
                         <field name="use_repairs" invisible="1"/>
                         <field name="use_timesheet" invisible="1"/>
                     </group>

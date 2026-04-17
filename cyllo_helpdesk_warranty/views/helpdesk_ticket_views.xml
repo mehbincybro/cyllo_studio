@@ -7,12 +7,19 @@
         <field name="arch" type="xml">
             <xpath expr="//widget[@name='web_ribbon']" position="after">
                 <field name="use_product_warranty" invisible="1"/>
-                <field name="sale_order_line_id" invisible="1"/>
-                <widget name="web_ribbon" title="Warranty Expired" bg_color="bg-danger" invisible="warranty_status != 'expired' or not use_product_warranty"/>
-                <widget name="web_ribbon" title="Under Warranty" bg_color="bg-success" invisible="warranty_status != 'under_warranty' or not use_product_warranty"/>
-            </xpath>
-            <xpath expr="//field[@name='sale_order_id']" position="after">
                 <field name="warranty_status" invisible="1"/>
+            </xpath>
+            <xpath expr="//field[@name='sale_order_line_id']" position="replace">
+                <label for="sale_order_line_id" invisible="not use_sale_order"/>
+                <div class="o_row" invisible="not use_sale_order">
+                    <field name="sale_order_line_id"
+                           domain="[('order_id', '=', sale_order_id)]"
+                           placeholder="Select Order Line..."/>
+                    <field name="is_under_warranty_evaluation" invisible="1"/>
+                    <span class="fa fa-shield text-success"
+                          invisible="not is_under_warranty_evaluation"
+                          title="Under Warranty"/>
+                </div>
             </xpath>
         </field>
     </record>
