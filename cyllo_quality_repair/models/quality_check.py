@@ -19,10 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import product_warranty
-from . import sale_order_line
-from . import purchase_order_line
-from . import sale_order
-from . import purchase_order
-from . import stock_move_line
-from . import repair_order
+from odoo import fields, models
+
+
+class QualityCheck(models.Model):
+    _inherit = 'quality.check'
+
+    repair_id = fields.Many2one('repair.order', string='Repair Order')

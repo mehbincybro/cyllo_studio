@@ -36,8 +36,6 @@ class HelpDeskTeam(models.Model):
 
     name = fields.Char(string="Name", help="Team name", required=1)
     description = fields.Html(string="Description", help="Description about the team")
-    timesheet = fields.Boolean(string="Timesheet",
-                               help="Can add timesheet for the ticket")
     ticket_id = fields.Many2one('helpdesk.ticket', string="All tickets")
     user_id = fields.Many2one(related='ticket_id.user_id', string="Stage")
     state_id = fields.Many2one(related='ticket_id.stage_id', string="Stage")
@@ -80,6 +78,7 @@ class HelpDeskTeam(models.Model):
     # use_replacements = fields.Boolean(string="Use Replacements")
     use_field_service = fields.Boolean(string="Use Field Service")
     use_gift_cards = fields.Boolean(string="Use Gift Cards")
+    use_crm = fields.Boolean(string="Use CRM")
     use_returns = fields.Boolean(string="Use Returns")
     use_repairs = fields.Boolean(string="Use Repairs")
     use_product_warranty = fields.Boolean(string="Use Product Warranty")
@@ -112,6 +111,7 @@ class HelpDeskTeam(models.Model):
 
         'use_coupons': 'cyllo_helpdesk_loyalty',
         'use_gift_cards': 'cyllo_helpdesk_loyalty',
+        'use_crm': 'cyllo_helpdesk_crm',
         'use_field_service': 'cyllo_helpdesk_field_service',
         'use_product_warranty': 'cyllo_helpdesk_warranty',
         'use_website_ticket_creation': 'cyllo_helpdesk_website',
@@ -134,14 +134,12 @@ class HelpDeskTeam(models.Model):
                 ('state', '=', 'uninstalled'),
             ])
             if modules:
-                return modules.button_immediate_install()
+                modules.button_immediate_install()
         return teams
 
     def write(self, vals):
         res = super(HelpDeskTeam, self).write(vals)
-        install_action = self._install_modules_from_toggles(vals)
-        if install_action:
-            return install_action
+        self._install_modules_from_toggles(vals)
         return res
 
     def _install_modules_from_toggles(self, vals):
@@ -336,7 +334,7 @@ class HelpDeskTeam(models.Model):
 
     def _compute_sla_policy_count(self):
         for team in self:
-            team.sla_policy_count = self.env['helpdesk.sla'].search_count([('team_id', '=', team.id)])
+            team.sla_policy_count = self.env['helpdesk.sla'].search_count([('team_ids', 'in', team.ids)])
 
     def action_view_team_sla_policies(self):
         self.ensure_one()
@@ -345,7 +343,7 @@ class HelpDeskTeam(models.Model):
             'type': 'ir.actions.act_window',
             'res_model': 'helpdesk.sla',
             'view_mode': 'tree,form',
-            'domain': [('team_id', '=', self.id)],
+            'domain': [('team_ids', 'in', self.id)],
             'target': 'current',
         }
 
@@ -364,7 +362,7 @@ class HelpDeskTeam(models.Model):
     def _check_use_sla(self):
         for team in self:
             if not team.use_sla:
-                policies = self.env['helpdesk.sla'].search_count([('team_id', '=', team.id)])
+                policies = self.env['helpdesk.sla'].search_count([('team_ids', 'in', team.ids)])
                 if policies > 0:
                     raise models.ValidationError(_(
                         "You cannot disable SLA for team '%s' because it has active SLA policies. "

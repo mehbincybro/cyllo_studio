@@ -29,5 +29,10 @@ class ResConfigSettings(models.TransientModel):
 
     module_cyllo_product_warranty = fields.Boolean(
         string="Enable Product Warranty")
+
+    is_extend_warranty_purchase = fields.Boolean(
+        string="Extend Warranty",
+        config_parameter='cyllo_product_warranty.is_extend_warranty_purchase'
+    )
     module_cyllo_purchase_digitization = fields.Boolean(string="Purchase Digitization")
 

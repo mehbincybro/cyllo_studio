@@ -19,10 +19,4 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import product_warranty
-from . import sale_order_line
-from . import purchase_order_line
-from . import sale_order
-from . import purchase_order
-from . import stock_move_line
-from . import repair_order
+from . import models
