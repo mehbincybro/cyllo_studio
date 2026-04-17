@@ -271,7 +271,7 @@
                                                         <i class="fa fa-ellipsis-v fs-5"/>
                                                     </button>
                                                     <ul class="dropdown-menu dropdown-menu-end shadow-sm border">
-                                                        <li>
+                                                        <li t-if="state.isManager">
                                                             <button class="dropdown-item py-2"
                                                                     t-on-click="() => this.actionOpenProduction(group.production_id)">
                                                                 <i class="fa fa-external-link-square me-2 text-primary"/>
