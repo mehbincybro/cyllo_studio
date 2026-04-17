@@ -20,3 +20,5 @@
 #
 #############################################################################
 from . import res_config_settings
+from . import repair_order
+from . import repair_time_allocation_policy

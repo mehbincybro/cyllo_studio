@@ -1,27 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <odoo>
-    <record id="view_repair_order_form_inherit_time" model="ir.ui.view">
-        <field name="name">repair.order.form.inherit.time</field>
+    <record id="view_repair_order_form_inherit_shopfloor_button" model="ir.ui.view">
+        <field name="name">repair.order.form.inherit.shopfloor.button</field>
         <field name="model">repair.order</field>
         <field name="inherit_id" ref="repair.view_repair_order_form"/>
         <field name="arch" type="xml">
-
-            <xpath expr="//field[@name='tag_ids']" position="after">
-                <field name="is_timer_running" invisible="1"/>
-                <field name="total_accumulated_time" invisible="1"/>
-
-                <field name="operator_ids" widget="many2many_tags"
-                       options="{'no_create': True}"
-                       invisible="state not in ['under_repair', 'done']"/>
-
-                <field name="current_start_time" readonly="1"
-                       invisible="1"/>
-
-                <field name="actual_duration" widget="float_time" readonly="1"
-                       invisible="state not in ['under_repair', 'done']"/>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_open_repair_floor" type="object" class="oe_stat_button" icon="fa-wrench">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Repair Floor</span>
+                    </div>
+                </button>
             </xpath>
-
         </field>
     </record>
 </odoo>

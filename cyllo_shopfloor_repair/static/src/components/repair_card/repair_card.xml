@@ -69,6 +69,17 @@
                     <t t-esc="props.record.partner_id ? props.record.partner_id[1] : 'Internal'"/>
                 </div>
 
+                <div class="d-flex align-items-center flex-wrap gap-1 mb-1"
+                     t-if="props.record.tags_data and props.record.tags_data.length > 0">
+                    <i class="fa fa-tags text-muted me-1" style="font-size: 0.85rem;" title="Tags"/>
+                    <t t-foreach="props.record.tags_data" t-as="tag" t-key="tag.id">
+                        <span class="badge rounded-pill"
+                              style="background-color: #e1f0ff; color: #3b5998; font-size: 0.7rem; font-weight: 500; padding: 0.3em 0.6em; border: 1px solid #cce5ff;">
+                            <t t-esc="tag.name"/>
+                        </span>
+                    </t>
+                </div>
+
                 <t t-if="props.record.state !== 'done' and props.record.state !== 'cancel'">
                     <div class="d-flex justify-content-center mt-auto pt-2 gap-2">
 

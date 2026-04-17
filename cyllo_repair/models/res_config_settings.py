@@ -28,3 +28,10 @@ class ResConfigSettings(models.TransientModel):
     module_cyllo_shopfloor_repair = fields.Boolean(
         string="Shopfloor"
     )
+
+    repair_max_active_orders = fields.Integer(
+        string="Max Active Repairs per Operator",
+        config_parameter='repair.max_active_orders',
+        default=0,
+        help="Maximum number of repairs an operator can have running at the same time. Set to 0 for unlimited."
+    )
