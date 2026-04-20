@@ -54,7 +54,6 @@
                         </group>
                         <group>
                             <separator string="Core Features"/>
-                            <field name="timesheet"/>
                             <field name="customer_rating"/>
                             <field name="use_sla"/>
                             <field name="use_timesheet"/>
@@ -88,6 +87,7 @@
                                     <field name="use_credit_notes"/>
                                     <field name="use_coupons"/>
                                     <field name="use_gift_cards"/>
+                                    <field name="use_crm"/>
                                     <field name="use_sale_order"/>
                                     <field name="use_product_warranty"/>
                                 </group>

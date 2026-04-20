@@ -29,13 +29,13 @@ class HelpDeskSLAPolicy(models.Model):
     name = fields.Char(string="Name", help="Name for SLA policy")
     description = fields.Html(string="Description",
                               help="Description for SLA policy")
-    team_id = fields.Many2one('helpdesk.team', string="Team",
-                              domain="[('use_sla', '=', True)]",
-                              help="Helpdesk team")
+    team_ids = fields.Many2many('helpdesk.team', string="Teams",required=1,
+                               domain="[('use_sla', '=', True)]",
+                               help="Helpdesk teams")
     category_ids = fields.Many2many('helpdesk.category', string="Category",
-                                    help="Helpdesk categories")
+                                    help=" Specific ticket categories that trigger this SLA.")
     tag_ids = fields.Many2many('helpdesk.tag', string="Tag",
-                               help="Helpdesk tags")
+                               help="Specific tags that trigger this SLA.")
     customer_ids = fields.Many2many('res.partner', string="Customer",
                                     help="Customers who affect this SLA policy")
     target_stage = fields.Many2one('helpdesk.stage', default=lambda self: self.env.ref(
@@ -62,12 +62,13 @@ class HelpDeskSLAPolicy(models.Model):
             'target': 'current',
         }
 
-    @api.constrains('team_id')
-    def _check_team_id(self):
+    @api.constrains('team_ids')
+    def _check_team_ids(self):
         for policy in self:
-            if policy.team_id and not policy.team_id.use_sla:
-                raise models.ValidationError(_(
-                    "The selected team '%s' does not have SLA enabled. "
-                    "Please enable 'Use SLA' on the team first."
-                ) % policy.team_id.name)
+            for team in policy.team_ids:
+                if not team.use_sla:
+                    raise models.ValidationError(_(
+                        "The selected team '%s' does not have SLA enabled. "
+                        "Please enable 'Use SLA' on the team first."
+                    ) % team.name)
 

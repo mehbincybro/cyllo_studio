@@ -19,10 +19,23 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import product_warranty
-from . import sale_order_line
-from . import purchase_order_line
-from . import sale_order
-from . import purchase_order
-from . import stock_move_line
-from . import repair_order
+{
+    'name': 'Cyllo Quality Repair',
+    'version': '1.0',
+    'summary': 'Bridge module for Quality Checks in Repair',
+    'description': "Integrates Quality management with Repair to enable quality checks during repair operations.",
+    'category': 'Manufacturing/Repair',
+    'author': 'Cyllo',
+    'company': 'Cyllo',
+    'maintainer': 'Cyllo',
+    'website': 'https://www.cyllo.com',
+    'depends': ['cyllo_quality', 'repair'],
+    'data': [
+        'views/repair_order_views.xml',
+        'views/quality_check_views.xml',
+    ],
+    'installable': True,
+    'auto_install': True,
+    'application': False,
+    'license': 'LGPL-3',
+}

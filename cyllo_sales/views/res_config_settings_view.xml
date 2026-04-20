@@ -11,6 +11,12 @@
                 <setting id="enable_product_warranty_sale"
                          help="Enable product warranty management in Sales.">
                     <field name="module_cyllo_product_warranty"/>
+                    <div class="content-group" invisible="not module_cyllo_product_warranty">
+                        <div class="mt16">
+                            <label for="is_extend_warranty" string="Extend Warranty"/>
+                            <field name="is_extend_warranty" class="oe_inline"/>
+                        </div>
+                    </div>
                 </setting>
             </xpath>
         </field>

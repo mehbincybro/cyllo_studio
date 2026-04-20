@@ -33,8 +33,18 @@ class WarrantyExtensionWizard(models.TransientModel):
     )
     line_ids = fields.Many2many(
         'sale.order.line',
-        string="Order Lines",
+        string="Sale Order Lines",
         domain="[('order_id', '=', order_id), ('is_under_warranty', '=', True)]",
+    )
+    purchase_order_id = fields.Many2one(
+        'purchase.order',
+        string="Purchase Order",
+        readonly=True,
+    )
+    purchase_line_ids = fields.Many2many(
+        'purchase.order.line',
+        string="Purchase Order Lines",
+        domain="[('order_id', '=', purchase_order_id), ('is_under_warranty', '=', True)]",
     )
     extension_period = fields.Integer(
         string="Extension Period",
@@ -53,7 +63,8 @@ class WarrantyExtensionWizard(models.TransientModel):
     )
 
     def action_confirm(self):
-        for line in self.line_ids:
+        lines = self.line_ids or self.purchase_line_ids
+        for line in lines:
             line.write({
                 'warranty_extension_period': line.warranty_extension_period + self.extension_period,
                 'warranty_extension_unit': self.extension_unit,

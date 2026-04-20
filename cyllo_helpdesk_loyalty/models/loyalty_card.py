@@ -30,7 +30,10 @@ class LoyaltyCard(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records.filtered('helpdesk_ticket_id'):
-            record.helpdesk_ticket_id.coupon_ids = [(4, record.id)]
+            if record.program_id.program_type == 'gift_card':
+                record.helpdesk_ticket_id.gift_card_ids = [(4, record.id)]
+            else:
+                record.helpdesk_ticket_id.coupon_ids = [(4, record.id)]
         return records
 
 

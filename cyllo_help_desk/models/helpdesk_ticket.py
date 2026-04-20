@@ -139,12 +139,12 @@ class HelpDeskTicket(models.Model):
     # SLA Pause
     sla_paused = fields.Boolean(string='SLA Paused', default=False)
     sla_pause_date = fields.Datetime()
-    sla_progress = fields.Float(string='SLA Progress',
-                                compute='_compute_sla_progress',
-                                help="Progress towards the next SLA deadline")
+    total_paused_duration = fields.Float(string='Total Paused Duration (Hours)', default=0.0,
+                                         help='Total duration spent in manual pause')
     use_sla = fields.Boolean(related='team_id.use_sla', string="Use SLA")
     use_credit_notes = fields.Boolean(related='team_id.use_credit_notes', string="Use Credit Notes")
     use_coupons = fields.Boolean(related='team_id.use_coupons', string="Use Coupons")
+    use_gift_cards = fields.Boolean(related='team_id.use_gift_cards', string="Use Gift Cards")
     use_returns = fields.Boolean(related='team_id.use_returns', string="Use Returns")
     # use_replacements = fields.Boolean(related='team_id.use_replacements', string="Use Replacements")
     use_repairs = fields.Boolean(related='team_id.use_repairs', string="Use Repairs")
@@ -152,11 +152,8 @@ class HelpDeskTicket(models.Model):
     use_sale_order = fields.Boolean(related='team_id.use_sale_order',
                                     string="Use Sale Order")
     use_field_service = fields.Boolean(related='team_id.use_field_service', string="Use Field Service")
+    use_crm = fields.Boolean(related='team_id.use_crm', string="Use CRM")
     # Integrations (core)
-    crm_lead_ids = fields.One2many('crm.lead', 'helpdesk_ticket_id',
-                                   string='CRM Leads')
-    crm_lead_count = fields.Integer(compute='_compute_crm_lead_count',
-                                    string="CRM Lead Count")
     # Portal
     website_published = fields.Boolean(string='Visible in Portal', default=True)
     # Duplicate Detection
@@ -171,29 +168,6 @@ class HelpDeskTicket(models.Model):
     attachment_ids = fields.Many2many('ir.attachment', string='Attachments',
                                       help='Attach files to this ticket')
 
-    @api.depends('crm_lead_ids')
-    def _compute_crm_lead_count(self):
-        for ticket in self:
-            ticket.crm_lead_count = len(ticket.crm_lead_ids)
-
-    def action_view_crm_leads(self):
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("crm.crm_lead_action_pipeline")
-        action['domain'] = [('helpdesk_ticket_id', '=', self.id)]
-        action['context'] = {'default_helpdesk_ticket_id': self.id}
-        return action
-
-    def action_create_crm_lead(self):
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("crm.crm_lead_action_pipeline")
-        action['view_mode'] = 'form'
-        action['target'] = 'new'
-        action['context'] = {
-            'default_name': self.name,
-            'default_partner_id': self.customer_id.id,
-            'default_helpdesk_ticket_id': self.id,
-        }
-        return action
 
 
     @api.onchange('stage_id')
@@ -242,32 +216,6 @@ class HelpDeskTicket(models.Model):
         """Clear customer related integrations if customer is removed."""
         if not self.customer_id:
             pass
-
-    @api.depends('create_date', 'sla_ids', 'stage_id', 'sla_paused')
-    def _compute_sla_progress(self):
-        for ticket in self:
-            if not ticket.sla_ids or not ticket.create_date or ticket.stage_id.is_closed:
-                ticket.sla_progress = 0
-                continue
-            # Simple linear progress estimate based on earliest deadline
-            statuses = ticket.sla_status_ids.filtered(
-                lambda s: s.state == 'ongoing')
-            if not statuses:
-                ticket.sla_progress = 100 if ticket.sla_failed else 0
-                continue
-            earliest_status = min(statuses, key=lambda
-                s: s.deadline or fields.Datetime.now())
-            if not earliest_status.deadline:
-                ticket.sla_progress = 0
-                continue
-            elapsed_raw = (
-                                      fields.Datetime.now() - ticket.create_date).total_seconds() / 3600.0
-            excluded_hours = ticket._get_excluded_duration(
-                earliest_status.sla_id)
-            effective_elapsed = max(elapsed_raw - excluded_hours, 0)
-            progress = (effective_elapsed / (
-                        earliest_status.sla_id.within_hour or 1)) * 100
-            ticket.sla_progress = min(max(progress, 0), 100)
 
     @api.depends('sla_status_ids.deadline', 'sla_status_ids.reached_datetime',
                  'sla_status_ids.state')
@@ -421,8 +369,8 @@ class HelpDeskTicket(models.Model):
                 self.user_id = next_user.id
                 team.last_assigned_user_id = next_user.id
 
-    @api.onchange('customer_id', 'team_id')
-    def _onchange_customer_id(self):
+    @api.onchange('customer_id', 'team_id', 'category_id', 'tag_ids')
+    def _onchange_sla_policy_criteria(self):
         if self.team_id and self.team_id.use_sla:
             sla_policies = self._get_sla_policies()
             if sla_policies:
@@ -441,12 +389,24 @@ class HelpDeskTicket(models.Model):
         if not self.team_id:
             return self.env['helpdesk.sla']
 
-        domain = [('team_id', '=', self.team_id.id)]
+        domain = [('team_ids', 'in', [self.team_id.id])]
         if self.customer_id:
             domain += ['|', ('customer_ids', '=', False),
                        ('customer_ids', 'in', [self.customer_id.id])]
         else:
             domain += [('customer_ids', '=', False)]
+
+        if self.category_id:
+            domain += ['|', ('category_ids', '=', False),
+                       ('category_ids', 'in', [self.category_id.id])]
+        else:
+            domain += [('category_ids', '=', False)]
+
+        if self.tag_ids:
+            domain += ['|', ('tag_ids', '=', False),
+                       ('tag_ids', 'in', self.tag_ids.ids)]
+        else:
+            domain += [('tag_ids', '=', False)]
 
         return self.env['helpdesk.sla'].search(domain)
 
@@ -810,13 +770,18 @@ class HelpDeskTicket(models.Model):
     def action_toggle_sla_pause(self):
         for record in self:
             if record.sla_paused:
-                # Calculate how long it was paused and adjust deadline (conceptual)
-                # In a real system, you'd store pause durations
+                # Add current pause duration to total
+                if record.sla_pause_date:
+                    duration = (fields.Datetime.now() - record.sla_pause_date).total_seconds() / 3600.0
+                    record.total_paused_duration += duration
                 record.sla_paused = False
+                record.sla_pause_date = False
                 record.message_post(body=_("SLA policy resumed."))
+                # Re-calculate deadlines when resuming
+                record._update_sla_statuses()
             else:
                 record.sla_paused = True
-                record.sla_pause_date = datetime.now()
+                record.sla_pause_date = fields.Datetime.now()
                 record.message_post(body=_("SLA policy paused."))
 
     def _escalate_ticket(self):
@@ -850,15 +815,21 @@ class HelpDeskTicket(models.Model):
 
 
     def _get_excluded_duration(self, sla_policy):
-        """ Calculate total duration spent in excluded stages for a given SLA policy """
+        """ Calculate total duration spent in excluded stages or manual pauses for a given SLA policy """
         self.ensure_one()
+        total_duration = self.total_paused_duration
+        
+        # If currently paused, add duration since pause_date
+        if self.sla_paused and self.sla_pause_date:
+            total_duration += (fields.Datetime.now() - self.sla_pause_date).total_seconds() / 3600.0
+            
         if not sla_policy.excluded_stage_ids:
-            return 0.0
+            return total_duration
+            
         history = self.env['helpdesk.stage.history'].search([
             ('ticket_id', '=', self.id),
             ('stage_id', 'in', sla_policy.excluded_stage_ids.ids)
         ])
-        total_duration = 0.0
         for record in history:
             if record.end_date:
                 total_duration += record.duration
@@ -870,21 +841,6 @@ class HelpDeskTicket(models.Model):
 
 
 
-    def action_create_crm_lead(self):
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id(
-            "crm.crm_lead_action_pipeline")
-        action['res_model'] = 'crm.lead'
-        action['view_mode'] = 'form'
-        action['views'] = [(self.env.ref('crm.crm_lead_view_form').id, 'form')]
-        action['target'] = 'current'
-        action['context'] = {
-            'default_partner_id': self.customer_id.id,
-            'default_name': self.name,
-            'default_helpdesk_ticket_id': self.id,
-        }
-        self.message_post(body=_("CRM Lead creation initiated."))
-        return action
 
     @api.onchange('canned_response_ids')
     def onchange_canned_response_ids(self):
@@ -920,10 +876,3 @@ class HelpDeskTicket(models.Model):
                             ('move_type', '=', 'out_refund')]
         return action
 
-    def action_view_crm_leads(self):
-        self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id(
-            "crm.crm_lead_action_pipeline")
-        action['view_mode'] = 'list,form'
-        action['domain'] = [('helpdesk_ticket_id', '=', self.id)]
-        return action

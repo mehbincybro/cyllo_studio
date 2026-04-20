@@ -97,18 +97,14 @@
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_toggle_sla_pause" type="object" string="Pause SLA" class="btn-warning" invisible="not sla_flag or sla_paused"/>
-                    <button name="action_toggle_sla_pause" type="object" string="Resume SLA" class="oe_highlight" invisible="not sla_flag or not sla_paused"/>
-                    <button name="action_create_crm_lead" type="object" string="Create CRM Lead" invisible="not customer_id"/>
+                    <button name="action_toggle_sla_pause" type="object" string="Pause SLA" class="btn-warning" invisible="not sla_flag or sla_paused" groups="cyllo_help_desk.cyllo_help_desk_manager"/>
+                    <button name="action_toggle_sla_pause" type="object" string="Resume SLA" class="oe_highlight" invisible="not sla_flag or not sla_paused" groups="cyllo_help_desk.cyllo_help_desk_manager"/>
                     <field name="stage_id" widget="statusbar"
                            options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
                 <widget name="web_ribbon" title="SLA Failed" bg_color="bg-danger" invisible="not sla_failed"/>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_view_crm_leads" type="object" class="oe_stat_button" icon="fa-bullseye" invisible="crm_lead_count == 0">
-                            <field name="crm_lead_count" widget="statinfo" string="CRM Leads"/>
-                        </button>
                     </div>
                     <div class="alert alert-warning text-center o_form_header" role="alert" invisible="not has_duplicates">
                         <strong>Warning!</strong> Potential duplicate tickets found for this customer.
@@ -120,7 +116,6 @@
                         <field name="sla_paused" invisible="1"/>
                         <field name="stage_name" invisible="1"/>
                         <field name="sla_ids" widget="many2many_tags" invisible="not sla_flag"/>
-                        <field name="sla_progress" widget="progressbar" invisible="not sla_flag or stage_name == 'Solved'"/>
                         <field name="sla_deadline" invisible="not sla_flag or not sla_ids"/>
                         <field name="sla_reached_date" invisible="not sla_flag or not sla_reached_date"/>
                         <field name="sla_failed" invisible="1"/>
@@ -135,7 +130,6 @@
                         <field name="use_timesheet" invisible="1"/>
                     </group>
                     <group invisible="1">
-                        <field name="crm_lead_ids"/>
                     </group>
                     <group col="2">
                         <group>

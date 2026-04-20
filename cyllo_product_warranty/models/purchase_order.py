@@ -23,13 +23,13 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
-class SaleOrder(models.Model):
-    _inherit = 'sale.order'
+class PurchaseOrder(models.Model):
+    _inherit = 'purchase.order'
 
     display_extend_warranty = fields.Boolean(compute='_compute_display_extend_warranty')
 
     def _compute_display_extend_warranty(self):
-        is_extend_warranty = self.env['ir.config_parameter'].sudo().get_param('cyllo_product_warranty.is_extend_warranty')
+        is_extend_warranty = self.env['ir.config_parameter'].sudo().get_param('cyllo_product_warranty.is_extend_warranty_purchase')
         for order in self:
             order.display_extend_warranty = is_extend_warranty
 
@@ -37,7 +37,7 @@ class SaleOrder(models.Model):
         self.ensure_one()
         has_warranty = any(line.product_id._get_warranty_definition()[0] > 0 for line in self.order_line)
         if not has_warranty:
-            raise UserError(_("This Sale Order does not contain any products with a valid warranty to extend."))
+            raise UserError(_("This Purchase Order does not contain any products with a valid warranty to extend."))
         return {
             'name': 'Extend Warranty',
             'type': 'ir.actions.act_window',
@@ -45,6 +45,6 @@ class SaleOrder(models.Model):
             'view_mode': 'form',
             'target': 'new',
             'context': {
-                'default_order_id': self.id,
+                'default_purchase_order_id': self.id,
             }
         }

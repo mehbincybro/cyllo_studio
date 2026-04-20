@@ -26,13 +26,20 @@ from odoo.exceptions import UserError
 class HelpDeskTicket(models.Model):
     _inherit = 'helpdesk.ticket'
 
-    coupon_ids = fields.Many2many('loyalty.card', string='Coupons')
-    coupon_count = fields.Integer(compute='_compute_coupon_count')
+    coupon_ids = fields.Many2many('loyalty.card', 'helpdesk_ticket_coupon_rel',
+                                  string='Coupons',
+                                  domain=[('program_id.program_type', '=', 'coupons')])
+    coupon_count = fields.Integer(compute='_compute_counts')
+    gift_card_ids = fields.Many2many('loyalty.card', 'helpdesk_ticket_gift_card_rel',
+                                     string='Gift Cards',
+                                     domain=[('program_id.program_type', '=', 'gift_card')])
+    gift_card_count = fields.Integer(compute='_compute_counts')
 
-    @api.depends('coupon_ids')
-    def _compute_coupon_count(self):
+    @api.depends('coupon_ids', 'gift_card_ids')
+    def _compute_counts(self):
         for ticket in self:
             ticket.coupon_count = len(ticket.coupon_ids)
+            ticket.gift_card_count = len(ticket.gift_card_ids)
 
     def action_create_coupon(self):
         self.ensure_one()
@@ -56,10 +63,39 @@ class HelpDeskTicket(models.Model):
         self.message_post(body=_("Coupon generation initiated."))
         return action
 
-    def action_view_coupons(self):
-        self.ensure_one()
+    def _get_loyalty_action(self, domain):
         action = self.env["ir.actions.actions"]._for_xml_id(
             "loyalty.loyalty_card_action")
         action['view_mode'] = 'list,form'
-        action['domain'] = [('id', 'in', self.coupon_ids.ids)]
+        action['domain'] = domain
         return action
+
+    def action_view_coupons(self):
+        self.ensure_one()
+        return self._get_loyalty_action([('id', 'in', self.coupon_ids.ids)])
+
+    def action_send_gift_card(self):
+        self.ensure_one()
+        program = self.env['loyalty.program'].search(
+            [('program_type', '=', 'gift_card')], limit=1)
+        if not program:
+            raise UserError(
+                _("No gift card program is configured. Create a gift card loyalty program first."))
+
+        action = self.env["ir.actions.actions"]._for_xml_id(
+            "loyalty.loyalty_generate_wizard_action")
+        action['context'] = {
+            'active_id': program.id,
+            'default_program_id': program.id,
+            'default_mode': 'selected' if self.customer_id else 'anonymous',
+            'default_customer_ids': [
+                (6, 0, [self.customer_id.id])] if self.customer_id else [],
+            'default_coupon_qty': 1,
+            'default_helpdesk_ticket_id': self.id,
+        }
+        self.message_post(body=_("Gift card generation initiated."))
+        return action
+
+    def action_view_gift_cards(self):
+        self.ensure_one()
+        return self._get_loyalty_action([('id', 'in', self.gift_card_ids.ids)])

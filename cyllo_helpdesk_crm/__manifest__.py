@@ -19,10 +19,24 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import product_warranty
-from . import sale_order_line
-from . import purchase_order_line
-from . import sale_order
-from . import purchase_order
-from . import stock_move_line
-from . import repair_order
+
+{
+    'name': 'Cyllo Helpdesk CRM',
+    'version': '1.0',
+    'category': 'Helpdesk',
+    'summary': 'Integration between Helpdesk and CRM',
+    'description': """
+        This module provides integration between Helpdesk tickets and CRM leads.
+        It allows creating leads from tickets and viewing related leads via stat buttons.
+    """,
+    'author': "Cyllo",
+    'company': "Cyllo",
+    'maintainer': "Cyllo",
+    'website': "https://www.cyllo.com",
+    'depends': ['cyllo_help_desk', 'crm'],
+    'data': [
+        'views/helpdesk_ticket_views.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
+}

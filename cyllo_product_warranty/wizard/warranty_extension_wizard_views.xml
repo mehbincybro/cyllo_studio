@@ -7,10 +7,24 @@
             <form string="Extend Warranty">
                 <sheet>
                     <group>
-                        <field name="order_id" invisible="1"/>
+                        <field name="order_id" invisible="not order_id" readonly="1"/>
+                        <field name="purchase_order_id" invisible="not purchase_order_id" readonly="1"/>
+                    </group>
+                    <group string="Order Lines">
                         <field name="line_ids"
+                               invisible="not order_id"
                                domain="[('order_id', '=', order_id), ('is_under_warranty', '=', True)]"
-                               widget="many2many_checkboxes">
+                               widget="many2many_checkboxes" nolabel="1">
+                            <tree>
+                                <field name="product_id"/>
+                                <field name="name"/>
+                                <field name="warranty_expiration_date"/>
+                            </tree>
+                        </field>
+                        <field name="purchase_line_ids"
+                               invisible="not purchase_order_id"
+                               domain="[('order_id', '=', purchase_order_id), ('is_under_warranty', '=', True)]"
+                               widget="many2many_checkboxes" nolabel="1">
                             <tree>
                                 <field name="product_id"/>
                                 <field name="name"/>
