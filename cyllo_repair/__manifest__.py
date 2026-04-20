@@ -23,9 +23,12 @@
     'name': 'Cyllo Repair',
     'version': '1.0',
     'summary': 'Central Module for Repair features',
-    'depends': ['repair'],
+    'depends': ['repair', 'hr'],
     'data': [
+        'security/ir.model.access.csv',
         'views/res_config_settings_views.xml',
+        'views/repair_time_allocation_policy_views.xml',
+        'views/repair_order_views.xml',
     ],
     'installable': True,
     'auto_install': True,

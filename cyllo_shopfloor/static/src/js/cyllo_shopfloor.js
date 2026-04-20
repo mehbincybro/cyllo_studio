@@ -18,11 +18,13 @@ class ShopFloorScreen extends Component {
             currentFilter: "ready",
             employees: [],
             selectedEmployee: null,
+            isManager: false,
         });
 
         this.lastSyncTime = Date.now();
 
         onWillStart(async () => {
+            this.state.isManager = await this.userService.hasGroup("mrp.group_mrp_manager");
             await this.fetchEmployees();
             await this.fetchWorkcenters();
             this.busService.addChannel("shopfloor_channel");

@@ -19,19 +19,23 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import models, fields
-
-
-class ResConfigSettings(models.TransientModel):
-    _inherit = 'res.config.settings'
-
-    module_cyllo_shopfloor_repair = fields.Boolean(
-        string="Shopfloor"
-    )
-
-    repair_max_active_orders = fields.Integer(
-        string="Max Active Repairs per Operator",
-        config_parameter='repair.max_active_orders',
-        default=0,
-        help="Maximum number of repairs an operator can have running at the same time. Set to 0 for unlimited."
-    )
+{
+    'name': 'Shopfloor Quality',
+    'version': '1.0',
+    'category': 'Manufacturing',
+    'summary': 'Quality Check button integration for the Shopfloor view',
+    'author': 'Cyllo',
+    'maintainer': 'Cyllo',
+    'website': 'https://www.cyllo.com',
+    'depends': ['cyllo_shopfloor', 'cyllo_quality'],
+    'assets': {
+        'web.assets_backend': [
+            'cyllo_shopfloor_quality/static/src/js/shopfloor_quality.js',
+            'cyllo_shopfloor_quality/static/src/xml/shopfloor_quality_template.xml',
+        ],
+    },
+    'license': 'LGPL-3',
+    'installable': True,
+    'application': False,
+    'auto_install': True,
+}

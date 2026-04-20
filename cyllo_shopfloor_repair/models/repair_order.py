@@ -26,108 +26,15 @@ from odoo.exceptions import UserError
 
 
 class RepairOrder(models.Model):
-    """Extension of Repair Order to track operators and exact working durations."""
     _inherit = 'repair.order'
 
-    operator_ids = fields.Many2many(
-        comodel_name='hr.employee',
-        string="Operators"
-    )
-
-    current_start_time = fields.Datetime(
-        string="Current Session Start",
-        copy=False
-    )
-    total_accumulated_time = fields.Float(
-        string="Accumulated Time (Hours)",
-        default=0.0,
-        copy=False
-    )
-    is_timer_running = fields.Boolean(
-        string="Timer is Running",
-        default=False,
-        copy=False
-    )
-
-    actual_duration = fields.Float(
-        string="Actual Duration (Hours)",
-        compute="_compute_actual_duration"
-    )
-
-    @api.depends('current_start_time', 'total_accumulated_time', 'is_timer_running')
-    def _compute_actual_duration(self):
-        """Calculates total time dynamically even while the timer is running."""
-        for rec in self:
-            if rec.is_timer_running and rec.current_start_time:
-                delta = datetime.now() - rec.current_start_time
-                session_hours = delta.total_seconds() / 3600.0
-                rec.actual_duration = rec.total_accumulated_time + session_hours
-            else:
-                rec.actual_duration = rec.total_accumulated_time
-
-    def action_repair_start(self):
-        """Overrides native start action to start/resume the timer and check operator limits."""
-        limit = int(self.env['ir.config_parameter'].sudo().get_param('repair.max_active_orders', default=0))
-
-        if limit > 0:
-            active_operator_id = self.env.context.get('active_operator_id')
-
-            if active_operator_id:
-                operator = self.env['hr.employee'].browse(active_operator_id)
-                if operator.exists():
-                    running_count = self.env['repair.order'].search_count([
-                        ('is_timer_running', '=', True),
-                        ('operator_ids', 'in', operator.id),
-                        ('id', 'not in', self.ids)
-                    ])
-                    if running_count >= limit:
-                        raise UserError(
-                            f"Operator '{operator.name}' have reached the maximum limit of {limit} active repairs.")
-            else:
-                employee = self.env['hr.employee'].search([('user_id', '=', self.env.uid)], limit=1)
-                if employee:
-                    running_count = self.env['repair.order'].search_count([
-                        ('is_timer_running', '=', True),
-                        ('operator_ids', 'in', employee.id),
-                        ('id', 'not in', self.ids)
-                    ])
-                    if running_count >= limit:
-                        raise UserError(
-                            f"You have reached the maximum limit of {limit} active repairs.")
-
-        res = super().action_repair_start()
-        self.write({
-            'current_start_time': datetime.now(),
-            'is_timer_running': True
-        })
-        return res
-
-    def action_repair_pause(self):
-        """Custom action to pause the timer without ending the repair."""
-        for rec in self:
-            if rec.is_timer_running and rec.current_start_time:
-                delta = datetime.now() - rec.current_start_time
-                session_hours = delta.total_seconds() / 3600.0
-                rec.write({
-                    'total_accumulated_time': rec.total_accumulated_time + session_hours,
-                    'current_start_time': False,
-                    'is_timer_running': False
-                })
-        return True
-
-    def action_repair_end(self):
-        """Overrides native end action to stop the timer and finalize duration."""
-        for rec in self:
-            if rec.is_timer_running and rec.current_start_time:
-                delta = datetime.now() - rec.current_start_time
-                session_hours = delta.total_seconds() / 3600.0
-                rec.write({
-                    'total_accumulated_time': rec.total_accumulated_time + session_hours,
-                    'current_start_time': False,
-                    'is_timer_running': False
-                })
-        res = super().action_repair_end()
-        return res
+    def action_open_repair_floor(self):
+        """Redirects the user to the Repair Floor dashboard for this record."""
+        self.ensure_one()
+        action = self.env.ref('cyllo_shopfloor_repair.action_repair_floor').read()[0]
+        # Setting context so it can be handled by JS components if needed
+        action['context'] = {'default_repair_id': self.id}
+        return action
 
     def action_show_repair_notes(self):
         """Returns an action to open the repair notes in a custom popup view."""
@@ -142,3 +49,4 @@ class RepairOrder(models.Model):
             'views': [(notes_view_id, 'form')],
             'target': 'new',
         }
+

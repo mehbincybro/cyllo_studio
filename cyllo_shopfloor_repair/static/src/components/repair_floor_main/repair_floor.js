@@ -16,7 +16,8 @@ export class RepairFloorDashboard extends Component {
             employees: [],
             selectedEmployee: null,
             repairs: {draft: [], confirmed: [], under_repair: [], done: [], cancel: []},
-            isManager: false
+            isManager: false,
+            highlightedRepairId: this.props.action?.context?.default_repair_id || null,
         });
 
         onWillStart(async () => {
@@ -48,25 +49,44 @@ export class RepairFloorDashboard extends Component {
     // Simple tab navigation
     setView(viewName) {
         this.state.currentFilter = viewName;
+        this.state.highlightedRepairId = null; // Clear isolate mode on tab change
+        this.fetchRepairOrders();
     }
 
     async fetchRepairOrders() {
+        let domain = [["state", "in", ["draft", "confirmed", "under_repair", "done", "cancel"]]];
+        if (this.state.highlightedRepairId) {
+            domain.push(["id", "=", this.state.highlightedRepairId]);
+        }
+        
         const records = await this.orm.searchRead(
             "repair.order",
-            [["state", "in", ["draft", "confirmed", "under_repair", "done", "cancel"]]],
+            domain,
             [
                 "name", "state", "product_id", "partner_id", "user_id",
                 "under_warranty", "operator_ids",
-                "current_start_time", "is_timer_running", "total_accumulated_time", "sale_order_id",
+                "current_start_time", "is_timer_running", "total_accumulated_time", "sale_order_id", "tag_ids",
             ]
         );
 
+        const tagIds = [...new Set(records.flatMap(r => r.tag_ids || []))];
+        const tagMap = {};
+        if (tagIds.length > 0) {
+            const tags = await this.orm.searchRead("repair.tags", [["id", "in", tagIds]], ["id", "name"]);
+            tags.forEach(t => { tagMap[t.id] = t; });
+        }
         this.state.repairs = {draft: [], confirmed: [], under_repair: [], done: [], cancel: []};
         records.forEach(record => {
+            record.tags_data = (record.tag_ids || []).map(id => tagMap[id]).filter(Boolean);
+
             if (this.state.repairs[record.state]) {
                 this.state.repairs[record.state].push(record);
             }
         });
+        
+        if (this.state.highlightedRepairId && records.length > 0) {
+            this.state.currentFilter = records[0].state;
+        }
     }
 }
 
