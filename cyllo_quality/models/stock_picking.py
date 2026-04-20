@@ -39,9 +39,36 @@ class StockPicking(models.Model):
             [('operation_type_ids', 'in', self.picking_type_id.id)])
         quality_control_points = []
         for point in quality_points:
+            # No product/category restriction — applies to all products
             if not point.product_category_ids and not point.product_ids:
                 self.is_quality_check = True
                 quality_control_points.append(point.id)
+            elif point.qc_check_for == 'category':
+                if not point.product_category_ids:
+                    # Category mode but no categories selected → apply to all
+                    self.is_quality_check = True
+                    quality_control_points.append(point.id)
+                else:
+                    all_category_id = self.env.ref('product.product_category_all')
+                    if point.product_category_ids.filtered(
+                            lambda c: c.id == all_category_id.id):
+                        self.is_quality_check = True
+                        quality_control_points.append(point.id)
+                    elif self.move_ids_without_package.filtered(
+                            lambda c: (
+                                c.product_id.categ_id.id in point.product_category_ids.ids) or (
+                                c.product_id.categ_id.parent_id.id in point.product_category_ids.ids)):
+                        self.is_quality_check = True
+                        quality_control_points.append(point.id)
+            elif point.qc_check_for == 'product':
+                if not point.product_ids:
+                    # Product mode but no products selected → apply to all
+                    self.is_quality_check = True
+                    quality_control_points.append(point.id)
+                elif self.move_ids_without_package.filtered(
+                        lambda p: p.product_id.id in point.product_ids.ids):
+                    self.is_quality_check = True
+                    quality_control_points.append(point.id)
             elif point.product_category_ids:
                 all_category_id = self.env.ref('product.product_category_all')
                 if point.product_category_ids.filtered(
@@ -50,8 +77,8 @@ class StockPicking(models.Model):
                     quality_control_points.append(point.id)
                 elif self.move_ids_without_package.filtered(
                         lambda c: (
-                                          c.product_id.categ_id.id in point.product_category_ids.ids) or (
-                                          c.product_id.categ_id.parent_id.id in point.product_category_ids.ids)):
+                            c.product_id.categ_id.id in point.product_category_ids.ids) or (
+                            c.product_id.categ_id.parent_id.id in point.product_category_ids.ids)):
                     self.is_quality_check = True
                     quality_control_points.append(point.id)
             elif point.product_ids and self.move_ids_without_package.filtered(
@@ -93,8 +120,38 @@ class StockPicking(models.Model):
                     quality_controls[qcp.id] = {}
                 products_list = []
                 if not qcp.product_ids and not qcp.product_category_ids:
+                    # No restriction — apply to all products in picking
                     products_list = self.move_ids_without_package.mapped(
                         'product_id').ids
+                elif qcp.qc_check_for == 'category':
+                    if not qcp.product_category_ids:
+                        # Category mode with no categories → apply to all
+                        products_list = self.move_ids_without_package.mapped(
+                            'product_id').ids
+                    else:
+                        all_category_id = self.env.ref(
+                            'product.product_category_all').id
+                        if qcp.product_category_ids.filtered(
+                                lambda c: c.id == all_category_id):
+                            products_list = self.move_ids_without_package.mapped(
+                                'product_id').ids
+                        else:
+                            product_in_move = self.move_ids_without_package.filtered(
+                                lambda c: (
+                                    c.product_id.categ_id.id in qcp.product_category_ids.ids) or (
+                                    c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids))
+                            if product_in_move:
+                                products_list = product_in_move.mapped('product_id').ids
+                elif qcp.qc_check_for == 'product':
+                    if not qcp.product_ids:
+                        # Product mode with no products → apply to all
+                        products_list = self.move_ids_without_package.mapped(
+                            'product_id').ids
+                    else:
+                        product_in_move = self.move_ids_without_package.filtered(
+                            lambda p: p.product_id.id in qcp.product_ids.ids)
+                        if product_in_move:
+                            products_list = product_in_move.mapped('product_id').ids
                 elif qcp.product_category_ids:
                     all_category_id = self.env.ref(
                         'product.product_category_all').id
@@ -102,12 +159,13 @@ class StockPicking(models.Model):
                             lambda c: c.id == all_category_id):
                         products_list = self.move_ids_without_package.mapped(
                             'product_id').ids
-                    product_in_move = self.move_ids_without_package.filtered(
-                        lambda c: (
-                                              c.product_id.categ_id.id in qcp.product_category_ids.ids) or (
-                                          c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids))
-                    if product_in_move:
-                        products_list = product_in_move.mapped('product_id').ids
+                    else:
+                        product_in_move = self.move_ids_without_package.filtered(
+                            lambda c: (
+                                c.product_id.categ_id.id in qcp.product_category_ids.ids) or (
+                                c.product_id.categ_id.parent_id.id in qcp.product_category_ids.ids))
+                        if product_in_move:
+                            products_list = product_in_move.mapped('product_id').ids
                 elif qcp.product_ids:
                     product_in_move = self.move_ids_without_package.filtered(
                         lambda p: p.product_id.id in qcp.product_ids.ids)

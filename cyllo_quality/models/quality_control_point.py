@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -103,8 +103,6 @@ class QualityControlPoint(models.Model):
 
 
 
-
-
     @api.depends('quality_team_id')
     def _compute_user_id(self):
         for qcp in self:
@@ -138,7 +136,6 @@ class QualityControlPoint(models.Model):
             'type': 'ir.actions.act_window',
             'target': 'current',
         }
-
 
 
 

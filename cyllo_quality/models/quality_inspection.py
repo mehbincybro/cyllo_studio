@@ -66,9 +66,6 @@ class QualityInspection(models.Model):
             }
         }
 
-
-
-
     @api.depends('inspection_type_id')
     def _compute_is_measure(self):
         measure_inspection_type_id = self.env.ref('cyllo_quality.inspection_type_measure').id

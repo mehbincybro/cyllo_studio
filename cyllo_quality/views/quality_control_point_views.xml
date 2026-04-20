@@ -47,9 +47,8 @@
 
                             <field name="qc_check_for" widget="radio"/>
                             <field name="product_category_ids" widget="many2many_tags"
-                                   invisible="qc_check_for != 'category'" required="qc_check_for == 'category'"/>
-                            <field name="product_ids" widget="many2many_tags" invisible="qc_check_for != 'product'"
-                                   required="qc_check_for == 'product'"/>
+                                   invisible="qc_check_for != 'category'" />
+                            <field name="product_ids" widget="many2many_tags" invisible="qc_check_for != 'product'"/>
                             <field name="control_type"/>
                             <label for="control_quantity" string="Partial Check"
                                    invisible="control_type != 'quantity'"/>
