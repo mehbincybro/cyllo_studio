@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- View definitions for Culinary & Banqueting Services (Hospitality) -->
+    <record id="catering_booking_view_tree" model="ir.ui.view">
+        <field name="name">catering.booking.view.tree</field>
+        <field name="model">catering.booking</field>
+        <field name="arch" type="xml">
+            <tree decoration-info="state == 'draft'" decoration-success="state == 'confirm'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="platter_type_id"/>
+                <field name="guest_count"/>
+                <field name="total_amount"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirm'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for managing catering booking details and confirmation -->
+    <record id="catering_booking_view_form" model="ir.ui.view">
+        <field name="name">catering.booking.view.form</field>
+        <field name="model">catering.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="state == 'confirm'"/>
+                            <field name="platter_type_id" readonly="state == 'confirm'"/>
+                            <field name="event_id" invisible="not event_id" readonly="1"/>
+                            <field name="venue_booking_id" invisible="not venue_booking_id" readonly="1"/>
+                        </group>
+                        <group>
+                            <label for="start_date" string="Date Range"/>
+                            <div class="o_row">
+                                <field name="start_date" widget="daterange" options="{'related_end_date': 'end_date'}" readonly="state == 'confirm'"/>
+                                <i class="fa fa-long-arrow-right mx-2 text-muted" aria-label="Arrow icon" title="Arrow"/>
+                                <field name="end_date" widget="daterange" options="{'related_start_date': 'start_date'}" readonly="state == 'confirm'"/>
+                            </div>
+                            <field name="guest_count" readonly="state == 'confirm'"/>
+                            <field name="total_amount" readonly="1" force_save="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Action and menu configuration for managing catering (culinary) bookings -->
+    <record id="catering_booking_action" model="ir.actions.act_window">
+        <field name="name">Culinary Services</field>
+        <field name="res_model">catering.booking</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Parent menu for catering and hospitality services -->
+    <menuitem id="catering_menu_booking" name="Hospitality"
+              parent="venue_booking_menu_root"
+              sequence="6"/>
+    <!-- Submenu to access catering booking records -->
+    <menuitem id="catering_menu_booking_child" name="Culinary &amp; Banqueting"
+              parent="catering_menu_booking"
+              action="catering_booking_action"
+              sequence="1"/>
+</odoo>

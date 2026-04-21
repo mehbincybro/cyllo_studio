@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Integration views to bridge Occasions with Fleet Logistics -->
+    <!-- Venue Booking Inherit -->
+    <record id="venue_booking_view_form_inherit_transport" model="ir.ui.view">
+        <field name="name">venue.booking.view.form.inherit.transport</field>
+        <field name="model">venue.booking</field>
+        <field name="inherit_id" ref="cyllo_occasion_management.venue_booking_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_transport_booking" string="Create Transport Order" type="object" class="btn-primary" invisible="not need_transport"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_transport_booking" type="object" class="oe_stat_button" icon="fa-bus" invisible="transport_count == 0">
+                    <field name="transport_count" widget="statinfo" string="Transport"/>
+                </button>
+            </xpath>
+            <xpath expr="//sheet" position="before">
+                <div class="alert alert-warning text-center" role="alert" invisible="not transport_warning">
+                    <field name="transport_warning"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='catering_ids']" position="after">
+                <field name="need_transport"/>
+                <field name="transport_ids" widget="many2many_tags" options="{'no_create': True}" invisible="not need_transport"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Event Inherit -->
+    <record id="event_event_view_form_inherit_transport" model="ir.ui.view">
+        <field name="name">event.event.view.form.inherit.transport</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="cyllo_occasion_management.event_event_view_form_inherit_venue"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_transport_booking" string="Create Transport Order" type="object" class="btn-primary" invisible="not need_transport"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_transport_booking" type="object" class="oe_stat_button" icon="fa-bus" invisible="transport_count == 0">
+                    <field name="transport_count" widget="statinfo" string="Transport"/>
+                </button>
+            </xpath>
+            <xpath expr="//field[@name='catering_ids']" position="after">
+                <field name="need_transport"/>
+                <field name="transport_ids" widget="many2many_tags" options="{'no_create': True}" invisible="not need_transport"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

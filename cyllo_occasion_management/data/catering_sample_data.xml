@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Catering Food Categories -->
+        <record id="food_cat_starter" model="catering.food.category">
+            <field name="name">Starter</field>
+        </record>
+        <record id="food_cat_main" model="catering.food.category">
+            <field name="name">Main Course</field>
+        </record>
+        <record id="food_cat_dessert" model="catering.food.category">
+            <field name="name">Dessert</field>
+        </record>
+
+        <!-- Catering Categories (Staff) -->
+        <record id="staff_cat_chefs" model="catering.category">
+            <field name="name">Chefs</field>
+        </record>
+        <record id="staff_cat_servers" model="catering.category">
+            <field name="name">Servers</field>
+        </record>
+
+        <!-- Catering Products -->
+        <record id="product_spring_rolls" model="product.product">
+            <field name="name">Spring Rolls</field>
+            <field name="is_catering_product" eval="True"/>
+            <field name="catering_food_category_id" ref="food_cat_starter"/>
+            <field name="lst_price">15.0</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_biryani" model="product.product">
+            <field name="name">Chicken Biryani</field>
+            <field name="is_catering_product" eval="True"/>
+            <field name="catering_food_category_id" ref="food_cat_main"/>
+            <field name="lst_price">45.0</field>
+            <field name="type">consu</field>
+        </record>
+        <record id="product_ice_cream" model="product.product">
+            <field name="name">Vanilla Ice Cream</field>
+            <field name="is_catering_product" eval="True"/>
+            <field name="catering_food_category_id" ref="food_cat_dessert"/>
+            <field name="lst_price">10.0</field>
+            <field name="type">consu</field>
+        </record>
+    </data>
+</odoo>
