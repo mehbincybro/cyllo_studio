@@ -2,7 +2,7 @@
 
 import {registry} from "@web/core/registry";
 import {useService} from "@web/core/utils/hooks";
-import {Component, useState, onWillStart} from "@odoo/owl";
+import {Component, useState, onWillStart, onWillDestroy, onMounted} from "@odoo/owl";
 import {RepairCard} from "../repair_card/repair_card";
 
 export class RepairFloorDashboard extends Component {
@@ -24,6 +24,13 @@ export class RepairFloorDashboard extends Component {
             this.state.isManager = await this.user.hasGroup("stock.group_stock_manager");
             await this.loadEmployees();
             await this.fetchRepairOrders();
+        });
+        onMounted(() => {
+            this.env.bus.trigger('onclickMenuBar', { isCollapse: true });
+        });
+
+        onWillDestroy(() => {
+            this.env.bus.trigger('onclickMenuBar', { isCollapse: false });
         });
     }
 

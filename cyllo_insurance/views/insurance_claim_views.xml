@@ -42,6 +42,7 @@
                             <field name="incident_date"/>
                             <field name="filing_date"/>
                             <field name="approved_date"/>
+                            <field name="incident_type_id"/>
                         </group>
                         <group>
                             <field name="claimed_amount"/>
@@ -49,7 +50,10 @@
                             <field name="deductible_applied" readonly="1"/>
                             <field name="payout_amount" readonly="1"/>
                         </group>
-                        <field name="description" string="Description"/>
+
+                    </group>
+                    <group>
+                        <field name="description"/>
                     </group>
                 </sheet>
             </form>

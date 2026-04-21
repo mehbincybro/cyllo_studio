@@ -1,3 +1,25 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
+
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError
 
@@ -24,9 +46,15 @@ class InsuranceClaim(models.Model):
     state = fields.Selection(
         [('draft', 'Draft'), ('submitted', 'Submitted'), ('approved', 'Approved'), ('rejected', 'Rejected'),
          ('paid', 'Paid'), ], default='draft', tracking=True)
-    description = fields.Text(help="Additional details about the claim.")
+    description = fields.Text(string="Description", help="Additional details about the claim.")
     attachment_ids = fields.Many2many('ir.attachment')
     currency_id = fields.Many2one(related='policy_id.currency_id', store=True)
+
+    incident_type_id = fields.Many2one(
+        'insurance.incident.type',
+        string="Incident Type",
+        required=True
+    )
 
     @api.depends('approved_amount', 'policy_id.deductible')
     def _compute_payout(self):
@@ -52,6 +80,11 @@ class InsuranceClaim(models.Model):
 
     def action_approve(self):
         """Approve claim if within remaining coverage."""
+        if self.incident_type_id in self.policy_id.excluded_incident_ids:
+            raise ValidationError(
+                "This incident type is excluded under the policy."
+            )
+
         if self.claimed_amount > self.policy_id.remaining_coverage:
             raise ValidationError("Claim exceeds remaining coverage.")
         self.write({
@@ -78,4 +111,5 @@ class InsuranceClaim(models.Model):
             if rec.incident_date and rec.filing_date:
                 if rec.filing_date < rec.incident_date:
                     raise ValidationError("Filing date cannot be before incident date.")
-
+                elif (rec.filing_date - rec.incident_date).days > rec.policy_id.plan_id.claim_window_days or 0:
+                    raise ValidationError("Claim must be filed within %s days of Incident." % rec.policy_id.plan_id.claim_window_days or 0)

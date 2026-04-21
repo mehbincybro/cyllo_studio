@@ -1,7 +1,7 @@
 /** @odoo-module **/
-import {registry} from "@web/core/registry";
-import {useService} from "@web/core/utils/hooks";
-import {Component, useState, onWillStart, onWillDestroy} from "@odoo/owl";
+import { registry } from "@web/core/registry";
+import { useService } from "@web/core/utils/hooks";
+import { Component, useState, onWillStart, onWillDestroy, onMounted } from "@odoo/owl";
 
 class ShopFloorScreen extends Component {
     setup() {
@@ -38,7 +38,7 @@ class ShopFloorScreen extends Component {
                     "mrp.workorder",
                     [["production_id", "=", targetMoId], ["state", "!=", "cancel"]],
                     ["workcenter_id"],
-                    {limit: 1}
+                    { limit: 1 }
                 );
 
                 if (targetData.length > 0) {
@@ -64,14 +64,20 @@ class ShopFloorScreen extends Component {
             }
         }, 1000);
 
+        onMounted(() => {
+            this.env.bus.trigger('onclickMenuBar', { isCollapse: true });
+        });
+
         onWillDestroy(() => {
             clearInterval(this.timerInterval);
             this.busService.removeEventListener("notification", this._onBusNotification);
+            
+            this.env.bus.trigger('onclickMenuBar', { isCollapse: false });
         });
     }
 
-    _onBusNotification({detail: notifications}) {
-        for (const {type, payload} of notifications) {
+    _onBusNotification({ detail: notifications }) {
+        for (const { type, payload } of notifications) {
             if (type === "workorder_updated") {
                 this.fetchWorkcenters();
                 if (this.state.selectedWorkcenter && payload.workcenter_id === this.state.selectedWorkcenter.id) {
@@ -94,7 +100,7 @@ class ShopFloorScreen extends Component {
     }
 
     getShopfloorContext() {
-        const ctx = {from_shopfloor: true};
+        const ctx = { from_shopfloor: true };
         if (this.state.selectedEmployee) {
             ctx.employee_id = this.state.selectedEmployee.id;
         }
@@ -142,14 +148,18 @@ class ShopFloorScreen extends Component {
 
         const domain = [
             ["workcenter_id", "=", this.state.selectedWorkcenter.id],
-            ["state", "!=", "cancel"],
             ["production_state", "!=", "draft"],
         ];
 
-        if (this.state.currentFilter === "ready") {
-            domain.push(["state", "in", ["ready", "progress", "pending", "waiting"]]);
-        } else if (this.state.currentFilter === "done") {
-            domain.push(["state", "=", "done"]);
+        if (this.state.currentFilter === "cancel") {
+            domain.push(["production_state", "=", "cancel"]);
+        } else {
+            domain.push(["state", "!=", "cancel"]);
+            if (this.state.currentFilter === "ready") {
+                domain.push(["production_state", "in", ["confirmed", "progress"]]);
+            } else if (this.state.currentFilter === "done") {
+                domain.push(["production_state", "in", ["to_close", "done"]]);
+            }
         }
 
         const rawWorkOrders = await this.orm.searchRead(
@@ -232,8 +242,29 @@ class ShopFloorScreen extends Component {
                 ["id", "employee_ids"]
             );
 
+            const otherWorkOrders = await this.orm.searchRead(
+                "mrp.workorder",
+                [
+                    ["production_id", "in", productionIds],
+                    ["state", "not in", ["done", "cancel"]],
+                    ["workcenter_id", "!=", this.state.selectedWorkcenter.id]
+                ],
+                ["production_id", "name", "workcenter_id"],
+                { order: "id asc" }
+            );
+
+            const nextWoByMo = {};
+            for (const wo of otherWorkOrders) {
+                const moId = wo.production_id[0];
+                if (!nextWoByMo[moId]) {
+                    nextWoByMo[moId] = [];
+                }
+                nextWoByMo[moId].push(wo);
+            }
+
             for (const group of this.state.groupedWorkOrders) {
                 group.missingComponents = missingData[group.production_id] || [];
+                group.next_work_orders = nextWoByMo[group.production_id] || [];
 
                 group.mo_employees = [];
                 const mo = moData.find(m => m.id === group.production_id);
@@ -259,6 +290,18 @@ class ShopFloorScreen extends Component {
         this.state.selectedProduction = null;
     }
 
+    async goToWorkCenter(workcenterId, productionId, ev) {
+        if (ev) ev.stopPropagation();
+        const targetWorkcenter = this.state.workcenters.find((wc) => wc.id === workcenterId);
+        if (targetWorkcenter) {
+            this.state.currentFilter = "ready";
+            await this.selectWorkcenter(targetWorkcenter);
+            this.selectProduction(productionId);
+        } else {
+            this.env.services.notification.add("Target workcenter not found.", { type: "warning" });
+        }
+    }
+
     clearSelection() {
         this.state.selectedWorkcenter = null;
         this.state.selectedProduction = null;
@@ -273,7 +316,7 @@ class ShopFloorScreen extends Component {
     async blockWorkcenter(workcenterId, ev) {
         if (ev) ev.stopPropagation();
         this.action.doAction("mrp.act_mrp_block_workcenter_wo", {
-            additionalContext: {default_workcenter_id: workcenterId},
+            additionalContext: { default_workcenter_id: workcenterId },
             onClose: () => {
                 this.fetchWorkcenters();
             },
@@ -283,7 +326,7 @@ class ShopFloorScreen extends Component {
     async unblockWorkcenter(workcenterId, ev) {
         if (ev) ev.stopPropagation();
         await this.orm.call("mrp.workcenter", "unblock", [workcenterId], {
-            context: {from_shopfloor: true}
+            context: { from_shopfloor: true }
         });
         await this.fetchWorkcenters();
     }
@@ -295,7 +338,7 @@ class ShopFloorScreen extends Component {
             );
 
             if (!this.state.selectedEmployee) {
-                this.env.services.notification.add("Your user account has no linked employee.", {type: "warning"});
+                this.env.services.notification.add("Your user account has no linked employee.", { type: "warning" });
                 return;
             }
         }
@@ -313,7 +356,7 @@ class ShopFloorScreen extends Component {
 
     async finishWorkOrder(workOrderId) {
         if (!this.state.selectedEmployee) {
-            this.env.services.notification.add("Please select an operator first.", {type: "warning"});
+            this.env.services.notification.add("Please select an operator first.", { type: "warning" });
             return;
         }
 
@@ -363,7 +406,7 @@ class ShopFloorScreen extends Component {
             } else {
                 this.env.services.notification.add(
                     "Cannot navigate: target workcenter not found.",
-                    {type: "warning"}
+                    { type: "warning" }
                 );
             }
         }
@@ -392,7 +435,7 @@ class ShopFloorScreen extends Component {
     async actionOpenProductCatalog(productionId) {
         if (!productionId) return;
         this.action.doAction("cyllo_shopfloor.action_mrp_add_component_wizard", {
-            additionalContext: {default_production_id: productionId},
+            additionalContext: { default_production_id: productionId },
             onClose: () => {
                 this.loadWorkOrders();
             },
@@ -402,7 +445,7 @@ class ShopFloorScreen extends Component {
     async actionScrapComponent(productionId) {
         if (!productionId) return;
         this.action.doAction("cyllo_shopfloor.action_mrp_scrap_component_wizard", {
-            additionalContext: {default_production_id: productionId},
+            additionalContext: { default_production_id: productionId },
             onClose: () => {
                 this.loadWorkOrders();
             },

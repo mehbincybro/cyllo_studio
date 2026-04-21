@@ -5,6 +5,9 @@ access_insurance_policy_type_user,insurance.policy.type.user,cyllo_insurance.mod
 access_insurance_coverage_admin,insurance.coverage.admin,cyllo_insurance.model_insurance_coverage,cyllo_insurance.group_insurance_admin,1,1,1,1
 access_insurance_coverage_user,insurance.coverage.user,cyllo_insurance.model_insurance_coverage,cyllo_insurance.group_insurance_user,1,0,0,0
 
+access_insurance_incident_type_admin,insurance.incident.type.admin,cyllo_insurance.model_insurance_incident_type,cyllo_insurance.group_insurance_admin,1,1,1,1
+access_insurance_incident_type_user,insurance.incident.type.user,cyllo_insurance.model_insurance_incident_type,cyllo_insurance.group_insurance_user,1,0,0,0
+
 access_insurance_plan_admin,insurance.plan.admin,cyllo_insurance.model_insurance_plan,cyllo_insurance.group_insurance_admin,1,1,1,1
 access_insurance_plan_user,insurance.plan.user,cyllo_insurance.model_insurance_plan,cyllo_insurance.group_insurance_user,1,0,0,0
 

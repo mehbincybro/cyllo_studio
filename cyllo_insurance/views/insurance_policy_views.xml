@@ -1,42 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_policy_tree" model="ir.ui.view">
-        <field name="name">insurance.policy.tree</field>
-        <field name="model">insurance.policy</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="policy_no"/>
-                <field name="user_id"/>
-                <field name="start_date"/>
-                <field name="end_date"/>
-                <field name="state"/>
-                <field name="premium_amount" sum="Total"/>
-                <field name="remaining_coverage" sum="Total"/>
-                <field name="currency_id" column_invisible="1"/>
-            </tree>
-        </field>
-    </record>
-
     <record id="view_policy_form" model="ir.ui.view">
         <field name="name">insurance.policy.form</field>
         <field name="model">insurance.policy</field>
         <field name="arch" type="xml">
             <form>
                 <header>
-                    <button name="action_active" string="Confirm" type="object" class="btn-primary"
+                    <button name="action_confirm" string="Confirm" type="object" class="btn-primary"
                             invisible="state != 'draft'"/>
+                    <button name="action_create_invoice" string="Create Invoice" type="object" class="btn-primary"
+                            invisible="state != 'confirmed'"/>
                     <button name="action_expired" string="Expire" type="object" class="btn-secondary"
                             invisible="state != 'active'"/>
                     <button name="action_reset_to_draft" string="Reset to draft" type="object" class="btn-secondary"
-                            invisible="state != 'expired'"/>
-                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"/>
-                    <field name="state" widget="statusbar"/>
+                            invisible="state not in ('expired', 'cancel')"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"
+                            invisible="state in ('expired', 'cancel')"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirmed,active,expired,cancel"/>
                 </header>
                 <sheet>
                     <group>
                         <group>
                             <field name="currency_id" invisible="True"/>
-                            <field name="policy_no" readonly="1"/>
+                            <field name="policy_no"/>
                             <field name="plan_id"/>
                             <field name="user_id"/>
                         </group>
@@ -45,6 +31,9 @@
                             <field name="issue_date"/>
                             <field name="start_date"/>
                             <field name="end_date"/>
+                            <field name="is_recurring" invisible="1"/>
+                            <field name="parent_policy_id" readonly="1" invisible="not parent_policy_id"/>
+                            <field name="excluded_incident_ids" widget="many2many_tags"/>
                         </group>
 
                         <group>
@@ -69,9 +58,18 @@
                                     <field name="coverage_id"/>
                                     <field name="coverage_type"/>
                                     <field name="coverage_amount"/>
-                                    <!--                                    <field name="deductible"/>-->
                                     <button name="action_add_addons" string="Add" type="object" class="btn-primary"
                                             invisible="coverage_type != 'addons' or addon_added"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Renewal History">
+                            <field name="renewal_history_ids" readonly="1">
+                                <tree>
+                                    <field name="policy_no"/>
+                                    <field name="start_date"/>
+                                    <field name="end_date"/>
+                                    <field name="state"/>
                                 </tree>
                             </field>
                         </page>
