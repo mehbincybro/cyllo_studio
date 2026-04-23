@@ -601,13 +601,23 @@
 							<i t-if="drawBoardState.edit" class="ri-lock-fill"/>
                             <i t-else="" class="ri-lock-unlock-fill"/>
 						</div>
-                        <div class="cy-w-zoom-controls bar-zoom position-fixed">
-							<button class="cy-w-zoom-button" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>
+                         <div t-if="!state.testResult || state.testResultMinimized"
+                              class="cy-w-zoom-controls bar-zoom position-fixed">
+                            <button class="cy-w-zoom-button" title="Zoom In" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>
                             <div class="cy-w-divider"/>
-                            <button class="cy-w-zoom-button" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>
+                            <span class="cy-w-zoom-percent" t-esc="state.zoomPercent or 100 + '%'"/>
                             <div class="cy-w-divider"/>
-                            <button class="cy-w-zoom-button" t-on-click="zoomReset"><i style="color:#111;" class="ri-fullscreen-line"/></button>
-						</div>
+                            <button class="cy-w-zoom-button" title="Zoom Out" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>
+                            <div class="cy-w-divider"/>
+                            <button class="cy-w-zoom-button" title="Fit to Screen" t-on-click="zoomReset"><i style="color:#111;" class="ri-focus-3-line"/></button>
+                        </div>
+<!--                        <div class="cy-w-zoom-controls bar-zoom position-fixed">-->
+<!--							<button class="cy-w-zoom-button" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>-->
+<!--                            <div class="cy-w-divider"/>-->
+<!--                            <button class="cy-w-zoom-button" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>-->
+<!--                            <div class="cy-w-divider"/>-->
+<!--                            <button class="cy-w-zoom-button" t-on-click="zoomReset"><i style="color:#111;" class="ri-fullscreen-line"/></button>-->
+<!--						</div>-->
                         <TestResultPanel
                             visible="state.testResult ? true : false"
                             minimized="state.testResultMinimized"
