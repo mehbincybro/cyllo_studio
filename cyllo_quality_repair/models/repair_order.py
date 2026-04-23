@@ -89,7 +89,6 @@ class RepairOrder(models.Model):
                 raise UserError(_("No Quality Checks could be generated. Please verify your Quality Control Point configuration (Operations, Products, and Categories)."))
             self.quality_check_ids = [fields.Command.link(qc) for qc in qc_ids]
             self.is_quality_check_created = True
-        return self.action_view_quality_check()
 
     @api.depends('quality_check_ids', 'quality_check_ids.quality_check_line_ids.is_checked', 'quality_control_point_ids')
     def _compute_quality_checks(self):

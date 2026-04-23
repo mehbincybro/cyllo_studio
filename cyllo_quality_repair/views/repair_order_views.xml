@@ -5,6 +5,9 @@
         <field name="model">repair.order</field>
         <field name="inherit_id" ref="repair.view_repair_order_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="js_class">quality_check_view</attribute>
+            </xpath>
             <xpath expr="//field[@name='priority']" position="after">
                 <field name="is_quality_check" invisible="1"/>
                 <field name="quality_check_ids" invisible="1"/>
