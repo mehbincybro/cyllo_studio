@@ -8,7 +8,7 @@
                 <field name="name"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="policy_type_id"/>
-                <field name="default_premium" sum="Total"/>
+<!--                <field name="default_premium" sum="Total"/>-->
                 <field name="state"/>
             </tree>
         </field>
@@ -35,10 +35,15 @@
                             <field name="name" readonly="state != 'draft'"/>
                             <field name="code" readonly="state != 'draft'"/>
                             <field name="policy_type_id" readonly="state != 'draft'"/>
+                            <field name="claim_window_days" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="valid_from" readonly="state != 'draft'"/>
-                            <field name="valid_to" readonly="state != 'draft'"/>
+                            <label for="duration" string="Duration"/>
+                            <div class="o_row">
+                                <field name="duration" readonly="state != 'draft'"/>
+                                <field name="duration_type" readonly="state != 'draft'"/>
+                            </div>
+                            <field name="is_recurring"/>
                         </group>
                     </group>
 
@@ -59,12 +64,8 @@
                                     <field name="coverage_id"/>
                                     <field name="coverage_type"/>
                                     <field name="coverage_amount"/>
-<!--                                    <field name="deductible"/>-->
                                 </tree>
                             </field>
-<!--                            <group class="oe_subtotal_footer fs-1">-->
-<!--                                <field name="total_coverage_amount"/>-->
-<!--                            </group>-->
                         </page>
                         <page string="Description">
                             <field name="description"/>

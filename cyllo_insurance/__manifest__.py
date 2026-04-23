@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -30,14 +30,17 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': [
-        'mail',],
-    # 'icon': '/cyllo_asset_management/static/description/assets.svg',
+        'mail', ],
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
+
         'data/sequence.xml',
+        'data/policy_plan_renewal_cron.xml',
+
         'views/insurance_claim_views.xml',
         'views/insurance_coverage_views.xml',
+        'views/insurance_incident_type_views.xml',
         'views/insurance_plan_views.xml',
         'views/insurance_policy_type_views.xml',
         'views/insurance_policy_views.xml',

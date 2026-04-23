@@ -10,6 +10,11 @@
         <field name="res_model">insurance.coverage</field>
         <field name="view_mode">tree,form</field>
     </record>
+    <record id="action_incident_type" model="ir.actions.act_window">
+        <field name="name">Incident Type</field>
+        <field name="res_model">insurance.incident.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
     <record id="action_plan" model="ir.actions.act_window">
         <field name="name">Insurance Plans</field>
         <field name="res_model">insurance.plan</field>
@@ -39,6 +44,11 @@
               parent="menu_insurance_root"
               name="Coverages"
               action="action_coverage"/>
+
+    <menuitem id="menu_incident_type"
+              parent="menu_insurance_root"
+              name="Incident Type"
+              action="action_incident_type"/>
 
     <menuitem id="menu_plan"
               parent="menu_insurance_root"
