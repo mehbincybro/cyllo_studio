@@ -30,6 +30,14 @@
         <field name="res_model">insurance.claim</field>
         <field name="view_mode">tree,form</field>
     </record>
+
+    <!-- Underwriting Rules Action -->
+    <record id="action_underwriting_rules_menu" model="ir.actions.act_window">
+        <field name="name">Underwriting Rules</field>
+        <field name="res_model">cyllo.insurance.underwriting.rule</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
     <!-- Root Menu -->
     <menuitem id="menu_insurance_root"
               name="Insurance"
@@ -64,4 +72,17 @@
               parent="menu_insurance_root"
               name="Claims"
               action="action_claim"/>
+
+    <!-- Configuration sub-menu (admin only) -->
+    <menuitem id="menu_insurance_config"
+              parent="menu_insurance_root"
+              name="Configuration"
+              sequence="100"
+              groups="cyllo_insurance.group_insurance_admin"/>
+
+    <menuitem id="menu_underwriting_rules"
+              parent="menu_insurance_config"
+              name="Underwriting Rules"
+              action="action_underwriting_rules_menu"
+              groups="cyllo_insurance.group_insurance_admin"/>
 </odoo>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ═══════════════════════════════════════════════════════════════════
+         Underwriting Rule – Tree View
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_underwriting_rule_tree" model="ir.ui.view">
+        <field name="name">cyllo.insurance.underwriting.rule.tree</field>
+        <field name="model">cyllo.insurance.underwriting.rule</field>
+        <field name="arch" type="xml">
+            <tree string="Underwriting Rules">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="rule_type"/>
+                <field name="plan_ids" widget="many2many_tags"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         Underwriting Rule – Form View
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <record id="view_underwriting_rule_form" model="ir.ui.view">
+        <field name="name">cyllo.insurance.underwriting.rule.form</field>
+        <field name="model">cyllo.insurance.underwriting.rule</field>
+        <field name="arch" type="xml">
+            <form string="Underwriting Rule">
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger"
+                            invisible="active"/>
+                    <group>
+                        <group>
+                            <field name="name" placeholder="e.g. Maximum Applicant Age"/>
+                            <field name="sequence"/>
+                            <field name="active"/>
+                            <field name="rule_type"/>
+                            <field name="plan_ids" widget="many2many_tags"
+                                   options="{'no_create': True}"
+                                   placeholder="Leave empty to apply to ALL plans"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group string="Threshold Parameters">
+                            <!-- Max Age -->
+                            <field name="max_age"
+                                   invisible="rule_type != 'max_age'"/>
+
+                            <!-- Max Coverage -->
+                            <field name="max_coverage_amount"
+                                   invisible="rule_type != 'max_coverage'"/>
+
+                            <!-- Min Premium -->
+                            <field name="min_premium_amount"
+                                   invisible="rule_type != 'min_premium'"/>
+
+                            <!-- Severe Accident History -->
+                            <field name="max_approved_claims"
+                                   invisible="rule_type != 'severe_accident_history'"/>
+
+                            <!-- Claim Frequency -->
+                            <field name="max_claims_in_period"
+                                   invisible="rule_type != 'claim_frequency'"/>
+                            <field name="claim_period_months"
+                                   invisible="rule_type != 'claim_frequency'"/>
+
+                            <!-- High-Risk Incident -->
+                            <field name="high_risk_incident_ids"
+                                   widget="many2many_tags"
+                                   invisible="rule_type != 'high_risk_incident'"/>
+                        </group>
+                    </group>
+                    <group string="Description">
+                        <field name="description" nolabel="1" colspan="2"
+                               placeholder="Describe the intent and impact of this rule..."/>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         Window Action
+    ═══════════════════════════════════════════════════════════════════════ -->
+    <record id="action_underwriting_rules" model="ir.actions.act_window">
+        <field name="name">Underwriting Rules</field>
+        <field name="res_model">cyllo.insurance.underwriting.rule</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No underwriting rules defined yet.
+            </p>
+            <p>
+                Create rules to automate risk assessment.
+                When a policy is confirmed and "Assess Risk" is clicked,
+                each rule is evaluated. Triggered rules send the policy
+                to <strong>Under Review</strong> for manual admin approval.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -22,3 +22,6 @@ access_insurance_policy_coverage_admin,insurance.policy.coverage.admin,cyllo_ins
 
 access_insurance_claim_user,insurance.claim.user,cyllo_insurance.model_insurance_claim,cyllo_insurance.group_insurance_user,1,1,1,0
 access_insurance_claim_admin,insurance.claim.admin,cyllo_insurance.model_insurance_claim,cyllo_insurance.group_insurance_admin,1,1,1,1
+
+access_underwriting_rule_admin,underwriting.rule.admin,cyllo_insurance.model_cyllo_insurance_underwriting_rule,cyllo_insurance.group_insurance_admin,1,1,1,1
+access_underwriting_rule_user,underwriting.rule.user,cyllo_insurance.model_cyllo_insurance_underwriting_rule,cyllo_insurance.group_insurance_user,1,0,0,0

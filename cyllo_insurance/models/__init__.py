@@ -20,6 +20,7 @@
 #
 #############################################################################
 from . import insurance_policy_type
+from . import account_move
 from . import insurance_coverage
 from . import insurance_incident_type
 from . import insurance_plan_coverage
@@ -27,3 +28,4 @@ from . import insurance_plan
 from . import insurance_policy
 from . import insurance_claim
 from . import insurance_policy_coverage
+from . import insurance_underwriting_rule

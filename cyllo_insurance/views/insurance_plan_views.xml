@@ -8,7 +8,6 @@
                 <field name="name"/>
                 <field name="currency_id" column_invisible="1"/>
                 <field name="policy_type_id"/>
-<!--                <field name="default_premium" sum="Total"/>-->
                 <field name="state"/>
             </tree>
         </field>
@@ -44,6 +43,7 @@
                                 <field name="duration_type" readonly="state != 'draft'"/>
                             </div>
                             <field name="is_recurring"/>
+                            <field name="activation_policy" invisible="not is_recurring"/>
                         </group>
                     </group>
 
@@ -53,6 +53,13 @@
                                 <field name="default_premium" readonly="state != 'draft'"/>
                                 <field name="default_coverage_limit" readonly="state != 'draft'"/>
                                 <field name="default_deductible" readonly="state != 'draft'"/>
+                            </group>
+                            <group string="No Claim Bonus (NCB)">
+                                <field name="has_no_claim_bonus" readonly="state != 'draft'"/>
+                                <field name="ncb_step_percentage" readonly="state != 'draft'"
+                                       invisible="not has_no_claim_bonus"/>
+                                <field name="max_ncb_percentage" readonly="state != 'draft'"
+                                       invisible="not has_no_claim_bonus"/>
                             </group>
                         </page>
 
