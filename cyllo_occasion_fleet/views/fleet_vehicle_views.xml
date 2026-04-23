@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit fleet vehicle form to add capacity and daily charge fields -->
+    <record id="fleet_vehicle_view_form_inherit_capacity" model="ir.ui.view">
+        <field name="name">fleet.vehicle.view.form.inherit.capacity</field>
+        <field name="model">fleet.vehicle</field>
+        <field name="inherit_id" ref="fleet.fleet_vehicle_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='driver_id']" position="after">
+                <field name="max_capacity"/>
+                <field name="daily_charge"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

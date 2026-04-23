@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree view to list platter types with pricing details -->
+    <record id="platter_type_view_tree" model="ir.ui.view">
+        <field name="name">platter.type.view.tree</field>
+        <field name="model">platter.type</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="amount_per_person"/>
+                <field name="total_food_amount"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view to manage platter details including foods and catering members -->
+    <record id="platter_type_view_form" model="ir.ui.view">
+        <field name="name">platter.type.view.form</field>
+        <field name="model">platter.type</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Platter Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="amount_per_person"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Foods and Beverages">
+                            <field name="platter_food_line_ids">
+                                <tree editable="bottom">
+                                    <field name="category_id"/>
+                                    <field name="food_ids" widget="many2many_tags" 
+                                           domain="[('is_catering_product', '=', True), ('catering_food_category_id', '=', category_id)]"
+                                           options="{'no_create': True}"/>
+                                </tree>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right" colspan="2" name="food_total">
+                                <field name="total_food_amount" widget="monetary"/>
+                            </group>
+                        </page>
+                        <page string="Catering Members">
+                            <field name="catering_member_ids">
+                                <tree editable="bottom">
+                                    <field name="category_id"/>
+                                    <field name="employee_ids" widget="many2many_tags"/>
+                                    <field name="count"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Action to open platter type records -->
+    <record id="platter_type_action" model="ir.actions.act_window">
+        <field name="name">Banqueting Packages</field>
+        <field name="res_model">platter.type</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+    <!-- Menu to access platter configuration -->
+    <menuitem id="platter_type_menu"
+              name="Service Packages"
+              parent="venue_booking_management_configuration_menu"
+              action="platter_type_action"
+              sequence="25"/>
+</odoo>

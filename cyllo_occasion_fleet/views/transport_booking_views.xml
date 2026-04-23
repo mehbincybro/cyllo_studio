@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- View definitions for Transport Booking (Mobility Services) -->
+    <record id="transport_booking_view_tree" model="ir.ui.view">
+        <field name="name">transport.booking.view.tree</field>
+        <field name="model">transport.booking</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="vehicle_id"/>
+                <field name="driver_id"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="booked_capacity"/>
+                <field name="daily_rate"/>
+                <field name="total_amount" sum="Total"/>
+                <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'confirm'"/>
+            </tree>
+        </field>
+    </record>
+    <!-- Form view for managing transport booking details -->
+    <record id="transport_booking_view_form" model="ir.ui.view">
+        <field name="name">transport.booking.view.form</field>
+        <field name="model">transport.booking</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_confirm" string="Confirm" type="object" class="oe_highlight" invisible="state != 'draft'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,confirm"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="vehicle_id" readonly="state == 'confirm'"/>
+                            <field name="driver_id" readonly="state == 'confirm'"/>
+                        </group>
+                        <group>
+                            <field name="max_capacity"/>
+                            <field name="booked_capacity" readonly="state == 'confirm'"/>
+                            <field name="start_date" readonly="state == 'confirm'"/>
+                            <field name="end_date" readonly="state == 'confirm'"/>
+                            <field name="daily_rate" readonly="state == 'confirm'"/>
+                            <field name="total_amount"/>
+                        </group>
+                        <group>
+                            <field name="event_id" invisible="not event_id" readonly="1"/>
+                            <field name="venue_booking_id" invisible="not venue_booking_id" readonly="1"/>
+                        </group>
+                    </group>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Action to open transport booking records -->
+    <record id="transport_booking_action" model="ir.actions.act_window">
+        <field name="name">Mobility Services</field>
+        <field name="res_model">transport.booking</field>
+        <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Menu configuration for Event Logistics & Fleet -->
+    <menuitem id="transport_menu_booking" name="Logistics"
+              parent="cyllo_occasion_management.venue_booking_menu_root"
+              sequence="7"/>
+    <!-- Menu item to access transport booking under parent menu -->
+    <menuitem id="transport_menu_booking_child" name="Event Logistics &amp; Fleet"
+              parent="transport_menu_booking"
+              action="transport_booking_action"
+              sequence="1"/>
+</odoo>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+     <!-- Inherit event form to add venue and catering integration features -->
+    <record id="event_event_view_form_inherit_venue" model="ir.ui.view">
+        <field name="name">event.event.view.form.inherit.venue</field>
+        <field name="model">event.event</field>
+        <field name="inherit_id" ref="event.view_event_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_catering_booking" string="Create Catering Order" type="object" class="btn-primary" invisible="not need_catering"/>
+            </xpath>
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_venue_booking" type="object" class="oe_stat_button" icon="fa-building" invisible="not venue_booking_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Venue Booking</span>
+                    </div>
+                </button>
+                <button name="action_view_catering_booking" type="object" class="oe_stat_button" icon="fa-cutlery" invisible="catering_count == 0">
+                    <field name="catering_count" widget="statinfo" string="Catering"/>
+                </button>
+            </xpath>
+            <xpath expr="//group[1]/group[1]" position="inside">
+                <field name="need_venue"/>
+                <field name="venue_id" invisible="not need_venue" required="need_venue"/>
+                <field name="venue_booking_id" invisible="not venue_booking_id"/>
+                <field name="need_catering"/>
+                <field name="catering_ids" widget="many2many_tags" invisible="not need_catering" options="{'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
