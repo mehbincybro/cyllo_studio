@@ -76,7 +76,12 @@ class InsuranceClaim(models.Model):
 
     def action_submit(self):
         """Submit claim for approval."""
-        self.write({'state': 'submitted'})
+        for rec in self:
+            if rec.policy_id.state != 'active':
+                raise ValidationError("You cannot submit a claim. The policy must be active.")
+            if rec.policy_id.invoice_id and rec.policy_id.invoice_id.payment_state not in ('paid', 'in_payment'):
+                raise ValidationError("The policy invoice must be paid before submitting claims.")
+            rec.write({'state': 'submitted'})
 
     def action_approve(self):
         """Approve claim if within remaining coverage."""

@@ -30,13 +30,19 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': [
-        'mail', ],
+        'mail',
+        'cyllo_accounting',
+        'product',
+        'sale',
+    ],
+    'post_init_hook': 'post_init_hook',
     'data': [
         'security/security.xml',
         'security/ir.model.access.csv',
 
         'data/sequence.xml',
         'data/policy_plan_renewal_cron.xml',
+        'data/insurance_product_data.xml',
 
         'views/insurance_claim_views.xml',
         'views/insurance_coverage_views.xml',
@@ -44,6 +50,8 @@
         'views/insurance_plan_views.xml',
         'views/insurance_policy_type_views.xml',
         'views/insurance_policy_views.xml',
+        'views/insurance_underwriting_rule_views.xml',
+        'views/account_move_views.xml',
         'views/insurance_menus.xml'
     ],
     'license': 'LGPL-3',

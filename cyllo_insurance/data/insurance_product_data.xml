@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="product_category_insurance" model="product.category">
+        <field name="name">Insurance</field>
+    </record>
+
+    <record id="product_product_insurance_premium" model="product.product">
+        <field name="name">Insurance Premium</field>
+        <field name="type">service</field>
+        <field name="invoice_policy">order</field>
+        <field name="categ_id" ref="cyllo_insurance.product_category_insurance"/>
+        <field name="taxes_id" eval="False"/>
+        <field name="supplier_taxes_id" eval="False"/>
+    </record>
+</odoo>
