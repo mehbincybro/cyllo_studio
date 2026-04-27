@@ -616,14 +616,56 @@ export class ModelComponent extends Component {
         this.raiseNotification("Record Saved...!", "success");
     }
 
+    getCurrentNodeContext() {
+        const nodes = this.context?.nodes || [];
+        return nodes.find((node) => node.nodeId === this.props.nodeId) || null;
+    }
+
+    resolveTriggerContext() {
+        const globalContext = this.env.globalContext?.() || {};
+        const normalizedGlobalTrigger = typeof globalContext.trigger === "string" ? globalContext.trigger : "";
+        const normalizedGlobalTriggerType = typeof globalContext.triggerType === "string" ? globalContext.triggerType : "";
+
+        if (normalizedGlobalTrigger || normalizedGlobalTriggerType) {
+            return {
+                trigger: normalizedGlobalTrigger,
+                triggerType: normalizedGlobalTriggerType,
+            };
+        }
+
+        let walker = this.getCurrentNodeContext();
+        while (walker?.left) {
+            const parent = walker.left;
+            if (parent?.type === "action" || parent?.trigger_type || parent?.ttype) {
+                return {
+                    trigger: typeof parent.ttype === "string" ? parent.ttype : "",
+                    triggerType: typeof parent.trigger_type === "string" ? parent.trigger_type : "",
+                };
+            }
+            walker = parent;
+        }
+
+        return {
+            trigger: "",
+            triggerType: "",
+        };
+    }
+
     triggerName() {
-        const [, trigger_word] = this.env.globalContext().trigger.split(' ');
-        return trigger_word?.toLowerCase();
+        const { trigger, triggerType } = this.resolveTriggerContext();
+        if (triggerType) {
+            return triggerType.toLowerCase();
+        }
+        if (!trigger) {
+            return "";
+        }
+        const [, triggerWord] = trigger.split(" ");
+        return (triggerWord || trigger).toLowerCase();
     }
 
     allTriggerName() {
-        const trigger_word = this.env.globalContext().trigger;
-        return trigger_word?.toLowerCase();
+        const { trigger, triggerType } = this.resolveTriggerContext();
+        return (trigger || triggerType || "").toLowerCase();
     }
 
     deleteNode() {
