@@ -2058,3 +2058,77 @@ select>option {
     font-size: 13px;
     cursor: pointer;
 }
+.bg-light{
+    background:#ffffff !important;
+}
+
+/* ── Issue 4B: QR Block – visible in edit mode ───────────────────────────── */
+.s_qr_block {
+    position: relative;
+    display: inline-block;
+    margin-top: 18px; /* room for the handle above */
+    vertical-align: top;
+}
+
+/* The dashed placeholder is purely for edit-mode visibility */
+.s_qr_block .qr-edit-placeholder {
+    cursor: default;
+    transition: box-shadow 0.2s ease;
+}
+
+.s_qr_block:hover .qr-edit-placeholder,
+.s_qr_block.selected .qr-edit-placeholder {
+    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.35);
+}
+
+/* Hide the edit placeholder in preview mode */
+.previewing .s_qr_block .qr-edit-placeholder {
+    display: none !important;
+}
+
+.previewing .s_qr_block .qr-handle-container {
+    display: none !important;
+}
+
+/* ── A4 page bottom boundary ───────────────────────────────────────────────── */
+
+/* Strong downward shadow on the paper container to visually "ground" the page */
+.cyllo-studio-report-container {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25),
+                0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Ensure the editable area always fills out to A4 height so short reports
+   never look cut off mid-page */
+.editable-area {
+    min-height: calc(297mm - 40mm);
+    box-sizing: border-box;
+}
+
+/* "End of Page" label below the A4 sheet */
+.cyllo-end-of-page-marker {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
+    gap: 10px;
+}
+
+.cyllo-end-of-page-marker::before,
+.cyllo-end-of-page-marker::after {
+    content: '';
+    flex: 1;
+    max-width: 80px;
+    height: 1px;
+    background: #b0b8c6;
+}
+
+.cyllo-end-of-page-marker span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #9aa3b0;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    user-select: none;
+}

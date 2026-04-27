@@ -257,8 +257,9 @@ class StudioReportController(Controller):
             if not report.exists():
                 return {'success': False, 'error': 'Report not found'}
 
-            html_content, _ = report.sudo()._render_qweb_html(report.id, doc_ids)
-            return {'success': True, 'html': html_content.decode('utf-8')}
+            ids_str = ','.join(str(i) for i in doc_ids)
+            preview_url = f'/report/html/{report.report_name}/{ids_str}'
+            return {'success': True, 'preview_url': preview_url}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 

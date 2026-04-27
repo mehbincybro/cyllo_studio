@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from '@web/core/registry';
-import { Component, useRef, onMounted, useState, onWillStart, onPatched } from "@odoo/owl";
+import { Component, useRef, onMounted, onWillUnmount, useState, onWillStart, onPatched } from "@odoo/owl";
 import { StudioFieldSelectorPopover } from "@cyllo_studio/js/studio_field_selector_popover";
 import { useLoadFieldInfo } from "@web/core/model_field_selector/utils";
 import { useService } from "@web/core/utils/hooks";
@@ -9,6 +9,8 @@ import { loadJS } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { groupBy } from "@web/core/utils/arrays";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+import { QrMixin } from "@cyllo_studio/js/custom_report/studio_report_qr";
+import { BoxMixin } from "@cyllo_studio/js/custom_report/studio_report_box";
 
 const Sortable = window.Sortable;
 const SS_TEMPLATE = 'cyllo_report_template';
@@ -46,6 +48,7 @@ export class EditReport extends Component {
             reportInfo: {},
             paperFormats: [],
             previewHtml: false,
+            previewUrl: false,
             showSourceEditor: false,
             sourceCode: "",
             showResetDialog: false,
@@ -85,6 +88,79 @@ export class EditReport extends Component {
 
         onMounted(async () => {
             const params = this.props.action.params || {};
+            console.log('params',params,this)
+
+            // Hide the Cyllo sidebar logic per user request
+            this._cyElsToRestore = [];
+
+            // 1. Hide the exact submenu box requested (and firmly use !important to block OWL patches)
+            const submenuBox = document.querySelector('.cy-submenu-box');
+            if (submenuBox) {
+                this._cyElsToRestore.push({ el: submenuBox, display: submenuBox.style.display || '' });
+                submenuBox.style.setProperty('display', 'none', 'important');
+
+                // 2. Hide the sibling wrapper / parent container that holds the dark sidebar
+                const parentNav = submenuBox.parentElement;
+                if (parentNav) {
+                    this._cyElsToRestore.push({ el: parentNav, display: parentNav.style.display || '' });
+                    parentNav.style.setProperty('display', 'none', 'important');
+
+                    // 3. Find the closest flex/grid ancestor
+                    let layoutContainer = parentNav.parentElement;
+                    while (layoutContainer && layoutContainer.tagName !== 'BODY') {
+                        const style = window.getComputedStyle(layoutContainer);
+                        if (style.display.includes('flex') || style.display.includes('grid')) {
+                            break;
+                        }
+                        layoutContainer = layoutContainer.parentElement;
+                    }
+
+                    // 4. Force the content sibling to take full width
+                    if (layoutContainer && layoutContainer.tagName !== 'BODY') {
+                        Array.from(layoutContainer.children).forEach(child => {
+                            if (!child.contains(parentNav) && child !== parentNav && !child.classList.contains('o_navbar')) {
+                                this._cyElsToRestore.push({
+                                    el: child,
+                                    width: child.style.width || '',
+                                    flex: child.style.flex || '',
+                                    maxWidth: child.style.maxWidth || '',
+                                    marginLeft: child.style.marginLeft || '',
+                                    paddingLeft: child.style.paddingLeft || ''
+                                });
+                                child.style.setProperty('width', '100%', 'important');
+                                child.style.setProperty('flex', '1 1 auto', 'important');
+                                child.style.setProperty('max-width', '100%', 'important');
+                                child.style.setProperty('margin-left', '0', 'important');
+                                child.style.setProperty('padding-left', '0', 'important');
+                            }
+                        });
+                    }
+                }
+
+                // Fallback direct kills for sticky buttons that might escape
+                const sideItems = document.querySelectorAll('.cy_dashboard_back-btn, .cy-left-sidebar, .cy-submenu-logo, #accordionSidebar');
+                sideItems.forEach(el => {
+                    this._cyElsToRestore.push({ el: el, display: el.style.display || '' });
+                    el.style.setProperty('display', 'none', 'important');
+                });
+
+                // 5. Shift Action Manager down to respect Cyllo's 50px top navbar
+                const actionManager = document.querySelector('.o_action_manager');
+                if (actionManager) {
+                    const isAlreadyTracked = this._cyElsToRestore.some(item => item.el === actionManager);
+                    if (!isAlreadyTracked) {
+                        this._cyElsToRestore.push({
+                            el: actionManager,
+                            width: actionManager.style.width || '',
+                            marginLeft: actionManager.style.marginLeft || '',
+                            paddingLeft: actionManager.style.paddingLeft || ''
+                        });
+                    }
+                    actionManager.style.setProperty('width', '100%', 'important');
+                    actionManager.style.setProperty('margin-left', '0', 'important');
+                    actionManager.style.setProperty('padding-left', '0', 'important');
+                }
+            }
 
             let template = params.template;
             let resModel = params.res_model;
@@ -116,6 +192,20 @@ export class EditReport extends Component {
 
             this._setupReportFrame(arch || '');
             this._setupSortable();
+        });
+
+        onWillUnmount(() => {
+            if (this._cyElsToRestore && this._cyElsToRestore.length > 0) {
+                this._cyElsToRestore.forEach(item => {
+                    if (item.display !== undefined) item.el.style.display = item.display;
+                    if (item.width !== undefined) item.el.style.width = item.width;
+                    if (item.flex !== undefined) item.el.style.flex = item.flex;
+                    if (item.maxWidth !== undefined) item.el.style.maxWidth = item.maxWidth;
+                    if (item.marginLeft !== undefined) item.el.style.marginLeft = item.marginLeft;
+                    if (item.paddingLeft !== undefined) item.el.style.paddingLeft = item.paddingLeft;
+                });
+                this._cyElsToRestore = [];
+            }
         });
 
         onPatched(() => {
@@ -245,6 +335,15 @@ export class EditReport extends Component {
                 el = fieldBlock;
             }
 
+            // For .text-node: skip wasSelected gate — always open editor on any click
+            const isTextNode = el.classList.contains('text-node');
+
+            // ── Issue 5: Check if this element was just dropped (data-needs-edit flag) ──
+            const isNewDrop = el.dataset && el.dataset.needsEdit === '1';
+            if (isNewDrop) {
+                delete el.dataset.needsEdit;
+            }
+
             const wasSelected = el.classList.contains('selected');
 
             $('.selected').removeClass('selected');
@@ -261,9 +360,14 @@ export class EditReport extends Component {
             el.classList.add('selected');
 
             // "Select then Edit" strategy:
-            // Only trigger the editor if the element was ALREADY selected.
-            // And DON'T trigger MediumEditor for the whole table wrapper or field block.
-            if (!wasSelected || el.classList.contains('table-wrapper') || el.classList.contains('field-block') || el.classList.contains('box-section-wrapper')) {
+            // text-node: ALWAYS open editor on any click (no wasSelected gate)
+            // other elements: open editor only if already selected (or just dropped)
+            // Never open MediumEditor for table wrapper, field block, or box wrapper
+            const shouldSkipEditor = el.classList.contains('table-wrapper')
+                || el.classList.contains('field-block')
+                || el.classList.contains('box-section-wrapper');
+
+            if (shouldSkipEditor || (!isTextNode && !wasSelected && !isNewDrop)) {
                 if (self.editor) {
                     const prevEl = self.editor.elements[0];
                     self.editor.destroy();
@@ -302,7 +406,7 @@ export class EditReport extends Component {
                         'bold', 'italic', 'underline', 'strikethrough',
                         'h1', 'h3', 'quote', 'anchor', 'deleteElement',
                     ],
-                    relativeContainer: self.reportFrameRef.el,
+                    // No relativeContainer — let MediumEditor float near the selected text
                 },
                 extensions: {
                     'deleteElement': new window.DeleteButton(),
@@ -330,6 +434,9 @@ export class EditReport extends Component {
             // Disable drag and drop
             this._destroySortableInstances();
         } else {
+            // Clear preview state so the editable frame is shown
+            this.state.previewUrl = false;
+            this.state.previewHtml = false;
             // Re-enable drag and drop
             setTimeout(() => {
                 this._setupReportFrame(this._loadedArch);
@@ -369,7 +476,10 @@ export class EditReport extends Component {
             doc_ids: [docId],
         });
         if (res.success) {
-            this.state.previewHtml = res.html;
+            // Use the URL-based preview so Odoo's CSS/JS assets load correctly
+            // inside the iframe (srcdoc breaks relative asset bundle paths).
+            this.state.previewUrl = res.preview_url || false;
+            this.state.previewHtml = false;
         }
     }
 
@@ -712,8 +822,8 @@ export class EditReport extends Component {
         const instance = Sortable.create(dropzone, {
             group: { name: 'studio', pull: true, put: true },
             animation: 150,
-            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]:not(.dynamic-field-wrapper *)',
-            handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node',
+            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"]',
+            handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="qr"]',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) { self.editor.destroy(); self.editor = null; }
@@ -731,10 +841,40 @@ export class EditReport extends Component {
                 item.style.opacity = '0.4';
 
                 if (type === 'text') {
-                    item.className = 'text-node c_new';
-                    item.setAttribute('contenteditable', 'false');
-                    item.innerHTML = 'Click to select, click again to edit';
+                    // Transform dropped snippet into an immediately-editable text node
+                    item.className = 'text-node c_new selected';
+                    item.setAttribute('contenteditable', 'true');
+                    item.innerHTML = 'Click to edit';
                     item.style.opacity = '1';
+
+                    // Destroy any existing editor first
+                    if (self.editor) {
+                        try { self.editor.destroy(); } catch (_) {}
+                        self.editor = null;
+                    }
+
+                    // Init MediumEditor immediately so the node is ready to type into
+                    setTimeout(() => {
+                        self.editor = new MediumEditor(item, {
+                            toolbar: {
+                                buttons: [
+                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                                ],
+                            },
+                            extensions: {
+                                'deleteElement': new window.DeleteButton(),
+                                'undoButton':    new window.UndoButton(),
+                                'redoButton':    new window.RedoButton(),
+                            },
+                            owner: self,
+                            placeholder: false,
+                            disableExtraSpaces: true,
+                        });
+                        self.editor.selectElement(item);
+                        item.focus();
+                    }, 0);
+
                     self._refreshDragHandles();
                     return;
                 }
@@ -823,8 +963,8 @@ export class EditReport extends Component {
             },
             animation: 150,
 
-            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]:not(.dynamic-field-wrapper *)',
-            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, [cy-type="dynamic"]',
+            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"]',
+            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"]',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -853,18 +993,43 @@ export class EditReport extends Component {
                 item.style.opacity = '0.4';
 
                 if (type === 'text') {
-                    // Transform dropped snippet into a text node at the drop position
-                    item.className = 'text-node c_new';
-                    item.setAttribute('contenteditable', 'false');
-                    item.innerHTML = 'Click to select, click again to edit';
+                    // Transform dropped snippet into an immediately-editable text node
+                    item.className = 'text-node c_new selected';
+                    item.setAttribute('contenteditable', 'true');
+                    item.innerHTML = 'Click to edit';
                     item.style.position = '';
                     item.style.left = '';
                     item.style.top = '';
                     item.style.opacity = '1';
-                    // Select the new text node
+
+                    // Destroy any existing editor first
+                    if (self.editor) {
+                        try { self.editor.destroy(); } catch (_) {}
+                        self.editor = null;
+                    }
+
+                    // Init MediumEditor immediately so the node is ready to type into
                     setTimeout(() => {
-                        item.classList.add('selected');
+                        self.editor = new MediumEditor(item, {
+                            toolbar: {
+                                buttons: [
+                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                                ],
+                            },
+                            extensions: {
+                                'deleteElement': new window.DeleteButton(),
+                                'undoButton':    new window.UndoButton(),
+                                'redoButton':    new window.RedoButton(),
+                            },
+                            owner: self,
+                            placeholder: false,
+                            disableExtraSpaces: true,
+                        });
+                        self.editor.selectElement(item);
+                        item.focus();
                     }, 0);
+
                     self._refreshDragHandles();
                     return;
                 }
@@ -1136,259 +1301,6 @@ export class EditReport extends Component {
         };
     }
 
-    _getDefaultQrState() {
-        return {
-            step: 1,
-            type: 'portal',
-            config: {
-                field: 'object.name',
-                baseUrl: window.location.origin,
-                portalPath: '',
-                tokenType: 'auto',
-                tokenExpr: '',
-                upiVpa: '',
-                amountField: 'amount_residual',
-                noteField: 'object.name',
-                expression: '',
-                size: 100,
-                align: 'center',
-                errorCorrection: 'M',
-                caption: '',
-                requireAuth: false,
-                trackAnalytics: true,
-                hasExpiry: false,
-                expiresDays: 30,
-            },
-            previewImgUrl: '',
-            previewLoading: false,
-            previewError: false,
-            previewStr: '',
-            qwebPreview: '',
-            validationResult: 'none',
-            validationError: '',
-            warnings: {},
-            errors: {
-                hasErrors: false,
-                upi_vpa: false,
-            }
-        };
-    }
-
-    async openQrWizard(placeholderEl, mode = 'insert') {
-        const self = this;
-        this.state.showQrWizard = true;
-
-        if (mode === 'edit' && placeholderEl.dataset.qrConfig) {
-            try {
-                const existing = JSON.parse(placeholderEl.dataset.qrConfig);
-                this.state.qr = this._getDefaultQrState();
-                this.state.qr.type = existing.type || 'portal';
-                Object.assign(this.state.qr.config, existing.config || {});
-                this.state.qr.step = 3;
-            } catch (e) {
-                this.state.qr = this._getDefaultQrState();
-            }
-        } else {
-            this.state.qr = this._getDefaultQrState();
-        }
-
-        const model = this.state.reportInfo.model;
-        if (model === 'account.move') {
-            this.state.qr.config.portalPath = '/my/invoices/';
-        } else if (model === 'sale.order') {
-            this.state.qr.config.portalPath = '/my/orders/';
-        }
-
-        this._updateQrPreviews();
-
-        return new Promise((resolve) => {
-            self._qrResolve = (config) => {
-                self.state.showQrWizard = false;
-                resolve(config);
-            };
-        });
-    }
-
-    onSelectQrType(type) {
-        this.state.qr.type = type;
-        this._updateQrPreviews();
-    }
-
-    updateQrConfig(key, value) {
-        if (key === 'size') {
-            value = parseInt(value, 10) || 100;
-        }
-        this.state.qr.config[key] = value;
-        if (this.state.qr.type === 'upi') {
-            this.state.qr.errors.upi_vpa = !this.state.qr.config.upiVpa;
-            this.state.qr.errors.hasErrors = this.state.qr.errors.upi_vpa;
-        } else {
-            this.state.qr.errors.hasErrors = false;
-        }
-        this._updateQrPreviews();
-    }
-
-    qrNextStep() {
-        if (this.state.qr.step < 3) this.state.qr.step++;
-    }
-
-    qrPrevStep() {
-        if (this.state.qr.step > 1) this.state.qr.step--;
-    }
-
-    qrGoToStep(step) {
-        if (step < this.state.qr.step || !this.state.qr.errors.hasErrors) {
-            this.state.qr.step = step;
-        }
-    }
-
-    onQrWizardCancel() {
-        this.onQrCancel();
-    }
-
-    onQrCancel() {
-        this.state.showQrWizard = false;
-        if (this._qrResolve) this._qrResolve(null);
-    }
-
-    async onQrWizardConfirm() {
-        if (this.state.qr.type === 'pdf_link' && !this.state.qr.config.token) {
-            console.log('entered', this.state.reportInfo.report_name, this)
-            try {
-                this.state.qr.previewLoading = true;
-                const res = await this.rpc('/cyllo_studio/generate_qr_token', {
-                    template: this.state.reportInfo.report_name || this._template,
-                    options: {
-                        requireAuth: this.state.qr.config.requireAuth,
-                        trackAnalytics: this.state.qr.config.trackAnalytics,
-                        expiresDays: this.state.qr.config.hasExpiry ? this.state.qr.config.expiresDays : null,
-                    }
-                });
-                if (res.success) {
-                    this.state.qr.config.token = res.token;
-                } else {
-                    this.notification.add(res.error || "Failed to generate token", { type: "danger" });
-                    this.state.qr.previewLoading = false;
-                    return;
-                }
-            } catch (e) {
-                this.notification.add("Could not connect to server", { type: "danger" });
-                this.state.qr.previewLoading = false;
-                return;
-            }
-        }
-
-        if (this._qrResolve) {
-            this._qrResolve({
-                type: this.state.qr.type,
-                config: { ...this.state.qr.config }
-            });
-        }
-    }
-
-    async validateQrExpression() {
-        const expr = this.state.qr.config.expression;
-        if (!expr) return;
-        try {
-            const result = await this.rpc('/studio/report/validate_expr', {
-                expr: expr,
-                model: this.state.reportInfo.model
-            });
-            this.state.qr.validationResult = result.valid ? 'valid' : 'invalid';
-            this.state.qr.validationError = result.error || '';
-        } catch (e) {
-            this.state.qr.validationResult = 'invalid';
-            this.state.qr.validationError = e.message;
-        }
-    }
-
-    onQrPreviewError() {
-        this.state.qr.previewError = true;
-        this.state.qr.previewLoading = false;
-    }
-
-    _updateQrPreviews() {
-        if (!this.state.showQrWizard) return;
-        const expr = this._buildQrExpression();
-        this.state.qr.previewStr = expr;
-        this.state.qr.previewLoading = true;
-        this.state.qr.previewError = false;
-
-        const encoded = encodeURIComponent(expr.replace(/doc\./g, 'object.'));
-        const size = this.state.qr.config.size || 100;
-        this.state.qr.previewImgUrl = `/report/barcode/?barcode_type=QR&value=${encoded}&width=${size}&height=${size}`;
-
-        const align = this.state.qr.config.align;
-        const qwebExpr = this._buildQrExpression(true);
-
-        let html = `<div style="text-align:${align};">\n`;
-        html += `  <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=${size}&amp;height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')" \n`;
-        html += `       style="width:${size}px; height:${size}px;"/>\n`;
-        if (this.state.qr.config.caption) {
-            html += `  <div style="font-size:8pt; margin-top:3px;">${this.state.qr.config.caption}</div>\n`;
-        }
-        html += `</div>`;
-        this.state.qr.qwebPreview = html;
-    }
-
-    _buildQrExpression(forQWeb = false, qrState = null) {
-        const type = qrState ? qrState.type : this.state.qr.type;
-        const config = qrState ? qrState.config : this.state.qr.config;
-        const obj = 'doc'; // Always use 'doc' to match the blank report iterator
-
-        /**
-         * Determine whether a string value looks like a Python field expression
-         * (e.g. "doc.partner_id.name") or a static literal that must be quoted.
-         * A static value = anything that:
-         *   - contains '://' (URLs like https://...)
-         *   - starts with a digit or special char that isn't a valid Python identifier start
-         *   - contains spaces
-         *   - is NOT prefixed with a known Python variable name
-         */
-        const _quoteIfStatic = (val) => {
-            if (!val) return "''";
-            // Already a quoted string in the expression (starts/ends with quote)
-            if ((val.startsWith("'") && val.endsWith("'")) ||
-                (val.startsWith('"') && val.endsWith('"'))) {
-                return val;
-            }
-            // Looks like a field path: starts with a word char and contains only
-            // word chars, dots, underscores (e.g. doc.partner_id.name)
-            if (/^[a-zA-Z_][a-zA-Z0-9_.]*$/.test(val)) {
-                return val.replace(/object\./g, obj + '.');
-            }
-            // Static value — escape single quotes and wrap
-            const escaped = val.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
-            return `'${escaped}'`;
-        };
-
-        if (type === 'plain') return _quoteIfStatic(config.field);
-        if (type === 'portal') {
-            const path = config.portalPath || '/my/view/';
-            let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
-            if (config.baseUrl && config.baseUrl !== window.location.origin) {
-                const safeUrl = config.baseUrl.replace(/'/g, "\\'").replace(/\/$/, '');
-                baseUrlStr = `'${safeUrl}'`;
-            }
-
-            const s = `${baseUrlStr} `;
-            if (config.tokenType === 'auto') return s + ` + '?' + ${obj}._get_share_url()`;
-            return s;
-        }
-        if (type === 'upi') {
-            const pa = config.upiVpa;
-            const am = `${obj}.${config.amountField}`;
-            const tn = config.noteField === 'custom' ? "'Payment'" : config.noteField.replace(/object\./g, obj + '.');
-            return `'upi://pay?pa=${pa}&am=' + str(${am}) + '&tn=' + str(${tn})`;
-        }
-        if (type === 'custom') return _quoteIfStatic(config.expression || "''");
-        if (type === 'pdf_link') {
-            const reportId = this.state.reportInfo?.id || this._reportId || 'REPORT_ID';
-            let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
-            return `${baseUrlStr} + '/report/pdf/${this.state.reportInfo.id}/' + str(${obj}.id) + '?token=${config.token || "PENDING"}'`;
-        }
-        return "''";
-    }
 
     async openTableConfigModal(targetEl, resModel) {
         // Reset state to default
@@ -2068,44 +1980,6 @@ export class EditReport extends Component {
         );
     }
 
-    insertQrBlock(placeholderEl, qrConfig, mode = 'insert') {
-        const type = qrConfig.type;
-        const config = qrConfig.config;
-        const align = config.align || 'center';
-        const size = config.size || 100;
-
-        placeholderEl.className = 's_qr_block c_new';
-        placeholderEl.style.textAlign = align;
-        placeholderEl.style.cursor = 'default';
-        placeholderEl.style.opacity = '1';
-        placeholderEl.setAttribute('cy-type', 'qr');
-        placeholderEl.dataset.qrConfig = JSON.stringify(qrConfig);
-
-        const previewImg = this._buildQrExpression().replace(/doc\./g, 'object.');
-        const encoded = encodeURIComponent(previewImg);
-
-        placeholderEl.innerHTML = `
-            <div class="qr-handle-container" contenteditable="false" style="position:absolute; top:-10px; left:10px; background:#9ea700; border-radius:4px; padding:0 4px; display:flex; gap:6px; z-index:100;">
-                <span class="fa fa-bars" style="color:white; font-size:10px; cursor:grab; padding:2px;"></span>
-                <span class="qr-edit-btn fa fa-edit" style="color:white; font-size:10px; cursor:pointer; padding:2px;" title="Edit QR"></span>
-                <span class="qr-delete fa fa-trash" style="color:#ffdce0; font-size:10px; cursor:pointer; padding:2px;" title="Delete QR"></span>
-            </div>
-            <div class="qr-content-wrapper" style="display:inline-block; position:relative;">
-                <img src="/report/barcode/?barcode_type=QR&value=${encoded}&width=${size}&height=${size}" style="width:${size}px; height:${size}px; display:block; margin:0 auto;"/>
-                ${config.caption ? `<div class="qr-caption" style="font-size:8pt; margin-top:3px; text-align:center;">${config.caption}</div>` : ''}
-            </div>
-        `;
-
-        placeholderEl.querySelector('.qr-delete').onclick = (e) => {
-            e.stopPropagation();
-            if (confirm("Delete this QR code?")) placeholderEl.remove();
-        };
-
-        if (mode === 'insert') {
-            setTimeout(() => placeholderEl.classList.add('selected'), 0);
-        }
-        this._refreshDragHandles();
-    }
 
     _cleanStudioAttrs(node) {
         if (!node) return;
@@ -2427,170 +2301,6 @@ export class EditReport extends Component {
      * Wire up pointer-based resize logic for all 8 handles on a box wrapper.
      * Stores result back into data-box-config.
      */
-    _setupBoxResizeHandles(boxEl) {
-        // Remove previous listeners by replacing handle container
-        const oldHandles = boxEl.querySelectorAll('.box-resize-handle');
-        oldHandles.forEach(h => {
-            // Clone replaces to remove old listeners
-            const clone = h.cloneNode(true);
-            h.parentNode && h.parentNode.replaceChild(clone, h);
-        });
-
-        const self = this;
-        boxEl.querySelectorAll('.box-resize-handle').forEach(handle => {
-            const dir = handle.dataset.dir;
-            let startX, startY, startW, startH;
-
-            const onMove = (e) => {
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-                let newW = startW;
-                let newH = startH;
-
-                if (dir.includes('e')) newW = Math.max(80, startW + dx);
-                if (dir.includes('w')) newW = Math.max(80, startW - dx);
-                if (dir.includes('s')) newH = Math.max(80, startH + dy);
-                if (dir.includes('n')) newH = Math.max(80, startH - dy);
-
-                boxEl.style.width = newW + 'px';
-                boxEl.style.height = newH + 'px';
-
-                // Live-update config
-                try {
-                    const cfg = JSON.parse(boxEl.dataset.boxConfig || '{}');
-                    cfg.style = cfg.style || {};
-                    cfg.style.width = Math.round(newW);
-                    cfg.style.height = Math.round(newH);
-                    boxEl.dataset.boxConfig = JSON.stringify(cfg);
-                    // Update props panel if this box is selected
-                    if (self._selectedBoxEl === boxEl) {
-                        self.state.boxConfig.width = cfg.style.width;
-                        self.state.boxConfig.height = cfg.style.height;
-                    }
-                } catch (ex) { }
-            };
-
-            const onUp = () => {
-                document.removeEventListener('pointermove', onMove);
-                document.removeEventListener('pointerup', onUp);
-            };
-
-            handle.addEventListener('pointerdown', (e) => {
-                if (self.state.previewMode) return;
-                e.stopPropagation();
-                e.preventDefault();
-                startX = e.clientX;
-                startY = e.clientY;
-                startW = boxEl.offsetWidth;
-                startH = boxEl.offsetHeight;
-                document.addEventListener('pointermove', onMove);
-                document.addEventListener('pointerup', onUp);
-            });
-        });
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    // Box Properties Panel – OWL event handlers
-    // ──────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Open the box properties panel for a given box wrapper element.
-     */
-    openBoxProps(boxEl) {
-        this._selectedBoxEl = boxEl;
-        let cfg = {};
-        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
-        const s = cfg.style || {};
-        this.state.boxConfig = {
-            label: cfg.label || 'Section',
-            width: s.width || boxEl.offsetWidth || 300,
-            height: s.height || boxEl.offsetHeight || 200,
-            backgroundColor: s.backgroundColor || 'transparent',
-            border: s.border || '1px solid #ccc',
-            borderRadius: s.borderRadius !== undefined ? s.borderRadius : 4,
-            padding: s.padding !== undefined ? s.padding : 8,
-            layoutMode: cfg.layoutMode || 'free',
-        };
-        this.state.showBoxProps = true;
-    }
-
-    closeBoxProps() {
-        this._selectedBoxEl = null;
-        this.state.showBoxProps = false;
-    }
-
-    /**
-     * Called when any box property input changes.
-     */
-    onBoxConfigChange(field, value) {
-        const boxEl = this._selectedBoxEl;
-        if (!boxEl) return;
-        this.state.boxConfig[field] = value;
-
-        let cfg = {};
-        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
-        cfg.style = cfg.style || {};
-
-        if (field === 'label') {
-            cfg.label = value;
-            const labelEl = boxEl.querySelector('.box-label-text');
-            if (labelEl) labelEl.textContent = value;
-        } else if (field === 'width') {
-            const v = Math.max(80, parseInt(value) || 80);
-            cfg.style.width = v;
-            boxEl.style.width = v + 'px';
-        } else if (field === 'height') {
-            const v = Math.max(80, parseInt(value) || 80);
-            cfg.style.height = v;
-            boxEl.style.height = v + 'px';
-        } else if (field === 'backgroundColor') {
-            cfg.style.backgroundColor = value;
-            const dz = boxEl.querySelector('.box-dropzone');
-            if (dz) dz.style.backgroundColor = value;
-        } else if (field === 'border') {
-            cfg.style.border = value;
-            const dz = boxEl.querySelector('.box-dropzone');
-            if (dz) dz.style.border = value;
-        } else if (field === 'borderRadius') {
-            const v = parseInt(value) || 0;
-            cfg.style.borderRadius = v;
-            const dz = boxEl.querySelector('.box-dropzone');
-            if (dz) dz.style.borderRadius = v + 'px';
-        } else if (field === 'padding') {
-            const v = parseInt(value) || 0;
-            cfg.style.padding = v;
-            const dz = boxEl.querySelector('.box-dropzone');
-            if (dz) dz.style.padding = v + 'px';
-        }
-
-        boxEl.dataset.boxConfig = JSON.stringify(cfg);
-    }
-
-    onBoxLayoutModeChange(mode) {
-        const boxEl = this._selectedBoxEl;
-        if (!boxEl) return;
-        this.state.boxConfig.layoutMode = mode;
-
-        let cfg = {};
-        try { cfg = JSON.parse(boxEl.dataset.boxConfig || '{}'); } catch (e) { }
-        cfg.layoutMode = mode;
-        boxEl.dataset.boxConfig = JSON.stringify(cfg);
-
-        const dz = boxEl.querySelector('.box-dropzone');
-        if (dz) {
-            dz.classList.remove('layout-free', 'layout-flow');
-            dz.classList.add('layout-' + mode);
-        }
-        const badge = boxEl.querySelector('.box-layout-badge');
-        if (badge) badge.textContent = mode;
-    }
-
-    deleteSelectedBox() {
-        const boxEl = this._selectedBoxEl;
-        if (!boxEl) return;
-        this.closeBoxProps();
-        boxEl.remove();
-    }
 
     buildInheritanceXML(changes) {
         let new_inherits = [];
@@ -2637,6 +2347,11 @@ export class EditReport extends Component {
 
     _setupTextNodeEvents(textNode) { }
 }
+
+// ── Apply focused mixins ─────────────────────────────────────────────────────
+// QR wizard and Box section methods live in dedicated files to keep
+// studio_report.js under a manageable size.
+Object.assign(EditReport.prototype, QrMixin, BoxMixin);
 
 EditReport.template = "custom_report.edit_report";
 registry.category("actions").add("edit_report", EditReport);

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!--
+        custom_report.preview_sidebar
+        Report Setup panel shown in the left sidebar when Preview mode is active.
+        Called from the main edit_report template via:
+            <t t-call="custom_report.preview_sidebar"/>
+    -->
+    <t t-name="custom_report.preview_sidebar">
+        <div class="modern-preview-sidebar p-4 d-flex flex-column h-100" style="width: 330px; z-index: 10;">
+            <!-- Header -->
+            <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-sliders text-primary fs-5"/>
+                    <h6 class="text-uppercase m-0 fw-bolder tracking-wider fs-6">Report Setup</h6>
+                </div>
+                <p class="small text-muted mt-2 mb-0" style="font-size: 11px;">Configure rendering and actions</p>
+            </div>
+
+            <!-- Report Identity -->
+            <div class="props-group mb-4">
+                <label class="modern-label mb-2 d-block">Report Identity</label>
+                <div class="modern-input-wrapper mb-3">
+                    <i class="fa fa-file-text-o input-icon"/>
+                    <input type="text" class="modern-input form-control"
+                           placeholder="Report Name..."
+                           t-att-value="state.reportInfo.name"
+                           t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
+                </div>
+
+                <label class="modern-label mb-2 d-block mt-3">Paper Format</label>
+                <div class="modern-input-wrapper">
+                    <i class="fa fa-file-pdf-o input-icon"/>
+                    <select class="modern-select form-select"
+                            t-on-change="(ev) => this.onReportPropertyChange('paperformat_id', ev.target.value)">
+                        <option t-foreach="state.paperFormats" t-as="fmt" t-key="fmt.id"
+                                t-att-value="fmt.id"
+                                t-att-selected="fmt.id === state.reportInfo.paperformat_id">
+                            <t t-esc="fmt.name"/>
+                        </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Options -->
+            <div class="props-group mb-4 border-top border-secondary border-opacity-25 pt-4">
+                <label class="modern-label mb-3 d-block">Options</label>
+
+                <div class="modern-toggle-card mb-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold fs-7">Print Menu</div>
+                            <div class="small text-muted" style="font-size: 10px;">Visible in standard menu</div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input custom-switch" type="checkbox" id="showPrintMenu"
+                                   t-att-checked="true" disabled="1"/>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modern-toggle-card">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="fw-bold fs-7">Save Attachment</div>
+                            <div class="small text-muted" style="font-size: 10px;">Cache rendered PDF logic</div>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input custom-switch" type="checkbox" id="reloadAttach"
+                                   t-att-checked="state.reportInfo.attachment_use"
+                                   t-on-change="(ev) => this.onReportPropertyChange('attachment_use', ev.target.checked)"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons d-flex flex-column gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
+                <button class="btn modern-action-btn primary-action"
+                        t-on-click="onEditSources">
+                    <i class="fa fa-code me-2"/>
+                    <span class="fw-bold tracking-wider">EDIT SOURCES</span>
+                </button>
+                <button class="btn modern-action-btn danger-action"
+                        t-on-click="onResetReport">
+                    <i class="fa fa-refresh me-2"/>
+                    <span class="fw-bold tracking-wider">RESET REPORT</span>
+                </button>
+            </div>
+
+            <div class="flex-grow-1"/>
+        </div>
+    </t>
+</templates>

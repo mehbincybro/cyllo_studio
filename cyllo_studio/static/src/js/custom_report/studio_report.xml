@@ -13,23 +13,53 @@
                 <button class="btn btn-light border px-4"
                         t-on-click="() => this.close_edit(this)">Discard</button>
                 <div class="ms-4 form-check form-switch pt-1">
-                    <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview" t-att-checked="state.previewMode"/>
+                    <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview"
+                           t-att-checked="state.previewMode"/>
                     <label class="form-check-label fw-bold" for="previewSwitch">Preview</label>
                 </div>
                 <div class="flex-grow-1"/>
-                <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1" title="Undo">
-                    <i class="fa fa-undo"/>
+                <t t-if="!state.previewMode">
+                    <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1"
+                            title="Undo">
+                        <i class="fa fa-undo"/>
+                    </button>
+                    <button t-ref="redoBtn" t-on-click="redo" class="btn btn-light border mx-1" disabled="1"
+                            title="Redo">
+                        <i class="fa fa-repeat"/>
+                    </button>
+                </t>
+                <t t-if="state.previewMode">
+                <button class="btn btn-light border px-3 position-absolute translate-middle-x"
+                        style="left: calc(50% + 170px);"
+                        t-on-click="onPrintReport">
+                <i class="fa fa-print me-1"/>Print
                 </button>
-                <button t-ref="redoBtn" t-on-click="redo" class="btn btn-light border mx-1" disabled="1" title="Redo">
-                    <i class="fa fa-repeat"/>
-                </button>
+                    <div class="ms-auto d-flex align-items-center gap-1">
+                    <button class="btn btn-sm btn-outline-secondary px-2"
+                            t-on-click="onPrevRecord"
+                            style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa fa-chevron-left small"/>
+                    </button>
+                        <span class="small text-muted px-1" style="min-width:48px;text-align:center;">
+                        <t t-esc="state.currentIndex + 1"/>
+                            /
+                            <t t-esc="state.records.length"/>
+                    </span>
+                        <button class="btn btn-sm btn-outline-secondary px-2"
+                                t-on-click="onNextRecord"
+                                style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
+                        <i class="fa fa-chevron-right small"/>
+                    </button>
+                </div>
+            </t>
             </div>
-
             <!-- Body -->
             <div class="d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
                 <!-- Sidebar (Editable) -->
-                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column" t-att-class="{'d-none': state.previewMode}" style="width: 260px; overflow-y: auto; z-index: 10;">
-                    <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold" style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
+                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column"
+                     t-att-class="{'d-none': state.previewMode}" style="width: 260px; overflow-y: auto; z-index: 10;">
+                    <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold"
+                        style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
 
 
                     <h6 class="text-uppercase text-muted mb-3 fw-bold" style="font-size: 11px; letter-spacing: 1px;">Basic Elements</h6>
@@ -76,143 +106,61 @@
 
                     <!-- Technical Actions -->
                     <div class="border-top pt-3 mb-4">
-                        <h6 class="text-uppercase text-muted mb-3 fw-bold" style="font-size: 11px; letter-spacing: 1px;">Technical Tools</h6>
+                        <h6 class="text-uppercase text-muted mb-3 fw-bold"
+                            style="font-size: 11px; letter-spacing: 1px;">Technical Tools</h6>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
                                     style="font-size: 10px; background-color: #9ea700; border: none; border-radius: 4px;"
                                     t-on-click="onEditSources">
-                                <i class="fa fa-code me-1"/> Edit Sources
+                                <i class="fa fa-code me-1"/>
+                                Edit Sources
                             </button>
                             <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
                                     style="font-size: 10px; background-color: #e85e6a; border: none; border-radius: 4px;"
                                     t-on-click="onResetReport">
-                                <i class="fa fa-refresh me-1"/> Reset Report
+                                <i class="fa fa-refresh me-1"/>
+                                Reset Report
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Properties Sidebar (Preview) -->
-                <div t-if="state.previewMode and !state.showSourceEditor" class="modern-preview-sidebar p-4 d-flex flex-column h-100" style="width: 330px; z-index: 10;">
-                    <div class="sidebar-header mb-4 pb-3 border-bottom border-secondary border-opacity-25">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fa fa-sliders text-primary fs-5"/>
-                            <h6 class="text-uppercase m-0 fw-bolder tracking-wider fs-6">Report Setup</h6>
-                        </div>
-                        <p class="small text-muted mt-2 mb-0" style="font-size: 11px;">Configure rendering and actions</p>
-                    </div>
-
-                    <div class="props-group mb-4">
-                        <label class="modern-label mb-2 d-block">Report Identity</label>
-                        <div class="modern-input-wrapper mb-3">
-                            <i class="fa fa-file-text-o input-icon"/>
-                            <input type="text" class="modern-input form-control"
-                                   placeholder="Report Name..."
-                                   t-att-value="state.reportInfo.name"
-                                   t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
-                        </div>
-
-                        <label class="modern-label mb-2 d-block mt-3">Paper Format</label>
-                        <div class="modern-input-wrapper">
-                            <i class="fa fa-file-pdf-o input-icon"/>
-                            <select class="modern-select form-select"
-                                    t-on-change="(ev) => this.onReportPropertyChange('paperformat_id', ev.target.value)">
-                                <option t-foreach="state.paperFormats" t-as="fmt" t-key="fmt.id"
-                                        t-att-value="fmt.id"
-                                        t-att-selected="fmt.id === state.reportInfo.paperformat_id">
-                                    <t t-esc="fmt.name"/>
-                                </option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="props-group mb-4 border-top border-secondary border-opacity-25 pt-4">
-                        <label class="modern-label mb-3 d-block">Options</label>
-
-                        <div class="modern-toggle-card mb-3">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="fw-bold fs-7">Print Menu</div>
-                                    <div class="small text-muted" style="font-size: 10px;">Visible in standard menu</div>
-                                </div>
-                                <div class="form-check form-switch m-0">
-                                    <input class="form-check-input custom-switch" type="checkbox" id="showPrintMenu"
-                                           t-att-checked="true" disabled="1"/>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="modern-toggle-card">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <div>
-                                    <div class="fw-bold fs-7">Save Attachment</div>
-                                    <div class="small text-muted" style="font-size: 10px;">Cache rendered PDF logic</div>
-                                </div>
-                                <div class="form-check form-switch m-0">
-                                    <input class="form-check-input custom-switch" type="checkbox" id="reloadAttach"
-                                           t-att-checked="state.reportInfo.attachment_use"
-                                           t-on-change="(ev) => this.onReportPropertyChange('attachment_use', ev.target.checked)"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action buttons -->
-                    <div class="action-buttons d-flex flex-column gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
-                        <button class="btn modern-action-btn primary-action"
-                                t-on-click="onEditSources">
-                            <i class="fa fa-code me-2"/>
-                            <span class="fw-bold tracking-wider">EDIT SOURCES</span>
-                        </button>
-                        <button class="btn modern-action-btn danger-action"
-                                t-on-click="onResetReport">
-                            <i class="fa fa-refresh me-2"/>
-                            <span class="fw-bold tracking-wider">RESET REPORT</span>
-                        </button>
-                    </div>
-
-                    <div class="flex-grow-1"/>
-                </div>
+                <!-- Properties Sidebar (Preview) — defined in studio_report_setup_sidebar.xml -->
+                <t t-if="state.previewMode and !state.showSourceEditor" t-call="custom_report.preview_sidebar"/>
 
                 <!-- Source Editor -->
-                <div t-if="state.showSourceEditor" class="source-editor-container d-flex flex-column border-end bg-dark" style="width: 500px; z-index: 5;">
+
+                <div t-if="state.showSourceEditor" class="source-editor-container d-flex flex-column border-end bg-dark"
+                     style="width: 500px; z-index: 5;">
                     <div class="source-editor-header d-flex align-items-center justify-content-between p-2 text-white small fw-bold">
                         <span>SOURCE EDITOR</span>
                         <div class="d-flex gap-2">
                             <button class="btn btn-sm btn-success py-0 px-2" t-on-click="onSaveSource">Save</button>
-                            <button class="btn btn-sm btn-light py-0 px-2" t-on-click="() => state.showSourceEditor = false">Close</button>
+                            <button class="btn btn-sm btn-light py-0 px-2"
+                                    t-on-click="() => state.showSourceEditor = false">Close</button>
                         </div>
                     </div>
-                    <div id="ace-editor" t-ref="aceEditor" class="flex-grow-1 w-100" style="font-size: 14px; min-height: 400px;"/>
+                    <div id="ace-editor" t-ref="aceEditor" class="flex-grow-1 w-100"
+                         style="font-size: 14px; min-height: 400px;"/>
                 </div>
 
                 <!-- Main Area -->
-                <div class="flex-grow-1 overflow-auto d-flex flex-column align-items-center py-4 bg-200" style="position: relative;">
-                    <!-- Preview Toolbar -->
-                    <div t-if="state.previewMode" class="d-flex align-items-center justify-content-between mb-4 sticky-top px-4 py-2 bg-dark rounded-pill shadow-sm border border-secondary border-opacity-25" style="width: 90%; min-width: 600px; z-index: 100;">
-                        <div class="d-flex align-items-center gap-3">
-                        </div>
-                        <div class="d-flex align-items-center gap-3">
-                            <button class="btn btn-sm btn-outline-light text-white border-secondary border-opacity-50 px-3" t-on-click="onPrintReport">
-                                <i class="fa fa-print me-1"/> Print
-                            </button>
-                            <div class="pagination-controls d-flex align-items-center gap-2 bg-black rounded-pill p-1">
-                                <span class="small px-3 text-white opacity-75"><t t-esc="state.currentIndex + 1"/> / <t t-esc="state.records.length"/></span>
-                                <div class="btn-group">
-                                    <button class="btn btn-sm btn-dark py-1 rounded-circle me-1" t-on-click="onPrevRecord" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;"><i class="fa fa-chevron-left small"/></button>
-                                    <button class="btn btn-sm btn-dark py-1 rounded-circle" t-on-click="onNextRecord" style="width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;"><i class="fa fa-chevron-right small"/></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="flex-grow-1 overflow-auto d-flex flex-column align-items-center py-4 bg-200"
+                     style="position: relative;">
 
                     <!-- A4 / Custom Paper Container -->
-                    <div class="cyllo-studio-report-container bg-white shadow-lg mb-5"
-                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; box-sizing: border-box; position: relative; transition: all 0.3s ease;'">
-                        <iframe t-if="state.previewMode and state.previewHtml"
-                                class="live-report-content w-100 h-100 border-0"
-                                t-att-srcdoc="state.previewHtml"/>
-                        <div t-else="" id="studio_report" t-ref="report_frame" class="editable-area w-100 h-100 text-dark" style="padding: 20mm;"/>
+                    <div class="cyllo-studio-report-container bg-white shadow-lg"
+                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; box-sizing: border-box; position: relative; transition: all 0.3s ease; border-bottom: 4px solid #c8cdd5;'">
+                        <iframe t-if="state.previewMode and state.previewUrl"
+                                class="live-report-content w-100 border-0"
+                                style="min-height: 297mm;"
+                                t-att-src="state.previewUrl"/>
+                        <div t-else="" id="studio_report" t-ref="report_frame"
+                             class="editable-area w-100 h-100 text-dark" style="padding: 20mm;"/>
+                    </div>
+                    <!-- End of Page marker -->
+                    <div class="cyllo-end-of-page-marker mb-5">
+                        <span>&#8212; End of Page &#8212;</span>
                     </div>
                 </div>
 
@@ -363,7 +311,8 @@
                     </p>
 
                     <!-- Include header and footer checkbox -->
-                    <div class="d-flex align-items-start gap-3 mb-4 p-3 rounded-2" style="background: rgba(255,255,255,0.08);">
+                    <div class="d-flex align-items-start gap-3 mb-4 p-3 rounded-2"
+                         style="background: rgba(255,255,255,0.08);">
                         <div class="mt-1">
                             <input type="checkbox" id="resetHeaderFooter" class="form-check-input"
                                    t-att-checked="state.includeHeaderFooter"
@@ -371,7 +320,8 @@
                                    style="width: 18px; height: 18px; accent-color: #28a745;"/>
                         </div>
                         <div>
-                            <label for="resetHeaderFooter" class="fw-semibold small mb-1 d-block" style="cursor: pointer;">Include header and footer</label>
+                            <label for="resetHeaderFooter" class="fw-semibold small mb-1 d-block"
+                                   style="cursor: pointer;">Include header and footer</label>
                             <span class="small opacity-50">Header and footer are shared with other reports which may be impacted by the reset.</span>
                         </div>
                     </div>
@@ -379,7 +329,8 @@
                     <!-- Buttons -->
                     <div class="d-flex gap-2">
                         <button class="btn btn-danger px-4" t-on-click="confirmResetReport">Reset report</button>
-                        <button class="btn btn-secondary px-4" t-on-click="() => state.showResetDialog = false">Go back</button>
+                        <button class="btn btn-secondary px-4"
+                                t-on-click="() => state.showResetDialog = false">Go back</button>
                     </div>
                 </div>
             </div>
@@ -440,7 +391,8 @@
                             <t t-foreach="state.tcm.availableModels" t-as="m" t-key="m.model">
                                 <option t-att-value="m.model"
                                         t-att-selected="m.model === state.tcm.model">
-                                    <t t-esc="m.name"/> (<t t-esc="m.model"/>)
+                                    <t t-esc="m.name"/>
+                                    (<t t-esc="m.model"/>)
                                 </option>
                             </t>
                         </select>
@@ -485,7 +437,8 @@
                                        placeholder="Width"
                                        t-att-value="col.width"
                                        t-on-change="(ev) => this.onColumnWidthChange(col_index, ev)"/>
-                                <button class="tcm-col-remove" t-on-click="() => this.onRemoveColumn(col_index)">✕</button>
+                                <button class="tcm-col-remove"
+                                        t-on-click="() => this.onRemoveColumn(col_index)">✕</button>
                             </div>
                         </t>
                     </div>
@@ -567,309 +520,8 @@
                 </div>
             </div>
 
-            <!-- QR Code Wizard Modal -->
-            <div t-if="state.showQrWizard" class="qr-wizard-overlay" t-on-click.self="onQrWizardCancel">
-                <div class="qr-wizard-modal">
-                    <!-- Header -->
-                    <div class="qr-wizard-header">
-                        <h5>QR Code Wizard</h5>
-                        <button class="qr-wizard-close" t-on-click="onQrWizardCancel">✕</button>
-                    </div>
-
-                    <div class="qr-wizard-content">
-                        <!-- Step 1: Purpose Selector -->
-                        <div t-if="state.qr.step === 1" class="qr-step-container">
-                            <div class="qr-type-grid">
-                                <div t-att-class="'qr-type-card' + (state.qr.type === 'portal' ? ' active' : '')"
-                                     t-on-click="() => this.onSelectQrType('portal')">
-                                    <i class="fa fa-external-link qr-card-icon"/>
-                                    <div class="qr-card-title">Portal link</div>
-                                    <div class="qr-card-desc">Customer scans → opens this document in the Odoo portal.</div>
-                                    <div class="qr-card-preview">yoursite.com/my/invoices/42</div>
-                                </div>
-                                <div t-att-class="'qr-type-card' + (state.qr.type === 'plain' ? ' active' : '')"
-                                     t-on-click="() => this.onSelectQrType('plain')">
-                                    <i class="fa fa-file-text-o qr-card-icon"/>
-                                    <div class="qr-card-title">Plain reference</div>
-                                    <div class="qr-card-desc">Encodes the document number. Staff scan to pull up records.</div>
-                                    <div class="qr-card-preview">INV/2025/00142</div>
-                                </div>
-                                <div t-if="state.reportInfo.model === 'account.move'"
-                                     t-att-class="'qr-type-card' + (state.qr.type === 'upi' ? ' active' : '')"
-                                     t-on-click="() => this.onSelectQrType('upi')">
-                                    <i class="fa fa-mobile qr-card-icon"/>
-                                    <div class="qr-card-title">UPI payment</div>
-                                    <div class="qr-card-desc">India — customer scans with GPay/PhonePe, amount pre-filled.</div>
-                                    <div class="qr-card-preview">upi://pay?pa=...&amp;am=150.00</div>
-                                </div>
-                                <div t-att-class="'qr-type-card' + (state.qr.type === 'custom' ? ' active' : '')"
-                                     t-on-click="() => this.onSelectQrType('custom')">
-                                    <i class="fa fa-code qr-card-icon"/>
-                                    <div class="qr-card-title">Custom expression</div>
-                                    <div class="qr-card-desc">Write your own field path or URL. For developers.</div>
-                                    <div class="qr-card-preview">object.name + '-' + object.id</div>
-                                </div>
-                                <div t-att-class="'qr-type-card' + (state.qr.type === 'pdf_link' ? ' active' : '')"
-                                     t-on-click="() => this.onSelectQrType('pdf_link')">
-                                    <i class="fa fa-file-pdf-o qr-card-icon"/>
-                                    <div class="qr-card-title">Link to PDF Report</div>
-                                    <div class="qr-card-desc">Customer scans → downloads PDF version of this report.</div>
-                                    <div class="qr-card-preview">yoursite.com/report/pdf/...</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Configure -->
-                        <div t-if="state.qr.step === 2" class="qr-step-container qr-config-panel">
-                            <div class="qr-detected-info">
-                                <div>
-                                    <span class="opacity-50">Detected report:</span>
-                                    <strong class="ms-2"><t t-esc="state.reportInfo.model"/></strong>
-                                    <span class="ms-2 text-muted fw-normal"><t t-esc="state.reportInfo.name"/></span>
-                                </div>
-                            </div>
-
-                            <!-- Plain Config -->
-                            <div t-if="state.qr.type === 'plain'">
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Field</label>
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control" t-att-value="state.qr.config.field"
-                                               t-on-change="(ev) => this.updateQrConfig('field', ev.target.value)"/>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Common fields</label>
-                                    <div class="d-flex gap-2 flex-wrap">
-                                        <button t-foreach="['object.name', 'object.ref', 'object.partner_id.ref', 'object.origin']" t-as="f" t-key="f"
-                                                class="btn btn-xs btn-outline-secondary py-1 px-2 text-nowrap" style="font-size: 10px;"
-                                                t-on-click="() => this.updateQrConfig('field', f)">
-                                            <t t-esc="f"/>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Portal Config -->
-                            <div t-if="state.qr.type === 'portal'">
-                                <div t-if="state.qr.warnings.portalNotSupported" class="qr-warning-msg mb-3">
-                                    <i class="fa fa-warning me-2"/> Portal link not available for this report type. Switching to Plain reference.
-                                </div>
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Base URL</label>
-                                    <input type="text" class="form-control form-control-sm" t-att-value="state.qr.config.baseUrl"
-                                           t-on-change="(ev) => this.updateQrConfig('baseUrl', ev.target.value)"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Portal path</label>
-                                    <input type="text" class="form-control form-control-sm bg-light" readonly="1" t-att-value="state.qr.config.portalPath"/>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Access token</label>
-                                    <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('tokenType', ev.target.value)">
-                                        <option value="auto" t-att-selected="state.qr.config.tokenType === 'auto'">Append automatically</option>
-                                        <option value="none" t-att-selected="state.qr.config.tokenType === 'none'">None (public portal)</option>
-                                    </select>
-                                    <div t-if="state.qr.config.tokenType === 'auto' and !state.qr.config.tokenExpr" class="small text-muted mt-1">
-                                        Note: No token method found for this model.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- UPI Config -->
-                            <div t-if="state.qr.type === 'upi'">
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">UPI VPA</label>
-                                    <input type="text" t-att-class="'form-control form-control-sm' + (state.qr.errors.upi_vpa ? ' is-invalid' : '')"
-                                           t-att-value="state.qr.config.upiVpa"
-                                           t-on-change="(ev) => this.updateQrConfig('upiVpa', ev.target.value)"/>
-                                    <div t-if="!state.qr.config.upiVpa" class="qr-warning-msg mt-2">
-                                        Set your UPI VPA in Settings → Company → Accounting first.
-                                    </div>
-                                </div>
-                                <div class="row g-3">
-                                    <div class="col-6">
-                                        <label class="qr-label-sm mb-2 d-block">Amount field</label>
-                                        <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('amountField', ev.target.value)">
-                                            <option value="amount_residual">amount_residual</option>
-                                            <option value="amount_total">amount_total</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-6">
-                                        <label class="qr-label-sm mb-2 d-block">Note / reference</label>
-                                        <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('noteField', ev.target.value)">
-                                            <option value="object.name">object.name</option>
-                                            <option value="object.ref">object.ref</option>
-                                            <option value="custom">Custom...</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Custom Config -->
-                            <div t-if="state.qr.type === 'custom'">
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Expression</label>
-                                    <textarea class="form-control form-control-sm" rows="3"
-                                              placeholder="e.g. 'https://example.com/' + str(object.id)"
-                                              t-att-value="state.qr.config.expression"
-                                              t-on-change="(ev) => this.updateQrConfig('expression', ev.target.value)"/>
-                                </div>
-                                <div class="d-flex align-items-center gap-3">
-                                    <button class="btn btn-sm btn-outline-dark" t-on-click="validateQrExpression">Validate expression</button>
-                                    <span t-if="state.qr.validationResult === 'valid'" class="text-success small"><i class="fa fa-check"/> Valid</span>
-                                    <span t-if="state.qr.validationResult === 'invalid'" class="text-danger small"><i class="fa fa-times"/> Invalid: <t t-esc="state.qr.validationError"/></span>
-                                </div>
-                            </div>
-
-                            <!-- PDF Link Config -->
-                            <div t-if="state.qr.type === 'pdf_link'">
-                                <div class="mb-3">
-                                    <div class="qr-label-sm mb-2 d-block">PDF Download Options</div>
-                                    <div class="border rounded p-3 bg-light" style="border-color: #dee2e6 !important;">
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" checked="1" disabled="1" id="qrPdfGen"/>
-                                            <label class="form-check-label small" for="qrPdfGen">Generate PDF when scanned</label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="qrRequireAuth"
-                                                   t-att-checked="state.qr.config.requireAuth"
-                                                   t-on-change="(ev) => this.updateQrConfig('requireAuth', ev.target.checked)"/>
-                                            <label class="form-check-label small" for="qrRequireAuth">Require login to download</label>
-                                        </div>
-                                        <div class="form-check mb-2">
-                                            <input class="form-check-input" type="checkbox" id="qrTrackAnalytics"
-                                                   t-att-checked="state.qr.config.trackAnalytics"
-                                                   t-on-change="(ev) => this.updateQrConfig('trackAnalytics', ev.target.checked)"/>
-                                            <label class="form-check-label small" for="qrTrackAnalytics">Track scan analytics</label>
-                                        </div>
-                                        <div class="form-check d-flex align-items-center mb-0">
-                                            <input class="form-check-input me-2 mt-0" type="checkbox" id="qrExpireCheck"
-                                                   t-att-checked="state.qr.config.hasExpiry"
-                                                   t-on-change="(ev) => this.updateQrConfig('hasExpiry', ev.target.checked)"/>
-                                            <label class="form-check-label small me-2" for="qrExpireCheck" style="margin-bottom: 0;">Expire after:</label>
-                                            <input type="number" class="form-control form-control-sm" style="width: 60px; padding: 2px 5px;" min="1"
-                                                   t-att-disabled="!state.qr.config.hasExpiry"
-                                                   t-att-value="state.qr.config.expiresDays"
-                                                   t-on-change="(ev) => this.updateQrConfig('expiresDays', ev.target.value || 30)"/>
-                                            <span class="small ms-2">days</span>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="qr-label-sm mb-2 d-block">Filename format</label>
-                                    <input type="text" class="form-control form-control-sm bg-white" readonly="1" value="Report_{doc.name}.pdf"/>
-                                </div>
-                                <div class="alert alert-info py-2 small mb-0">
-                                    <i class="fa fa-info-circle me-1"/> When printed, the QR will point to this specific report instance.
-                                </div>
-                            </div>
-
-                            <div class="qr-preview-str mt-auto">
-                                <div class="qr-label-sm mb-1" style="font-size: 9px; opacity: 0.7;">Built string preview</div>
-                                <div class="text-break"><t t-out="state.qr.previewStr"/></div>
-                            </div>
-                        </div>
-
-                        <!-- Step 3: Preview & Style -->
-                        <div t-if="state.qr.step === 3" class="qr-step-container">
-                            <div class="qr-preview-container">
-                                <div class="qr-preview-left">
-                                    <div class="qr-image-box shadow-sm" t-att-style="'width: ' + state.qr.config.size + 'px; height: ' + state.qr.config.size + 'px;'">
-                                        <div t-if="state.qr.previewLoading" class="position-absolute inset-0 d-flex align-items-center justify-content-center bg-white bg-opacity-75">
-                                            <i class="fa fa-spinner fa-spin text-muted"/>
-                                        </div>
-                                        <img t-if="!state.qr.previewError" t-att-src="state.qr.previewImgUrl" t-on-load="() => state.qr.previewLoading = false" t-on-error="onQrPreviewError"/>
-                                        <div t-else="" class="text-center p-2">
-                                            <i class="fa fa-unlink fa-2x text-danger opacity-25 mb-1"/>
-                                            <div class="small text-muted" style="font-size: 9px;">Preview unavailable — will render correctly at print time.</div>
-                                        </div>
-                                    </div>
-                                    <div class="qr-label-sm mt-1 fw-bold"><t t-esc="state.qr.config.size"/>px</div>
-                                </div>
-
-                                <div class="qr-preview-right">
-                                    <div class="qr-style-row">
-                                        <label class="qr-label-sm">Size</label>
-                                        <input type="range" class="form-range" min="40" max="200" step="10"
-                                               t-att-value="state.qr.config.size"
-                                               t-on-input="(ev) => this.updateQrConfig('size', ev.target.value)"/>
-                                    </div>
-                                    <div class="qr-style-row">
-                                        <label class="qr-label-sm">Alignment</label>
-                                        <div class="qr-align-buttons">
-                                            <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'left' ? ' active' : '')"
-                                                 t-on-click="() => this.updateQrConfig('align', 'left')">
-                                                <i class="fa fa-align-left"/>
-                                            </div>
-                                            <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'center' ? ' active' : '')"
-                                                 t-on-click="() => this.updateQrConfig('align', 'center')">
-                                                <i class="fa fa-align-center"/>
-                                            </div>
-                                            <div t-att-class="'qr-align-btn' + (state.qr.config.align === 'right' ? ' active' : '')"
-                                                 t-on-click="() => this.updateQrConfig('align', 'right')">
-                                                <i class="fa fa-align-right"/>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="row g-3">
-                                        <div class="col-6">
-                                            <label class="qr-label-sm mb-1 d-block">Error correction</label>
-                                            <select class="form-select form-select-sm" t-on-change="(ev) => this.updateQrConfig('errorCorrection', ev.target.value)"
-                                                    title="Higher = more reliable scan but larger QR. Use H for small sizes or printed on textured paper.">
-                                                <option value="L">L (Low)</option>
-                                                <option value="M" selected="1">M (Medium)</option>
-                                                <option value="Q">Q</option>
-                                                <option value="H">H</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="qr-label-sm mb-1 d-block">Caption text</label>
-                                            <div class="position-relative">
-                                                <input type="text" class="form-control form-control-sm" maxlength="40"
-                                                       placeholder="None"
-                                                       t-att-value="state.qr.config.caption"
-                                                       t-on-input="(ev) => this.updateQrConfig('caption', ev.target.value)"/>
-                                                <div class="position-absolute end-0 top-100 mt-1 small opacity-50" style="font-size: 8px;">
-                                                    <t t-esc="state.qr.config.caption.length"/>/40
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="px-4 pb-4">
-                                <div class="qr-label-sm mb-2 opacity-75">Will render in report as</div>
-                                <div class="qr-qweb-code">
-                                    <t t-out="state.qr.qwebPreview"/>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="qr-footer">
-                        <div class="qr-nav-dots">
-                            <div t-att-class="'qr-dot' + (state.qr.step === 1 ? ' active' : (state.qr.step > 1 ? ' completed' : ''))" t-on-click="() => this.qrGoToStep(1)"/>
-                            <div t-att-class="'qr-dot' + (state.qr.step === 2 ? ' active' : (state.qr.step > 2 ? ' completed' : ''))" t-on-click="state.qr.step > 1 ? () => this.qrGoToStep(2) : null"/>
-                            <div t-att-class="'qr-dot' + (state.qr.step === 3 ? ' active' : '')" t-on-click="state.qr.step > 2 ? () => this.qrGoToStep(3) : null"/>
-                        </div>
-
-                        <div class="qr-step-indicator">Step <t t-esc="state.qr.step"/> of 3</div>
-
-                        <div class="d-flex gap-2">
-                            <button t-if="state.qr.step > 1" class="qr-btn-secondary" t-on-click="qrPrevStep">Back</button>
-                            <button t-if="state.qr.step &lt; 3" class="qr-btn-primary"
-                                    t-att-disabled="state.qr.step === 2 and state.qr.errors.hasErrors"
-                                    t-on-click="qrNextStep"
-                                    t-att-title="state.qr.step === 2 and state.qr.errors.hasErrors ? 'Fix the errors above first.' : ''">
-                                Next
-                            </button>
-                            <button t-if="state.qr.step === 3" class="qr-btn-primary px-4" t-on-click="onQrWizardConfirm">Insert QR</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <!-- QR Code Wizard Modal — defined in studio_report_qr_wizard.xml -->
+            <t t-call="custom_report.qr_wizard"/>
         </div>
     </t>
 

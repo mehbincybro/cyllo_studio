@@ -64,6 +64,7 @@
             'cyllo_studio/static/src/lib/auto_scroll/auto_scroll.min.js',
             'cyllo_studio/static/src/lib/jqueryui/jquery.min.js',
             'cyllo_studio/static/src/lib/flatted/min.js',
+            'cyllo_studio/static/src/lib/html2canvas/html2canvas.min.js',
 
             'cyllo_studio/static/src/css/style.css',
             'cyllo_studio/static/src/css/theme_rtl.scss',
@@ -295,7 +296,11 @@
             'cyllo_studio/static/src/js/utils/display_notification.js',
             'cyllo_studio/static/src/js/utils/client_action.js',
 
+            'cyllo_studio/static/src/js/custom_report/studio_report_qr.js',
+            'cyllo_studio/static/src/js/custom_report/studio_report_box.js',
             'cyllo_studio/static/src/js/custom_report/studio_report.js',
+            'cyllo_studio/static/src/js/custom_report/studio_report_setup_sidebar.xml',
+            'cyllo_studio/static/src/js/custom_report/studio_report_qr_wizard.xml',
             'cyllo_studio/static/src/js/custom_report/studio_report.xml',
             'cyllo_studio/static/src/js/custom_report/studio_report.css'
         ]
