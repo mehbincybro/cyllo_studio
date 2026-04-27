@@ -889,9 +889,9 @@ export class EditReport extends Component {
                             <span class="field-handle fa fa-bars" title="Drag to move"></span>
                             <span class="field-delete fa fa-trash" title="Delete Field"></span>
                         </div>
-                        <div class="field-container d-inline-flex gap-1">
-                            <strong class="field-label">${fieldInfo.string}: </strong>
-                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
+                        <div class="field-container" style="display: inline-block;">
+                            <strong class="field-label" style="margin-right: 4px;">${fieldInfo.string}: </strong>
+                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}" ${fieldInfo.type === 'binary' ? `t-options='{"widget": "image", "qweb_img_raw_data": 1}'` : ''}>${fieldPath}</span>
                         </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.opacity = '1';
@@ -1056,9 +1056,9 @@ export class EditReport extends Component {
                             <span class="field-handle fa fa-bars" title="Drag to move"></span>
                             <span class="field-delete fa fa-trash" title="Delete Field"></span>
                         </div>
-                        <div class="field-container d-inline-flex gap-1">
-                            <strong class="field-label">${fieldInfo.string}: </strong>
-                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>
+                        <div class="field-container" style="display: inline-block;">
+                            <strong class="field-label" style="margin-right: 4px;">${fieldInfo.string}: </strong>
+                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}" ${fieldInfo.type === 'binary' ? `t-options='{"widget": "image", "qweb_img_raw_data": 1}'` : ''}>${fieldPath}</span>
                         </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.cursor = 'default';
@@ -1778,6 +1778,8 @@ export class EditReport extends Component {
      * Called after inserting new nodes into the report frame.
      */
     _refreshDragHandles() {
+        if (!this._reportFrame) return;
+
         // Destroy existing zone sortables (keep panel sortable alive – index 0)
         const [panelSortable, ...zoneSortables] = this._sortableInstances;
         zoneSortables.forEach(s => { try { s.destroy(); } catch (_) { } });
@@ -2024,12 +2026,13 @@ export class EditReport extends Component {
                             caption.innerText = qr.config.caption;
                             el.appendChild(caption);
                         }
+
+                        el.classList.add('report-qr');
                     } catch (e) {
                         console.error("[Cyllo Studio] QR Serialization failed", e);
                     }
                 }
                 el.classList.remove('s_qr_block', 'c_new', 'selected');
-                el.removeAttribute('data-qr-config');
             }
 
             studioAttrs.forEach(a => el.removeAttribute(a));
@@ -2109,6 +2112,7 @@ export class EditReport extends Component {
             if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
                 const fieldContainer = el.querySelector('.field-container');
                 if (fieldContainer && el.parentNode) {
+                    if (fieldContainer.classList) fieldContainer.classList.remove('d-inline-flex', 'gap-1');
                     el.parentNode.replaceChild(fieldContainer, el);
                     clean(fieldContainer);
                     return;
@@ -2207,6 +2211,20 @@ export class EditReport extends Component {
             this._setupBoxResizeHandles(wrapper);
         });
 
+        // ── Enrich existing report-qr from previous edits ──
+        container.querySelectorAll('div.report-qr:not(.s_qr_block)').forEach(qrDiv => {
+            let qrConfig = null;
+            try {
+                if (qrDiv.dataset.qrConfig) {
+                    qrConfig = JSON.parse(qrDiv.dataset.qrConfig);
+                }
+            } catch (e) {}
+
+            if (qrConfig) {
+                this.insertQrBlock(qrDiv, qrConfig, 'enrich');
+            }
+        });
+
         const tables = container.querySelectorAll('table:not(.table-wrapper table)');
         tables.forEach(table => {
             if (table.closest('.table-wrapper')) return;
@@ -2255,7 +2273,7 @@ export class EditReport extends Component {
                     <span class="field-handle fa fa-bars" title="Drag to move"></span>
                     <span class="field-delete fa fa-trash" title="Delete Field"></span>
                 </div>
-                <div class="field-container d-inline-flex gap-1"></div>
+                <div class="field-container" style="display: inline-block;"></div>
             `;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.querySelector('.field-container').appendChild(targetNode);
