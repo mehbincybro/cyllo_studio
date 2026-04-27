@@ -140,12 +140,12 @@ export class ConfigurationBase extends Component {
     /**
      * Handles confirmation action, validating the form and executing the confirm callback.
      */
-    onConfirm() {
+    async onConfirm() {
         this.state.used_variables = {}
         const {isValid, errors} = this.validateForm();
         if (isValid) {
             const code = this.generateCode();
-            this.props.onConfirm(this.fieldState, code, this.state.used_variables);
+            await this.props.onConfirm(this.fieldState, code, this.state.used_variables);
             this.props.close();
         } else {
             this.env.services.effect.add({

@@ -44,6 +44,23 @@ const BUTTON_CLASSES = [
     'btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'
 ]
 
+const AUTO_OPEN_CONFIG_FIELDS = {
+    Warning: ['label', 'warning_text', 'notification_title', 'notification_type'],
+    Search: ['label', 'search_variable', 'search_domain_tree', 'search_domain'],
+    Create: ['label', 'search_variable', 'create_required_field', 'create_tree_fields_values', 'create_model_field_value'],
+    Write: ['label', 'write_selected_record', 'write_field_value'],
+    'Button Click': ['label', 'function_name', 'function_record', 'function_args'],
+    Code: ['label', 'code_code', 'code'],
+    Mail: ['label', 'mail_record', 'mail_to', 'mail_subject', 'mail_body', 'mail_template'],
+    SMS: ['label', 'sms_record', 'sms_partner_ids', 'sms_message', 'sms_template'],
+    WhatsApp: ['label', 'wa_record', 'wa_partner_path', 'wa_other_partner', 'wa_free_message', 'wa_template'],
+    Follower: ['label', 'followers', 'follower_record'],
+    Activity: ['label', 'activity_record', 'activity_summary', 'activity_user', 'activity_deadline', 'activity_type'],
+    Condition: ['label', 'condition_tree_value', 'else_setup_code'],
+    Loop: ['label', 'loop_collection', 'loop_variable_name'],
+    'Reuse Automation': ['label', 'reused_work_auto_id', 'reused_variable'],
+};
+
 const GLOBAL_IMPORTS = [{
     "childStatement": [
         {
@@ -479,10 +496,14 @@ export class WorkFlowAuto extends Component {
                 this.contextUpdateConnection(data, true);
                 this.saveHistory();
                 await this.autoSaveDrawFlow();
-                const node = Object.values(this.editor.drawflow.drawflow.Home.data).filter(item => item.id === parseInt(input_id))
-                const name = node[0].data.name
-                const nodeId = node[0].data.nodeId
-                this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
+                const node = Object.values(this.editor.drawflow.drawflow.Home.data).find(
+                    (item) => item.id === parseInt(input_id)
+                );
+                if (node && await this.shouldAutoOpenConfigModal(node)) {
+                    const name = node.data.name;
+                    const nodeId = node.data.nodeId;
+                    this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
+                }
             });
 
             this.editor.on('connectionRemoved', async (data) => {
@@ -519,6 +540,45 @@ export class WorkFlowAuto extends Component {
             return count > 0;
         } catch {
             return false;
+        }
+    }
+
+    _hasSavedConfigValue(value) {
+        if (value === null || value === undefined || value === false) {
+            return false;
+        }
+        if (typeof value === 'string') {
+            const trimmed = value.trim();
+            return trimmed !== '' && trimmed !== '[]' && trimmed !== '{}' && trimmed !== 'null';
+        }
+        if (Array.isArray(value)) {
+            return value.length > 0;
+        }
+        if (typeof value === 'object') {
+            return Object.keys(value).length > 0;
+        }
+        return true;
+    }
+
+    async shouldAutoOpenConfigModal(node) {
+        if (!node?.data?.nodeId || node.data.type !== 'action_to_do') {
+            return false;
+        }
+
+        const configFields = AUTO_OPEN_CONFIG_FIELDS[node.data.name];
+        if (!configFields?.length) {
+            return true;
+        }
+
+        try {
+            const [savedNode] = await this.orm.read('node.struct', [node.data.nodeId], configFields);
+            if (!savedNode) {
+                return true;
+            }
+            return !configFields.some((fieldName) => this._hasSavedConfigValue(savedNode[fieldName]));
+        } catch (error) {
+            console.warn('Could not determine whether node is already configured:', error);
+            return true;
         }
     }
 
@@ -2752,6 +2812,10 @@ export class WorkFlowAuto extends Component {
 
     async addNodeToDrawFlow(name, pos_x, pos_y, selectedValue, record, action, type, trigger_type) {
         if (this.editor.editor_mode === 'fixed') return false;
+        if (type === 'trigger') {
+            this.state.trigger = name || "";
+            this.state.triggerType = trigger_type || "";
+        }
         // Calculate position
         pos_x = pos_x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().x * (this.editor.precanvas.clientWidth / (this.editor.precanvas.clientWidth * this.editor.zoom)));
         pos_y = pos_y * (this.editor.precanvas.clientHeight / (this.editor.precanvas.clientHeight * this.editor.zoom)) - (this.editor.precanvas.getBoundingClientRect().y * (this.editor.precanvas.clientHeight / (this.editor.precanvas.clientHeight * this.editor.zoom)));
