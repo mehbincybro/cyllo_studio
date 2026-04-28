@@ -24,6 +24,7 @@
                                 <span class="o_stat_text">Total</span>
                             </div>
                         </button>
+                        <field name="is_published" widget="website_redirect_button"/>
                     </div>
                     <div class="oe_title">
                         <label for="name"/>
@@ -32,22 +33,25 @@
                     <group>
                         <group string="General">
                             <field name="category"/>
+                            <field name="scheduling_type"/>
                             <field name="location_type"/>
                             <field name="location" invisible="location_type == 'online'"/>
-<!--                            <field name="meeting_url" attrs="{'invisible': [('location_type', '!=', 'online')]}" string="Meeting URL"/>-->
+                            <field name="meeting_url" attrs="{'invisible': [('location_type', '!=', 'online')]}" string="Meeting URL"/>
                             <field name="color" widget="color_picker"/>
                             <field name="active" widget="boolean_toggle"/>
+                        </group>
+                        <group string="Billing &amp; Payment">
+                            <field name="is_paid"/>
+                            <field name="product_id" invisible="is_paid == False"/>
                         </group>
                         <group string="Duration &amp; Slots">
                             <field name="duration" widget="float_time"/>
                             <field name="slot_interval"/>
-                            <field name="buffer_time"/>
                             <field name="min_booking_notice"/>
                             <field name="max_booking_days"/>
                             <field name="max_attendees"/>
                         </group>
                     </group>
-
                     <notebook>
                         <!-- Resources & Staff Tab -->
                         <page string="Resources &amp; Staff" name="resources">
@@ -69,7 +73,6 @@
                                     options="{'color_field': 'color'}"/>
                             </group>
                         </page>
-
                         <!-- Rescheduling Tab -->
                         <page string="Booking &amp; Rescheduling" name="rescheduling">
                             <group>
@@ -80,13 +83,15 @@
                                 </group>
                             </group>
                         </page>
-
                         <!-- Notifications Tab -->
                         <page string="Notifications &amp; Reminders" name="notifications">
                             <group string="Confirmation">
                                 <field name="send_confirmation"/>
                                 <field name="confirmation_template_id"
                                     invisible="send_confirmation == False"/>
+                                <field name="send_whatsapp_confirmation"/>
+                                <field name="whatsapp_confirmation_template_id"
+                                    invisible="send_whatsapp_confirmation == False"/>
                             </group>
                             <group string="Reminders">
                                 <field name="send_reminder"/>
@@ -99,6 +104,10 @@
                                     invisible="send_reminder == False"/>
                                 <field name="sms_reminder_template_id"
                                     invisible="send_sms_reminder == False"/>
+                                <field name="send_whatsapp_reminder"
+                                    invisible="send_reminder == False"/>
+                                <field name="whatsapp_reminder_template_id"
+                                    invisible="send_whatsapp_reminder == False"/>
                             </group>
                             <group string="Follow-up">
                                 <field name="send_followup"/>
@@ -106,9 +115,21 @@
                                     invisible="send_followup == False"/>
                                 <field name="followup_template_id"
                                     invisible="send_followup == False"/>
+                                <field name="send_whatsapp_followup"
+                                    invisible="send_followup == False"/>
+                                <field name="whatsapp_followup_template_id"
+                                    invisible="send_whatsapp_followup == False"/>
+                            </group>
+                            <group string="Cancellation">
+                                <field name="send_cancellation"/>
+                                <field name="cancellation_template_id"
+                                    invisible="send_cancellation == False"/>
+                                <field name="send_whatsapp_cancellation"
+                                    invisible="send_cancellation == False"/>
+                                <field name="whatsapp_cancellation_template_id"
+                                    invisible="send_whatsapp_cancellation == False"/>
                             </group>
                         </page>
-
                         <!-- Description Tab -->
                         <page string="Description" name="description">
                             <field name="description" widget="html" placeholder="Add a description for this appointment type..."/>
@@ -135,9 +156,9 @@
                 <field name="category"/>
                 <field name="duration" widget="float_time"/>
                 <field name="slot_interval"/>
-                <field name="buffer_time"/>
                 <field name="min_booking_notice"/>
                 <field name="max_attendees"/>
+                <field name="scheduling_type"/>
                 <field name="allow_reschedule" widget="boolean_toggle"/>
                 <field name="send_confirmation" widget="boolean_toggle"/>
                 <field name="send_reminder" widget="boolean_toggle"/>
@@ -146,7 +167,6 @@
             </tree>
         </field>
     </record>
-
     <!-- Appointment Type Kanban View -->
     <record id="view_appointment_type_kanban" model="ir.ui.view">
         <field name="name">appointment.type.kanban</field>
@@ -219,7 +239,6 @@
             </search>
         </field>
     </record>
-
     <!-- Action -->
     <record id="action_appointment_type" model="ir.actions.act_window">
         <field name="name">Appointment Types</field>

@@ -23,6 +23,7 @@ from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError, UserError
 from datetime import timedelta
 import logging
+import uuid
 
 _logger = logging.getLogger(__name__)
 
@@ -34,9 +35,11 @@ class Appointment(models.Model):
     _order = 'start_datetime desc'
 
     # Identity
-    name = fields.Char(string='Reference', required=True, copy=False, readonly=True,
-        default=lambda self: _('New'))
-    display_name = fields.Char(string='Title', compute='_compute_display_name', store=True)
+    name = fields.Char(string='Reference', required=True, copy=False,
+                       readonly=True,
+                       default=lambda self: _('New'))
+    display_name = fields.Char(string='Title', compute='_compute_display_name',
+                               store=True)
     # Type & Classification
     appointment_type_id = fields.Many2one(
         'appointment.type', string='Appointment Type',
@@ -45,32 +48,47 @@ class Appointment(models.Model):
     category = fields.Selection(
         related='appointment_type_id.category', string='Category', store=True
     )
+    scheduling_type = fields.Selection(
+        related='appointment_type_id.scheduling_type', string='Scheduling Type',
+        store=False
+    )
     # Scheduling
-    start_datetime = fields.Datetime(string='Start', required=True, tracking=True)
+    start_datetime = fields.Datetime(string='Start', required=True,
+                                     tracking=True)
     end_datetime = fields.Datetime(string='End', required=True, tracking=True)
-    duration = fields.Float(string='Duration (hours)', compute='_compute_duration', store=True)
+    duration = fields.Float(string='Duration (hours)',
+                            compute='_compute_duration', store=True)
     slot_id = fields.Many2one('appointment.slot', string='Time Slot')
     timezone = fields.Selection(
         '_tz_get', string='Timezone',
         default=lambda self: self.env.user.tz or 'UTC'
     )
     # Customer / Attendee
-    partner_id = fields.Many2one('res.partner', string='Customer', required=True, tracking=True)
-    attendee_ids = fields.Many2many('res.partner', string='Additional Attendees')
+    partner_id = fields.Many2one('res.partner', string='Customer',
+                                 required=True, tracking=True)
+    attendee_ids = fields.Many2many('res.partner',
+                                    string='Additional Attendees')
     attendee_count = fields.Integer(string='Number of Attendees', default=1)
     customer_notes = fields.Text(string='Customer Notes')
     # Staff & Resources
-    staff_id = fields.Many2one('appointment.staff', string='Staff Member', tracking=True)
-    resource_id = fields.Many2one('appointment.resource', string='Resource', tracking=True)
+    staff_id = fields.Many2one('appointment.staff', string='Staff Member',
+                               tracking=True)
+    resource_id = fields.Many2one('appointment.resource', string='Resource',
+                                  tracking=True)
     # Location
     location_type = fields.Selection(
-        related='appointment_type_id.location_type', string='Location Type', store=True
+        related='appointment_type_id.location_type', string='Location Type',
+        store=True
     )
     location = fields.Char(string='Location')
     meeting_url = fields.Char(string='Meeting URL')
+    # Billing / Payment
+    sale_order_id = fields.Many2one('sale.order', string='Sales Order',
+                                    readonly=True)
     # Status
     state = fields.Selection([
         ('draft', 'Draft'),
+        ('pending_payment', 'Pending Payment'),
         ('confirmed', 'Confirmed'),
         ('in_progress', 'In Progress'),
         ('done', 'Completed'),
@@ -91,9 +109,25 @@ class Appointment(models.Model):
         ('system', 'System'),
     ], string='Cancelled By')
     # Notifications
-    confirmation_sent = fields.Boolean(string='Confirmation Sent', default=False)
+    confirmation_sent = fields.Boolean(string='Confirmation Sent',
+                                       default=False)
     reminder_sent = fields.Boolean(string='Reminders Sent', default=False)
     followup_sent = fields.Boolean(string='Follow-up Sent', default=False)
+    cancellation_sent = fields.Boolean(string='Cancellation Sent',
+                                       default=False)
+    whatsapp_confirmation_sent = fields.Boolean(
+        string='WhatsApp Confirmation Sent', default=False)
+    whatsapp_reminder_sent = fields.Boolean(string='WhatsApp Reminders Sent',
+                                            default=False)
+    whatsapp_followup_sent = fields.Boolean(string='WhatsApp Follow-up Sent',
+                                            default=False)
+    whatsapp_cancellation_sent = fields.Boolean(
+        string='WhatsApp Cancellation Sent', default=False)
+    # Secure website management token
+    access_token = fields.Char(
+        string='Access Token', copy=False, readonly=True, index=True,
+        default=lambda self: str(uuid.uuid4())
+    )
     # Internal
     internal_notes = fields.Html(string='Internal Notes')
     priority = fields.Selection([
@@ -151,19 +185,35 @@ class Appointment(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
-                vals['name'] = self.env['ir.sequence'].next_by_code('appointment.appointment') or _('New')
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'appointment.appointment') or _('New')
         records = super().create(vals_list)
         for record in records:
-            if record.appointment_type_id.send_confirmation:
-                record._send_confirmation_email()
+            if record.state == 'confirmed':
+                if record.appointment_type_id.send_confirmation:
+                    record._send_confirmation_email()
+                if record.appointment_type_id.send_whatsapp_confirmation and not record.whatsapp_confirmation_sent:
+                    record._send_whatsapp_confirmation()
+                record._send_staff_confirmation_email()
         return records
+
+    def write(self, vals):
+        res = super().write(vals)
+        if 'state' in vals and vals['state'] == 'cancelled':
+            for record in self:
+                if record.appointment_type_id.send_cancellation and not record.cancellation_sent:
+                    record._send_cancellation_email()
+                if record.appointment_type_id.send_whatsapp_cancellation and not record.whatsapp_cancellation_sent:
+                    record._send_whatsapp_cancellation()
+        return res
 
     @api.onchange('appointment_type_id')
     def _onchange_appointment_type_id(self):
         if self.appointment_type_id:
             atype = self.appointment_type_id
             if self.start_datetime and not self.end_datetime:
-                self.end_datetime = self.start_datetime + timedelta(hours=atype.duration)
+                self.end_datetime = self.start_datetime + timedelta(
+                    hours=atype.duration)
             if atype.location:
                 self.location = atype.location
 
@@ -179,7 +229,6 @@ class Appointment(models.Model):
             if slot.resource_id:
                 self.resource_id = slot.resource_id
 
-
     @api.onchange('start_datetime', 'appointment_type_id')
     def _onchange_start_datetime(self):
         if self.start_datetime and self.appointment_type_id:
@@ -192,9 +241,25 @@ class Appointment(models.Model):
         for rec in self:
             if rec.start_datetime and rec.end_datetime:
                 if rec.end_datetime <= rec.start_datetime:
-                    raise ValidationError(_('End time must be after start time.'))
+                    raise ValidationError(
+                        _('End time must be after start time.'))
 
-    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id', 'state', 'slot_id')
+    @api.constrains('start_datetime', 'end_datetime', 'slot_id',
+                    'appointment_type_id')
+    def _check_predefined_slot_times(self):
+        for rec in self:
+            if rec.appointment_type_id.scheduling_type == 'predefined' and rec.slot_id:
+                if rec.start_datetime and rec.start_datetime != rec.slot_id.start_datetime:
+                    raise ValidationError(_(
+                        'Start time must match the selected slot (%s).'
+                    ) % rec.slot_id.display_name)
+                if rec.end_datetime and rec.end_datetime != rec.slot_id.end_datetime:
+                    raise ValidationError(_(
+                        'End time must match the selected slot (%s).'
+                    ) % rec.slot_id.display_name)
+
+    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id',
+                    'state', 'slot_id')
     def _check_overlap(self):
         for rec in self:
             if rec.state in ('cancelled', 'rejected'):
@@ -202,10 +267,8 @@ class Appointment(models.Model):
             if not rec.start_datetime or not rec.end_datetime:
                 continue
 
-            our_buffer = getattr(rec.appointment_type_id, 'buffer_time', 0.0) or 0.0
-            our_eff_end = rec.end_datetime + timedelta(minutes=our_buffer)
             search_start = rec.start_datetime - timedelta(days=1)
-            search_end = our_eff_end + timedelta(days=1)
+            search_end = rec.end_datetime + timedelta(days=1)
             appt_domain = [
                 ('id', '!=', rec.id),
                 ('state', 'not in', ('cancelled', 'rejected')),
@@ -214,39 +277,50 @@ class Appointment(models.Model):
             ]
             # Check overlap with defined time slots
             slot_domain = [
-                ('start_datetime', '<', our_eff_end),
+                ('start_datetime', '<', rec.end_datetime),
                 ('end_datetime', '>', rec.start_datetime),
             ]
             if rec.slot_id:
                 slot_domain.append(('id', '!=', rec.slot_id.id))
             if rec.staff_id:
                 # 1. Overlap with other appointments
-                staff_appts = self.search(appt_domain + [('staff_id', '=', rec.staff_id.id)])
+                staff_appts = self.search(
+                    appt_domain + [('staff_id', '=', rec.staff_id.id)])
                 if rec.slot_id:
-                    staff_appts = staff_appts.filtered(lambda a: a.slot_id != rec.slot_id)
+                    staff_appts = staff_appts.filtered(
+                        lambda a: a.slot_id != rec.slot_id)
                 for appt in staff_appts:
-                    their_buffer = getattr(appt.appointment_type_id, 'buffer_time', 0.0) or 0.0
-                    their_eff_end = appt.end_datetime + timedelta(minutes=their_buffer)
-                    if appt.start_datetime < our_eff_end and their_eff_end > rec.start_datetime:
-                        raise ValidationError(_('Staff member "%s" is already booked by another appointment during this time.') % rec.staff_id.name)
+                    if appt.start_datetime < rec.end_datetime and appt.end_datetime > rec.start_datetime:
+                        raise ValidationError(
+                            _('Staff member "%s" is already booked by another appointment during this time.') % rec.staff_id.name)
                 # 2. Overlap with predefined slots
-                staff_slots = self.env['appointment.slot'].search(slot_domain + [('staff_id', '=', rec.staff_id.id)], limit=1)
+                staff_slots = self.env['appointment.slot'].search(
+                    slot_domain + [('staff_id', '=', rec.staff_id.id)], limit=1)
                 if staff_slots:
-                    raise ValidationError(_('Staff member "%s" is already scheduled for a "%s" slot during this time.') % (rec.staff_id.name, staff_slots.appointment_type_id.name))
+                    raise ValidationError(
+                        _('Staff member "%s" is already scheduled for a "%s" slot during this time.') % (
+                            rec.staff_id.name,
+                            staff_slots.appointment_type_id.name))
             if rec.resource_id:
                 # 1. Overlap with other appointments
-                res_appts = self.search(appt_domain + [('resource_id', '=', rec.resource_id.id)])
+                res_appts = self.search(
+                    appt_domain + [('resource_id', '=', rec.resource_id.id)])
                 if rec.slot_id:
-                    res_appts = res_appts.filtered(lambda a: a.slot_id != rec.slot_id)
+                    res_appts = res_appts.filtered(
+                        lambda a: a.slot_id != rec.slot_id)
                 for appt in res_appts:
-                    their_buffer = getattr(appt.appointment_type_id, 'buffer_time', 0.0) or 0.0
-                    their_eff_end = appt.end_datetime + timedelta(minutes=their_buffer)
-                    if appt.start_datetime < our_eff_end and their_eff_end > rec.start_datetime:
-                        raise ValidationError(_('Resource "%s" is already booked by another appointment during this time.') % rec.resource_id.name)
+                    if appt.start_datetime < rec.end_datetime and appt.end_datetime > rec.start_datetime:
+                        raise ValidationError(
+                            _('Resource "%s" is already booked by another appointment during this time.') % rec.resource_id.name)
                 # 2. Overlap with predefined slots
-                res_slots = self.env['appointment.slot'].search(slot_domain + [('resource_id', '=', rec.resource_id.id)], limit=1)
+                res_slots = self.env['appointment.slot'].search(
+                    slot_domain + [('resource_id', '=', rec.resource_id.id)],
+                    limit=1)
                 if res_slots:
-                    raise ValidationError(_('Resource "%s" is already scheduled for a "%s" slot during this time.') % (rec.resource_id.name, res_slots.appointment_type_id.name))
+                    raise ValidationError(
+                        _('Resource "%s" is already scheduled for a "%s" slot during this time.') % (
+                            rec.resource_id.name,
+                            res_slots.appointment_type_id.name))
 
     @api.constrains('slot_id', 'attendee_count', 'state')
     def _check_slot_capacity(self):
@@ -258,10 +332,12 @@ class Appointment(models.Model):
                 total_attendees = sum(active_appts.mapped('attendee_count'))
                 if total_attendees > rec.slot_id.max_attendees:
                     # Calculate spots before this appointment to show accurate error
-                    spots_before_this = rec.slot_id.max_attendees - (total_attendees - rec.attendee_count)
+                    spots_before_this = rec.slot_id.max_attendees - (
+                                total_attendees - rec.attendee_count)
                     raise ValidationError(_(
                         'The selected slot "%s" does not have enough capacity for %s attendee(s). Only %s spot(s) remaining.'
-                    ) % (rec.slot_id.name, rec.attendee_count, max(0, spots_before_this)))
+                    ) % (rec.slot_id.name, rec.attendee_count,
+                         max(0, spots_before_this)))
 
     @api.constrains('start_datetime', 'appointment_type_id')
     def _check_min_booking_notice(self):
@@ -269,7 +345,8 @@ class Appointment(models.Model):
             if rec.appointment_type_id and rec.start_datetime:
                 min_notice = rec.appointment_type_id.min_booking_notice
                 if min_notice > 0:
-                    min_start = fields.Datetime.now() + timedelta(hours=min_notice)
+                    min_start = fields.Datetime.now() + timedelta(
+                        hours=min_notice)
                     if rec.start_datetime < min_start:
                         raise ValidationError(_(
                             'This appointment type requires at least %s hour(s) advance notice.'
@@ -281,23 +358,27 @@ class Appointment(models.Model):
             if rec.state in ('cancelled', 'rejected'):
                 continue
             if rec.appointment_type_id.require_staff and not rec.staff_id:
-                raise ValidationError(_('A staff member must be assigned for this appointment type.'))
+                raise ValidationError(
+                    _('A staff member must be assigned for this appointment type.'))
             if rec.appointment_type_id.require_resource and not rec.resource_id:
-                raise ValidationError(_('A resource must be assigned for this appointment type.'))
+                raise ValidationError(
+                    _('A resource must be assigned for this appointment type.'))
 
     def action_confirm(self):
         for rec in self:
             rec.state = 'confirmed'
             if rec.appointment_type_id.send_confirmation and not rec.confirmation_sent:
                 rec._send_confirmation_email()
-            # Send Staff Confirmation Email
-            if rec.staff_id and rec.staff_id.notify_on_new_appointment and rec.staff_id.email:
-                staff_tmpl = self.env.ref('cyllo_appointment.email_template_appointment_confirmed_staff', raise_if_not_found=False)
-                if staff_tmpl:
-                    try:
-                        staff_tmpl.send_mail(rec.id, force_send=True)
-                    except Exception as e:
-                        logging.getLogger(__name__).warning("Failed to send staff confirmation email for %s: %s", rec.name, str(e))
+            if rec.appointment_type_id.send_whatsapp_confirmation and not rec.whatsapp_confirmation_sent:
+                rec._send_whatsapp_confirmation()
+            rec._send_staff_confirmation_email()
+
+    def action_check_payment(self):
+        """Check if linked sale order is confirmed/paid and auto-confirm."""
+        for rec in self:
+            if rec.sale_order_id and rec.sale_order_id.state in ['sale',
+                                                                 'done']:
+                rec.action_confirm()
 
     def action_start(self):
         for rec in self:
@@ -308,6 +389,8 @@ class Appointment(models.Model):
             rec.state = 'done'
             if rec.appointment_type_id.send_followup and not rec.followup_sent:
                 rec._send_followup_email()
+            if rec.appointment_type_id.send_whatsapp_followup and not rec.whatsapp_followup_sent:
+                rec._send_whatsapp_followup()
 
     def action_cancel(self):
         return {
@@ -323,7 +406,8 @@ class Appointment(models.Model):
         self.ensure_one()
         atype = self.appointment_type_id
         if not atype.allow_reschedule:
-            raise UserError(_('Rescheduling is not allowed for this appointment type.'))
+            raise UserError(
+                _('Rescheduling is not allowed for this appointment type.'))
         deadline_hours = atype.reschedule_deadline_hours
         if deadline_hours > 0:
             deadline = self.start_datetime - timedelta(hours=deadline_hours)
@@ -356,9 +440,25 @@ class Appointment(models.Model):
             try:
                 template.send_mail(self.id, force_send=True)
                 self.confirmation_sent = True
-                _logger.info('Confirmation email sent for appointment %s', self.name)
+                _logger.info('Confirmation email sent for appointment %s',
+                             self.name)
             except Exception as e:
-                _logger.warning('Failed to send confirmation email for %s: %s', self.name, str(e))
+                _logger.warning('Failed to send confirmation email for %s: %s',
+                                self.name, str(e))
+
+    def _send_staff_confirmation_email(self):
+        self.ensure_one()
+        if self.staff_id and self.staff_id.notify_on_new_appointment and self.staff_id.email:
+            staff_tmpl = self.env.ref(
+                'cyllo_appointment.email_template_appointment_confirmed_staff',
+                raise_if_not_found=False)
+            if staff_tmpl:
+                try:
+                    staff_tmpl.send_mail(self.id, force_send=True)
+                except Exception as e:
+                    _logger.warning(
+                        "Failed to send staff confirmation email for %s: %s",
+                        self.name, str(e))
 
     def _send_reminder_emails(self):
         """Called by scheduled action to send reminders."""
@@ -372,18 +472,23 @@ class Appointment(models.Model):
             if not atype.send_reminder or not atype.reminder_template_id:
                 continue
             reminder_times_str = atype.reminder_hours_before or '24'
-            reminder_hours = [float(h.strip()) for h in reminder_times_str.split(',') if h.strip()]
+            reminder_hours = [float(h.strip()) for h in
+                              reminder_times_str.split(',') if h.strip()]
             for hours in reminder_hours:
                 reminder_time = appt.start_datetime - timedelta(hours=hours)
                 if reminder_time <= now < reminder_time + timedelta(minutes=30):
                     try:
-                        atype.reminder_template_id.send_mail(appt.id, force_send=True)
+                        atype.reminder_template_id.send_mail(appt.id,
+                                                             force_send=True)
                         appt.reminder_sent = True
                         if atype.send_sms_reminder and atype.sms_reminder_template_id:
                             appt._send_sms_reminder()
+                        if atype.send_whatsapp_reminder and atype.whatsapp_reminder_template_id and not appt.whatsapp_reminder_sent:
+                            appt._send_whatsapp_reminder()
                         break
                     except Exception as e:
-                        _logger.warning('Failed to send reminder for %s: %s', appt.name, str(e))
+                        _logger.warning('Failed to send reminder for %s: %s',
+                                        appt.name, str(e))
 
     def _send_sms_reminder(self):
         self.ensure_one()
@@ -394,7 +499,8 @@ class Appointment(models.Model):
             try:
                 template.send_sms(self.id)
             except Exception as e:
-                _logger.warning('Failed to send SMS for %s: %s', self.name, str(e))
+                _logger.warning('Failed to send SMS for %s: %s', self.name,
+                                str(e))
 
     def _send_followup_email(self):
         self.ensure_one()
@@ -404,4 +510,84 @@ class Appointment(models.Model):
                 template.send_mail(self.id, force_send=True)
                 self.followup_sent = True
             except Exception as e:
-                _logger.warning('Failed to send follow-up for %s: %s', self.name, str(e))
+                _logger.warning('Failed to send follow-up for %s: %s',
+                                self.name, str(e))
+
+    def _send_cancellation_email(self):
+        self.ensure_one()
+        template = self.appointment_type_id.cancellation_template_id
+        if template:
+            try:
+                template.send_mail(self.id, force_send=True)
+                self.cancellation_sent = True
+                _logger.info('Cancellation email sent for appointment %s',
+                             self.name)
+            except Exception as e:
+                _logger.warning('Failed to send cancellation email for %s: %s',
+                                self.name, str(e))
+
+    def _send_whatsapp_confirmation(self):
+        self.ensure_one()
+        if not self.partner_id.whatsapp_number and not self.partner_id.mobile and not self.partner_id.phone:
+            return
+        template = self.appointment_type_id.whatsapp_confirmation_template_id
+        if template:
+            try:
+                template.action_send_template(self, attachment=False,
+                                              partner=self.partner_id)
+                self.whatsapp_confirmation_sent = True
+                _logger.info('WhatsApp confirmation sent for appointment %s',
+                             self.name)
+            except Exception as e:
+                _logger.warning(
+                    'Failed to send WhatsApp confirmation for %s: %s',
+                    self.name, str(e))
+
+    def _send_whatsapp_reminder(self):
+        self.ensure_one()
+        if not self.partner_id.whatsapp_number and not self.partner_id.mobile and not self.partner_id.phone:
+            return
+        template = self.appointment_type_id.whatsapp_reminder_template_id
+        if template:
+            try:
+                template.action_send_template(self, attachment=False,
+                                              partner=self.partner_id)
+                self.whatsapp_reminder_sent = True
+                _logger.info('WhatsApp reminder sent for appointment %s',
+                             self.name)
+            except Exception as e:
+                _logger.warning('Failed to send WhatsApp reminder for %s: %s',
+                                self.name, str(e))
+
+    def _send_whatsapp_followup(self):
+        self.ensure_one()
+        if not self.partner_id.whatsapp_number and not self.partner_id.mobile and not self.partner_id.phone:
+            return
+        template = self.appointment_type_id.whatsapp_followup_template_id
+        if template:
+            try:
+                template.action_send_template(self, attachment=False,
+                                              partner=self.partner_id)
+                self.whatsapp_followup_sent = True
+                _logger.info('WhatsApp follow-up sent for appointment %s',
+                             self.name)
+            except Exception as e:
+                _logger.warning('Failed to send WhatsApp follow-up for %s: %s',
+                                self.name, str(e))
+
+    def _send_whatsapp_cancellation(self):
+        self.ensure_one()
+        if not self.partner_id.whatsapp_number and not self.partner_id.mobile and not self.partner_id.phone:
+            return
+        template = self.appointment_type_id.whatsapp_cancellation_template_id
+        if template:
+            try:
+                template.action_send_template(self, attachment=False,
+                                              partner=self.partner_id)
+                self.whatsapp_cancellation_sent = True
+                _logger.info('WhatsApp cancellation sent for appointment %s',
+                             self.name)
+            except Exception as e:
+                _logger.warning(
+                    'Failed to send WhatsApp cancellation for %s: %s',
+                    self.name, str(e))

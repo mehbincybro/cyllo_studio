@@ -22,7 +22,7 @@
                         <group string="Details">
                             <field name="resource_type"/>
                             <field name="capacity"/>
-                            <field name="location"/>
+                            <field name="location" invisible="resource_type != 'room'"/>
                             <field name="color" widget="color_picker"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
@@ -57,7 +57,7 @@
                 <field name="name"/>
                 <field name="resource_type"/>
                 <field name="capacity"/>
-                <field name="location"/>
+                <field name="location" optional="show" column_invisible="False"/>
                 <field name="working_hours_id"/>
                 <field name="appointment_count" string="Appointments"/>
                 <field name="active" column_invisible="1"/>
@@ -86,7 +86,7 @@
                                     t-attf-src="/web/image/appointment.resource/{{record.id.raw_value}}/image"
                                     class="o_image_64_max"/>
                                 <div t-else="" class="apt-resource-icon">
-                                    <i t-attf-class="fa fa-#{record.resource_type.raw_value == 'room' ? 'building' : record.resource_type.raw_value == 'equipment' ? 'wrench' : 'cube'} fa-2x"/>
+                                    <i t-attf-class="fa fa-#{record.resource_type.raw_value == 'room' ? 'building' : record.resource_type.raw_value == 'equipment' ? 'wrench' : 'cube'} fa-2x" title="Resource Type"/>
                                 </div>
                             </div>
                             <strong><t t-esc="record.name.value"/></strong>

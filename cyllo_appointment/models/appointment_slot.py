@@ -29,7 +29,7 @@ class AppointmentSlot(models.Model):
     _description = 'Appointment Slot'
     _order = 'start_datetime'
 
-    name = fields.Char(string='Slot Name', compute='_compute_name', store=True)
+    name = fields.Char(string='Slot Name', required=True)
     appointment_type_id = fields.Many2one(
         'appointment.type', string='Appointment Type', required=True, ondelete='cascade'
     )
@@ -59,14 +59,6 @@ class AppointmentSlot(models.Model):
     appointment_ids = fields.One2many(
         'appointment.appointment', 'slot_id', string='Appointments'
     )
-
-    @api.depends('start_datetime', 'appointment_type_id.name')
-    def _compute_name(self):
-        for rec in self:
-            if rec.start_datetime and rec.appointment_type_id:
-                rec.name = f"{rec.appointment_type_id.name} - {fields.Datetime.to_string(rec.start_datetime)}"
-            else:
-                rec.name = _('New Slot')
 
     @api.depends('start_datetime', 'duration')
     def _compute_end_datetime(self):
@@ -98,3 +90,11 @@ class AppointmentSlot(models.Model):
             if rec.start_datetime and rec.end_datetime:
                 if rec.end_datetime <= rec.start_datetime:
                     raise ValidationError(_('End time must be after start time.'))
+
+    @api.constrains('appointment_type_id', 'staff_id', 'resource_id')
+    def _check_required_assignments(self):
+        for rec in self:
+            if rec.appointment_type_id.require_staff and not rec.staff_id:
+                raise ValidationError(_('A staff member must be assigned for this slot because its appointment type requires one.'))
+            if rec.appointment_type_id.require_resource and not rec.resource_id:
+                raise ValidationError(_('A resource must be assigned for this slot because its appointment type requires one.'))

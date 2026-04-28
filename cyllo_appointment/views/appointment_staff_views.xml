@@ -66,7 +66,6 @@
             </form>
         </field>
     </record>
-
     <!-- Staff List View -->
     <record id="view_appointment_staff_list" model="ir.ui.view">
         <field name="name">appointment.staff.list</field>
@@ -84,7 +83,6 @@
             </tree>
         </field>
     </record>
-
     <!-- Staff Kanban View -->
     <record id="view_appointment_staff_kanban" model="ir.ui.view">
         <field name="name">appointment.staff.kanban</field>
@@ -105,9 +103,9 @@
                             <div class="apt-staff-avatar">
                                 <img t-if="record.image.raw_value"
                                     t-attf-src="/web/image/appointment.staff/{{record.id.raw_value}}/image"
-                                    class="o_image_64_max rounded-circle"/>
+                                    class="o_image_64_max rounded-circle" alt="Staff Image"/>
                                 <div t-else="" class="apt-staff-avatar-placeholder">
-                                    <i class="fa fa-user fa-2x"/>
+                                    <i class="fa fa-user fa-2x" title="Staff Avatar"/>
                                 </div>
                             </div>
                             <strong class="d-block mt-2"><t t-esc="record.name.value"/></strong>
@@ -123,7 +121,6 @@
             </kanban>
         </field>
     </record>
-
     <!-- Action -->
     <record id="action_appointment_staff" model="ir.actions.act_window">
         <field name="name">Staff Members</field>

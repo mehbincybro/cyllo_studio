@@ -11,3 +11,11 @@ access_appointment_user,appointment.appointment user,model_appointment_appointme
 access_appointment_manager,appointment.appointment manager,model_appointment_appointment,cyllo_appointment.group_appointment_manager,1,1,1,1
 access_appointment_cancel_wizard_user,appointment.cancel.wizard user,model_appointment_cancel_wizard,cyllo_appointment.group_appointment_user,1,1,1,1
 access_appointment_reschedule_wizard_user,appointment.reschedule.wizard user,model_appointment_reschedule_wizard,cyllo_appointment.group_appointment_user,1,1,1,1
+access_appointment_type_public,appointment.type public,model_appointment_type,base.group_public,1,0,0,0
+access_appointment_slot_public,appointment.slot public,model_appointment_slot,base.group_public,1,0,0,0
+access_appointment_staff_public,appointment.staff public,model_appointment_staff,base.group_public,1,0,0,0
+access_appointment_resource_public,appointment.resource public,model_appointment_resource,base.group_public,1,0,0,0
+access_appointment_type_portal,appointment.type portal,model_appointment_type,base.group_portal,1,0,0,0
+access_appointment_slot_portal,appointment.slot portal,model_appointment_slot,base.group_portal,1,0,0,0
+access_appointment_staff_portal,appointment.staff portal,model_appointment_staff,base.group_portal,1,0,0,0
+access_appointment_resource_portal,appointment.resource portal,model_appointment_resource,base.group_portal,1,0,0,0
