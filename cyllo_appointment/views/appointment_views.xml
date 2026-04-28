@@ -12,6 +12,8 @@
                         invisible="state not in ['draft']"/>
                     <button name="action_start" string="Start" type="object"
                         invisible="state not in ['confirmed']"/>
+                    <button name="action_check_payment" string="Check Payment" type="object"
+                        invisible="state != 'pending_payment'" class="btn-secondary"/>
                     <button name="action_done" string="Mark as Done" type="object"
                         class="btn-primary"
                         invisible="state not in ['in_progress', 'confirmed']"/>
@@ -23,7 +25,7 @@
                         class="btn-danger"
                         invisible="state in ['done', 'cancelled', 'rejected', 'no_show']"/>
                     <field name="state" widget="statusbar"
-                        statusbar_visible="draft,confirmed,in_progress,done"
+                        statusbar_visible="draft,pending_payment,confirmed,in_progress,done"
                         options="{'clickable': '1'}"/>
                 </header>
                 <sheet>
@@ -37,20 +39,21 @@
                             </div>
                         </button>
                     </div>
-
                     <!-- Priority & Reference -->
                     <div class="apt-form-header">
                         <span class="apt-reference"><field name="name" readonly="1"/></span>
                         <span invisible="is_rescheduled == False" class="badge badge-warning ml-2">
-                            <i class="fa fa-refresh"/> Rescheduled
+                            <i class="fa fa-refresh" title="Rescheduled"/> Rescheduled
                         </span>
                     </div>
-
                     <div class="oe_title">
                         <label for="appointment_type_id" string="Appointment Type"/>
                         <h1><field name="appointment_type_id" placeholder="Select appointment type..."/></h1>
+                        <h3 invisible="sale_order_id == False">
+                            <label for="sale_order_id" string="Order: "/>
+                            <field name="sale_order_id" readonly="1" widget="many2one"/>
+                        </h3>
                     </div>
-
                     <group>
                         <group string="Customer">
                             <field name="partner_id" widget="many2one_avatar"/>
@@ -59,14 +62,14 @@
                                 invisible="attendee_count == 1"/>
                         </group>
                         <group string="Scheduling">
-                            <field name="start_datetime"/>
-                            <field name="end_datetime"/>
+                            <field name="scheduling_type" invisible="1"/>
+                            <field name="start_datetime" readonly="scheduling_type == 'predefined'"/>
+                            <field name="end_datetime" readonly="scheduling_type == 'predefined'"/>
                             <field name="duration" widget="float_time" readonly="1"/>
                             <field name="timezone"/>
                             <field name="slot_id" string="Event / Slot" domain="[('state', '!=', 'fully_booked')]"/>
                         </group>
                     </group>
-
                     <group>
                         <group string="Assignment">
                             <field name="staff_id"
@@ -82,7 +85,6 @@
                                 invisible="location_type != 'online'"/>
                         </group>
                     </group>
-
                     <notebook>
                         <page string="Notes" name="notes">
                             <group>
@@ -103,7 +105,6 @@
                                 </group>
                             </group>
                         </page>
-
                         <page string="Rescheduling History" name="reschedule"
                             invisible="is_rescheduled == False">
                             <group>
@@ -112,7 +113,6 @@
                                 <field name="reschedule_reason" readonly="1"/>
                             </group>
                         </page>
-
                         <page string="Cancellation" name="cancellation"
                             invisible="state not in ['cancelled', 'rejected']">
                             <group>
@@ -189,7 +189,7 @@
                                     <field name="priority" widget="priority"/>
                                     <span class="apt-kanban-ref text-muted small"><t t-esc="record.name.value"/></span>
                                     <span invisible="is_rescheduled == False" class="badge badge-warning badge-pill ml-1 small">
-                                        <i class="fa fa-refresh"/>
+                                        <i class="fa fa-refresh" title="Rescheduled"/>
                                     </span>
                                 </div>
                                 <div class="apt-kanban-type">
@@ -199,11 +199,11 @@
                                     <field name="partner_id" widget="many2one_avatar"/>
                                 </div>
                                 <div class="apt-kanban-time">
-                                    <i class="fa fa-clock-o text-muted"/>
+                                    <i class="fa fa-clock-o text-muted" title="Time"/>
                                     <span class="ml-1"><t t-esc="record.start_datetime.value"/></span>
                                 </div>
                                 <div invisible="staff_id == False" class="apt-kanban-staff text-muted small">
-                                    <i class="fa fa-user"/> <t t-esc="record.staff_id.value"/>
+                                    <i class="fa fa-user" title="User"/> <t t-esc="record.staff_id.value"/>
                                 </div>
                             </a>
                         </div>

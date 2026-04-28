@@ -1,9 +1,3 @@
-/* ============================================================
-   APPOINTMENT PRO — Custom Stylesheet
-   Odoo 17 | Premium UI Design
-   ============================================================ */
-
-/* ── CSS Variables ─────────────────────────────────────────── */
 :root {
   --apt-primary: #1a1a2e;
   --apt-secondary: #16213e;
@@ -28,14 +22,6 @@
   --apt-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Form: Appointment ──────────────────────────────────────── */
-.apt_appointment_form .o_form_sheet {
-  background: #fff;
-  border-radius: var(--apt-radius);
-  box-shadow: var(--apt-shadow-md);
-  overflow: hidden;
-}
-
 .apt-form-header {
   display: flex;
   align-items: center;
@@ -55,24 +41,7 @@
   letter-spacing: 0.5px;
 }
 
-/* Form Title Enhancement */
-.apt_appointment_form .oe_title h1 {
-  font-size: 1.75rem !important;
-  line-height: 1.2;
-}
-
-/* Status bar enhancement */
-.apt_appointment_form .o_statusbar_status button.btn-primary,
-.apt_appointment_form .o_statusbar_status button.o_arrow_button_current {
-  background: transparent !important;
-  border-color: transparent !important;
-  color: var(--apt-primary) !important;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-
-/* ── Kanban: Appointments ──────────────────────────────────── */
+/* Kanban: Appointments */
 .o_appointment_kanban .o_kanban_group_header {
   background: var(--apt-primary) !important;
   border-radius: var(--apt-radius-sm) var(--apt-radius-sm) 0 0;
@@ -99,32 +68,6 @@
 .apt-kanban-card:hover {
   box-shadow: var(--apt-shadow-md);
   transform: translateY(-2px);
-}
-
-.apt-kanban-card.apt-state-draft {
-  border-left-color: var(--apt-gray-400);
-}
-
-.apt-kanban-card.apt-state-confirmed {
-  border-left-color: var(--apt-green);
-}
-
-.apt-kanban-card.apt-state-in_progress {
-  border-left-color: var(--apt-blue);
-}
-
-.apt-kanban-card.apt-state-done {
-  border-left-color: var(--apt-accent);
-}
-
-.apt-kanban-card.apt-state-cancelled {
-  border-left-color: var(--apt-red);
-  opacity: 0.65;
-}
-
-.apt-kanban-card.apt-state-no_show {
-  border-left-color: var(--apt-orange);
-  opacity: 0.65;
 }
 
 .apt-kanban-header {
@@ -158,7 +101,7 @@
   font-size: 11px;
 }
 
-/* ── Appointment Type Kanban ─────────────────────────────── */
+/* Appointment Type Kanban */
 .o_appointment_type_kanban .o_kanban_record {
   border-radius: var(--apt-radius) !important;
   overflow: hidden;
@@ -274,7 +217,7 @@
   border-color: var(--apt-primary);
 }
 
-/* ── Staff Kanban ──────────────────────────────────────────── */
+/* Staff Kanban */
 .apt-staff-card {
   text-align: center;
   padding: 10px;
@@ -306,7 +249,7 @@
   margin-top: 8px;
 }
 
-/* ── Resource Kanban ────────────────────────────────────────── */
+/* Resource Kanban */
 .apt-resource-card {
   text-align: center;
   padding: 10px;
@@ -334,7 +277,7 @@
   background: linear-gradient(135deg, var(--apt-gray-100), var(--apt-gray-200));
 }
 
-/* ── Badge & Status Enhancements ───────────────────────────── */
+/* Badge & Status Enhancements */
 .o_field_badge.badge {
   border-radius: 20px !important;
   font-size: 11px !important;
@@ -343,37 +286,22 @@
   letter-spacing: 0.3px;
 }
 
-/* ── Stat Buttons ───────────────────────────────────────────── */
+/* Stat Buttons */
 .o_form_view .o_stat_info .o_stat_value {
   font-weight: 700;
   color: var(--apt-primary);
-}
-
-/* ── Settings Page ──────────────────────────────────────────── */
-.o_settings_container [data-key="appointment_pro"] .o_setting_box {
-  background: #fff;
-  border-radius: var(--apt-radius-sm);
-  box-shadow: var(--apt-shadow-sm);
-  margin-bottom: 8px;
-  padding: 12px 16px;
-  transition: var(--apt-transition);
 }
 
 .o_settings_container [data-key="appointment_pro"] .o_setting_box:hover {
   box-shadow: var(--apt-shadow-md);
 }
 
-/* ── List View Enhancements ─────────────────────────────────── */
-.o_list_view .o_data_row:hover td {
-  background: var(--apt-gray-50) !important;
-}
-
-/* ── Form Sheet ─────────────────────────────────────────────── */
+/* Form Sheet */
 .o_form_sheet {
   transition: var(--apt-transition);
 }
 
-/* ── Notebook tabs ──────────────────────────────────────────── */
+/* Notebook tabs  */
 .o_notebook .nav-tabs .nav-link.active {
   border-bottom-color: var(--apt-accent) !important;
   color: var(--apt-primary) !important;
@@ -384,23 +312,17 @@
   color: var(--apt-primary) !important;
 }
 
-/* ── Chatter ────────────────────────────────────────────────── */
-.o_form_view .o_chatter_panel {
-  border-left: 1px solid var(--apt-gray-200);
-}
-
-/* ── Responsive tweaks ──────────────────────────────────────── */
+/* Responsive tweaks */
 @media (max-width: 768px) {
   .apt-type-stats {
     flex-wrap: wrap;
   }
-
   .apt-kanban-card {
     padding: 10px;
   }
 }
 
-/* ── Animations ─────────────────────────────────────────────── */
+/* Animations */
 @keyframes apt-fade-in {
   from {
     opacity: 0;
@@ -413,49 +335,7 @@
   }
 }
 
-.o_appointment_kanban .o_kanban_record,
-.o_appointment_type_kanban .o_kanban_record {
-  animation: apt-fade-in 0.25s ease both;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(1) {
-  animation-delay: 0.02s;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(2) {
-  animation-delay: 0.05s;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(3) {
-  animation-delay: 0.08s;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(4) {
-  animation-delay: 0.11s;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(5) {
-  animation-delay: 0.14s;
-}
-
-.o_appointment_kanban .o_kanban_record:nth-child(6) {
-  animation-delay: 0.17s;
-}
-
-/* ── Utility ────────────────────────────────────────────────── */
-.apt-text-accent {
-  color: var(--apt-accent) !important;
-}
-
-.apt-bg-primary {
-  background: var(--apt-primary) !important;
-}
-
-.apt-border-accent {
-  border-color: var(--apt-accent) !important;
-}
-
-/* ── Custom Click/Focus Styling ─────────────────────────────── */
+/*  Custom Click/Focus Styling */
 .o_kanban_record:focus,
 .o_kanban_record:focus-within,
 .o_kanban_record:active,
@@ -471,4 +351,11 @@
   transform: scale(0.98) !important;
   box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05), var(--apt-shadow-sm) !important;
   transition: transform 0.1s, box-shadow 0.1s;
+}
+
+/* Website Booking / Reschedule slot buttons */
+.slot-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
 }

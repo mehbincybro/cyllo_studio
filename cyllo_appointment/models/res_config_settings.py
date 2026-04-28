@@ -25,12 +25,6 @@ from odoo import fields, models
 class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
-    appointment_default_buffer_time = fields.Float(
-        string='Default Buffer Time (minutes)',
-        config_parameter='cyllo_appointment.default_buffer_time',
-        default=0.0,
-        help='Default buffer time between appointments in minutes'
-    )
     appointment_default_slot_interval = fields.Selection([
         ('15', '15 Minutes'),
         ('30', '30 Minutes'),

@@ -31,7 +31,8 @@ class AppointmentCancelWizard(models.TransientModel):
         'appointment.appointment', string='Appointment',
         required=True, readonly=True
     )
-    cancellation_reason = fields.Text(string='Cancellation Reason', required=True)
+    cancellation_reason = fields.Text(string='Cancellation Reason',
+                                      required=True)
     cancelled_by = fields.Selection([
         ('customer', 'Customer'),
         ('staff', 'Staff'),
@@ -49,7 +50,8 @@ class AppointmentCancelWizard(models.TransientModel):
         })
         if self.send_notification:
             appt.message_post(
-                body=_('Appointment cancelled. Reason: %s') % self.cancellation_reason,
+                body=_(
+                    'Appointment cancelled. Reason: %s') % self.cancellation_reason,
                 subtype_xmlid='mail.mt_note'
             )
         # Send Staff Cancellation Email
@@ -63,6 +65,7 @@ class AppointmentCancelWizard(models.TransientModel):
                     staff_tmpl.send_mail(appt.id, force_send=True)
                 except Exception as e:
                     logging.getLogger(__name__).warning(
-                        "Failed to send staff cancellation email for %s: %s", appt.name, str(e)
+                        "Failed to send staff cancellation email for %s: %s",
+                        appt.name, str(e)
                     )
         return {'type': 'ir.actions.act_window_close'}

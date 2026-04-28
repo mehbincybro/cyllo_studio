@@ -56,7 +56,6 @@
             </form>
         </field>
     </record>
-
     <!-- Slot List View -->
     <record id="view_appointment_slot_list" model="ir.ui.view">
         <field name="name">appointment.slot.list</field>
@@ -80,7 +79,6 @@
             </tree>
         </field>
     </record>
-
     <!-- Slot Calendar View -->
     <record id="view_appointment_slot_calendar" model="ir.ui.view">
         <field name="name">appointment.slot.calendar</field>
@@ -95,7 +93,6 @@
             </calendar>
         </field>
     </record>
-
     <!-- Search View -->
     <record id="view_appointment_slot_search" model="ir.ui.view">
         <field name="name">appointment.slot.search</field>
@@ -121,7 +118,6 @@
             </search>
         </field>
     </record>
-
     <!-- Action -->
     <record id="action_appointment_slot" model="ir.actions.act_window">
         <field name="name">Time Slots</field>

@@ -36,22 +36,27 @@ class AppointmentRescheduleWizard(models.TransientModel):
         required=True, readonly=True
     )
     current_start = fields.Datetime(
-        string='Current Start', related='appointment_id.start_datetime', readonly=True
+        string='Current Start', related='appointment_id.start_datetime',
+        readonly=True
     )
-    new_start_datetime = fields.Datetime(string='New Start Date & Time', required=True)
+    new_start_datetime = fields.Datetime(string='New Start Date & Time',
+                                         required=True)
     new_end_datetime = fields.Datetime(
-        string='New End Date & Time', compute='_compute_new_end', store=True, readonly=False
+        string='New End Date & Time', compute='_compute_new_end', store=True,
+        readonly=False
     )
     reschedule_reason = fields.Text(string='Reason for Rescheduling')
     notify_customer = fields.Boolean(string='Notify Customer', default=True)
     notify_staff = fields.Boolean(string='Notify Staff', default=True)
 
-    @api.depends('new_start_datetime', 'appointment_id.appointment_type_id.duration')
+    @api.depends('new_start_datetime',
+                 'appointment_id.appointment_type_id.duration')
     def _compute_new_end(self):
         for rec in self:
             if rec.new_start_datetime and rec.appointment_id.appointment_type_id:
                 duration = rec.appointment_id.appointment_type_id.duration
-                rec.new_end_datetime = rec.new_start_datetime + timedelta(hours=duration)
+                rec.new_end_datetime = rec.new_start_datetime + timedelta(
+                    hours=duration)
             else:
                 rec.new_end_datetime = rec.new_start_datetime
 
@@ -62,7 +67,8 @@ class AppointmentRescheduleWizard(models.TransientModel):
             if appt and appt.appointment_type_id:
                 min_notice = appt.appointment_type_id.min_booking_notice
                 if min_notice > 0:
-                    min_start = fields.Datetime.now() + timedelta(hours=min_notice)
+                    min_start = fields.Datetime.now() + timedelta(
+                        hours=min_notice)
                     if rec.new_start_datetime < min_start:
                         raise UserError(_(
                             'This appointment type requires at least %s hour(s) advance notice.'
@@ -87,19 +93,27 @@ class AppointmentRescheduleWizard(models.TransientModel):
         appt.message_post(body=msg, subtype_xmlid='mail.mt_note')
         # Send Customer Reschedule Email
         if self.notify_customer:
-            cust_tmpl = self.env.ref('cyllo_appointment.email_template_appointment_rescheduled', raise_if_not_found=False)
+            cust_tmpl = self.env.ref(
+                'cyllo_appointment.email_template_appointment_rescheduled',
+                raise_if_not_found=False)
             if cust_tmpl:
                 try:
                     cust_tmpl.send_mail(appt.id, force_send=True)
                 except Exception as e:
-                    _logger.warning("Failed to send customer reschedule email for %s: %s", appt.name, str(e))
+                    _logger.warning(
+                        "Failed to send customer reschedule email for %s: %s",
+                        appt.name, str(e))
         # Send Staff Reschedule Email
         if self.notify_staff and appt.staff_id and appt.staff_id.notify_on_reschedule and appt.staff_id.email:
-            staff_tmpl = self.env.ref('cyllo_appointment.email_template_appointment_rescheduled_staff', raise_if_not_found=False)
+            staff_tmpl = self.env.ref(
+                'cyllo_appointment.email_template_appointment_rescheduled_staff',
+                raise_if_not_found=False)
             if staff_tmpl:
                 try:
                     staff_tmpl.send_mail(appt.id, force_send=True)
                 except Exception as e:
-                    _logger.warning("Failed to send staff reschedule email for %s: %s", appt.name, str(e))
+                    _logger.warning(
+                        "Failed to send staff reschedule email for %s: %s",
+                        appt.name, str(e))
 
         return {'type': 'ir.actions.act_window_close'}

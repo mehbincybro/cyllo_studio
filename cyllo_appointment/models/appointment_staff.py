@@ -32,7 +32,7 @@ class AppointmentStaff(models.Model):
     active = fields.Boolean(string='Active', default=True)
     user_id = fields.Many2one('res.users', string='Related User', tracking=True)
     employee_id = fields.Many2one('hr.employee', string='Employee',
-        help='Link to HR employee record if available')
+                                  help='Link to HR employee record if available')
     email = fields.Char(string='Email', required=True, tracking=True)
     phone = fields.Char(string='Phone')
     mobile = fields.Char(string='Mobile')
@@ -78,7 +78,8 @@ class AppointmentStaff(models.Model):
             ])
             rec.appointment_count = len(appointments)
             rec.upcoming_appointment_count = len(appointments.filtered(
-                lambda a: a.start_datetime >= today and a.state not in ('cancelled', 'rejected')
+                lambda a: a.start_datetime >= today and a.state not in (
+                    'cancelled', 'rejected')
             ))
 
     @api.onchange('user_id')

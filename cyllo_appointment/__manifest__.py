@@ -25,22 +25,23 @@
     'category': 'Services/Appointments',
     'summary': 'Advanced Appointment Scheduling with Resources, Staff, and Notifications',
     'description': """
-        Appointment Pro - A comprehensive appointment scheduling solution for Odoo 17.
+        Cyllo Appointment - A comprehensive appointment scheduling solution.
 
         Features:
         - Appointment Types with configurable settings
         - Resource & Staff Management
-        - Time Slot Management (intervals, buffer time, working hours)
-        - Email & SMS Notifications and Reminders
+        - Time Slot Management (intervals, working hours)
+        - Email & WhatsApp Notifications and Reminders
         - Rescheduling support
         - Minimum booking notice
         - Confirmation and follow-up messages
-        - Beautiful, user-friendly interface
+        - User-friendly interface
     """,
     'author': "Cyllo",
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
+    'icon': '/cyllo_appointment/static/description/cyllo_appointment_tick.svg',
     'depends': [
         'base',
         'mail',
@@ -48,6 +49,9 @@
         'resource',
         'sms',
         'web',
+        'website',
+        'website_sale',
+        'cyllo_whatsapp',
     ],
     'data': [
         # Security
@@ -56,7 +60,6 @@
         # Data
         'data/appointment_sequence.xml',
         'data/appointment_mail_templates.xml',
-        'data/appointment_sms_templates.xml',
         # Views
         'views/appointment_type_views.xml',
         'views/appointment_resource_views.xml',
@@ -65,15 +68,21 @@
         'views/appointment_views.xml',
         'views/appointment_settings_views.xml',
         'views/appointment_menus.xml',
+        'views/website_appointment_templates.xml',
+        'views/website_manage_templates.xml',
+        'views/sale_order_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
             'cyllo_appointment/static/src/css/appointment_pro.css',
+        ],
+        'web.assets_frontend': [
+            'cyllo_appointment/static/src/js/appointment_booking.js',
+            'cyllo_appointment/static/src/js/appointment_reschedule.js',
         ],
     },
     'installable': True,
     'application': True,
     'auto_install': False,
     'license': 'LGPL-3',
-    'images': ['static/src/img/appointment_pro_screenshot.png'],
 }

@@ -3,7 +3,8 @@
     <menuitem id="menu_appointment_root"
         name="Appointments"
         sequence="90"
-        groups="cyllo_appointment.group_appointment_user"/>
+        groups="cyllo_appointment.group_appointment_user"
+        web_icon="cyllo_appointment,static/description/cyllo_appointment_tick_dark.svg"/>
     <menuitem id="menu_appointment_main"
         name="Appointments"
         parent="menu_appointment_root"
@@ -55,4 +56,12 @@
         parent="menu_appointment_config"
         action="action_appointment_config_settings"
         sequence="100"/>
+
+    <!-- Website Menu -->
+    <record id="menu_appointment_website" model="website.menu">
+        <field name="name">Appointments</field>
+        <field name="url">/appointment</field>
+        <field name="parent_id" search="[('url', '=', '/default-main-menu')]"/>
+        <field name="sequence" type="int">50</field>
+    </record>
 </odoo>
