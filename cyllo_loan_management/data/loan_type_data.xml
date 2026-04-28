@@ -2,7 +2,7 @@
 <odoo>
     <data noupdate="1">
 
-        <record id="cyllo_loan_type_personal" model="cyllo.loan.type">
+        <record id="loan_type_personal" model="loan.type">
             <field name="name">Personal Loan</field>
             <field name="code">PERSONAL</field>
             <field name="loan_direction">both</field>
@@ -11,9 +11,14 @@
             <field name="default_duration">24</field>
             <field name="repayment_frequency">monthly</field>
             <field name="sequence">10</field>
+            <field name="loan_given_account_id" ref="account_loan_receivable"/>
+            <field name="loan_taken_account_id" ref="account_loan_payable"/>
+            <field name="interest_income_account_id" ref="account_interest_income"/>
+            <field name="interest_expense_account_id" ref="account_interest_expense"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
-        <record id="cyllo_loan_type_business" model="cyllo.loan.type">
+        <record id="loan_type_business" model="loan.type">
             <field name="name">Business Loan</field>
             <field name="code">BUSINESS</field>
             <field name="loan_direction">both</field>
@@ -22,9 +27,14 @@
             <field name="default_duration">60</field>
             <field name="repayment_frequency">monthly</field>
             <field name="sequence">20</field>
+            <field name="loan_given_account_id" ref="account_loan_receivable"/>
+            <field name="loan_taken_account_id" ref="account_loan_payable"/>
+            <field name="interest_income_account_id" ref="account_interest_income"/>
+            <field name="interest_expense_account_id" ref="account_interest_expense"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
-        <record id="cyllo_loan_type_vehicle" model="cyllo.loan.type">
+        <record id="loan_type_vehicle" model="loan.type">
             <field name="name">Vehicle Loan</field>
             <field name="code">VEHICLE</field>
             <field name="loan_direction">taking</field>
@@ -33,9 +43,12 @@
             <field name="default_duration">48</field>
             <field name="repayment_frequency">monthly</field>
             <field name="sequence">30</field>
+            <field name="loan_taken_account_id" ref="account_loan_payable"/>
+            <field name="interest_expense_account_id" ref="account_interest_expense"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
-        <record id="cyllo_loan_type_mortgage" model="cyllo.loan.type">
+        <record id="loan_type_mortgage" model="loan.type">
             <field name="name">Mortgage / Property Loan</field>
             <field name="code">MORTGAGE</field>
             <field name="loan_direction">taking</field>
@@ -44,9 +57,12 @@
             <field name="default_duration">240</field>
             <field name="repayment_frequency">monthly</field>
             <field name="sequence">40</field>
+            <field name="loan_taken_account_id" ref="account_loan_payable"/>
+            <field name="interest_expense_account_id" ref="account_interest_expense"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
-        <record id="cyllo_loan_type_employee" model="cyllo.loan.type">
+        <record id="loan_type_employee" model="loan.type">
             <field name="name">Employee Loan</field>
             <field name="code">EMPLOYEE</field>
             <field name="loan_direction">giving</field>
@@ -55,9 +71,12 @@
             <field name="default_duration">12</field>
             <field name="repayment_frequency">monthly</field>
             <field name="sequence">50</field>
+            <field name="loan_given_account_id" ref="account_loan_receivable"/>
+            <field name="interest_income_account_id" ref="account_interest_income"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
-        <record id="cyllo_loan_type_overdraft" model="cyllo.loan.type">
+        <record id="loan_type_overdraft" model="loan.type">
             <field name="name">Overdraft / Short-Term</field>
             <field name="code">OVERDRAFT</field>
             <field name="loan_direction">both</field>
@@ -66,6 +85,11 @@
             <field name="default_duration">3</field>
             <field name="repayment_frequency">bullet</field>
             <field name="sequence">60</field>
+            <field name="loan_given_account_id" ref="account_loan_receivable"/>
+            <field name="loan_taken_account_id" ref="account_loan_payable"/>
+            <field name="interest_income_account_id" ref="account_interest_income"/>
+            <field name="interest_expense_account_id" ref="account_interest_expense"/>
+            <field name="journal_id" ref="loan_journal"/>
         </record>
 
     </data>

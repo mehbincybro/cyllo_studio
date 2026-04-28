@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root Menu -->
+    <menuitem id="menu_loan_loan_root"
+        name="Loan Management"
+        sequence="85"
+        web_icon="cyllo_loan_management,static/description/icon.png"
+        groups="cyllo_loan_management.group_loan_loan_user"/>
+
+    <!-- Loans sub-menu -->
+    <menuitem id="menu_loan_loan_main"
+        name="Loans"
+        parent="menu_loan_loan_root"
+        sequence="10"/>
+
+    <menuitem id="menu_loan_loan_all"
+        name="All Loans"
+        parent="menu_loan_loan_main"
+        action="action_loan_loan_all"
+        sequence="10"/>
+
+    <menuitem id="menu_loan_loan_giving"
+        name="Loans Given"
+        parent="menu_loan_loan_main"
+        action="action_loan_loan_giving"
+        sequence="20"/>
+
+    <menuitem id="menu_loan_loan_taking"
+        name="Loans Taken"
+        parent="menu_loan_loan_main"
+        action="action_loan_loan_taking"
+        sequence="30"/>
+
+    <!-- Repayments sub-menu -->
+    <menuitem id="menu_loan_repayments"
+        name="Repayments"
+        parent="menu_loan_loan_root"
+        sequence="20"/>
+
+    <menuitem id="menu_loan_repayment_due"
+        name="Due Installments"
+        parent="menu_loan_repayments"
+        action="action_loan_repayment_due"
+        sequence="10"/>
+
+    <menuitem id="menu_loan_repayment_overdue"
+        name="Overdue Installments"
+        parent="menu_loan_repayments"
+        action="action_loan_repayment_overdue"
+        sequence="20"/>
+
+    <!-- Configuration sub-menu (Manager only) -->
+    <menuitem id="menu_loan_loan_config"
+        name="Configuration"
+        parent="menu_loan_loan_root"
+        sequence="90"
+        groups="cyllo_loan_management.group_loan_loan_manager"/>
+
+    <menuitem id="menu_loan_type"
+        name="Loan Types"
+        parent="menu_loan_loan_config"
+        action="action_loan_type"
+        sequence="10"
+        groups="cyllo_loan_management.group_loan_loan_manager"/>
+
+</odoo>

@@ -23,17 +23,17 @@ from odoo import fields, models, _
 from odoo.exceptions import UserError
 
 
-class CylloLoanCloseWizard(models.TransientModel):
+class LoanCloseWizard(models.TransientModel):
     # -------------------------------------------------------------------------
     # Private attributes
     # -------------------------------------------------------------------------
-    _name = 'cyllo.loan.close.wizard'
+    _name = 'loan.close.wizard'
     _description = 'Loan Close / Settlement Wizard'
 
     # -------------------------------------------------------------------------
     # Fields declaration
     # -------------------------------------------------------------------------
-    loan_id = fields.Many2one('cyllo.loan', required=True, ondelete='cascade')
+    loan_id = fields.Many2one('loan.loan', required=True, ondelete='cascade')
     loan_name = fields.Char(related='loan_id.name', readonly=True)
     amount_remaining = fields.Monetary(
         related='loan_id.amount_remaining',
@@ -42,19 +42,23 @@ class CylloLoanCloseWizard(models.TransientModel):
     )
     currency_id = fields.Many2one(related='loan_id.currency_id', readonly=True)
     close_date = fields.Date(required=True, default=fields.Date.today)
-    close_type = fields.Selection([
-        ('full_settlement', 'Full Settlement (All dues paid)'),
-        ('early_closure', 'Early Closure (Prepayment)'),
-        ('write_off', 'Write-Off (Bad Debt)'),
-    ], required=True, default='full_settlement')
     waive_remaining = fields.Boolean(
         string='Waive Remaining Amount',
         default=False,
         help='Cancel remaining unpaid installments without creating accounting entries.',
     )
-    journal_id = fields.Many2one(
-        'account.journal',
-        domain="[('type', 'in', ['bank', 'cash', 'general'])]",
+    is_interest_needed = fields.Boolean(
+        string='Pay Interest Amount',
+        default=True,
+        help='If enabled, pending interest should be paid while closing loan.',
+    )
+    is_penalty_needed = fields.Boolean(
+        string='Pay Penalty Amount',
+        default=True,
+        help='If enabled, penalty should be paid while closing loan.',
+    )
+    account_id = fields.Many2one(
+        'account.account',
     )
     notes = fields.Text(string='Closure Notes')
 
@@ -64,33 +68,33 @@ class CylloLoanCloseWizard(models.TransientModel):
     def action_close_loan(self):
         self.ensure_one()
         loan = self.loan_id
-        unpaid = loan.repayment_ids.filtered(lambda l: l.state not in ('paid',))
+        unpaid = loan.repayment_ids.filtered(lambda l: l.state not in ('paid', 'posted'))
+        remaining_principal_amount = sum(unpaid.mapped('principal_amount'))
+        penalty_amount = sum(unpaid.mapped('penalty_amount'))
 
-        if self.close_type == 'full_settlement':
-            if unpaid:
-                raise UserError(_(
-                    'There are still %d unpaid installments. '
-                    'Use "Early Closure" or waive the remaining amount.', len(unpaid)
-                ))
-        elif self.close_type in ('early_closure', 'write_off'):
-            if self.waive_remaining:
-                unpaid.write({'state': 'paid', 'amount_paid': unpaid.mapped('total_amount')[0] if len(unpaid) == 1 else 0})
-                for line in unpaid:
-                    line.write({'amount_paid': line.total_amount})
-            else:
-                unpaid.unlink()
+        if self.waive_remaining:
+            unpaid.write({
+                'state': 'paid',
+                'amount_paid': unpaid.mapped('total_amount')[0] if len(unpaid) == 1 else 0
+            })
+            for line in unpaid:
+                line.write({'amount_paid': line.total_amount})
+        else:
+            loan.repayment_ids.create({
+                'sequence': unpaid[0].sequence,
+                'due_date': fields.date.today(),
+                'principal_amount': round(remaining_principal_amount, 2),
+                'interest_amount': round(
+                    loan.amount_remaining - remaining_principal_amount, 2
+                ) if not self.is_interest_needed else 0,
+                'penalty_amount': penalty_amount if not self.is_penalty_needed else 0,
+            })
 
-        loan.write({'state': 'closed'})
-        loan.message_post(
-            body=_(
-                'Loan closed — Type: %s. %s',
-                dict(self._fields['close_type'].selection).get(self.close_type),
-                self.notes or '',
-            )
-        )
+            unpaid.unlink()
+
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'cyllo.loan',
+            'res_model': 'loan.loan',
             'res_id': loan.id,
             'view_mode': 'form',
         }

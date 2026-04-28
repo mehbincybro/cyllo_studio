@@ -1,9 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_cyllo_loan_type_user,cyllo.loan.type user,model_cyllo_loan_type,group_cyllo_loan_user,1,0,0,0
-access_cyllo_loan_type_manager,cyllo.loan.type manager,model_cyllo_loan_type,group_cyllo_loan_manager,1,1,1,1
-access_cyllo_loan_user,cyllo.loan user,model_cyllo_loan,group_cyllo_loan_user,1,1,1,0
-access_cyllo_loan_manager,cyllo.loan manager,model_cyllo_loan,group_cyllo_loan_manager,1,1,1,1
-access_cyllo_loan_repayment_user,cyllo.loan.repayment user,model_cyllo_loan_repayment,group_cyllo_loan_user,1,1,0,0
-access_cyllo_loan_repayment_manager,cyllo.loan.repayment manager,model_cyllo_loan_repayment,group_cyllo_loan_manager,1,1,1,1
-access_cyllo_loan_disburse_wizard_user,cyllo.loan.disburse.wizard user,model_cyllo_loan_disburse_wizard,group_cyllo_loan_user,1,1,1,1
-access_cyllo_loan_close_wizard_user,cyllo.loan.close.wizard user,model_cyllo_loan_close_wizard,group_cyllo_loan_manager,1,1,1,1
+access_loan_type_user,loan.type user,model_loan_type,group_loan_loan_user,1,0,0,0
+access_loan_type_manager,loan.type manager,model_loan_type,group_loan_loan_manager,1,1,1,1
+access_loan_loan_user,loan.loan user,model_loan_loan,group_loan_loan_user,1,1,1,0
+access_loan_loan_manager,loan.loan manager,model_loan_loan,group_loan_loan_manager,1,1,1,1
+access_loan_repayment_user,loan.repayment user,model_loan_repayment,group_loan_loan_user,1,1,0,0
+access_loan_repayment_manager,loan.repayment manager,model_loan_repayment,group_loan_loan_manager,1,1,1,1
+access_loan_disburse_wizard_user,loan.disburse.wizard user,model_loan_disburse_wizard,group_loan_loan_user,1,1,1,1
+access_loan_close_wizard_user,loan.close.wizard user,model_loan_close_wizard,group_loan_loan_manager,1,1,1,1

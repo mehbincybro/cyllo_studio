@@ -25,11 +25,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
-class CylloLoan(models.Model):
+class Loan(models.Model):
     # -------------------------------------------------------------------------
     # Private attributes
     # -------------------------------------------------------------------------
-    _name = 'cyllo.loan'
+    _name = 'loan.loan'
     _description = 'Loan'
     _inherit = ['mail.thread', 'mail.activity.mixin']
     _order = 'date_start desc, name'
@@ -60,7 +60,7 @@ class CylloLoan(models.Model):
         ('cancelled', 'Cancelled'),
     ], default='draft', required=True, tracking=True, copy=False)
     loan_type_id = fields.Many2one(
-        'cyllo.loan.type',
+        'loan.type',
         required=True,
         tracking=True,
         ondelete='restrict',
@@ -130,7 +130,6 @@ class CylloLoan(models.Model):
         string='Maturity Date',
         compute='_compute_date_end',
         store=True,
-        readonly=False,
         tracking=True,
     )
     # Accounting
@@ -163,7 +162,7 @@ class CylloLoan(models.Model):
     )
     # Repayment
     repayment_ids = fields.One2many(
-        'cyllo.loan.repayment',
+        'loan.repayment',
         'loan_id',
         string='Repayment Schedule',
         copy=False,
@@ -171,10 +170,17 @@ class CylloLoan(models.Model):
     # Entries relation
     invoice_ids = fields.Many2many(
         'account.move',
-        'cyllo_loan_invoice_rel',
+        'loan_loan_invoice_rel',
         'loan_id',
         'move_id',
         string='Invoices / Bills',
+        copy=False,
+    )
+    payment_ids = fields.Many2many(
+        'account.payment',
+        'loan_loan_payment_rel',
+        'loan_id',
+        'payment_id',
         copy=False,
     )
     # Computed summaries
@@ -203,7 +209,7 @@ class CylloLoan(models.Model):
     installment_count = fields.Integer(compute='_compute_totals', store=True)
     paid_installment_count = fields.Integer(compute='_compute_totals', store=True)
     overdue_installment_count = fields.Integer(compute='_compute_totals', store=True)
-    invoice_count = fields.Integer(compute='_compute_invoice_count', string='Invoices')
+    payment_count = fields.Integer(compute='_compute_payment_count', string='Payments')
     move_count = fields.Integer(compute='_compute_move_count', string='Journal Entries')
     notes = fields.Html(string='Internal Notes')
 
@@ -220,7 +226,7 @@ class CylloLoan(models.Model):
     # Default methods
     # -------------------------------------------------------------------------
     def _default_name(self):
-        return self.env['ir.sequence'].next_by_code('cyllo.loan') or '/'
+        return self.env['ir.sequence'].next_by_code('loan.loan') or '/'
 
     # -------------------------------------------------------------------------
     # Compute and search methods
@@ -255,9 +261,9 @@ class CylloLoan(models.Model):
             record.paid_installment_count = len(lines.filtered(lambda l: l.state == 'paid'))
             record.overdue_installment_count = len(lines.filtered(lambda l: l.state == 'overdue'))
 
-    def _compute_invoice_count(self):
+    def _compute_payment_count(self):
         for record in self:
-            record.invoice_count = len(record.invoice_ids)
+            record.payment_count = len(record.payment_ids)
 
     def _compute_move_count(self):
         for record in self:
@@ -291,12 +297,16 @@ class CylloLoan(models.Model):
                 self.interest_type = loan_type.interest_type
             if loan_type.journal_id:
                 self.journal_id = loan_type.journal_id
-            if loan_type.loan_account_id:
-                self.loan_account_id = loan_type.loan_account_id
-            if self.loan_direction == 'giving' and loan_type.interest_income_account_id:
-                self.interest_account_id = loan_type.interest_income_account_id
-            elif self.loan_direction == 'taking' and loan_type.interest_expense_account_id:
-                self.interest_account_id = loan_type.interest_expense_account_id
+            if self.loan_direction == 'giving':
+                if loan_type.loan_given_account_id:
+                    self.loan_account_id = loan_type.loan_given_account_id
+                if loan_type.interest_income_account_id:
+                    self.interest_account_id = loan_type.interest_income_account_id
+            elif self.loan_direction == 'taking':
+                if loan_type.loan_taken_account_id:
+                    self.loan_account_id = loan_type.loan_taken_account_id
+                if loan_type.interest_expense_account_id:
+                    self.interest_account_id = loan_type.interest_expense_account_id
 
     @api.onchange('loan_direction')
     def _onchange_loan_direction(self):
@@ -310,7 +320,7 @@ class CylloLoan(models.Model):
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', '/') == '/':
-                vals['name'] = self.env['ir.sequence'].next_by_code('cyllo.loan') or '/'
+                vals['name'] = self.env['ir.sequence'].next_by_code('loan.loan') or '/'
         return super().create(vals_list)
 
     def unlink(self):
@@ -348,7 +358,7 @@ class CylloLoan(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Disburse Loan'),
-            'res_model': 'cyllo.loan.disburse.wizard',
+            'res_model': 'loan.disburse.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_loan_id': self.id},
@@ -381,23 +391,21 @@ class CylloLoan(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': _('Close Loan'),
-            'res_model': 'cyllo.loan.close.wizard',
+            'res_model': 'loan.close.wizard',
             'view_mode': 'form',
             'target': 'new',
             'context': {'default_loan_id': self.id},
         }
 
-    def action_view_invoices(self):
+    def action_view_payments(self):
         self.ensure_one()
-        move_type = 'out_invoice' if self.loan_direction == 'giving' else 'in_invoice'
         return {
             'type': 'ir.actions.act_window',
-            'name': _('Invoices / Bills'),
-            'res_model': 'account.move',
+            'name': _('Payments'),
+            'res_model': 'account.payment',
             'view_mode': 'tree,form',
-            'domain': [('id', 'in', self.invoice_ids.ids)],
+            'domain': [('id', 'in', self.payment_ids.ids)],
             'context': {
-                'default_move_type': move_type,
                 'default_partner_id': self.partner_id.id,
             },
         }
@@ -415,6 +423,42 @@ class CylloLoan(models.Model):
             'res_model': 'account.move',
             'view_mode': 'tree,form',
             'domain': [('id', 'in', list(move_ids))],
+        }
+
+    def action_register_payment_all(self):
+        self.ensure_one()
+        posted_repayments = self.repayment_ids.filtered(lambda r: r.state == 'posted')
+        if posted_repayments:
+            raise UserError(_('Pay All Posted requires at least 1 posted installment. You can register payment individually for a single installment.'))
+            
+        account_type = 'asset_receivable' if self.loan_direction == 'giving' else 'liability_payable'
+        
+        outstanding_lines = self.env['account.move.line']
+        for rep in posted_repayments:
+            if rep.invoice_id:
+                outstanding_lines |= rep.invoice_id.line_ids.filtered(
+                    lambda l: l.account_id.account_type == account_type
+                        and not l.reconciled
+                        and l.partner_id
+                        and l.account_id not in [self.loan_account_id,
+                                                 self.interest_account_id]
+                )
+
+        if not outstanding_lines:
+            raise UserError(_('No outstanding lines found for posted installments.'))
+
+        return {
+            'name': _('Register Payment for All Posted'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'context': {
+                'active_model': 'account.move.line',
+                'active_ids': outstanding_lines.ids,
+                'loan_id': self.id,
+                'loan_repayment_id': posted_repayments.ids,
+            },
+            'target': 'new',
+            'type': 'ir.actions.act_window',
         }
 
     def action_generate_schedule(self):
@@ -462,7 +506,7 @@ class CylloLoan(models.Model):
         else:
             lines = self._compute_reducing_schedule(number_of_installments, frequency_months)
 
-        self.env['cyllo.loan.repayment'].create(lines)
+        self.env['loan.repayment'].create(lines)
 
     def _compute_flat_schedule(self, num_installments, freq_months):
         """Flat rate: interest = principal × rate × (duration/12) spread equally."""
@@ -531,10 +575,10 @@ class CylloLoan(models.Model):
         if self.loan_direction == 'giving':
             # Dr Loan Receivable  /  Cr Bank/Cash
             debit_account = self.loan_account_id
-            credit_account = journal_id.default_account_id
+            credit_account = partner.property_account_payable_id
         else:
             # Dr Bank/Cash  /  Cr Loan Payable
-            debit_account = journal_id.default_account_id
+            debit_account = partner.property_account_receivable_id
             credit_account = self.loan_account_id
 
         if not debit_account or not credit_account:

@@ -19,6 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import cyllo_loan
-from . import cyllo_loan_repayment
-from . import cyllo_loan_type
+from . import loan
+from . import loan_repayment
+from . import loan_type
+from . import account_payment_register

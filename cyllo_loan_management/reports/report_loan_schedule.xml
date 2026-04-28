@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-<template id="report_cyllo_loan_schedule_doc">
+<template id="report_loan_loan_schedule_doc">
     <t t-call="web.html_container">
         <t t-foreach="docs" t-as="loan">
             <t t-call="web.external_layout">

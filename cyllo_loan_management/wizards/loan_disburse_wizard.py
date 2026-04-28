@@ -21,17 +21,17 @@
 #############################################################################
 from odoo import api, fields, models
 
-class CylloLoanDisburseWizard(models.TransientModel):
+class LoanDisburseWizard(models.TransientModel):
     # -------------------------------------------------------------------------
     # Private attributes
     # -------------------------------------------------------------------------
-    _name = 'cyllo.loan.disburse.wizard'
+    _name = 'loan.disburse.wizard'
     _description = 'Loan Disbursement Wizard'
 
     # -------------------------------------------------------------------------
     # Fields declaration
     # -------------------------------------------------------------------------
-    loan_id = fields.Many2one('cyllo.loan', required=True, ondelete='cascade')
+    loan_id = fields.Many2one('loan.loan', required=True, ondelete='cascade')
     loan_name = fields.Char(related='loan_id.name', readonly=True)
     partner_id = fields.Many2one(related='loan_id.partner_id', readonly=True)
     principal_amount = fields.Monetary(
@@ -92,7 +92,7 @@ class CylloLoanDisburseWizard(models.TransientModel):
 
         return {
             'type': 'ir.actions.act_window',
-            'res_model': 'cyllo.loan',
+            'res_model': 'loan.loan',
             'res_id': loan.id,
             'view_mode': 'form',
         }

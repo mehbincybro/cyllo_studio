@@ -4,9 +4,9 @@
     <!-- ============================================================
          Repayment — Tree View (standalone)
     ============================================================ -->
-    <record id="view_cyllo_loan_repayment_tree" model="ir.ui.view">
-        <field name="name">cyllo.loan.repayment.tree</field>
-        <field name="model">cyllo.loan.repayment</field>
+    <record id="view_loan_repayment_tree" model="ir.ui.view">
+        <field name="name">loan.repayment.tree</field>
+        <field name="model">loan.repayment</field>
         <field name="arch" type="xml">
             <tree string="Repayment Installments"
                   decoration-danger="state == 'overdue'"
@@ -35,10 +35,10 @@
                     decoration-danger="state == 'overdue'"/>
                 <button name="action_post" type="object" string="Post"
                     icon="fa-check" invisible="state != 'draft'"
-                    groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                    groups="cyllo_loan_management.group_loan_loan_manager"/>
                 <button name="action_register_payment" type="object" string="Pay"
                     icon="fa-money" invisible="state not in ('posted', 'overdue')"
-                    groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                    groups="cyllo_loan_management.group_loan_loan_manager"/>
             </tree>
         </field>
     </record>
@@ -46,9 +46,9 @@
     <!-- ============================================================
          Repayment — Search View
     ============================================================ -->
-    <record id="view_cyllo_loan_repayment_search" model="ir.ui.view">
-        <field name="name">cyllo.loan.repayment.search</field>
-        <field name="model">cyllo.loan.repayment</field>
+    <record id="view_loan_repayment_search" model="ir.ui.view">
+        <field name="name">loan.repayment.search</field>
+        <field name="model">loan.repayment</field>
         <field name="arch" type="xml">
             <search string="Search Installments">
                 <field name="loan_id"/>
@@ -81,17 +81,17 @@
     </record>
 
     <!-- Window Action -->
-    <record id="action_cyllo_loan_repayment_due" model="ir.actions.act_window">
+    <record id="action_loan_repayment_due" model="ir.actions.act_window">
         <field name="name">Due Installments</field>
-        <field name="res_model">cyllo.loan.repayment</field>
+        <field name="res_model">loan.repayment</field>
         <field name="view_mode">tree</field>
         <field name="domain">[('state', 'in', ('posted', 'overdue'))]</field>
         <field name="context">{'search_default_unpaid': 1}</field>
     </record>
 
-    <record id="action_cyllo_loan_repayment_overdue" model="ir.actions.act_window">
+    <record id="action_loan_repayment_overdue" model="ir.actions.act_window">
         <field name="name">Overdue Installments</field>
-        <field name="res_model">cyllo.loan.repayment</field>
+        <field name="res_model">loan.repayment</field>
         <field name="view_mode">tree</field>
         <field name="domain">[('state', '=', 'overdue')]</field>
         <field name="context">{'search_default_overdue': 1}</field>

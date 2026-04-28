@@ -19,5 +19,5 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import cyllo_loan_close_wizard
-from . import cyllo_loan_disburse_wizard
+from . import loan_close_wizard
+from . import loan_disburse_wizard
