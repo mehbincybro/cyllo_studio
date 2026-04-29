@@ -33,10 +33,30 @@ export class WarningNode extends ConfigurationBase {
             type: "char",
             string: "Label"
         }
+        const warning_type = {
+            type: "char",
+            string: "Warning Type",
+        }
+        const notification_type = {
+            type: "char",
+            string: "Notification Type",
+        }
+        const notification_title = {
+            type: "char",
+            string: "Notification Title",
+        }
+        const notification_sticky = {
+            type: "boolean",
+            string: "Sticky",
+        }
         const fields = {
              warning_text,
              warning,
-             label
+             label,
+             warning_type,
+             notification_type,
+             notification_title,
+             notification_sticky,
         }
          return {
              mode: "edit",
@@ -82,7 +102,8 @@ export class WarningNode extends ConfigurationBase {
             this.props.updateImports({ parent: EXCEPTION_IMPORT, child: this.fieldState.warning, nodeId: this.props.id })
             return `raise ${this.fieldState.warning}("${this.fieldState.warning_text}")`
         }
-        else  if (this.fieldState.warning_type === "notification") {
+        else if (this.fieldState.warning_type === "notification") {
+            const sticky = this.fieldState.notification_sticky === true ? 'True' : 'False';
             return `action = {
 'type': 'ir.actions.client',
 'tag': 'display_notification',
@@ -90,7 +111,7 @@ export class WarningNode extends ConfigurationBase {
     'title': '${this.fieldState.notification_title}',
     'type': '${this.fieldState.notification_type}',
     'message': '${this.fieldState.warning_text}',
-    'sticky': False,
+    'sticky': ${sticky},
     'next': {'type': 'ir.actions.act_window_close'},
     },
 }
@@ -110,13 +131,11 @@ env['bus.bus']._sendone(channel, "notification", message)
 
     validateForm() {
         const { warning, warning_text, label, notification_type, notification_title, warning_type  } = this.fieldState;
-        // Validation rules
         const errors = {};
 
-         if (!label || label === '' || label.trim() === "") {
+        if (!label || label === '' || label.trim() === "") {
             errors.label = "Label must be a non-empty string.";
         }
-        // Validate model_id: must be a non-empty string
         if (warning_type === "error"){
             if (!warning) {
                 errors.warning = "Please select warning.";
@@ -125,7 +144,6 @@ env['bus.bus']._sendone(channel, "notification", message)
             if (!notification_type) {
                 errors.notification_type = "Please select type.";
             }
-
             if (!notification_title || notification_title === '' || notification_title.trim() === "") {
                 errors.notification_title = "Title must be a non-empty string.";
             }
@@ -135,12 +153,10 @@ env['bus.bus']._sendone(channel, "notification", message)
             errors.warning_text = "Set Warning text.";
         }
 
-        // If there are errors, return or log them
         if (Object.keys(errors).length > 0) {
             return { isValid: false, errors };
         }
 
-        // If no errors, form is valid
         return { isValid: true };
     }
 }

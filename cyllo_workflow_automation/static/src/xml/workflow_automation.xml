@@ -611,13 +611,7 @@
                             <div class="cy-w-divider"/>
                             <button class="cy-w-zoom-button" title="Fit to Screen" t-on-click="zoomReset"><i style="color:#111;" class="ri-focus-3-line"/></button>
                         </div>
-<!--                        <div class="cy-w-zoom-controls bar-zoom position-fixed">-->
-<!--							<button class="cy-w-zoom-button" t-on-click="zoomIn"><i style="color:#111;" class="ri-add-line"/></button>-->
-<!--                            <div class="cy-w-divider"/>-->
-<!--                            <button class="cy-w-zoom-button" t-on-click="zoomOut"><i style="color:#111;" class="ri-subtract-line"/></button>-->
-<!--                            <div class="cy-w-divider"/>-->
-<!--                            <button class="cy-w-zoom-button" t-on-click="zoomReset"><i style="color:#111;" class="ri-fullscreen-line"/></button>-->
-<!--						</div>-->
+
                         <t t-call="client_action.chat_bot"/>
                         <TestResultPanel
                             visible="state.testResult ? true : false"

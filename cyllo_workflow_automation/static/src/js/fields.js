@@ -2,7 +2,7 @@
 
 export const conditionFields = [{ name: 'model_id', type: "many2One" }, { name: "condition_tree_value", type: "json" }, { name: 'label', type: "char" }, { name: 'else_setup_code', type: "char" }];
 
-export const warningFields = [{ name: 'model_id', type: "many2One" }, { name: 'warning', type: 'selection' }, { name: 'warning_text', type: 'text' }, { name: 'used_variables', type: 'json' }, { name: 'label', type: "char" }, { name: 'warning_type', type: "char" }, { name: 'notification_type', type: "char" }, { name: 'notification_title', type: "char" }];
+export const warningFields = [{ name: 'model_id', type: "many2One" }, { name: 'warning', type: 'selection' }, { name: 'warning_text', type: 'text' }, { name: 'used_variables', type: 'json' }, { name: 'label', type: "char" }, { name: 'warning_type', type: "char" }, { name: 'notification_type', type: "char" }, { name: 'notification_title', type: "char" }, { name: 'notification_sticky', type: "boolean" }];
 
 export const searchFields = [{ name: 'model_id', type: "many2One" }, { name: 'search_domain', type: 'char' }, { name: 'search_limit', type: 'integer' }, { name: 'search_order', type: "selection" }, { name: 'search_order_field', type: "char" }, { name: 'search_domain_tree', type: "json" }, { name: 'search_variable', type: "json" }, { name: 'used_variables', type: 'json' }, { name: 'label', type: "char" }];
 

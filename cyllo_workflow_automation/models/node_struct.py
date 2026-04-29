@@ -62,6 +62,7 @@ class NodeStruct(models.Model):
     warning_type = fields.Char(string="Warning Type", default="error")
     notification_type = fields.Char(string="Notification Type")
     notification_title = fields.Char(string="Notification Title")
+    notification_sticky = fields.Boolean(string="Sticky Notification", default=False)
 
     #search block fields
     search_domain = fields.Char()
