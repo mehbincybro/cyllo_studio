@@ -261,7 +261,11 @@ export const QrMixin = {
         const align = config.align || 'center';
         const size = config.size || 100;
 
-        placeholderEl.className = 's_qr_block c_new';
+        let existingClasses = placeholderEl.className || '';
+        placeholderEl.className = 's_qr_block';
+        if (mode === 'insert' || existingClasses.includes('c_new')) {
+            placeholderEl.classList.add('c_new');
+        }
         placeholderEl.style.textAlign = align;
         placeholderEl.style.cursor = 'default';
         placeholderEl.style.opacity = '1';

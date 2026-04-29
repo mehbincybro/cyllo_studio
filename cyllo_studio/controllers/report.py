@@ -250,7 +250,10 @@ class StudioReportController(Controller):
     @route('/cyllo_studio/render_report_html', auth='user', csrf=False, type='json')
     def render_report_html(self, report_id, doc_ids):
         """
-        Render the target report with real data for the given doc_ids and return the HTML.
+        Return a preview URL for the target report so the frontend can render it
+        inside an <iframe src="..."> tag instead of using srcdoc with raw HTML.
+        Using Odoo's native /report/html/ route ensures the report is fully styled
+        (Odoo asset bundles load correctly) and all QWeb field values are resolved.
         """
         try:
             report = request.env['ir.actions.report'].browse(report_id)
