@@ -4,9 +4,9 @@
     <!-- ============================================================
          Loan — Tree View
     ============================================================ -->
-    <record id="view_cyllo_loan_tree" model="ir.ui.view">
-        <field name="name">cyllo.loan.tree</field>
-        <field name="model">cyllo.loan</field>
+    <record id="view_loan_loan_tree" model="ir.ui.view">
+        <field name="name">loan.loan.tree</field>
+        <field name="model">loan.loan</field>
         <field name="arch" type="xml">
             <tree string="Loans"
                   decoration-success="state == 'closed'"
@@ -41,37 +41,40 @@
     <!-- ============================================================
          Loan — Form View
     ============================================================ -->
-    <record id="view_cyllo_loan_form" model="ir.ui.view">
-        <field name="name">cyllo.loan.form</field>
-        <field name="model">cyllo.loan</field>
+    <record id="view_loan_loan_form" model="ir.ui.view">
+        <field name="name">loan.loan.form</field>
+        <field name="model">loan.loan</field>
         <field name="arch" type="xml">
             <form string="Loan">
                 <header>
                     <button name="action_approve" string="Approve"
                         type="object" class="oe_highlight"
                         invisible="state != 'draft'"
-                        groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                        groups="cyllo_loan_management.group_loan_loan_manager"/>
                     <button name="action_disburse" string="Disburse"
                         type="object" class="oe_highlight"
                         invisible="state != 'approved'"
-                        groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                        groups="cyllo_loan_management.group_loan_loan_manager"/>
                     <button name="action_generate_schedule" string="Generate Schedule"
                         type="object"
                         invisible="state not in ('draft', 'approved')"
                         confirm="This will delete and regenerate the repayment schedule. Continue?"/>
+                    <button name="action_register_payment_all" string="Pay All Posted"
+                        type="object" class="oe_highlight"
+                        invisible="state not in ('running', 'disbursed')"/>
                     <button name="action_close" string="Close Loan"
                         type="object"
                         invisible="state != 'running'"
-                        groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                        groups="cyllo_loan_management.group_loan_loan_manager"/>
                     <button name="action_cancel" string="Cancel"
                         type="object"
                         invisible="state in ('closed', 'cancelled')"
-                        groups="cyllo_loan_management.group_cyllo_loan_manager"
+                        groups="cyllo_loan_management.group_loan_loan_manager"
                         confirm="Are you sure you want to cancel this loan?"/>
                     <button name="action_reset_to_draft" string="Reset to Draft"
                         type="object"
                         invisible="state != 'cancelled'"
-                        groups="cyllo_loan_management.group_cyllo_loan_manager"/>
+                        groups="cyllo_loan_management.group_loan_loan_manager"/>
                     <field name="state" widget="statusbar"
                         statusbar_visible="draft,approved,running,closed"/>
                 </header>
@@ -79,9 +82,9 @@
                     <!-- Smart buttons -->
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object"
-                            name="action_view_invoices" icon="fa-file-text-o"
-                            invisible="invoice_count == 0">
-                            <field name="invoice_count" widget="statinfo" string="Invoices"/>
+                            name="action_view_payments" icon="fa-money"
+                            invisible="payment_count == 0">
+                            <field name="payment_count" widget="statinfo" string="Payments"/>
                         </button>
                         <button class="oe_stat_button" type="object"
                             name="action_view_moves" icon="fa-book"
@@ -115,32 +118,32 @@
 
                     <group>
                         <group string="Loan Details">
-                            <field name="loan_type_id"/>
+                            <field name="loan_type_id" readonly="state != 'draft'"/>
                             <label for="partner_id" string_expr="partner_type_label"/>
-                            <field name="partner_id" nolabel="1"/>
+                            <field name="partner_id" nolabel="1" readonly="state != 'draft'"/>
                             <field name="partner_type_label" invisible="1"/>
-                            <field name="user_id" widget="many2one_avatar_user"/>
-                            <field name="company_id" groups="base.group_multi_company"/>
-                            <field name="currency_id" groups="base.group_multi_currency"/>
+                            <field name="user_id" widget="many2one_avatar_user" readonly="state != 'draft'"/>
+                            <field name="company_id" groups="base.group_multi_company" readonly="state != 'draft'"/>
+                            <field name="currency_id" groups="base.group_multi_currency" readonly="state != 'draft'"/>
                         </group>
                         <group string="Loan Terms">
-                            <field name="principal_amount" widget="monetary"/>
-                            <field name="interest_type"/>
-                            <field name="interest_rate" string="Annual Rate (%)"/>
-                            <field name="repayment_frequency"/>
-                            <field name="duration" string="Duration (Months)"/>
-                            <field name="date_start"/>
-                            <field name="date_end"/>
+                            <field name="principal_amount" widget="monetary" readonly="state != 'draft'"/>
+                            <field name="interest_type" readonly="state != 'draft'"/>
+                            <field name="interest_rate" string="Annual Rate (%)" readonly="state != 'draft'"/>
+                            <field name="repayment_frequency" readonly="state != 'draft'"/>
+                            <field name="duration" string="Duration (Months)" readonly="state != 'draft'"/>
+                            <field name="date_start" readonly="state != 'draft'"/>
+                            <field name="date_end" readonly="state != 'draft'"/>
                         </group>
                     </group>
 
                     <group string="Accounting Configuration">
                         <group>
-                            <field name="journal_id"/>
-                            <field name="loan_account_id"/>
+                            <field name="journal_id" readonly="state != 'draft'"/>
+                            <field name="loan_account_id" readonly="state != 'draft'"/>
                         </group>
                         <group>
-                            <field name="interest_account_id"/>
+                            <field name="interest_account_id" readonly="state != 'draft'"/>
                             <field name="disburse_move_id" readonly="True"
                                 invisible="not disburse_move_id"/>
                         </group>
@@ -160,11 +163,8 @@
 
                     <notebook>
                         <page string="Repayment Schedule" name="repayment_schedule">
-                            <field name="repayment_ids">
-                                <tree string="Repayment Schedule"
-                                      decoration-danger="state == 'overdue'"
-                                      decoration-success="state == 'paid'"
-                                      decoration-muted="state == 'draft'">
+                            <field name="repayment_ids" readonly="state != 'draft'">
+                                <tree string="Repayment Schedule">
                                     <field name="sequence" string="#"/>
                                     <field name="due_date"/>
                                     <field name="principal_amount" widget="monetary" sum="Total"/>
@@ -191,9 +191,9 @@
                                 </tree>
                             </field>
                         </page>
-                        <page string="Invoices / Bills" name="invoices">
+                        <page string="Repayments" name="repayments">
                             <field name="invoice_ids">
-                                <tree string="Linked Invoices">
+                                <tree string="Linked Repayments">
                                     <field name="name" string="Reference"/>
                                     <field name="move_type" widget="badge"/>
                                     <field name="invoice_date"/>
@@ -212,7 +212,7 @@
                             </field>
                         </page>
                         <page string="Notes" name="notes">
-                            <field name="notes" placeholder="Internal notes..."/>
+                            <field name="notes" placeholder="Internal notes..." readonly="state != 'draft'"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -228,9 +228,9 @@
     <!-- ============================================================
          Loan — Kanban View
     ============================================================ -->
-    <record id="view_cyllo_loan_kanban" model="ir.ui.view">
-        <field name="name">cyllo.loan.kanban</field>
-        <field name="model">cyllo.loan</field>
+    <record id="view_loan_loan_kanban" model="ir.ui.view">
+        <field name="name">loan.loan.kanban</field>
+        <field name="model">loan.loan</field>
         <field name="arch" type="xml">
             <kanban default_group_by="state" quick_create="false"
                 class="o_kanban_small_column">
@@ -297,9 +297,9 @@
     <!-- ============================================================
          Loan — Search View
     ============================================================ -->
-    <record id="view_cyllo_loan_search" model="ir.ui.view">
-        <field name="name">cyllo.loan.search</field>
-        <field name="model">cyllo.loan</field>
+    <record id="view_loan_loan_search" model="ir.ui.view">
+        <field name="name">loan.loan.search</field>
+        <field name="model">loan.loan</field>
         <field name="arch" type="xml">
             <search string="Search Loans">
                 <field name="name" string="Reference"/>
@@ -345,18 +345,18 @@
     <!-- ============================================================
          Window Actions
     ============================================================ -->
-    <record id="action_cyllo_loan_all" model="ir.actions.act_window">
+    <record id="action_loan_loan_all" model="ir.actions.act_window">
         <field name="name">All Loans</field>
-        <field name="res_model">cyllo.loan</field>
+        <field name="res_model">loan.loan</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">Create your first loan!</p>
         </field>
     </record>
 
-    <record id="action_cyllo_loan_giving" model="ir.actions.act_window">
+    <record id="action_loan_loan_giving" model="ir.actions.act_window">
         <field name="name">Loans Given</field>
-        <field name="res_model">cyllo.loan</field>
+        <field name="res_model">loan.loan</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="domain">[('loan_direction', '=', 'giving')]</field>
         <field name="context">{'default_loan_direction': 'giving', 'search_default_giving': 1}</field>
@@ -366,9 +366,9 @@
         </field>
     </record>
 
-    <record id="action_cyllo_loan_taking" model="ir.actions.act_window">
+    <record id="action_loan_loan_taking" model="ir.actions.act_window">
         <field name="name">Loans Taken</field>
-        <field name="res_model">cyllo.loan</field>
+        <field name="res_model">loan.loan</field>
         <field name="view_mode">tree,kanban,form</field>
         <field name="domain">[('loan_direction', '=', 'taking')]</field>
         <field name="context">{'default_loan_direction': 'taking', 'search_default_taking': 1}</field>
@@ -378,9 +378,9 @@
         </field>
     </record>
 
-    <record id="action_cyllo_loan_overdue" model="ir.actions.act_window">
+    <record id="action_loan_loan_overdue" model="ir.actions.act_window">
         <field name="name">Overdue Loans</field>
-        <field name="res_model">cyllo.loan</field>
+        <field name="res_model">loan.loan</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[('overdue_installment_count', '>', 0), ('state', '=', 'running')]</field>
         <field name="context">{'search_default_overdue': 1}</field>

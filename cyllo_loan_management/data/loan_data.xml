@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Miscellaneous Journal: Loan Journal -->
+        <record id="loan_journal" model="account.journal">
+            <field name="name">Loan Journal</field>
+            <field name="code">LOAN</field>
+            <field name="type">general</field>
+            <field name="show_on_dashboard" eval="True"/>
+        </record>
+
+        <!-- Accounts -->
+        <record id="account_loan_receivable" model="account.account">
+            <field name="name">Loan Receivable</field>
+            <field name="code">100300</field>
+            <field name="account_type">asset_current</field>
+        </record>
+
+        <record id="account_loan_payable" model="account.account">
+            <field name="name">Loan Payable</field>
+            <field name="code">200300</field>
+            <field name="account_type">liability_current</field>
+        </record>
+
+        <record id="account_interest_income" model="account.account">
+            <field name="name">Interest Income</field>
+            <field name="code">400300</field>
+            <field name="account_type">income</field>
+        </record>
+
+        <record id="account_interest_expense" model="account.account">
+            <field name="name">Interest Expense</field>
+            <field name="code">600300</field>
+            <field name="account_type">expense</field>
+        </record>
+    </data>
+</odoo>

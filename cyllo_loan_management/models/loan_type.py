@@ -22,11 +22,11 @@
 from odoo import fields, models
 
 
-class CylloLoanType(models.Model):
+class LoanType(models.Model):
     # -------------------------------------------------------------------------
     # Private attributes
     # -------------------------------------------------------------------------
-    _name = 'cyllo.loan.type'
+    _name = 'loan.type'
     _description = 'Loan Type'
     _order = 'sequence, name'
 
@@ -60,29 +60,40 @@ class CylloLoanType(models.Model):
         ('annual', 'Annual'),
         ('bullet', 'Bullet (End of Term)'),
     ], required=True, default='monthly', string='Default Repayment Frequency')
-    # Accounting accounts
-    loan_account_id = fields.Many2one(
+    # Accounting accountsOnline
+    loan_taken_account_id = fields.Many2one(
         'account.account',
-        string='Loan Account',
-        domain="[('account_type', 'in', ['asset_non_current', 'asset_current', 'liability_non_current', 'liability_current'])]",
-        help='Balance sheet account for the loan principal.',
+        string='Loan Taken Account',
+        domain="[('account_type', 'in', ['liability_non_current', 'liability_current'])]",
+        help='Balance sheet account for the loan principal when taking a loan.',
+        default=lambda self: self.env.ref('cyllo_loan_management.account_loan_payable', raise_if_not_found=False),
+    )
+    loan_given_account_id = fields.Many2one(
+        'account.account',
+        string='Loan Given Account',
+        domain="[('account_type', 'in', ['asset_non_current', 'asset_current'])]",
+        help='Balance sheet account for the loan principal when giving a loan.',
+        default=lambda self: self.env.ref('cyllo_loan_management.account_loan_receivable', raise_if_not_found=False),
     )
     interest_income_account_id = fields.Many2one(
         'account.account',
         string='Interest Income Account',
         domain="[('account_type', 'in', ['income', 'income_other'])]",
         help='Account for interest income (loan giving).',
+        default=lambda self: self.env.ref('cyllo_loan_management.account_interest_income', raise_if_not_found=False),
     )
     interest_expense_account_id = fields.Many2one(
         'account.account',
         string='Interest Expense Account',
         domain="[('account_type', '=', 'expense')]",
         help='Account for interest expense (loan taking).',
+        default=lambda self: self.env.ref('cyllo_loan_management.account_interest_expense', raise_if_not_found=False),
     )
     journal_id = fields.Many2one(
         'account.journal',
         string='Default Journal',
         domain="[('type', 'in', ['bank', 'cash', 'general'])]",
+        default=lambda self: self.env.ref('cyllo_loan_management.loan_journal', raise_if_not_found=False),
     )
     company_id = fields.Many2one(
         'res.company',
@@ -103,7 +114,7 @@ class CylloLoanType(models.Model):
     # Compute and search methods
     # -------------------------------------------------------------------------
     def _compute_loan_count(self):
-        loan_data = self.env['cyllo.loan'].read_group(
+        loan_data = self.env['loan.loan'].read_group(
             [('loan_type_id', 'in', self.ids)],
             ['loan_type_id'],
             ['loan_type_id'],
@@ -120,7 +131,7 @@ class CylloLoanType(models.Model):
         return {
             'type': 'ir.actions.act_window',
             'name': f'Loans — {self.name}',
-            'res_model': 'cyllo.loan',
+            'res_model': 'loan.loan',
             'view_mode': 'tree,form',
             'domain': [('loan_type_id', '=', self.id)],
             'context': {'default_loan_type_id': self.id},

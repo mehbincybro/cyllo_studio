@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-    <record id="view_cyllo_loan_close_wizard_form" model="ir.ui.view">
-        <field name="name">cyllo.loan.close.wizard.form</field>
-        <field name="model">cyllo.loan.close.wizard</field>
+    <record id="view_loan_close_wizard_form" model="ir.ui.view">
+        <field name="name">loan.close.wizard.form</field>
+        <field name="model">loan.close.wizard</field>
         <field name="arch" type="xml">
             <form string="Close Loan">
                 <group string="Loan Summary">
@@ -14,18 +14,19 @@
                 </group>
                 <group string="Closure Details">
                     <field name="close_date"/>
-                    <field name="close_type"/>
-                    <field name="waive_remaining"
-                        invisible="close_type == 'full_settlement'"/>
-                    <field name="journal_id"
-                        invisible="close_type == 'full_settlement' or waive_remaining"/>
+                    <field name="is_interest_needed"/>
+                    <field name="is_penalty_needed"/>
+                    <field name="waive_remaining"/>
+                    <field name="account_id"
+                        invisible="not waive_remaining"
+                        required="waive_remaining"/>
                 </group>
                 <group>
                     <field name="notes" placeholder="Reason for closure..."/>
                 </group>
                 <footer>
                     <button name="action_close_loan" type="object"
-                        string="Close Loan" class="oe_highlight btn-danger"/>
+                        string="Close Loan" class="btn-danger"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>

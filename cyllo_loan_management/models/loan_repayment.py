@@ -23,11 +23,11 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 
 
-class CylloLoanRepayment(models.Model):
+class LoanRepayment(models.Model):
     # -------------------------------------------------------------------------
     # Private attributes
     # -------------------------------------------------------------------------
-    _name = 'cyllo.loan.repayment'
+    _name = 'loan.repayment'
     _description = 'Loan Repayment Installment'
     _order = 'loan_id, sequence'
 
@@ -35,7 +35,7 @@ class CylloLoanRepayment(models.Model):
     # Fields declaration
     # -------------------------------------------------------------------------
     loan_id = fields.Many2one(
-        'cyllo.loan',
+        'loan.loan',
         required=True,
         ondelete='cascade',
         index=True,
@@ -55,30 +55,25 @@ class CylloLoanRepayment(models.Model):
     ], default='draft', required=True, tracking=True, copy=False)
     # Amounts
     principal_amount = fields.Monetary(
-        currency_field='currency_id',
         required=True,
     )
-    interest_amount = fields.Monetary(currency_field='currency_id', required=True)
+    interest_amount = fields.Monetary(required=True)
     penalty_amount = fields.Monetary(
-        currency_field='currency_id',
         default=0.0,
         help='Late payment penalty applied to this installment.',
     )
     total_amount = fields.Monetary(
         compute='_compute_total_amount',
         store=True,
-        currency_field='currency_id',
         string='Total Due',
     )
     amount_paid = fields.Monetary(
-        currency_field='currency_id',
         default=0.0,
         copy=False,
     )
     amount_remaining = fields.Monetary(
         compute='_compute_amount_remaining',
         store=True,
-        currency_field='currency_id',
     )
     days_overdue = fields.Integer(compute='_compute_days_overdue', store=False)
     # Accounting links
@@ -97,10 +92,10 @@ class CylloLoanRepayment(models.Model):
     )
     payment_date = fields.Date(string='Payment Date', copy=False, tracking=True)
     # Related / convenience
-    currency_id = fields.Many2one(related='loan_id.currency_id', store=True)
-    partner_id = fields.Many2one(related='loan_id.partner_id', store=True)
+    currency_id = fields.Many2one('res.currency', related='loan_id.currency_id', store=True)
+    partner_id = fields.Many2one('res.partner', related='loan_id.partner_id', store=True)
     loan_direction = fields.Selection(related='loan_id.loan_direction', store=True)
-    company_id = fields.Many2one(related='loan_id.company_id', store=True)
+    company_id = fields.Many2one('res.company',related='loan_id.company_id', store=True)
     notes = fields.Char(string='Notes')
 
     # -------------------------------------------------------------------------
@@ -179,38 +174,34 @@ class CylloLoanRepayment(models.Model):
             record.write({'state': 'posted'})
 
     def action_register_payment(self):
-        """Mark installment as paid and post accounting entry."""
-        for record in self:
-            if record.state not in ('posted', 'overdue'):
-                raise UserError(_('Only posted or overdue installments can be paid.'))
-            # record._post_repayment_entry()
-            account_type = 'asset_receivable' if record.loan_direction == 'giving' else 'liability_payable'
+        """Open payment register wizard for this installment."""
+        self.ensure_one()
+        if self.state not in ('posted', 'overdue'):
+            raise UserError(_('Only posted or overdue installments can be paid.'))
+            
+        account_type = 'asset_receivable' if self.loan_direction == 'giving' else 'liability_payable'
 
-            outstanding_lines = record.invoice_id.line_ids.filtered(
-                lambda l: l.account_id.account_type == account_type
-                    and not l.reconciled
-                    and l.partner_id
-                    and l.account_id not in [record.loan_id.loan_account_id,
-                                             record.loan_id.interest_account_id]
-            )
-            print('out', outstanding_lines)
-            payment_register = self.env['account.payment.register'].with_context(
-                active_model='account.move.line',
-                active_ids=outstanding_lines.ids
-            ).create({
-                'payment_date': fields.Date.today(),
-            })
+        outstanding_lines = self.invoice_id.line_ids.filtered(
+            lambda l: l.account_id.account_type == account_type
+                and not l.reconciled
+                and l.partner_id
+                and l.account_id not in [self.loan_id.loan_account_id,
+                                         self.loan_id.interest_account_id]
+        )
 
-            payments = payment_register.action_create_payments()
-            print('payments', payments)
-
-            record.write({
-                'state': 'paid',
-                'amount_paid': record.total_amount,
-                'payment_date': fields.Date.today(),
-            })
-            # Check if parent loan is fully repaid
-            record.loan_id._check_running_state()
+        return {
+            'name': _('Register Payment'),
+            'res_model': 'account.payment.register',
+            'view_mode': 'form',
+            'context': {
+                'active_model': 'account.move.line',
+                'active_ids': outstanding_lines.ids,
+                'loan_id': self.loan_id.id,
+                'loan_repayment_id': self.id,
+            },
+            'target': 'new',
+            'type': 'ir.actions.act_window',
+        }
 
     def action_mark_overdue(self):
         """Mark overdue installments (called by scheduled action)."""
