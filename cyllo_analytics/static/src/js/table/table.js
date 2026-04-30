@@ -243,6 +243,15 @@ export class Table extends Component {
         return NaN; // or handle the case where no numeric value is found
     };
 
+    getImageUrl(val) {
+        if (!val) return '';
+        const parts = val.split(':');
+        if (parts.length === 4) {
+            return `/web/image?model=${parts[1]}&field=${parts[2]}&id=${parts[3]}`;
+        }
+        return '';
+    }
+
     onClickTable(ev) {
         var hasData = true
         if (this.props.data) {
@@ -275,22 +284,23 @@ export class Table extends Component {
 Table.template = xml`
 <t t-name="Table">
     <div t-attf-id="elem_{{props.data?.id}}" class="card cp mr-1 mt-0 align-items-stretch cy_tile cy_sheet_scrollable_table cy_sheet_table" t-att-class="state.className" t-att-style="state.style" t-on-click="onClickTable">
-        <div class="table_footer">
-            <t t-slot="footer"/>
-        </div>
-        <div t-ref="eChart-ref" t-attf-style="display: {{ state.hasData ? 'none': 'block' }}; {{state.cardStyle}}"/>
-        <t t-if="state.hasData">
-            <div  class="cy-churn_table--container cy_sheets_table">
-                <div class="cy-churn_tabl-header__section d-flex justify-content-between align-items-center cy-table-header-pad">
-                    <h2 class="cy-churn_tile-text cy-table-header"><t t-esc="convertToTitleCase(state.name)"/></h2>
-                    <div class="d-flex align-items-center gap-2 cy-table-nav-button-container">
-                        <div class="d-flex">
-                            <button class=" cy-churn-nav_btn" t-if="hasPrev" t-on-click.stop.prevent="() => this.onClick(-1)"><i class="ri-arrow-left-line"></i></button>
-                            <button class=" cy-churn-nav_btn" t-if="hasNext" t-on-click.stop.prevent="() => this.onClick(1)"><i class="ri-arrow-right-line cy-icon"></i></button>
-                        </div>
+        <div class="cy-churn_tabl-header__section d-flex justify-content-between align-items-center cy-table-header-pad sheet-header">
+            <h2 class="cy-churn_tile-text cy-table-header sheet-title"><t t-esc="convertToTitleCase(state.name)"></t></h2>
+            <div class="d-flex align-items-center gap-2 cy-table-nav-button-container">
+                <t t-if="state.hasData">
+                    <div class="d-flex">
+                        <button class=" cy-churn-nav_btn" t-if="hasPrev" t-on-click.stop.prevent="() => this.onClick(-1)"><i class="ri-arrow-left-line"></i></button>
+                        <button class=" cy-churn-nav_btn" t-if="hasNext" t-on-click.stop.prevent="() => this.onClick(1)"><i class="ri-arrow-right-line cy-icon"></i></button>
                     </div>
+                </t>
+                <div class="table_footer">
+                    <t t-slot="footer"></t>
                 </div>
             </div>
+        </div>
+        <div t-ref="eChart-ref" t-attf-style="display: {{ state.hasData ? 'none': 'block' }}; {{state.cardStyle}} height: calc(100% - clamp(35px, 15%, 60px));"></div>
+        <t t-if="state.hasData">
+            <div  class="cy-churn_table--container cy_sheets_table" style="height: calc(100% - clamp(35px, 15%, 60px)); overflow: auto;">
             <table class="cy-listView-table cy-churn_predict--table">
                 <thead class="cy-listview-head cy-churn-prdt_thead">
                     <tr>
@@ -298,7 +308,7 @@ Table.template = xml`
                         class="o_list_record_selector o_list_controller align-middle pe-1 cursor-pointer">
                         <span class="d-block min-w-0 text-truncate flex-grow-1"
                         t-esc="convertToTitleCase(heading)"
-                        t-on-click.stop.prevent="() => this.sortBy(heading)"/>
+                        t-on-click.stop.prevent="() => this.sortBy(heading)"></span>
                         </th>
                     </tr>
                 </thead>
@@ -306,7 +316,12 @@ Table.template = xml`
                 <tr class="o_data_row" t-foreach="state.arr" t-as="arr" t-key="arr_index">
                     <td class="o_data_cell cursor-pointer o_field_cell o_list_char"
                     t-foreach="state.heading" t-as="heading" t-key="heading_index">
-                    <span t-esc="arr[heading]"/>
+                        <t t-if="arr[heading] and typeof arr[heading] === 'string' and arr[heading].startsWith('CY_IMAGE:')">
+                            <img t-att-src="this.getImageUrl(arr[heading])" style="max-height: 32px; max-width: 32px; border-radius: 4px; object-fit: contain;"/>
+                        </t>
+                        <t t-else="">
+                            <span t-esc="arr[heading]"></span>
+                        </t>
                     </td>
                     </tr>
                 </tbody>

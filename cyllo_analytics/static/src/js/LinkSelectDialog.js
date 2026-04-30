@@ -60,9 +60,9 @@ export class LinkSelectDialog extends Component {
     /**
      * Confirm the selected field and close the dialog.
      */
-    confirm(){
+    confirm() {
         var field = this.state.field
-        if(field){
+        if (field) {
             this.props.onConfirm(field)
             this.props.close()
         }

@@ -311,6 +311,11 @@
                                     aria-selected="false">Global Filter
                             </button>
                         </li>
+                        <li t-if="state.fields.length" class="nav-item" role="presentation">
+                            <button class="nav-link" id="color-tab" data-bs-toggle="tab" data-bs-target="#color-tab-pane" type="button" role="tab" aria-controls="color-tab-pane" aria-selected="false">
+                                Color Mapping
+                            </button>
+                        </li>
                     </ul>
                     <div class="tab-content" id="filterTabContent">
                         <div t-if="state.fields.length"
@@ -407,6 +412,66 @@
                                 </t>
                             </div>
                         </div>
+                        <div class="tab-pane fade mt-2" id="color-tab-pane" role="tabpanel" aria-labelledby="color-tab" tabindex="0">
+                            <div class="col-12 mb-3">
+                                <t t-set="mappingErrors" t-value="this.getColorMappingErrors()"/>
+                                <t t-if="mappingErrors.length > 0">
+                                    <div class="alert alert-warning py-1 px-2 mb-2" style="font-size: 11px;">
+                                        <i class="ri-error-warning-line me-1"/>
+                                        <strong>Wait!</strong> Range overlaps detected:
+                                        <ul class="mb-0 ps-3">
+                                            <t t-foreach="mappingErrors" t-as="err" t-key="err">
+                                                <li><t t-esc="err"/></li>
+                                            </t>
+                                        </ul>
+                                    </div>
+                                </t>
+                                <button t-on-click="addColorMapping" class="cy-new-chat-button">
+                                    <i class="ri-add-line"/>
+                                    Add Mapping
+                                </button>
+                                <div class="mt-1" style="font-size: 10px; color: #888;">
+                                    * type <b>"all above"</b> or leave Max empty to color everything above the Min value.
+                                </div>
+                            </div>
+                            <div class="color-mapping-container overflow-auto" style="max-height: 400px; padding-bottom: 20px;">
+                                <t t-foreach="query_data.color_mappings" t-as="mapping" t-key="mapping_index">
+                                    <div class="d-flex align-items-center gap-2 mb-3 p-3 cy-button-stroke rounded shadow-sm bg-white" style="border: 1px solid #e0e0e0;">
+                                        <div class="flex-grow-1">
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Measure</label>
+                                            <select class="form-select form-select-sm" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'measure_alias', ev.target.value)">
+                                                <t t-foreach="query_data.measure" t-as="msr" t-key="msr.alias">
+                                                    <option t-att-value="msr.alias" t-att-selected="mapping.measure_alias == msr.alias">
+                                                        <t t-esc="msr.value"/>
+                                                    </option>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div style="width: 80px;">
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Min</label>
+                                            <input type="number" class="form-control form-control-sm" t-att-value="mapping.min_value" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'min_value', ev.target.value)"/>
+                                        </div>
+                                        <div style="width: 80px;">
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Max</label>
+                                            <input type="text" class="form-control form-control-sm" t-att-value="mapping.max_value" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'max_value', ev.target.value)" placeholder="all above"/>
+                                        </div>
+                                        <div style="width: 50px;">
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Color</label>
+                                            <input type="color" class="form-control form-control-color form-control-sm border-0 bg-transparent" t-att-value="mapping.color" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'color', ev.target.value)" style="cursor: pointer; padding: 0; min-height: 31px;"/>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Notes</label>
+                                            <input type="text" class="form-control form-control-sm" t-att-value="mapping.notes" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'notes', ev.target.value)" placeholder="Tooltip note..."/>
+                                        </div>
+                                        <div class="align-self-end pb-1">
+                                            <button class="btn btn-sm btn-outline-danger border-0" t-on-click="() => this.removeColorMapping(mapping_index)" title="Delete Mapping">
+                                                <i class="ri-delete-bin-line"/>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-7">
@@ -488,7 +553,7 @@
                        t-value="field.column || (field.model.table + '.' + field.name)"/>
                     <DragItem is_json="field.is_json" column="column"
                                draggable="'true'" type="props.mode == 'presets' ? 'measure' : props.mode"
-                              value="field.label"
+                               value="field.label"
                                field_type="field.field_type"
                                 relation="field.model.relation"
                                isPreset="field.isPreset"

@@ -29,7 +29,7 @@ class DashboardConfig(models.Model):
     """Dashboard Configuration Model"""
     _name = 'dashboard.config'
     _description = 'Dashboard Configuration'
-    _inherit = ['image.mixin']
+    _inherit = ['image.mixin', 'mail.thread']
 
     def _get_default_user_ids(self):
         """Returns the default admin user ids"""
@@ -129,7 +129,7 @@ class DashboardConfig(models.Model):
             rec = get_a_sheet()
         theme_id = rec.theme_id or self.env.ref(
             'cyllo_analytics.dashboard_theme_walden')
-        return [rec.get_data(), rec.id, theme_id.read_theme(), rec.name,
+        return [rec.get_data(), rec.id, theme_id.read_theme(), rec.name or 'Dashboard',
                 rec.banner_id.read(['name', 'image_1920'])]
 
     def get_data(self, field_list=None):
@@ -165,6 +165,12 @@ class DashboardConfig(models.Model):
         for t in all_tables: tables_map.setdefault(t['sheet_id'][0], []).append(t)
         axes_map = {}
         for a in all_axes: axes_map.setdefault(a['sheet_id'][0], []).append(a)
+        
+        all_color_mappings = self.sheet_ids.mapped('color_mapping_ids').read(
+            ["measure_alias", "min_value", "max_value", "color", "notes", "sheet_id"]
+        )
+        color_mappings_map = {}
+        for cm in all_color_mappings: color_mappings_map.setdefault(cm['sheet_id'][0], []).append(cm)
 
         # Global Filters (sheet_filter_ids) - requires deeper batch fetch
         global_filters = self.env['dashboard.sheet.global'].search([
@@ -196,6 +202,7 @@ class DashboardConfig(models.Model):
             res["filter_ids"] = filters_map.get(sheet.id, [])
             res["table_ids"] = tables_map.get(sheet.id, [])
             res["axis_ids"] = axes_map.get(sheet.id, [])
+            res["color_mappings"] = color_mappings_map.get(sheet.id, [])
             res["sheet_filter_ids"] = global_filters_processed_map.get(sheet.id, [])
             results.append(res)
 
@@ -252,7 +259,8 @@ class DashboardConfig(models.Model):
             else:
                 return False
         except Exception as error:
-            return False
+            self.env.cr.rollback()
+            return {"__query_error__": True, "message": str(error)}
 
     def save_position(self, vals):
         """Save the position of the graph in the dashboard (optimized)."""
@@ -468,6 +476,11 @@ class DashboardConfig(models.Model):
         if not app_id:
             # Fetch all root menus (Apps)
             apps = IrUiMenu.search([('parent_id', '=', False)], order='sequence')
+            
+            home_menu = self.env.ref('cyllo_dashboard.menu_cyllo_dashboard_root', raise_if_not_found=False)
+            if home_menu:
+                apps -= home_menu
+                
             return [{'id': m.id, 'name': m.name, 'sequence': m.sequence} for m in apps]
 
         def get_children_recursive(menu):
@@ -508,7 +521,7 @@ class DashboardConfig(models.Model):
             order='sequence, id'
         )
         sibling_list = list(siblings)
-        
+
         # Find exact insertion index
         if before_menu_id:
             idx = next((i for i, m in enumerate(sibling_list) if m.id == before_menu_id), len(sibling_list))
@@ -518,7 +531,7 @@ class DashboardConfig(models.Model):
             sibling_list.insert(idx + 1, new_menu)
         else:
             sibling_list.append(new_menu)
-            
+
         # Resequence safely with gaps of 10
         for i, menu in enumerate(sibling_list):
             menu.sequence = (i + 1) * 10

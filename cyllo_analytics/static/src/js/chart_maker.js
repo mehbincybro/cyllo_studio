@@ -49,7 +49,28 @@ export class ChartMaker {
         this.type = type
         this.dimension_axis = dimension_axis
         this.params = params
+        this.color_mappings = params.color_mappings || []
         this.chartOptions = {}
+    }
+
+    getPointMapping(measureAlias, value) {
+        if (!this.color_mappings || !this.color_mappings.length) return null;
+        return this.color_mappings.find(m => {
+            if (m.measure_alias !== measureAlias) return false;
+            const min = parseFloat(m.min_value);
+            const val = parseFloat(value);
+            const maxStr = String(m.max_value || '').toLowerCase().trim();
+            
+            if (maxStr === 'all above' || maxStr === '') {
+                return val >= min;
+            }
+            return val >= min && val <= parseFloat(m.max_value);
+        });
+    }
+
+    getPointColor(measureAlias, value) {
+        const mapping = this.getPointMapping(measureAlias, value);
+        return mapping ? mapping.color : null;
     }
 
     getDefaultZoom() {
@@ -80,21 +101,18 @@ export class ChartMaker {
         } else if (this.type === 'bar') {
             startValue += 8 * (this.measures.length)
         }
-        const dataZoom = [{
-            type: 'inside',
-            start: startValue >= 100 ? 95 : startValue,
-            end: 100,
-            zoomOnMouseWheel: false,
-            moveOnMouseMove: true,
-            moveOnMouseWheel: true
-        }]
-        if (this.dimension_axis === "x") {
-            dataZoom[0].id = "insideY"
-            dataZoom[0].YAxisIndex = 0
-        } else {
-            dataZoom[0].id = "insideX"
-            dataZoom[0].XAxisIndex = 0
-        }
+        const dataZoom = [
+            {
+                type: 'inside',
+                xAxisIndex: this.dimension_axis === "x" ? 0 : undefined,
+                yAxisIndex: this.dimension_axis === "x" ? undefined : 0,
+                start: startValue >= 100 ? 95 : startValue,
+                end: 100,
+                zoomOnMouseWheel: false,
+                moveOnMouseMove: true,
+                moveOnMouseWheel: true
+            }
+        ]
         return dataZoom
     }
 
@@ -113,7 +131,35 @@ export class ChartMaker {
         var legends = {
             data: [this.name]
         }
-        var formatter = '{a} <br/>{b} : {c}'
+        const richLabels = {};
+        const buildImagePath = (val) => {
+            if (typeof val === 'string' && val.startsWith('CY_IMAGE:')) {
+                const parts = val.split(':');
+                return `/web/image?model=${parts[1]}&field=${parts[2]}&id=${parts[3]}`;
+            }
+            return null;
+        };
+
+        var formatter = (params) => {
+            let value = params.name || params;
+            const imgPath = buildImagePath(value);
+            let content = "";
+            if (imgPath) {
+                const parts = value.split(':');
+                content = `${params.seriesName} <br/><img src="${imgPath}" style="max-height: 50px; max-width: 50px; border-radius: 4px; margin-top: 5px;"/><br/>ID: ${parts[3] || '?'}<br/>Value: ${params.value}`;
+            } else {
+                content = `${params.seriesName} <br/>${value} : ${params.value}`;
+            }
+
+            // Get Note from Mapping using seriesIndex-based alias lookup
+            const alias = this.measures[params.seriesIndex];
+            const mapping = this.getPointMapping(alias, params.value);
+            if (mapping && mapping.notes) {
+                content += `<div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px; font-style: italic; opacity: 0.9;"><strong>Note:</strong> ${mapping.notes}</div>`;
+            }
+            return content;
+        }
+
         this.hasItemStyle = this.measures.includes("itemStyle")
         if (this.hasItemStyle) {
             this.measures = this.measures.filter(item => item !== 'itemStyle')
@@ -133,6 +179,7 @@ export class ChartMaker {
             const label = this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key);
             series.push({
                 name: label,
+                id: key,
                 type: this.type,
                 data: [],
                 emphasis: {
@@ -141,16 +188,75 @@ export class ChartMaker {
                         fontSize: 10
                     }
                 },
+                itemStyle: {
+                    color: (params) => {
+                        const customColor = this.getPointColor(key, params.value);
+                        return customColor || params.color;
+                    }
+                }
             })
         })
+
+        var dataZoom = this.getDefaultZoom();
+
+        // Calculate dynamic image size to prevent congestion
+        let hasImage = this.data && this.data.some(item => typeof item[this.dimension] === 'string' && item[this.dimension].startsWith('CY_IMAGE:'));
+        let imgSize = 30;
+
+        if (hasImage) {
+            let totalItems = this.data ? this.data.length : 0;
+            const maxVisible = 12; // Enforce stricter limit for smaller builder panels so images never overlap
+
+            if (totalItems > maxVisible && dataZoom && dataZoom[0]) {
+                const visiblePercentage = (maxVisible / totalItems) * 100;
+                dataZoom[0].start = Math.max(0, 100 - visiblePercentage);
+                dataZoom[0].end = 100;
+            }
+
+            let visibleItems = totalItems;
+            if (dataZoom && dataZoom[0]) {
+                const start = dataZoom[0].start;
+                const end = dataZoom[0].end;
+                visibleItems = Math.max(1, Math.ceil((totalItems * (end - start)) / 100));
+            }
+            // Use safe baseline container width of 400px for tight dashboards
+            const estimatedSpace = 400 / visibleItems;
+            const maxImgSize = 32; // Limit max size so line charts don't scale too large and overlap
+            const minImgSize = 25; // Keep a readable minimum
+
+            imgSize = Math.max(minImgSize, Math.min(maxImgSize, Math.floor(estimatedSpace * 0.8)));
+        }
+
+        // Pre-populate rich labels
+        this.richLabels = richLabels;
+        this.data && this.data.forEach(item => {
+            const val = item[this.dimension];
+            const imgPath = buildImagePath(val);
+            if (imgPath) {
+                const key = val.replace(/[^a-zA-Z0-9]/g, '_');
+                this.richLabels[key] = {
+                    backgroundColor: {
+                        image: imgPath
+                    },
+                    height: imgSize,
+                    width: imgSize,
+                    borderRadius: 4
+                };
+            }
+        });
+
         var xAxis = {
             data: [],
             type: 'category',
             axisLabel: {
                 interval: 0,  // Show all labels
-                rotate: this.data.length > 6 ? 45 : 0,  // Rotate labels if they are too long
+                rotate: (Object.keys(this.richLabels).length > 0) ? 0 : (this.data.length > 6 ? 45 : 0),  // Disable rotate for images
                 fontSize: 10,
                 formatter: function (value) {
+                    if (typeof value === 'string' && value.startsWith('CY_IMAGE:')) {
+                        const key = value.replace(/[^a-zA-Z0-9]/g, '_');
+                        return `{${key}|}`;
+                    }
                     // Set maximum length for labels
                     const maxLength = 12;
                     if (value.length > maxLength) {
@@ -162,7 +268,8 @@ export class ChartMaker {
                         return value.substring(0, closestSpaceIndex) + '\n' + value.substring(closestSpaceIndex).trim();
                     }
                     return value;
-                }
+                },
+                rich: this.richLabels
             }
         }
 
@@ -175,24 +282,35 @@ export class ChartMaker {
         var yAxis = {
             type: "value"
         }
-        var dataZoom = this.getDefaultZoom()
+
+        let titleBgColor = '#ffffff';
+        let titleTextColor = '#333333';
+        let legendIconColor = '#e0e0e0';
+        if (this.params?.themeColor && this.params.themeColor.length > 0) {
+            titleBgColor = this.params.themeColor[0];
+            titleTextColor = '#ffffff';
+            legendIconColor = '#ffffff';
+        }
+
+        var legends = {
+            data: this.measures.map(key => this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key))
+        }
+
         let val = {
-            title: {
-                text: convertToTitleCase(this.name, " "),
-                padding: [15, 0, 0, 15],
-                textStyle: {
-                    fontSize: 17,
-                    fontWeight: 600,
-                    textBorderColor: 'white', // Add border color
-                }
-            },
             legends,
             legend: {
                 type: 'scroll',
-                orient: 'vertical',
-                right: 10,
-                top: 20,
-                bottom: 20,
+                orient: 'horizontal',
+                right: 20,
+                top: 10,
+                textStyle: {
+                    color: '#333333',
+                    fontSize: 12,
+                    fontWeight: 500
+                },
+                itemGap: 15,
+                icon: 'roundRect',
+                z: 100
             },
             xAxis: this.dimension_axis === "x" ? xAxis : yAxis,
             yAxis: this.dimension_axis === "x" ? yAxis : xAxis,
@@ -203,10 +321,10 @@ export class ChartMaker {
             },
             grid: {
                 containLabel: true,
-                left: '10', // Adjust as needed
-                right: '10%', // Adjust as needed
-                top: '15%', // Adjust as needed
-                bottom: '10%' // Adjust as needed
+                left: '2%',
+                right: '4%',
+                top: 40,
+                bottom: '10%'
             },
             dataZoom,
         }
@@ -243,14 +361,30 @@ export class ChartMaker {
                 if (this.hasItemStyle) {
                     data.itemStyle = item["itemStyle"]
                 }
+                const customColor = this.getPointColor(key, item[key]);
+                if (customColor) {
+                    data.itemStyle = { ...(data.itemStyle || {}), color: customColor };
+                }
                 val.series[i].data.push(data)
                 val.series[i].radius = radius
                 val.series[i].type = "pie"
+                val.series[i].label = {
+                    formatter: (params) => {
+                        if (typeof params.name === 'string' && params.name.startsWith('CY_IMAGE:')) {
+                            const key = params.name.replace(/[^a-zA-Z0-9]/g, '_');
+                            return `{${key}|}`;
+                        }
+                        return params.name;
+                    },
+                    rich: this.richLabels
+                }
             })
         })
         delete val.xAxis
         delete val.yAxis
-        val.tooltip.formatter = this.chartOptions.formatter + '({d}%)'
+        val.tooltip.formatter = (params) => {
+            return `${params.name}<br/>${params.seriesName}: <b>${params.value}</b> (${params.percent}%)`
+        }
         return val
     }
 
@@ -284,7 +418,17 @@ export class ChartMaker {
         var dataZoom = this.getDefaultZoom()
         const axisData = this.data.map(item => item[this.dimension]);
         var series = this.measures.map(measure => {
-            const data = this.data.map(item => [axisData.findIndex(axis => axis === item[this.dimension]), item[measure]])
+            const data = this.data.map(item => {
+                const val = item[measure];
+                const customColor = this.getPointColor(measure, val);
+                const res = {
+                    value: [axisData.findIndex(axis => axis === item[this.dimension]), val]
+                };
+                if (customColor) {
+                    res.itemStyle = { color: customColor };
+                }
+                return res;
+            });
             return {
                 data,
                 type: "scatter",
@@ -313,7 +457,17 @@ export class ChartMaker {
             }
         })
         val.radar = {
-            indicator
+            indicator,
+            axisName: {
+                formatter: (value) => {
+                    if (typeof value === 'string' && value.startsWith('CY_IMAGE:')) {
+                        const key = value.replace(/[^a-zA-Z0-9]/g, '_');
+                        return `{${key}|}`;
+                    }
+                    return value;
+                },
+                rich: this.richLabels
+            }
         }
         val.series = [{
             name: this.name,
@@ -428,14 +582,17 @@ export class ChartMaker {
                             shadowColor: 'rgba(0, 0, 0, 0.5)'
                         }
                     }
-                }]
+                }],
+                graphic: val.graphic
             };
             if (this.dimension_axis === "x") {
                 option.xAxis.data = xAxis
                 option.yAxis.data = yAxis
+                option.yAxis.axisLabel = val.xAxis?.axisLabel
             } else {
                 option.xAxis.data = yAxis
                 option.yAxis.data = xAxis
+                option.xAxis.axisLabel = val.yAxis?.axisLabel
             }
         } else {
             option = val
@@ -520,11 +677,14 @@ export class ChartMaker {
             }
             ],
             dataZoom,
+            graphic: val.graphic,
         };
         if (this.dimension_axis === "x") {
             option.xAxis.data = axisData
+            option.xAxis.axisLabel = val.xAxis?.axisLabel
         } else {
             option.yAxis.data = axisData
+            option.yAxis.axisLabel = val.yAxis?.axisLabel
         }
         return option
     }
@@ -532,11 +692,28 @@ export class ChartMaker {
     funnelChart(val) {
         let data = this.dimension_axis === "x" ? val.xAxis.data : val.yAxis.data;
         data = data.filter(item => item).map(item => typeof item === 'number' ? JSON.stringify(item) : item)
+        const baseFormatter = this.dimension_axis === "x" ? val.xAxis?.axisLabel?.formatter : val.yAxis?.axisLabel?.formatter;
+
+        // Calculate funnel-specific image size to prevent vertical overlapping inside the funnel bounds
+        const totalFunnelItems = this.data ? this.data.length : 1;
+        // Strictly bound height to scale natively under the slice bounds, safely assuming a 220px inner vertical area
+        // with appropriate buffering for the 2px gap per slice. No aggressive minimum bounds.
+        const funnelImgSize = Math.max(2, Math.min(32, Math.floor(220 / totalFunnelItems) - 3));
+
+        const funnelRichLabels = {};
+        for (const [key, value] of Object.entries(this.richLabels || {})) {
+            funnelRichLabels[key] = {
+                ...value,
+                height: funnelImgSize,
+                width: funnelImgSize
+            };
+        }
+
         const seriesData = {
             name: convertToTitleCase(this.measures[0]),
             type: 'funnel',
             left: '10%',
-            top: 80,
+            top: 40,
             bottom: 60,
             width: '80%',
             min: 0,
@@ -547,7 +724,11 @@ export class ChartMaker {
             gap: 2,
             label: {
                 show: true,
-                position: 'inside'
+                position: 'inside',
+                formatter: (params) => {
+                    return baseFormatter && typeof baseFormatter === 'function' ? baseFormatter(params.name) : params.name;
+                },
+                rich: funnelRichLabels
             },
             labelLine: {
                 length: 10,
@@ -577,13 +758,29 @@ export class ChartMaker {
                 ...seriesData
             }
         })
+        let titleTextColor = '#333333';
+        let legendIconColor = '#e0e0e0';
+        if (this.params?.themeColor && this.params.themeColor.length > 0) {
+            titleTextColor = '#ffffff';
+            legendIconColor = '#ffffff';
+        }
+
         val.legend = {
-            top: 34,
+            top: 10,
             data,
             type: 'scroll',
             orient: 'horizontal',
-            right: 10,
-            bottom: 20,
+            right: 20,
+            formatter: (name) => {
+                return baseFormatter && typeof baseFormatter === 'function' ? baseFormatter(name) : name;
+            },
+            textStyle: {
+                rich: this.richLabels,
+                color: '#333333',
+                fontSize: 12,
+                fontWeight: 500
+            },
+            icon: 'roundRect'
         }
         val.series = series
         delete val.xAxis
@@ -600,27 +797,17 @@ export class ChartMaker {
             var lineSeriesData = this.data.map(item => item[this.measures[1]])
             option = {
                 dataZoom,
-                title: {
-                    text: convertToTitleCase(this.name, " "),
-                    padding: [15, 0, 0, 15],
-                    textStyle: {
-                        fontSize: 17,
-                        fontWeight: 600,
-                        textBorderColor: 'white', // Add border color
-                    }
-                },
+                title: val.title,
                 tooltip: {
                     trigger: 'axis',
                     axisPointer: {
                         type: 'shadow'
                     }
                 },
+                graphic: val.graphic,
                 legend: {
-                    data: [convertToTitleCase(this.measures[0]), convertToTitleCase(this.measures[1])],
-                    textStyle: {
-                        color: '#ccc'
-                    },
-                    top: 35,
+                    ...val.legend,
+                    data: [convertToTitleCase(this.measures[0]), convertToTitleCase(this.measures[1])]
                 },
                 series: [{
                     name: convertToTitleCase(this.measures[1]),
@@ -689,6 +876,7 @@ export class ChartMaker {
             };
             var xAxis = {
                 data: axisCategory,
+                axisLabel: val.xAxis?.axisLabel,
                 axisLine: {
                     lineStyle: {
                         color: '#ccc'
@@ -696,6 +884,7 @@ export class ChartMaker {
                 }
             }
             var yAxis = {
+                axisLabel: val.yAxis?.axisLabel,
                 splitLine: {
                     show: false
                 },

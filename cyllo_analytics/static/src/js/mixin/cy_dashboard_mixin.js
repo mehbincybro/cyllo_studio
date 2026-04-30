@@ -258,14 +258,25 @@ export function CyAnalyticMixin(CyComponent) {
             this.items.forEach((item, i) => {
                 var sql = item.query.replace(/\n/g, ' ');
                 this.orm.call("dashboard.config", "sql_execute", [sql]).then((res) => {
+                    const measuresList = eval(item.measure);
+                    const measureAliases = measuresList.map(m => typeof m === 'object' ? m.alias : m);
+                    const measureNames = (Array.isArray(measuresList) ? measuresList : []).reduce((acc, m) => {
+                        if (typeof m === 'object' && (m.isPreset || m.value)) {
+                            acc[m.alias] = m.value;
+                        }
+                        return acc;
+                    }, {});
+
                     let props = {
                         data: res,
                         name: item.name,
-                        measures: eval(item.measure),
+                        measures: measureAliases,
+                        measureNames: measureNames,
                         dimension: item.dimension,
                         dimension_axis: item.dimension_axis,
                         type: item.type,
-                        id: item.id
+                        id: item.id,
+                        color_mappings: item.color_mappings || []
                     }
                     this.ChartData.data.push(props)
                     itemLength--;
@@ -324,14 +335,44 @@ export function CyAnalyticMixin(CyComponent) {
         }
 
         applyItemFilter(item) {
+            if (!item.query) {
+                // Query not yet computed – skip filter application for this item.
+                return;
+            }
             var domains = item.filter_ids
                 .filter(item => item.is_active)
                 .map(item => item.domain)
             var where = domains.join(' AND ')
+
+            // Pre-compute which tables are actually referenced in the FROM / JOIN
+            // section of this query so we can safely skip global filters whose
+            // field table is absent (e.g. a custom query on purchase_order_line
+            // with a date filter mapped to purchase_order.create_date).
+            const _tablesInQuery = (() => {
+                const upperQ = item.query.toUpperCase();
+                const fromIdx = upperQ.indexOf('FROM');
+                if (fromIdx === -1) return new Set();
+                const fromSection = upperQ.slice(fromIdx);
+                const tableRe = /(?:FROM|JOIN)\s+"?([a-zA-Z_][a-zA-Z0-9_]*)"?/gi;
+                const tables = new Set();
+                let m;
+                while ((m = tableRe.exec(fromSection)) !== null) {
+                    tables.add(m[1].toUpperCase());
+                }
+                return tables;
+            })();
+
             item.sheet_filter_ids.forEach(filter => {
                 var {operator, code} = filter.global_filter_id
                 var value = this.filters[code]
                 if (value?.length) {
+                    // Skip filters that reference a table not present in the query.
+                    if (filter.field) {
+                        const filterTable = filter.field.split('.')[0].toUpperCase();
+                        if (!_tablesInQuery.has(filterTable)) {
+                            return; // table not in FROM/JOIN – skip this global filter
+                        }
+                    }
                     value = typeof value == 'string' ? `'${value}'` :
                         typeof value == 'object' ? `(${value.join(', ')})` : value
                     var domain = `${filter.field} ${operator} ${value}`
@@ -342,6 +383,7 @@ export function CyAnalyticMixin(CyComponent) {
             var new_query = this.applyFilters(item.query, where)
             item.query = new_query
         }
+
 
         applyFilters(query, newCondition) {
             const beforeFrom = query.slice(0, query.toUpperCase().lastIndexOf("FROM"));

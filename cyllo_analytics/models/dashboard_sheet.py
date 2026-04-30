@@ -105,6 +105,11 @@ class DashboardSheet(models.Model):
         'res.currency',
         'Currency'
     )
+    color_mapping_ids = fields.One2many(
+        'dashboard.sheet.color.mapping',
+        'sheet_id',
+        string='Color Mappings'
+    )
 
     @api.model
     def get_config_data(self):
@@ -297,7 +302,7 @@ class DashboardSheet(models.Model):
                 lambda x: x.dashboard_config_id.id in configs
             ).ids
             is_new_sheet = not bool(len(data.get("configs", [])) > len(sheet_option_ids))
-
+            
             if is_graph_before_now_kpi:
                 for record in rec.dashboard_sheet_option_ids:
                     record.write({"attributes": {**record.attributes, "graph_width": 3, "graph_height": 1}})
@@ -315,7 +320,7 @@ class DashboardSheet(models.Model):
 
         # Commands for related records
         batch_vals = {}
-
+        
         # filter_ids
         filter_commands = []
         sheet_filter = []
@@ -431,6 +436,21 @@ class DashboardSheet(models.Model):
 
         if batch_vals:
             rec.write(batch_vals)
+
+        # Update Color Mappings
+        if "color_mappings" in data:
+            rec.color_mapping_ids.unlink()
+            for mapping in data["color_mappings"]:
+                # Don't force float cast for max_value because it might be "all above"
+                max_val = mapping.get("max_value", "")
+                self.env["dashboard.sheet.color.mapping"].create({
+                    "sheet_id": rec.id,
+                    "measure_alias": mapping.get("measure_alias"),
+                    "min_value": float(mapping.get("min_value", 0)),
+                    "max_value": str(max_val) if max_val is not None else "",
+                    "color": mapping.get("color", "#344BD2"),
+                    "notes": mapping.get("notes", ""),
+                })
 
         rec.unlink_data(data.get("unlink_list", {"axis":[], "tables":[], "where":[], "configs":[]}))
         return {
@@ -699,7 +719,7 @@ class DashboardSheet(models.Model):
         join_data = []
         all_models = []
         join = []
-
+        
         # Batch read for table_ids
         tables = self.table_ids.read(["field", "join", "model", "model_id", "name", "linked"])
         for table_val in tables:
@@ -771,6 +791,7 @@ class DashboardSheet(models.Model):
                 "icon": self.kpi_icon,
                 "model": self.kpi_model,
             },
+            "color_mappings": self.color_mapping_ids.read(["measure_alias", "min_value", "max_value", "color", "notes"]),
         }
 
     def get_dashboard_sheet(self):
@@ -984,5 +1005,18 @@ class DashboardSheetGlobal(models.Model):
              "operator"]
         )[0]
         return rec
+
+
+class DashboardSheetColorMapping(models.Model):
+    """Model representing color mapping for measures in dashboard sheets."""
+    _name = "dashboard.sheet.color.mapping"
+    _description = "Dashboard Sheet Color Mapping"
+
+    sheet_id = fields.Many2one("dashboard.sheet", string="Sheet", ondelete="cascade")
+    measure_alias = fields.Char(string="Measure Alias")
+    min_value = fields.Float(string="Min Value")
+    max_value = fields.Char(string="Max Value")
+    color = fields.Char(string="Color", default="#344BD2")
+    notes = fields.Text(string="Notes")
 
 

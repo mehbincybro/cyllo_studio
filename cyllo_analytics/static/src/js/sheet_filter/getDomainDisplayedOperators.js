@@ -3,7 +3,7 @@ export const getDomainDisplayedOperators = (fieldDef) => {
     if (!fieldDef) {
         fieldDef = {};
     }
-    const {type, is_property} = fieldDef;
+    const { type, is_property } = fieldDef;
 
     if (is_property) {
         switch (type) {
@@ -42,7 +42,7 @@ export const getDomainDisplayedOperators = (fieldDef) => {
                 "not_set",
             ];
         case "many2one":
-             return ["in", "not in", "=", "!=", "set", "not_set"];
+            return ["in", "not in", "=", "!=", "set", "not_set"];
         case "many2many":
             return ["in", "not in", "set", "not_set"];
         case "one2many":

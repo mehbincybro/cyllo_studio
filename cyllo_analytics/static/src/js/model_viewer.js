@@ -10,7 +10,7 @@ const { Component, useState, onWillStart, useEffect, onWillUpdateProps } = owl
 
 export class ModelViewer extends Component {
     /** Class for model viewer */
-    setup(){
+    setup() {
         this.notification = useService("notification")
         this.orm = useService("orm")
         this.dialog = useService("dialog")
@@ -27,8 +27,8 @@ export class ModelViewer extends Component {
                 join.model_id = model.id
                 return join
             })
-            this.env.bus.trigger('CY:UPDATE_QUERY', {type: 'join', data})
-            this.env.bus.trigger('CY:UPDATE_QUERY', {type: 'joinData', data: joinData})
+            this.env.bus.trigger('CY:UPDATE_QUERY', { type: 'join', data })
+            this.env.bus.trigger('CY:UPDATE_QUERY', { type: 'joinData', data: joinData })
         }, () => [this.state.models.length])
         onWillUpdateProps((newProps) => {
             this.state.models = newProps.models
@@ -38,19 +38,19 @@ export class ModelViewer extends Component {
      * Define the domain for model selection.
      * @returns {Array} - The domain for model selection.
      */
-    getDomain(){
+    getDomain() {
         return [["transient", "=", false]]
     }
-    onRemoveModel(ev){
+    onRemoveModel(ev) {
         var indexToRemove = this.state.models.findIndex(item => item.id === ev.id)
         if (indexToRemove !== -1) {
             var model = this.state.models[indexToRemove]
             var data = this.props.checkHasLink(model)
-            if(data.link){
+            if (data.link) {
                 this.constructErrorMessage(data)
             } else {
-                if(ev.linked_by.id){
-                    this.env.bus.trigger("CY:UPDATE_UNLINKS", {type: 'tables', id: ev.linked_by.id})
+                if (ev.linked_by.id) {
+                    this.env.bus.trigger("CY:UPDATE_UNLINKS", { type: 'tables', id: ev.linked_by.id })
                 }
                 this.state.models.splice(indexToRemove, 1);
                 this.props.setModel(this.state.models)
@@ -58,7 +58,7 @@ export class ModelViewer extends Component {
             }
         }
     }
-    constructErrorMessage(data){
+    constructErrorMessage(data) {
         var message = `
             Can't delete the model because of the dependencies shown below
             Please remove them first to delete the model
@@ -77,29 +77,29 @@ export class ModelViewer extends Component {
      * Handle the selection of a model.
      * @param {Object} ev - The selected model's event.
      */
-    async onSelect(ev){
-        if(!ev) return
+    async onSelect(ev) {
+        if (!ev) return
         const data = await this.orm.call('dashboard.sheet', 'get_data', [ev[0].id])
-        for(var i in data.fields){
+        for (var i in data.fields) {
             data.fields[i].model = data
         }
-         // Check if there are already selected models
-        if(this.state.models.length){
+        // Check if there are already selected models
+        if (this.state.models.length) {
             var field_list = []
             var inverse_field_list = []
             var fields = this.state.models.map((model) => model.fields)
             // Find fields related to the selected model
-            for(var field of fields){
+            for (var field of fields) {
                 Object.entries(field).forEach(entry => {
-                    if(entry[1].relation == data.model && entry[1].type == "many2one"){
+                    if (entry[1].relation == data.model && entry[1].type == "many2one") {
                         field_list.push(entry)
                     }
                 })
             }
             var models = this.state.models.map((model) => model.model)
-             // Find inverse fields related to the selected model
+            // Find inverse fields related to the selected model
             Object.values(data.fields).forEach((field) => {
-                if(models.includes(field.relation) && field.type == "many2one"){
+                if (models.includes(field.relation) && field.type == "many2one") {
                     var mdl = this.state.models.filter((model) => model.model == field.relation)[0]
                     var field = {
                         name: "id",
@@ -111,8 +111,8 @@ export class ModelViewer extends Component {
                 }
             })
             // Check for the number of possible link fields
-            if((inverse_field_list.length + field_list.length) == 1){
-                if(field_list.length) {
+            if ((inverse_field_list.length + field_list.length) == 1) {
+                if (field_list.length) {
                     var cur_field = field_list[0][1]
                     data.linked_by = {
                         model: data.model,
@@ -122,7 +122,7 @@ export class ModelViewer extends Component {
                         name: data.name
                     }
                 }
-                if(inverse_field_list.length) {
+                if (inverse_field_list.length) {
                     var cur_field = inverse_field_list[0]
                     data.linked_by = {
                         model: data.model,
@@ -136,7 +136,7 @@ export class ModelViewer extends Component {
                 this.props.setModel(this.state.models)
                 this.state.can_select = this.state.models.length < this.limit
             }
-            else if((inverse_field_list.length + field_list.length) == 0){
+            else if ((inverse_field_list.length + field_list.length) == 0) {
                 this.showMessage('No link field found', 'danger')
                 return
             } else {
@@ -164,7 +164,7 @@ export class ModelViewer extends Component {
         }
     }
 
-    showMessage(message, type){
+    showMessage(message, type) {
         this.notification.add(message, { type })
     }
 }

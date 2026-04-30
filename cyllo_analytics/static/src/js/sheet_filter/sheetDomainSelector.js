@@ -1,9 +1,9 @@
 /* @odoo-module */
-import {DomainSelector} from "@web/core/domain_selector/domain_selector";
-import {SheetTreeEditor} from "./tree_editor";
-import {getOperatorEditorInfo} from "@web/core/tree_editor/tree_editor_operator_editor";
-import {getDomainDisplayedOperators} from "./getDomainDisplayedOperators";
-import {condition} from "@web/core/tree_editor/condition_tree";
+import { DomainSelector } from "@web/core/domain_selector/domain_selector";
+import { SheetTreeEditor } from "./tree_editor";
+import { getOperatorEditorInfo } from "@web/core/tree_editor/tree_editor_operator_editor";
+import { getDomainDisplayedOperators } from "./getDomainDisplayedOperators";
+import { condition } from "@web/core/tree_editor/condition_tree";
 
 export const ALLOWED_FIELD_TYPES = [
     'many2one',
@@ -34,11 +34,11 @@ export class SheetDomainSelector extends DomainSelector {
     }
 
     getPathEditorInfo() {
-        const {resModel, isDebugMode} = this.props;
+        const { resModel, isDebugMode } = this.props;
         const res = super.getPathEditorInfo(...arguments);
         return {
             ...res,
-            extractProps: ({update, value: path}) => {
+            extractProps: ({ update, value: path }) => {
                 return {
                     path,
                     update,
@@ -119,8 +119,8 @@ SheetDomainSelector.components = {
 
 SheetDomainSelector.props = {
     ...SheetDomainSelector.props,
-    modelName: {type: String, optional: true},
-    handleDeleteDomain: {type: Function, optional: true},
+    modelName: { type: String, optional: true },
+    handleDeleteDomain: { type: Function, optional: true },
 }
 SheetDomainSelector.defaultProps = {
     ...SheetDomainSelector.defaultProps,

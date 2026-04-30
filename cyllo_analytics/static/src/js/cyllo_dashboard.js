@@ -19,6 +19,7 @@ import {Table} from "@cyllo_analytics/js/table/table";
 import {KpiSheetChart} from "@cyllo_analytics/js/kpi_sheet_chart";
 import {_t} from "@web/core/l10n/translation";
 import {SheetDeleteDialog} from "./cyllo_sheet";
+import {AlertConfigurationDialog} from "./alert_configuration_dialog";
 
 export class CylloDashboard extends CyAnalyticMixin(Component) {
     /** Class for creating a dashboard component */
@@ -352,49 +353,166 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         })
     }
 
+    getRecordModel(item, kpi = false) {
+        if (kpi?.model) {
+            return kpi.model;
+        }
+        const tables = item?.table_ids || [];
+        const primaryTable = tables.find((table) => !table.linked && table.model) || tables.find((table) => table.model);
+        return primaryTable?.model || false;
+    }
+
     openRecord(kpi, item) {
+        const resModel = this.getRecordModel(item, kpi);
+        if (!resModel) {
+            return;
+        }
         var {
             filter_ids,
             sheet_filter_ids
         } = item
+        const tables = item.table_ids || [];
+        const tableJoinMap = {};
+        tables.forEach(t => tableJoinMap[t.name] = t);
+
+        const buildRelationPath = (tableName) => {
+            const table = tableJoinMap[tableName];
+            if (!table || !table.linked) return "";
+            const match = table.join.match(/ON\s+[\w_]+\.id\s*=\s*([\w_]+)\.([\w_]+)/i);
+            if (match) {
+                const parentTable = match[1];
+                const fieldName = match[2];
+                const parentPath = buildRelationPath(parentTable);
+                return parentPath ? `${parentPath}.${fieldName}` : fieldName;
+            }
+            return "";
+        };
+
+        const primaryTable = tables.find(t => !t.linked) || tables[0];
+        const primaryTableName = resModel.replace(/\./g, '_');
+
         var domain = [];
-        for (const {
-            global_filter_id: {
-                code,
-                operator
-            },
-            field
-        }
-            of sheet_filter_ids) {
-            if (this.filters[code])
-                domain.push([field.split('.')[1], operator, this.filters[code]])
-        }
-        filter_ids = filter_ids.filter(item => item.is_active)
-        for (const {
-            domain: filterD
-        }
-            of filter_ids) {
-            const subD = filterD.split(" OR ").map(item => {
-                const match = item.match(/^(.*?)\s*(=|!=|>|<|>=|<=|IN|NOT\s+IN)\s*(.*)$/);
-                const lhs = match[1].trim().split(".")[1];
-                const opr = match[2].trim().toLowerCase();
-                let rhs = match[3].trim();
-                if (rhs.startsWith("'") && rhs.endsWith("'")) {
-                    rhs = rhs.slice(1, -1);
+        // 1. Implicit Relational Filters (INNER JOIN Simulation)
+        const addedRelationalPaths = new Set();
+        tables.forEach(table => {
+            if (table.linked) {
+                const path = buildRelationPath(table.name);
+                if (path && !addedRelationalPaths.has(path)) {
+                    domain.push([path, '!=', false]);
+                    addedRelationalPaths.add(path);
                 }
-                if (rhs.includes('(') && rhs.includes(')')) {
-                    rhs = rhs.replace(/\(/g, '[').replace(/\)/g, ']');
-                    rhs = eval(rhs);
+            }
+        });
+
+        // 2. Global Filters (ANDed)
+        for (const filter of sheet_filter_ids) {
+            const code = filter.global_filter_id.code;
+            const operator = filter.global_filter_id.operator;
+            const val = this.filters[code];
+            if (val !== undefined && val !== null && (Array.isArray(val) ? val.length : true)) {
+                let field = filter.field;
+                if (field.includes('.')) {
+                    const [table, col] = field.split('.');
+                    if (table === primaryTableName || tableJoinMap[table]) {
+                        const path = buildRelationPath(table);
+                        field = path ? `${path}.${col}` : col;
+                    } else {
+                        field = col; // Fallback
+                    }
                 }
-                domain.unshift('|');
-                return [lhs, opr, rhs];
-            })
-            domain.push(...subD);
+                domain.push([field, operator, val]);
+            }
+        }
+
+        // 3. Item Filters (Internal ORs, External ANDs)
+        filter_ids = filter_ids.filter(item => item.is_active);
+        for (const { domain: filterD } of filter_ids) {
+            const parts = filterD.split(" OR ");
+            if (parts.length > 1) {
+                for (let i = 0; i < parts.length - 1; i++) {
+                    domain.push('|');
+                }
+            }
+            for (const part of parts) {
+                const match = part.match(/^(.*?)\s*(=|!=|>|<|>=|<=|IN|NOT\s+IN)\s*(.*)$/i);
+                if (match) {
+                    let lhs = match[1].trim();
+                    if (lhs.includes('.')) {
+                        const [table, col] = lhs.split('.');
+                        if (table === primaryTableName || tableJoinMap[table]) {
+                            const path = buildRelationPath(table);
+                            lhs = path ? `${path}.${col}` : col;
+                        } else {
+                            lhs = col; // Fallback
+                        }
+                    }
+                    const opr = match[2].trim().toLowerCase();
+                    let rhs = match[3].trim();
+                    if (rhs.startsWith("'") && rhs.endsWith("'")) {
+                        rhs = rhs.slice(1, -1);
+                    }
+                    if (rhs.includes('(') && rhs.includes(')')) {
+                        rhs = rhs.replace(/\(/g, '[').replace(/\)/g, ']');
+                        try {
+                            rhs = JSON.parse(rhs.replace(/'/g, '"'));
+                        } catch (e) {
+                            try {
+                                rhs = eval(rhs);
+                            } catch (e2) {}
+                        }
+                    }
+                    domain.push([lhs, opr, rhs]);
+                }
+            }
+        }
+
+        // 4. MAX Aggregation Support
+        const chartItem = this.ChartData.data.find(d => d.id === item.id);
+        const maxMeasure = (item.axis_ids || []).find(a => a.type === 'measure' && a.aggregate_func === 'MAX');
+        const dimension = (item.axis_ids || []).find(a => a.type === 'dimension');
+
+        if (maxMeasure && dimension && chartItem && chartItem.data && chartItem.data.length) {
+            const getOdooField = (colPath) => {
+                if (colPath.includes('.')) {
+                    const [table, col] = colPath.split('.');
+                    if (table === primaryTableName || tableJoinMap[table]) {
+                        const path = buildRelationPath(table);
+                        return path ? `${path}.${col}` : col;
+                    }
+                    return col;
+                }
+                return colPath;
+            }
+
+            const dimField = getOdooField(dimension.column);
+            const msrField = getOdooField(maxMeasure.column);
+            const maxDomain = [];
+
+            // Add OR prefixes
+            if (chartItem.data.length > 1) {
+                for (let i = 0; i < chartItem.data.length - 1; i++) {
+                    maxDomain.push('|');
+                }
+            }
+
+            chartItem.data.forEach(row => {
+                const dimVal = row[dimension.alias];
+                const msrVal = row[maxMeasure.alias];
+                if (dimVal !== undefined && dimVal !== null) {
+                    maxDomain.push('&', [dimField, '=', dimVal], [msrField, '=', msrVal]);
+                } else {
+                    maxDomain.push('&', [dimField, '=', false], [msrField, '=', msrVal]);
+                }
+            });
+
+            if (maxDomain.length) {
+                domain.push(...maxDomain);
+            }
         }
         return this.actionService.doAction({
             name: _t("My Dashboard"),
             type: 'ir.actions.act_window',
-            res_model: kpi.model,
+            res_model: resModel,
             view_mode: 'tree,form,calendar',
             views: [
                 [false, 'list'],
@@ -574,9 +692,11 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
      */
     async OnSelectTheme(themeId) {
         this.themeState.theme_id = themeId
-        await this.orm.write("dashboard.config", [this.id], {
-            theme_id: themeId
-        })
+        if (this.id) {
+            await this.orm.write("dashboard.config", [this.id], {
+                theme_id: themeId
+            })
+        }
         this.applyTheme()
     }
 
@@ -639,6 +759,77 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                     this.state.showInfo = true;
                 }
             }
+        })
+    }
+
+    async onSetAlert(item) {
+        // Use string comparison for IDs to be safe against type mismatches
+        const allData = this.ChartData.data || [];
+        let chartData = [...allData].reverse().find(d => String(d.id) === String(item.id));
+        
+        // If data is missing from the store, fetch it manually (GraphTile handles its own fetching)
+        if (!chartData && item.query) {
+            try {
+                const sql = item.query.replace(/\n/g, ' ');
+                const res = await this.orm.call("dashboard.config", "sql_execute", [sql]);
+                if (res && Array.isArray(res)) {
+                    let measuresList = item.measure || '[]';
+                    if (typeof measuresList === 'string') {
+                        try {
+                            measuresList = JSON.parse(measuresList.replaceAll("'", '"'));
+                        } catch (e) {
+                            measuresList = [];
+                        }
+                    }
+                    const measureAliases = Array.isArray(measuresList) ? measuresList.map(m => typeof m === 'object' ? m.alias : m) : [];
+                    
+                    chartData = {
+                        data: res,
+                        id: item.id,
+                        name: item.name,
+                        dimension: item.dimension,
+                        measures: measureAliases,
+                    };
+                    // Sync back to store for future use
+                    this.ChartData.data.push(chartData);
+                }
+            } catch (err) {
+                console.error("Failed to fetch alert data:", err);
+            }
+        }
+
+        const dimensionAxis = (item.axis_ids || []).find(a => a.type === 'dimension');
+        let dimKey = dimensionAxis ? (dimensionAxis.alias || dimensionAxis.name) : (chartData ? chartData.dimension : null);
+        let dimensionValues = [];
+
+        if (chartData && chartData.data && Array.isArray(chartData.data) && chartData.data.length > 0) {
+            const firstRow = chartData.data[0];
+            const dataKeys = Object.keys(firstRow);
+            
+            // Resilient dimKey detection
+            if (!dimKey || !dataKeys.includes(dimKey)) {
+                const ciKey = dimKey ? dataKeys.find(k => k.toLowerCase() === dimKey.toLowerCase()) : null;
+                if (ciKey) {
+                    dimKey = ciKey;
+                } else {
+                    // Try to find a key that is likely the dimension (string-like, not a measure)
+                    const measureKeys = (chartData.measures || []).concat(['__count']);
+                    dimKey = dataKeys.find(k => !measureKeys.includes(k) && typeof firstRow[k] === 'string') 
+                             || dataKeys.find(k => !measureKeys.includes(k)) 
+                             || dataKeys[0];
+                }
+            }
+
+            if (dimKey && dataKeys.includes(dimKey)) {
+                dimensionValues = [...new Set(chartData.data.map(row => row[dimKey]))]
+                    .filter(v => v !== undefined && v !== null && v !== "")
+                    .map(v => String(v));
+            }
+        }
+
+        this.dialogService.add(AlertConfigurationDialog, {
+            item,
+            dimensionValues
         })
     }
 

@@ -33,7 +33,7 @@ export class DragItem extends Component {
 
     setOptionsFromProps(p) {
         if (p.type == "measure") {
-            this.options = ["MIN", "MAX", "AVG", "SUM", "COUNT"]
+            this.options = ["NONE", "MIN", "MAX", "AVG", "SUM", "COUNT"]
             this.mode = "AGG"
         } else if (p.type == "dimension" &&
             ["date", "datetime"].includes(p.field_type)) {
@@ -140,7 +140,6 @@ export class DropZone extends Component {
     async onItemDrop(e) {
         e.preventDefault();
         const companyId = this.company.currentCompany?.id
-
         var type = e.dataTransfer.getData("type")
         var is_json = e.dataTransfer.getData("is_json")
         var field_type = e.dataTransfer.getData("field_type");
@@ -242,9 +241,24 @@ export class DropZone extends Component {
                 // Monetary field → row-level conversion (NO SUM)
                 else if (field_type === "monetary") {
                     const modelName = column.split(".")[0];
+                    let has_currency = false;
+                    const technicalName = await this.orm.searchRead(
+                        "ir.model",
+                        [["table_name", "=", modelName]],
+                        ["model"]
+                    );
+                    const fieldsInfo = await this.orm.call(technicalName?.[0]?.model, "fields_get", ['currency_id']);
+                    if (fieldsInfo && fieldsInfo.currency_id && fieldsInfo.currency_id.store) {
+                        has_currency = true;
+                    }
+
+                    const source_currency = has_currency
+                        ? `${modelName}.currency_id`
+                        : `(SELECT currency_id FROM res_company WHERE id = ${companyId})`;
+
                     const currency_rate = `COALESCE((
                             SELECT rate FROM res_currency_rate
-                            WHERE currency_id = ${modelName}.currency_id
+                            WHERE currency_id = ${source_currency}
                             AND company_id = ${companyId}
                             ORDER BY name DESC
                             LIMIT 1
@@ -270,6 +284,7 @@ export class DropZone extends Component {
                     alias,
                     query,
                     column,
+                    name: column.split('.')[1],
                     raw_column: column,  // Always preserve the clean column for AGG rebuilding
                     monetaryInBase: monetaryInBase,
                     field_type: field_type,
@@ -342,7 +357,8 @@ export class DropZone extends Component {
             const baseLabel = child.original_label || child.value || child.alias;
             child.value = baseLabel ? `${val}(${baseLabel})` : child.value;
             this.state.children[index] = child;
-            this.env.bus.trigger("CY:UPDATE_QUERY", { type: this.state.type, data: this.state.children })
+            const targetType = this.state.type === "both" ? "axis" : this.state.type;
+            this.env.bus.trigger("CY:UPDATE_QUERY", { type: targetType, data: this.state.children })
             return;
         }
 
@@ -350,11 +366,30 @@ export class DropZone extends Component {
         // `raw_column` is stored when the item is first dropped; fall back to `column`
         // if the item pre-dates this fix (e.g. restored from saved data).
         const cur = this.state.children[index];
-        const rawCol = cur.raw_column || cur.column.replace(/^\w+\((.+)\)$/, '$1').trim();
+        const extractField = cur.column.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/);
+        const rawCol = cur.raw_column || (extractField ? extractField[0] : cur.column.replace(/^\w+\(([\s\S]+)\)$/, '$1').trim());
         const monetaryInBase = cur.monetaryInBase;
         const baseExpr = monetaryInBase ? monetaryInBase.trim() : rawCol.trim();
+        const baseLabel = cur.original_value || cur.original_label || (cur.value ? cur.value.replace(/^[A-Z]+\((.*)\)$/i, '$1') : rawCol.replace(/\./g, ' > '));
+        if (val === 'NONE') {
+            const alias = rawCol.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '').substring(0, 50);
+            this.state.children[index] = {
+                ...cur,
+                raw_column: rawCol,
+                [mode]: false,
+                aggregate_func: false,
+                query: `${baseExpr} AS ${alias}`,
+                alias: alias,
+                column: rawCol,
+                value: baseLabel,
+                type: this.state.type,
+            };
+            const targetType = this.state.type === "both" ? "axis" : this.state.type;
+            this.env.bus.trigger("CY:UPDATE_QUERY", { type: targetType, data: this.state.children });
+            return;
+        }
         const new_column = `${val}(${baseExpr})`;
-        const alias = `${rawCol.replace('.', '_')}_${val.toLowerCase().trim()}`;
+        const alias = `${rawCol.replace(/\./g, '_').replace(/[^a-zA-Z0-9_]/g, '').substring(0, 50)}_${val.toLowerCase().trim()}`;
         this.state.children[index] = {
             ...cur,
             raw_column: rawCol,      // Persist the clean column for future re-selections
@@ -363,10 +398,11 @@ export class DropZone extends Component {
             query: `${new_column} AS ${alias}`,
             alias,
             column: rawCol,          // Keep column clean so GROUP BY logic uses the right field
-            value: `${val}(${rawCol.replace('.', ' > ')})`,
+            value: `${val}(${baseLabel})`,
             type: this.state.type,
         };
-        this.env.bus.trigger("CY:UPDATE_QUERY", { type: this.state.type, data: this.state.children })
+        const targetType = this.state.type === "both" ? "axis" : this.state.type;
+        this.env.bus.trigger("CY:UPDATE_QUERY", { type: targetType, data: this.state.children })
     }
 
     /**

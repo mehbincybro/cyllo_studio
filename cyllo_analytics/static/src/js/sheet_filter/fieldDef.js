@@ -21,160 +21,160 @@ function _getPeriodSql(operator) {
 export function getPsqlOperatorsAndValues(fieldDef) {
     const operatorsMapping = {
         "many2many": {
-            "in": {type: 'array_of_int', operator: 'IN'},
-            "not in": {type: 'array_of_int', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "in": { type: 'array_of_int', operator: 'IN' },
+            "not in": { type: 'array_of_int', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "many2one": {
-            "=": {type: 'int', operator: '='},
-            "!=": {type: 'int', operator: '!='},
-            "in": {type: 'array_of_int', operator: 'IN'},
-            "not in": {type: 'array_of_int', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'int', operator: '=' },
+            "!=": { type: 'int', operator: '!=' },
+            "in": { type: 'array_of_int', operator: 'IN' },
+            "not in": { type: 'array_of_int', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "one2many": {
-            "in": {type: 'array_of_int', operator: 'IN'},
-            "not in": {type: 'array_of_int', operator: 'NOT IN'}
+            "in": { type: 'array_of_int', operator: 'IN' },
+            "not in": { type: 'array_of_int', operator: 'NOT IN' }
         },
         "boolean": {
-            "is": {type: 'boolean', operator: 'IS TRUE'},
-            "is_not": {type: 'boolean', operator: 'IS FALSE'}
+            "is": { type: 'boolean', operator: 'IS TRUE' },
+            "is_not": { type: 'boolean', operator: 'IS FALSE' }
         },
         "selection": {
-            "=": {type: 'string', operator: '='},
-            "!=": {type: 'string', operator: '!='},
-            "in": {type: 'array_of_string', operator: 'IN'},
-            "not in": {type: 'array_of_string', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'string', operator: '=' },
+            "!=": { type: 'string', operator: '!=' },
+            "in": { type: 'array_of_string', operator: 'IN' },
+            "not in": { type: 'array_of_string', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "char": {
-            "=": {type: 'string', operator: '='},
-            "!=": {type: 'string', operator: '!='},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "not ilike": {type: 'string', operator: 'NOT ILIKE'},
-            "in": {type: 'array_of_string', operator: 'IN'},
-            "not in": {type: 'array_of_string', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'string', operator: '=' },
+            "!=": { type: 'string', operator: '!=' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "not ilike": { type: 'string', operator: 'NOT ILIKE' },
+            "in": { type: 'array_of_string', operator: 'IN' },
+            "not in": { type: 'array_of_string', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "text": {
-            "=": {type: 'string', operator: '='},
-            "!=": {type: 'string', operator: '!='},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "not ilike": {type: 'string', operator: 'NOT ILIKE'},
-            "in": {type: 'array_of_string', operator: 'IN'},
-            "not in": {type: 'array_of_string', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'string', operator: '=' },
+            "!=": { type: 'string', operator: '!=' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "not ilike": { type: 'string', operator: 'NOT ILIKE' },
+            "in": { type: 'array_of_string', operator: 'IN' },
+            "not in": { type: 'array_of_string', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "html": {
-            "=": {type: 'string', operator: '='},
-            "!=": {type: 'string', operator: '!='},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "not ilike": {type: 'string', operator: 'NOT ILIKE'},
-            "in": {type: 'array_of_string', operator: 'IN'},
-            "not in": {type: 'array_of_string', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'string', operator: '=' },
+            "!=": { type: 'string', operator: '!=' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "not ilike": { type: 'string', operator: 'NOT ILIKE' },
+            "in": { type: 'array_of_string', operator: 'IN' },
+            "not in": { type: 'array_of_string', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "date": {
-            "=": {type: 'date', operator: '='},
-            "!=": {type: 'date', operator: '!='},
-            ">": {type: 'date', operator: '>'},
-            ">=": {type: 'date', operator: '>='},
-            "<": {type: 'date', operator: '<'},
-            "<=": {type: 'date', operator: '<='},
+            "=": { type: 'date', operator: '=' },
+            "!=": { type: 'date', operator: '!=' },
+            ">": { type: 'date', operator: '>' },
+            ">=": { type: 'date', operator: '>=' },
+            "<": { type: 'date', operator: '<' },
+            "<=": { type: 'date', operator: '<=' },
             "in_period": { type: 'period', operator: 'IN_PERIOD' },
             "between": { type: 'date_range', operator: 'BETWEEN' },
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "datetime": {
-            "=": {type: 'datetime', operator: '='},
-            "!=": {type: 'datetime', operator: '!='},
-            ">": {type: 'datetime', operator: '>'},
-            ">=": {type: 'datetime', operator: '>='},
-            "<": {type: 'datetime', operator: '<'},
-            "<=": {type: 'datetime', operator: '<='},
+            "=": { type: 'datetime', operator: '=' },
+            "!=": { type: 'datetime', operator: '!=' },
+            ">": { type: 'datetime', operator: '>' },
+            ">=": { type: 'datetime', operator: '>=' },
+            "<": { type: 'datetime', operator: '<' },
+            "<=": { type: 'datetime', operator: '<=' },
             "in_period": { type: 'period', operator: 'IN_PERIOD' },
             "between": { type: 'date_range', operator: 'BETWEEN' },
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "integer": {
-            "=": {type: 'int', operator: '='},
-            "!=": {type: 'int', operator: '!='},
-            ">": {type: 'int', operator: '>'},
-            ">=": {type: 'int', operator: '>='},
-            "<": {type: 'int', operator: '<'},
-            "<=": {type: 'int', operator: '<='},
-            "in": {type: 'array_of_int', operator: 'in'},
-            "contains": {type: 'string', operator: 'LIKE'},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "between": {type: 'array_of_int', operator: 'BETWEEN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'int', operator: '=' },
+            "!=": { type: 'int', operator: '!=' },
+            ">": { type: 'int', operator: '>' },
+            ">=": { type: 'int', operator: '>=' },
+            "<": { type: 'int', operator: '<' },
+            "<=": { type: 'int', operator: '<=' },
+            "in": { type: 'array_of_int', operator: 'in' },
+            "contains": { type: 'string', operator: 'LIKE' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "between": { type: 'array_of_int', operator: 'BETWEEN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "float": {
-            "=": {type: 'float', operator: '='},
-            "!=": {type: 'float', operator: '!='},
-            ">": {type: 'float', operator: '>'},
-            ">=": {type: 'float', operator: '>='},
-            "<": {type: 'float', operator: '<'},
-            "<=": {type: 'float', operator: '<='},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "between": {type: 'array_of_float', operator: 'BETWEEN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'float', operator: '=' },
+            "!=": { type: 'float', operator: '!=' },
+            ">": { type: 'float', operator: '>' },
+            ">=": { type: 'float', operator: '>=' },
+            "<": { type: 'float', operator: '<' },
+            "<=": { type: 'float', operator: '<=' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "between": { type: 'array_of_float', operator: 'BETWEEN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "monetary": {
-            "=": {type: 'float', operator: '='},
-            "!=": {type: 'float', operator: '!='},
-            ">": {type: 'float', operator: '>'},
-            ">=": {type: 'float', operator: '>='},
-            "<": {type: 'float', operator: '<'},
-            "<=": {type: 'float', operator: '<='},
-            "between": {type: 'array_of_float', operator: 'BETWEEN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'float', operator: '=' },
+            "!=": { type: 'float', operator: '!=' },
+            ">": { type: 'float', operator: '>' },
+            ">=": { type: 'float', operator: '>=' },
+            "<": { type: 'float', operator: '<' },
+            "<=": { type: 'float', operator: '<=' },
+            "between": { type: 'array_of_float', operator: 'BETWEEN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "json": {
-            "=": {type: 'object', operator: '='},
-            "!=": {type: 'object', operator: '!='},
-            "contains": {type: 'object', operator: '@>'},
-            "not contains": {type: 'object', operator: '<@'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'object', operator: '=' },
+            "!=": { type: 'object', operator: '!=' },
+            "contains": { type: 'object', operator: '@>' },
+            "not contains": { type: 'object', operator: '<@' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "properties": {
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         },
         "default": {
-            "=": {type: 'unknown type', operator: '='},
-            "!=": {type: 'unknown type', operator: '!='},
-            ">": {type: 'unknown type', operator: '>'},
-            ">=": {type: 'unknown type', operator: '>='},
-            "<": {type: 'unknown type', operator: '<'},
-            "<=": {type: 'unknown type', operator: '<='},
-            "ilike": {type: 'string', operator: 'ILIKE'},
-            "not ilike": {type: 'string', operator: 'NOT ILIKE'},
-            "like": {type: 'string', operator: 'LIKE'},
-            "not like": {type: 'string', operator: 'NOT LIKE'},
-            "in": {type: 'array', operator: 'IN'},
-            "not in": {type: 'array', operator: 'NOT IN'},
-            "set": {type: 'boolean', operator: 'IS NOT NULL'},
-            "not_set": {type: 'boolean', operator: 'IS NULL'}
+            "=": { type: 'unknown type', operator: '=' },
+            "!=": { type: 'unknown type', operator: '!=' },
+            ">": { type: 'unknown type', operator: '>' },
+            ">=": { type: 'unknown type', operator: '>=' },
+            "<": { type: 'unknown type', operator: '<' },
+            "<=": { type: 'unknown type', operator: '<=' },
+            "ilike": { type: 'string', operator: 'ILIKE' },
+            "not ilike": { type: 'string', operator: 'NOT ILIKE' },
+            "like": { type: 'string', operator: 'LIKE' },
+            "not like": { type: 'string', operator: 'NOT LIKE' },
+            "in": { type: 'array', operator: 'IN' },
+            "not in": { type: 'array', operator: 'NOT IN' },
+            "set": { type: 'boolean', operator: 'IS NOT NULL' },
+            "not_set": { type: 'boolean', operator: 'IS NULL' }
         }
     };
     let isvalid = true
     if (!fieldDef) {
         return [{}, "", isvalid];
     }
-    const {type, operator, value} = fieldDef;
+    const { type, operator, value } = fieldDef;
 
     const field = operatorsMapping[type] || operatorsMapping["default"]
     const returnValue = field[operator]
@@ -198,13 +198,13 @@ export function getPsqlOperatorsAndValues(fieldDef) {
         if (operator === "=" && value) {
             groupRhs = "= TRUE"
         }
-        else if(operator === "=" && !value) {
+        else if (operator === "=" && !value) {
             groupRhs = "= FALSE"
         }
-        else if(operator === "!=" && !value) {
+        else if (operator === "!=" && !value) {
             groupRhs = "= TRUE"
         }
-        else if(operator === "!=" && value) {
+        else if (operator === "!=" && value) {
             groupRhs = "= FALSE"
         }
         else {

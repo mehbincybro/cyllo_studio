@@ -1,13 +1,17 @@
 import base64
 import io
 import datetime
+import csv
+import json
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 try:
     import openpyxl
+    from openpyxl.utils import column_index_from_string
 except ImportError:
     openpyxl = None
+    column_index_from_string = None
 
 class ImportXlsxWizardSheet(models.TransientModel):
     _name = 'import.xlsx.wizard.sheet'
@@ -25,6 +29,10 @@ class ImportXlsxWizard(models.TransientModel):
     file_name = fields.Char(string='File Name')
     table_name = fields.Char(string='Table Name (Technical)', help="e.g. x_my_table")
     table_label = fields.Char(string='Table Label', help="e.g. My Table")
+    start_row = fields.Integer(string='Start Row', default=1, help="Row number where the table headers begin.")
+    end_row = fields.Integer(string='End Row', default=0, help="Row number where the data ends. Leave 0 to read all below start row.")
+    start_col = fields.Char(string='Start Column', default='A', help="Column Letter (e.g. A)")
+    end_col = fields.Char(string='End Column', help="Column Letter (e.g. D). Leave empty for all.")
     state = fields.Selection([('init', 'Init'), ('sheet', 'Select Sheet'), ('columns', 'Columns'), ('confirm', 'Confirm')], default='init')
     confirm_append = fields.Boolean(default=False)
     
@@ -48,12 +56,17 @@ class ImportXlsxWizard(models.TransientModel):
 
     def action_analyze_file(self):
         self.ensure_one()
-        if not openpyxl:
-            raise UserError(_("Please install openpyxl python library."))
-        
         if not self.file:
             raise UserError(_("Please upload a file."))
+        if not self.file_name:
+            raise UserError(_("File name is missing. Please re-upload."))
 
+        if self.file_name.lower().endswith(('.csv', '.json')):
+            return self.action_read_first_row()
+
+        if not openpyxl:
+            raise UserError(_("Please install openpyxl python library."))
+            
         file_content = base64.b64decode(self.file)
         if not file_content:
             return
@@ -65,52 +78,34 @@ class ImportXlsxWizard(models.TransientModel):
         except Exception as e:
             raise UserError(_("Failed to read the excel file. Error: %s" % e))
 
-        # Hard clear existing sheet choices for THIS specific wizard instance
         existing_sheets = self.env['import.xlsx.wizard.sheet'].search([('wizard_id', '=', self.id)])
         if existing_sheets:
             existing_sheets.unlink()
             
-        self.write({'sheet_id': False}) # Reset the Many2one reference
+        self.write({'sheet_id': False}) 
 
-        # Create fresh sheet choices
-        new_sheets = []
-        for name in sheet_names:
-            new_sheets.append({
-                'wizard_id': self.id,
-                'name': name
-            })
-            
-        # Create them using create method with vals list
+        new_sheets = [{'wizard_id': self.id, 'name': name} for name in sheet_names]
         if new_sheets:
             self.env['import.xlsx.wizard.sheet'].create(new_sheets)
 
         all_sheets = self.env['import.xlsx.wizard.sheet'].search([('wizard_id', '=', self.id)])
         
         if len(all_sheets) > 1:
-            self.write({
-                'state': 'sheet',
-                'sheet_id': False # Ensure it is blanked out
-            })
+            self.write({'state': 'sheet', 'sheet_id': False})
             return {
                 'type': 'ir.actions.act_window',
                 'res_model': 'import.xlsx.wizard',
                 'res_id': self.id,
                 'view_mode': 'form',
                 'target': 'new',
-                # Return domain to strictly filter only these specific newly created records
                 'domain': [('id', 'in', all_sheets.ids)]
             }
         else:
-            self.write({
-                'sheet_id': all_sheets[0].id if all_sheets else False
-            })
+            self.write({'sheet_id': all_sheets[0].id if all_sheets else False})
             return self.action_read_first_row()
 
     def action_read_first_row(self):
         self.ensure_one()
-        if not openpyxl:
-            raise UserError(_("Please install openpyxl python library."))
-        
         if not self.file:
             raise UserError(_("Please upload a file."))
             
@@ -119,29 +114,75 @@ class ImportXlsxWizard(models.TransientModel):
             self.state = 'init'
             return
 
-        if not self.sheet_id:
-            raise UserError(_("Please select a sheet first."))
-
-        try:
-            wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-            if self.sheet_id.name in wb.sheetnames:
-                sheet = wb[self.sheet_id.name]
-            else:
-                sheet = wb.active
-        except Exception as e:
-            raise UserError(_("Failed to read the excel file. Error: %s" % e))
-            
         first_row = []
         second_row = []
+        file_ext = self.file_name.lower() if self.file_name else ''
         
-        for i, row in enumerate(sheet.iter_rows(values_only=True)):
-            if i == 0:
-                first_row = list(row)
-            elif i <= 100:
-                second_row.append(list(row))
+        try:
+            if file_ext.endswith('.csv'):
+                decoded_file = file_content.decode('utf-8')
+                reader = csv.reader(io.StringIO(decoded_file))
+                for i, row in enumerate(reader):
+                    if i == 0:
+                        first_row = list(row)
+                    elif i <= 100:
+                        second_row.append(list(row))
+                    else:
+                        break
+            elif file_ext.endswith('.json'):
+                decoded_file = file_content.decode('utf-8')
+                data = json.loads(decoded_file)
+                if not isinstance(data, dict) or not data:
+                    raise UserError("JSON file must contain a list of dictionaries/objects.")
+                first_row = list(data[0].keys())
+                for i, row_dict in enumerate(data):
+                    if i > 100: break
+                    mapped_row = [row_dict.get(col, '') for col in first_row]
+                    second_row.append(mapped_row)
             else:
-                break
+                if not openpyxl:
+                    raise UserError(_("Please install openpyxl python library."))
+                if not self.sheet_id:
+                    raise UserError(_("Please select a sheet first."))
+                wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+                if self.sheet_id.name in wb.sheetnames:
+                    sheet = wb[self.sheet_id.name]
+                else:
+                    sheet = wb.active
+                min_r = self.start_row if self.start_row > 0 else 1
+                max_r = self.end_row if self.end_row > 0 else None
+                min_c = 1
+                max_c = None
                 
+                if self.start_col and column_index_from_string:
+                    try:
+                        min_c = column_index_from_string(self.start_col.upper())
+                    except Exception:
+                        pass
+                        
+                if self.end_col and column_index_from_string:
+                    try:
+                        max_c = column_index_from_string(self.end_col.upper())
+                    except Exception:
+                        pass
+
+                iterator = sheet.iter_rows(
+                    min_row=min_r, 
+                    max_row=max_r, 
+                    min_col=min_c,
+                    max_col=max_c,
+                    values_only=True
+                )
+                for i, row in enumerate(iterator):
+                    if i == 0:
+                        first_row = list(row)
+                    elif i <= 100:
+                        second_row.append(list(row))
+                    else:
+                        break
+        except Exception as e:
+            raise UserError(_("Failed to read the file. Error: %s" % e))
+            
         # Clean existing lines
         self.column_lines.unlink()
         
@@ -170,8 +211,10 @@ class ImportXlsxWizard(models.TransientModel):
                 else:
                     # check if we can make it a selection
                     distinct_vals = set(str(v).strip() for v in col_values)
+                    # Skip selection if any value contains a comma to avoid splitting issues
+                    has_comma = any(',' in v for v in distinct_vals)
                     # If few distinct values compared to total sample, it's likely a selection
-                    if 0 < len(distinct_vals) <= 15 and len(col_values) >= len(distinct_vals):
+                    if 0 < len(distinct_vals) <= 15 and len(col_values) >= len(distinct_vals) and not has_comma:
                         field_type = 'selection'
                         selection_options = ','.join(distinct_vals)
                     
@@ -190,7 +233,11 @@ class ImportXlsxWizard(models.TransientModel):
             'state': 'columns',
             'column_lines': lines,
             'table_name': self.table_name or '',
-            'table_label': self.table_label or ''
+            'table_label': self.table_label or '',
+            'start_row': self.start_row,
+            'end_row': self.end_row,
+            'start_col': self.start_col or '',
+            'end_col': self.end_col or ''
         })
         
         return {
@@ -217,7 +264,17 @@ class ImportXlsxWizard(models.TransientModel):
             
         if not self.column_lines:
             raise UserError(_("No columns defined to import."))
-            
+
+        # Validate manually-set selection fields have options populated
+        for line in self.column_lines:
+            if line.field_type == 'selection' and not line.selection_options:
+                raise UserError(_(
+                    "Column '%s' is set to 'Selection' but has no valid options. "
+                    "This usually means its values contain commas, which are not "
+                    "allowed in Odoo selection fields.\n\n"
+                    "Please change the Field Type to 'Text' instead."
+                ) % line.column_name)
+
         # Create ir.model
         IrModel = self.env['ir.model'].sudo()
         IrModelField = self.env['ir.model.fields'].sudo()
@@ -261,7 +318,6 @@ class ImportXlsxWizard(models.TransientModel):
                     'ttype': line.field_type,
                     'state': 'manual',
                 }
-                
                 if line.field_type == 'selection' and line.selection_options:
                     # Convert comma-separated string to list of tuples properly
                     opts = [opt.strip() for opt in line.selection_options.split(',') if opt.strip()]
@@ -297,27 +353,57 @@ class ImportXlsxWizard(models.TransientModel):
                 
         # Now import the data
         file_content = base64.b64decode(self.file)
-        wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
-        if self.sheet_id and self.sheet_id.name in wb.sheetnames:
-            sheet = wb[self.sheet_id.name]
-        else:
-            sheet = wb.active
-        
+        file_ext = self.file_name.lower() if self.file_name else ''
         DynamicModel = self.env[self.table_name].sudo()
-        
-        # Preload target model records for many2one mappings to avoid repeated searches
+
         m2o_caches = {}
         for index, line in enumerate(self.column_lines):
             if line.field_type == 'many2one' and line.relation_model_id:
-                m2o_caches[index] = {
-                    'model': self.env[line.relation_model_id.model].sudo(),
-                    'cache': {}
-                }
-                
+                m2o_caches[index] = {'model': self.env[line.relation_model_id.model].sudo(), 'cache': {}}
+
         vals_list = []
-        for i, row in enumerate(sheet.iter_rows(values_only=True)):
-            if i == 0: # Skip header
-                continue
+        if file_ext.endswith('.csv'):
+            decoded_file = file_content.decode('utf-8')
+            reader = csv.reader(io.StringIO(decoded_file))
+            iterator = list(reader)[1:]  # Skip headers
+        elif file_ext.endswith('.json'):
+            data = json.loads(file_content.decode('utf-8'))
+            headers = list(data[0].keys())
+            iterator = [[row_dict.get(col, '') for col in headers] for row_dict in data]
+        else:
+            wb = openpyxl.load_workbook(io.BytesIO(file_content), data_only=True)
+            if self.sheet_id and self.sheet_id.name in wb.sheetnames:
+                sheet = wb[self.sheet_id.name]
+            else:
+                sheet = wb.active
+                
+            min_r = self.start_row if self.start_row > 0 else 1
+            max_r = self.end_row if self.end_row > 0 else None
+            min_c = 1
+            max_c = None
+            
+            if self.start_col and column_index_from_string:
+                try:
+                    min_c = column_index_from_string(self.start_col.upper())
+                except Exception:
+                    pass
+                    
+            if self.end_col and column_index_from_string:
+                try:
+                    max_c = column_index_from_string(self.end_col.upper())
+                except Exception:
+                    pass
+
+            rows = list(sheet.iter_rows(
+                min_row=min_r, 
+                max_row=max_r, 
+                min_col=min_c,
+                max_col=max_c,
+                values_only=True
+            ))
+            iterator = rows[1:] if rows else []
+
+        for i, row in enumerate(iterator):
             
             vals = {}
             for index, val in enumerate(row):

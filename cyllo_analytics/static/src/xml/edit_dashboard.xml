@@ -22,7 +22,7 @@
         <xpath expr="//div[hasclass('stack-item')]" position="replace">
             <div class="cy-edit-grid-items"
                  style="overflow-y: scroll;height: 91vh;">
-                <div t-ref="chart-container" class="grid_stack_item"/>
+                <div t-ref="chart-container" class="grid_stack_item"></div>
             </div>
         </xpath>
     </t>

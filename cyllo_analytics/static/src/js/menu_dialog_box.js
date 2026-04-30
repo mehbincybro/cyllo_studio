@@ -23,7 +23,7 @@ export class MenuTreeNode extends Component {
     onDragEndNewMenu(ev) { if (this.props.node.isTemp) this.props.comp.onDragEndNewMenu(ev); }
 }
 export class MenuDialog extends Component {
-    setup(){
+    setup() {
         this.orm = useService('orm')
         this.action = useService('action')
         this.menuService = useService("menu")
@@ -88,7 +88,7 @@ export class MenuDialog extends Component {
                 this.notification.add('Failed to load menu structure.', { type: 'danger' });
             }
         }
-        }
+    }
     onDragStartNewMenu(ev) {
         ev.dataTransfer.effectAllowed = "move";
         this.state.isDragging = true;
@@ -179,7 +179,7 @@ export class MenuDialog extends Component {
                     if (idx !== -1) {
                         node.children.splice(idx + 1, 0, tempNode);
                         return true;
-    }
+                    }
                 }
                 // Fallback (e.g. drop into or app init)
                 node.children.push(tempNode);
@@ -210,7 +210,7 @@ export class MenuDialog extends Component {
         } else if (afterSeq) {
             newSeq = parseFloat(afterSeq) + 10;
         }
-         this.state.targetParentId = parentId;
+        this.state.targetParentId = parentId;
         this.state.targetSequence = Math.round(newSeq);
         this.state.targetBeforeId = beforeId ? parseInt(beforeId) : null;
         this.state.targetAfterId = afterId ? parseInt(afterId) : null;
@@ -268,8 +268,8 @@ export class MenuDialog extends Component {
                 return false;
             };
             removeTemp(this.state.appTree);
-    }
-         this.state.targetParentId = null;
+        }
+        this.state.targetParentId = null;
         this.state.targetParentName = "";
         this.state.targetSequence = 0;
         this.state.targetBeforeId = null;
@@ -285,26 +285,26 @@ export class MenuDialog extends Component {
                 for (var key in changes) {
                     this.data[key] = changes[key]
                 }
-             },
-             resModel: "dashboard.config.menu",
-             resId: this.id,
-             fieldNames: fields,
-             activeFields: fields,
+            },
+            resModel: "dashboard.config.menu",
+            resId: this.id,
+            fieldNames: fields,
+            activeFields: fields,
         };
     }
     async handleConfirm() {
-        if(!this.data.name){
+        if (!this.data.name) {
             this.notification.add('Please provide a name', { type: 'danger' })
             return
         }
-         if (!this.state.targetParentId) {
+        if (!this.state.targetParentId) {
             this.notification.add('Please select a parent menu by dragging the item.', { type: 'danger' })
             return
         }
         const action = await this.createAction();
-          const menuData = {
+        const menuData = {
             name: this.data.name,
-              parent_id: this.state.targetParentId,
+            parent_id: this.state.targetParentId,
             action: `ir.actions.client,${action}`,
             is_cyllo_analytic_menu: true,
             sequence: this.state.targetSequence,
@@ -332,7 +332,7 @@ export class MenuDialog extends Component {
         return action
     }
     async _cancel() {
-         this.props.close();
+        this.props.close();
     }
 }
 // Define the template for the MenuDialog component

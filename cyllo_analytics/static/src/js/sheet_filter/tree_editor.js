@@ -1,5 +1,5 @@
 /* @odoo-module */
-import {TreeEditor} from "@web/core/tree_editor/tree_editor";
+import { TreeEditor } from "@web/core/tree_editor/tree_editor";
 import {
     getValueEditorInfo,
 } from "@web/core/tree_editor/tree_editor_value_editors";
@@ -47,7 +47,7 @@ export class SheetTreeEditor extends TreeEditor {
 }
 SheetTreeEditor.props = {
     ...SheetTreeEditor.props,
-    modelName: {type: String, optional: true},
+    modelName: { type: String, optional: true },
 }
 SheetTreeEditor.defaultProps = {
     ...SheetTreeEditor.defaultProps,

@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="cyllo_analytics.CylloDashboard" owl="1">
-        <div t-ref="dashboard" class="scroll" t-if="ui.size > 4"
-             style="width: 100%;">
-            <div class="container-fluid o_pj_dashboard background-image-banner control-panel"
-                 style="display: flex; justify-content: space-between; align-items: center; height: 75px;">
-                <div class="dashbd-info d-flex justify-content-center"
-                     style="flex-direction: column; width: 100%; align-items: baseline;">
-                    <div class="d-flex">
-                        <div class="d-flex align-items-center"
-                             t-if="props.action.tag === 'cy_analytic_dashboard'">
-                            <a class="cy-menu_icon"
-                               t-on-click="() => this.env.bus.trigger('onclickMenuBar')">
-                                <i class="cy-icons ri-menu-line pe-3 ps-1"
-                                   style="font-size:16px !important;"/>
-                            </a>
+        <t t-if="ui.size > 4">
+            <div t-ref="dashboard" class="scroll" style="width: 100%;">
+                <div class="container-fluid o_pj_dashboard background-image-banner control-panel"
+                     style="display: flex; justify-content: space-between; align-items: center; height: 75px;">
+                    <div class="dashbd-info d-flex justify-content-center"
+                         style="flex-direction: column; width: 100%; align-items: baseline;">
+                        <div class="d-flex">
+                            <div class="d-flex align-items-center"
+                                 t-if="props.action.tag === 'cy_analytic_dashboard'">
+                                <a class="cy-menu_icon"
+                                   t-on-click="() => this.env.bus.trigger('onclickMenuBar')">
+                                    <i class="cy-icons ri-menu-line pe-3 ps-1"
+                                       style="font-size:16px !important;"></i>
+                                </a>
+                            </div>
+                            <div class="heading mb-1">
+                                <span class="dashboard-header-title"
+                                      t-esc="state.name"></span>
+                            </div>
                         </div>
-                        <div class="heading mb-1">
-                            <span class="dashboard-header-title"
-                                  t-esc="state.name" />
+                        <div class="info-content gap-1 mb-1" t-if="!state.showInfo">
+                            <i class="ri-information-line cy-icons"></i>
+                            <p class="info-message d-flex cy-template-title mb-0">
+                                <span class="info-hover-msg info-message mb-0 px-1">
+                                    This Dashboard Shows Information From
+                                </span>
+                                <t t-esc="filterData?.date_0"></t>
+                                to
+                                <t t-esc="filterData?.date_1"></t>
+                            </p>
                         </div>
                     </div>
-                    <div class="info-content gap-1 mb-1" t-if="!state.showInfo">
-                        <i class="ri-information-line cy-icons"/>
-                        <p class="info-message d-flex cy-template-title mb-0">
-                            <span class="info-hover-msg info-message mb-0 px-1">
-                                This Dashboard Shows Information From
-                            </span>
-                            <t t-esc="filterData?.date_0"/>
-                            to
-                            <t t-esc="filterData?.date_1"/>
-                        </p>
-                    </div>
-                </div>
                 <div class="date_records d-flex justify-content-end align-items-center"
                      t-on-click="closeFilterSidebar"
                      style="margin-right: 10px; width: fit-content;">
@@ -42,12 +42,12 @@
                                    type="text"
                                    placeholder="Search..."
                                    t-model="state.search"
-                                   t-on-focus="closeFilter"/>
+                                   t-on-focus="closeFilter"></input>
                             <div class="icon"
                                  data-hotkey="f"
                                  t-on-click="onClickSearch"
                                  style="cursor: pointer;">
-                                <i class="ri-search-line cy_analytic_i"/>
+                                <i class="ri-search-line cy_analytic_i"></i>
                             </div>
                         </div>
                         <t t-if="state.sources.length > 1">
@@ -59,8 +59,8 @@
                                         role="button"
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false">
-                                    <i class="ri-dashboard-line cy_analytic_i"/>
-                                    <t t-out="state.name"/>
+                                    <i class="ri-dashboard-line cy_analytic_i"></i>
+                                    <t t-out="state.name"></t>
                                 </button>
                                 <ul class="dropdown-menu cy-dashboard_selection-dropdown"
                                     aria-labelledby="dashboardDropdown"
@@ -69,7 +69,7 @@
                                        t-key="source_index">
                                         <li><a class="dropdown-item"
                                                t-on-click="()=> this.sourceDashboard(source)">
-                                                <t t-out="source.name"/>
+                                                <t t-out="source.name"></t>
                                             </a></li>
                                     </t>
                                 </ul>
@@ -82,7 +82,7 @@
                                     type="button"
                                     t-att-title="timFrameDisplayName"
                                     t-on-click="onClickFilter">
-                                <i class="cy_icons ri-filter-line cy-filter-line-top"/>
+                                <i class="cy_icons ri-filter-line cy-filter-line-top"></i>
                                 Filters
                             </button>
                             <div class="cy-marketing-auto_add-parent-container cy_filter_toggler"
@@ -99,13 +99,13 @@
                                                 <div id="tooltip-content"
                                                      class="custom-tooltip-content">
                                                     <div class="tooltip-inner-content"
-                                                         t-out="filterInfo"/>
+                                                         t-out="filterInfo"></div>
                                                 </div>
                                             </div>
                                         </div>
                                         <i class="ri-close-fill"
                                            style="cursor: pointer;"
-                                           t-on-click="onClickFilter"/>
+                                           t-on-click="onClickFilter"></i>
                                     </div>
                                 </div>
                                 <form action="" class="p-3">
@@ -122,7 +122,7 @@
                                                     t-key="time_index"
                                                     t-att-value="TimeFrame[time]"
                                                     t-out="time"
-                                                    t-attf-style="{{TimeFrame[time] === 'custom' and 'display:none;' }}"/>
+                                                    t-attf-style="{{TimeFrame[time] === 'custom' and 'display:none;' }}"></option>
                                         </select>
                                     </div>
                                     <t t-foreach="state.globalFilters"
@@ -131,7 +131,7 @@
                                              t-on-click="closeFilterSidebar">
                                             <label for="date"
                                                    style="margin-right: 5px;">
-                                                <t t-esc="filter.name"/>
+                                                <t t-esc="filter.name"></t>
                                             </label>
                                             <t t-if="filter.type == 'datetime'">
                                                 <input type="date"
@@ -141,7 +141,7 @@
                                                        t-att-value="getDate(filter_index)"
                                                        t-on-change="(ev) => this.onSelect(ev, filter)"
                                                        style="padding: 5px 10px; border-radius: 5px; margin-right: 10px;"
-                                                       placeholder="Start Date"/>
+                                                       placeholder="Start Date"></input>
                                             </t>
                                             <t t-if="filter.type == 'many2one'">
                                                 <div class="cy_analytic_d input_tags cy_filter_input_tags input_tags_row w-100 col-4  mb-3">
@@ -152,9 +152,9 @@
                                                            t-key="rec.id">
                                                             <div class="badge rounded-pill o_tag d-flex gap-1"
                                                                  style="width: fit-content;">
-                                                                <t t-esc="rec.display_name"/>
+                                                                <t t-esc="rec.display_name"></t>
                                                                 <i t-on-click="() => this.onRemoveFilter(rec, filter)"
-                                                                   class="ri-close-line"/>
+                                                                   class="ri-close-line"></i>
                                                             </div>
                                                         </t>
                                                     </div>
@@ -165,7 +165,7 @@
                                                             activeActions="{}"
                                                             update.bind="(ev) => this.onSelect(ev, filter)"
                                                             isToMany="true"
-                                                            autoSelect="true"/>
+                                                            autoSelect="true"></Many2XAutocomplete>
                                                 </div>
                                             </t>
                                         </div>
@@ -189,14 +189,14 @@
                                 t-on-click="addGraph"
                                 title="Add Graph">
                             <i class="ri-file-add-line inner-box"
-                               t-att-class="{'jumping-icon': state.showInfo}"/>
+                               t-att-class="{'jumping-icon': state.showInfo}"></i>
                         </button>
                         <Dropdown
                                 togglerClass="'nav-link dropdown-toggle print-dropdown-dash cy-dropdown-arrow'"
                                 beforeOpen.bind="closeFilter">
                             <t t-set-slot="toggler">
                                 <i class="ri-printer-line cy-icons inner-box"
-                                   title="Print"/>
+                                   title="Print"></i>
                             </t>
                             <DropdownItem
                                     onSelected.bind="() => this.exportPDF('p')">
@@ -210,7 +210,7 @@
                         <button class="cy-add-graph" t-on-click="onPresent"
                                 title="Presentation">
                             <i class="ri-slideshow-2-line inner-box"
-                               t-att-class="opacityClass"/>
+                               t-att-class="opacityClass"></i>
                         </button>
                     </div>
                     <div class="dash-conf" t-on-click="closeFilter">
@@ -219,39 +219,39 @@
                                 beforeOpen.bind="closeFilter">
                             <t t-set-slot="toggler">
                                 <i class="ri-more-2-fill"
-                                   style="font-size: 20px;"/>
+                                   style="font-size: 20px;"></i>
                             </t>
                             <DropdownItem t-if="hasAccess and !is_subAction"
                                           onSelected.bind="onConfig">
-                                <i class="ri-settings-4-line"/>
+                                <i class="ri-settings-4-line"></i>
                                 Configuration
                             </DropdownItem>
                             <DropdownItem t-if="hasAccess and !is_subAction"
                                           onSelected.bind="onAddToMenu">
-                                <i class="ri-menu-add-fill"/>
+                                <i class="ri-menu-add-fill"></i>
                                 Add to Menu
                             </DropdownItem>
                             <t t-if="this.id">
                                 <DropdownItem t-if="hasAccess and !is_subAction"
                                               onSelected.bind="onDelete">
-                                    <i class="ri-delete-bin-4-line"/>
+                                    <i class="ri-delete-bin-4-line"></i>
                                     Delete
                                 </DropdownItem>
                             </t>
                             <DropdownItem t-if="hasAccess"
                                           onSelected.bind="onJsonExport">
-                                <i class="ri-braces-line"/>
+                                <i class="ri-braces-line"></i>
                                 Export as JSON
                             </DropdownItem>
                             <DropdownItem class="opacityClass"
                                           t-if="hasAccess and !is_subAction"
                                           onSelected.bind="onEdit">
-                                <i class="ri-dashboard-line"/>
+                                <i class="ri-dashboard-line"></i>
                                 Edit Layout
                             </DropdownItem>
                             <Dropdown>
                                 <t t-set-slot="toggler">
-                                    <i class="ri-palette-line"/>
+                                    <i class="ri-palette-line"></i>
                                     Themes
                                 </t>
                                 <t t-foreach="themes" t-as="theme"
@@ -259,22 +259,22 @@
                                     <DropdownItem parentClosingMode="'none'"
                                                   onSelected.bind="() => this.OnSelectTheme(theme.id)">
                                         <div t-att-id="theme.id">
-                                            <t t-out="theme.name"/>
+                                            <t t-out="theme.name"></t>
                                             <i t-att-class="themeState.currentTheme == theme.name and 'ri-check-line'"
-                                               style="margin-left: 5%;"/>
+                                               style="margin-left: 5%;"></i>
                                         </div>
                                     </DropdownItem>
                                 </t>
                             </Dropdown>
                             <DropdownItem parentClosingMode="'none'" class="">
                                 <div class="d-flex justify-content-center align-items-center">
-                                <div class="me-4"><i class="ri-moon-line"/>
+                                <div class="me-4"><i class="ri-moon-line"></i>
                                     Dark Mode</div>
                                     <span class="ms-2 slider-container">
                                     <label class="switch">
                                     <input type="checkbox"
-                                           t-model="state.darkMode"/>
-                                        <span class="slider round"/>
+                                           t-model="state.darkMode"></input>
+                                        <span class="slider round"></span>
                                     </label>
                                 </span>
                                 </div>
@@ -297,19 +297,19 @@
                                 <div class="col-4 cy_dash_info_how_to">
                                     <div class="d-flex justify-content-center p-2 mb-5">
                                         <img src="cyllo_analytics/static/src/img/amico.png"
-                                             alt=""/>
+                                             alt=""></img>
                                     </div>
                                     <h3 class="dashboard_info_text dashboard_info_head">
                                         No sheets here! Let's whip up a new one!
                                     </h3>
                                     <ul class="no-graph-info-list">
                                         <li class="dashboard_info_text">Click on the <i
-                                                class="ri-file-add-line"/>
+                                                class="ri-file-add-line"></i>
                                             "Add Graph" on the top right corner</li>
                                         <li class="dashboard_info_text">Or If you already have charts in the sheets model you can navigate to the sheets menu,</li>
                                         <li class="dashboard_info_text">And add this "<span
                                                 class="info-dashboard-name"
-                                                t-out="state.name"/>" from the
+                                                t-out="state.name"></span>" from the
                                             top right corner of the sheet's form
                                             view.</li>
                                     </ul>
@@ -318,9 +318,9 @@
                         </t>
                         <t t-foreach="state.sortedItems" t-as="item"
                            t-key="item.id" t-if="container.el">
-                            <t t-set="data" t-value="this.computeStyle(item)"/>
+                            <t t-set="data" t-value="this.computeStyle(item)"></t>
                             <t t-if="item.type == 'kpi'">
-                                <t t-set="kpi" t-value="this.getKpi(item)"/>
+                                <t t-set="kpi" t-value="this.getKpi(item)"></t>
                                 <KpiSheetChart query="item"
                                                kpi="kpi"
                                                style="data.style"
@@ -332,7 +332,7 @@
                                                     t-if="item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
-                                                       title="Filter"/>
+                                                       title="Filter"></i>
                                                 </t>
                                                 <DropdownItem
                                                         parentClosingMode="'none'"
@@ -340,33 +340,38 @@
                                                         t-as="filter"
                                                         t-key="filter.id"
                                                         onSelected.bind="() => this.filterChange(filter, item_index)">
-                                                    <t t-out="filter.name"/>
+                                                    <t t-out="filter.name"></t>
                                                     <i t-att-class="filter.is_active and 'ri-check-line'"
-                                                       style="margin-left: 5%;"/>
+                                                       style="margin-left: 5%;"></i>
                                                 </DropdownItem>
                                             </Dropdown>
-                                            <Dropdown t-if="hasAccess and !is_subAction">
-                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"/></t>
+                                            <Dropdown>
+                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"></i></t>
                                                 <DropdownItem
                                                         t-if="!is_subAction"
                                                         onSelected.bind="() => this.onEditSheet(item)">
-                                                    <i class="ri-edit-circle-line"/>
+                                                    <i class="ri-edit-circle-line"></i>
                                                     Edit</DropdownItem>
                                                 <DropdownItem
                                                         t-if="kpi.redirect"
                                                         onSelected.bind="() => this.openRecord(kpi, item)">
-                                                    <i class="ri-arrow-go-forward-line"/>
+                                                    <i class="ri-arrow-go-forward-line"></i>
                                                     View Records</DropdownItem>
                                                 <DropdownItem
                                                         t-if="!is_subAction"
                                                         onSelected.bind="() => this.onDeleteSheet(item)">
-                                                    <i class="ri-delete-bin-4-line"/>
+                                                    <i class="ri-delete-bin-4-line"></i>
                                                     Delete</DropdownItem>
                                                 <DropdownItem
                                                         t-if="!is_subAction"
                                                         onSelected.bind="() => this.onHideSheet(item)">
-                                                    <i class="ri-rest-time-line"/>
+                                                    <i class="ri-rest-time-line"></i>
                                                     Hide</DropdownItem>
+                                                <DropdownItem
+                                                        t-if="!is_subAction"
+                                                        onSelected.bind="() => this.onSetAlert(item)">
+                                                    <i class="ri-notification-3-line"></i>
+                                                    Set Alert</DropdownItem>
                                             </Dropdown>
                                         </div>
                                     </t>
@@ -383,7 +388,7 @@
                                                      t-if="item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
-                                                       title="Filter"/>
+                                                       title="Filter"></i>
                                                 </t>
                                                  <DropdownItem
                                                          parentClosingMode="'none'"
@@ -391,29 +396,34 @@
                                                          t-as="filter"
                                                          t-key="filter.id"
                                                          onSelected.bind="() => this.filterChange(filter, item_index)">
-                                                    <t t-out="filter.name"/>
+                                                    <t t-out="filter.name"></t>
                                                      <i t-att-class="filter.is_active and 'ri-check-line'"
-                                                        style="margin-left: 5%;"/>
+                                                        style="margin-left: 5%;"></i>
                                                 </DropdownItem>
                                             </Dropdown>
-                                             <Dropdown t-if="hasAccess and !is_subAction">
-                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"/></t>
+                                             <Dropdown>
+                                                <t t-set-slot="toggler"><i class="ri-more-2-fill"></i></t>
                                                  <DropdownItem
                                                          t-if="!is_subAction"
                                                          onSelected.bind="() => this.onEditSheet(item)">
-                                                    <i class="ri-edit-circle-line"/>
+                                                    <i class="ri-edit-circle-line"></i>
                                                      Edit</DropdownItem>
                                                  <DropdownItem
                                                          t-if="!is_subAction"
                                                          onSelected.bind="() => this.onDeleteSheet(item)">
-                                                    <i class="ri-delete-bin-4-line"/>
+                                                    <i class="ri-delete-bin-4-line"></i>
                                                      Delete</DropdownItem>
                                                  <DropdownItem
                                                          t-if="!is_subAction"
                                                          onSelected.bind="() => this.onHideSheet(item)">
-                                                    <i class="ri-rest-time-line"/>
+                                                    <i class="ri-rest-time-line"></i>
                                                      Hide</DropdownItem>
-                                            </Dropdown>
+                                                 <DropdownItem
+                                                         t-if="!is_subAction"
+                                                         onSelected.bind="() => this.onSetAlert(item)">
+                                                     <i class="ri-notification-3-line"></i>
+                                                     Set Alert</DropdownItem>
+                                             </Dropdown>
                                          </div>
                                     </t>
                                 </Table>
@@ -433,7 +443,7 @@
                                                      t-if="item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
-                                                       title="Filter"/>
+                                                       title="Filter"></i>
                                                 </t>
                                                  <DropdownItem
                                                          parentClosingMode="'none'"
@@ -441,33 +451,38 @@
                                                          t-as="filter"
                                                          t-key="filter.id"
                                                          onSelected.bind="() => this.filterChange(filter, item_index)">
-                                                    <t t-out="filter.name"/>
+                                                    <t t-out="filter.name"></t>
                                                      <i t-att-class="filter.is_active and 'ri-check-line'"
-                                                        style="margin-left: 5%;"/>
+                                                        style="margin-left: 5%;"></i>
                                                 </DropdownItem>
                                             </Dropdown>
                                             <Dropdown>
                                                 <t t-set-slot="toggler">
-                                                    <i class="ri-more-2-fill"/>
+                                                    <i class="ri-more-2-fill"></i>
                                                 </t>
                                                 <DropdownItem
                                                         t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onEditSheet(item)">
-                                                    <i class="ri-edit-circle-line"/>
+                                                    <i class="ri-edit-circle-line"></i>
                                                     Edit</DropdownItem>
                                                 <DropdownItem
                                                         t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onDeleteSheet(item)">
-                                                    <i class="ri-delete-bin-4-line"/>
+                                                    <i class="ri-delete-bin-4-line"></i>
                                                     Delete</DropdownItem>
                                                 <DropdownItem
                                                         t-if="hasAccess and !is_subAction"
                                                         onSelected.bind="() => this.onHideSheet(item)">
-                                                    <i class="ri-rest-time-line"/>
+                                                    <i class="ri-rest-time-line"></i>
                                                     Hide</DropdownItem>
                                                 <DropdownItem
+                                                        t-if="hasAccess and !is_subAction"
+                                                        onSelected.bind="() => this.onSetAlert(item)">
+                                                    <i class="ri-notification-3-line"></i>
+                                                    Set Alert</DropdownItem>
+                                                <DropdownItem
                                                         onSelected.bind="() => this.exportAsPNG(item)">
-                                                    <i class="ri-image-add-line"/>
+                                                    <i class="ri-image-add-line"></i>
                                                     Export as PNG</DropdownItem>
                                             </Dropdown>
                                         </div>
@@ -484,7 +499,8 @@
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </t>
         <t t-else="">
             <div t-ref="dashboard"
                  class="d-flex justify-content-center align-items-center">

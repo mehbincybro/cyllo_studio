@@ -12,15 +12,6 @@
  */
 export function loadingChart(props) {
     return {
-        title: {
-            text: props.title ? props.title : '',
-            padding: [15, 0, 0, 15],
-            textStyle: {
-                fontSize: 17,
-                fontWeight: 600,
-                textBorderColor: 'white', // Add border color
-            }
-        },
         graphic: {
             elements: [{
                 type: 'text',

@@ -1,154 +1,162 @@
-.chart-container-absolute .card-body.kpi-card-body {
-    padding-top: 0;
-    padding-bottom: 0;
-}
-
-.chart-container-absolute .kpi-icon-size {
-    font-size: 44px;
-}
-
-.chart-container-absolute .kpi-structure div {
-    font-size: 18px;
-}
-
-.chart-container-absolute .kpi-view_1 .kpi-middle-container {
-    gap: 8px 0;
-}
-
+/* KPI Sheet Base Overrides */
 .chart-container-absolute.cy-kpi-top-card.card {
     overflow: hidden;
+    padding: 0;
+    border: none;
 }
 
-.chart-container-absolute .description-kpi {
-    bottom: 22px;
-}
-
-.chart-container-absolute .card-body .kpi-card-body {
-    max-width: 100%;
-    max-height: 100%;
-    overflow: hidden;
-    box-sizing: border-box;
-}
-
-.chart-container-absolute .card-inner-body {
-    width: 106%;
-}
-
-.chart-container-absolute .kpi-tools-container {
-    width: fit-content;
-}
-
-.chart-container-absolute .description-kpi {
-  //margin-right: 10px;
-}
-
-.chart-container-absolute .kpi-heading-container {
-    display: flex;
-    justify-content: space-between;
-}
-
-.chart-container-absolute .description-kpi {
-    display: flex;
-    gap: 8px;
-}
-
-.chart-container-absolute .kpi-view_1 .description-kpi {
-  //left: -42px;
-}
-
-@media (min-width: 2000px) and (max-width: 2325px) {
-    .chart-container-absolute .kpi-card-body .card-inner-body {
-        height: 145px;
-    }
-    .chart-container-absolute .kpi-card-body .card-inner-body div.w-100 {
-        height: 120px;
-    }
-    .chart-container-absolute .kpi-icon-size {
-        font-size: 60px;
-    }
-    .chart-container-absolute .kpi-view_1 .kpi-middle-container {
-        gap: 26px 0;
-    }
-    .chart-container-absolute .kpi-left-aligned-container {
-        gap: 54px;
-    }
-    .chart-container-absolute .kpi-view-icon-status {
-        font-size: 58px;
-        height: 70px;
-    }
-    .chart-container-absolute .description-kpi {
-        bottom: 38px;
-        font-size: 20px;
-    }
-    .chart-container-absolute .kpi-structure div {
-        font-size: 24px;
-    }
-    .chart-container-absolute .progress-container, .chart-container-absolute .progress {
-        height: 10px;
-    }
-}
-
-@media (max-width: 1480px) {
-
-    .chart-container-absolute .kpi-icon-size {
-        font-size: 32px;
-    }
-    .chart-container-absolute .kpi-structure div {
-        font-size: 14px;
-    }
-    .chart-container-absolute .kpi-right-container {
-        margin-left: 10px;
-    }
-    .chart-container-absolute .description-kpi {
-        font-size: 14px;
-    }
-    .chart-container-absolute .kpi-view_1 .description-kpi {
-        bottom: 4px;
-    }
-    .chart-container-absolute .card-body.kpi-card-body {
-        padding-right: 2px;
-    }
-    .chart-container-absolute .card-inner-body {
-        width: 100%;
-        padding-top: 4px;
-    }
-    .chart-container-absolute .kpi-view-2 .description-kpi {
-        bottom: 18px;
-    }
-    .chart-container-absolute .kpi-view-2 .kpi-view-icon-status {
-        font-size: 25px;
-        height: 32px;
-    }
-}
-
-.chart-container-absolute .kpi-view-2 .kpi-view-icon-status {
-    font-size: 44px;
-    font-weight: 600;
-    height: 50px;
+.chart-container-absolute .card-body.kpi-card-body {
+    padding: 0;
 }
 
 .edit_elem.grid-stack-item .kpi-card-body.card-body {
-    padding: 4px 6px 0px;
+    padding: 0;
 }
 
-.edit_elem.grid-stack-item .kpi-view_1 .kpi-middle-container {
-    gap: 6px;
-}
-
-.edit_elem.grid-stack-item .progress,
-.edit_elem.grid-stack-item .percentage-sheet::after,
-.edit_elem.grid-stack-item .percentage-sheet,
+/* Base Theme Fallback */
 .chart-container-absolute .progress-container .progress,
-.chart-container-absolute .percentage-sheet::after,
-.chart-container-absolute .percentage-sheet,
-{
-    background-color: var(--dashboard-primary-color) !important;
+.chart-container-absolute .percentage-sheet {
+    background-color: var(--kpi-color, var(--dashboard-primary-color)) !important;
 }
 
-.chart-container-absolute .description-kpi .ri-information-line{
-    color: var(--dashboard-primary-color);
-}
 
 .view-type-container-sheet .form-check {
     padding-left: unset !important;
+}
+
+.sheet-header {
+    display: flex;
+    align-items: center;
+    background-color: var(--dashboard-primary-color, var(--primary, #0c2041));
+    height: clamp(35px, 15%, 60px);
+    width: 100%;
+    justify-content: space-between;
+    padding: 0 12px;
+    box-sizing: border-box;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+    z-index: 10;
+}
+
+.sheet-header .sheet-title,
+.sheet-header .kpi-heading-name,
+.sheet-header h2 {
+    color: #FFFFFF !important;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.sheet-header .cy_options_container-tile i.ri-more-2-fill,
+.sheet-header .kpi-tools-container i.ri-more-2-fill,
+.sheet-header i.ri-more-2-fill {
+    color: #FFFFFF !important;
+}
+
+.sheet-header .cy-graph-option-container,
+.sheet-header .cy_options_container-tile {
+    position: relative !important;
+    top: auto !important;
+    right: auto !important;
+    height: auto !important;
+    width: auto !important;
+    justify-content: flex-end !important;
+}
+
+/* User KPI Component Layout Redesign */
+
+/* Card */
+.cy-kpi-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 12px;
+    position: relative;
+    border-left: 4px solid var(--kpi-color);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+/* Header */
+.cy-kpi-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.cy-kpi-menu {
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--kpi-color);
+}
+
+.cy-kpi-menu i {
+    color: var(--kpi-color) !important;
+}
+
+/* Body */
+.cy-kpi-body {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Icon */
+.cy-kpi-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.05);
+    color: var(--kpi-color);
+    font-size: 16px;
+}
+
+/* Values */
+.cy-kpi-values {
+    flex: 1;
+}
+
+.cy-kpi-main {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+}
+
+/* Progress */
+.cy-kpi-progress {
+    position: relative;
+    height: 6px;
+    background: #e5e5e5;
+    border-radius: 10px;
+    overflow: visible;
+}
+
+.cy-kpi-progress-bar {
+    height: 100%;
+    width: 40%; /* dynamic */
+    background: var(--kpi-color);
+    border-radius: 10px;
+}
+
+/* Badge */
+.cy-kpi-badge {
+    position: absolute;
+    top: -18px;
+    transform: translateX(-50%);
+    background: var(--kpi-color);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    white-space: nowrap;
 }
