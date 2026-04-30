@@ -4,12 +4,46 @@
         <div t-attf-id="elem_{{ state.rec_id }}"
              t-att-class="props.toggleClass"
              class="card cp mr-1 mt-1 align-items-stretch cy_tile cy_dashboard_chart"
-             t-att-style="props.width.length ? 'width: ' + props.width : '' + (state.cardStyle ? ' ' + state.cardStyle : '')"
+             t-att-style="(props.width ? 'width: ' + props.width + ';' : '') + (state.cardStyle ? ' ' + state.cardStyle : '')"
              t-on-click.prevent.stop="onClickChart">
-            <div class="position-relative">
-                <t t-if="props.footer" t-slot="footer"/>
+            <div class="sheet-header">
+                <div class="sheet-title" t-esc="props.item?.name || props.value?.name || state.name"></div>
+                <div class="position-relative">
+                    <t t-if="props.footer" t-slot="footer"></t>
+                </div>
             </div>
-            <div t-ref="root" t-att-style="state.style"/>
+            <div t-ref="root" t-attf-style="{{state.style}} height: 85%; width: 100%; box-sizing: border-box;"></div>
+            
+            <!-- Color Reference Panel -->
+            <t t-if="state.showColorGuide">
+                <div class="position-absolute bg-white border rounded shadow p-2" 
+                     style="z-index: 1000; right: 15px; bottom: 60px; font-size: 10px; min-width: 180px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd !important; border-radius: 8px !important;">
+                    <div class="fw-bold mb-2 border-bottom pb-1 d-flex justify-content-between align-items-center" style="color: #333;">
+                        <span>Color Reference</span>
+                        <i class="ri-close-line cp" t-on-click.stop="toggleColorGuide" style="font-size: 14px; color: #999;"/>
+                    </div>
+                    <t t-set="all_mappings" t-value="props.value?.color_mappings || props.item?.color_mappings || []"/>
+                    <t t-foreach="all_mappings" t-as="m" t-key="m_index">
+                         <div class="d-flex align-items-center mb-1 py-1">
+                             <div t-attf-style="width: 12px; height: 12px; background: {{m.color}}; margin-right: 10px; border-radius: 3px; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);"></div>
+                             <div class="text-truncate" style="color: #444; font-weight: 500;">
+                                 <t t-esc="m.measure_alias"/>: <t t-esc="m.min_value"/>-<t t-esc="m.max_value || '+'"/>
+                             </div>
+                         </div>
+                    </t>
+                </div>
+            </t>
+            
+            <!-- Floating Palette Button -->
+            <div class="position-absolute" style="bottom: 12%; right: 15px; z-index: 100;">
+                <t t-if="props.value?.color_mappings?.length or props.item?.color_mappings?.length">
+                    <button t-on-click.stop="toggleColorGuide" class="btn shadow-sm" 
+                            style="border-radius: 50%; width: 34px; height: 34px; background: white; border: 1px solid #eee; display: flex; align-items: center; justify-content: center;">
+                        <i class="ri-palette-line" style="color: #2196F3; font-size: 18px;"/>
+                    </button>
+                </t>
+            </div>
+
             <t t-if="state.hasData" t-slot="ai-footer"/>
             <t t-if="state.hasData and showZoom" t-slot="zoom-footer">
                 <div class="position-absolute zoom-btn-container-graph-tile"
@@ -21,11 +55,11 @@
                     <svg class="zoom-container" viewBox="0 0 8 20"
                          xmlns="http://www.w3.org/2000/svg">
                         <path t-on-click.stop="() => this.zoom('in')"
-                              class="zoom-btn-chart"
-                              d="M7.02,3.58c0-1.92-1.56-3.48-3.48-3.48c-1.92,0-3.48,1.56-3.48,3.48c0,0.03,0,0.06,0,0.09h0v5.56h6.96V3.67h0  C7.01,3.64,7.02,3.61,7.02,3.58z M5.84,5.54H3.88v1.95H3.19V5.54H1.24V4.85h1.95V2.9h0.69v1.95h1.95V5.54z"/>
+                               class="zoom-btn-chart"
+                               d="M7.02,3.58c0-1.92-1.56-3.48-3.48-3.48c-1.92,0-3.48,1.56-3.48,3.48c0,0.03,0,0.06,0,0.09h0v5.56h6.96V3.67h0  C7.01,3.64,7.02,3.61,7.02,3.58z M5.84,5.54H3.88v1.95H3.19V5.54H1.24V4.85h1.95V2.9h0.69v1.95h1.95V5.54z"/>
                         <path t-on-click.stop="() => this.zoom('out')"
-                              class="zoom-btn-chart"
-                              d="M7.01,15.31L7.01,15.31l0-5.56H0.06v5.56h0c0,0.03,0,0.06,0,0.09c0,1.92,1.56,3.48,3.48,3.48  c1.92,0,3.48-1.56,3.48-3.48C7.02,15.37,7.01,15.34,7.01,15.31z M5.57,14.13H1.5v-0.69h4.07V14.13z"/>
+                               class="zoom-btn-chart"
+                               d="M7.01,15.31L7.01,15.31l0-5.56H0.06v5.56h0c0,0.03,0,0.06,0,0.09c0,1.92,1.56,3.48,3.48,3.48  c1.92,0,3.48-1.56,3.48-3.48C7.02,15.37,7.01,15.34,7.01,15.31z M5.57,14.13H1.5v-0.69h4.07V14.13z"/>
                     </svg>
                 </div>
             </t>

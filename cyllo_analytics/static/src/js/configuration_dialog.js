@@ -120,11 +120,14 @@ export class ConfigurationDialog extends Component {
      */
     async onConfigSave() {
         if(this.props.id){
-            this.orm.write("dashboard.config", [this.props.id], this.data);
+            await this.orm.write("dashboard.config", [this.props.id], this.data);
             if(this.data.theme_id){
                 this.props.applyTheme(this.data.theme_id)
             }
             this.props.onClickSave(this.data)
+            if (this.data.ir_menu_ids) {
+                this.action.doAction("reload_context");
+            }
         } else {
             await this.orm.create("dashboard.config", [this.data])
             this.action.doAction('soft_reload')

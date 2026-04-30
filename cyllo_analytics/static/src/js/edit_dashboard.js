@@ -83,67 +83,85 @@ class EditDashboard extends CylloDashboard {
     /**
      * Fetch data for the dashboard and set up event listeners.
      */
-    fetchData() {
+    async fetchData() {
         this.stack = GridStack.init({
             float: true,
-            verticalMargin: 100,
-            horizontalMargin: 100,
+            cellHeight: 'auto',
+            margin: 10,
         }, this.ref.el)
-        // Iterate through items and create dashboard components
-        this.state.sortedItems.forEach((item, i) => {
-            var sql = item.query.replace(/\n/g, ' ');
-            this.orm.call("dashboard.config", "sql_execute", [sql]).then((res) => {
-                let props = {
-                    data: res,
-                    name: item.name,
-                    measures: eval(item.measure),
-                    dimension: item.dimension,
-                    dimension_axis: item.dimension_axis,
-                    type: item.type,
-                    id: item.id
-                }
+        
+        if (this.state.width === 0) {
+            this.state.width = (this.ref.el?.clientWidth || (window.innerWidth - 300)) / 12;
+        }
 
-                if (item.type == 'kpi') {
-                    props.kpi = this.getKpi(item)
-                }
+        // Fetch all chart data in parallel first to avoid GridStack layout thrashing
+        const dataPromises = this.state.sortedItems.map(item => {
+            const sql = item.query.replace(/\n/g, ' ');
+            return this.orm.call("dashboard.config", "sql_execute", [sql])
+                .then(res => ({ item, res }))
+                .catch(err => {
+                    console.error("Scale error fetching chart data:", err);
+                    return { item, res: [] };
+                });
+        });
 
-                var element = document.createElement('div')
-                element.className = "card edit_elem"
-                element.id = `elem_${item.id}`
-                element.sheetId = item.id
-                element.resId = this.id
-                let girdOptions = this.gridValues(item)
-                const {dashboard_sheet_option_ids: option} = item
-                this.stack.addWidget(element, girdOptions)
-                const unit = this.state.width
-                if (item.type == "kpi") {
-                    const kpiStyle = this.computeKpiStyle(option)
-                    element.className += " cy-sheet_progress-card"
-                    this.stackItems[element.id] = new StackKpiItem(element, props, this.stack, this.env, {
-                        kpiStyle,
-                        unit
-                    })
-                } else if (item.type == "table") {
-                    const kpiStyle = this.computeKpiStyle(option)
-                    var {graph_height, graph_width, x, y} = option[0].attributes
-                    this.stackItems[element.id] = new StackTableItem(element, props, this.stack, this.env, {
-                        style: {
-                            h: graph_height, w: graph_width, x, y
-                        }, kpiStyle, unit, theme: this.themeState.currentTheme
-                    })
-                } else {
-                    var {graph_height, graph_width, x, y} = option[0].attributes
-                    var params = {
-                        themeColor: this.themeState.theme.theme_color_ids,
-                        unit: this.state.width,
-                        graph_height,
-                        isDarkMode: this.state.darkMode
-                    }
-                    this.stackItems[element.id] = new StackItem(element, props, this.stack, this.themeState.currentTheme, params)
+        const results = await Promise.all(dataPromises);
+
+        // Batch add widgets once all data is ready
+        this.stack.batchUpdate();
+        results.forEach(({ item, res }) => {
+            let props = {
+                data: res,
+                name: item.name,
+                measures: eval(item.measure),
+                dimension: item.dimension,
+                dimension_axis: item.dimension_axis,
+                type: item.type,
+                id: item.id
+            }
+
+            if (item.type == 'kpi') {
+                props.kpi = this.getKpi(item)
+            }
+
+            var element = document.createElement('div')
+            element.className = "card edit_elem"
+            element.id = `elem_${item.id}`
+            element.sheetId = item.id
+            element.resId = this.id
+            let girdOptions = this.gridValues(item)
+            const {dashboard_sheet_option_ids: option} = item
+            this.stack.addWidget(element, girdOptions)
+            const unit = this.state.width
+            if (item.type == "kpi") {
+                const kpiStyle = this.computeKpiStyle(option)
+                element.className += " cy-sheet_progress-card"
+                this.stackItems[element.id] = new StackKpiItem(element, props, this.stack, this.env, {
+                    kpiStyle,
+                    unit
+                })
+            } else if (item.type == "table") {
+                const kpiStyle = this.computeKpiStyle(option)
+                var {graph_height, graph_width, x, y} = option[0].attributes
+                this.stackItems[element.id] = new StackTableItem(element, props, this.stack, this.env, {
+                    style: {
+                        h: graph_height, w: graph_width, x, y
+                    }, kpiStyle, unit, theme: this.themeState.currentTheme
+                })
+            } else {
+                var {graph_height, graph_width, x, y} = option[0].attributes
+                var params = {
+                    themeColor: this.themeState.theme.theme_color_ids,
+                    unit: this.state.width,
+                    graph_height,
+                    isDarkMode: this.state.darkMode
                 }
-                this.vals = this.stack.save(false, true)
-            })
-        })
+                this.stackItems[element.id] = new StackItem(element, props, this.stack, this.themeState.currentTheme, params)
+            }
+        });
+        this.stack.commit();
+        this.vals = this.stack.save(false, true);
+
         this.stack.on('change', this.onChange.bind(this))
         this.stack.on('dragstop', this.dragStop.bind(this))
         this.stack.on('resize', (event, el) => {

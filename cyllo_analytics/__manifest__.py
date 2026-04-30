@@ -31,7 +31,7 @@
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
     'license': 'LGPL-3',
-    'depends': ['cyllo_base', 'web'],
+    'depends': ['cyllo_base', 'web', 'base_automation', 'mail'],
     'icon': '/cyllo_analytics/static/description/analytics.svg',
     'data': [
         'security/dashboard_config_security.xml',
@@ -60,6 +60,7 @@
         'views/dashboard_sheet.xml',
         'views/cyllo_dashboard_templates.xml',
         'views/res_config_settings_views.xml',
+        'data/ir_cron_data.xml',
     ],
     'uninstall_hook': 'cyllo_d_uninstall_hook',
     'post_init_hook': 'cyllo_d_post_init_hook',
@@ -109,6 +110,9 @@
             'cyllo_analytics/static/src/xml/presets/preset_apply_dialog.xml',
             'cyllo_analytics/static/src/js/imported_table_list_view.js',
             'cyllo_analytics/static/src/xml/imported_table_list_view.xml',
+            'cyllo_analytics/static/src/js/alert_configuration_dialog.js',
+            'cyllo_analytics/static/src/xml/alert_configuration_dialog.xml',
+            'cyllo_analytics/static/src/js/cyllo_analytics_notifications.js',
             'cyllo_analytics/static/src/tests/tours/dashboard_onboarding.js',
         ],
         "web.qunit_suite_tests": [

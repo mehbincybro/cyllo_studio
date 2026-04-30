@@ -212,24 +212,133 @@ export class ExplainAIModal extends Component {
 
     download() {
         if (this.state.error) return;
-        var pdf = new jsPDF('l', 'mm', 'a3');
-        html2canvas(this.rootRef.el).then(async (canvas) => {
+
+        // 1. Create the global print wrapper
+        var printDiv = document.createElement('div');
+        printDiv.style.position = 'absolute';
+        printDiv.style.left = '-9999px';
+        printDiv.style.top = '0';
+        printDiv.style.width = '1000px';
+        printDiv.style.backgroundColor = '#ffffff';
+        printDiv.style.color = '#333';
+        printDiv.style.fontFamily = 'Arial, sans-serif';
+
+        // 2. Build the Purple Header (Matches your image exactly)
+       var header = document.createElement('div');
+        // Fetch the primary theme color from the dashboard's current theme properties
+        header.style.backgroundColor = this.props.theme.theme_color_ids ? this.props.theme.theme_color_ids[0] : '#6a0dad';
+        header.style.color = 'white';
+        header.style.padding = '20px 40px';
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.alignItems = 'center';
+
+        var leftHeader = document.createElement('div');
+        leftHeader.innerHTML = '<span style="font-size:20px; margin-right:8px;">❖</span><b style="font-size: 20px; letter-spacing: 2px;">AI Insights</b>';
+
+        var rightHeader = document.createElement('div');
+        rightHeader.innerText = this.state.name || 'AI Insight';
+        rightHeader.style.fontSize = '14px';
+
+        header.appendChild(leftHeader);
+        header.appendChild(rightHeader);
+        printDiv.appendChild(header);
+
+        // 3. Create a wrapper for the body content purely for padding
+        var contentWrapper = document.createElement('div');
+        contentWrapper.style.padding = '10px 40px 40px 40px';
+        printDiv.appendChild(contentWrapper);
+
+        // 4. Insert the Chart Image cleanly at the top
+        if (this.state.imgSrc) {
+            var img = document.createElement('img');
+            img.src = this.state.imgSrc;
+            img.style.width = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            img.style.marginBottom = '20px';
+            contentWrapper.appendChild(img);
+        }
+
+        // 5. Add the Horizontal Separator Line below the chart
+        var hr = document.createElement('hr');
+        hr.style.border = 'none';
+        hr.style.borderTop = '2px solid #e0e0e0'; // Light grey line
+        hr.style.marginBottom = '30px';
+        contentWrapper.appendChild(hr);
+
+        // 6. Clone the styled AI Explanation Text below the line
+        var textContainer = this.rootRef.el.querySelector('.explain-text-container');
+        if (textContainer) {
+            var clonedText = textContainer.cloneNode(true);
+
+            // Remove the interactive button tools
+            var footerTools = clonedText.querySelector('.explain-footer');
+            if (footerTools) footerTools.remove();
+
+            // Ensure no scrollbars cut off bullets
+            clonedText.style.height = 'max-content';
+            clonedText.style.overflow = 'visible';
+            clonedText.style.fontSize = '15px';
+            clonedText.style.lineHeight = '1.8';
+            clonedText.style.color = '#000000';
+            clonedText.querySelectorAll('*').forEach(el => {el.style.color = '#000000';});
+            contentWrapper.appendChild(clonedText);
+        }
+
+        document.body.appendChild(printDiv);
+
+        // 7. Capture the assembled beauty with html2canvas
+        html2canvas(printDiv, { scale: 2 }).then(async (canvas) => {
+
+            document.body.removeChild(printDiv);
+
             var imgData = canvas.toDataURL('image/png');
+            var pdf = new jsPDF('p', 'mm', 'a4');
+
             var pageWidth = pdf.internal.pageSize.getWidth();
             var pageHeight = pdf.internal.pageSize.getHeight();
-            var imageWidth = pageWidth - 25;
-            var imageHeight = (imageWidth / canvas.width) * canvas.height;
-            var offsetX = 15;
-            var offsetY = 40
-            pdf.setFont("helvetica");
-            pdf.setFontType("bold");
-            pdf.setFontSize(14);
-            pdf.text(`${this.state.name || ''}`, 140, 20);
-            pdf.addImage(imgData, 'PNG', offsetX, offsetY, imageWidth, imageHeight);
-            pdf.save(`${this.state.name}.pdf`);
-            this.showActionMessage("Downloaded")
+
+            var imgWidth = pageWidth;
+            var imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+            // Calculate exact total pages realistically for the footer
+            var totalPages = Math.ceil(imgHeight / pageHeight);
+            var currentPage = 1;
+
+            var heightLeft = imgHeight;
+            var position = 0;
+
+            // Stamp Page 1
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+            // Add native "Page 1 of X" text to the absolute bottom of PDF Page 1
+            pdf.setFontSize(9);
+            pdf.setTextColor(150); // Muted grey
+            pdf.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+
+            heightLeft -= pageHeight;
+
+            // Mathematically slice remaining pages in loop
+            while (heightLeft > 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+
+                currentPage++;
+
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+
+                // Add "Page X of Y" to subsequent pages
+                pdf.text(`Page ${currentPage} of ${totalPages}`, pageWidth / 2, pageHeight - 8, { align: 'center' });
+
+                heightLeft -= pageHeight;
+            }
+
+            pdf.save(`${this.state.name || 'AI Insight'}.pdf`);
+            this.showActionMessage("Downloaded");
         });
     }
+
 
     async handleChatKeydown(ev) {
         if(!this.state.isResponding && !ev.shiftKey && ev.key === "Enter" && this.state.chat.trim()) {

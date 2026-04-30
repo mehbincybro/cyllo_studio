@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import {registry} from "@web/core/registry";
-import {useState, useEffect, Component, useRef, onWillStart, onMounted, onWillUpdateProps, status} from "@odoo/owl";
+import {useState, useEffect, Component, useRef, onWillStart, onMounted, onWillUpdateProps, status, onWillDestroy} from "@odoo/owl";
 import {ChartMaker} from "../../chart_maker"
 import { useService, useBus } from "@web/core/utils/hooks";
 
@@ -19,8 +19,6 @@ export class GraphTile extends Component {
     setup() {
         const {
             theme,
-            height,
-            width
         } = this.props
         this.state = useState({
             style: "",
@@ -29,7 +27,8 @@ export class GraphTile extends Component {
             rec_id: false,
             hasData: true,
             zoom: 0,
-            showZoom: false
+            showZoom: false,
+            showColorGuide: false
         })
         this.orm = useService('orm')
         this.is_init = true
@@ -46,20 +45,47 @@ export class GraphTile extends Component {
             }
             reRender = this.props.reRender
         }, () => [this.props.item?.query, this.props.value])
+        
         useEffect(() => {
             this.setStyle()
         }, () => [this.props.style])
+        
         useEffect(() => {
             if (this.props.theme != this.state.theme) {
                 this.state.theme = this.props.theme
                 this.reRender()
             }
         }, () => [this.props.theme])
+
         useEffect(() => {
             if (this.options) {
                 this.addElement()
             }
         }, () => [this.options])
+
+        onMounted(() => {
+            if (this.options) {
+                this.addElement()
+            }
+            this.resizeObserver = new ResizeObserver(() => {
+                if (this.eChart) {
+                    this.eChart.resize();
+                }
+            });
+            if (this.rootRef.el) {
+                this.resizeObserver.observe(this.rootRef.el);
+            }
+        })
+        
+        onWillDestroy(() => {
+            if (this.resizeObserver) {
+                this.resizeObserver.disconnect();
+            }
+        })
+    }
+
+    toggleColorGuide() {
+        this.state.showColorGuide = !this.state.showColorGuide;
     }
 
     /**
@@ -67,16 +93,14 @@ export class GraphTile extends Component {
      * @function
      */
     async reRender() {
-        if (this.eChart) {
-            if (this.props.item?.type && RE_RENDER_GRAPHS.includes(this.props.item?.type)) {
-                var params = this.props.themeColor ? {themeColor: this.props.themeColor} : {};
-                this.options = await this.maker.regenGraphOptions(params)
-            } else {
-                this.setOptions(this.props.value || this.props.item)
-            }
-            this.eChart.dispose()
-            this.addElement()
+        if (this.props.item?.type && RE_RENDER_GRAPHS.includes(this.props.item?.type)) {
+            var params = this.props.themeColor ? {themeColor: this.props.themeColor} : {};
+            this.options = await this.maker.regenGraphOptions(params)
+        } else {
+            this.setOptions(this.props.value || this.props.item)
+            this.options = await this.maker.makeGraphOptions()
         }
+        this.addElement()
     }
 
     /**
@@ -87,15 +111,9 @@ export class GraphTile extends Component {
     async setupGraphData() {
         if (this.props.value) {
             this.state.rec_id = this.props.value.id
-            this.setOptions(this.props.value)
             if (this.is_init) {
                 await this.setStyle()
                 this.is_init = false
-            }
-
-            this.options = await this.maker.makeGraphOptions()
-            if (this.props.value.type == 'map') {
-                this.addElement()
             }
             this.reRender()
         } else if (this.props.item) {
@@ -113,14 +131,21 @@ export class GraphTile extends Component {
      * @function
      */
     setStyle() {
-        var cardStyle = Object.keys(this.props.style).map(key => {
-            return key !== "width" ? `${key === 'card_width' ? 'width' : key}:${this.props.style[key]}` : ""
-        }).join('');
-        var style = Object.keys(this.props.style).filter(key => ['height', 'width'].includes(key)).map(key => {
-            return key !== "card_width" ? `${key}:${this.props.style[key]}` : ""
-        }).join('');
+        let cardStyle = "";
+        let style = "";
+        if (this.props.style) {
+            Object.keys(this.props.style).forEach(key => {
+                let val = this.props.style[key];
+                if (!val.endsWith(';')) val += ';';
+                let k = key === 'card_width' ? 'width' : key;
+                cardStyle += `${k}:${val} `;
+                if (['height', 'width'].includes(key)) {
+                    style += `${k}:${val} `;
+                }
+            });
+        }
         this.state.cardStyle = cardStyle + " border-radius: 12px;"
-        this.state.style = style + " border-radius: 12wpx;"
+        this.state.style = style + " border-radius: 12px;"
     }
 
     /**
@@ -132,6 +157,7 @@ export class GraphTile extends Component {
         var params = {
             toolFeatures: {},
             measureNames: props.measureNames || {},
+            color_mappings: props.color_mappings || [],
         }
         if (this.props.themeColor) {
             params.themeColor = this.props.themeColor
@@ -160,15 +186,25 @@ export class GraphTile extends Component {
      */
     addElement() {
         if (status(this) === "destroyed") return
-        try {
-            const themeName = this.props.isDarkMode ? `${this.state.theme}_dark` : this.state.theme
-            this.eChart = echarts.init(this.rootRef.el, themeName)
-            this.eChart.setOption(this.options)
-            this.eChart.on('finished', () => {
-                this.props.setImage(this.Image, this.maker.name, this.props.item?.id || this.props.value?.id)
-            })
-        } catch {
-        }
+        setTimeout(() => {
+            if (status(this) === "destroyed") return
+            try {
+                if (this.eChart) {
+                    this.eChart.dispose();
+                }
+                const themeName = this.props.isDarkMode ? `${this.state.theme}_dark` : this.state.theme
+                this.eChart = echarts.init(this.rootRef.el, themeName)
+                if (this.options) {
+                    this.eChart.setOption(this.options, true)
+                }
+                this.eChart.resize();
+                this.eChart.on('finished', () => {
+                    this.props.setImage(this.Image, this.maker?.name || 'Chart', this.props.item?.id || this.props.value?.id)
+                })
+            } catch (e) {
+                console.error("ECharts init error:", e);
+            }
+        }, 150);
     }
 
     /**
@@ -180,7 +216,21 @@ export class GraphTile extends Component {
         if (status(this) == "destroyed") return
         var sql = item.query.replace(/\n/g, ' ');
         this.orm.call("dashboard.config", "sql_execute", [sql]).then(async (res) => {
-            this.state.rec_id = res.id
+            if (!res || (res && res.__query_error__)) {
+                const msg = res && res.message ? res.message : 'The query returned no data.';
+                this.state.hasData = false;
+                this.options = {
+                    graphic: [{
+                        type: 'text',
+                        left: 'center',
+                        top: 'center',
+                        style: { text: msg, fill: '#999', font: '14px sans-serif' }
+                    }]
+                };
+                this.addElement();
+                return;
+            }
+
             let measuresList = item.measure;
             if (typeof measuresList === 'string') {
                 try {
@@ -190,7 +240,7 @@ export class GraphTile extends Component {
                 }
             }
             const measureAliases = measuresList.map(m => typeof m === 'object' ? m.alias : m);
-            const measureNames = measuresList.reduce((acc, m) => {
+            const measureNames = (Array.isArray(measuresList) ? measuresList : []).reduce((acc, m) => {
                 if (typeof m === 'object' && m.isPreset) {
                     acc[m.alias] = m.value;
                 }
@@ -206,15 +256,13 @@ export class GraphTile extends Component {
                 dimension_axis: item.dimension_axis,
                 type: item.type,
                 id: item.id,
+                color_mappings: item.color_mappings || [],
             }
             this.state.hasData = Boolean(res?.length)
             this.setOptions(props)
             this.options = await this.maker.makeGraphOptions()
-            if (item.type == 'map') {
-                this.addElement()
-            }
-            this.reRender()
-        })
+            this.addElement()
+        });
     }
 
     /**
@@ -226,9 +274,9 @@ export class GraphTile extends Component {
         var imgSrc
         try {
             imgSrc = this.eChart.getDataURL({
-                type: 'png', // can be jpeg or png
-                pixelRatio: 1, // image's ratio. default is 1
-                backgroundColor: '#fff', // hex color defining the background of the chart
+                type: 'png',
+                pixelRatio: 1,
+                backgroundColor: '#fff',
             });
         } catch (e) {
             console.warn("Could not get Image from eChart")
@@ -260,12 +308,9 @@ export class GraphTile extends Component {
         this.eChart.dispose()
         this.addElement()
     }
-
 }
 
-// Define the template for the GraphTile component
 GraphTile.template = "GraphTile";
-// Define default properties for the GraphTile component
 GraphTile.defaultProps = {
     style: {
         height: `400px;`,

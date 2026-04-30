@@ -22,7 +22,10 @@ export class SQLQueryParser {
      */
     parse() {
         const tables = this.extractTables();
-        this.query = this.query.replaceAll('*', `${tables[0].model}.id`)
+        if (tables.length > 0 && tables[0].model) {
+            this.query = this.query.replace(/\bSELECT\s+\*\s/gi, `SELECT ${tables[0].model}.id `);
+            this.query = this.query.replace(/\bCOUNT\(\s*\*\s*\)/gi, `COUNT(${tables[0].model}.id)`);
+        }
         const columns = this.extractColumns();
         const where = this.extractWhereConditions();
         const groupBy = this.extractGroupByColumns();
@@ -40,21 +43,54 @@ export class SQLQueryParser {
         };
     }
 
+    getMaskedQuery() {
+        let result = "";
+        let brackets = 0;
+        let inString = false;
+        let stringChar = '';
+        for (let i = 0; i < this.query.length; i++) {
+            const char = this.query[i];
+            
+            if (inString) {
+                result += "#";
+                if (char === stringChar && this.query[i - 1] !== '\\') inString = false;
+            } else {
+                if (char === "'" || char === '"') {
+                    inString = true;
+                    stringChar = char;
+                    result += "#";
+                } else if (char === '(') {
+                    brackets++;
+                    result += "#";
+                } else if (char === ')') {
+                    brackets--;
+                    result += "#";
+                } else if (brackets > 0) {
+                    result += "#";
+                } else {
+                    result += char;
+                }
+            }
+        }
+        return result;
+    }
+
     /**
      * Extracts the tables involved in the SQL query.
      * @function
      * @returns {Array} - An array of table information objects.
      */
     extractTables() {
-        const regex_1 = /\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:AS\s+([a-zA-Z_][a-zA-Z0-9_]*))?\b/i;
-        const regex_2 = /\bFROM\s+([a-zA-Z_][a-zA-Z0-9_])\s(?:AS\s+([a-zA-Z_][a-zA-Z0-9_]*))?\b/i;
-        const regex_3 = /\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*(?:AS\s+([a-zA-Z_][a-zA-Z0-9_]*))?(?:\s*->>'[a-zA-Z0-9_]+')?\b/i;
-
-        var match = this.query.match(regex_1) || this.query.match(regex_2) || this.query.match(regex_3);
+        const maskedQuery = this.getMaskedQuery();
+        const regex = /\bFROM\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s+(?:AS\s+)?([a-zA-Z_][a-zA-Z0-9_]*))?/i;
+        const match = maskedQuery.match(regex);
         if (match) {
             const model = match[1];
-            const alias = match[2] || false;
-            const join = alias ? `${model} AS ${alias}` : model
+            let alias = match[2] || false;
+            if (alias && /^(WHERE|GROUP|ORDER|LIMIT|JOIN|ON|HAVING)$/i.test(alias)) {
+                alias = false;
+            }
+            const join = alias ? `${model} AS ${alias}` : model;
             return [{
                 join,
                 model,
@@ -64,6 +100,27 @@ export class SQLQueryParser {
                 field: false
             }];
         }
+        return [];
+    }
+
+    splitByCommaOutsideParentheses(str) {
+        const result = [];
+        let brackets = 0;
+        let current = "";
+        for (let i = 0; i < str.length; i++) {
+            const char = str[i];
+            if (char === '(') brackets++;
+            else if (char === ')') brackets--;
+            
+            if (char === ',' && brackets === 0) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += char;
+            }
+        }
+        if (current.trim()) result.push(current.trim());
+        return result;
     }
 
     /**
@@ -72,22 +129,27 @@ export class SQLQueryParser {
      * @returns {Array} - An array of column information objects.
      */
     extractColumns() {
-        const regex = /SELECT\s+([^]+?)\s+FROM/i;
-        const match = this.query.match(regex);
-        if (match) {
-            const columnStr = match[1];
-            const columns = columnStr.split(',').map((column) => {
-                let [name, alias] = column.trim().split(' AS ');
+        const maskedQuery = this.getMaskedQuery();
+        const selectMatch = maskedQuery.match(/\bSELECT\b/i);
+        const fromMatch = maskedQuery.match(/\bFROM\b/i);
+        
+        if (selectMatch && fromMatch && selectMatch.index < fromMatch.index) {
+            const startIndex = selectMatch.index + 6;
+            const columnStr = this.query.substring(startIndex, fromMatch.index).trim();
+            const columns = this.splitByCommaOutsideParentheses(columnStr).map((column) => {
+                let matchAlias = column.match(/^([\s\S]*?)(?:\s+AS\s+([\s\S]+))?$/i);
+                let name = matchAlias ? matchAlias[1].trim() : column.trim();
+                let alias = matchAlias && matchAlias[2] ? matchAlias[2].trim() : false;
                 let query = column.trim()
                 if (!alias) {
-                    alias = name.replaceAll('.', '_')
+                    alias = name.replaceAll(/['"\.]/g, '_').replace(/[^a-zA-Z0-9_]/g, '');
                     query = `${query} AS ${alias}`
                 }
                 return {
                     column: name,
                     alias,
                     query,
-                    value: name.replace('.', ' > ')
+                    value: name.replace(/\./g, ' > ')
                 };
             });
             return columns;
@@ -101,10 +163,15 @@ export class SQLQueryParser {
      * @returns {Array} - An array of where condition objects.
      */
     extractWhereConditions() {
-        const regex = /WHERE\s+([^]+?)(?:GROUP BY|ORDER BY|LIMIT|$)/i;
-        const match = this.query.match(regex);
-        if (match) {
-            const conditions = match[1].trim().split(' AND ');
+        const maskedQuery = this.getMaskedQuery();
+        const whereMatch = maskedQuery.match(/\bWHERE\b/i);
+        if (whereMatch) {
+            const startStr = maskedQuery.substring(whereMatch.index + 5);
+            const endMatch = startStr.match(/\b(GROUP BY|ORDER BY|LIMIT)\b/i);
+            const rawLength = endMatch ? endMatch.index : startStr.length;
+            
+            const conditionStr = this.query.substring(whereMatch.index + 5, whereMatch.index + 5 + rawLength).trim();
+            const conditions = conditionStr.split(/\sAND\s/i);
             const whereConditions = conditions.map((condition, index) => {
                 return {
                     name: `Filter ${index + 1}`,
@@ -125,17 +192,23 @@ export class SQLQueryParser {
      * @returns {Array} - An array of group by column information objects.
      */
     extractGroupByColumns() {
-        const regex = /GROUP BY\s+([^]+?)(?:ORDER BY|LIMIT|$)/i;
-        const match = this.query.match(regex);
-        if (match) {
-            const columnStr = match[1];
-            const columns = columnStr.split(',').map((column) => {
-                const [name, alias] = column.trim().split(' AS ');
+        const maskedQuery = this.getMaskedQuery();
+        const groupMatch = maskedQuery.match(/\bGROUP BY\b/i);
+        if (groupMatch) {
+            const startStr = maskedQuery.substring(groupMatch.index + 8);
+            const endMatch = startStr.match(/\b(ORDER BY|LIMIT)\b/i);
+            const rawLength = endMatch ? endMatch.index : startStr.length;
+            
+            const columnStr = this.query.substring(groupMatch.index + 8, groupMatch.index + 8 + rawLength).trim();
+            const columns = this.splitByCommaOutsideParentheses(columnStr).map((column) => {
+                let matchAlias = column.match(/^([\s\S]*?)(?:\s+AS\s+([\s\S]+))?$/i);
+                let name = matchAlias ? matchAlias[1].trim() : column.trim();
+                let alias = matchAlias && matchAlias[2] ? matchAlias[2].trim() : false;
                 return {
                     column: name,
                     alias: alias || false,
                     query: column.trim(),
-                    value: name.replace('.', ' > ')
+                    value: name.replace(/\./g, ' > ')
                 };
             });
             return columns;
@@ -149,18 +222,24 @@ export class SQLQueryParser {
      * @returns {Array} - An array of order by column information objects.
      */
     extractOrderBy() {
-        const regex = /ORDER BY\s+([^]+?)(?:LIMIT|$)/i;
-        const match = this.query.match(regex);
-        if (match) {
-            const columnStr = match[1];
-            const columns = columnStr.split(',').map((column) => {
-                const [name, alias] = column.trim().split(' AS ');
+        const maskedQuery = this.getMaskedQuery();
+        const orderMatch = maskedQuery.match(/\bORDER BY\b/i);
+        if (orderMatch) {
+            const startStr = maskedQuery.substring(orderMatch.index + 8);
+            const endMatch = startStr.match(/\b(LIMIT)\b/i);
+            const rawLength = endMatch ? endMatch.index : startStr.length;
+            
+            const columnStr = this.query.substring(orderMatch.index + 8, orderMatch.index + 8 + rawLength).trim();
+            const columns = this.splitByCommaOutsideParentheses(columnStr).map((column) => {
+                let matchAlias = column.match(/^([\s\S]*?)(?:\s+AS\s+([\s\S]+))?$/i);
+                let name = matchAlias ? matchAlias[1].trim() : column.trim();
+                let alias = matchAlias && matchAlias[2] ? matchAlias[2].trim() : false;
                 const cleanName = name.replace(/\s+(DESC|ASC)$/i, '').trim(); // Remove DESC or ASC and trim
                 return {
                     column: cleanName,
                     alias: alias || false,
                     query: column.trim(),
-                    value: cleanName.replace('.', ' > ')
+                    value: cleanName.replace(/\./g, ' > ')
                 };
             });
             return columns;
@@ -174,8 +253,11 @@ export class SQLQueryParser {
      * @returns {number|null} - The limit value or null if not present.
      */
     extractLimit() {
-        const regex = /LIMIT\s+(\d+)/i;
-        const match = this.query.match(regex);
+        // Use the masked query so that LIMIT inside subqueries (e.g. COALESCE subqueries)
+        // are hidden and we only match the top-level LIMIT clause.
+        const maskedQuery = this.getMaskedQuery();
+        const regex = /\bLIMIT\s+(\d+)/i;
+        const match = maskedQuery.match(regex);
         return match ? parseInt(match[1]) : null;
     }
 
@@ -185,21 +267,31 @@ export class SQLQueryParser {
      * @returns {Array} - An array of join information objects.
      */
     extractJoins() {
-        const regex = /JOIN\s+([\w_]+)(?:\s+AS\s+([\w_]+))?\s+ON\s+([^]+?)(?=(?:JOIN|WHERE|GROUP BY|ORDER BY|LIMIT|$))/ig;
+        const maskedQuery = this.getMaskedQuery();
         const joins = [];
+        const regex = /\bJOIN\s+([a-zA-Z_][a-zA-Z0-9_]*)(?:\s+(?:AS\s+)?([a-zA-Z_][a-zA-Z0-9_]*))?\s+ON\s+/ig;
         let match;
-        while ((match = regex.exec(this.query)) !== null) {
-            const join = match[0].replace('\n', '').trim()
+        
+        while ((match = regex.exec(maskedQuery)) !== null) {
             const model = match[1];
-            const alias = match[2] || false;
-            const condition = match[3].trim();
+            const aliasMatches = match[2] || false;
+            let alias = aliasMatches && !/^(WHERE|GROUP|ORDER|LIMIT|JOIN|ON|HAVING)$/i.test(aliasMatches) ? aliasMatches : false;
+            
+            const joinStartIndex = match.index;
+            const contextStr = maskedQuery.substring(joinStartIndex + match[0].length);
+            const nextClauseMatch = contextStr.match(/\b(JOIN|WHERE|GROUP BY|ORDER BY|LIMIT)\b/i);
+            const conditionLength = nextClauseMatch ? nextClauseMatch.index : contextStr.length;
+            
+            const joinRawStr = this.query.substring(joinStartIndex, joinStartIndex + match[0].length + conditionLength).trim().replace(/\n/g, '');
+            const conditionStr = this.query.substring(joinStartIndex + match[0].length, joinStartIndex + match[0].length + conditionLength).trim();
+            
             const linkedTableRegex = /([^\.]+)\.(\w+)\s*=\s*([^\.]+)\.(\w+)/;
-            const linkedTableMatch = condition.match(linkedTableRegex);
+            const linkedTableMatch = conditionStr.match(linkedTableRegex);
             const linked = linkedTableMatch ? linkedTableMatch[3] : null;
             const field = linkedTableMatch ? linkedTableMatch[4] : null;
 
             joins.push({
-                join,
+                join: joinRawStr,
                 model,
                 alias,
                 linked,

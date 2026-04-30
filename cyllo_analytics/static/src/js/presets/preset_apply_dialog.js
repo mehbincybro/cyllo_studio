@@ -341,6 +341,10 @@ export class PresetApplyDialog extends Component {
             this.state.error = 'Please provide a field name.';
             return;
         }
+        if (/^\d/.test(fieldName)) {
+            this.state.error = 'Field name cannot start with or be a numeric value.';
+            return;
+        }
         if (!rawFormula) {
             this.state.error = 'No formula defined.';
             return;
@@ -469,6 +473,10 @@ export class PresetApplyDialog extends Component {
 
         if (!fieldName) {
             this.state.error = 'Please provide a template name.';
+            return;
+        }
+        if (/^\d/.test(fieldName)) {
+            this.state.error = 'Template name cannot start with or be a numeric value.';
             return;
         }
         if (!rawFormula) {

@@ -1,5 +1,6 @@
 /** @odoo-module **/
 import { convertToTitleCase, ChartMaker } from "@cyllo_analytics/js/chart_maker"
+import { CylloSheet } from "@cyllo_analytics/js/cyllo_sheet";
 
 QUnit.test("should return the chart options based on the provided data, dimension, measures, name, type, and dimension_axis", async function (assert) {
 const data = [{ dimension: 'A', measure1: 10, measure2: 20 }];
@@ -86,4 +87,68 @@ QUnit.test('should convert a string with all lowercase letters to title case', (
     const expectedOutput = "hello";
     const actualOutput = convertToTitleCase(inputString);
     assert.equal(actualOutput, expectedOutput);
+});
+
+QUnit.test("query rebuild only groups when group by is explicit", (assert) => {
+    const columns = [
+        {
+            type: "dimension",
+            column: "sale_order.partner_id",
+            query: "sale_order.partner_id AS sale_order_partner_id",
+        },
+        {
+            type: "measure",
+            column: "sale_order.amount_total",
+            query: "sale_order.amount_total AS sale_order_amount_total",
+        },
+    ];
+
+    const noGroupBy = CylloSheet.prototype._getGroupByTerms.call(
+        {
+            query_data: { groupBy: [] },
+            state: { preserveExplicitGrouping: true },
+        },
+        columns
+    );
+    assert.deepEqual(noGroupBy.totalGroupBy, []);
+    assert.strictEqual(noGroupBy.isGrouping, false);
+
+    const explicitGroupBy = CylloSheet.prototype._getGroupByTerms.call(
+        {
+            query_data: {
+                groupBy: [{ column: "sale_order.partner_id" }],
+            },
+            state: { preserveExplicitGrouping: true },
+        },
+        columns
+    );
+    assert.deepEqual(explicitGroupBy.totalGroupBy, ["sale_order.partner_id"]);
+    assert.strictEqual(explicitGroupBy.isGrouping, true);
+});
+
+QUnit.test("drag-and-drop query keeps inferred grouping for aggregated measures", (assert) => {
+    const columns = [
+        {
+            type: "dimension",
+            column: "utm_medium.name",
+            query: "utm_medium.name AS utm_medium_name",
+        },
+        {
+            type: "measure",
+            column: "sale_order.amount_total",
+            query: "sale_order.amount_total AS sale_order_amount_total",
+            aggregate_func: "SUM",
+        },
+    ];
+
+    const result = CylloSheet.prototype._getGroupByTerms.call(
+        {
+            query_data: { groupBy: [] },
+            state: { preserveExplicitGrouping: false },
+        },
+        columns
+    );
+
+    assert.deepEqual(result.totalGroupBy, ["utm_medium.name"]);
+    assert.strictEqual(result.isGrouping, true);
 });

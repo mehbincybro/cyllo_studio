@@ -1,15 +1,15 @@
 /* @odoo-module */
-import {Component, useState, useRef, useEffect, onWillStart} from "@odoo/owl";
-import {Dialog} from "@web/core/dialog/dialog";
-import {SheetDomainSelector} from "./sheetDomainSelector";
-import {Dropdown} from "@web/core/dropdown/dropdown";
-import {DropdownItem} from "@web/core/dropdown/dropdown_item";
-import {getPsqlOperatorsAndValues} from "./fieldDef";
-import {parseQueryToDomain} from "./queryParserToDomain";
+import { Component, useState, useRef, useEffect, onWillStart } from "@odoo/owl";
+import { Dialog } from "@web/core/dialog/dialog";
+import { SheetDomainSelector } from "./sheetDomainSelector";
+import { Dropdown } from "@web/core/dropdown/dropdown";
+import { DropdownItem } from "@web/core/dropdown/dropdown_item";
+import { getPsqlOperatorsAndValues } from "./fieldDef";
+import { parseQueryToDomain } from "./queryParserToDomain";
 
 export class SheetFilterDomain extends Component {
     static template = "SheetFilterDomain"
-    static components = {Dialog, SheetDomainSelector, Dropdown, DropdownItem}
+    static components = { Dialog, SheetDomainSelector, Dropdown, DropdownItem }
 
     setup() {
         this.root = useRef("root")
@@ -39,17 +39,17 @@ export class SheetFilterDomain extends Component {
                 }
             })
             const parsed = parseQueryToDomain(this.state.query, tables)
-            if(!parsed.error) {
+            if (!parsed.error) {
                 this.state.domains = parsed.domains
                 this.state.domainNoEdit = false
-            }else {
+            } else {
                 this.state.domainNoEdit = true
             }
         }
     }
 
     addModel(model) {
-        this.state.domains.push({table: model.table, model: model.model, modelName: model.name, domain: "[]"})
+        this.state.domains.push({ table: model.table, model: model.model, modelName: model.name, domain: "[]" })
     }
 
     getOrWhereClause(domains) {
@@ -59,7 +59,7 @@ export class SheetFilterDomain extends Component {
             let modifiedArray = JSON.parse(rec.domain.replace(/\(/g, '[').replace(/\)/g, ']').replace(/True/g, 'true').replace(/False/g, 'false'));
             modifiedArray = modifiedArray.filter(item => !["|", "&"].includes(item))
             const model = this.props.models.find(item => item.model === rec.model)
-            const {table} = model
+            const { table } = model
             if (isValidDomain) {
                 isValidDomain = modifiedArray.length
             }

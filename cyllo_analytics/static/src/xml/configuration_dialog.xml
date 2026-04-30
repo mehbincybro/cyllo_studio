@@ -11,7 +11,7 @@
                             </h5>
                             <span class="cy-icons cy-social_cmnt-closebtn"
                                   t-on-click="props.close">
-                                <i class="ri-close-line"/>
+                                <i class="ri-close-line"></i>
                             </span>
                         </div>
                         <div class="modal-body cy-modal-body py-0 overflow-auto">

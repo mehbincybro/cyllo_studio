@@ -122,6 +122,7 @@ export class CylloSheet extends Component {
             saveClicked: false,
             id: id,
             currency: false,
+            isCustomSQL: false,
         })
 
         this.query_data = useState({
@@ -132,6 +133,7 @@ export class CylloSheet extends Component {
             where: [],
             groupBy: [],
             orderBy: [],
+            color_mappings: [],
             dimension_axis: 'x',
         })
         this.navState = useState({
@@ -163,6 +165,10 @@ export class CylloSheet extends Component {
         useBus(this.env.bus, "CY:UPDATE_QUERY", (ev) => {
             this.state.false_linking = false
             var { type, data } = ev.detail
+            
+            if (['measure', 'dimension', 'axis', 'dimension_axis', 'where', 'groupBy', 'orderBy'].includes(type)) {
+                this.state.isCustomSQL = false;
+            }
 
             if (type === 'groupBy') {
                 // Detect which date groupBy items were just removed
@@ -279,7 +285,7 @@ export class CylloSheet extends Component {
             () => [this.state.selectedType[0]])
         useEffect(() => {
             this.generateChart()
-        }, () => [this.state.query])
+        }, () => [this.state.previewQuery])
         useEffect((event) => {
             this.setTableSave()
         }, () => [this.state.models, this.state.limit])
@@ -450,6 +456,58 @@ export class CylloSheet extends Component {
         await this.globalFilters()
     }
 
+    addColorMapping() {
+        this.query_data.color_mappings.push({
+            measure_alias: this.query_data.measure.length ? this.query_data.measure[0].alias : '',
+            min_value: 0,
+            max_value: '',
+            color: '#344BD2',
+            notes: ''
+        });
+        if (this.ChartData.data) {
+            this.ChartData.data = { ...this.ChartData.data, color_mappings: this.query_data.color_mappings };
+        }
+    }
+
+    removeColorMapping(index) {
+        this.query_data.color_mappings.splice(index, 1);
+        if (this.ChartData.data) {
+            this.ChartData.data = { ...this.ChartData.data, color_mappings: this.query_data.color_mappings };
+        }
+    }
+
+    updateColorMapping(index, field, value) {
+        this.query_data.color_mappings[index][field] = value;
+        if (this.ChartData.data) {
+            this.ChartData.data = { ...this.ChartData.data, color_mappings: this.query_data.color_mappings };
+        }
+    }
+
+    getColorMappingErrors() {
+        const errors = [];
+        const measures = [...new Set(this.query_data.color_mappings.map(m => m.measure_alias))];
+        
+        measures.forEach(alias => {
+            const mappings = this.query_data.color_mappings.filter(m => m.measure_alias === alias);
+            // Sort by min value
+            mappings.sort((a, b) => parseFloat(a.min_value) - parseFloat(b.min_value));
+            
+            for (let i = 0; i < mappings.length - 1; i++) {
+                const current = mappings[i];
+                const next = mappings[i+1];
+                const currentMin = parseFloat(current.min_value || 0);
+                const currentMax = (current.max_value === 'all above' || current.max_value === '') ? Infinity : parseFloat(current.max_value);
+                const nextMin = parseFloat(next.min_value || 0);
+                
+                if (currentMax > nextMin) {
+                    const measureName = this.query_data.measure.find(m => m.alias === alias)?.name || alias;
+                    errors.push(`Overlap in ${measureName}: [${currentMin} - ${currentMax === Infinity ? 'all above' : currentMax}] overlaps with [Min: ${nextMin}]`);
+                }
+            }
+        });
+        return errors;
+    }
+
     /**
      * Generate the SQL query based on query data.
      */
@@ -462,17 +520,30 @@ export class CylloSheet extends Component {
     }
 
     genQuery() {
+         if (this.state.isCustomSQL || this.isParsing) {
+             return;
+         }
         const query_data = this.query_data;
         this.hasMonetary = false;
 
+        // If an active preset has no aggregate variables, Group By is not
+        // allowed.  Clear any stale groupBy entries so they don't reach the
+        // backend and produce invalid SQL.
+        if (this.presetBlocksGroupBy && query_data.groupBy.length) {
+            query_data.groupBy = [];
+        }
+
         if (!query_data.measure.length) {
-            this.state.query = '';
-            this.ChartData.generate = false;
-            return;
+            if (!this.isParsing) {
+                this.state.query = '';
+                this.ChartData.generate = false;
+                return;
+            }
         }
 
         let columns = this._prepareQueryColumns();
         const { totalGroupBy, aggregate, isGrouping } = this._getGroupByTerms(columns);
+
 
         // Always call _applyMeasureAggregates if we have measures, even without grouping (e.g. KPIs)
         columns = this._applyMeasureAggregates(columns, totalGroupBy, aggregate, isGrouping);
@@ -503,6 +574,14 @@ export class CylloSheet extends Component {
                 const replaceString = col.monetaryInBase.replaceAll('{selectedCurrency}', `${this.state.currency?.id}`);
                 col.query = `${replaceString} AS ${col.alias}`;
             }
+            if (col.field_type === 'image' || col.field_type === 'binary') {
+                const tableName = col.model ? col.model.table : col.column.split('.')[0];
+                const modelName = col.model ? col.model.name : tableName.replace('_', '.');
+                const fieldName = col.name || col.column.split('.')[1];
+                const cyImageExpr = `CONCAT('CY_IMAGE:', '${modelName}', ':', '${fieldName}', ':', COALESCE(${tableName}.id::text, ''))`;
+                col.column = cyImageExpr;
+                col.query = `${cyImageExpr} AS ${col.alias}`;
+            }
             return col;
         });
 
@@ -531,9 +610,14 @@ export class CylloSheet extends Component {
             .map(item => {
                 // If it's a relational field, group by ID as well to ensure distinct records
                 if (item.relational && item.relational.table) {
-                    return [`${item.relational.table}.id`, item.alias];
+                    return [`${item.relational.table}.id`, item.column];
                 }
-                return item.alias;
+                if (item.field_type === 'image' || item.field_type === 'binary') {
+                    // Group by the table ID to avoid grouping by binary image data
+                    const tableName = item.model ? item.model.table : 'id';
+                    return `${tableName}.id`;
+                }
+                return item.column;
             })
             .flat();
 
@@ -630,23 +714,55 @@ export class CylloSheet extends Component {
      */
     generateChart() {
         try {
-            if (this.isGoodQuery) {
+            if (this.isGoodQuery || this.state.isCustomSQL) {
                 this.orm.call("dashboard.config", "sql_execute", [
                     this.state.previewQuery
                 ]).then((data) => {
+                    if (!data || (Array.isArray(data) && data.length === 0) || (data && data.__query_error__)) {
+                        const msg = data && data.message
+                            ? `Query Error: ${data.message}`
+                            : 'The query returned no data. Please check your configuration.';
+                        this.showMessage(msg, 'danger');
+                        this.ChartData.data = false;
+                        this.ChartData.generate = false;
+                        return;
+                    }
+                    let finalMeasures;
+                    let finalDimensions;
+                    if (this.state.isCustomSQL) {
+                        // AUTO-DETECT from the actual data returned by Postgres
+                        finalMeasures = [];
+                        finalDimensions = [];
+                        const firstRow = data[0];
+                        if (firstRow) {
+                            Object.entries(firstRow).forEach(([key, value]) => {
+                                if (typeof value === 'number') {
+                                    finalMeasures.push(key);
+                                } else {
+                                    finalDimensions.push(key);
+                                }
+                            });
+                        }
+                    } else {
+                    // NORMAL mode: use the drag-and-drop configuration
+                        finalMeasures = this.query_data.measure.map(item => item.alias);
+                        finalDimensions = this.query_data.dimension.map(item => item.alias);
+                    }
+
                     this.ChartData.data = {
                         data,
                         name: this.state.name || '',
-                        measures: this.query_data.measure.map(item => item.alias),
+                        measures: finalMeasures,
                         measureNames: this.query_data.measure.reduce((acc, m) => {
                             if (m.isPreset) {
                                 acc[m.alias] = m.value;
                             }
                             return acc;
                         }, {}),
-                        dimension: this.query_data.dimension.map(item => item.alias),
+                        dimension: finalDimensions,
                         dimension_axis: this.query_data.dimension_axis,
                         type: this.state.selectedType[1],
+                        color_mappings: this.query_data.color_mappings,
                     };
                     this.ChartData.generate = true;
                 });
@@ -877,6 +993,14 @@ export class CylloSheet extends Component {
      * Save the sheet configuration.
      */
     async onSave() {
+        const mappingErrors = this.getColorMappingErrors();
+        if (mappingErrors.length > 0) {
+            this.notification.add(_t("Cannot save chart: Color mapping range overlaps detected. Please fix errors in the Color Mapping tab."), {
+                type: "danger",
+                title: _t("Validation Error")
+            });
+            return;
+        }
         if (this.state.saveClicked) return
         this.state.saveClicked = true
         var joinData = [...this.query_data.joinData]
@@ -927,6 +1051,7 @@ export class CylloSheet extends Component {
         } else {
             try {
                 vals['name'] = this.state.name.substring(0, 32)
+                vals['color_mappings'] = this.query_data.color_mappings
                 const data = await this.orm.call(this.model, 'update_data', [vals])
                 this.id = data.rec_id
                 this.state.id = data.rec_id
@@ -1037,6 +1162,10 @@ export class CylloSheet extends Component {
         this.query_data.where = data.where
         this.filterOptions = data.options
         this.state.kpiValue = data.kpi
+        this.query_data.color_mappings = (data.color_mappings || []).map(m => ({
+            ...m,
+            notes: m.notes || ''
+        }));
     }
 
     showMessage(message, type) {
@@ -1250,12 +1379,18 @@ export class CylloSheet extends Component {
 
     async onQueryChange(query) {
         try {
+            this.isParsing = true;
+            this.state.query = query;
             this.setContentEmpty()
             const parser = new SQLQueryParser(query);
             const parsedData = parser.parse();
             const tableAlias = {}
             if (!parsedData.joins) {
-                return
+                this.isParsing = false;
+                this.state.isCustomSQL = true;
+                this.state.previewQuery = query;
+                this.generateChart();
+                return;
             }
             // Joins
             for (var join of parsedData.joins) {
@@ -1267,30 +1402,42 @@ export class CylloSheet extends Component {
                 if (split) {
                     split.forEach(item => {
                         var [table, field] = item
-                        var table_name = tableAlias[table]
+                        var table_name = tableAlias[table] || table
                         n_join = n_join.replace(`${table}.${field}`, `${table_name}.${field}`)
                     })
                 }
                 join.join = n_join
                 await this.setModelFromTable(join)
             }
+            
+            let parsingIncomplete = false;
+
             // Measure and Dimension
             parsedData.columns.forEach(column => {
                 var [mode, col] = this.splitStringWithParentheses(column.column)
-                var [table, field] = col.split('.')
-                field = field.replace(`->>'en_US'`, '').trim()
+                let splitColMatches = col.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/);
+                if (!splitColMatches) {
+                    parsingIncomplete = true;
+                    return;
+                }
+                var table = splitColMatches[1];
+                var field = splitColMatches[2];
                 var table_name = tableAlias[table] || table
                 if (table_name) {
                     var val_to_change = `${table}.${field}`
                     var val_new = `${table_name}.${field}`
                     column.column = column.column.replace(val_to_change, val_new)
                     column.query = column.query.replace(val_to_change, val_new)
+                    col = col.replace(val_to_change, val_new)
                 }
                 var fieldData = this.state.fields.filter(item => {
                     return item.model.table == table_name && item.name == field
                 })
                 if (fieldData.length) {
-                    this.updateColumns(fieldData, column, fieldData[0].type, mode)
+                    const targetType = mode ? 'measure' : fieldData[0].type;
+                    this.updateColumns(fieldData, column, targetType, mode, col)
+                } else {
+                    parsingIncomplete = true;
                 }
             })
             // Sheet Filters
@@ -1304,61 +1451,95 @@ export class CylloSheet extends Component {
             })
             // Group by
             parsedData.groupBy.forEach(groupBy => {
-                if (groupBy.column.includes('.')) {
-                    var [table, field] = groupBy.column.split('.')
-                    var table_name = tableAlias[table]
+                let splitColMatches = groupBy.column.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/);
+                if (splitColMatches) {
+                    var table = splitColMatches[1];
+                    var field = splitColMatches[2];
+                    var table_name = tableAlias[table] || table
                     var val_to_change = `${table}.${field}`
                     var val_new = `${table_name}.${field}`
                     groupBy.column = groupBy.column.replace(val_to_change, val_new)
                     groupBy.query = groupBy.query.replace(val_to_change, val_new)
-                    var field = this.state.fields.filter(item => {
+                    var fieldData = this.state.fields.filter(item => {
                         return item.model.table == table_name && item.name == field
                     })
-                    if (field.length) {
-                        var type = field[0].type
-                        this.updateColumns(field, groupBy, 'groupBy')
+                    if (fieldData.length) {
+                        this.updateColumns(fieldData, groupBy, 'groupBy')
+                    } else {
+                        parsingIncomplete = true;
                     }
+                } else {
+                    parsingIncomplete = true;
                 }
             })
             // Order by
             parsedData.orderBy.forEach(orderBy => {
-                if (orderBy.column.includes('.')) {
-                    var [table, field] = orderBy.column.split('.')
-                    var table_name = tableAlias[table]
+                let splitColMatches = orderBy.column.match(/([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)/);
+                if (splitColMatches) {
+                    var table = splitColMatches[1];
+                    var field = splitColMatches[2];
+                    var table_name = tableAlias[table] || table
                     var val_to_change = `${table}.${field}`
                     var val_new = `${table_name}.${field}`
                     orderBy.column = orderBy.column.replace(val_to_change, val_new)
                     orderBy.query = orderBy.query.replace(val_to_change, val_new)
-                    var field = this.state.fields.filter(item => {
+                    var fieldData = this.state.fields.filter(item => {
                         return item.model.table == table_name && item.name == field
                     })
-                    if (field.length) {
-                        var type = field[0].type
-                        this.updateColumns(field, orderBy, 'orderBy')
+                    if (fieldData.length) {
+                        this.updateColumns(fieldData, orderBy, 'orderBy')
+                    } else {
+                        parsingIncomplete = true;
                     }
+                } else {
+                    parsingIncomplete = true;
                 }
             })
             // Limit
             this.state.limit = parsedData.limit || false
+            
+            // Sync join data
+            var joinsArray = this.state.models.map(model => model.linked_by?.join).filter(item => item);
+            var joinDataArray = this.state.models.map(model => {
+                if (!model.linked_by) return null;
+                var joinObj = { ...model.linked_by };
+                joinObj.model_id = model.id;
+                return joinObj;
+            }).filter(item => item);
+            
+            this.query_data.join = joinsArray;
+            this.query_data.joinData = joinDataArray;
+
+            this.state.isCustomSQL = parsingIncomplete;
+            this.state.previewQuery = query;
+            this.isParsing = false; 
             this.setTableSave()
+            if (this.state.isCustomSQL) {
+                this.generateChart();
+            } else {
+                this.genQuery();
+            }
         } catch {
-            this.setContentEmpty()
-            this.showMessage('This query is not compatible', "danger")
+            this.isParsing = false;
+            this.state.isCustomSQL = true;
+            this.state.query = query;
+            this.state.previewQuery = query;
+            this.generateChart();
         }
     }
 
     splitStringWithParentheses(input) {
-        const match = input.match(/([^()]+)(?:\(([^)]+)\))?/);
-        if (match) {
-            const [, outsideParentheses, insideParentheses] = match;
-            const firstPart = outsideParentheses.trim();
-            const secondPart = insideParentheses ? insideParentheses.trim() : false;
-            if (!secondPart) {
-                return [false, firstPart]
+        input = input.trim();
+        const firstParen = input.indexOf('(');
+        const lastParen = input.lastIndexOf(')');
+        if (firstParen > 0 && lastParen === input.length - 1) {
+            const firstPart = input.substring(0, firstParen).trim();
+            if (/^[a-zA-Z0-9_]+$/.test(firstPart)) {
+                const secondPart = input.substring(firstParen + 1, lastParen).trim();
+                return [firstPart, secondPart];
             }
-            return [firstPart, secondPart];
         }
-        return [false, input.trim()];
+        return [false, input];
     }
 
     splitJoinOnClause(joinClause) {
@@ -1375,15 +1556,20 @@ export class CylloSheet extends Component {
         return null;
     }
 
-    updateColumns(field, column, type, mode) {
+    updateColumns(field, column, type, mode, innerCol) {
         var cur_field = field[0]
+        var rawCol = `${cur_field.model.table}.${cur_field.name}`;
         var val = {
             query: column.query,
             alias: column.alias,
             column: column.column,
-            value: cur_field.label,
+            raw_column: rawCol,
+            monetaryInBase: (innerCol && innerCol !== rawCol) ? innerCol : false,
+            value: mode ? `${mode}(${cur_field.label})` : cur_field.label,
+            original_value: cur_field.label,
             id: false,
-            type
+            type,
+            field_type: cur_field.field_type
         }
         if (mode) {
             val.AGG = mode
@@ -1604,6 +1790,36 @@ export class CylloSheet extends Component {
         this.navState.recordValue = index + 1
     }
 
+    /**
+     * Returns true when any active preset measure has no aggregate function
+     * configured for ANY of its variables (i.e. all vars use scalar expressions).
+     * In that case GROUP BY would produce invalid SQL, so we hide the drop zone.
+     */
+    get presetBlocksGroupBy() {
+        const presetMeasures = this.query_data.measure.filter(m => m.isPreset);
+        if (!presetMeasures.length) return false;
+
+        return presetMeasures.some(m => {
+            // Row-level presets never produce aggregates
+            if (m.calculation_type === 'row') return true;
+
+            // Aggregate presets: check if at least one variable has an agg function.
+            // If NONE have one, then the formula is still non-aggregated.
+            let configs;
+            try {
+                configs = typeof m.variable_configs === 'string'
+                    ? JSON.parse(m.variable_configs)
+                    : (m.variable_configs || []);
+            } catch (e) {
+                configs = [];
+            }
+            // If there are no variable configs at all, we cannot guarantee aggregation
+            if (!configs.length) return true;
+            const hasAnyAggregate = configs.some(vc => vc.aggregate && vc.aggregate.trim());
+            return !hasAnyAggregate;
+        });
+    }
+
     get axis() {
         let x, y, group;
         switch (this.state.selectedType[1].toLowerCase()) {
@@ -1622,7 +1838,8 @@ export class CylloSheet extends Component {
             default:
                 x = true;
                 y = true;
-                group = true;
+                // Hide Group By when a preset with no-aggregate variables is active
+                group = !this.presetBlocksGroupBy;
         }
         return {
             x,

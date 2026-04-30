@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_analytics.AlertConfigurationDialog" owl="1">
+        <Dialog title="'Set Smart Alert'" size="'md'">
+            <div class="p-3">
+
+                <!-- ── Alert Name ── -->
+                <div class="row mb-3">
+                    <label class="col-sm-4 col-form-label fw-semibold">Alert Name</label>
+                    <div class="col-sm-8">
+                        <input type="text" class="form-control"
+                               t-model="state.name"
+                               placeholder="e.g. Sales Target Alert"/>
+                    </div>
+                </div>
+
+                <!-- ── Measure Conditions (only when chart has measures) ── -->
+                <t t-if="hasMeasures">
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="fw-semibold">Measure-Specific Conditions</span>
+                            <small class="text-muted ms-2">Set individual thresholds for multiple measures</small>
+                        </div>
+
+                        <t t-foreach="state.measureConditions" t-as="row" t-key="row_index">
+                            <div class="border rounded p-2 mb-2"
+                                 t-att-class="row.enabled ? 'border-primary' : 'border-secondary-subtle'">
+
+                                <!-- Measure toggle row -->
+                                <div class="d-flex align-items-center">
+                                    <div class="form-check form-switch mb-0 me-2">
+                                        <input class="form-check-input" type="checkbox"
+                                               t-att-id="'msr_' + row_index"
+                                               t-att-checked="row.enabled"
+                                               t-on-change="() => this.toggleMeasure(row_index)"/>
+                                    </div>
+                                    <label t-att-for="'msr_' + row_index"
+                                           class="mb-0 fw-semibold me-auto"
+                                           t-esc="row.label"/>
+                                    <span t-if="row.enabled" class="badge bg-primary">Active</span>
+                                    <span t-if="!row.enabled" class="badge bg-secondary">Disabled</span>
+                                </div>
+
+                                <!-- Condition + Value (visible only when measure is enabled) -->
+                                <t t-if="row.enabled">
+                                    <div class="row g-2 mt-2">
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1">Condition</label>
+                                            <select class="form-select form-select-sm"
+                                                    t-model="row.condition">
+                                                <t t-foreach="conditionOptions" t-as="opt" t-key="opt.value">
+                                                    <option t-att-value="opt.value" t-esc="opt.label"/>
+                                                </t>
+                                            </select>
+                                        </div>
+                                        <div class="col-6">
+                                            <label class="form-label small text-muted mb-1">Threshold Value</label>
+                                            <input type="number" class="form-control form-control-sm"
+                                                   t-model.number="row.value"/>
+                                        </div>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- No measures fallback -->
+                <t t-if="!hasMeasures">
+                    <div class="alert alert-warning mb-3">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        No numeric measures found in this chart. Open the sheet editor and add a measure to use alerts.
+                    </div>
+                </t>
+
+                <!-- ── Dimension-based Filter (Domain-Wise) ── -->
+                <t t-if="hasDimension">
+                    <div class="border rounded p-2 mb-3"
+                         t-att-class="state.dimension_filter ? 'border-info' : 'border-secondary-subtle'">
+
+                        <div class="d-flex align-items-center">
+                            <div class="form-check form-switch mb-0 me-2">
+                                <input class="form-check-input" type="checkbox"
+                                       id="dimensionFilterToggle"
+                                       t-model="state.dimension_filter"/>
+                            </div>
+                            <label for="dimensionFilterToggle" class="fw-semibold mb-0 me-auto">
+                                Filter by <t t-esc="dimensionAxisName"/> (Domain-Wise)
+                            </label>
+                        </div>
+
+                        <t t-if="state.dimension_filter">
+                            <div class="mt-2 text-muted small">
+                                <i class="fa fa-info-circle me-1"/>
+                                Alert will only trigger when values for this specific <t t-esc="dimensionAxisName"/> meet the conditions.
+                            </div>
+                            <div class="mt-2">
+                                <label class="form-label small fw-bold mb-1">
+                                    Target Value
+                                </label>
+                                <select class="form-select form-select-sm"
+                                        t-model="state.dimension_value">
+                                    <option value="">-- Select Value --</option>
+                                    <t t-foreach="state.dimensionValues" t-as="val" t-key="val">
+                                        <option t-att-value="val" t-esc="val"/>
+                                    </t>
+                                </select>
+                            </div>
+                        </t>
+                    </div>
+                </t>
+
+                <!-- ── Notifications ── -->
+                <div class="row mb-3">
+                    <label class="col-sm-4 col-form-label fw-semibold">Notifications</label>
+                    <div class="col-sm-8">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox"
+                                   id="notifyScreen" t-model="state.screen_notification"/>
+                            <label class="form-check-label" for="notifyScreen">Real-time Screen Warning</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox"
+                                   id="notifyEmail" t-model="state.send_email"/>
+                            <label class="form-check-label" for="notifyEmail">Send Email to Manager</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Notify User ── -->
+                <div class="row mb-1">
+                    <label class="col-sm-4 col-form-label fw-semibold">Notify User</label>
+                    <div class="col-sm-8 d-flex align-items-center">
+                        <span class="fw-bold text-dark"><t t-esc="state.userName"/></span>
+                        <small class="text-muted ms-2">· Odoo inbox and activities on trigger</small>
+                    </div>
+                </div>
+
+            </div>
+
+            <t t-set-slot="footer">
+                <div class="d-flex justify-content-between w-100">
+                    <div>
+                        <button t-if="state.alertId" class="btn btn-outline-danger"
+                                t-on-click="onDelete">
+                            Delete Alert
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary me-2" t-on-click="props.close">Cancel</button>
+                        <button class="btn btn-primary" t-on-click="onSave">Save Alert</button>
+                    </div>
+                </div>
+            </t>
+        </Dialog>
+    </t>
+</templates>
