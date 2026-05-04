@@ -187,8 +187,8 @@ export const QrMixin = {
         const qwebExpr = this._buildQrExpression(true);
 
         let html = `<div style="text-align:${align};">\n`;
-        html += `  <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=${size}&amp;height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')" \n`;
-        html += `       style="width:${size}px; height:${size}px;"/>\n`;
+        html += `  <span t-out="str(${qwebExpr}) or 'No Data'" t-options='{"widget": "barcode", "symbology": "QR", "width": ${size}, "height": ${size}, "quiet": 0}' \n`;
+        html += `       style="display:inline-block; width:${size}px; height:${size}px;"/>\n`;
         if (this.state.qr.config.caption) {
             html += `  <div style="font-size:8pt; margin-top:3px;">${this.state.qr.config.caption}</div>\n`;
         }
@@ -250,7 +250,7 @@ export const QrMixin = {
         if (type === 'pdf_link') {
             const reportId = this.state.reportInfo?.id || this._reportId || 'REPORT_ID';
             let baseUrlStr = `str(${obj}.get_base_url()).rstrip('/')`;
-            return `${baseUrlStr} + '/report/pdf/${this.state.reportInfo.id}/' + str(${obj}.id) + '?token=${config.token || "PENDING"}'`;
+            return `${baseUrlStr} + '/report/pdf/${reportId}/' + str(${obj}.id) + '?token=${config.token || "PENDING"}'`;
         }
         return "''";
     },
@@ -277,16 +277,16 @@ export const QrMixin = {
 
         // Build a clear edit-mode placeholder with icon + label visible even if img fails
         placeholderEl.innerHTML = `
-            <div class="qr-handle-container" contenteditable="false" style="position:absolute; top:-10px; left:10px; background:#9ea700; border-radius:4px; padding:0 4px; display:flex; gap:6px; z-index:100;">
-                <span class="fa fa-bars" style="color:white; font-size:10px; cursor:grab; padding:2px;"></span>
-                <span class="qr-edit-btn fa fa-edit" style="color:white; font-size:10px; cursor:pointer; padding:2px;" title="Edit QR"></span>
-                <span class="qr-delete fa fa-trash" style="color:#ffdce0; font-size:10px; cursor:pointer; padding:2px;" title="Delete QR"></span>
+            <div class="qr-handle-container" contenteditable="false" style="position:absolute; top:-10px; left:10px; background:#5b8dee; border-radius:4px; padding:0 4px; display:none; gap:6px; z-index:100;">
+                <span class="ri-drag-move-line" style="color:white; font-size:10px; cursor:grab; padding:2px;"></span>
+                <span class="qr-edit-btn ri-edit-line" style="color:white; font-size:10px; cursor:pointer; padding:2px;" title="Edit QR"></span>
+                <span class="qr-delete ri-delete-bin-line" style="color:#fdfbfb; font-size:10px; cursor:pointer; padding:2px;" title="Delete QR"></span>
             </div>
-            <div class="qr-edit-placeholder" style="display:inline-block; border:2px dashed #9ea700; border-radius:6px; padding:10px; min-width:${size}px; min-height:${size}px; position:relative; background:#fafdf0;">
-                <div style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:9px; color:#9ea700; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">QR Code</div>
+            <div class="qr-edit-placeholder" style="display:inline-block; border:2px dashed #ccc; border-radius:6px; padding:10px; min-width:${size}px; min-height:${size}px; position:relative; background:#fff;">
+                <div style="position:absolute; top:4px; left:0; right:0; text-align:center; font-size:9px; color:#666; font-weight:700; letter-spacing:0.5px; text-transform:uppercase;">QR Code</div>
                 <div style="width:${size}px; height:${size}px; display:flex; flex-direction:column; align-items:center; justify-content:center; margin:0 auto; padding-top:10px;">
-                    <i class="fa fa-qrcode" style="font-size:${Math.round(size * 0.55)}px; color:#9ea700; opacity:0.7;"></i>
-                    <div style="font-size:9px; color:#9ea700; margin-top:4px; opacity:0.8;">${type}</div>
+                    <i class="fa fa-qrcode" style="font-size:${Math.round(size * 0.55)}px; color:#333; opacity:0.8;"></i>
+                    <div style="font-size:9px; color:#666; margin-top:4px; opacity:0.8;">${type}</div>
                 </div>
                 ${config.caption ? `<div class="qr-caption" style="font-size:8pt; margin-top:3px; text-align:center; color:#555;">${config.caption}</div>` : ''}
             </div>
