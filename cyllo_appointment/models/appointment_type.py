@@ -96,7 +96,7 @@ class AppointmentType(models.Model):
         string='Resources'
     )
     staff_ids = fields.Many2many(
-        'appointment.staff', 'appointment_type_staff_rel',
+        'hr.employee', 'appointment_type_staff_rel',
         'type_id', 'staff_id',
         string='Staff Members'
     )

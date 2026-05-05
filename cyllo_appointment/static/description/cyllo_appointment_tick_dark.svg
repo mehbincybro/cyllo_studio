@@ -2,7 +2,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="-100 -100 1050 1050">
   <defs>
     <style>
-      .bg  { fill: #26261A; }
+      .bg  { fill: transparent; }
       .c2  { fill: #BCBBA7; }
       .c3  { fill: #c9c9b9; }
       .c4  { fill: #969686; }
@@ -17,7 +17,7 @@
   </defs>
 
   <!-- Background -->
-  <rect class="bg" width="850" height="850" rx="72.61" ry="72.61"/>
+  <rect class="bg" style="#26261A" width="850" height="850" rx="72.61" ry="72.61"/>
 
   <!-- Ring pegs -->
   <rect class="c3" x="268" y="150" width="50" height="120" rx="25" ry="25"/>

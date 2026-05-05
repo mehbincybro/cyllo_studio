@@ -22,29 +22,9 @@
 from odoo import api, fields, models, _
 
 
-class AppointmentStaff(models.Model):
-    _name = 'appointment.staff'
-    _description = 'Appointment Staff'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-    _order = 'name'
+class HrEmployee(models.Model):
+    _inherit = 'hr.employee'
 
-    name = fields.Char(string='Name', required=True, tracking=True)
-    active = fields.Boolean(string='Active', default=True)
-    user_id = fields.Many2one('res.users', string='Related User', tracking=True)
-    employee_id = fields.Many2one('hr.employee', string='Employee',
-                                  help='Link to HR employee record if available')
-    email = fields.Char(string='Email', required=True, tracking=True)
-    phone = fields.Char(string='Phone')
-    mobile = fields.Char(string='Mobile')
-    job_title = fields.Char(string='Job Title / Specialization')
-    bio = fields.Text(string='Bio / Description')
-    image = fields.Image(string='Photo', max_width=256, max_height=256)
-    color = fields.Integer(string='Color Index', default=0)
-    # Working hours
-    working_hours_id = fields.Many2one(
-        'resource.calendar', string='Working Hours',
-        help='Staff member availability schedule'
-    )
     # Linked appointment types
     appointment_type_ids = fields.Many2many(
         'appointment.type', 'appointment_type_staff_rel',
@@ -69,7 +49,6 @@ class AppointmentStaff(models.Model):
         string='Upcoming Appointments', compute='_compute_appointment_count'
     )
 
-    @api.depends('name')
     def _compute_appointment_count(self):
         today = fields.Datetime.now()
         for rec in self:
@@ -81,14 +60,6 @@ class AppointmentStaff(models.Model):
                 lambda a: a.start_datetime >= today and a.state not in (
                     'cancelled', 'rejected')
             ))
-
-    @api.onchange('user_id')
-    def _onchange_user_id(self):
-        if self.user_id:
-            if not self.name:
-                self.name = self.user_id.name
-            if not self.email:
-                self.email = self.user_id.email
 
     def action_view_upcoming_appointments(self):
         self.ensure_one()

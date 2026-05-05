@@ -71,7 +71,9 @@ class Appointment(models.Model):
     attendee_count = fields.Integer(string='Number of Attendees', default=1)
     customer_notes = fields.Text(string='Customer Notes')
     # Staff & Resources
-    staff_id = fields.Many2one('appointment.staff', string='Staff Member',
+    staff_domain = fields.Char(compute='_compute_staff_resource_domain')
+    resource_domain = fields.Char(compute='_compute_staff_resource_domain')
+    staff_id = fields.Many2one('hr.employee', string='Staff Member',
                                tracking=True)
     resource_id = fields.Many2one('appointment.resource', string='Resource',
                                   tracking=True)
@@ -140,6 +142,9 @@ class Appointment(models.Model):
         'res.company', string='Company',
         default=lambda self: self.env.company
     )
+    calendar_event_id = fields.Many2one(
+        'calendar.event',
+        string='Calendar Event')
 
     @api.model
     def _tz_get(self):
@@ -157,6 +162,19 @@ class Appointment(models.Model):
             if rec.partner_id:
                 parts.append(rec.partner_id.name)
             rec.display_name = ' - '.join(parts) if parts else _('Appointment')
+
+    @api.depends('appointment_type_id.staff_ids', 'appointment_type_id.resource_ids')
+    def _compute_staff_resource_domain(self):
+        for rec in self:
+            if rec.appointment_type_id and rec.appointment_type_id.staff_ids:
+                rec.staff_domain = f"[('appointment_type_ids', 'in', {rec.appointment_type_id.id})]"
+            else:
+                rec.staff_domain = "[]"
+
+            if rec.appointment_type_id and rec.appointment_type_id.resource_ids:
+                rec.resource_domain = f"[('appointment_type_ids', 'in', {rec.appointment_type_id.id})]"
+            else:
+                rec.resource_domain = "[]"
 
     @api.depends('start_datetime', 'end_datetime')
     def _compute_duration(self):
@@ -188,6 +206,18 @@ class Appointment(models.Model):
                 vals['name'] = self.env['ir.sequence'].next_by_code(
                     'appointment.appointment') or _('New')
         records = super().create(vals_list)
+        #Creating calendar event
+        for record in records:
+            event_vals = {
+                'name': record.display_name or record.name,
+                'start': record.start_datetime,
+                'stop': record.end_datetime,
+                'partner_ids': [(4, record.partner_id.id)],
+                'description': record.customer_notes or '',
+                'user_id': record.staff_id.user_id.id if record.staff_id and record.staff_id.user_id else self.env.user.id,
+            }
+            event = self.env['calendar.event'].create(event_vals)
+            record.calendar_event_id = event.id
         for record in records:
             if record.state == 'confirmed':
                 if record.appointment_type_id.send_confirmation:
@@ -199,8 +229,17 @@ class Appointment(models.Model):
 
     def write(self, vals):
         res = super().write(vals)
+        for rec in self:
+            if rec.calendar_event_id:
+                rec.calendar_event_id.write({
+                    'name': rec.display_name,
+                    'start': rec.start_datetime,
+                    'stop': rec.end_datetime,
+                })
         if 'state' in vals and vals['state'] == 'cancelled':
             for record in self:
+                if record.calendar_event_id:
+                    record.calendar_event_id.unlink()
                 if record.appointment_type_id.send_cancellation and not record.cancellation_sent:
                     record._send_cancellation_email()
                 if record.appointment_type_id.send_whatsapp_cancellation and not record.whatsapp_cancellation_sent:
@@ -448,7 +487,7 @@ class Appointment(models.Model):
 
     def _send_staff_confirmation_email(self):
         self.ensure_one()
-        if self.staff_id and self.staff_id.notify_on_new_appointment and self.staff_id.email:
+        if self.staff_id and self.staff_id.notify_on_new_appointment and self.staff_id.work_email:
             staff_tmpl = self.env.ref(
                 'cyllo_appointment.email_template_appointment_confirmed_staff',
                 raise_if_not_found=False)

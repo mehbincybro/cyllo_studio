@@ -36,13 +36,14 @@
                             <field name="scheduling_type"/>
                             <field name="location_type"/>
                             <field name="location" invisible="location_type == 'online'"/>
-                            <field name="meeting_url" attrs="{'invisible': [('location_type', '!=', 'online')]}" string="Meeting URL"/>
+<!--                            <field name="meeting_url" attrs="{'invisible': [('location_type', '!=', 'online')]}" string="Meeting URL"/>-->
                             <field name="color" widget="color_picker"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                         <group string="Billing &amp; Payment">
                             <field name="is_paid"/>
-                            <field name="product_id" invisible="is_paid == False"/>
+                            <field name="product_id" invisible="is_paid == False"
+                                   context="{'default_detailed_type': 'service', 'default_type': 'service'}"/>
                         </group>
                         <group string="Duration &amp; Slots">
                             <field name="duration" widget="float_time"/>
@@ -88,46 +89,57 @@
                             <group string="Confirmation">
                                 <field name="send_confirmation"/>
                                 <field name="confirmation_template_id"
-                                    invisible="send_confirmation == False"/>
+                                    invisible="send_confirmation == False"
+                                    required="send_confirmation == True"/>
                                 <field name="send_whatsapp_confirmation"/>
                                 <field name="whatsapp_confirmation_template_id"
-                                    invisible="send_whatsapp_confirmation == False"/>
+                                    invisible="send_whatsapp_confirmation == False"
+                                    required="send_whatsapp_confirmation == True"/>
                             </group>
                             <group string="Reminders">
                                 <field name="send_reminder"/>
                                 <field name="reminder_hours_before"
                                     invisible="send_reminder == False"
+                                    required="send_reminder == True"
                                     help="Comma-separated hours: e.g. 24,2 means 24h and 2h before"/>
                                 <field name="reminder_template_id"
-                                    invisible="send_reminder == False"/>
+                                    invisible="send_reminder == False"
+                                    required="send_reminder == True"/>
                                 <field name="send_sms_reminder"
                                     invisible="send_reminder == False"/>
                                 <field name="sms_reminder_template_id"
-                                    invisible="send_sms_reminder == False"/>
+                                    invisible="send_sms_reminder == False"
+                                    required="send_sms_reminder == True"/>
                                 <field name="send_whatsapp_reminder"
                                     invisible="send_reminder == False"/>
                                 <field name="whatsapp_reminder_template_id"
-                                    invisible="send_whatsapp_reminder == False"/>
+                                    invisible="send_whatsapp_reminder == False"
+                                    required="send_whatsapp_reminder == True"/>
                             </group>
                             <group string="Follow-up">
                                 <field name="send_followup"/>
                                 <field name="followup_hours_after"
-                                    invisible="send_followup == False"/>
+                                    invisible="send_followup == False"
+                                    required="send_followup == True"/>
                                 <field name="followup_template_id"
-                                    invisible="send_followup == False"/>
+                                    invisible="send_followup == False"
+                                    required="send_followup == True"/>
                                 <field name="send_whatsapp_followup"
                                     invisible="send_followup == False"/>
                                 <field name="whatsapp_followup_template_id"
-                                    invisible="send_whatsapp_followup == False"/>
+                                    invisible="send_whatsapp_followup == False"
+                                    required="send_whatsapp_followup == True"/>
                             </group>
                             <group string="Cancellation">
                                 <field name="send_cancellation"/>
                                 <field name="cancellation_template_id"
-                                    invisible="send_cancellation == False"/>
+                                    invisible="send_cancellation == False"
+                                    required="send_cancellation == True"/>
                                 <field name="send_whatsapp_cancellation"
                                     invisible="send_cancellation == False"/>
                                 <field name="whatsapp_cancellation_template_id"
-                                    invisible="send_whatsapp_cancellation == False"/>
+                                    invisible="send_whatsapp_cancellation == False"
+                                    required="send_whatsapp_cancellation == True"/>
                             </group>
                         </page>
                         <!-- Description Tab -->

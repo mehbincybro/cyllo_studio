@@ -45,12 +45,18 @@ class AppointmentWebsiteController(http.Controller):
         if not appointment_type.is_published and request.env.user._is_public():
             return request.redirect('/appointment')
 
+        staffs = False
+        if appointment_type.require_staff:
+            staffs = appointment_type.sudo().staff_ids or request.env['hr.employee'].sudo().search([])
+        resources = False
+        if appointment_type.require_resource:
+            resources = appointment_type.sudo().resource_ids or request.env['appointment.resource'].sudo().search([])
         values = {
             'main_object': appointment_type,
             'appointment_type': appointment_type,
             'scheduling_type': appointment_type.scheduling_type,
-            'staffs': appointment_type.sudo().staff_ids if appointment_type.require_staff else False,
-            'resources': appointment_type.sudo().resource_ids if appointment_type.require_resource else False,
+            'staffs': staffs,
+            'resources': resources,
         }
         return request.render('cyllo_appointment.appointment_selection', values)
 
@@ -90,9 +96,10 @@ class AppointmentWebsiteController(http.Controller):
                     'start_datetime': slot.start_datetime.strftime(
                         '%Y-%m-%d %H:%M:%S'),
                     'is_dynamic': False,
+                    'staff_id': slot.staff_id.id if slot.staff_id else False,
+                    'resource_id': slot.resource_id.id if slot.resource_id else False,
                 })
             return available_slots
-
         else:
             user_tz = pytz.timezone(request.context.get('tz') or 'UTC')
             interval_minutes = int(appointment_type.slot_interval)
@@ -202,12 +209,18 @@ class AppointmentWebsiteController(http.Controller):
             appointment = request.env['appointment.appointment'].sudo().create(
                 val)
         except ValidationError as e:
+            staffs = False
+            if appointment_type.require_staff:
+                staffs = appointment_type.sudo().staff_ids or request.env['hr.employee'].sudo().search([])
+            resources = False
+            if appointment_type.require_resource:
+                resources = appointment_type.sudo().resource_ids or request.env['appointment.resource'].sudo().search([])
             values = {
                 'main_object': appointment_type,
                 'appointment_type': appointment_type,
                 'scheduling_type': appointment_type.scheduling_type,
-                'staffs': appointment_type.sudo().staff_ids if appointment_type.require_staff else False,
-                'resources': appointment_type.sudo().resource_ids if appointment_type.require_resource else False,
+                'staffs': staffs,
+                'resources': resources,
                 'error_message': str(e),
             }
             return request.render('cyllo_appointment.appointment_selection',
@@ -247,7 +260,6 @@ class AppointmentWebsiteController(http.Controller):
 
         now = fields.Datetime.now()
         atype = appointment.appointment_type_id
-
         can_reschedule = (
                 atype.allow_reschedule and
                 appointment.state == 'confirmed' and
@@ -282,12 +294,20 @@ class AppointmentWebsiteController(http.Controller):
         if not atype.allow_reschedule:
             return request.redirect('/appointment/manage/' + token)
 
+        staffs = False
+        if atype.require_staff:
+            staffs = atype.sudo().staff_ids or request.env['hr.employee'].sudo().search([])
+
+        resources = False
+        if atype.require_resource:
+            resources = atype.sudo().resource_ids or request.env['appointment.resource'].sudo().search([])
+
         return request.render('cyllo_appointment.appointment_reschedule', {
             'appointment': appointment,
             'appointment_type': atype,
             'token': token,
-            'staffs': atype.staff_ids if atype.require_staff else False,
-            'resources': atype.resource_ids if atype.require_resource else False,
+            'staffs': staffs,
+            'resources': resources,
         })
 
     @http.route('/appointment/manage/<string:token>/reschedule/submit',
@@ -343,12 +363,19 @@ class AppointmentWebsiteController(http.Controller):
                 vals['resource_id'] = int(post.get('resource_id'))
             appointment.sudo().write(vals)
         except (ValidationError, ValueError) as e:
+            staffs = False
+            if atype.require_staff:
+                staffs = atype.sudo().staff_ids or request.env['hr.employee'].sudo().search([])
+            resources = False
+            if atype.require_resource:
+                resources = atype.sudo().resource_ids or request.env['appointment.resource'].sudo().search([])
+
             return request.render('cyllo_appointment.appointment_reschedule', {
                 'appointment': appointment,
                 'appointment_type': atype,
                 'token': token,
-                'staffs': atype.staff_ids if atype.require_staff else False,
-                'resources': atype.resource_ids if atype.require_resource else False,
+                'staffs': staffs,
+                'resources': resources,
                 'error_message': str(e),
             })
         # Recalculate based on new start_datetime

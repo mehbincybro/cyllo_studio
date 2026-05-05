@@ -21,7 +21,7 @@
 #############################################################################
 from . import appointment_type
 from . import appointment_resource
-from . import appointment_staff
+from . import hr_employee
 from . import appointment_slot
 from . import appointment
 from . import res_config_settings

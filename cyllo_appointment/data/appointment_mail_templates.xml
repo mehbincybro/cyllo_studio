@@ -169,7 +169,7 @@
         <field name="name">Appointment: Rescheduled (Staff)</field>
         <field name="model_id" ref="model_appointment_appointment"/>
         <field name="subject">Appointment Rescheduled - {{ object.display_name }}</field>
-        <field name="email_to">{{ object.staff_id.email }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
         <field name="body_html" type="html">
 <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
     <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -203,7 +203,7 @@
         <field name="name">Appointment: Confirmed (Staff)</field>
         <field name="model_id" ref="model_appointment_appointment"/>
         <field name="subject">New Appointment Confirmed - {{ object.display_name }}</field>
-        <field name="email_to">{{ object.staff_id.email }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
         <field name="body_html" type="html">
 <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
     <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
@@ -234,7 +234,7 @@
         <field name="name">Appointment: Cancelled (Staff)</field>
         <field name="model_id" ref="model_appointment_appointment"/>
         <field name="subject">Appointment Cancelled - {{ object.display_name }}</field>
-        <field name="email_to">{{ object.staff_id.email }}</field>
+        <field name="email_to">{{ object.staff_id.work_email }}</field>
         <field name="body_html" type="html">
 <div style="font-family: 'Inter', Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
     <div style="background: #373627; padding: 40px 30px; text-align: center; border-radius: 8px 8px 0 0;">
