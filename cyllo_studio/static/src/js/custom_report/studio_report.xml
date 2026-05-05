@@ -3,20 +3,28 @@
     <t t-name="custom_report.edit_report">
         <div class="d-flex flex-column w-100 bg-200" style="height: calc(100vh - 50px);">
             <!-- Header -->
-            <div class="w-100 bg-white border-bottom px-4 py-2 d-flex align-items-center shadow-sm">
-                <button class="btn btn-primary px-4 me-2"
-                        t-att-disabled="state.isSaving"
-                        t-on-click="() => this.save_changes(this)">
-                    <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
-                    Save
-                </button>
-                <button class="btn btn-light border px-4"
-                        t-on-click="() => this.close_edit(this)">Discard</button>
+            <div class="cy-report-hdr w-100 bg-white border-bottom px-4 py-2 d-flex align-items-center shadow-sm">
+                <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                    <button class="cy-back-icon-btn btn btn-light border-0"
+                            title="Back to Reports"
+                            t-on-click="() => this.close_edit(this)">
+                        <i class="ri-arrow-left-line"/>
+                    </button>
+                    <button class="cy-hdr-save btn"
+                            t-att-disabled="state.isSaving"
+                            t-on-click="() => this.save_changes(this)">
+                        <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
+                        Save
+                    </button>
+                    <button class="cy-hdr-discard btn"
+                            t-on-click="() => this.close_edit(this)">Discard</button>
+                </div>
                 <div class="ms-4 form-check form-switch pt-1">
                     <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview"
                            t-att-checked="state.previewMode"/>
                     <label class="form-check-label fw-bold" for="previewSwitch">Preview</label>
                 </div>
+                <!-- Preview-mode controls: Print + Record navigation -->
                 <div class="flex-grow-1"/>
                 <t t-if="!state.previewMode">
                     <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1"
@@ -156,7 +164,7 @@
                                 style="min-height: 297mm;"
                                 t-att-src="state.previewUrl"/>
                         <div t-else="" id="studio_report" t-ref="report_frame"
-                             class="editable-area w-100 h-100 text-dark" style="padding: 20mm;"/>
+                             class="editable-area w-100 h-100 text-dark" style="padding: 18mm;"/>
                     </div>
                     <!-- End of Page marker -->
                     <div class="cyllo-end-of-page-marker mb-5">

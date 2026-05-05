@@ -198,15 +198,15 @@
 .table-handle,
 .field-handle {
     color: white;
-    font-size: 10px;
+    font-size: 12px;
     cursor: grab;
     padding: 2px;
 }
 
 .table-delete,
 .field-delete {
-    color: #ffdce0;
-    font-size: 10px;
+    color: #faf9f9;
+    font-size: 12px;
     cursor: pointer;
     padding: 2px;
     transition: color 0.15s;
@@ -219,8 +219,8 @@
 
 .table-wrapper {
     position: relative;
-    margin-top: 30px !important;
-    padding: 8px;
+    margin: 0 !important;
+    padding: 0;
     /* Buffer for selection click */
     border: 1px transparent solid;
     transition: border-color 0.2s;
@@ -314,8 +314,7 @@
 }
 
 /* ── Element Handles ────────────────────────────────── */
-.box-handle,
-.field-handle {
+.box-handle {
     background: #5b8dee;
     width: 8px;
     height: 8px;
@@ -1682,20 +1681,18 @@ select>option {
     .field-block {
         position: relative !important;
         display: inline-flex !important;
-        align-items: center !important;
-        gap: 4px !important;
-        padding: 2px 6px !important;
-        border: 1px dashed #ccc !important;
-        background: #fdfdfd !important;
-        border-radius: 4px !important;
+        max-width: 100%;
+        padding: 0 !important;
+        outline: 1px dashed rgba(91, 141, 238, 0.15) !important;
+        outline-offset: -1px;
+        background: transparent !important;
         transition: all 0.2s !important;
         cursor: grab !important;
-        vertical-align: middle;
+        vertical-align: baseline;
     }
 
     .field-block:hover {
-        border-color: #9ab83a !important;
-        background: #f7f9f0 !important;
+        outline-color: rgba(91, 141, 238, 0.5) !important;
     }
 
     .field-block.selected {
@@ -1704,26 +1701,9 @@ select>option {
         box-shadow: 0 0 5px rgba(154, 184, 58, 0.2) !important;
     }
 
-    .field-handle {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 20px;
-        height: 20px;
-        background: #9ab83a;
-        color: white;
-        border-radius: 3px;
-        font-size: 10px;
-        cursor: grab;
-        margin-right: 4px;
-    }
 
-    .field-delete {
-        color: #ccc;
-        font-size: 10px;
-        cursor: pointer;
-        margin-left: 4px;
-    }
+
+
 
     .field-delete:hover {
         color: #e35d6a;
@@ -2058,15 +2038,17 @@ select>option {
     font-size: 13px;
     cursor: pointer;
 }
-.bg-light{
-    background:#ffffff !important;
+
+.bg-light {
+    background: #ffffff !important;
 }
 
 /* ── Issue 4B: QR Block – visible in edit mode ───────────────────────────── */
 .s_qr_block {
     position: relative;
     display: inline-block;
-    margin-top: 18px; /* room for the handle above */
+    margin-top: 18px;
+    /* room for the handle above */
     vertical-align: top;
 }
 
@@ -2078,7 +2060,12 @@ select>option {
 
 .s_qr_block:hover .qr-edit-placeholder,
 .s_qr_block.selected .qr-edit-placeholder {
-    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.35);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+.s_qr_block:hover .qr-handle-container,
+.s_qr_block.selected .qr-handle-container {
+    display: flex !important;
 }
 
 /* Hide the edit placeholder in preview mode */
@@ -2095,7 +2082,7 @@ select>option {
 /* Strong downward shadow on the paper container to visually "ground" the page */
 .cyllo-studio-report-container {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25),
-                0 2px 8px rgba(0, 0, 0, 0.12) !important;
+        0 2px 8px rgba(0, 0, 0, 0.12) !important;
 }
 
 /* Ensure the editable area always fills out to A4 height so short reports
@@ -2131,4 +2118,99 @@ select>option {
     text-transform: uppercase;
     white-space: nowrap;
     user-select: none;
+}
+
+/* ── Report Editor Header Buttons ─────────────────────────────────────────── */
+
+.cy-report-hdr {
+    height: 56px;
+    z-index: 1000;
+}
+
+/* Back icon button */
+.cy-back-icon-btn {
+    flex: 0 0 auto !important;
+    width: 36px !important;
+    height: 36px !important;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+    color: #555 !important;
+    font-size: 18px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border-radius: 50% !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.cy-back-icon-btn:hover,
+.cy-back-icon-btn:focus {
+    background: rgba(0, 0, 0, 0.06) !important;
+    color: #9ea700 !important;
+    box-shadow: none !important;
+}
+
+/* Save button - Cyllo Green */
+.cy-hdr-save {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 6px 20px !important;
+    background: #9ea700 !important;
+    border: 1px solid #9ea700 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 4px rgba(158, 167, 0, 0.25) !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+}
+
+.cy-hdr-save:hover {
+    background: #8b9200 !important;
+    border-color: #8b9200 !important;
+    box-shadow: 0 4px 8px rgba(158, 167, 0, 0.35) !important;
+}
+
+.cy-hdr-save:disabled {
+    background: #c8ccc0 !important;
+    border-color: #c8ccc0 !important;
+    cursor: not-allowed !important;
+    opacity: 0.7 !important;
+}
+
+/* Discard button - neutral */
+.cy-hdr-discard {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    padding: 6px 20px !important;
+    background: #ffffff !important;
+    border: 1px solid #d1d5db !important;
+    color: #4b5563 !important;
+    font-weight: 600 !important;
+    font-size: 14px !important;
+    border-radius: 6px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    box-shadow: none !important;
+}
+
+.cy-hdr-discard:hover {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+    color: #111827 !important;
 }

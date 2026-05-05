@@ -19,7 +19,9 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import base64
 import io
+import logging
 import werkzeug
 
 from PIL import Image
@@ -38,6 +40,31 @@ class IrActionsReport(models.Model):
     _inherit = 'ir.actions.report'
 
     report_thumbnail = fields.Image("Report Thumbnail", max_width=1024, max_height=1024, attachment=True)
+
+    @api.model
+    def get_safe_image_data_uri(self, base64_source):
+        """ Convert any image (including WebP/HEIC if supported by Pillow) to a safe PNG data URI for wkhtmltopdf """
+        if not base64_source:
+            return ''
+        try:
+            # base64_source can be a string or bytes
+            if isinstance(base64_source, str):
+                base64_source = base64_source.encode('utf-8')
+
+            img_bytes = base64.b64decode(base64_source)
+            image = Image.open(io.BytesIO(img_bytes))
+
+            # Convert to RGBA for PNG compatibility
+            if image.mode not in ('RGB', 'RGBA'):
+                image = image.convert('RGBA')
+
+            out = io.BytesIO()
+            image.save(out, format='PNG')
+            safe_b64 = base64.b64encode(out.getvalue()).decode('utf-8')
+            return f"data:image/png;base64,{safe_b64}"
+        except Exception as e:
+            logging.getLogger(__name__).warning("Studio safe image conversion failed: %s", e)
+            return ''
 
     def _get_report(self, report_ref):
         """Get the report (with sudo) from a reference

@@ -192,6 +192,7 @@ export class EditReport extends Component {
 
             this._setupReportFrame(arch || '');
             this._setupSortable();
+            await this._fetchPreviewData();
         });
 
         onWillUnmount(() => {
@@ -364,7 +365,6 @@ export class EditReport extends Component {
             // other elements: open editor only if already selected (or just dropped)
             // Never open MediumEditor for table wrapper, field block, or box wrapper
             const shouldSkipEditor = el.classList.contains('table-wrapper')
-                || el.classList.contains('field-block')
                 || el.classList.contains('box-section-wrapper');
 
             if (shouldSkipEditor || (!isTextNode && !wasSelected && !isNewDrop)) {
@@ -794,10 +794,10 @@ export class EditReport extends Component {
         const label = cfg.label || 'Section';
         return `
             <div class="box-toolbar" contenteditable="false">
-                <span class="box-drag-handle fa fa-bars" title="Drag to move"></span>
+                <span class="box-drag-handle ri-drag-move-line" title="Drag to move"></span>
                 <span class="box-label-text">${label}</span>
                 <span class="box-layout-badge">${layoutMode}</span>
-                <span class="box-delete-btn fa fa-trash" title="Delete Section"></span>
+                <span class="box-delete-btn ri-delete-bin-line" title="Delete Section"></span>
             </div>
             <div class="box-dropzone layout-${layoutMode}"></div>
             <div class="box-resize-handles" contenteditable="false">
@@ -886,16 +886,23 @@ export class EditReport extends Component {
                     item.className = 'field-block c_new dynamic-field-wrapper';
                     item.innerHTML = `
                         <div class="field-handle-container" contenteditable="false">
-                            <span class="field-handle fa fa-bars" title="Drag to move"></span>
-                            <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                            <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                         </div>
-                        <div class="field-container" style="display: inline-block;">
+                        <div class="field-container">
                             <strong class="field-label" style="margin-right: 4px;">${fieldInfo.string}: </strong>
-                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}" ${fieldInfo.type === 'binary' ? `t-options='{"widget": "image", "qweb_img_raw_data": 1}'` : ''}>${fieldPath}</span>
+                            ${fieldInfo.type === 'binary' ? `<img t-if="doc.${fieldPath}" src="/web/static/src/img/mimetypes/image.svg" t-att-src="doc.env['ir.actions.report'].get_safe_image_data_uri(doc.${fieldPath})" style="max-width: 100%; width: 200px; height: auto; object-fit: contain;" title="${fieldInfo.string}" />` : `<span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>`}
                         </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.opacity = '1';
-                    item.querySelector('.field-delete').onclick = (e) => { e.stopPropagation(); if (confirm('Delete this field?')) item.remove(); };
+                    item.querySelector('.field-delete').onclick = (e) => { e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, {
+                            body: "Are you sure you want to delete this field?",
+                            confirm: () => item.remove(),
+                            cancel: () => { },
+                        });
+                        // if (confirm('Delete this field?')) item.remove();
+                    };
                 }
 
                 if (type === 'box') {
@@ -926,8 +933,8 @@ export class EditReport extends Component {
                     item.className = 'c_new table-wrapper';
                     item.innerHTML = `
                         <div class="table-handle-container" contenteditable="false">
-                            <div class="table-handle fa fa-bars" title="Drag to move"></div>
-                            <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                            <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
+                            <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                         </div>
                         ${tableHtml}`;
                     item.setAttribute('cy-type', 'table');
@@ -980,7 +987,6 @@ export class EditReport extends Component {
 
             async onAdd(evt) {
                 console.log("DROP", evt);
-                console.log(self.reportFrameRef.el.querySelectorAll('[cy-template]'))
                 const item = evt.item;
                 const fromPanel = item.dataset._fromPanel === '1';
 
@@ -1053,12 +1059,12 @@ export class EditReport extends Component {
                     item.className = 'field-block c_new dynamic-field-wrapper';
                     item.innerHTML = `
                         <div class="field-handle-container" contenteditable="false">
-                            <span class="field-handle fa fa-bars" title="Drag to move"></span>
-                            <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                            <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                         </div>
                         <div class="field-container" style="display: inline-block;">
                             <strong class="field-label" style="margin-right: 4px;">${fieldInfo.string}: </strong>
-                            <span t-field="doc.${fieldPath}" title="${fieldInfo.string}" ${fieldInfo.type === 'binary' ? `t-options='{"widget": "image", "qweb_img_raw_data": 1}'` : ''}>${fieldPath}</span>
+                            ${fieldInfo.type === 'binary' ? `<img t-if="doc.${fieldPath}" src="/web/static/src/img/mimetypes/image.svg" t-att-src="doc.env['ir.actions.report'].get_safe_image_data_uri(doc.${fieldPath})" style="max-width: 100%; width: 200px; height: auto; object-fit: contain;" title="${fieldInfo.string}" />` : `<span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>`}
                         </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.cursor = 'default';
@@ -1067,7 +1073,12 @@ export class EditReport extends Component {
                     // Internal delete handler
                     item.querySelector('.field-delete').onclick = (e) => {
                         e.stopPropagation();
-                        if (confirm("Delete this field?")) item.remove();
+                        self.dialog.add(ConfirmationDialog, {
+                            body: "Are you sure you want to delete this Field?",
+                            confirm: () => item.remove(),
+                            cancel: () => { },
+                        });
+                        // if (confirm("Delete this field?")) item.remove();
                     };
                 }
 
@@ -1129,8 +1140,8 @@ export class EditReport extends Component {
                     item.className = 'c_new table-wrapper';
                     item.innerHTML = `
                             <div class="table-handle-container" contenteditable="false">
-                                <div class="table-handle fa fa-bars" title="Drag to move"></div>
-                                <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                                <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
+                                <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                             </div>
                             ${tableHtml}`;
                     item.setAttribute('cy-type', 'table');
@@ -1827,13 +1838,23 @@ export class EditReport extends Component {
     }
 
     async close_edit(component) {
-        component.action.doAction({
+        const action = {
             name: 'Reports',
             type: 'ir.actions.act_window',
             res_model: 'ir.actions.report',
             target: 'current',
             views: [[false, 'kanban']],
-        });
+            context: {
+                default_model: this._resModel,
+                search_default_model: this._resModel,
+            }
+        };
+
+        if (this._resModel) {
+            action.domain = [['model', '=', this._resModel]];
+        }
+
+        component.action.doAction(action);
     }
 
     async save_changes(component) {
@@ -2238,8 +2259,8 @@ export class EditReport extends Component {
             wrapper.className = 'table-wrapper';
             wrapper.innerHTML = `
                 <div class="table-handle-container" contenteditable="false">
-                    <div class="table-handle fa fa-bars" title="Drag to move"></div>
-                    <div class="table-delete fa fa-trash" title="Delete Table"></div>
+                    <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
+                    <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                 </div>`;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.appendChild(targetNode);
@@ -2270,16 +2291,21 @@ export class EditReport extends Component {
             wrapper.className = 'field-block dynamic-field-wrapper';
             wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
-                    <span class="field-handle fa fa-bars" title="Drag to move"></span>
-                    <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                    <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
-                <div class="field-container" style="display: inline-block;"></div>
+                <div class="field-container"></div>
             `;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.querySelector('.field-container').appendChild(targetNode);
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("Delete this field?")) wrapper.remove();
+                this.dialog.add(ConfirmationDialog, {
+                            body: "Are you sure you want to delete this field?",
+                            confirm: () => wrapper.remove(),
+                            cancel: () => { },
+                        });
+                // if (confirm("Delete this field?")) wrapper.remove();
             };
         });
 
@@ -2296,15 +2322,20 @@ export class EditReport extends Component {
             wrapper.className = 'field-block dynamic-field-wrapper';
             wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
-                    <span class="field-handle fa fa-bars" title="Drag to move"></span>
-                    <span class="field-delete fa fa-trash" title="Delete Field"></span>
+                    <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
             `;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
             wrapper.appendChild(targetNode);
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("Delete this field?")) wrapper.remove();
+                this.dialog.add(ConfirmationDialog, {
+                            body: "Are you sure you want to delete this field?",
+                            confirm: () => wrapper.remove(),
+                            cancel: () => { },
+                        });
+                // if (confirm("Delete this field?")) wrapper.remove();
             };
         });
 
