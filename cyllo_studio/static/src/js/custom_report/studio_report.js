@@ -849,7 +849,7 @@ export class EditReport extends Component {
 
                     // Destroy any existing editor first
                     if (self.editor) {
-                        try { self.editor.destroy(); } catch (_) {}
+                        try { self.editor.destroy(); } catch (_) { }
                         self.editor = null;
                     }
 
@@ -864,8 +864,8 @@ export class EditReport extends Component {
                             },
                             extensions: {
                                 'deleteElement': new window.DeleteButton(),
-                                'undoButton':    new window.UndoButton(),
-                                'redoButton':    new window.RedoButton(),
+                                'undoButton': new window.UndoButton(),
+                                'redoButton': new window.RedoButton(),
                             },
                             owner: self,
                             placeholder: false,
@@ -895,7 +895,8 @@ export class EditReport extends Component {
                         </div>`;
                     item.setAttribute('cy-type', 'dynamic');
                     item.style.opacity = '1';
-                    item.querySelector('.field-delete').onclick = (e) => { e.stopPropagation();
+                    item.querySelector('.field-delete').onclick = (e) => {
+                        e.stopPropagation();
                         self.dialog.add(ConfirmationDialog, {
                             body: "Are you sure you want to delete this field?",
                             confirm: () => item.remove(),
@@ -1010,7 +1011,7 @@ export class EditReport extends Component {
 
                     // Destroy any existing editor first
                     if (self.editor) {
-                        try { self.editor.destroy(); } catch (_) {}
+                        try { self.editor.destroy(); } catch (_) { }
                         self.editor = null;
                     }
 
@@ -1025,8 +1026,8 @@ export class EditReport extends Component {
                             },
                             extensions: {
                                 'deleteElement': new window.DeleteButton(),
-                                'undoButton':    new window.UndoButton(),
-                                'redoButton':    new window.RedoButton(),
+                                'undoButton': new window.UndoButton(),
+                                'redoButton': new window.RedoButton(),
                             },
                             owner: self,
                             placeholder: false,
@@ -2073,10 +2074,11 @@ export class EditReport extends Component {
 
             // Unwrap wrappers
             if (el.classList && el.classList.contains('table-wrapper')) {
-                const table = el.querySelector('table');
-                if (table && el.parentNode) {
-                    el.parentNode.replaceChild(table, el);
-                    clean(table);
+                if (el.parentNode) {
+                    const children = Array.from(el.childNodes);
+                    children.forEach(child => el.parentNode.insertBefore(child, el));
+                    el.remove();
+                    children.forEach(child => clean(child));
                     return;
                 }
             }
@@ -2123,27 +2125,26 @@ export class EditReport extends Component {
 
             // Legacy box-wrapper (old format) compat
             if (el.classList && el.classList.contains('box-wrapper')) {
-                const span = el.querySelector('span');
-                if (span && el.parentNode) {
-                    el.parentNode.replaceChild(span, el);
-                    clean(span);
+                if (el.parentNode) {
+                    const children = Array.from(el.childNodes);
+                    children.forEach(child => el.parentNode.insertBefore(child, el));
+                    el.remove();
+                    children.forEach(child => clean(child));
                     return;
                 }
             }
             if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
-                const fieldContainer = el.querySelector('.field-container');
-                if (fieldContainer && el.parentNode) {
-                    if (fieldContainer.classList) fieldContainer.classList.remove('d-inline-flex', 'gap-1');
-                    el.parentNode.replaceChild(fieldContainer, el);
-                    clean(fieldContainer);
+                if (el.parentNode) {
+                    const children = Array.from(el.childNodes);
+                    children.forEach(child => {
+                        if (child.classList && child.classList.contains('field-container')) {
+                            child.classList.remove('d-inline-flex', 'gap-1');
+                        }
+                        el.parentNode.insertBefore(child, el);
+                    });
+                    el.remove();
+                    children.forEach(child => clean(child));
                     return;
-                } else {
-                    const span = el.querySelector('span[t-field]');
-                    if (span && el.parentNode) {
-                        el.parentNode.replaceChild(span, el);
-                        clean(span);
-                        return;
-                    }
                 }
             }
 
@@ -2239,7 +2240,7 @@ export class EditReport extends Component {
                 if (qrDiv.dataset.qrConfig) {
                     qrConfig = JSON.parse(qrDiv.dataset.qrConfig);
                 }
-            } catch (e) {}
+            } catch (e) { }
 
             if (qrConfig) {
                 this.insertQrBlock(qrDiv, qrConfig, 'enrich');
@@ -2301,10 +2302,10 @@ export class EditReport extends Component {
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
                 this.dialog.add(ConfirmationDialog, {
-                            body: "Are you sure you want to delete this field?",
-                            confirm: () => wrapper.remove(),
-                            cancel: () => { },
-                        });
+                    body: "Are you sure you want to delete this field?",
+                    confirm: () => wrapper.remove(),
+                    cancel: () => { },
+                });
                 // if (confirm("Delete this field?")) wrapper.remove();
             };
         });
@@ -2331,10 +2332,10 @@ export class EditReport extends Component {
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
                 this.dialog.add(ConfirmationDialog, {
-                            body: "Are you sure you want to delete this field?",
-                            confirm: () => wrapper.remove(),
-                            cancel: () => { },
-                        });
+                    body: "Are you sure you want to delete this field?",
+                    confirm: () => wrapper.remove(),
+                    cancel: () => { },
+                });
                 // if (confirm("Delete this field?")) wrapper.remove();
             };
         });

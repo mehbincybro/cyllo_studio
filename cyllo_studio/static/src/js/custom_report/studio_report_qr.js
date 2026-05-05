@@ -1,4 +1,6 @@
 /** @odoo-module **/
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
+
 export const QrMixin = {
 
     _getDefaultQrState() {
