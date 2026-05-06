@@ -55,7 +55,7 @@ class AppointmentCancelWizard(models.TransientModel):
                 subtype_xmlid='mail.mt_note'
             )
         # Send Staff Cancellation Email
-        if appt.staff_id and appt.staff_id.notify_on_cancellation and appt.staff_id.email:
+        if appt.staff_id and appt.staff_id.notify_on_cancellation and appt.staff_id.work_email:
             staff_tmpl = self.env.ref(
                 'cyllo_appointment.email_template_appointment_cancelled_staff',
                 raise_if_not_found=False

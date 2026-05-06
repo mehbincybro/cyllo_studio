@@ -15,3 +15,4 @@ access_appointment_resource_public,appointment.resource public,model_appointment
 access_appointment_type_portal,appointment.type portal,model_appointment_type,base.group_portal,1,0,0,0
 access_appointment_slot_portal,appointment.slot portal,model_appointment_slot,base.group_portal,1,0,0,0
 access_appointment_resource_portal,appointment.resource portal,model_appointment_resource,base.group_portal,1,0,0,0
+access_appointment_portal,appointment.appointment portal,model_appointment_appointment,base.group_portal,1,0,0,0

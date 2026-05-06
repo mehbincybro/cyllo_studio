@@ -26,18 +26,15 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--apt-gray-200);
+  margin-top: 16px;
+  margin-bottom: 4px;
+  padding-bottom: 4px;
 }
 
 .apt-reference {
-  font-size: 24px;
+  font-size: 32px;
   font-weight: 700;
   color: var(--apt-primary);
-  background: var(--apt-gray-100);
-  padding: 6px 16px;
-  border-radius: 20px;
   letter-spacing: 0.5px;
 }
 

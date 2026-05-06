@@ -81,7 +81,6 @@ class AppointmentWebsiteController(http.Controller):
                 domain.append(('staff_id', '=', int(staff_id)))
             if resource_id:
                 domain.append(('resource_id', '=', int(resource_id)))
-
             slots = request.env['appointment.slot'].sudo().search(domain)
             available_slots = []
             for slot in slots:
@@ -104,41 +103,59 @@ class AppointmentWebsiteController(http.Controller):
             user_tz = pytz.timezone(request.context.get('tz') or 'UTC')
             interval_minutes = int(appointment_type.slot_interval)
             duration_hours = appointment_type.duration
-            start_hour = 9
-            end_hour = 17
+            calendar = request.env['resource.calendar']
+            if staff_id:
+                staff = request.env['hr.employee'].sudo().browse(int(staff_id))
+                calendar = staff.resource_calendar_id
+            if not calendar and resource_id:
+                resource = request.env['appointment.resource'].sudo().browse(int(resource_id))
+                calendar = resource.working_hours_id
+            if not calendar:
+                calendar = appointment_type.working_hours_id
             available_slots = []
-            current_time = datetime.combine(target_date,
-                                            datetime.min.time().replace(
-                                                hour=start_hour))
-            end_time_limit = datetime.combine(target_date,
-                                              datetime.min.time().replace(
-                                                  hour=end_hour))
-            while current_time < end_time_limit:
-                slot_end = current_time + timedelta(hours=duration_hours)
-                utc_start = user_tz.localize(current_time).astimezone(
-                    pytz.utc).replace(tzinfo=None)
-                utc_end = user_tz.localize(slot_end).astimezone(
-                    pytz.utc).replace(tzinfo=None)
-                domain = [
-                    ('state', 'in', ['confirmed', 'in_progress']),
-                    ('start_datetime', '<', utc_end),
-                    ('end_datetime', '>', utc_start),
-                ]
-                if staff_id:
-                    domain.append(('staff_id', '=', int(staff_id)))
-                if resource_id:
-                    domain.append(('resource_id', '=', int(resource_id)))
-                overlapping = request.env[
-                    'appointment.appointment'].sudo().search(domain, limit=1)
-                available_slots.append({
-                    'id': f"{utc_start.strftime('%Y-%m-%d %H:%M:%S')}",
-                    'time': current_time.strftime('%I:%M %p'),
-                    'spots': 0 if overlapping else 1,
-                    'is_full': bool(overlapping),
-                    'start_datetime': utc_start.strftime('%Y-%m-%d %H:%M:%S'),
-                    'is_dynamic': True,
-                })
-                current_time += timedelta(minutes=interval_minutes)
+            valid_intervals = []
+            if calendar:
+                attendances = calendar.attendance_ids.filtered(lambda a: a.dayofweek == str(target_date.weekday()))
+                for att in attendances:
+                    h_from, m_from = divmod(att.hour_from * 60, 60)
+                    h_to, m_to = divmod(att.hour_to * 60, 60)
+                    valid_intervals.append((
+                        datetime.combine(target_date, datetime.min.time().replace(hour=int(h_from), minute=int(m_from))),
+                        datetime.combine(target_date, datetime.min.time().replace(hour=int(h_to), minute=int(m_to)))
+                    ))
+            else:
+                valid_intervals.append((
+                    datetime.combine(target_date, datetime.min.time().replace(hour=9)),
+                    datetime.combine(target_date, datetime.min.time().replace(hour=17))
+                ))
+            for interval_start, interval_end in valid_intervals:
+                current_time = interval_start
+                while current_time + timedelta(hours=duration_hours) <= interval_end:
+                    slot_end = current_time + timedelta(hours=duration_hours)
+                    utc_start = user_tz.localize(current_time).astimezone(
+                        pytz.utc).replace(tzinfo=None)
+                    utc_end = user_tz.localize(slot_end).astimezone(
+                        pytz.utc).replace(tzinfo=None)
+                    domain = [
+                        ('state', 'in', ['confirmed', 'in_progress']),
+                        ('start_datetime', '<', utc_end),
+                        ('end_datetime', '>', utc_start),
+                    ]
+                    if staff_id:
+                        domain.append(('staff_id', '=', int(staff_id)))
+                    if resource_id:
+                        domain.append(('resource_id', '=', int(resource_id)))
+                    overlapping = request.env[
+                        'appointment.appointment'].sudo().search(domain, limit=1)
+                    available_slots.append({
+                        'id': f"{utc_start.strftime('%Y-%m-%d %H:%M:%S')}",
+                        'time': current_time.strftime('%I:%M %p'),
+                        'spots': 0 if overlapping else 1,
+                        'is_full': bool(overlapping),
+                        'start_datetime': utc_start.strftime('%Y-%m-%d %H:%M:%S'),
+                        'is_dynamic': True,
+                    })
+                    current_time += timedelta(minutes=interval_minutes)
 
             return available_slots
 
@@ -164,6 +181,7 @@ class AppointmentWebsiteController(http.Controller):
         val = {
             'appointment_type_id': appointment_type.id,
             'partner_id': partner.id,
+            'booker_name': partner_name,
             'customer_notes': post.get('notes'),
             'state': 'pending_payment' if appointment_type.is_paid else 'confirmed',
             'attendee_count': attendee_count,
