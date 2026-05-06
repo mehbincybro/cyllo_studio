@@ -42,7 +42,7 @@
     <menuitem id="menu_appointment_staff"
         name="Staff Members"
         parent="menu_appointment_config"
-        action="action_appointment_staff"
+        action="hr.open_view_employee_list_my"
         sequence="40"/>
     <record id="action_appointment_config_settings" model="ir.actions.act_window">
         <field name="name">Settings</field>

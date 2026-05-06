@@ -26,12 +26,10 @@ function initBooking() {
         let staff_id = '';
         if (staff_select.length) {
             staff_id = staff_select.val();
-            if (!staff_id) return;
         }
         let resource_id = '';
         if (resource_select.length) {
             resource_id = resource_select.val();
-            if (!resource_id) return;
         }
         slots_container.show();
         slots_grid.html('<div class="col-12 text-center text-muted"><i class="fa fa-spinner fa-spin"/> Loading availability...</div>');
@@ -91,6 +89,12 @@ function initBooking() {
                                     is_dynamic_input.val('false');
                                     predefined_slot_id.val(slot.id);
                                     dynamic_slot_datetime.val('');
+                                    if (slot.staff_id && staff_select.length) {
+                                        staff_select.val(slot.staff_id);
+                                    }
+                                    if (slot.resource_id && resource_select.length) {
+                                        resource_select.val(slot.resource_id);
+                                    }
                                 }
                                 const maxSpots = Math.min(slot.spots, type_max_attendees);
                                 const attSelect = $('#attendee_count');

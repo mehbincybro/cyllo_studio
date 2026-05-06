@@ -47,6 +47,7 @@
         'mail',
         'calendar',
         'resource',
+        'hr',
         'sms',
         'web',
         'website',
@@ -63,7 +64,7 @@
         # Views
         'views/appointment_type_views.xml',
         'views/appointment_resource_views.xml',
-        'views/appointment_staff_views.xml',
+        'views/hr_employee_views.xml',
         'views/appointment_slot_views.xml',
         'views/appointment_views.xml',
         'views/appointment_settings_views.xml',

@@ -33,7 +33,9 @@ class AppointmentSlot(models.Model):
     appointment_type_id = fields.Many2one(
         'appointment.type', string='Appointment Type', required=True, ondelete='cascade'
     )
-    staff_id = fields.Many2one('appointment.staff', string='Staff Member')
+    staff_domain = fields.Char(compute='_compute_staff_resource_domain')
+    resource_domain = fields.Char(compute='_compute_staff_resource_domain')
+    staff_id = fields.Many2one('hr.employee', string='Staff Member')
     resource_id = fields.Many2one('appointment.resource', string='Resource')
     start_datetime = fields.Datetime(string='Start', required=True)
     end_datetime = fields.Datetime(string='End', required=True, compute='_compute_end_datetime', store=True, readonly=False)
@@ -59,6 +61,19 @@ class AppointmentSlot(models.Model):
     appointment_ids = fields.One2many(
         'appointment.appointment', 'slot_id', string='Appointments'
     )
+
+    @api.depends('appointment_type_id', 'appointment_type_id.staff_ids', 'appointment_type_id.resource_ids')
+    def _compute_staff_resource_domain(self):
+        for rec in self:
+            if rec.appointment_type_id and rec.appointment_type_id.staff_ids:
+                rec.staff_domain = f"[('appointment_type_ids', 'in', {rec.appointment_type_id.id})]"
+            else:
+                rec.staff_domain = "[]"
+
+            if rec.appointment_type_id and rec.appointment_type_id.resource_ids:
+                rec.resource_domain = f"[('appointment_type_ids', 'in', {rec.appointment_type_id.id})]"
+            else:
+                rec.resource_domain = "[]"
 
     @api.depends('start_datetime', 'duration')
     def _compute_end_datetime(self):

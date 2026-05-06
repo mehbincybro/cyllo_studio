@@ -86,7 +86,7 @@
                                     t-attf-src="/web/image/appointment.resource/{{record.id.raw_value}}/image"
                                     class="o_image_64_max"/>
                                 <div t-else="" class="apt-resource-icon">
-                                    <i t-attf-class="fa fa-#{record.resource_type.raw_value == 'room' ? 'building' : record.resource_type.raw_value == 'equipment' ? 'wrench' : 'cube'} fa-2x" title="Resource Type"/>
+                                    <i t-attf-class="fa fa-#{record.resource_type.raw_value == 'room' ? 'building' : record.resource_type.raw_value == 'equipment' ? 'wrench' : record.resource_type.raw_value == 'vehicle' ? 'car' : 'cube'} fa-2x" title="Resource Type"/>
                                 </div>
                             </div>
                             <strong><t t-esc="record.name.value"/></strong>

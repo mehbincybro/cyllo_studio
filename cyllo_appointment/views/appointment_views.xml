@@ -63,8 +63,8 @@
                         </group>
                         <group string="Scheduling">
                             <field name="scheduling_type" invisible="1"/>
-                            <field name="start_datetime" readonly="scheduling_type == 'predefined'"/>
-                            <field name="end_datetime" readonly="scheduling_type == 'predefined'"/>
+                            <field name="start_datetime" readonly="scheduling_type == 'predefined' or state != 'draft'" force_save="1"/>
+                            <field name="end_datetime" readonly="scheduling_type == 'predefined' or state != 'draft'" force_save="1"/>
                             <field name="duration" widget="float_time" readonly="1"/>
                             <field name="timezone"/>
                             <field name="slot_id" string="Event / Slot" domain="[('state', '!=', 'fully_booked')]"/>
@@ -72,11 +72,13 @@
                     </group>
                     <group>
                         <group string="Assignment">
+                            <field name="staff_domain" invisible="1"/>
+                            <field name="resource_domain" invisible="1"/>
                             <field name="staff_id"
-                                domain="[('appointment_type_ids', 'in', [appointment_type_id])]"
+                                domain="staff_domain"
                                 context="{'default_appointment_type_ids': [appointment_type_id]}"/>
                             <field name="resource_id"
-                                domain="[('appointment_type_ids', 'in', [appointment_type_id])]"/>
+                                domain="resource_domain"/>
                         </group>
                         <group string="Location">
                             <field name="location_type" readonly="1"/>
