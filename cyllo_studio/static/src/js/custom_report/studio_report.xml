@@ -164,7 +164,7 @@
                                 style="min-height: 297mm;"
                                 t-att-src="state.previewUrl"/>
                         <div t-else="" id="studio_report" t-ref="report_frame"
-                             class="editable-area w-100 h-100 text-dark" style="padding: 18mm;"/>
+                             class="editable-area w-100 h-100 text-dark" style="padding: 10mm;"/>
                     </div>
                     <!-- End of Page marker -->
                     <div class="cyllo-end-of-page-marker mb-5">
