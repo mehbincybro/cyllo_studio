@@ -111,7 +111,7 @@ export class MenuSideBar extends Component {
                 svgContainer.innerHTML = data;
             }
             this.cyLeftSidebar.el?.querySelectorAll(
-                ".cy-left-sidebar .cy-svg-container *[style*='#26261A'], .cy-left-sidebar .cy-svg-container [fill='#26261A']"
+                ".cy-left-sidebar .cy-svg-container *[style*='#26261A'], .cy-left-sidebar .cy-svg-container [fill='#26261A'], .cy-left-sidebar .cy-svg-container .bg"
             ).forEach(rect => {
                 rect.setAttribute('style', 'fill: transparent !important;')
             });
