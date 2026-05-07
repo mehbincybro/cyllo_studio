@@ -2,8 +2,9 @@
 <templates id="template" xml:space="preserve">
     <t t-name="client_action.chat_bot">
 
-    <!-- AI Chat Icon — drag it anywhere; click (no drag) toggles the chat box -->
+    <!-- AI Chat Icon — click to open/close; drag to reposition icon + panel -->
     <div draggable="false"
+         t-ref="aiChatIcon"
          t-on-mousedown="_onIconMouseDown"
          t-on-dragstart="_stopBubble"
          t-attf-style="
@@ -13,99 +14,114 @@
              background: #9EA700;
              color: white;
              border-radius: 50%;
-             width: 50px; height: 50px;
+             width: 56px; height: 56px;
              display: flex; align-items: center; justify-content: center;
-             font-size: 24px;
+             font-size: 26px;
              cursor: grab;
-             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+             box-shadow: 0 4px 10px rgba(0,0,0,0.25);
              z-index: 1050;
              user-select: none;
          ">
         <i class="ri-robot-2-line"/>
     </div>
 
-    <!-- AI Chat Box — follows the icon position via state.chatPos -->
+    <!-- AI Chat Panel — Fix 2: bigger (520×620); Fix 3: header is the drag handle -->
     <div draggable="false"
+         t-ref="aiChatBox"
          t-on-dragstart="_stopBubble"
          t-attf-style="
              position: fixed;
              bottom: {{ state.chatPos.bottom }}px;
              right:  {{ state.chatPos.right  }}px;
-             width: 340px;
-             max-height: 440px;
+             width: 520px;
+             height: 620px;
              background: white;
              border: 1px solid #ccc;
-             border-radius: 8px;
+             border-radius: 12px;
              display: {{ state.aiChatOpen ? 'flex' : 'none' }};
              flex-direction: column;
-             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+             box-shadow: 0 8px 24px rgba(0,0,0,0.18);
              z-index: 1050;
              overflow: hidden;
              user-select: none;
          ">
 
-        <!-- Chat Header (static — drag the icon instead) -->
-        <div style="background: #9EA700; color: white; padding: 8px 12px; font-weight: 600;
-                    font-size: 13px; display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
-            <i class="ri-robot-2-line"/>
-            <span>Workflow AI Assistant</span>
+        <!-- Header — grab anywhere on it to drag the whole panel (Fix 3) -->
+        <div t-on-mousedown="_onPanelHeaderMouseDown"
+             t-on-dragstart="_stopBubble"
+             style="background: #9EA700;
+                    color: white;
+                    padding: 10px 14px;
+                    font-weight: 600;
+                    font-size: 14px;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    flex-shrink: 0;
+                    cursor: grab;
+                    user-select: none;">
+            <i class="ri-robot-2-line" style="font-size: 18px;"/>
+            <span style="flex: 1;">Workflow AI Assistant</span>
+            <span style="font-size: 11px; opacity: 0.75; font-weight: 400;">⠿ drag to move</span>
         </div>
 
         <!-- Chat Output -->
-        <div style="flex: 1; overflow-y: auto; padding: 10px; display: flex;
-                    flex-direction: column; gap: 6px;"
+        <div style="flex: 1; overflow-y: auto; padding: 14px; display: flex;
+                    flex-direction: column; gap: 8px;"
              t-ref="aiChatOutput">
             <t t-if="state.aiMessages.length === 0">
-                <div style="color: #888; font-size: 12px; text-align: center; margin-top: 20px;">
+                <div style="color: #888; font-size: 13px; text-align: center; margin-top: 30px; line-height: 1.6;">
                     Describe the workflow you want to create.<br/>
-                    e.g. "Send an email when a sale order is confirmed"
+                    <span style="color:#bbb;">e.g. "Send an email when a sale order is confirmed"</span>
                 </div>
             </t>
             <t t-foreach="state.aiMessages" t-as="msg" t-key="msg.id">
                 <div t-attf-style="
-                    max-width: 90%;
-                    padding: 6px 10px;
-                    border-radius: 10px;
+                    max-width: 88%;
+                    padding: 8px 12px;
+                    border-radius: 12px;
                     font-size: 13px;
-                    line-height: 1.4;
+                    line-height: 1.5;
                     word-break: break-word;
                     {{ msg.from === 'user'
-                        ? 'align-self: flex-end; background: #9EA700; color: white; border-bottom-right-radius: 2px;'
+                        ? 'align-self: flex-end; background: #9EA700; color: white; border-bottom-right-radius: 3px;'
                         : msg.type === 'error'
-                            ? 'align-self: flex-start; background: #fdecea; color: #c62828; border: 1px solid #f5c6c6; border-bottom-left-radius: 2px;'
-                            : 'align-self: flex-start; background: #f0f0f0; color: #333; border-bottom-left-radius: 2px;'
+                            ? 'align-self: flex-start; background: #fdecea; color: #c62828; border: 1px solid #f5c6c6; border-bottom-left-radius: 3px;'
+                            : 'align-self: flex-start; background: #f2f2f2; color: #333; border-bottom-left-radius: 3px;'
                     }}
                 ">
                     <t t-esc="msg.text"/>
                 </div>
             </t>
             <t t-if="state.aiLoading">
-                <div style="align-self: flex-start; background: #f0f0f0; color: #555;
-                            padding: 6px 12px; border-radius: 10px;
-                            border-bottom-left-radius: 2px; font-size: 13px; font-style: italic;">
+                <div style="align-self: flex-start; background: #f2f2f2; color: #666;
+                            padding: 8px 14px; border-radius: 12px;
+                            border-bottom-left-radius: 3px; font-size: 13px; font-style: italic;">
                     ⏳ Building workflow…
                 </div>
             </t>
         </div>
 
-        <!-- Chat Input -->
-        <div style="display: flex; border-top: 1px solid #ddd; flex-shrink: 0; user-select: text;">
+        <!-- Chat Input — user-select:text so typing works; stopBubble prevents canvas interference -->
+        <div style="display: flex; border-top: 1px solid #e0e0e0; flex-shrink: 0; user-select: text;">
             <input
                 t-model="state.aiInput"
                 t-on-keydown="onAiInputKeydown"
                 t-att-disabled="state.aiLoading"
                 t-on-mousedown="_stopBubble"
                 placeholder="Describe your workflow…"
-                style="flex: 1; border: none; padding: 9px 10px; outline: none;
+                style="flex: 1; border: none; padding: 12px 14px; outline: none;
                        font-size: 13px; background: transparent; user-select: text; cursor: text;"
             />
             <button
                 t-on-click="sendAiMessage"
                 t-att-disabled="state.aiLoading"
-                t-attf-style="background: {{ state.aiLoading ? '#bbb' : '#4b8bf5' }}; color: white;
-                              border: none; padding: 0 14px;
+                t-attf-style="background: {{ state.aiLoading ? '#bbb' : '#4b8bf5' }};
+                              color: white; border: none; padding: 0 18px;
                               cursor: {{ state.aiLoading ? 'not-allowed' : 'pointer' }};
-                              font-size: 13px; font-weight: 600; transition: background 0.2s;">
+                              font-size: 13px; font-weight: 600;
+                              transition: background 0.2s;
+                              border-radius: 0 0 12px 0;">
                 Send
             </button>
         </div>

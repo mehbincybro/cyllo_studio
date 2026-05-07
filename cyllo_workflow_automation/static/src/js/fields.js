@@ -62,3 +62,12 @@ export const reusableAutomationFields = [
     { name: 'reused_variable', type: 'json' },
     { name: 'label', type: 'char' },
 ];
+
+export const windowFields = [
+    { name: 'label', type: 'char' },
+    { name: 'window_action_id', type: 'many2One' },
+    { name: 'window_view_type', type: 'selection' },
+    { name: 'window_target', type: 'selection' },
+    { name: 'window_domain', type: 'char' },
+    { name: 'window_context', type: 'char' },
+];

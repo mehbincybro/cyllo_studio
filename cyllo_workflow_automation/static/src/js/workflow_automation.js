@@ -59,6 +59,7 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Condition: ['label', 'condition_tree_value', 'else_setup_code'],
     Loop: ['label', 'loop_collection', 'loop_variable_name'],
     'Reuse Automation': ['label', 'reused_work_auto_id', 'reused_variable'],
+    Window: ['label', 'window_action_id'],
 };
 
 const GLOBAL_IMPORTS = [{
@@ -162,10 +163,13 @@ export class WorkFlowAuto extends Component {
         });
 
         this.env.bus.addEventListener("DELETE:NODE:BY:CLICK", ({detail}) => {
-            const data = this.editorValue[0].flow_data?.drawflow?.Home?.data
-            if (data) {
-                const node = Object.values(data).find(item => item.data.nodeId === detail.nodeId)
-                owl.status(this) !== 'destroyed' && this.deleteNode(node);
+            const data = this.getCurrentFlowData();
+            if (!Object.keys(data).length) {
+                return;
+            }
+            const node = Object.values(data).find(item => item.data?.nodeId === detail.nodeId);
+            if (node && owl.status(this) !== 'destroyed') {
+                this.deleteNode(node);
             }
         });
 
@@ -853,6 +857,9 @@ export class WorkFlowAuto extends Component {
     }
 
     deleteNode(node) {
+        if (!node || !node.data) {
+            return;
+        }
         const variablesInScope = this.env.variables.context.variables.filter(variable => variable.scopeId === node.data.nodeId);
         const isUsed = variablesInScope.some(item =>
             item.usedIn.length > 1 || (item.usedIn.length === 1 && item.usedIn[0] !== node.data.nodeId)
@@ -913,7 +920,8 @@ export class WorkFlowAuto extends Component {
     }
 
     canConnect(inputId, outputId, outputClass) {
-        const flowNodes = Object.values(this.editorValue[0].flow_data.drawflow.Home.data);
+        const flowData = this.getCurrentFlowData();
+        const flowNodes = Object.values(flowData || {});
         const outPutNode = flowNodes.find(node => node.id === outputId);
         const inPutNode = flowNodes.find(node => node.id === inputId);
         if (!outPutNode || !inPutNode) {
@@ -2358,6 +2366,10 @@ export class WorkFlowAuto extends Component {
     }
 
     updateCode() {
+        const editor = this.editor || this.env.editor?.();
+        if (!editor || typeof editor.export !== "function") {
+            return;
+        }
         const contextNodes = structuredClone(this.env.context.context?.nodes || []);
         const variables = this.env.variables.context.variables;
         const globalVariables = this.env.globalVariables.context.variables;
@@ -2376,7 +2388,7 @@ export class WorkFlowAuto extends Component {
             }
         }
 
-        const flowData = this.editor.export().drawflow.Home.data || {};
+        const flowData = editor.export()?.drawflow?.Home?.data || {};
 
         // Map from trigger label (e.g. "On Write") to canonical trigger_type string.
         const triggerLabelMap = {
@@ -2604,7 +2616,7 @@ export class WorkFlowAuto extends Component {
     get scope() {
         try {
             const scopeId = this.state.selectedVariable.scopeId
-            const data = this.editorValue[0].flow_data?.drawflow?.Home?.data;
+            const data = this.getCurrentFlowData();
             const node = Object.values(data).find(item => item.data.nodeId === scopeId);
             return node || null
         } catch (e) {
@@ -2862,6 +2874,7 @@ export class WorkFlowAuto extends Component {
             case 'Follower':
             case 'Mapped':
             case 'Assignment':
+            case 'Window':
                 specificProps.type = "action_to_do";
                 break;
             case 'Warning':
@@ -2985,22 +2998,62 @@ export class WorkFlowAuto extends Component {
         return []
     }
 
+    getContextNodes() {
+        return this.env.context?.context?.nodes || [];
+    }
+
+    getValidRecordIds(ids = []) {
+        return ids
+            .map((id) => {
+                if (typeof id === "number" && Number.isInteger(id) && id > 0) {
+                    return id;
+                }
+                if (typeof id === "string" && /^\d+$/.test(id)) {
+                    const parsedId = Number.parseInt(id, 10);
+                    return parsedId > 0 ? parsedId : null;
+                }
+                return null;
+            })
+            .filter((id) => id !== null);
+    }
+
+    getCurrentRecordIds() {
+        return this.getValidRecordIds([this.id]);
+    }
+
+    hasPersistedCurrentRecord() {
+        return this.getCurrentRecordIds().length > 0;
+    }
+
+    shouldDeleteCurrentEmptyRecord() {
+        return !this.getContextNodes().length && this.hasPersistedCurrentRecord();
+    }
+
+    async unlinkCurrentRecordIfValid() {
+        const recordIds = this.getCurrentRecordIds();
+        if (!recordIds.length) {
+            return false;
+        }
+        await this.orm.unlink("work.auto", recordIds);
+        return true;
+    }
+
     async deleteEmpty() {
-        if (!this.env.context.context.nodes.length) {
-            await this.orm.unlink("work.auto", [this.id])
+        if (this.shouldDeleteCurrentEmptyRecord()) {
+            await this.unlinkCurrentRecordIfValid();
         }
     }
 
     deleteEmptyRecord(action, message) {
-        if (!this.env.context.context.nodes.length) {
+        if (this.shouldDeleteCurrentEmptyRecord()) {
             this.dialogService.add(ConfirmationPopup, {
                 title: _t("Are you sure"),
                 message: message || _t("If you leave this page,This empty record will be deleted"),
                 confirmText: _t("Yes, proceed"),
                 cancelText: _t("No, cancel"),
                 onConfirm: async () => {
-                    await this.orm.unlink("work.auto", [this.id])
-                    this.action.doAction(action)
+                    await this.unlinkCurrentRecordIfValid();
+                    this.action.doAction(action);
                 },
                 onCancel: () => {
                 },
@@ -3032,7 +3085,7 @@ export class WorkFlowAuto extends Component {
             target: "main",
             name: "Workflow Automation",
             // domain,
-            context: {delete_node_id: !this.env.context.context.nodes.length ? this.id : false}
+            context: {delete_node_id: this.shouldDeleteCurrentEmptyRecord() ? this.getCurrentRecordIds()[0] : false}
         }
         const message = _t("If you go back, This record will be deleted");
         this.deleteEmptyRecord(action, message)

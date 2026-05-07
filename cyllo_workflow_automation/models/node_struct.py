@@ -195,6 +195,45 @@ class NodeStruct(models.Model):
         ondelete='set null',
     )
 
+    # Window node block fields
+    window_action_id = fields.Many2one(
+        'ir.actions.act_window',
+        string="Window Action",
+        ondelete='set null',
+        help="The act_window action to open when this node executes.",
+    )
+    window_view_type = fields.Selection(
+        selection=[
+            ('list', 'List'),
+            ('form', 'Form'),
+            ('kanban', 'Kanban'),
+            ('calendar', 'Calendar'),
+            ('pivot', 'Pivot'),
+            ('graph', 'Graph'),
+            ('activity', 'Activity'),
+        ],
+        string="View Type",
+        default='list',
+    )
+    window_target = fields.Selection(
+        selection=[
+            ('current', 'Current'),
+            ('new', 'New Tab / Dialog'),
+            ('fullscreen', 'Fullscreen'),
+            ('inline', 'Inline'),
+        ],
+        string="Target",
+        default='current',
+    )
+    window_domain = fields.Char(
+        string="Domain Filter",
+        help="Optional domain expression to restrict records, e.g. [('state','=','done')]",
+    )
+    window_context = fields.Char(
+        string="Context",
+        help="Optional context dict to pass to the window action, e.g. {'default_partner_id': 1}",
+    )
+
     # FollowersNode block fields
     isRemoveFollower = fields.Json()
     followers = fields.Json()

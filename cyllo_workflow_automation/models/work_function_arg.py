@@ -841,7 +841,7 @@ class WorkAuto(models.Model):
                 flow_nodes[int(struct_id)] = node_data
         graph_issues = self._get_test_graph_issues()
 
-        external_nodes = {'Mail', 'SMS', 'WhatsApp'}
+        external_nodes = {'Mail', 'SMS', 'WhatsApp', 'Window'}
         trigger_labels = {'On Create', 'On Write', 'On Unlink', 'On Field Change', 'On Time'}
 
         def _is_empty(value):
@@ -949,6 +949,10 @@ class WorkAuto(models.Model):
                 if trigger_type or trigger_label in trigger_labels or has_function_link:
                     return 'success', _("Trigger configured.")
                 return 'error', _("Select a trigger type.")
+            if node_name == 'Window':
+                if node.window_action_id:
+                    return 'success', _("Window action configured.")
+                return 'error', _("Select a window action to open.")
             if node_name in external_nodes:
                 return 'success', _("Validated in test mode. It will execute during real workflow runtime.")
             if node_name == 'Condition':

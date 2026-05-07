@@ -30,222 +30,155 @@ _logger = logging.getLogger(__name__)
 # ── Validation constants ─────────────────────────────────────────────────────
 _REQUIRED_KEYS      = {'object', 'trigger', 'conditions', 'actions'}
 _VALID_TRIGGERS     = {'On Create', 'On Write', 'On Unlink'}
-_VALID_ACTION_TYPES = {'Warning', 'Mail', 'SMS', 'Activity', 'Write'}
+_VALID_ACTION_TYPES = {'Warning', 'Mail', 'SMS', 'Activity', 'Write', 'Reuse Automation'}
 
-# ── Prompt ───────────────────────────────────────────────────────────────────
-_SYSTEM_PROMPT = """You are a Cyllo 17 workflow automation expert.
-Your ONLY job is to convert a natural language request into a single JSON object.
 
-ABSOLUTE RULES — violating any rule makes your output unusable:
-1. Return RAW JSON and nothing else. No markdown fences, no explanation, no preamble, no trailing text.
-2. The JSON must have exactly four top-level keys: "object", "trigger", "conditions", "actions".
-3. Every string value must use double quotes. Numbers must be unquoted. Booleans: true / false.
-4. If you are unsure about any field, pick the most reasonable default rather than omitting it.
+_SYSTEM_PROMPT = """You are a Cyllo 17 workflow automation expert. Convert the user query into a single raw JSON object.
 
-FIELD: "object"  - Cyllo technical model name (string)
-Use the exact technical name. Common mappings:
-  Sales Order            -> "sale.order"
-  Purchase Order         -> "purchase.order"
-  Invoice / Bill         -> "account.move"
-  Contact / Partner      -> "res.partner"
-  Product                -> "product.template"
-  Product Variant        -> "product.product"
-  Employee               -> "hr.employee"
-  CRM Lead / Opportunity -> "crm.lead"
-  Project Task           -> "project.task"
-  Stock Picking          -> "stock.picking"
-  Manufacturing Order    -> "mrp.production"
-  Expense                -> "hr.expense"
-  Leave / Time Off       -> "hr.leave"
-  Payslip                -> "hr.payslip"
-  Helpdesk Ticket        -> "helpdesk.ticket"
+RULES:
+1. Return RAW JSON only — no markdown, no explanation, no preamble.
+2. Exactly four top-level keys: "object", "trigger", "conditions", "actions".
+3. Strings: double quotes. Numbers: unquoted. Booleans: true/false.
+4. When unsure, pick the most reasonable default.
 
-FIELD: "trigger"  - EXACTLY one of these three strings
-  "On Create"  -> new record is saved for the first time
-  "On Write"   -> existing record is updated / confirmed / validated
-  "On Unlink"  -> record is deleted
+"object" — Cyllo technical model name:
+  Sales Order→sale.order | Purchase Order→purchase.order | Invoice/Bill→account.move
+  Contact/Partner→res.partner | Product→product.template | Product Variant→product.product
+  Employee→hr.employee | CRM Lead→crm.lead | Project Task→project.task
+  Stock Picking→stock.picking | Manufacturing Order→mrp.production | Expense→hr.expense
+  Leave/Time Off→hr.leave | Payslip→hr.payslip | Helpdesk Ticket→helpdesk.ticket
 
-Selection rules:
-  "posted", "confirmed", "validated", "approved", "done"  -> "On Write"
-  "created", "new", "added", "submitted"                  -> "On Create"
-  "deleted", "removed", "archived"                        -> "On Unlink"
-  Ambiguous or unspecified                                -> "On Write"
+"trigger" — exactly one of: "On Create" | "On Write" | "On Unlink"
+  posted/confirmed/validated/approved/done→On Write
+  created/new/added/submitted→On Create
+  deleted/removed/archived→On Unlink
+  ambiguous→On Write
 
-FIELD: "conditions"  - array (use [] when there are no conditions)
-Each condition object:
-{
-  "field":    "<technical_field_name_or_dotted_path>",
-  "operator": "=" | "!=" | ">" | "<" | ">=" | "<=",
-  "value":    <string | number | boolean>
-}
+"conditions" — array ([] if none). Each item:
+  {"field":"<field_or_dotted.path>","operator":"="|"!="|">"|"<"|">="|"<=","value":<str|num|bool>}
+  Direct fields (main record): use field name directly, e.g. "amount_total"
+  Relational fields (sub-records): use dotted path, e.g. "order_line.product_uom_qty"
 
-CRITICAL RULE FOR FIELD PATHS:
-- If the condition is about a field on the main record itself, use the direct field name.
-  Example: sale.order.amount_total -> "field": "amount_total"
-- If the condition is about a field on a related sub-record (one2many / many2many line),
-  use a dotted path: "<relation_field>.<sub_field>".
-  Example: checking product quantity on a sale order line -> "field": "order_line.product_uom_qty"
-  Example: checking a tag on a contact -> "field": "category_id.name"
+  Key fields:
+    sale.order: state(draft|sent|sale|done|cancel), amount_total, partner_id
+      lines: order_line.product_uom_qty, .price_unit, .discount, .product_id
+    purchase.order: state(draft|sent|purchase|done|cancel), amount_total
+      lines: order_line.product_qty, .price_unit, .product_id
+    account.move: state(draft|posted|cancel), amount_total, payment_state, move_type
+      lines: invoice_line_ids.quantity, .price_unit, .product_id
+    crm.lead: expected_revenue, stage_id, probability
+    hr.leave: state(draft|confirm|validate1|validate|refuse), number_of_days
+    project.task: stage_id, priority(0|1)
+    hr.employee: active, department_id
+    res.partner: country_id, category_id, customer_rank, supplier_rank, is_company
+      dotted: country_id.name, category_id.name
 
-Common DIRECT fields per model:
-  sale.order     : state (draft|sent|sale|done|cancel), amount_total, partner_id
-  purchase.order : state (draft|sent|purchase|done|cancel), amount_total
-  account.move   : state (draft|posted|cancel), amount_total, payment_state, move_type
-  crm.lead       : expected_revenue, stage_id, probability
-  hr.leave       : state (draft|confirm|validate1|validate|refuse), number_of_days
-  project.task   : stage_id, priority (0|1)
-  hr.employee    : active, department_id
-  res.partner    : country_id, category_id, customer_rank, supplier_rank, is_company
+  Value rules: selection fields use technical keys ("posted" not "Posted"), numbers unquoted, operator "=" not "=="
 
-Common RELATIONAL (dotted) paths:
-  Sale order lines (sale.order):
-    order_line.product_uom_qty   -> quantity of any product in the order lines
-    order_line.price_unit        -> unit price on any order line
-    order_line.discount          -> discount on any order line
-    order_line.product_id        -> product on any order line
-  Purchase order lines (purchase.order):
-    order_line.product_qty       -> quantity on any purchase order line
-    order_line.price_unit        -> unit price on any purchase order line
-    order_line.product_id        -> product on any purchase order line
-  Invoice lines (account.move):
-    invoice_line_ids.quantity    -> quantity on any invoice line
-    invoice_line_ids.price_unit  -> unit price on any invoice line
-    invoice_line_ids.product_id  -> product on any invoice line
-  Contact (res.partner):
-    country_id.name              -> country name of the contact
-    category_id.name             -> tag name of the contact
+"actions" — array, at least one item. Use these exact types:
 
-Value rules:
-  - Selection fields: use technical key e.g. "posted" not "Posted"
-  - Numbers must be numeric type: 2000 not "2000"
-  - Use "=" not "==" as the equality operator
-  - For dotted paths: use the value appropriate to the SUB-field type
-
-FIELD: "actions"  - array with at least one item
-Use EXACTLY these "type" values. Include ALL listed keys for the chosen type.
-
-TYPE "Warning":
-Use "warning_type": "error" for Python exceptions (blocks execution).
-Use "warning_type": "notification" for UI pop-up notifications (non-blocking).
-
-When warning_type is "error":
-{
-  "type":         "Warning",
-  "label":        "<short canvas title>",
-  "warning_type": "error",
-  "warning":      "UserError" | "ValidationError" | "AccessError",
-  "message":      "<error message shown to the user>"
-}
-
-When warning_type is "notification":
-{
-  "type":               "Warning",
-  "label":              "<short canvas title>",
-  "warning_type":       "notification",
-  "notification_type":  "success" | "info" | "warning" | "danger",
-  "notification_title": "<short notification title>",
-  "message":            "<notification body text>",
-  "sticky":             true | false
-}
-
-TYPE "Mail":
-{
-  "type":           "Mail",
-  "label":          "<short canvas title>",
-  "subject":        "<email subject line>",
-  "body":           "<full email body>",
-  "recipient_role": "current_user" | "assigned_user" | "customer" | "partner" | "employee"
-}
-
-TYPE "SMS":
-{
-  "type":           "SMS",
-  "label":          "<short canvas title>",
-  "message":        "<SMS text max 160 chars>",
-  "recipient_role": "current_user" | "assigned_user" | "customer" | "partner" | "employee"
-}
-
-TYPE "Activity":
-{
-  "type":               "Activity",
-  "label":              "<short canvas title>",
-  "activity_type_name": "<Odoo activity type name — see mapping below>",
-  "summary":            "<activity description shown in the chatter>",
-  "assignee_role":      "current_user" | "assigned_user",
-  "deadline":           "<YYYY-MM-DD if explicitly given, otherwise empty string>"
-}
-
-  activity_type_name mapping:
-    "email" / "e-mail" / "send email" / "mail activity"  -> "Email"
-    "call" / "phone call" / "phone"                       -> "Phone Call"
-    "meeting" / "schedule meeting" / "calendar"           -> "Meeting"
-    "to-do" / "todo" / "task" / "follow up" / unspecified -> "To-Do"
-    "upload document" / "document" / "file"               -> "Upload Document"
-
-TYPE "Write":
-{
-  "type":  "Write",
-  "label": "<short canvas title>",
-  "field": "<technical field name to update>",
-  "value": <new value — correct type: string, number, or boolean>
-}
+Warning (warning_type="error"):
+  {"type":"Warning","label":"...","warning_type":"error","warning":"UserError"|"ValidationError"|"AccessError","message":"..."}
+Warning (warning_type="notification"):
+  {"type":"Warning","label":"...","warning_type":"notification","notification_type":"success"|"info"|"warning"|"danger","notification_title":"...","message":"...","sticky":true|false}
+Mail:
+  {"type":"Mail","label":"...","subject":"...","body":"...","recipient_role":"current_user"|"assigned_user"|"customer"|"partner"|"employee"}
+SMS:
+  {"type":"SMS","label":"...","message":"<max 160 chars>","recipient_role":"current_user"|"assigned_user"|"customer"|"partner"|"employee"}
+Activity:
+  {"type":"Activity","label":"...","activity_type_name":"Email"|"Call"|"Meeting"|"To-Do"|"Upload Document","summary":"...","assignee_role":"current_user"|"assigned_user","deadline":"YYYY-MM-DD or empty"}
+  (email/e-mail→Email | call/phone→Call | meeting→Meeting | todo/follow-up/unspecified→To-Do | document/file→Upload Document)
+Write:
+  {"type":"Write","label":"...","field":"<technical field>","value":<str|num|bool>}
+Reuse Automation (only when user explicitly names an existing workflow to call):
+  {"type":"Reuse Automation","label":"...","reuse_automation_name":"<exact name from user>"}
 
 EXAMPLES:
-
 Query: Raise an error on Sale Order if discount > 50
 {"object":"sale.order","trigger":"On Create","conditions":[{"field":"order_line.discount","operator":">","value":50}],"actions":[{"type":"Warning","label":"High Discount Warning","warning_type":"error","warning":"UserError","message":"Discount exceeds 50%. Please review before confirming."}]}
 
-Query: Add a discount when a sale order is created and any product has a quantity greater than 2 apply a 3% discount
-{"object":"sale.order","trigger":"On Create","conditions":[{"field":"order_line.product_uom_qty","operator":">","value":2}],"actions":[{"type":"Write","label":"Apply 3% Discount","field":"order_line.discount","value":3}]}
-
-Query: On write of Purchase Order send an email if quantity < 10
-{"object":"purchase.order","trigger":"On Write","conditions":[{"field":"order_line.product_qty","operator":"<","value":10}],"actions":[{"type":"Mail","label":"Low Quantity Alert","subject":"Purchase Order: Low Quantity Alert","body":"A purchase order has a quantity below 10. Please review and reorder stock as needed.","recipient_role":"assigned_user"}]}
-
-Query: Send an email when an Invoice is posted and the amount is greater than 2000
-{"object":"account.move","trigger":"On Write","conditions":[{"field":"state","operator":"=","value":"posted"},{"field":"amount_total","operator":">","value":2000}],"actions":[{"type":"Mail","label":"High Value Invoice Alert","subject":"Invoice Posted: Amount Exceeds 2000","body":"An invoice has been posted with an amount greater than 2000. Please review and take the necessary action.","recipient_role":"assigned_user"}]}
-
-Query: On creation of a Contact set the tag as New Customer if the country is India
-{"object":"res.partner","trigger":"On Create","conditions":[{"field":"country_id.name","operator":"=","value":"India"}],"actions":[{"type":"Write","label":"Set New Customer Tag","field":"category_id","value":"New Customer"}]}
-
-Query: Schedule a follow-up activity when an invoice is created with amount > 1000
-{"object":"account.move","trigger":"On Create","conditions":[{"field":"amount_total","operator":">","value":1000}],"actions":[{"type":"Activity","label":"High-Value Invoice Follow-up","activity_type_name":"To-Do","summary":"Follow up on high-value invoice exceeding 1000","assignee_role":"current_user","deadline":""}]}
-
-Query: When creating a sale order please create an email activity for the customer
-{"object":"sale.order","trigger":"On Create","conditions":[],"actions":[{"type":"Activity","label":"Customer Email Activity","activity_type_name":"Email","summary":"Send an email to the customer regarding the new sale order","assignee_role":"assigned_user","deadline":""}]}
-
-Query: When creating a sale order schedule a phone call activity
-{"object":"sale.order","trigger":"On Create","conditions":[],"actions":[{"type":"Activity","label":"Customer Phone Call","activity_type_name":"Phone Call","summary":"Call the customer to confirm the new sale order","assignee_role":"assigned_user","deadline":""}]}
-
-Query: Send an SMS when a sale order is created
-{"object":"sale.order","trigger":"On Create","conditions":[],"actions":[{"type":"SMS","label":"New Order SMS","message":"A new sale order has been created. Please review it in Cyllo.","recipient_role":"customer"}]}
-
-Query: When a lead is created with expected revenue > 5000 send an email and schedule a follow-up
-{"object":"crm.lead","trigger":"On Create","conditions":[{"field":"expected_revenue","operator":">","value":5000}],"actions":[{"type":"Mail","label":"High Revenue Lead Email","subject":"New High-Value Lead Created","body":"A new lead with expected revenue over 5000 has been created. Please assign a sales rep and follow up promptly.","recipient_role":"assigned_user"},{"type":"Activity","label":"Lead Follow-up Activity","activity_type_name":"To-Do","summary":"Follow up on high-value lead with expected revenue greater than 5000","assignee_role":"assigned_user","deadline":""}]}
-
-Query: On write of a product set the priority to high
-{"object":"product.template","trigger":"On Write","conditions":[],"actions":[{"type":"Write","label":"Set Priority High","field":"priority","value":"1"}]}
-
-Query: Send a warning when a leave request is confirmed and days > 5
-{"object":"hr.leave","trigger":"On Write","conditions":[{"field":"state","operator":"=","value":"confirm"},{"field":"number_of_days","operator":">","value":5}],"actions":[{"type":"Warning","label":"Long Leave Warning","warning_type":"error","warning":"UserError","message":"This leave request exceeds 5 days. Manager approval is required."}]}
-
-Query: Create a success sticky notification when a sale order is created
-{"object":"sale.order","trigger":"On Create","conditions":[],"actions":[{"type":"Warning","label":"Sale Order Created","warning_type":"notification","notification_type":"success","notification_title":"Sale Order Created","message":"A new sale order has been successfully created.","sticky":true}]}
+Query: Send an email when an Invoice is posted and amount > 2000
+{"object":"account.move","trigger":"On Write","conditions":[{"field":"state","operator":"=","value":"posted"},{"field":"amount_total","operator":">","value":2000}],"actions":[{"type":"Mail","label":"High Value Invoice Alert","subject":"Invoice Posted: Amount Exceeds 2000","body":"An invoice has been posted with an amount greater than 2000. Please review.","recipient_role":"assigned_user"}]}
 
 Query: Show a success notification when an invoice is posted
 {"object":"account.move","trigger":"On Write","conditions":[{"field":"state","operator":"=","value":"posted"}],"actions":[{"type":"Warning","label":"Invoice Posted","warning_type":"notification","notification_type":"success","notification_title":"Invoice Posted","message":"The invoice has been posted successfully.","sticky":false}]}
 
-Query: Show an info notification when a new contact is created
-{"object":"res.partner","trigger":"On Create","conditions":[],"actions":[{"type":"Warning","label":"New Contact","warning_type":"notification","notification_type":"info","notification_title":"New Contact Added","message":"A new contact has been added to the system.","sticky":false}]}
+Query: When a lead is created with expected revenue > 5000 send an email and schedule a follow-up
+{"object":"crm.lead","trigger":"On Create","conditions":[{"field":"expected_revenue","operator":">","value":5000}],"actions":[{"type":"Mail","label":"High Revenue Lead Email","subject":"New High-Value Lead Created","body":"A new lead with expected revenue over 5000 has been created.","recipient_role":"assigned_user"},{"type":"Activity","label":"Lead Follow-up Activity","activity_type_name":"To-Do","summary":"Follow up on high-value lead","assignee_role":"assigned_user","deadline":""}]}
 
-Query: When a task priority is set to high send an email to the assigned user
-{"object":"project.task","trigger":"On Write","conditions":[{"field":"priority","operator":"=","value":"1"}],"actions":[{"type":"Mail","label":"High Priority Task Alert","subject":"Task Marked as High Priority","body":"A project task has been marked as high priority. Please review and take immediate action.","recipient_role":"assigned_user"}]}
-
-Query: On updating a Product show a warning if the price is less than 10
-{"object":"product.template","trigger":"On Write","conditions":[{"field":"list_price","operator":"<","value":10}],"actions":[{"type":"Warning","label":"Low Price Warning","warning_type":"error","warning":"ValidationError","message":"Product price is below 10. Please verify before saving."}]}
+Query: When a sale order is created run the "Customer Onboarding" reusable workflow
+{"object":"sale.order","trigger":"On Create","conditions":[],"actions":[{"type":"Reuse Automation","label":"Run Customer Onboarding","reuse_automation_name":"Customer Onboarding"}]}
 
 Now generate workflow JSON for this user query:
 {user_query}"""
 
+
+def _build_workflow_context_prompt(workflow_context):
+    if not isinstance(workflow_context, dict):
+        return ""
+    if workflow_context.get('mode') != 'update':
+        return ""
+
+    object_name = workflow_context.get('object') or ''
+    trigger = workflow_context.get('trigger') or ''
+    existing_actions = workflow_context.get('existing_actions') or []
+    actions_text = ', '.join(existing_actions) if existing_actions else 'none'
+
+    return f"""
+
+CURRENT WORKFLOW CONTEXT:
+- The user is editing an EXISTING workflow, not creating a new one.
+- Keep the same object exactly: "{object_name}"
+- Keep the same trigger exactly: "{trigger}"
+- Existing actions already on the workflow: {actions_text}
+- Return only the NEW action(s) needed for the user's latest request.
+- Do NOT repeat existing actions unless the user explicitly asks to duplicate them.
+- Keep "conditions" as [] unless the user explicitly asks for a new condition.
+- You may omit "object" and "trigger" in your reasoning, but the final JSON must still be valid for an update.
+"""
+
+
+def _build_reusable_create_context_prompt(workflow_context):
+    if not isinstance(workflow_context, dict):
+        return ""
+    if workflow_context.get('mode') != 'reusable_create':
+        return ""
+
+    return """
+
+CURRENT WORKFLOW CONTEXT:
+- The user is creating a GENERIC REUSABLE workflow.
+- Do NOT depend on a specific object model.
+- This workflow should start directly from the trigger.
+- Return actions that can run in a reusable workflow.
+- Set "conditions" to [] unless the user explicitly asks for them.
+- Use an empty string for "object".
+"""
+
+
+def _normalize_update_payload(data, workflow_context):
+    if not isinstance(data, dict) or not isinstance(workflow_context, dict):
+        return data
+    if workflow_context.get('mode') != 'update':
+        return data
+
+    normalized = dict(data)
+    normalized.setdefault('object', workflow_context.get('object') or '')
+    normalized.setdefault('trigger', workflow_context.get('trigger') or '')
+    normalized.setdefault('conditions', [])
+    return normalized
+
+
+def _normalize_reusable_create_payload(data, workflow_context):
+    if not isinstance(data, dict) or not isinstance(workflow_context, dict):
+        return data
+    if workflow_context.get('mode') != 'reusable_create':
+        return data
+
+    normalized = dict(data)
+    normalized.setdefault('object', '')
+    normalized.setdefault('conditions', [])
+    return normalized
 
 def _clean_json_text(text):
     """Strip markdown fences / BOM / extra surrounding text from AI output."""
@@ -284,10 +217,10 @@ class ChatBot(models.Model):
                     model_name = llm_record.name
         except Exception as exc:
             _logger.warning("Workflow AI: could not read cyllo.llm model — %s", exc)
-        return model_name or 'gemini-2.0-flash'
+        return model_name or 'gemini-2.5-flash'
 
     @api.model
-    def my_python_method(self, user_query):
+    def my_python_method(self, user_query, workflow_context=None):
         if not user_query or not str(user_query).strip():
             return {"error": "Empty query provided. Please describe the workflow you want to create."}
 
@@ -321,6 +254,8 @@ class ChatBot(models.Model):
         _logger.info("Workflow AI: using model '%s'", model_name)
 
         prompt_text = _SYSTEM_PROMPT.replace('{user_query}', user_query)
+        prompt_text += _build_workflow_context_prompt(workflow_context)
+        prompt_text += _build_reusable_create_context_prompt(workflow_context)
 
         try:
             llm = ChatGoogleGenerativeAI(
@@ -354,6 +289,9 @@ class ChatBot(models.Model):
 
         if not isinstance(data, dict):
             return {"error": "The AI returned an unexpected data type. Please try again."}
+
+        data = _normalize_update_payload(data, workflow_context)
+        data = _normalize_reusable_create_payload(data, workflow_context)
 
         missing = _REQUIRED_KEYS - set(data.keys())
         if missing:
@@ -389,6 +327,14 @@ class ChatBot(models.Model):
                     "error": (
                         f"AI returned an unsupported action type: \"{action_type}\". "
                         f"Supported types: {', '.join(sorted(_VALID_ACTION_TYPES))}."
+                    ),
+                }
+            # Reuse Automation requires a name to search for
+            if action_type == 'Reuse Automation' and not action.get('reuse_automation_name', '').strip():
+                return {
+                    "error": (
+                        "A 'Reuse Automation' action is missing 'reuse_automation_name'. "
+                        "Please specify the name of the existing reusable workflow."
                     ),
                 }
 

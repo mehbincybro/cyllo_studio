@@ -93,6 +93,7 @@ class StudioReportController(Controller):
                 # Parse and validate
                 try:
                     arch_el = etree.fromstring(xpath_blocks.encode('utf-8'))
+
                 except etree.XMLSyntaxError as xml_err:
                     print(f"[Cyllo Studio] XML Syntax Error: {xml_err}\nBlocks: {xpath_blocks}")
                     return {'success': False,
@@ -100,6 +101,29 @@ class StudioReportController(Controller):
 
                 # ── Strip studio attrs from incoming content ─────────────────
                 self._strip_studio_attrs(arch_el)
+
+                for xpath_el in arch_el:
+                    position = xpath_el.get('position', '')
+                    if position == 'replace':
+                        replacement_content = list(xpath_el)
+                        for i, node in enumerate(replacement_content):
+                            tag = node.tag if isinstance(node.tag, str) else ''
+                            if tag == 't':
+                                # Check: t-elif / t-else must be immediately preceded by t-if or t-elif
+                                if node.get('t-elif') is not None or node.get('t-else') is not None:
+                                    prev = replacement_content[i - 1] if i > 0 else None
+                                    if prev is None or prev.tag != 't' or (
+                                            prev.get('t-if') is None and prev.get('t-elif') is None
+                                    ):
+                                        return {
+                                            'success': False,
+                                            'error': (
+                                                    'Save rejected: t-elif/t-else node at position %d is not '
+                                                    'immediately preceded by t-if or t-elif. '
+                                                    'This would cause a QWeb SyntaxError. '
+                                                    'Please Reset Report and try again.' % i
+                                            )
+                                        }
 
                 print(f"[Cyllo Studio] Saving changes for {key}. XPaths: {[el.get('expr') for el in arch_el]}")
 

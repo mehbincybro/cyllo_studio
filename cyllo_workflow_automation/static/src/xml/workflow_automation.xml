@@ -401,6 +401,14 @@
                                                      alt=""/>
                                                 <p>Reuse Automation</p>
                                             </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'window')"
+                                                 data-node="Window">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/window.svg"
+                                                     alt=""/>
+                                                <p>Window</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

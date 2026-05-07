@@ -19,6 +19,7 @@ import {
     AssignmentFields,
     loopFields,
     reusableAutomationFields,
+    windowFields,
 } from "./fields";
 import {
     icons,
@@ -41,6 +42,7 @@ import { PYTHON_KEYWORDS } from "./components/Assists/utils/utils";
 import { removeNodeIdFromVariables } from "./utils/utils"
 import { LoopNode } from "./components/loopNode/loopNode";
 import { ReusableAutomationNode } from "./components/reusableAutomationNode/reusableAutomationNode";
+import { WindowNode } from "./components/windowNode/windowNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -98,6 +100,10 @@ const MODAL_CONFIGS = {
     'Reuse Automation': {
         component: ReusableAutomationNode,
         fields: reusableAutomationFields,
+    },
+    'Window': {
+        component: WindowNode,
+        fields: windowFields,
     },
 };
 
