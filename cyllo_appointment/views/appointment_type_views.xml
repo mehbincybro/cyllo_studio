@@ -36,13 +36,12 @@
                             <field name="scheduling_type"/>
                             <field name="location_type"/>
                             <field name="location" invisible="location_type == 'online'"/>
-<!--                            <field name="meeting_url" attrs="{'invisible': [('location_type', '!=', 'online')]}" string="Meeting URL"/>-->
                             <field name="color" widget="color_picker"/>
                             <field name="active" widget="boolean_toggle"/>
                         </group>
                         <group string="Billing &amp; Payment">
                             <field name="is_paid"/>
-                            <field name="product_id" invisible="is_paid == False"
+                            <field name="product_id" invisible="is_paid == False" required="is_paid"
                                    context="{'default_detailed_type': 'service', 'default_type': 'service'}"/>
                         </group>
                         <group string="Duration &amp; Slots">

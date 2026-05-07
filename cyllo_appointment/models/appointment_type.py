@@ -207,6 +207,15 @@ class AppointmentType(models.Model):
                 raise ValidationError(
                     _('Minimum booking notice cannot be negative.'))
 
+    @api.constrains('reminder_hours_before')
+    def _check_reminder_hours_before(self):
+        for rec in self:
+            if rec.reminder_hours_before:
+                try:
+                    [float(h.strip()) for h in rec.reminder_hours_before.split(',') if h.strip()]
+                except ValueError:
+                    raise ValidationError(_("Reminder Times must be a comma-separated list of numbers (e.g., '24, 2')."))
+
     def action_view_appointments(self):
         self.ensure_one()
         return {

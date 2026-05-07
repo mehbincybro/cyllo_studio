@@ -44,6 +44,7 @@
     'icon': '/cyllo_appointment/static/description/cyllo_appointment_tick.svg',
     'depends': [
         'base',
+        'portal',
         'mail',
         'calendar',
         'resource',
@@ -71,6 +72,7 @@
         'views/appointment_menus.xml',
         'views/website_appointment_templates.xml',
         'views/website_manage_templates.xml',
+        'views/portal_templates.xml',
         'views/sale_order_views.xml',
     ],
     'assets': {

@@ -40,6 +40,10 @@ class Appointment(models.Model):
                        default=lambda self: _('New'))
     display_name = fields.Char(string='Title', compute='_compute_display_name',
                                store=True)
+    meeting_subject = fields.Char(
+        string='Meeting Subject', compute='_compute_meeting_subject',
+        store=True
+    )
     # Type & Classification
     appointment_type_id = fields.Many2one(
         'appointment.type', string='Appointment Type',
@@ -70,6 +74,8 @@ class Appointment(models.Model):
                                     string='Additional Attendees')
     attendee_count = fields.Integer(string='Number of Attendees', default=1)
     customer_notes = fields.Text(string='Customer Notes')
+    booker_name = fields.Char(string='Booker Name',
+                              help='Name entered by the customer on the website booking form')
     # Staff & Resources
     staff_domain = fields.Char(compute='_compute_staff_resource_domain')
     resource_domain = fields.Char(compute='_compute_staff_resource_domain')
@@ -114,6 +120,7 @@ class Appointment(models.Model):
     confirmation_sent = fields.Boolean(string='Confirmation Sent',
                                        default=False)
     reminder_sent = fields.Boolean(string='Reminders Sent', default=False)
+    sent_reminder_hours = fields.Char(string='Sent Reminder Hours', default='')
     followup_sent = fields.Boolean(string='Follow-up Sent', default=False)
     cancellation_sent = fields.Boolean(string='Cancellation Sent',
                                        default=False)
@@ -162,6 +169,16 @@ class Appointment(models.Model):
             if rec.partner_id:
                 parts.append(rec.partner_id.name)
             rec.display_name = ' - '.join(parts) if parts else _('Appointment')
+
+    @api.depends('partner_id.name', 'appointment_type_id.name', 'booker_name')
+    def _compute_meeting_subject(self):
+        for rec in self:
+            customer = rec.booker_name or rec.partner_id.name or ''
+            atype = rec.appointment_type_id.name or ''
+            if customer and atype:
+                rec.meeting_subject = '%s - %s' % (customer, atype)
+            else:
+                rec.meeting_subject = customer or atype or ''
 
     @api.depends('appointment_type_id.staff_ids', 'appointment_type_id.resource_ids')
     def _compute_staff_resource_domain(self):
@@ -412,13 +429,6 @@ class Appointment(models.Model):
                 rec._send_whatsapp_confirmation()
             rec._send_staff_confirmation_email()
 
-    def action_check_payment(self):
-        """Check if linked sale order is confirmed/paid and auto-confirm."""
-        for rec in self:
-            if rec.sale_order_id and rec.sale_order_id.state in ['sale',
-                                                                 'done']:
-                rec.action_confirm()
-
     def action_start(self):
         for rec in self:
             rec.state = 'in_progress'
@@ -504,7 +514,7 @@ class Appointment(models.Model):
         now = fields.Datetime.now()
         appointments = self.search([
             ('state', 'in', ['confirmed']),
-            ('reminder_sent', '=', False),
+            ('start_datetime', '>=', now - timedelta(minutes=30)),
         ])
         for appt in appointments:
             atype = appt.appointment_type_id
@@ -513,13 +523,19 @@ class Appointment(models.Model):
             reminder_times_str = atype.reminder_hours_before or '24'
             reminder_hours = [float(h.strip()) for h in
                               reminder_times_str.split(',') if h.strip()]
+            sent_hours_str = appt.sent_reminder_hours or ''
+            sent_hours = [float(h.strip()) for h in sent_hours_str.split(',') if h.strip()]
             for hours in reminder_hours:
+                if hours in sent_hours:
+                    continue
                 reminder_time = appt.start_datetime - timedelta(hours=hours)
                 if reminder_time <= now < reminder_time + timedelta(minutes=30):
                     try:
                         atype.reminder_template_id.send_mail(appt.id,
                                                              force_send=True)
                         appt.reminder_sent = True
+                        sent_hours.append(hours)
+                        appt.sent_reminder_hours = ','.join(map(str, sent_hours))
                         if atype.send_sms_reminder and atype.sms_reminder_template_id:
                             appt._send_sms_reminder()
                         if atype.send_whatsapp_reminder and atype.whatsapp_reminder_template_id and not appt.whatsapp_reminder_sent:

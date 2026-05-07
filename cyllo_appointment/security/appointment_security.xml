@@ -21,4 +21,12 @@
         <field name="implied_ids" eval="[(4, ref('group_appointment_user'))]"/>
         <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
     </record>
+
+    <!-- Portal Record Rules -->
+    <record id="appointment_appointment_portal_rule" model="ir.rule">
+        <field name="name">Appointments: Portal users see their own appointments</field>
+        <field name="model_id" ref="cyllo_appointment.model_appointment_appointment"/>
+        <field name="domain_force">[('partner_id', '=', user.partner_id.id)]</field>
+        <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+    </record>
 </odoo>

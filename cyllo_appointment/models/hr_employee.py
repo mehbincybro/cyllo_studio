@@ -61,22 +61,6 @@ class HrEmployee(models.Model):
                     'cancelled', 'rejected')
             ))
 
-    def action_view_upcoming_appointments(self):
-        self.ensure_one()
-        today = fields.Datetime.now()
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Upcoming Appointments - %s') % self.name,
-            'res_model': 'appointment.appointment',
-            'view_mode': 'list,form,calendar',
-            'domain': [
-                ('staff_id', '=', self.id),
-                ('start_datetime', '>=', today),
-                ('state', 'not in', ['cancelled', 'rejected']),
-            ],
-            'context': {'default_staff_id': self.id},
-        }
-
     def action_view_appointments(self):
         self.ensure_one()
         return {

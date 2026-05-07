@@ -104,7 +104,7 @@ class AppointmentRescheduleWizard(models.TransientModel):
                         "Failed to send customer reschedule email for %s: %s",
                         appt.name, str(e))
         # Send Staff Reschedule Email
-        if self.notify_staff and appt.staff_id and appt.staff_id.notify_on_reschedule and appt.staff_id.email:
+        if self.notify_staff and appt.staff_id and appt.staff_id.notify_on_reschedule and appt.staff_id.work_email:
             staff_tmpl = self.env.ref(
                 'cyllo_appointment.email_template_appointment_rescheduled_staff',
                 raise_if_not_found=False)

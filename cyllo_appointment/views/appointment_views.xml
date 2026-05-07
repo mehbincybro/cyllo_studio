@@ -12,8 +12,6 @@
                         invisible="state not in ['draft']"/>
                     <button name="action_start" string="Start" type="object"
                         invisible="state not in ['confirmed']"/>
-                    <button name="action_check_payment" string="Check Payment" type="object"
-                        invisible="state != 'pending_payment'" class="btn-secondary"/>
                     <button name="action_done" string="Mark as Done" type="object"
                         class="btn-primary"
                         invisible="state not in ['in_progress', 'confirmed']"/>
@@ -41,14 +39,15 @@
                     </div>
                     <!-- Priority & Reference -->
                     <div class="apt-form-header">
-                        <span class="apt-reference"><field name="name" readonly="1"/></span>
+                        <span class="apt-reference"><field name="meeting_subject" readonly="1"/></span>
                         <span invisible="is_rescheduled == False" class="badge badge-warning ml-2">
                             <i class="fa fa-refresh" title="Rescheduled"/> Rescheduled
                         </span>
                     </div>
                     <div class="oe_title">
+                        <h2 class="text-muted"><field name="name" readonly="1"/></h2>
                         <label for="appointment_type_id" string="Appointment Type"/>
-                        <h1><field name="appointment_type_id" placeholder="Select appointment type..."/></h1>
+                        <h2><field name="appointment_type_id" placeholder="Select appointment type..."/></h2>
                         <h3 invisible="sale_order_id == False">
                             <label for="sale_order_id" string="Order: "/>
                             <field name="sale_order_id" readonly="1" widget="many2one"/>
@@ -144,6 +143,7 @@
                 decoration-muted="state in ('cancelled', 'rejected', 'no_show')"
                 decoration-primary="state == 'in_progress'">
                 <field name="name"/>
+                <field name="meeting_subject"/>
                 <field name="partner_id" widget="many2one_avatar"/>
                 <field name="appointment_type_id"/>
                 <field name="category"/>
@@ -183,6 +183,7 @@
                 <field name="color"/>
                 <field name="priority"/>
                 <field name="is_rescheduled"/>
+                <field name="meeting_subject"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div t-attf-class="apt-kanban-card apt-state-#{record.state.raw_value}">
