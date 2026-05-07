@@ -387,7 +387,7 @@ class Model(models.AbstractModel):
                                     }
                                     .page {
                                         word-wrap: break-word;
-                                        padding: 20px;
+                                        padding: 1 px;
                                     }
                                     /* Ensure Bootstrap tables are visible and styled */
                                     table {

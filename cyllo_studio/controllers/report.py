@@ -130,9 +130,19 @@ class StudioReportController(Controller):
                         else:
                             data_node = data_nodes[0]
 
+                        processed_xpaths = set()
                         for new_el in arch_el:
                             expr = new_el.get('expr')
                             position = new_el.get('position')
+                            if not expr:
+                                continue
+
+                            # Deduplicate within the same save operation
+                            xpath_key = (expr, position)
+                            if xpath_key in processed_xpaths:
+                                print(f'[Cyllo Studio] Skipping redundant XPath in same save: {expr}')
+                                continue
+                            processed_xpaths.add(xpath_key)
 
                             # Purge logic:
                             for old_el in list(root.xpath('//*[@expr]')):

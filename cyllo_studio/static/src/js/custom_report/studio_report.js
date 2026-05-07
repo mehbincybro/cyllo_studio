@@ -2076,9 +2076,15 @@ export class EditReport extends Component {
             if (el.classList && el.classList.contains('table-wrapper')) {
                 if (el.parentNode) {
                     const children = Array.from(el.childNodes);
-                    children.forEach(child => el.parentNode.insertBefore(child, el));
+                    const promotedChildren = [];
+                    children.forEach(child => {
+                        // Skip whitespace nodes introduced by the wrapper's HTML template
+                        if (child.nodeType === 3 && !child.textContent.trim()) return;
+                        promotedChildren.push(child);
+                        el.parentNode.insertBefore(child, el);
+                    });
                     el.remove();
-                    children.forEach(child => clean(child));
+                    promotedChildren.forEach(child => clean(child));
                     return;
                 }
             }
@@ -2133,17 +2139,22 @@ export class EditReport extends Component {
                     return;
                 }
             }
-            if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block'))) {
+            if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block') || el.classList.contains('field-container'))) {
                 if (el.parentNode) {
                     const children = Array.from(el.childNodes);
+                    const promotedChildren = [];
                     children.forEach(child => {
+                        // Skip whitespace nodes introduced by the wrapper's HTML template
+                        if (child.nodeType === 3 && !child.textContent.trim()) return;
+
                         if (child.classList && child.classList.contains('field-container')) {
                             child.classList.remove('d-inline-flex', 'gap-1');
                         }
+                        promotedChildren.push(child);
                         el.parentNode.insertBefore(child, el);
                     });
                     el.remove();
-                    children.forEach(child => clean(child));
+                    promotedChildren.forEach(child => clean(child));
                     return;
                 }
             }

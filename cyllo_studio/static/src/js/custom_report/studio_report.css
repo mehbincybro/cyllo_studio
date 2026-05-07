@@ -66,28 +66,106 @@
     box-sizing: border-box;
 }
 
-.editable-area .col-6 {
-    width: 50%;
+.editable-area .col-1 {
+    width: 8.333333%;
 }
 
-.editable-area .col-4 {
-    width: 33.33%;
+.editable-area .col-2 {
+    width: 16.666667%;
 }
 
 .editable-area .col-3 {
     width: 25%;
 }
 
+.editable-area .col-4 {
+    width: 33.333333%;
+}
+
+.editable-area .col-5 {
+    width: 41.666667%;
+}
+
+.editable-area .col-6 {
+    width: 50%;
+}
+
+.editable-area .col-7 {
+    width: 58.333333%;
+}
+
 .editable-area .col-8 {
-    width: 66.66%;
+    width: 66.666667%;
 }
 
 .editable-area .col-9 {
     width: 75%;
 }
 
+.editable-area .col-10 {
+    width: 83.333333%;
+}
+
+.editable-area .col-11 {
+    width: 91.666667%;
+}
+
 .editable-area .col-12 {
     width: 100%;
+}
+
+.editable-area .col-auto {
+    width: auto;
+}
+
+/* Offsets */
+.editable-area .offset-1 {
+    margin-left: 8.333333%;
+}
+
+.editable-area .offset-2 {
+    margin-left: 16.666667%;
+}
+
+.editable-area .offset-3 {
+    margin-left: 25%;
+}
+
+.editable-area .offset-4 {
+    margin-left: 33.333333%;
+}
+
+.editable-area .offset-5 {
+    margin-left: 41.666667%;
+}
+
+.editable-area .offset-6 {
+    margin-left: 50%;
+}
+
+/* Margin/Padding Utility compatibility */
+.editable-area .ms-auto {
+    margin-left: auto !important;
+}
+
+.editable-area .me-auto {
+    margin-right: auto !important;
+}
+
+.editable-area .mt-0 {
+    margin-top: 0 !important;
+}
+
+.editable-area .mb-0 {
+    margin-bottom: 0 !important;
+}
+
+.editable-area .p-0 {
+    padding: 0 !important;
+}
+
+.editable-area .pt-0 {
+    padding-top: 0 !important;
 }
 
 /* ── Text utilities used by Odoo report templates ── */
