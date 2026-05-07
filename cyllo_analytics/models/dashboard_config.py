@@ -20,6 +20,8 @@
 #
 #############################################################################
 import re
+import logging
+_logger = logging.getLogger(__name__)
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
@@ -135,7 +137,8 @@ class DashboardConfig(models.Model):
     def get_data(self, field_list=None):
         """Method to get data for the specified fields from associated sheets (optimized)."""
         if not field_list:
-            field_list = []
+            # Need to explicitly request non-stored computed fields, otherwise Odoo skips them
+            field_list = ['name', 'query', 'dimension', 'measure', 'dimension_axis', 'type', 'limit']
 
         # Batch read sheets metadata
         sheets_data = self.sheet_ids.read(field_list)
@@ -254,8 +257,17 @@ class DashboardConfig(models.Model):
                             flags=re.IGNORECASE,
                         )
                 new_query = before + after
+                _logger.info("============== EXECUTING DASHBOARD SQL ==============")
+                _logger.info(new_query)
+                
+                # Write to tmp file for raw debugging
+                with open('/tmp/dashboard_sql_debug.txt', 'w') as f:
+                    f.write(new_query + "\n\nPARAMS: " + str(params))
+                    
                 self.env.cr.execute(new_query, params)
-                return self.env.cr.dictfetchall()
+                res = self.env.cr.dictfetchall()
+                _logger.info("============== RESULT LENGTH: %s ==============", len(res))
+                return res
             else:
                 return False
         except Exception as error:

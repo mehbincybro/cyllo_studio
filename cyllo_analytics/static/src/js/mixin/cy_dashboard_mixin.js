@@ -183,12 +183,13 @@ export function CyAnalyticMixin(CyComponent) {
         }
 
         onMessage({detail: notifications}) {
-            notifications = notifications.filter(item => item.payload.channel === "CY:ANALYTICS")
-            notifications.forEach(item => {
-                var res = this.ChartData.itemData.find(data => data.id === item.payload.id)
-                if (res) {
-                    res.data = item.payload.result
-                    this.ChartData.data.push(res)
+            notifications = notifications.filter(item => item.payload && item.payload.channel === "CY:ANALYTICS")
+            notifications.forEach(msg => {
+                const payload = msg.payload;
+                var item = this.items.find(i => i.id === payload.id)
+                if (item) {
+                    item.data = payload.result
+                    this.env.bus.trigger("REFRESH_GRAPH") // Trigger re-render with new local data
                 }
             })
         }

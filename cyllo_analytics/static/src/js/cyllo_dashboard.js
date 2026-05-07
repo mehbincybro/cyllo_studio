@@ -138,6 +138,16 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                 }
             }
         }, () => [this.themeState.theme])
+
+        // Auto-refresh heartbeat every 2 minutes
+        useEffect(() => {
+            const interval = setInterval(() => {
+                if (status(this) !== "destroyed") {
+                    this.env.bus.trigger("REFRESH_GRAPH", { type: "refresh_graph" });
+                }
+            }, 120000);
+            return () => clearInterval(interval);
+        }, () => []);
     }
 
     closeFilterSidebar() {

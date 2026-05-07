@@ -6,13 +6,13 @@
              class="card cp mr-1 mt-1 align-items-stretch cy_tile cy_dashboard_chart"
              t-att-style="(props.width ? 'width: ' + props.width + ';' : '') + (state.cardStyle ? ' ' + state.cardStyle : '')"
              t-on-click.prevent.stop="onClickChart">
-            <div class="sheet-header">
+            <div t-if="props.item?.name || props.value?.name || state.name" class="sheet-header">
                 <div class="sheet-title" t-esc="props.item?.name || props.value?.name || state.name"></div>
                 <div class="position-relative">
                     <t t-if="props.footer" t-slot="footer"></t>
                 </div>
             </div>
-            <div t-ref="root" t-attf-style="{{state.style}} height: 85%; width: 100%; box-sizing: border-box;"></div>
+            <div t-ref="root" t-attf-style="height: 85%; width: 100%; box-sizing: border-box; {{state.style}}"></div>
             
             <!-- Color Reference Panel -->
             <t t-if="state.showColorGuide">
@@ -20,7 +20,7 @@
                      style="z-index: 1000; right: 15px; bottom: 60px; font-size: 10px; min-width: 180px; max-height: 200px; overflow-y: auto; border: 1px solid #ddd !important; border-radius: 8px !important;">
                     <div class="fw-bold mb-2 border-bottom pb-1 d-flex justify-content-between align-items-center" style="color: #333;">
                         <span>Color Reference</span>
-                        <i class="ri-close-line cp" t-on-click.stop="toggleColorGuide" style="font-size: 14px; color: #999;"/>
+                        <i class="fa fa-times cp" t-on-click.stop="toggleColorGuide" style="font-size: 14px; color: #999;"/>
                     </div>
                     <t t-set="all_mappings" t-value="props.value?.color_mappings || props.item?.color_mappings || []"/>
                     <t t-foreach="all_mappings" t-as="m" t-key="m_index">
@@ -39,7 +39,7 @@
                 <t t-if="props.value?.color_mappings?.length or props.item?.color_mappings?.length">
                     <button t-on-click.stop="toggleColorGuide" class="btn shadow-sm" 
                             style="border-radius: 50%; width: 34px; height: 34px; background: white; border: 1px solid #eee; display: flex; align-items: center; justify-content: center;">
-                        <i class="ri-palette-line" style="color: #2196F3; font-size: 18px;"/>
+                        <i class="fa fa-paint-brush" style="color: #2196F3; font-size: 16px;"/>
                     </button>
                 </t>
             </div>
