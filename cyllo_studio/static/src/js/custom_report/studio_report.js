@@ -73,6 +73,11 @@ export class EditReport extends Component {
                 padding: 8,
                 layoutMode: 'free',
             },
+            analytics: {
+                total_scans: 0,
+                recent_scans: [],
+            },
+            hasQr: false,
         });
 
         // Promise resolver for the table config modal
@@ -218,6 +223,7 @@ export class EditReport extends Component {
 
     _setupReportFrame(arch) {
         this._loadedArch = arch;
+        this._updateHasQr(arch);
         this.reportFrameRef.el.innerHTML = arch;
         const editableArea = this.reportFrameRef.el;
 
@@ -363,7 +369,7 @@ export class EditReport extends Component {
             // "Select then Edit" strategy:
             // text-node: ALWAYS open editor on any click (no wasSelected gate)
             // other elements: open editor only if already selected (or just dropped)
-            // Never open MediumEditor for table wrapper, field block, or box wrapper
+            // Never open MediumEditor for table wrapper or box wrapper
             const shouldSkipEditor = el.classList.contains('table-wrapper')
                 || el.classList.contains('box-section-wrapper');
 
@@ -456,6 +462,7 @@ export class EditReport extends Component {
     }
 
     async _fetchPreviewData() {
+        this._updateHasQr();
         const data = await this.rpc("/cyllo_studio/get_report_preview_data", {
             template: this._template,
             res_model: this._resModel,
@@ -464,6 +471,11 @@ export class EditReport extends Component {
             this.state.records = data.record_ids;
             this.state.reportInfo = data.report;
             this.state.paperFormats = data.paper_formats;
+            this.state.analytics = data.analytics || { total_scans: 0, recent_scans: [], tracking_enabled: false };
+
+            // Rely purely on the DOM/arch to decide visibility.
+            this._updateHasQr();
+
             if (this.state.records.length > 0) {
                 this._loadRealReport(this.state.records[0]);
             }
@@ -650,6 +662,51 @@ export class EditReport extends Component {
                 active_model: report.model,
             }
         });
+    }
+
+    onOpenFullAnalytics() {
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            name: 'QR Scan Analytics',
+            res_model: 'qr.scan.event',
+            view_mode: 'tree,form,pivot,graph',
+            views: [[false, 'tree'], [false, 'form'], [false, 'pivot'], [false, 'graph']],
+            domain: [['report_id', '=', this.state.reportInfo.id]],
+            target: 'current',
+        });
+    }
+
+    _updateHasQr(arch = null) {
+        const targetArch = arch || this._loadedArch || '';
+        const qrRegex = /cy-type=['"]qr['"]|s_qr_block|symbology['"]\s*:\s*['"]QR['"]|['"]QR['"]\s*:\s*symbology/;
+        const hasQrInArch = qrRegex.test(targetArch);
+
+        // Check for Studio-managed QR blocks
+        const qrBlocks = this.reportFrameRef.el?.querySelectorAll('.s_qr_block, [cy-type="qr"]');
+        const hasQrInDom = qrBlocks && qrBlocks.length > 0;
+
+        // Also check for raw Odoo barcode widgets (img or svg) that might be QRs
+        const rawBarcodes = this.reportFrameRef.el?.querySelectorAll('img[src*="barcode"][src*="QR"], img[src*="barcode"][src*="qr"], svg[data-code-type="QR"]');
+        const hasRawQrInDom = rawBarcodes && rawBarcodes.length > 0;
+
+        if (hasQrInDom) {
+            let tracked = false;
+            qrBlocks.forEach(el => {
+                try {
+                    const cfg = JSON.parse(el.dataset.qrConfig || '{}');
+                    // Assume tracked unless explicitly disabled in config
+                    if (cfg.config && cfg.config.trackAnalytics !== false) tracked = true;
+                } catch (e) { }
+            });
+            this.state.hasQr = tracked;
+        } else if (hasRawQrInDom) {
+            // If we see a raw QR barcode in the DOM, show analytics if tracking was ever enabled for this report
+            this.state.hasQr = !!(this.state.analytics && this.state.analytics.tracking_enabled);
+        } else {
+            // If no QR is rendered in the current view, hide the analytics panel.
+            this.state.hasQr = false;
+        }
+
     }
 
     get currentPaperFormat() {
@@ -1871,11 +1928,46 @@ export class EditReport extends Component {
             // Ensure any pending DOM updates are finished
             await new Promise(r => setTimeout(r, 100));
 
+            // SAFETY: If a c_new element landed inside a zone, we should move it to the
+            // nearest .oe_structure anchor. This is especially critical for zones
+            // containing tables or loops, where the browser mangles the DOM structure.
+            // By moving new nodes to safe anchors, we ensure the parent zone remains
+            // structurally identical to the original, preventing a position="replace"
+            // that would corrupt QWeb directive chains.
+            const frameEl = component.reportFrameRef.el;
+            frameEl.querySelectorAll('[cy-template]').forEach(zone => {
+                const newNodes = Array.from(zone.children).filter(
+                    c => !c.hasAttribute('cy-xpath') && c.classList.contains('c_new')
+                );
+                if (!newNodes.length) return;
+
+                // Find a safe anchor (.oe_structure) in this zone or its parents
+                let anchor = zone.querySelector('.oe_structure[cy-xpath]') || zone.querySelector('.oe_structure');
+
+                // If this zone IS an oe_structure, or we found one, we are good.
+                if (zone.classList.contains('oe_structure') || anchor) {
+                    if (anchor && anchor !== zone) {
+                        newNodes.forEach(node => anchor.appendChild(node));
+                    }
+                } else {
+                    // If no anchor in zone, move to the global page anchor if possible
+                    const pageAnchor = frameEl.querySelector('.page > .oe_structure') || frameEl.querySelector('.oe_structure');
+                    if (pageAnchor && pageAnchor !== zone) {
+                        newNodes.forEach(node => pageAnchor.appendChild(node));
+                    }
+                }
+            });
+
             const editedHTML = component.reportFrameRef.el.innerHTML;
+
+
             console.log('[Cyllo Studio] Serializing HTML...', editedHTML.length, 'bytes');
             const parser = new DOMParser();
             const editedDoc = parser.parseFromString(editedHTML, 'text/html');
             const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
+
+            // Normalize editedDoc by unwrapping UI shells to match originalDoc structure
+            component._cleanStudioAttrs(editedDoc.body, true);
 
             const changes = component.getChangedElements(originalDoc, editedDoc);
             console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
@@ -1970,7 +2062,7 @@ export class EditReport extends Component {
     }
 
     getChangedElements(originalDoc, editedDoc) {
-        let allChanges = [];
+        let allChanges = []
         editedDoc.querySelectorAll('[cy-template]').forEach(el => {
             const xpath = el.getAttribute('cy-xpath');
             const template = el.getAttribute('cy-template');
@@ -1990,14 +2082,80 @@ export class EditReport extends Component {
                 .filter(c => c.hasAttribute('cy-xpath'))
                 .map(c => c.getAttribute('cy-xpath')).join(',');
 
+            // A zone is a "loop container" if any of its children (direct or nested)
+            // in the ORIGINAL document are QWeb structural nodes (t-foreach, t-set,
+            // t-if, t-elif, t-else, t-call). These structural nodes create loop
+            // variable scope — replacing the container in full would lose that context
+            // and cause "NoneType is not subscriptable" in QWeb at render time.
+            const hasStructuralNodes = (node) => {
+                if (!node || !node.hasAttribute) return false;
+                const attrs = ['t-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value', 't-field', 't-esc', 't-out'];
+
+                // Check the node itself first
+                if (attrs.some(a => node.hasAttribute(a))) return true;
+                const tag = (node.tagName || '').toLowerCase();
+                if (tag === 't' || tag === 'cy-qweb-t') return true;
+
+                // Check all descendants using a broad selector that catches both t and cy-qweb-t
+                const selector = attrs.map(a => `t[${a}], cy-qweb-t[${a}]`).join(',') + ',t,cy-qweb-t';
+                try {
+                    return !!(node.querySelector && node.querySelector(selector));
+                } catch (e) {
+                    // Fallback for extremely large zones if querySelector fails
+                    return Array.from(node.getElementsByTagName('*')).some(el => {
+                        const etag = (el.tagName || '').toLowerCase();
+                        if (etag === 't' || etag === 'cy-qweb-t') return true;
+                        return attrs.some(a => el.hasAttribute(a));
+                    });
+                }
+            };
+
+
+            // Check whether ANY direct child of this zone (in original) contains a
+            // t-if/t-elif/t-else chain. If a sibling carries t-elif or t-else, then
+            // replacing the zone with position="replace" would orphan those directives
+            // from their t-if, causing the QWeb SyntaxError.
+            const hasTIfElIfChainInChildren = (node) => {
+                return Array.from(node.children).some(c => {
+                    const tag = (c.tagName || '').toLowerCase();
+                    if (tag !== 'cy-qweb-t' && tag !== 't') return false;
+                    if (c.hasAttribute('t-if')) return true;
+                    if (c.hasAttribute('t-elif') || c.hasAttribute('t-else')) return true;
+                    return Array.from(c.children).some(gc => {
+                        const gtag = (gc.tagName || '').toLowerCase();
+                        if (gtag !== 'cy-qweb-t' && gtag !== 't') return false;
+                        return gc.hasAttribute('t-if') || gc.hasAttribute('t-elif') || gc.hasAttribute('t-else');
+                    });
+                });
+            };
+
+            // Also block replace if the zone contains ANY table. Tables are dangerous
+            // because browser HTML parser hoists QWeb directives out of tbody,
+            // breaking t-if/t-elif sibling chains and loop scopes.
+            const containsTable = (node) => {
+                return !!(node.querySelector && node.querySelector('table'));
+            };
+
             const textChanged = text(original) !== text(el);
             const innerChanged = inner(original) !== inner(el);
-            const structChanged = cyXpathChildren(original) !== cyXpathChildren(el);
+            const rawStructChanged = cyXpathChildren(original) !== cyXpathChildren(el);
+
+            const structChanged = rawStructChanged
+                && !hasStructuralNodes(original)
+                && !hasTIfElIfChainInChildren(original)
+                && !containsTable(original)
+                && !original.classList.contains('page')
+                && !original.hasAttribute('name'); // Zones with names are often anchors in Odoo layouts
 
             if (textChanged || innerChanged || structChanged) {
+                console.log(`[Cyllo Studio] Change detected in ${xpath}: text=${textChanged}, inner=${innerChanged}, struct=${structChanged} (rawStruct=${rawStructChanged})`);
+                if (structChanged) {
+                    console.log(`[Cyllo Studio]   - Struct check for ${xpath}: hasStructural=${hasStructuralNodes(original)}, hasChain=${hasTIfElIfChainInChildren(original)}, hasTable=${containsTable(original)}`);
+                }
                 allChanges.push({ el, xpath, template, structChanged });
             }
         });
+
 
         return allChanges.filter(change =>
             !allChanges.some(p => p !== change && change.xpath.startsWith(p.xpath + '/'))
@@ -2005,7 +2163,7 @@ export class EditReport extends Component {
     }
 
 
-    _cleanStudioAttrs(node) {
+    _cleanStudioAttrs(node, keepStudioAttrs = false) {
         if (!node) return;
         const self = this;
         // Wrap in a temporary span to allow unwrapping the root itself
@@ -2057,16 +2215,18 @@ export class EditReport extends Component {
                 el.classList.remove('s_qr_block', 'c_new', 'selected');
             }
 
-            studioAttrs.forEach(a => el.removeAttribute(a));
-            el.removeAttribute('onmouseover');
-            el.removeAttribute('onmouseout');
-            el.removeAttribute('onclick');
-            el.removeAttribute('contenteditable');
-            if (el.style) {
-                if (el.style.cursor) el.style.removeProperty('cursor');
-                if (el.style.outline) el.style.removeProperty('outline');
-                if (el.style.opacity) el.style.removeProperty('opacity');
-                if (el.getAttribute('style') === '') el.removeAttribute('style');
+            if (!keepStudioAttrs) {
+                studioAttrs.forEach(a => el.removeAttribute(a));
+                el.removeAttribute('onmouseover');
+                el.removeAttribute('onmouseout');
+                el.removeAttribute('onclick');
+                el.removeAttribute('contenteditable');
+                if (el.style) {
+                    if (el.style.cursor) el.style.removeProperty('cursor');
+                    if (el.style.outline) el.style.removeProperty('outline');
+                    if (el.style.opacity) el.style.removeProperty('opacity');
+                    if (el.getAttribute('style') === '') el.removeAttribute('style');
+                }
             }
 
             const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .box-toolbar, .box-resize-handles, .box-resize-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
@@ -2098,6 +2258,8 @@ export class EditReport extends Component {
                 // Build the output <div class="report-section">
                 const section = document.createElement('div');
                 section.className = 'report-section';
+                if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
+                if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
                 section.setAttribute('data-box-id', cfg.id || '');
                 section.setAttribute('data-layout-mode', layoutMode);
 
@@ -2160,7 +2322,7 @@ export class EditReport extends Component {
             }
 
             // Cleanup residual classes
-            if (el.classList) {
+            if (!keepStudioAttrs && el.classList) {
                 el.classList.remove('c_new', 'selected', 'bg-white');
                 if (el.classList.length === 0) el.removeAttribute('class');
             }
@@ -2216,6 +2378,8 @@ export class EditReport extends Component {
             const wrapper = document.createElement('div');
             wrapper.className = 'box-section-wrapper';
             wrapper.setAttribute('cy-type', 'box');
+            if (section.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', section.getAttribute('cy-xpath'));
+            if (section.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', section.getAttribute('cy-template'));
             wrapper.setAttribute('data-box-id', cfg.id);
             wrapper.setAttribute('data-box-config', JSON.stringify(cfg));
             wrapper.style.width = (cfg.style.width || 300) + 'px';
@@ -2372,12 +2536,53 @@ export class EditReport extends Component {
                     .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
                 if (change.structChanged) {
+                    // Secondary guard: never do a full position="replace" on a zone that still has
+                    // QWeb structural (t-foreach / t-set / t-if / t-elif / t-else)
+                    // descendants in the live DOM.
+                    const structuralAttrs = [
+                        't-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value'
+                    ];
+                    const hasStructuralDescendant = structuralAttrs.some(attr =>
+                        change.el.querySelector(`cy-qweb-t[${attr}], t[${attr}]`)
+                    );
+
+                    // Extra check: if ANY direct child of this zone is a t-if/t-elif/
+                    // t-else node, never replace the zone — the sibling chain would break.
+                    const hasConditionalChainChild = Array.from(change.el.children).some(c => {
+                        const tag = (c.tagName || '').toLowerCase();
+                        if (tag !== 'cy-qweb-t' && tag !== 't') return false;
+                        return c.hasAttribute('t-if') || c.hasAttribute('t-elif') || c.hasAttribute('t-else');
+                    });
+
+                    // CRITICAL: If zone contains a table with QWeb directives, the browser HTML
+                    // parser hoists <t t-foreach/t-if> out of <tbody>, breaking the t-if/t-elif
+                    // sibling chain. A position="replace" on such a zone produces invalid QWeb.
+                    // Always fall back to position="inside" for c_new nodes in this case.
+                    const hasQwebTable = !!(change.el.querySelector && change.el.querySelector(
+                        'table t[t-foreach], table t[t-if], table t[t-elif], ' +
+                        'table cy-qweb-t[t-foreach], table cy-qweb-t[t-if], table cy-qweb-t[t-elif]'
+                    ));
+
+                    if (hasStructuralDescendant || hasConditionalChainChild || hasQwebTable) {
+                        // Fall back to saving only genuinely new user-added nodes
+                        if (newNodes.length) {
+                            newNodes.forEach(node => {
+                                const cloned = node.cloneNode(true);
+                                const cleaned = this._cleanStudioAttrs(cloned);
+                                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                                xpathBlock += `<xpath expr="${change.xpath}" position="inside">${content}</xpath>`;
+                            });
+                        }
+                        return;
+                    }
+
                     const clonedZone = change.el.cloneNode(true);
                     const cleaned = this._cleanStudioAttrs(clonedZone);
                     let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
                     xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
                     return;
                 }
+
 
                 if (newNodes.length) {
                     newNodes.forEach(node => {
