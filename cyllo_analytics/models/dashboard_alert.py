@@ -80,6 +80,8 @@ class DashboardAlert(models.Model):
 
     user_id = fields.Many2one('res.users', string='Person to Notify',
                               default=lambda self: self.env.user, required=True)
+    notify_user_ids = fields.Many2many('res.users', 'dashboard_alert_res_users_rel',
+                                       'alert_id', 'user_id', string='Additional Recipients')
 
     trigger_model_id = fields.Many2one('ir.model', string='Trigger Model')
     last_run = fields.Datetime(string='Last Checked')
@@ -276,11 +278,10 @@ class DashboardAlert(models.Model):
                     return False
 
                 # ── Evaluate each condition independently ──
-                # Each condition tracks its own is_met flag so that when
-                # multiple measures all breach their thresholds, every one
-                # fires its own notification (not just the first).
-                any_triggered = False
-
+                # Each condition tracks its own is_met flag.
+                # However, we collect ALL new notifications for this run into ONE fused message.
+                triggered_summaries = []
+                
                 if alert.condition_ids:
                     for cond_rec in alert.condition_ids:
                         alias     = cond_rec.measure_alias
@@ -299,51 +300,36 @@ class DashboardAlert(models.Model):
                                 break
 
                         if hit_value is not None:          # condition is currently breached
-                            any_triggered = True
-                            if not cond_rec.is_met:        # only notify if not already notified
-                                summary = (
-                                    f"{cond_rec.measure_label or alias} = {hit_value}"
-                                )
-                                try:
-                                    alert._send_notification(summary)
-                                except Exception as e:
-                                    _logger.error(f"Notification Error: {str(e)}")
+                            if not cond_rec.is_met:        # only include if not already notified
+                                triggered_summaries.append(f"{cond_rec.measure_label or alias}: {hit_value}")
                                 cond_rec.with_context(skip_alert_sync=True).write({'is_met': True})
                         else:
                             if cond_rec.is_met:
                                 cond_rec.with_context(skip_alert_sync=True).write({'is_met': False})
 
                 else:
-                    # ── Legacy single-condition fallback ──
+                    # ── Legacy fallback ──
                     triggered = False
                     trigger_info = []
-
                     for cond in effective_conditions:
-                        alias     = cond['alias']
-                        threshold = cond['threshold']
-                        op        = cond['op']
+                        alias, threshold, op = cond['alias'], cond['threshold'], cond['op']
                         for row in res:
-                            current_value = row.get(alias)
-                            if current_value is None:
-                                current_value = next(
-                                    (v for v in row.values() if isinstance(v, (int, float))), None
-                                )
-                            if current_value is None:
-                                continue
-                            if _check(op, current_value, threshold):
+                            val = row.get(alias)
+                            if val is not None and _check(op, val, threshold):
                                 triggered = True
-                                trigger_info.append(f"{cond['label']} = {current_value}")
+                                trigger_info.append(f"{cond['label']}: {val}")
                                 break
-
                     if triggered and not alert.is_condition_met:
-                        summary = '; '.join(trigger_info)
-                        try:
-                            alert._send_notification(summary)
-                        except Exception as e:
-                            _logger.error(f"Notification Error: {str(e)}")
+                        triggered_summaries = trigger_info
                         alert.is_condition_met = True
                     elif not triggered:
                         alert.is_condition_met = False
+
+                if triggered_summaries:
+                    try:
+                        alert._send_notification("; ".join(triggered_summaries))
+                    except Exception as e:
+                        _logger.error(f"Notification Error: {str(e)}")
 
                 # Real-time graph refresh signal
                 try:
@@ -384,6 +370,12 @@ class DashboardAlert(models.Model):
         )
 
         odoobot_id = self.env.ref('base.partner_root').id
+
+        # ── Recipients ──
+        recipients = self.user_id | self.notify_user_ids
+        recipient_partners = recipients.mapped('partner_id')
+
+        # ── 1. Create Odoo Inbox Message ──
         msg = self.env['mail.message'].sudo().create({
             'author_id': odoobot_id,
             'model': 'dashboard.config',
@@ -392,41 +384,59 @@ class DashboardAlert(models.Model):
             'subject': subject,
             'message_type': 'comment',
             'subtype_id': self.env.ref('mail.mt_comment').id,
-            'partner_ids': [(4, self.user_id.partner_id.id)],
-        })
-        self.env['mail.notification'].sudo().create({
-            'mail_message_id': msg.id,
-            'res_partner_id': self.user_id.partner_id.id,
-            'notification_type': 'inbox',
-        })
-        self.env['bus.bus']._sendone(self.user_id.partner_id, 'mail.message/inbox', {
-            'id': msg.id, 'body': link_body, 'subject': subject,
-            'model': 'dashboard.config',
-            'res_id': dashboard_config.id if dashboard_config else 0,
+            'partner_ids': [(6, 0, recipient_partners.ids)],
         })
 
-        payload = {
-            'id': dashboard_config.id if dashboard_config else 0,
-            'sheet_id': self.sheet_id.id,
-            'title': subject,
-            'message': plain_body,
-            'type': 'warning',
-            'sticky': True,
-        }
-        self.env['bus.bus']._sendone(self.user_id.partner_id, 'cyllo_analytics_alert', payload)
-        self.env['bus.bus']._sendone(self.user_id.partner_id, 'notification', {
-            'type': 'refresh_graph',
-            'dashboard_id': dashboard_config.id if dashboard_config else 0,
-            'sheet_id': self.sheet_id.id,
-            'clear_cache': True,
-        })
+        # ── 2. Create Notifications & Bus signals for each recipient ──
+        for partner in recipient_partners:
+            self.env['mail.notification'].sudo().create({
+                'mail_message_id': msg.id,
+                'res_partner_id': partner.id,
+                'notification_type': 'inbox',
+            })
+            self.env['bus.bus']._sendone(partner, 'mail.message/inbox', {
+                'id': msg.id, 'body': link_body, 'subject': subject,
+                'model': 'dashboard.config',
+                'res_id': dashboard_config.id if dashboard_config else 0,
+            })
 
+            # Real-time Screen Warning
+            if self.screen_notification:
+                payload = {
+                    'id': dashboard_config.id if dashboard_config else 0,
+                    'sheet_id': self.sheet_id.id,
+                    'title': subject,
+                    'message': plain_body,
+                    'type': 'warning',
+                    'sticky': True,
+                }
+                self.env['bus.bus']._sendone(partner, 'cyllo_analytics_alert', payload)
+
+            # Refresh Graph Signal
+            self.env['bus.bus']._sendone(partner, 'notification', {
+                'type': 'refresh_graph',
+                'dashboard_id': dashboard_config.id if dashboard_config else 0,
+                'sheet_id': self.sheet_id.id,
+                'clear_cache': True,
+            })
+
+        # ── 3. Send Emails ──
         if self.send_email:
-            self.env['mail.mail'].sudo().create({
-                'subject': subject, 'body_html': plain_body,
-                'email_to': self.user_id.email,
-                'recipient_ids': [(4, self.user_id.partner_id.id)],
-            }).send()
+            # Aggregate all emails into one mail record or send individually to ensure deliverability
+            # To avoid Nathan getting it twice, we ensure unique recordset
+            unique_recipients = recipients.sudo()
+            for user in unique_recipients:
+                if not user.email:
+                    _logger.warning(f"Cyllo Alert: Skipping user {user.name} - no email configured.")
+                    continue
+                
+                self.env['mail.mail'].sudo().create({
+                    'subject': subject,
+                    'body_html': f"<div>{plain_body}</div><br/><small>Ref: {self.name}</small>",
+                    'email_to': user.email,
+                    'recipient_ids': [(4, user.partner_id.id)],
+                    'auto_delete': True,
+                }).send()
 
     def unlink(self):
         self.mapped('automation_ids').sudo().unlink()

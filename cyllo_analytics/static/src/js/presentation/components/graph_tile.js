@@ -28,11 +28,23 @@ export class GraphTile extends Component {
             hasData: true,
             zoom: 0,
             showZoom: false,
-            showColorGuide: false
+            showColorGuide: false,
+            // Annotation inline overlay
+            showAnnotation: false,
+            annotationX: 0,
+            annotationY: 0,
+            annotationNote: '',
+            annotationLabel: '',
+            annotationSeries: '',
+            annotationSeriesIndex: 0,
+            annotationDataIndex: 0,
+            annotationValue: null,
         })
         this.orm = useService('orm')
+        this.action = useService('action')
         this.is_init = true
         this.rootRef = useRef('root')
+        this._clickTimer = null
 
         useBus(this.env.bus, "REFRESH_GRAPH", async (ev) => {
             if (ev && ev.detail && ev.detail.type === "refresh_graph") {
@@ -41,6 +53,17 @@ export class GraphTile extends Component {
                 this.setStyle()
                 await this.reRender()
             }
+        })
+
+        useBus(this.env.bus, "CHART_SHOW_ANNOTATION", (ev) => {
+            const d = ev.detail;
+            if (d.itemId !== this.props.itemId) return;
+            this.state.showAnnotation = true;
+            this.state.annotationNote = d.existingNote || '';
+            this.state.annotationLabel = `${d.measureName} — ${d.dimensionName} : ${d.numericValue}`;
+            this.state.annotationSeries = d.alias;
+            this.state.annotationValue = d.numericValue;
+            this._annotationSaveCallback = d.onSave;
         })
         let reRender = true
         useEffect(() => {
@@ -85,11 +108,87 @@ export class GraphTile extends Component {
             if (this.resizeObserver) {
                 this.resizeObserver.disconnect();
             }
+            if (this._clickTimer) {
+                clearTimeout(this._clickTimer);
+            }
         })
     }
 
     toggleColorGuide() {
         this.state.showColorGuide = !this.state.showColorGuide;
+    }
+
+    saveAnnotation() {
+        if (this._annotationSaveCallback) {
+            this._annotationSaveCallback(this.state.annotationNote);
+        }
+        this.state.showAnnotation = false;
+        this.state.annotationNote = '';
+        this._annotationSaveCallback = null;
+    }
+
+    closeAnnotation() {
+        this.state.showAnnotation = false;
+        this.state.annotationNote = '';
+        this._annotationSaveCallback = null;
+    }
+
+    onDblClickChart(ev) {
+        if (!this.eChart) return;
+        const rect = this.rootRef.el.getBoundingClientRect();
+        const mx = ev.clientX - rect.left;
+        const my = ev.clientY - rect.top;
+        const opt = this.eChart.getOption();
+        const series = opt.series || [];
+        const xAxisData = (opt.xAxis && opt.xAxis[0] && opt.xAxis[0].data) || [];
+
+        for (let si = 0; si < series.length; si++) {
+            const ser = series[si];
+            const rawData = ser.data || [];
+            if (xAxisData.length) {
+                try {
+                    const res = this.eChart.convertFromPixel({ seriesIndex: si }, [mx, my]);
+                    const di = Array.isArray(res) ? Math.round(res[0]) : null;
+                    if (di !== null && di >= 0 && di < xAxisData.length) {
+                        const val = rawData[di];
+                        this._fireAnnotation({
+                            seriesIndex: si,
+                            seriesName: ser.name,
+                            dataIndex: di,
+                            name: xAxisData[di],
+                            value: typeof val === 'object' ? (val && val.value !== undefined ? val.value : val) : val
+                        });
+                        return;
+                    }
+                } catch(e) {}
+            } else {
+                try {
+                    const res = this.eChart.convertFromPixel({ seriesIndex: si }, [mx, my]);
+                    const di = Array.isArray(res) ? res[0] : (typeof res === 'number' ? res : null);
+                    if (di !== null && di >= 0) {
+                        const entry = rawData[di];
+                        if (entry) {
+                            this._fireAnnotation({
+                                seriesIndex: si,
+                                seriesName: ser.name,
+                                dataIndex: di,
+                                name: typeof entry === 'object' ? entry.name : String(entry),
+                                value: typeof entry === 'object' ? (entry.value !== undefined ? entry.value : 0) : entry
+                            });
+                            return;
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+        // Fallback
+        this._fireAnnotation({ seriesIndex: 0, seriesName: '', dataIndex: 0, name: '(chart)', value: '' });
+    }
+
+    _fireAnnotation(params) {
+        if (this.props.onChartPointClick) {
+            this.props.onChartPointClick(params, this.props.itemId);
+        }
     }
 
     /**
@@ -162,6 +261,7 @@ export class GraphTile extends Component {
             toolFeatures: {},
             measureNames: props.measureNames || {},
             color_mappings: props.color_mappings || [],
+            annotations: props.annotations || [],
         }
         if (this.props.themeColor) {
             params.themeColor = this.props.themeColor
@@ -210,13 +310,63 @@ export class GraphTile extends Component {
                     this.eChart.setOption(this.options, true)
                 }
                 this.eChart.resize();
+
+                // Chart element click handler for Drill-Down
+                this.eChart.on('click', (params) => {
+                    if (params.componentType === 'series') {
+                        this.onChartClick(params);
+                    }
+                });
                 this.eChart.on('finished', () => {
                     this.props.setImage(this.Image, this.maker?.name || 'Chart', this.props.item?.id || this.props.value?.id)
                 })
+
             } catch (e) {
                 console.error("ECharts init error:", e);
             }
         }, 500);
+    }
+
+    /**
+     * Handles drill-down when a chart element is clicked.
+     * Maps the clicked dimension to a domain and opens the related records.
+     * @param {Object} params - ECharts click parameters.
+     */
+    onChartClick(params) {
+        const rootData = this.props.value || this.props.item;
+        const model = rootData?.model;
+        const field = rootData?.dimension_field;
+
+        if (!model || !field) return;
+
+        // Build domain for the clicked point
+        let drillDomain = [[field, "=", params.name]];
+        
+        // Add existing sheet filters if they are in Odoo domain format
+        const sheetFilters = rootData.where || [];
+        sheetFilters.forEach(f => {
+            if (f.is_active && f.domain_py_expression) {
+                // Assuming domain_py_expression is a valid Odoo domain list
+                try {
+                    const filters = typeof f.domain_py_expression === 'string' 
+                        ? JSON.parse(f.domain_py_expression) 
+                        : f.domain_py_expression;
+                    if (Array.isArray(filters)) {
+                        drillDomain = drillDomain.concat(filters);
+                    }
+                } catch(e) {}
+            }
+        });
+
+        // Execute Odoo action to open list view
+        this.action.doAction({
+            type: 'ir.actions.act_window',
+            name: `${rootData.name}: ${params.name}`,
+            res_model: model,
+            domain: drillDomain,
+            views: [[false, 'list'], [false, 'form']],
+            target: 'current',
+        });
     }
 
     /**
@@ -270,6 +420,7 @@ export class GraphTile extends Component {
                     type: item.type,
                     id: item.id,
                     color_mappings: item.color_mappings || [],
+                    annotations: item.annotations || [],
                 }
                 this.state.hasData = Boolean(res?.length)
                 item.data = res; // Preserve data for re-renders on resize
@@ -347,6 +498,7 @@ GraphTile.defaultProps = {
 }
 GraphTile.props = {
     onClickChart: {type: Function, optional: true},
+    onChartPointClick: {type: Function, optional: true},
     reRender: {type: Boolean, optional: true},
     width: {type: String, optional: true},
     setImage: {type: Function, optional: true},
@@ -360,4 +512,7 @@ GraphTile.props = {
     toggleClass: {type: String, optional: true},
     itemId: {type: Number, optional: true},
     isDarkMode: {type: Boolean, optional: true},
+    showNoteHint: {type: Boolean, optional: true},
+    isCreator: {type: Boolean, optional: true},
+    name: {type: String, optional: true},
 }

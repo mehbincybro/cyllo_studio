@@ -63,21 +63,7 @@ export const analyticsNotificationService = {
                 title: payload.title,
                 type: payload.type || "warning",
                 sticky: payload.sticky || false,
-                className: "cyllo_alert_notify",
-                onClick: () => {
-                    action.doAction({
-                        type: 'ir.actions.client',
-                        tag: 'cy_analytic_dashboard',
-                        context: {
-                            active_id: payload.id,
-                            sheet_id: payload.sheet_id
-                        },
-                        params: {
-                            id: payload.id,
-                            sheet_id: payload.sheet_id
-                        }
-                    });
-                }
+                className: "cyllo_alert_notify"
             });
         });
 

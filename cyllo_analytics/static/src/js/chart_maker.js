@@ -50,13 +50,53 @@ export class ChartMaker {
         this.dimension_axis = dimension_axis
         this.params = params
         this.color_mappings = params.color_mappings || []
+        this.annotations = params.annotations || []
+        this.themeColor = params.themeColor || {}
         this.chartOptions = {}
     }
 
-    getPointMapping(measureAlias, value) {
+    getPointMappings(measureAlias, value, dimensionLabel = null) {
+        if ((!this.color_mappings || !this.color_mappings.length) && (!this.annotations || !this.annotations.length)) return [];
+        const matches = [];
+        
+        // 1. Find Dedicated Business Annotation (Manual double-click context)
+        if (dimensionLabel && this.annotations && this.annotations.length) {
+            const annotation = this.annotations.find(a => 
+                a.measure_alias === measureAlias && 
+                (a.dimension_label === String(dimensionLabel) || a.dimension_label === dimensionLabel)
+            );
+            if (annotation) {
+                matches.push({ ...annotation, is_annotation: true });
+            }
+        }
+
+        // 2. Find Range mapping (Automated Indicator rule)
+        if (this.color_mappings && this.color_mappings.length) {
+            const rangeMatch = this.color_mappings.find(m => {
+                if (m.measure_alias !== measureAlias) return false;
+                
+                const min = parseFloat(m.min_value);
+                const val = parseFloat(value);
+                const maxStr = String(m.max_value || '').toLowerCase().trim();
+                
+                if (maxStr === 'all above' || maxStr === '') {
+                    return val >= min;
+                }
+                return val >= min && val <= parseFloat(m.max_value);
+            });
+            if (rangeMatch) matches.push(rangeMatch);
+        }
+
+        return matches;
+    }
+
+    getPointColor(measureAlias, value) {
+        // Colors are ONLY derived from indicator rules (the color_mappings section)
         if (!this.color_mappings || !this.color_mappings.length) return null;
-        return this.color_mappings.find(m => {
+        
+        const rangeMatch = this.color_mappings.find(m => {
             if (m.measure_alias !== measureAlias) return false;
+            
             const min = parseFloat(m.min_value);
             const val = parseFloat(value);
             const maxStr = String(m.max_value || '').toLowerCase().trim();
@@ -66,11 +106,8 @@ export class ChartMaker {
             }
             return val >= min && val <= parseFloat(m.max_value);
         });
-    }
-
-    getPointColor(measureAlias, value) {
-        const mapping = this.getPointMapping(measureAlias, value);
-        return mapping ? mapping.color : null;
+        
+        return rangeMatch ? rangeMatch.color : null;
     }
 
     getDefaultZoom() {
@@ -151,12 +188,23 @@ export class ChartMaker {
                 content = `${params.seriesName} <br/>${value} : ${params.value}`;
             }
 
-            // Get Note from Mapping using seriesIndex-based alias lookup
+            // Get all matching mappings (both point-specific and range-based)
             const alias = this.measures[params.seriesIndex];
-            const mapping = this.getPointMapping(alias, params.value);
-            if (mapping && mapping.notes) {
-                content += `<div style="margin-top: 8px; padding-top: 5px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 11px; font-style: italic; opacity: 0.9;"><strong>Note:</strong> ${mapping.notes}</div>`;
-            }
+            const mappings = this.getPointMappings(alias, params.value, params.name);
+            
+            let hasAddedLine = false;
+            mappings.forEach(mapping => {
+                const label = mapping.is_annotation ? "Note" : "Indicator";
+                const infoText = mapping.indicator || mapping.notes;
+                
+                if (infoText) {
+                    const topMargin = hasAddedLine ? 4 : 8;
+                    const topPadding = hasAddedLine ? 0 : 5;
+                    const topBorder = hasAddedLine ? 'none' : '1px solid rgba(255,255,255,0.2)';
+                    content += `<div style="margin-top: ${topMargin}px; padding-top: ${topPadding}px; border-top: ${topBorder}; font-size: 11px; font-style: italic; opacity: 0.9;"><strong>${label}:</strong> ${infoText}</div>`;
+                    hasAddedLine = true;
+                }
+            });
             return content;
         }
 
@@ -384,7 +432,24 @@ export class ChartMaker {
         delete val.xAxis
         delete val.yAxis
         val.tooltip.formatter = (params) => {
-            return `${params.name}<br/>${params.seriesName}: <b>${params.value}</b> (${params.percent}%)`
+            let content = `${params.name}<br/>${params.seriesName}: <b>${params.value}</b> (${params.percent}%)`;
+            const alias = this.measures[params.seriesIndex];
+            const mappings = this.getPointMappings(alias, params.value, params.name);
+            
+            let hasAddedLine = false;
+            mappings.forEach(mapping => {
+                const label = mapping.is_annotation ? "Note" : "Indicator";
+                const infoText = mapping.indicator || mapping.notes;
+                
+                if (infoText) {
+                    const topMargin = hasAddedLine ? 4 : 8;
+                    const topPadding = hasAddedLine ? 0 : 5;
+                    const topBorder = hasAddedLine ? 'none' : '1px solid rgba(255,255,255,0.2)';
+                    content += `<div style="margin-top: ${topMargin}px; padding-top: ${topPadding}px; border-top: ${topBorder}; font-size: 11px; font-style: italic; opacity: 0.9;"><strong>${label}:</strong> ${infoText}</div>`;
+                    hasAddedLine = true;
+                }
+            });
+            return content;
         }
         return val
     }
@@ -543,7 +608,8 @@ export class ChartMaker {
             var option = {
                 dataZoom,
                 tooltip: {
-                    position: 'top'
+                    position: 'top',
+                    formatter: this.chartOptions.formatter
                 },
                 title: val.title,
                 grid: val.grid,
@@ -636,7 +702,8 @@ export class ChartMaker {
                 trigger: 'axis',
                 axisPointer: {
                     type: 'cross'
-                }
+                },
+                formatter: this.chartOptions.formatter
             },
             xAxis: {
                 splitLine: {

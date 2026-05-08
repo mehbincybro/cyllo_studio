@@ -15,6 +15,7 @@ import { KpiSheet } from "@cyllo_analytics/js/KpiSheet";
 import { Table } from "@cyllo_analytics/js/table/table";
 import { Number } from "@cyllo_analytics/js/fields/number";
 import { DeleteDialog } from "./delete_dialog_box";
+import { Dialog } from "@web/core/dialog/dialog";
 import { standardActionServiceProps } from "@web/webclient/actions/action_service";
 import { _t } from "@web/core/l10n/translation";
 import { SheetFilterDomain } from "./sheet_filter/sheetFilterDomain";
@@ -70,6 +71,23 @@ class FieldList extends Component {
 
 FieldList.template = "FieldList"
 FieldList.components = { DragItem }
+
+export class ChartNoteDialog extends Component {
+    setup() {
+        this.state = useState({
+            note: this.props.existingNote || ''
+        });
+    }
+
+    _onSave() {
+        this.props.onSave({
+            note: this.state.note
+        });
+        this.props.close();
+    }
+}
+ChartNoteDialog.template = "ChartNoteDialog";
+ChartNoteDialog.components = { Dialog };
 
 export class CylloSheet extends Component {
     /** Class for creating a CylloSheet component. */
@@ -134,6 +152,7 @@ export class CylloSheet extends Component {
             groupBy: [],
             orderBy: [],
             color_mappings: [],
+            annotations: [],
             dimension_axis: 'x',
         })
         this.navState = useState({
@@ -258,6 +277,7 @@ export class CylloSheet extends Component {
         })
         useBus(this.env.bus, "CY:REBUILD_PRESET", this._onRebuildPreset.bind(this));
         useBus(this.env.bus, "CY:RELATIONAL_FIELD_DROPPED", this.onRelationalFieldDropped.bind(this));
+
         useEffect(() => {
             (async () => await this.updateSheet())()
         }, () => [this.id])
@@ -485,12 +505,14 @@ export class CylloSheet extends Component {
 
     getColorMappingErrors() {
         const errors = [];
-        const measures = [...new Set(this.query_data.color_mappings.map(m => m.measure_alias))];
+        // Only evaluate rule-based mappings for overlaps, ignore point annotations
+        const ruleBasedMappings = this.query_data.color_mappings.filter(m => !m._point_label);
+        const measures = [...new Set(ruleBasedMappings.map(m => m.measure_alias))];
         
         measures.forEach(alias => {
-            const mappings = this.query_data.color_mappings.filter(m => m.measure_alias === alias);
+            const mappings = ruleBasedMappings.filter(m => m.measure_alias === alias);
             // Sort by min value
-            mappings.sort((a, b) => parseFloat(a.min_value) - parseFloat(b.min_value));
+            mappings.sort((a, b) => parseFloat(a.min_value) || 0 - parseFloat(b.min_value) || 0);
             
             for (let i = 0; i < mappings.length - 1; i++) {
                 const current = mappings[i];
@@ -500,12 +522,65 @@ export class CylloSheet extends Component {
                 const nextMin = parseFloat(next.min_value || 0);
                 
                 if (currentMax > nextMin) {
-                    const measureName = this.query_data.measure.find(m => m.alias === alias)?.name || alias;
+                    const measureName = this.query_data.measure.find(m => m.alias === alias)?.value || alias;
                     errors.push(`Overlap in ${measureName}: [${currentMin} - ${currentMax === Infinity ? 'all above' : currentMax}] overlaps with [Min: ${nextMin}]`);
                 }
             }
         });
         return errors;
+    }
+
+    onChartPointClick(params, itemId) {
+        if (!this.ChartData.generate) return;
+        if (params === null || params === undefined) return;
+        const measureIndex = params.seriesIndex !== undefined ? params.seriesIndex : 0;
+        const measure = this.query_data.measure[measureIndex];
+        if (!measure) return;
+
+        const alias = measure.alias;
+        const dimensionName = params.name !== undefined ? String(params.name) : String(params.dataIndex);
+
+        let numericValue = params.value;
+        if (Array.isArray(numericValue)) {
+            numericValue = numericValue[1] !== undefined ? numericValue[1] : numericValue[0];
+        } else if (typeof numericValue === 'object' && numericValue !== null) {
+            numericValue = numericValue.value !== undefined ? numericValue.value : 0;
+        }
+
+        if (!this.query_data.annotations) {
+            this.query_data.annotations = [];
+        }
+        const existing = this.query_data.annotations.find(m =>
+            m.measure_alias === alias &&
+            m.dimension_label === dimensionName
+        );
+
+        if (this.env && this.env.bus) {
+            this.env.bus.trigger('CHART_SHOW_ANNOTATION', {
+                itemId: itemId,
+                measureName: params.seriesName || measure.value || alias,
+                alias,
+                dimensionName,
+                numericValue,
+                existingNote: existing ? existing.notes : '',
+                onSave: (note) => {
+                    if (existing) {
+                        existing.notes = note;
+                    } else {
+                        this.query_data.annotations.push({
+                            measure_alias: alias,
+                            dimension_label: dimensionName,
+                            notes: note
+                        });
+                    }
+                    if (this.ChartData.data) {
+                        this.ChartData.data = { ...this.ChartData.data, annotations: [...this.query_data.annotations] };
+                    }
+                    this.state.need_save = true;
+                    this.generateChart();
+                }
+            });
+        }
     }
 
     /**
@@ -763,6 +838,7 @@ export class CylloSheet extends Component {
                         dimension_axis: this.query_data.dimension_axis,
                         type: this.state.selectedType[1],
                         color_mappings: this.query_data.color_mappings,
+                        annotations: this.query_data.annotations,
                     };
                     this.ChartData.generate = true;
                 });
@@ -1052,6 +1128,7 @@ export class CylloSheet extends Component {
             try {
                 vals['name'] = this.state.name.substring(0, 32)
                 vals['color_mappings'] = this.query_data.color_mappings
+                vals['annotations'] = this.query_data.annotations
                 const data = await this.orm.call(this.model, 'update_data', [vals])
                 this.id = data.rec_id
                 this.state.id = data.rec_id
@@ -1166,6 +1243,8 @@ export class CylloSheet extends Component {
             ...m,
             notes: m.notes || ''
         }));
+        this.query_data.annotations = data.annotations || []
+        this.query_data.dimension_axis = data.dimension_axis
     }
 
     showMessage(message, type) {
