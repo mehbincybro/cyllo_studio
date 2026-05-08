@@ -55,6 +55,7 @@ Key Features:
         'security/ir.model.access.csv',
         'data/loan_sequence_data.xml',
         'data/loan_type_data.xml',
+        'views/loan_penalty_views.xml',
         'views/loan_type_views.xml',
         'views/loan_views.xml',
         'views/loan_repayment_views.xml',

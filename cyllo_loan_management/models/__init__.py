@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import account_payment_register
 from . import loan
+from . import loan_penalty
 from . import loan_repayment
 from . import loan_type
-from . import account_payment_register

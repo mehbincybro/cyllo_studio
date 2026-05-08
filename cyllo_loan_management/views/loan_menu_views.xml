@@ -64,4 +64,11 @@
         sequence="10"
         groups="cyllo_loan_management.group_loan_loan_manager"/>
 
+    <menuitem id="menu_loan_penalty"
+        name="Loan Penalties"
+        parent="menu_loan_loan_config"
+        action="cyllo_loan_management.action_loan_penalty"
+        sequence="20"
+        groups="cyllo_loan_management.group_loan_loan_manager"/>
+
 </odoo>

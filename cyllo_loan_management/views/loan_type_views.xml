@@ -53,22 +53,12 @@
                             <field name="loan_direction"/>
                             <field name="repayment_frequency"/>
                             <field name="sequence"/>
-                        </group>
-                        <group string="Accounting">
-                            <field name="loan_given_account_id"
-                                   invisible="loan_direction == 'taking'"/>
-                            <field name="loan_taken_account_id"
-                                   invisible="loan_direction == 'giving'"/>
-                            <field name="interest_income_account_id"
-                                   invisible="loan_direction == 'taking'"/>
-                            <field name="interest_expense_account_id"
-                                   invisible="loan_direction == 'giving'"/>
-                            <field name="journal_id"/>
-                            <field name="active"/>
+                            <field name="active" widget="boolean_toggle"/>
                             <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                         <group string="Default Terms">
                             <field name="interest_type"/>
+                            <field name="reducing_type" invisible="interest_type != 'reducing'"/>
                             <field name="default_interest_rate"/>
                             <field name="default_duration"/>
                         </group>
@@ -76,15 +66,32 @@
                     <group string="Default Accounting">
                         <group>
                             <field name="journal_id"/>
-                            <field name="loan_taken_account_id"/>
-                            <field name="loan_given_account_id"/>
+                            <field name="loan_given_account_id"
+                                   invisible="loan_direction == 'taking'"/>
+                            <field name="loan_taken_account_id"
+                                   invisible="loan_direction == 'giving'"/>
                         </group>
                         <group>
-                            <field name="interest_income_account_id"/>
-                            <field name="interest_expense_account_id"/>
+                            <field name="interest_income_account_id"
+                                   invisible="loan_direction == 'taking'"/>
+                            <field name="interest_expense_account_id"
+                                   invisible="loan_direction == 'giving'"/>
                         </group>
                     </group>
                     <notebook>
+                        <page string="Penalties" name="penalties">
+                            <field name="penalty_ids">
+                                <tree string="Penalty Rules" editable="bottom">
+                                    <field name="name"/>
+                                    <field name="days_from" string="From (Days)"/>
+                                    <field name="days_to" string="To (Days)"
+                                           help="0 = no upper limit (infinity)"/>
+                                    <field name="penalty_type"/>
+                                    <field name="amount_fixed" string="Fixed Amount" optional="show"/>
+                                    <field name="amount_percentage" string="%" optional="show"/>
+                                </tree>
+                            </field>
+                        </page>
                         <page string="Terms &amp; Conditions" name="terms">
                             <field name="notes" placeholder="Loan terms and conditions..."/>
                         </page>

@@ -7,3 +7,5 @@ access_loan_repayment_user,loan.repayment user,model_loan_repayment,group_loan_l
 access_loan_repayment_manager,loan.repayment manager,model_loan_repayment,group_loan_loan_manager,1,1,1,1
 access_loan_disburse_wizard_user,loan.disburse.wizard user,model_loan_disburse_wizard,group_loan_loan_user,1,1,1,1
 access_loan_close_wizard_user,loan.close.wizard user,model_loan_close_wizard,group_loan_loan_manager,1,1,1,1
+access_loan_penalty_user,loan.penalty user,model_loan_penalty,group_loan_loan_user,1,0,0,0
+access_loan_penalty_manager,loan.penalty manager,model_loan_penalty,group_loan_loan_manager,1,1,1,1
