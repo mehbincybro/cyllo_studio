@@ -31,9 +31,9 @@ class AccountPaymentRegister(models.TransientModel):
         
         if loan_id:
             loan_ids = loan_id.ids if hasattr(loan_id, 'ids') else loan_id
-            loan = self.env['loan.loan'].browse(loan_ids)
-            for l in loan:
-                l.payment_ids = [(4, p.id) for p in payments]
+            loans = self.env['loan.loan'].browse(loan_ids)
+            for loan in loans:
+                loan.payment_ids = [(4, payment.id) for payment in payments]
             
         if loan_repayment_id:
             rep_ids = loan_repayment_id.ids if hasattr(loan_repayment_id, 'ids') else loan_repayment_id

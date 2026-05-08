@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ============================================================
+         Loan Penalty — Tree View
+    ============================================================ -->
+    <record id="view_loan_penalty_tree" model="ir.ui.view">
+        <field name="name">loan.penalty.tree</field>
+        <field name="model">loan.penalty</field>
+        <field name="arch" type="xml">
+            <tree string="Loan Penalties">
+                <field name="name"/>
+                <field name="days_from" string="From (Days)"/>
+                <field name="days_to" string="To (Days)"/>
+                <field name="penalty_type"/>
+                <field name="amount_fixed" string="Fixed Amount" optional="show"/>
+                <field name="amount_percentage" string="(%)" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- ============================================================
+         Loan Penalty — Form View
+    ============================================================ -->
+    <record id="view_loan_penalty_form" model="ir.ui.view">
+        <field name="name">loan.penalty.form</field>
+        <field name="model">loan.penalty</field>
+        <field name="arch" type="xml">
+            <form string="Loan Penalty">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. 1-5 Days Late Fixed Penalty"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Overdue Range">
+                            <field name="days_from" string="From (Days)"/>
+                            <field name="days_to" string="To (Days)"
+                                   help="Set to 0 for no upper limit (infinity)."/>
+                        </group>
+                        <group string="Penalty Calculation">
+                            <field name="penalty_type"/>
+                            <field name="amount_fixed"
+                                   invisible="penalty_type == 'percentage'"
+                                   required="penalty_type in ('fixed', 'both')"/>
+                            <field name="amount_percentage"
+                                   invisible="penalty_type == 'fixed'"
+                                   required="penalty_type in ('percentage', 'both')"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Window Action -->
+    <record id="action_loan_penalty" model="ir.actions.act_window">
+        <field name="name">Loan Penalties</field>
+        <field name="res_model">loan.penalty</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first penalty rule!
+            </p>
+            <p>Define day-based penalty rules to apply automatically when repayments are overdue.</p>
+        </field>
+    </record>
+
+</odoo>

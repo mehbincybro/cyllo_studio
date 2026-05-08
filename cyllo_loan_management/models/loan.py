@@ -160,6 +160,12 @@ class Loan(models.Model):
         readonly=True,
         copy=False,
     )
+    waive_off_move_id = fields.Many2one(
+        'account.move',
+        string='Write off Entry',
+        readonly=True,
+        copy=False,
+    )
     # Repayment
     repayment_ids = fields.One2many(
         'loan.repayment',
@@ -219,7 +225,8 @@ class Loan(models.Model):
     _sql_constraints = [
         ('principal_positive', 'CHECK(principal_amount > 0)', 'Principal amount must be positive!'),
         ('duration_positive', 'CHECK(duration > 0)', 'Duration must be at least 1 month!'),
-        ('interest_rate_positive', 'CHECK(interest_rate >= 0)', 'Interest rate cannot be negative!'),
+        ('interest_rate_positive', 'CHECK(interest_rate >= 0)',
+         'Interest rate cannot be negative!'),
     ]
 
     # -------------------------------------------------------------------------
@@ -234,7 +241,8 @@ class Loan(models.Model):
     @api.depends('loan_direction')
     def _compute_partner_type_label(self):
         for record in self:
-            record.partner_type_label = _('Borrower') if record.loan_direction == 'giving' else _('Lender')
+            record.partner_type_label = _('Borrower') if record.loan_direction == 'giving' else _(
+                'Lender')
 
     @api.depends('date_start', 'duration')
     def _compute_date_end(self):
@@ -259,7 +267,8 @@ class Loan(models.Model):
             record.amount_remaining = record.total_repayment - record.amount_paid
             record.installment_count = len(lines)
             record.paid_installment_count = len(lines.filtered(lambda l: l.state == 'paid'))
-            record.overdue_installment_count = len(lines.filtered(lambda l: l.state == 'overdue'))
+            record.overdue_installment_count = len(
+                lines.filtered(lambda l: l.state == 'overdue'))
 
     def _compute_payment_count(self):
         for record in self:
@@ -270,6 +279,8 @@ class Loan(models.Model):
             move_ids = record.repayment_ids.mapped('move_id').ids
             if record.disburse_move_id:
                 move_ids.append(record.disburse_move_id.id)
+            if record.waive_off_move_id:
+                move_ids.append(record.waive_off_move_id.id)
             if record.invoice_ids:
                 move_ids += record.invoice_ids.ids
             record.move_count = len(move_ids)
@@ -415,6 +426,8 @@ class Loan(models.Model):
         move_ids = self.repayment_ids.mapped('move_id').ids
         if self.disburse_move_id:
             move_ids.append(self.disburse_move_id.id)
+        if self.waive_off_move_id:
+            move_ids.append(self.waive_off_move_id.id)
         if self.invoice_ids:
             move_ids += self.invoice_ids.ids
         return {
@@ -429,19 +442,21 @@ class Loan(models.Model):
         self.ensure_one()
         posted_repayments = self.repayment_ids.filtered(lambda r: r.state == 'posted')
         if posted_repayments:
-            raise UserError(_('Pay All Posted requires at least 1 posted installment. You can register payment individually for a single installment.'))
-            
+            raise UserError(
+                _('Pay All Posted requires at least 1 posted installment. You can register payment'
+                  ' individually for a single installment.'))
+
         account_type = 'asset_receivable' if self.loan_direction == 'giving' else 'liability_payable'
-        
+
         outstanding_lines = self.env['account.move.line']
-        for rep in posted_repayments:
-            if rep.invoice_id:
-                outstanding_lines |= rep.invoice_id.line_ids.filtered(
-                    lambda l: l.account_id.account_type == account_type
-                        and not l.reconciled
-                        and l.partner_id
-                        and l.account_id not in [self.loan_account_id,
-                                                 self.interest_account_id]
+        for repayment in posted_repayments:
+            if repayment.invoice_id:
+                outstanding_lines |= repayment.invoice_id.line_ids.filtered(
+                    lambda line: line.account_id.account_type == account_type
+                                 and not line.reconciled
+                                 and line.partner_id
+                                 and line.account_id not in [self.loan_account_id,
+                                                             self.interest_account_id]
                 )
 
         if not outstanding_lines:
@@ -500,7 +515,6 @@ class Loan(models.Model):
         if number_of_installments < 1:
             number_of_installments = 1
 
-        lines = []
         if self.interest_type == 'flat':
             lines = self._compute_flat_schedule(number_of_installments, frequency_months)
         else:
@@ -521,16 +535,16 @@ class Loan(models.Model):
         interest_last = total_interest - interest_per * (num_installments - 1)
 
         lines = []
-        for i in range(num_installments):
-            due_date = self.date_start + relativedelta(months=freq_months * (i + 1))
-            p = principal_last if i == num_installments - 1 else principal_per
-            n = interest_last if i == num_installments - 1 else interest_per
+        for installment in range(num_installments):
+            due_date = self.date_start + relativedelta(months=freq_months * (installment + 1))
+            principal = principal_last if installment == num_installments - 1 else principal_per
+            interest = interest_last if installment == num_installments - 1 else interest_per
             lines.append({
                 'loan_id': self.id,
-                'sequence': i + 1,
+                'sequence': installment + 1,
                 'due_date': due_date,
-                'principal_amount': round(p, 2),
-                'interest_amount': round(n, 2),
+                'principal_amount': round(principal, 2),
+                'interest_amount': round(interest, 2),
             })
         return lines
 
@@ -550,23 +564,112 @@ class Loan(models.Model):
 
         lines = []
         balance = principal
-        for i in range(num_installments):
-            due_date = self.date_start + relativedelta(months=freq_months * (i + 1))
+        for installment in range(num_installments):
+            due_date = self.date_start + relativedelta(months=freq_months * (installment + 1))
             interest = round(balance * periodic_rate, 2)
             principal_part = round(emi - interest, 2)
             # Last installment: close any floating point residual
-            if i == num_installments - 1:
+            if installment == num_installments - 1:
                 principal_part = round(balance, 2)
                 interest = round(emi - principal_part, 2) if emi > principal_part else 0.0
             balance = round(balance - principal_part, 2)
             lines.append({
                 'loan_id': self.id,
-                'sequence': i + 1,
+                'sequence': installment + 1,
                 'due_date': due_date,
                 'principal_amount': principal_part,
                 'interest_amount': max(interest, 0.0),
             })
         return lines
+
+    def _recalculate_schedule(self):
+        """Regenerate draft installments when extra principal is paid."""
+        self.ensure_one()
+        if self.interest_type != 'reducing':
+            return
+
+        drafts = self.repayment_ids.filtered(lambda r: r.state == 'draft')
+        if not drafts:
+            return
+
+        freq_months = self._get_frequency_months()
+        periodic_rate = (self.interest_rate / 100) * (freq_months / 12)
+
+        posted_or_paid = self.repayment_ids.filtered(
+            lambda r: r.state in ('posted', 'paid', 'overdue'))
+        principal_paid = sum(
+            repayment.principal_amount + repayment.extra_amount for repayment in posted_or_paid)
+        remaining_principal = self.principal_amount - principal_paid
+
+        if remaining_principal <= 0:
+            drafts.unlink()
+            return
+
+        # start sequential from last posted
+        last_posted = posted_or_paid.sorted('sequence')[-1] if posted_or_paid else None
+        start_date = last_posted.due_date if last_posted else self.date_start
+        start_seq = last_posted.sequence + 1 if last_posted else 1
+
+        reducing_type = self.loan_type_id.reducing_type
+
+        lines = []
+        if reducing_type == 'fixed_tenure':
+            num_installments = len(drafts)
+            if periodic_rate == 0:
+                emi = remaining_principal / num_installments
+            else:
+                emi = remaining_principal * periodic_rate * (
+                        1 + periodic_rate) ** num_installments / (
+                              (1 + periodic_rate) ** num_installments - 1
+                      )
+            emi = round(emi, 2)
+
+            balance = remaining_principal
+            for installment in range(num_installments):
+                due_date = start_date + relativedelta(months=freq_months * (installment + 1))
+                interest = round(balance * periodic_rate, 2)
+                principal_part = round(emi - interest, 2)
+                if installment == num_installments - 1:
+                    principal_part = round(balance, 2)
+                    interest = round(emi - principal_part, 2) if emi > principal_part else 0.0
+                balance = round(balance - principal_part, 2)
+                lines.append({
+                    'loan_id': self.id,
+                    'sequence': start_seq + installment,
+                    'due_date': due_date,
+                    'principal_amount': principal_part,
+                    'interest_amount': max(interest, 0.0),
+                    'state': 'draft'
+                })
+
+        elif reducing_type == 'fixed_emi':
+            emi = drafts[0].principal_amount + drafts[0].interest_amount
+
+            balance = remaining_principal
+            i = 0
+            while balance > 0 and i < 500:
+                due_date = start_date + relativedelta(months=freq_months * (i + 1))
+                interest = round(balance * periodic_rate, 2)
+                principal_part = round(emi - interest, 2)
+
+                if balance <= principal_part:
+                    principal_part = round(balance, 2)
+                    interest = round(emi - principal_part, 2) if emi > principal_part else 0.0
+                    interest = max(interest, 0.0)
+
+                balance = round(balance - principal_part, 2)
+                lines.append({
+                    'loan_id': self.id,
+                    'sequence': start_seq + i,
+                    'due_date': due_date,
+                    'principal_amount': principal_part,
+                    'interest_amount': max(interest, 0.0),
+                    'state': 'draft'
+                })
+                i += 1
+
+        drafts.unlink()
+        self.env['loan.repayment'].create(lines)
 
     def _create_disbursement_entry(self, journal_id, date):
         """Create the disbursement journal entry and post it."""

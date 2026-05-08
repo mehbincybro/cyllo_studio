@@ -21,6 +21,8 @@
                 <field name="due_date"/>
                 <field name="principal_amount" widget="monetary" sum="Total"/>
                 <field name="interest_amount" widget="monetary" sum="Total"/>
+                <field name="extra_amount" widget="monetary" sum="Total"
+                       readonly="state != 'draft'"/>
                 <field name="total_amount" widget="monetary" sum="Total"/>
                 <field name="amount_paid" widget="monetary" sum="Total"/>
                 <field name="amount_remaining" widget="monetary" sum="Total"/>
@@ -29,6 +31,8 @@
                 <field name="payment_date" optional="hide"/>
                 <field name="invoice_id" optional="hide"/>
                 <field name="currency_id" column_invisible="1"/>
+                <field name="penalty_amount" widget="monetary" sum="Total" optional="hide"/>
+                <field name="penalty_posted_amount" column_invisible="1"/>
                 <field name="state" widget="badge"
                     decoration-success="state == 'paid'"
                     decoration-warning="state == 'posted'"
@@ -38,6 +42,10 @@
                     groups="cyllo_loan_management.group_loan_loan_manager"/>
                 <button name="action_register_payment" type="object" string="Pay"
                     icon="fa-money" invisible="state not in ('posted', 'overdue')"
+                    groups="cyllo_loan_management.group_loan_loan_manager"/>
+                <button name="action_post_pending_penalty" type="object"
+                    string="Post Pending Penalty" icon="fa-exclamation-triangle"
+                    invisible="state not in ('posted', 'overdue') or penalty_amount &lt;= penalty_posted_amount"
                     groups="cyllo_loan_management.group_loan_loan_manager"/>
             </tree>
         </field>

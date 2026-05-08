@@ -40,7 +40,7 @@ class LoanDisburseWizard(models.TransientModel):
         currency_field='currency_id',
     )
     currency_id = fields.Many2one(related='loan_id.currency_id', readonly=True)
-    disbursement_date = fields.Date(required=True, default=fields.Date.today)
+    disbursement_date = fields.Date(required=True, related='loan_id.date_start')
     journal_id = fields.Many2one(
         'account.journal',
         string='Disbursement Journal',
