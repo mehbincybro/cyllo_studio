@@ -34,9 +34,13 @@ export class GraphTile extends Component {
         this.is_init = true
         this.rootRef = useRef('root')
 
-        useBus(this.env.bus, "REFRESH_GRAPH", async () => {
-            this.setStyle()
-            await this.reRender()
+        useBus(this.env.bus, "REFRESH_GRAPH", async (ev) => {
+            if (ev && ev.detail && ev.detail.type === "refresh_graph") {
+                await this.setupGraphData()
+            } else {
+                this.setStyle()
+                await this.reRender()
+            }
         })
         let reRender = true
         useEffect(() => {
@@ -162,7 +166,15 @@ export class GraphTile extends Component {
         if (this.props.themeColor) {
             params.themeColor = this.props.themeColor
         }
-        this.maker = new ChartMaker(props.data, props.dimension, props.measures,
+        let measures = props.measures
+        if (!measures && props.measure) {
+            try {
+                measures = JSON.parse(props.measure.replaceAll("'", '"'))
+            } catch (e) {
+                measures = []
+            }
+        }
+        this.maker = new ChartMaker(props.data, props.dimension, measures || [],
             props.name, props.type, props.dimension_axis, params)
     }
 
@@ -204,7 +216,7 @@ export class GraphTile extends Component {
             } catch (e) {
                 console.error("ECharts init error:", e);
             }
-        }, 150);
+        }, 500);
     }
 
     /**
@@ -231,37 +243,44 @@ export class GraphTile extends Component {
                 return;
             }
 
-            let measuresList = item.measure;
-            if (typeof measuresList === 'string') {
-                try {
-                    measuresList = JSON.parse(measuresList);
-                } catch (e) {
-                    measuresList = JSON.parse(measuresList.replaceAll("'", '"'));
+            try {
+                let measuresList = item.measure;
+                if (typeof measuresList === 'string') {
+                    try {
+                        measuresList = JSON.parse(measuresList);
+                    } catch (e) {
+                        measuresList = JSON.parse(measuresList.replaceAll("'", '"'));
+                    }
                 }
-            }
-            const measureAliases = measuresList.map(m => typeof m === 'object' ? m.alias : m);
-            const measureNames = (Array.isArray(measuresList) ? measuresList : []).reduce((acc, m) => {
-                if (typeof m === 'object' && m.isPreset) {
-                    acc[m.alias] = m.value;
-                }
-                return acc;
-            }, {});
+                const measureAliases = measuresList.map(m => typeof m === 'object' ? m.alias : m);
+                const measureNames = (Array.isArray(measuresList) ? measuresList : []).reduce((acc, m) => {
+                    if (typeof m === 'object' && m.isPreset) {
+                        acc[m.alias] = m.value;
+                    }
+                    return acc;
+                }, {});
 
-            let props = {
-                data: res,
-                name: item.name,
-                measures: measureAliases,
-                measureNames: measureNames,
-                dimension: item.dimension,
-                dimension_axis: item.dimension_axis,
-                type: item.type,
-                id: item.id,
-                color_mappings: item.color_mappings || [],
+                let props = {
+                    data: res,
+                    name: item.name,
+                    measures: measureAliases,
+                    measureNames: measureNames,
+                    dimension: item.dimension,
+                    dimension_axis: item.dimension_axis,
+                    type: item.type,
+                    id: item.id,
+                    color_mappings: item.color_mappings || [],
+                }
+                this.state.hasData = Boolean(res?.length)
+                item.data = res; // Preserve data for re-renders on resize
+                this.setOptions(props)
+                this.options = await this.maker.makeGraphOptions()
+                this.addElement()
+            } catch(err) {
+                console.error("GraphTile render error for:", item.name, err);
             }
-            this.state.hasData = Boolean(res?.length)
-            this.setOptions(props)
-            this.options = await this.maker.makeGraphOptions()
-            this.addElement()
+        }).catch(err => {
+            console.error("GraphTile fetchData RPC error:", err);
         });
     }
 

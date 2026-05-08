@@ -189,29 +189,24 @@ class DashboardAlert(models.Model):
             code = f"env['dashboard.alert'].browse({self.id})._evaluate_alert()"
 
             for model in models_to_watch:
-                action_name_write = f"Watchdog (Write): {self.name} [{model.model}]"
-                action_write = self.env['ir.actions.server'].sudo().create({
-                    'name': action_name_write, 'model_id': model.id,
+                action_name_save = f"Watchdog (Create/Write): {self.name} [{model.model}]"
+                action_save = self.env['ir.actions.server'].sudo().create({
+                    'name': action_name_save, 'model_id': model.id,
                     'state': 'code', 'code': code,
                 })
-                auto_write = self.env['base.automation'].sudo().create({
-                    'name': action_name_write, 'model_id': model.id,
-                    'trigger': 'on_create_or_write', 'action_server_ids': [(6, 0, [action_write.id])],
+                auto_save = self.env['base.automation'].sudo().create({
+                    'name': action_name_save, 'model_id': model.id,
+                    'trigger': 'on_create_or_write', 'action_server_ids': [(6, 0, [action_save.id])],
                 })
-                new_automations.append(auto_write.id)
-
-                action_name_unlink = f"Watchdog (Delete): {self.name} [{model.model}]"
-                action_unlink = self.env['ir.actions.server'].sudo().create({
-                    'name': action_name_unlink, 'model_id': model.id,
-                    'state': 'code', 'code': code,
-                })
-                auto_unlink = self.env['base.automation'].sudo().create({
-                    'name': action_name_unlink, 'model_id': model.id,
-                    'trigger': 'on_unlink', 'action_server_ids': [(6, 0, [action_unlink.id])],
-                })
-                new_automations.append(auto_unlink.id)
+                new_automations.append(auto_save.id)
 
             self.with_context(skip_alert_sync=True).write({'automation_ids': [(6, 0, new_automations)]})
+
+    @api.model
+    def _evaluate_all_alerts(self):
+        """Cron triggered method to evaluate all active alerts."""
+        alerts = self.search([])
+        alerts._evaluate_alert()
 
     def _evaluate_alert(self):
         """Evaluate alert: supports multi-measure conditions and optional dimension-level filtering."""

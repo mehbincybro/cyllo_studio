@@ -367,6 +367,7 @@ export class ChartMaker {
                 }
                 val.series[i].data.push(data)
                 val.series[i].radius = radius
+                val.series[i].center = ['50%', '60%']
                 val.series[i].type = "pie"
                 val.series[i].label = {
                     formatter: (params) => {
