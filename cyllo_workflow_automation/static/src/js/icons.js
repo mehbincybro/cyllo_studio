@@ -18,4 +18,5 @@ export const icons = {
     'Action': 'cyllo_workflow_automation/static/src/img/node-icons/trigger.svg',
     'Activity': 'cyllo_workflow_automation/static/src/img/routine-cl.svg',
     'Loop': 'cyllo_workflow_automation/static/src/img/node-icons/iteration.svg',
+    'Window': 'cyllo_workflow_automation/static/src/img/node-icons/window.svg',
 };

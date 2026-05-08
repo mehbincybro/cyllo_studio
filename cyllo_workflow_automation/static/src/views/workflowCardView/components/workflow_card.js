@@ -63,6 +63,20 @@ export class WorkflowCard extends Component {
         return (triggers || []).map(item => item?.[1]).filter(Boolean);
     }
 
+    get validRecordIds() {
+        const recordId = this.recordId;
+        if (typeof recordId === "number" && Number.isInteger(recordId) && recordId > 0) {
+            return [recordId];
+        }
+        if (typeof recordId === "string" && /^\d+$/.test(recordId)) {
+            const parsedId = Number.parseInt(recordId, 10);
+            if (parsedId > 0) {
+                return [parsedId];
+            }
+        }
+        return [];
+    }
+
     async openView() {
         this.closeMenu();
         if (this.props.model == "work.auto") {
@@ -253,7 +267,11 @@ export class WorkflowCard extends Component {
         this.dialogService.add(ConfirmationDialog, {
             body: _t("Do you really want to Delete the record?"),
             confirm: (async () => {
-                const domain = [['id', '!=', this.recordId]];
+                const recordIds = this.validRecordIds;
+                if (!recordIds.length) {
+                    return;
+                }
+                const domain = [['id', '!=', recordIds[0]]];
                 this.action.doAction({
                     type: "ir.actions.act_window",
                     res_model: "work.auto",
@@ -261,9 +279,9 @@ export class WorkflowCard extends Component {
                     target: "main",
                     name: "Workflow Automation",
                     domain,
-                    context: {delete_node_id: this.recordId}
+                    context: {delete_node_id: recordIds[0]}
                 })
-                await this.orm.unlink("work.auto", [this.recordId],)
+                await this.orm.unlink("work.auto", recordIds)
             }),
         });
     }
