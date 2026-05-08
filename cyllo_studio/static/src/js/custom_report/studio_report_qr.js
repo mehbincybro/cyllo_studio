@@ -258,6 +258,7 @@ export const QrMixin = {
     },
 
     insertQrBlock(placeholderEl, qrConfig, mode = 'insert') {
+        this.state.hasQr = true;
         const type = qrConfig.type;
         const config = qrConfig.config;
         const align = config.align || 'center';

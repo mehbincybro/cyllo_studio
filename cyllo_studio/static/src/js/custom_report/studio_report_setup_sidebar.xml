@@ -74,6 +74,37 @@
                 </div>
             </div>
 
+            <!-- Scan Analytics -->
+            <div t-if="state.hasQr" class="props-group mb-4 border-top border-secondary border-opacity-25 pt-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <label class="modern-label m-0">Scan Analytics</label>
+                    <span class="badge rounded-pill bg-primary px-2" style="font-size: 10px;">
+                        <t t-esc="state.analytics?.total_scans || 0"/> scans
+                    </span>
+                </div>
+
+                <div t-if="state.analytics?.recent_scans?.length" class="recent-scans-list mb-3">
+                    <div t-foreach="state.analytics.recent_scans" t-as="scan" t-key="scan.id"
+                         class="d-flex flex-column mb-2 p-2 rounded bg-light border" style="font-size: 10px;">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-bold text-dark"><t t-esc="scan.record_name"/></span>
+                            <span class="text-muted"><t t-esc="scan.scanned_at.split(' ')[0]"/></span>
+                        </div>
+                        <div class="text-muted opacity-75">
+                            <i class="fa fa-map-marker me-1"/> <t t-esc="scan.ip_address"/>
+                        </div>
+                    </div>
+                </div>
+                <div t-else="" class="text-center py-3 text-muted small border rounded bg-light opacity-50 mb-3" style="font-size: 10px;">
+                    No scan activity detected yet.
+                </div>
+
+                <button class="btn btn-sm btn-outline-primary w-100 py-1" style="font-size: 11px;"
+                        t-on-click="onOpenFullAnalytics">
+                    <i class="fa fa-external-link me-1"/> Open Full Report
+                </button>
+            </div>
+
             <!-- Action Buttons -->
             <div class="action-buttons d-flex flex-column gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
                 <button class="btn modern-action-btn primary-action"

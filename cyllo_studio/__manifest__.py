@@ -34,6 +34,7 @@
         'views/ir_model_access_views.xml',
         'views/ir_rule_views.xml',
         'views/ir_model_fields.xml',
+        'views/qr_analytics_views.xml',
     ],
     'assets': {
     'web_editor.backend_assets_wysiwyg': [

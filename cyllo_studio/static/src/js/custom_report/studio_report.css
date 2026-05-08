@@ -2292,3 +2292,7 @@ select>option {
     border-color: #9ca3af !important;
     color: #111827 !important;
 }
+
+span.badge.rounded-pill.bg-primary {
+    color: #ffffff !important;
+}

@@ -606,7 +606,6 @@ export class StudioWrapper extends Component {
                 field_path: detail.field_path || "",
                 label_path: detail.label_path || "",
                 domain: detail.domain || "",
-                label_path: detail.label_path || "",
                 position: detail.position || "",
                 recordData: detail.recordData || {},
             });
@@ -724,7 +723,6 @@ export class StudioWrapper extends Component {
                 mode: detail.mode,
                 model: detail.model,
                 activeFields: detail.activeFields,
-                model: detail.model,
                 calendar_info: detail.calendar_info
             });
             this.updateViewDetails(detail);
@@ -764,7 +762,6 @@ export class StudioWrapper extends Component {
                 bold: detail.bold,
                 italic : detail.italic,
                 underline: detail.underline,
-                element: detail.element,
                 classNames: detail.classNames,
                 string: detail.string,
                 is_edit: detail.is_edit,

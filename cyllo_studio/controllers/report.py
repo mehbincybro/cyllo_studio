@@ -265,6 +265,25 @@ class StudioReportController(Controller):
                 [], ['id', 'name', 'page_width', 'page_height', 'format']
             )
 
+            # ── Fetch Scan Analytics ─────────────────────────────────────────
+            tokens = request.env['qr.download.token'].sudo().search([('report_id', '=', report.id)])
+            total_scans = sum(tokens.mapped('scan_count'))
+            
+            recent_scans_data = request.env['qr.scan.event'].sudo().search_read(
+                [('report_id', '=', report.id)],
+                ['scanned_at', 'ip_address', 'record_id'],
+                limit=5,
+                order='scanned_at desc'
+            )
+            
+            # Resolve record names for recent scans
+            for scan in recent_scans_data:
+                if scan['record_id']:
+                    rec = request.env[res_model].sudo().browse(scan['record_id'])
+                    scan['record_name'] = rec.display_name if rec.exists() else f"ID: {scan['record_id']}"
+                else:
+                    scan['record_name'] = "Unknown"
+
             return {
                 'success': True,
                 'report': {
@@ -277,6 +296,10 @@ class StudioReportController(Controller):
                 },
                 'record_ids': records.ids,
                 'paper_formats': paper_formats,
+                'analytics': {
+                    'total_scans': total_scans,
+                    'recent_scans': recent_scans_data,
+                }
             }
         except Exception as e:
             return {'success': False, 'error': str(e)}
