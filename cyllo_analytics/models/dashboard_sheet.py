@@ -105,6 +105,11 @@ class DashboardSheet(models.Model):
         'res.currency',
         'Currency'
     )
+    annotation_ids = fields.One2many(
+        'dashboard.sheet.annotation',
+        'sheet_id',
+        string='Annotations'
+    )
     color_mapping_ids = fields.One2many(
         'dashboard.sheet.color.mapping',
         'sheet_id',
@@ -279,6 +284,9 @@ class DashboardSheet(models.Model):
             vals["sheet_type_id"] = data["type"][0]
         if data.get("dimension_axis"):
             vals["dimension_axis"] = data["dimension_axis"]
+        if data.get("annotations"):
+            # Placeholder for processing annotations if needed in this block
+            pass
         if data.get("kpi"):
             kpi = data["kpi"]
             vals.update({
@@ -441,15 +449,26 @@ class DashboardSheet(models.Model):
         if "color_mappings" in data:
             rec.color_mapping_ids.unlink()
             for mapping in data["color_mappings"]:
-                # Don't force float cast for max_value because it might be "all above"
-                max_val = mapping.get("max_value", "")
+                val_max = mapping.get("max_value", "")
                 self.env["dashboard.sheet.color.mapping"].create({
                     "sheet_id": rec.id,
                     "measure_alias": mapping.get("measure_alias"),
                     "min_value": float(mapping.get("min_value", 0)),
-                    "max_value": str(max_val) if max_val is not None else "",
+                    "max_value": str(val_max) if val_max is not None else "",
                     "color": mapping.get("color", "#344BD2"),
+                    "indicator": mapping.get("indicator", ""),
                     "notes": mapping.get("notes", ""),
+                })
+        
+        # Update Annotations (Dedicated section)
+        if "annotations" in data:
+            rec.annotation_ids.unlink()
+            for note in data["annotations"]:
+                self.env["dashboard.sheet.annotation"].create({
+                    "sheet_id": rec.id,
+                    "measure_alias": note.get("measure_alias"),
+                    "dimension_label": note.get("dimension_label"),
+                    "notes": note.get("notes", ""),
                 })
 
         rec.unlink_data(data.get("unlink_list", {"axis":[], "tables":[], "where":[], "configs":[]}))
@@ -764,6 +783,10 @@ class DashboardSheet(models.Model):
                 "field": option["field"],
                 "name": option["name"],
             }
+        primary_model = self.table_ids.filtered(lambda x: not x.linked)[:1].model if self.table_ids else False
+        dim_axis = self.axis_ids.filtered(lambda x: x.type == "dimension")[:1]
+        dimension_field = dim_axis.column if dim_axis else False
+        
         return {
             "has_error": has_error,
             "dimension": dimension,
@@ -781,6 +804,8 @@ class DashboardSheet(models.Model):
             "joinData": join_data,
             "models": all_models,
             "options": options,
+            "model": primary_model,
+            "dimension_field": dimension_field,
             "kpi": {
                 "target": self.kpi_target,
                 "measureView": self.kpi_view,
@@ -791,7 +816,8 @@ class DashboardSheet(models.Model):
                 "icon": self.kpi_icon,
                 "model": self.kpi_model,
             },
-            "color_mappings": self.color_mapping_ids.read(["measure_alias", "min_value", "max_value", "color", "notes"]),
+            "color_mappings": self.color_mapping_ids.filtered(lambda m: not m.notes or m.indicator).read(["measure_alias", "min_value", "max_value", "color", "indicator", "notes"]),
+            "annotations": self.annotation_ids.read(["measure_alias", "dimension_label", "notes"]),
         }
 
     def get_dashboard_sheet(self):
@@ -1017,6 +1043,18 @@ class DashboardSheetColorMapping(models.Model):
     min_value = fields.Float(string="Min Value")
     max_value = fields.Char(string="Max Value")
     color = fields.Char(string="Color", default="#344BD2")
+    indicator = fields.Char(string="Indicator")
+    notes = fields.Text(string="Notes")
+
+
+class DashboardSheetAnnotation(models.Model):
+    """Dedicated model for user-added business annotations/notes on specific chart points."""
+    _name = "dashboard.sheet.annotation"
+    _description = "Dashboard Sheet Annotation"
+
+    sheet_id = fields.Many2one("dashboard.sheet", string="Sheet", ondelete="cascade")
+    measure_alias = fields.Char(string="Measure Alias")
+    dimension_label = fields.Char(string="Dimension Label")
     notes = fields.Text(string="Notes")
 
 

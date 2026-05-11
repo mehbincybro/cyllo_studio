@@ -1,11 +1,12 @@
 /** @odoo-module **/
 import { Dialog } from "@web/core/dialog/dialog";
+import { AutoComplete } from "@web/core/autocomplete/autocomplete";
 import { useService } from "@web/core/utils/hooks";
 const { Component, useState, onWillStart } = owl;
 
 export class AlertConfigurationDialog extends Component {
     static template = "cyllo_analytics.AlertConfigurationDialog";
-    static components = { Dialog };
+    static components = { Dialog, AutoComplete };
 
     setup() {
         this.orm = useService("orm");
@@ -30,6 +31,7 @@ export class AlertConfigurationDialog extends Component {
             send_email: false,
             screen_notification: true,
             userName: this.user.name,
+            notify_users: [], // Selected users: { id, name }
 
             // One row per measure: { alias, label, enabled, condition, value }
             measureConditions: measureAxes.map(m => ({
@@ -52,7 +54,8 @@ export class AlertConfigurationDialog extends Component {
             const fields = [
                 "name", "send_email", "screen_notification",
                 "condition_ids", "dimension_filter",
-                "dimension_alias", "dimension_label", "dimension_value"
+                "dimension_alias", "dimension_label", "dimension_value",
+                "notify_user_ids"
             ];
             const existing = await this.orm.searchRead("dashboard.alert", [
                 ["sheet_id", "=", item.id],
@@ -69,6 +72,12 @@ export class AlertConfigurationDialog extends Component {
                 this.state.dimension_alias = alert.dimension_alias || this.state.dimension_alias;
                 this.state.dimension_label = alert.dimension_label || this.state.dimension_label;
                 this.state.dimension_value = alert.dimension_value || '';
+
+                if (alert.notify_user_ids && alert.notify_user_ids.length > 0) {
+                    this.state.notify_users = await this.orm.read(
+                        "res.users", alert.notify_user_ids, ["id", "display_name"]
+                    );
+                }
 
                 // If saved condition_ids exist, re-enable the matching measure rows
                 if (alert.condition_ids && alert.condition_ids.length > 0) {
@@ -156,6 +165,7 @@ export class AlertConfigurationDialog extends Component {
                         value: r.value,
                     }]),
                 ],
+                notify_user_ids: [[6, 0, this.state.notify_users.map(u => u.id)]],
             };
 
             if (this.state.alertId) {
@@ -181,5 +191,77 @@ export class AlertConfigurationDialog extends Component {
             this.notification.add("Alert deleted successfully", { type: "success" });
             this.props.close();
         }
+    }
+
+    get dimensionSources() {
+        return [
+            {
+                placeholder: "Search or select a value...",
+                options: (str) => {
+                    const values = (this.state.dimensionValues || []).filter(v => v !== null && v !== undefined);
+                    const searchStr = (str || "").toLowerCase();
+                    return values
+                        .filter(v => String(v).toLowerCase().includes(searchStr))
+                        .map(v => ({ label: String(v), value: v }));
+                }
+            }
+        ];
+    }
+
+    onDimensionSelect(selected) {
+        this.state.dimension_value = selected.value;
+    }
+
+    get userSources() {
+        return [{
+            placeholder: "Search for users...",
+            options: async (str) => {
+                const users = await this.orm.searchRead(
+                    "res.users", 
+                    [['name', 'ilike', str], ['active', '=', true]], 
+                    ["id", "display_name"], 
+                    { limit: 10 }
+                );
+                return users.map(u => ({ label: u.display_name, value: u.id }));
+            }
+        }];
+    }
+
+    onUserSelect(selected) {
+        if (!this.state.notify_users.find(u => u.id === selected.value)) {
+            this.state.notify_users.push({ 
+                id: selected.value, 
+                display_name: selected.label 
+            });
+        }
+    }
+
+    removeUser(userId) {
+        this.state.notify_users = this.state.notify_users.filter(u => u.id !== userId);
+    }
+
+    conditionSources(row) {
+        return [{
+            options: (str) => {
+                const searchStr = (str || "").toLowerCase();
+                return this.conditionOptions
+                    .filter(opt => opt.label.toLowerCase().includes(searchStr))
+                    .map(opt => ({
+                        label: opt.label,
+                        value: opt.value,
+                        isSelected: row.condition === opt.value
+                    }));
+            }
+        }];
+    }
+
+    onConditionSelect(row, selected) {
+        row.condition = selected.value;
+    }
+
+    /** Display label for the current condition in a row */
+    getConditionLabel(row) {
+        const opt = this.conditionOptions.find(o => o.value === row.condition);
+        return opt ? opt.label : "Select Condition...";
     }
 }

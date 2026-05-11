@@ -170,10 +170,16 @@ class DashboardConfig(models.Model):
         for a in all_axes: axes_map.setdefault(a['sheet_id'][0], []).append(a)
         
         all_color_mappings = self.sheet_ids.mapped('color_mapping_ids').read(
-            ["measure_alias", "min_value", "max_value", "color", "notes", "sheet_id"]
+            ["measure_alias", "min_value", "max_value", "color", "indicator", "notes", "sheet_id"]
         )
         color_mappings_map = {}
         for cm in all_color_mappings: color_mappings_map.setdefault(cm['sheet_id'][0], []).append(cm)
+
+        all_annotations = self.sheet_ids.mapped('annotation_ids').read(
+            ["measure_alias", "dimension_label", "notes", "sheet_id"]
+        )
+        annotations_map = {}
+        for a in all_annotations: annotations_map.setdefault(a['sheet_id'][0], []).append(a)
 
         # Global Filters (sheet_filter_ids) - requires deeper batch fetch
         global_filters = self.env['dashboard.sheet.global'].search([
@@ -206,6 +212,7 @@ class DashboardConfig(models.Model):
             res["table_ids"] = tables_map.get(sheet.id, [])
             res["axis_ids"] = axes_map.get(sheet.id, [])
             res["color_mappings"] = color_mappings_map.get(sheet.id, [])
+            res["annotations"] = annotations_map.get(sheet.id, [])
             res["sheet_filter_ids"] = global_filters_processed_map.get(sheet.id, [])
             results.append(res)
 

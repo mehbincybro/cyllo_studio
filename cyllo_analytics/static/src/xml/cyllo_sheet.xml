@@ -166,6 +166,10 @@
                 </div>
                 <div class="main m-3 w-100">
                     <div class="cy-sheets-previewContainer pb-2">
+                        <div class="cy-note-hint-sidebar">
+                            <i class="ri-information-line" style="color: #4CAF50; font-size: 16px;"/>
+                            <span>Tip: Double click on any chart point to add an independent business context note.</span>
+                        </div>
                         <div class="d-flex gap-3 mb-3">
                             <!-- Currency Autocomplete - Left Side -->
                             <div t-if="hasMonetary"
@@ -234,7 +238,11 @@
                                        value="ChartData.data"
                                        style="style"
                                        setImage.bind="setImage"
-                                       itemId="state.id"/>
+                                       onChartPointClick.bind="onChartPointClick"
+                                       itemId="state.id"
+                                       showNoteHint="true"
+                                       isCreator="true"
+                                       name="state.name"/>
                         </div>
                         <div class="d-flex justify-content-center"
                              t-if="state.false_linking and !ChartData.generate">
@@ -460,8 +468,8 @@
                                             <input type="color" class="form-control form-control-color form-control-sm border-0 bg-transparent" t-att-value="mapping.color" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'color', ev.target.value)" style="cursor: pointer; padding: 0; min-height: 31px;"/>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <label class="form-label" style="font-size: 11px; color: #666;">Notes</label>
-                                            <input type="text" class="form-control form-control-sm" t-att-value="mapping.notes" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'notes', ev.target.value)" placeholder="Tooltip note..."/>
+                                            <label class="form-label" style="font-size: 11px; color: #666;">Indicator</label>
+                                            <input type="text" class="form-control form-control-sm" t-att-value="mapping.indicator" t-on-change="(ev) => this.updateColorMapping(mapping_index, 'indicator', ev.target.value)" placeholder="Short label (e.g. Target reached)"/>
                                         </div>
                                         <div class="align-self-end pb-1">
                                             <button class="btn btn-sm btn-outline-danger border-0" t-on-click="() => this.removeColorMapping(mapping_index)" title="Delete Mapping">
@@ -639,5 +647,27 @@
             <img src="/cyllo_analytics/static/src/img/sheet_help.gif"
                  class="cy_sheet_helper-gif w-100 h-100"/>
         </div>
+    </t>
+    <t t-name="ChartNoteDialog">
+        <Dialog size="'md'" title="'Add Context Note'">
+            <div class="p-3">
+                <div class="mb-3">
+                    <label class="form-label">Measure</label>
+                    <input type="text" class="form-control" t-att-value="props.measureName" readonly="1" disabled="1"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Value</label>
+                    <input type="text" class="form-control" t-att-value="props.value" readonly="1" disabled="1"/>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Note Context</label>
+                    <textarea class="form-control" t-model="state.note" rows="3" placeholder="Enter reason or context..."></textarea>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary" t-on-click="_onSave">Save Context</button>
+                <button class="btn btn-secondary" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
     </t>
 </templates>
