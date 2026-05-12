@@ -299,6 +299,7 @@
 
             'cyllo_studio/static/src/js/custom_report/studio_report_qr.js',
             'cyllo_studio/static/src/js/custom_report/studio_report_box.js',
+            'cyllo_studio/static/src/js/custom_report/studio_report_sign.js',
             'cyllo_studio/static/src/js/custom_report/studio_report.js',
             'cyllo_studio/static/src/js/custom_report/studio_report_setup_sidebar.xml',
             'cyllo_studio/static/src/js/custom_report/studio_report_qr_wizard.xml',

@@ -59,6 +59,10 @@ class SignRequest(models.Model):
     custom_subject = fields.Char(string='Custom Email Subject')
     custom_message = fields.Html(string='Custom Email Message')
 
+    # Source document tracking
+    res_model = fields.Char(string='Source Model', index=True)
+    res_id = fields.Many2oneReference('Source ID', model_field='res_model', index=True)
+
     def action_sign(self):
         """Open the signing interface for the current user if authorized."""
         self.ensure_one()

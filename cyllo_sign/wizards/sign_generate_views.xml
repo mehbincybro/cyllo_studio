@@ -16,27 +16,27 @@
                 </group>
                 <notebook>
                     <page string="Signers">
-                        <field name="signer_ids">
+                        <field name="signer_ids" nolabel="1">
                             <tree editable="bottom" create="false" delete="0">
-                                <field name="role_id" readonly="1"/>
-                                <field name="filtered_partner_ids"
-                                       column_invisible="1"/>
+                                <field name="role_id" readonly="1" string="Role"/>
                                 <field name="partner_id"
-                                       domain="[('id', 'in', filtered_partner_ids)]"
-                                       options="{'no_create': True}"/>
+                                       options="{'no_create': True}"
+                                       string="Partner"/>
                             </tree>
                         </field>
                     </page>
                     <page string="Contacts in copy">
                         <group>
-                            <field name="contact_ids" string="Contacts"
-                                   widget="many2many_tags"/>
+                            <field name="contact_ids"
+                                   widget="many2many_tags"
+                                   placeholder="Add contacts..."
+                                   nolabel="1"/>
                         </group>
                     </page>
                     <page string="Signature Request">
                         <group>
-                            <field name="subject"/>
-                            <field name="message"/>
+                            <field name="subject" placeholder="Subject..."/>
+                            <field name="message" placeholder="Message..."/>
                         </group>
                     </page>
                 </notebook>

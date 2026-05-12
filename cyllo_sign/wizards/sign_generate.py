@@ -36,6 +36,8 @@ class SignGenerate(models.TransientModel):
     message = fields.Html()
     is_active = fields.Boolean("Active", compute="_compute_is_active",
                                help="Is active template", store=True, default=False)
+    res_model = fields.Char(string='Source Model')
+    res_id = fields.Integer(string='Source ID')
 
     @api.depends('template_id')
     def _compute_is_active(self):
@@ -69,8 +71,19 @@ class SignGenerate(models.TransientModel):
             'email_cc_ids': [fields.Command.set(self.contact_ids.ids)],
             'custom_subject': self.subject or False,
             'custom_message': self.message or False,
+            'res_model': self.res_model,
+            'res_id': self.res_id,
         })
-        return sign_request.send_sign_request_email()
+        sign_request.send_sign_request_email()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Signature Request',
+            'res_model': 'sign.request',
+            'res_id': sign_request.id,
+            'view_mode': 'form',
+            'views': [[False, 'form']],
+            'target': 'current',
+        }
 
     def action_generate_sign(self):
         users = self.env['res.users'].sudo().search([('partner_id', 'in', self.signer_ids.partner_id.ids)])
@@ -87,7 +100,9 @@ class SignGenerate(models.TransientModel):
                     'partner_id': signer.partner_id.id,
                     'role_id': signer.role_id.id,
                 }) for signer in self.signer_ids
-            ]
+            ],
+            'res_model': self.res_model,
+            'res_id': self.res_id,
         })
         return sign_request.action_sign()
 
@@ -97,7 +112,7 @@ class SignSigners(models.TransientModel):
     _description = 'Sign Signers'
 
     role_id = fields.Many2one('sign.role', required=True)
-    partner_id = fields.Many2one('res.partner')
+    partner_id = fields.Many2one('res.partner', required=True)
     sign_generate_id = fields.Many2one('sign.generate')
     filtered_partner_ids = fields.Many2many('res.partner', compute='_compute_filtered_partner_ids')
 

@@ -42,7 +42,8 @@
                         t-on-click="onPrintReport">
                 <i class="fa fa-print me-1"/>Print
                 </button>
-                <button class="btn btn-primary border px-3 position-absolute translate-middle-x"
+                <button t-if="state.hasSign"
+                        class="btn btn-primary border px-3 position-absolute translate-middle-x"
                         style="left: calc(50% + 280px); background-color: #9ea700; border-color: #9ea700;"
                         t-on-click="onSignReport">
                 <i class="fa fa-pencil me-1"/>Sign
@@ -361,6 +362,12 @@
                                 <input type="number" min="100"
                                        t-att-value="state.signConfig.width"
                                        t-on-change="(ev) => this.onSignConfigChange('width', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Height (px)</label>
+                                <input type="number" min="60"
+                                       t-att-value="state.signConfig.height"
+                                       t-on-change="(ev) => this.onSignConfigChange('height', ev.target.value)"/>
                             </div>
                             <div class="box-props-row">
                                 <label>Alignment</label>
