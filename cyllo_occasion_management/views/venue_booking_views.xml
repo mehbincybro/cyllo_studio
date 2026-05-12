@@ -127,7 +127,6 @@
                                    invisible="is_extra_check == False"
                                    readonly="state not in ('draft','confirm')"/>
                             <field name="need_catering"/>
-                            <field name="catering_ids" widget="many2many_tags" invisible="not need_catering" options="{'no_create': True}"/>
                         </group>
 
                         <group>
@@ -155,7 +154,9 @@
                             <field name="venue_booking_line_ids"
                                    readonly="state not in ('draft','confirm')">
                                 <tree editable="bottom">
-                                    <field name="amenity_id"/>
+                                    <field name="allowed_amenity_ids" column_invisible="1"/>
+                                    <field name="amenity_id"
+                                           domain="[('id', 'in', allowed_amenity_ids)]"/>
                                     <field name="quantity"/>
                                     <field name="amount"/>
                                     <field name="sub_total"/>
@@ -179,7 +180,8 @@
                         <page string="Included Amenities">
                             <field name="amenity_line_ids">
                                 <tree editable="bottom">
-                                    <field name="amenity_id"/>
+                                    <field name="allowed_amenity_ids" column_invisible="1"/>
+                                    <field name="amenity_id" domain="[('id', 'in', allowed_amenity_ids)]"/>
                                     <field name="quantity"/>
                                     <field name="amount"/>
                                     <field name="sub_total"/>
@@ -297,13 +299,13 @@
         </field>
     </record>
     <!--    MenuItems-->
-    <menuitem id="venue_booking_menu_root"
-              name="Venue Booking"
+    <menuitem id="occasion_management_menu_root"
+              name="Occasion Management"
               groups="cyllo_occasion_management.venue_booking_management_group_venue_manager,cyllo_occasion_management.venue_booking_management_group_venue_user"
               web_icon="venue_booking_management,static/description/icon.png"
               sequence="20"/>
     <menuitem id="venue_menu_booking" name="Venue Booking"
-              parent="venue_booking_menu_root"
+              parent="occasion_management_menu_root"
               sequence="5"/>
     <menuitem id="venue_menu_booking_2" name="Venue Booking"
               parent="venue_menu_booking"

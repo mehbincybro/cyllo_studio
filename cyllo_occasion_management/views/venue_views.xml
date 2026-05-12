@@ -177,7 +177,7 @@
     <!-- Menu to access venue management -->
     <menuitem id="venue_booking_management_venue_menu"
               name="Venue"
-              parent="venue_booking_menu_root" sequence="10"
+              parent="occasion_management_menu_root" sequence="10"
               action="venue_action"
               groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"/>
 </odoo>

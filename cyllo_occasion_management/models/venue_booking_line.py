@@ -59,6 +59,17 @@ class VenueBookingLine(models.Model):
                              readonly=True, help="Sub Total of the Values")
     is_included = fields.Boolean(string="Is Included Amenity",
                                  default=False)
+    allowed_amenity_ids = fields.Many2many('amenities', compute='_compute_allowed_amenity_ids',
+                                           help="Technical field to store allowed amenities for the selected venue")
+
+    @api.depends('venue_booking_id.venue_id')
+    def _compute_allowed_amenity_ids(self):
+        """Compute allowed amenities based on the selected venue in parent booking."""
+        for line in self:
+            if line.venue_booking_id.venue_id:
+                line.allowed_amenity_ids = line.venue_booking_id.venue_id.venue_line_ids.mapped('amenities_id')
+            else:
+                line.allowed_amenity_ids = self.env['amenities'].search([])
 
     @api.depends('quantity', 'amount')
     def _compute_extra_sub_total(self):

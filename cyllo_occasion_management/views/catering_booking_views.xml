@@ -68,7 +68,7 @@
     </record>
     <!-- Parent menu for catering and hospitality services -->
     <menuitem id="catering_menu_booking" name="Hospitality"
-              parent="venue_booking_menu_root"
+              parent="occasion_management_menu_root"
               sequence="6"/>
     <!-- Submenu to access catering booking records -->
     <menuitem id="catering_menu_booking_child" name="Culinary &amp; Banqueting"

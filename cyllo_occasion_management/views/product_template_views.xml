@@ -13,7 +13,10 @@
                 </span>
             </xpath>
             <xpath expr="//field[@name='categ_id']" position="after">
-                <field name="catering_food_category_id" invisible="not is_catering_product" required="is_catering_product"/>
+                <field name="catering_food_category_ids"
+                       widget="many2many_tags"
+                       invisible="not is_catering_product"
+                       required="is_catering_product"/>
             </xpath>
         </field>
     </record>

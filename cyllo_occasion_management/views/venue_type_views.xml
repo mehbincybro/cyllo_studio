@@ -46,7 +46,7 @@
     <!-- Configuration menu for venue booking management -->
     <menuitem id="venue_booking_management_configuration_menu"
               name="Configuration"
-              parent="venue_booking_menu_root" sequence="80"
+              parent="occasion_management_menu_root" sequence="80"
               groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"/>
     <!-- Menu to access venue type configuration -->
     <menuitem id="venue_type_menu" name="Venue Type"
