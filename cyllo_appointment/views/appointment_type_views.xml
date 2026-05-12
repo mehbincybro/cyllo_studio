@@ -81,6 +81,11 @@
                                     <field name="reschedule_deadline_hours"
                                         invisible="allow_reschedule == False"/>
                                 </group>
+                                <group string="Cancellation">
+                                    <field name="cancel_policy" widget="radio"/>
+                                    <field name="cancel_deadline_hours"
+                                        invisible="cancel_policy != 'up_to'"/>
+                                </group>
                             </group>
                         </page>
                         <!-- Notifications Tab -->
@@ -171,6 +176,7 @@
                 <field name="max_attendees"/>
                 <field name="scheduling_type"/>
                 <field name="allow_reschedule" widget="boolean_toggle"/>
+                <field name="cancel_policy"/>
                 <field name="send_confirmation" widget="boolean_toggle"/>
                 <field name="send_reminder" widget="boolean_toggle"/>
                 <field name="upcoming_appointment_count" string="Upcoming"/>

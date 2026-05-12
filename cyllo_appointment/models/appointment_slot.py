@@ -22,6 +22,7 @@
 from odoo import api, fields, models, _
 from odoo.exceptions import ValidationError
 from datetime import timedelta
+import pytz
 
 
 class AppointmentSlot(models.Model):
@@ -33,6 +34,7 @@ class AppointmentSlot(models.Model):
     appointment_type_id = fields.Many2one(
         'appointment.type', string='Appointment Type', required=True, ondelete='cascade'
     )
+    event_id = fields.Many2one('event.event', string='Event', ondelete='cascade')
     staff_domain = fields.Char(compute='_compute_staff_resource_domain')
     resource_domain = fields.Char(compute='_compute_staff_resource_domain')
     staff_id = fields.Many2one('hr.employee', string='Staff Member')
@@ -87,7 +89,7 @@ class AppointmentSlot(models.Model):
     def _compute_booked_count(self):
         for rec in self:
             active_appointments = rec.appointment_ids.filtered(
-                lambda a: a.state not in ('cancelled', 'rejected')
+                lambda a: a.state not in ('draft', 'cancelled', 'rejected')
             )
             rec.booked_count = sum(active_appointments.mapped('attendee_count'))
             rec.available_count = max(0, rec.max_attendees - rec.booked_count)
@@ -113,3 +115,38 @@ class AppointmentSlot(models.Model):
                 raise ValidationError(_('A staff member must be assigned for this slot because its appointment type requires one.'))
             if rec.appointment_type_id.require_resource and not rec.resource_id:
                 raise ValidationError(_('A resource must be assigned for this slot because its appointment type requires one.'))
+
+    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id', 'appointment_type_id')
+    def _check_working_hours(self):
+        for rec in self:
+            if not rec.start_datetime or not rec.end_datetime:
+                continue
+            if rec.event_id:
+                # Bypass working hours check for event-generated slots
+                continue
+            calendar = False
+            if rec.staff_id and rec.staff_id.resource_calendar_id:
+                calendar = rec.staff_id.resource_calendar_id
+            elif rec.resource_id and rec.resource_id.working_hours_id:
+                calendar = rec.resource_id.working_hours_id
+            elif rec.appointment_type_id.working_hours_id:
+                calendar = rec.appointment_type_id.working_hours_id
+
+            if calendar:
+                user_tz = pytz.timezone(self.env.user.tz or self._context.get('tz') or 'UTC')
+                start_dt = pytz.utc.localize(rec.start_datetime).astimezone(user_tz)
+                end_dt = pytz.utc.localize(rec.end_datetime).astimezone(user_tz)
+                weekday = str(start_dt.weekday())
+                attendances = calendar.attendance_ids.filtered(lambda a: a.dayofweek == weekday)
+                if not attendances:
+                    raise ValidationError(_("You cannot create slots on days where the assigned staff/resource has no working hours (e.g., weekends)."))
+                # Further check if the time is within working hours
+                start_float = start_dt.hour + start_dt.minute / 60.0
+                end_float = end_dt.hour + end_dt.minute / 60.0
+                valid_time = False
+                for att in attendances:
+                    if start_float >= att.hour_from and end_float <= att.hour_to:
+                        valid_time = True
+                        break
+                if not valid_time:
+                    raise ValidationError(_("The selected time slot falls outside the working hours defined in the calendar."))

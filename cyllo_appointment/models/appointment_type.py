@@ -61,12 +61,17 @@ class AppointmentType(models.Model):
         ('60', '1 Hour'),
         ('90', '1.5 Hours'),
         ('120', '2 Hours'),
-    ], string='Slot Interval', default='30', required=True)
+    ], string='Slot Interval',
+        default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+            'cyllo_appointment.default_slot_interval', '30'),
+        required=True)
     min_booking_notice = fields.Float(string='Minimum Booking Notice (hours)',
-                                      default=1.0,
+                                      default=lambda self: float(self.env['ir.config_parameter'].sudo().get_param(
+                                          'cyllo_appointment.default_min_booking_notice', '1.0')),
                                       help='Minimum hours required in advance for booking an appointment')
     max_booking_days = fields.Integer(string='Max Booking Horizon (days)',
-                                      default=60,
+                                      default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param(
+                                          'cyllo_appointment.default_max_booking_days', '60')),
                                       help='How many days in advance can an appointment be booked')
     # Rescheduling
     allow_reschedule = fields.Boolean(string='Allow Rescheduling', default=True)
@@ -74,8 +79,11 @@ class AppointmentType(models.Model):
         string='Reschedule Deadline (hours)', default=24.0,
         help='Hours before appointment when rescheduling is no longer allowed')
     # Cancellation
-    allow_cancel = fields.Boolean(string='Allow Cancellation from Website',
-                                  default=True)
+    cancel_policy = fields.Selection([
+        ('anytime', 'Anytime'),
+        ('up_to', 'Up to specific hours before'),
+        ('never', 'Never'),
+    ], string='Cancellation Policy', default='up_to', required=True)
     cancel_deadline_hours = fields.Float(string='Cancel Deadline (hours)',
                                          default=24.0,
                                          help='Hours before appointment when online cancellation is no longer allowed')
@@ -110,7 +118,8 @@ class AppointmentType(models.Model):
     )
     # Notification Settings
     send_confirmation = fields.Boolean(string='Send Confirmation Email',
-                                       default=True)
+                                       default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+                                           'cyllo_appointment.send_confirmation', 'True') == 'True')
     confirmation_template_id = fields.Many2one(
         'mail.template', string='Confirmation Email Template',
         domain=[('model', '=', 'appointment.appointment')]
@@ -121,10 +130,13 @@ class AppointmentType(models.Model):
         'whatsapp.template', string='WhatsApp Confirmation Template',
         domain=[('model_id.model', '=', 'appointment.appointment')]
     )
-    send_reminder = fields.Boolean(string='Send Reminders', default=True)
+    send_reminder = fields.Boolean(string='Send Reminders',
+                                   default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+                                       'cyllo_appointment.send_reminder', 'True') == 'True')
     reminder_hours_before = fields.Char(
         string='Reminder Times (hours before)',
-        default='24,2',
+        default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+            'cyllo_appointment.default_reminder_hours', '24,2'),
         help='Comma-separated hours before appointment to send reminders (e.g., 24,2)'
     )
     reminder_template_id = fields.Many2one(
@@ -143,9 +155,12 @@ class AppointmentType(models.Model):
         'whatsapp.template', string='WhatsApp Reminder Template',
         domain=[('model_id.model', '=', 'appointment.appointment')]
     )
-    send_followup = fields.Boolean(string='Send Follow-up', default=False)
+    send_followup = fields.Boolean(string='Send Follow-up',
+                                   default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
+                                       'cyllo_appointment.send_followup', 'False') == 'True')
     followup_hours_after = fields.Float(string='Follow-up After (hours)',
-                                        default=24.0)
+                                        default=lambda self: float(self.env['ir.config_parameter'].sudo().get_param(
+                                            'cyllo_appointment.followup_hours', '24.0')))
     followup_template_id = fields.Many2one(
         'mail.template', string='Follow-up Email Template',
         domain=[('model', '=', 'appointment.appointment')]

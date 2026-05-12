@@ -32,21 +32,12 @@
                             invisible="appointment_send_reminder == False">
                             <field name="appointment_default_reminder_hours"/>
                         </setting>
-                        <setting string="Enable SMS Reminders">
-                            <field name="appointment_send_sms"/>
-                        </setting>
                         <setting string="Send Follow-up Emails by Default">
                             <field name="appointment_send_followup"/>
                         </setting>
                         <setting string="Default Follow-up After (hours)"
                             invisible="appointment_send_followup == False">
                             <field name="appointment_followup_hours"/>
-                        </setting>
-                    </block>
-
-                    <block title="Policies" name="appointment_policies">
-                        <setting string="Cancellation Policy" help="Displayed to customers">
-                            <field name="appointment_cancellation_policy"/>
                         </setting>
                     </block>
                 </app>

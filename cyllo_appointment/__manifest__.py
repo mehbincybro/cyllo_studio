@@ -54,6 +54,7 @@
         'website',
         'website_sale',
         'cyllo_whatsapp',
+        'event',
     ],
     'data': [
         # Security
@@ -74,6 +75,7 @@
         'views/website_manage_templates.xml',
         'views/portal_templates.xml',
         'views/sale_order_views.xml',
+        'views/event_event_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

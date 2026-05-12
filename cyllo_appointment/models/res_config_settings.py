@@ -50,12 +50,12 @@ class ResConfigSettings(models.TransientModel):
     appointment_send_confirmation = fields.Boolean(
         string='Send Confirmation Emails by Default',
         config_parameter='cyllo_appointment.send_confirmation',
-        default=True
+        default=False
     )
     appointment_send_reminder = fields.Boolean(
         string='Send Reminder Emails by Default',
         config_parameter='cyllo_appointment.send_reminder',
-        default=True
+        default=False
     )
     appointment_default_reminder_hours = fields.Char(
         string='Default Reminder Times (hours before)',
@@ -72,14 +72,4 @@ class ResConfigSettings(models.TransientModel):
         string='Default Follow-up After (hours)',
         config_parameter='cyllo_appointment.followup_hours',
         default=24.0
-    )
-    appointment_send_sms = fields.Boolean(
-        string='Enable SMS Reminders',
-        config_parameter='cyllo_appointment.send_sms',
-        default=False
-    )
-    appointment_cancellation_policy = fields.Char(
-        string='Cancellation Policy',
-        config_parameter='cyllo_appointment.cancellation_policy',
-        help='Displayed to customers when booking'
     )

@@ -68,7 +68,7 @@ function initBooking() {
                                 'data-id': slot.id,
                                 'data-datetime': slot.start_datetime
                             });
-                        if (slot.is_full) {
+                        if (slot.is_full || slot.is_past) {
                             btn.prop('disabled', true)
                                .addClass('disabled opacity-50')
                                .css('cursor', 'not-allowed');

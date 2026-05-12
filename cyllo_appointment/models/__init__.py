@@ -26,3 +26,4 @@ from . import appointment_slot
 from . import appointment
 from . import res_config_settings
 from . import sale_order
+from . import event_event
