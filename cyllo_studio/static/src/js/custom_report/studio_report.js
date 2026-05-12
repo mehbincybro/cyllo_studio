@@ -11,6 +11,7 @@ import { groupBy } from "@web/core/utils/arrays";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { QrMixin } from "@cyllo_studio/js/custom_report/studio_report_qr";
 import { BoxMixin } from "@cyllo_studio/js/custom_report/studio_report_box";
+import { SignMixin } from "@cyllo_studio/js/custom_report/studio_report_sign";
 
 const Sortable = window.Sortable;
 const SS_TEMPLATE = 'cyllo_report_template';
@@ -72,6 +73,18 @@ export class EditReport extends Component {
                 borderRadius: 4,
                 padding: 8,
                 layoutMode: 'free',
+            },
+            // ── Signature Properties Panel state ──
+            showSignProps: false,
+            signConfig: {
+                role: 'customer',
+                label: 'Authorized Signature',
+                required: true,
+                show_date: false,
+                show_name: false,
+                width: 200,
+                height: 100,
+                alignment: 'left',
             },
             analytics: {
                 total_scans: 0,
@@ -143,7 +156,7 @@ export class EditReport extends Component {
                 }
 
                 // Fallback direct kills for sticky buttons that might escape
-                const sideItems = document.querySelectorAll('.cy_dashboard_back-btn, .cy-left-sidebar, .cy-submenu-logo, #accordionSidebar');
+                const sideItems = document.querySelectorAll('.cy_dashboard_back-btn, .cy-left-sidebar, .cy-submenu-logo, #accordionSidebar, .cy-NavHeader');
                 sideItems.forEach(el => {
                     this._cyElsToRestore.push({ el: el, display: el.style.display || '' });
                     el.style.setProperty('display', 'none', 'important');
@@ -162,8 +175,24 @@ export class EditReport extends Component {
                         });
                     }
                     actionManager.style.setProperty('width', '100%', 'important');
+                    actionManager.style.setProperty('height', '100%', 'important');
                     actionManager.style.setProperty('margin-left', '0', 'important');
                     actionManager.style.setProperty('padding-left', '0', 'important');
+                    actionManager.style.setProperty('margin-top', '0', 'important');
+                }
+
+                // 6. Force the main content container to take full height
+                const content = document.querySelector('.o_content');
+                if (content) {
+                    this._cyElsToRestore.push({
+                        el: content,
+                        height: content.style.height || '',
+                        maxHeight: content.style.maxHeight || '',
+                        overflow: content.style.overflow || ''
+                    });
+                    content.style.setProperty('height', '100vh', 'important');
+                    content.style.setProperty('max-height', '100vh', 'important');
+                    content.style.setProperty('overflow', 'hidden', 'important');
                 }
             }
 
@@ -295,6 +324,7 @@ export class EditReport extends Component {
                     $('.selected').removeClass('selected');
                     boxWrapper.classList.add('selected');
                     self.openBoxProps(boxWrapper);
+                    self.closeSignProps();
                     return;
                 } else {
                     // Clicked a child inside the box – close box props, let normal selection flow
@@ -305,6 +335,18 @@ export class EditReport extends Component {
             } else {
                 // Clicked outside any box – close box props panel
                 self.closeBoxProps();
+            }
+
+            // ── Sign click logic ──
+            const signWrapper = el.closest('.sign-wrapper');
+            if (signWrapper) {
+                e.stopPropagation();
+                $('.selected').removeClass('selected');
+                signWrapper.classList.add('selected');
+                self.openSignProps(signWrapper);
+                return;
+            } else {
+                self.closeSignProps();
             }
 
             // If we clicked something inside a table, we might want to select the cell OR the whole table.
@@ -664,6 +706,32 @@ export class EditReport extends Component {
         });
     }
 
+    async onSignReport() {
+        const report = this.state.reportInfo;
+        const activeId = this.state.records[this.state.currentIndex];
+        if (!report.id || !activeId) return;
+
+        this.state.isSaving = true;
+        try {
+            // First save to ensure the node is persisted
+            await this.save_changes(this);
+
+            // Call the universal backend action
+            const action = await this.orm.call(
+                'ir.actions.report',
+                'action_send_for_signature',
+                [[report.id], [activeId]]
+            );
+
+            if (action) {
+                this.action.doAction(action);
+            }
+        } finally {
+            this.state.isSaving = false;
+        }
+    }
+
+
     onOpenFullAnalytics() {
         this.action.doAction({
             type: 'ir.actions.act_window',
@@ -879,8 +947,8 @@ export class EditReport extends Component {
         const instance = Sortable.create(dropzone, {
             group: { name: 'studio', pull: true, put: true },
             animation: 150,
-            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"]',
-            handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="qr"]',
+            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
+            handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="qr"], .sign-toolbar',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) { self.editor.destroy(); self.editor = null; }
@@ -1010,6 +1078,62 @@ export class EditReport extends Component {
                     self.insertQrBlock(item, config);
                 }
 
+                if (type === 'sign') {
+                    const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
+                    const defaultCfg = {
+                        role: 'customer',
+                        label: 'Authorized Signature',
+                        required: true,
+                        show_date: false,
+                        show_name: false,
+                        width: 200,
+                        height: 100,
+                        alignment: 'left',
+                    };
+                    item.className = 'sign-wrapper c_new';
+                    item.setAttribute('cy-type', 'sign');
+                    item.setAttribute('data-sign-id', signId);
+                    item.setAttribute('data-sign-config', JSON.stringify(defaultCfg));
+                    item.dataset.role = defaultCfg.role;
+                    item.style.width = defaultCfg.width + 'px';
+                    item.style.height = defaultCfg.height + 'px';
+                    item.style.opacity = '1';
+                    item.style.cursor = 'default';
+                    item.style.textAlign = defaultCfg.alignment;
+
+                    item.innerHTML = `
+                        <div class="sign-toolbar" contenteditable="false">
+                            <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
+                        </div>
+                        <div class="sign-content-wrapper" style="pointer-events: none; border: 2px dashed #ccc; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                            <div class="sign-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; font-size: 40px; color: #9ea700;"><i class="fa fa-pencil"></i></div>
+                            <div class="sign-role-badge" style="position: absolute; top: -10px; right: 10px; background: #9ea700; color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; text-transform: uppercase;">${defaultCfg.role}</div>
+                            <div class="sign-empty-line" style="border-bottom: 1px solid #333; width: 80%; margin: 10px auto;"></div>
+                            <p class="sign-label" style="font-weight: bold; font-size: 14px; margin: 0;">${defaultCfg.label}</p>
+                        </div>
+                        <div class="sign-resize-handles" contenteditable="false">
+                            <div class="sign-resize-handle" data-dir="se"></div>
+                        </div>
+                    `;
+
+                    item.querySelector('.sign-delete-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, {
+                            body: 'Delete this Signature?',
+                            confirm: () => {
+                                if (self.state.showSignProps && self._selectedSignEl === item) {
+                                    self.closeSignProps();
+                                }
+                                item.remove();
+                            },
+                            cancel: () => { },
+                        });
+                    };
+
+                    self._setupSignResizeHandles(item);
+                }
+
                 self._refreshDragHandles();
             }
         });
@@ -1028,8 +1152,8 @@ export class EditReport extends Component {
             },
             animation: 150,
 
-            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"]',
-            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"]',
+            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
+            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"], .sign-toolbar',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -1235,6 +1359,62 @@ export class EditReport extends Component {
                         return;
                     }
                     self.insertQrBlock(item, config);
+                }
+
+                if (type === 'sign') {
+                    const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
+                    const defaultCfg = {
+                        role: 'customer',
+                        label: 'Authorized Signature',
+                        required: true,
+                        show_date: false,
+                        show_name: false,
+                        width: 200,
+                        height: 100,
+                        alignment: 'left',
+                    };
+                    item.className = 'sign-wrapper c_new';
+                    item.setAttribute('cy-type', 'sign');
+                    item.setAttribute('data-sign-id', signId);
+                    item.setAttribute('data-sign-config', JSON.stringify(defaultCfg));
+                    item.dataset.role = defaultCfg.role;
+                    item.style.width = defaultCfg.width + 'px';
+                    item.style.height = defaultCfg.height + 'px';
+                    item.style.opacity = '1';
+                    item.style.cursor = 'default';
+                    item.style.textAlign = defaultCfg.alignment;
+
+                    item.innerHTML = `
+                        <div class="sign-toolbar" contenteditable="false">
+                            <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
+                        </div>
+                        <div class="sign-content-wrapper" style="pointer-events: none; border: 2px dashed #ccc; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                            <div class="sign-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; font-size: 40px; color: #9ea700;"><i class="fa fa-pencil"></i></div>
+                            <div class="sign-role-badge" style="position: absolute; top: -10px; right: 10px; background: #9ea700; color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; text-transform: uppercase;">${defaultCfg.role}</div>
+                            <div class="sign-empty-line" style="border-bottom: 1px solid #333; width: 80%; margin: 10px auto;"></div>
+                            <p class="sign-label" style="font-weight: bold; font-size: 14px; margin: 0;">${defaultCfg.label}</p>
+                        </div>
+                        <div class="sign-resize-handles" contenteditable="false">
+                            <div class="sign-resize-handle" data-dir="se"></div>
+                        </div>
+                    `;
+
+                    item.querySelector('.sign-delete-btn').onclick = (e) => {
+                        e.stopPropagation();
+                        self.dialog.add(ConfirmationDialog, {
+                            body: 'Delete this Signature?',
+                            confirm: () => {
+                                if (self.state.showSignProps && self._selectedSignEl === item) {
+                                    self.closeSignProps();
+                                }
+                                item.remove();
+                            },
+                            cancel: () => { },
+                        });
+                    };
+
+                    self._setupSignResizeHandles(item);
                 }
                 // Re-initialize drag handles for the new zone content
                 self._refreshDragHandles();
@@ -2291,6 +2471,77 @@ export class EditReport extends Component {
                 return;
             }
 
+            // ── Sign Node Serialization ──
+            if (el.classList && el.classList.contains('sign-wrapper')) {
+                let cfg = {};
+                try { cfg = JSON.parse(el.dataset.signConfig || '{}'); } catch (ex) { }
+
+                const section = document.createElement('div');
+                section.className = 'o_sign_placeholder';
+                if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
+                if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
+                section.setAttribute('data-role', cfg.role || 'customer');
+
+                // Universal Anchor for backend detection - Tiny white text
+                const anchor = document.createElement('div');
+                anchor.setAttribute('style', 'color: white; font-size: 2pt; line-height: 1px; letter-spacing: normal !important; white-space: nowrap !important; overflow: hidden;');
+                anchor.innerText = `[[SIGN:${cfg.role || 'customer'}]]`;
+                section.appendChild(anchor);
+
+
+
+
+
+                let styleStr = '';
+                if (cfg.width) styleStr += `width:${cfg.width}px;`;
+                if (cfg.alignment) styleStr += `text-align:${cfg.alignment};`;
+                if (styleStr) section.setAttribute('style', styleStr.trim());
+
+
+                // Add inner content
+                const imgContainer = document.createElement('div');
+                imgContainer.setAttribute('t-if', 'doc.signature');
+                const img = document.createElement('img');
+                img.setAttribute('t-att-src', "image_data_uri(doc.signature)");
+                img.setAttribute('style', 'max-height:50px; max-width:150px;');
+                imgContainer.appendChild(img);
+                section.appendChild(imgContainer);
+
+                const emptyLine = document.createElement('div');
+                emptyLine.setAttribute('t-else', '');
+                emptyLine.className = 'sign-empty-line';
+                emptyLine.innerText = '_________________';
+                section.appendChild(emptyLine);
+
+                const labelP = document.createElement('p');
+                labelP.className = 'sign-label';
+                labelP.innerText = cfg.label || 'Authorized Signature';
+                section.appendChild(labelP);
+
+                if (cfg.show_date) {
+                    const dateP = document.createElement('p');
+                    dateP.className = 'sign-date';
+                    // We must output exact HTML without escaping the attributes inappropriately.
+                    // The easiest way is innerHTML
+                    dateP.innerHTML = 'Date: <span t-field="doc.signed_on" t-options=\'{"widget":"date"}\'></span>';
+                    section.appendChild(dateP);
+                }
+
+                if (cfg.show_name) {
+                    const nameP = document.createElement('p');
+                    nameP.className = 'sign-name';
+                    // Assuming doc.signed_by as the printed name field, if not specified in prompt
+                    nameP.innerHTML = 'Name: <span t-field="doc.signed_by"></span>';
+                    section.appendChild(nameP);
+                }
+
+                if (el.parentNode) {
+                    el.parentNode.replaceChild(section, el);
+                    Array.from(section.children).forEach(child => clean(child));
+                }
+                return;
+            }
+
             // Legacy box-wrapper (old format) compat
             if (el.classList && el.classList.contains('box-wrapper')) {
                 if (el.parentNode) {
@@ -2617,7 +2868,7 @@ export class EditReport extends Component {
 // ── Apply focused mixins ─────────────────────────────────────────────────────
 // QR wizard and Box section methods live in dedicated files to keep
 // studio_report.js under a manageable size.
-Object.assign(EditReport.prototype, QrMixin, BoxMixin);
+Object.assign(EditReport.prototype, QrMixin, BoxMixin, SignMixin);
 
 EditReport.template = "custom_report.edit_report";
 registry.category("actions").add("edit_report", EditReport);

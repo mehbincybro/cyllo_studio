@@ -2156,6 +2156,16 @@ select>option {
 }
 
 /* ── A4 page bottom boundary ───────────────────────────────────────────────── */
+.cy-studio.rounded.m-2.overflow-hidden.border-view.shadow {
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+}
+
+.border-view {
+    height: auto !important;
+    min-height: 0 !important;
+}
 
 /* Strong downward shadow on the paper container to visually "ground" the page */
 .cyllo-studio-report-container {
@@ -2295,4 +2305,131 @@ select>option {
 
 span.badge.rounded-pill.bg-primary {
     color: #ffffff !important;
+}
+
+/*justify-content: center !important;*/
+/*transition: all 0.2s ease !important;*/
+/*cursor: pointer !important;*/
+/*min-width: 0 !important;*/
+/*white-space: nowrap !important;*/
+/*box-shadow: none !important;*/
+/*}*/
+
+.cy-hdr-discard:hover {
+    background: #f3f4f6 !important;
+    border-color: #9ca3af !important;
+    color: #111827 !important;
+}
+
+span.badge.rounded-pill.bg-primary {
+    color: #ffffff !important;
+}
+
+/* ── Signature Node Styling ────────────────────────────────────────────── */
+.sign-wrapper {
+    position: relative;
+    box-sizing: border-box;
+    margin: 5px;
+    display: inline-block;
+    transition: outline 0.2s, box-shadow 0.2s;
+}
+
+.sign-wrapper:hover {
+    outline: 2px dashed #ccc;
+}
+
+.sign-wrapper.selected {
+    outline: 2px solid #5b8dee;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.sign-toolbar {
+    position: absolute;
+    top: -24px;
+    left: 0;
+    background: #5b8dee;
+    border-radius: 4px 4px 0 0;
+    display: flex;
+    gap: 2px;
+    padding: 2px 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.sign-wrapper:hover > .sign-toolbar,
+.sign-wrapper.selected > .sign-toolbar {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.sign-toolbar span {
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+    border-radius: 2px;
+}
+
+.sign-toolbar span:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.sign-drag-handle {
+    cursor: grab !important;
+}
+
+.sign-drag-handle:active {
+    cursor: grabbing !important;
+}
+
+.sign-delete-btn:hover {
+    background: #e85e6a !important;
+}
+
+.sign-resize-handles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 5;
+}
+
+.sign-resize-handle {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffffff;
+    border: 2px solid #5b8dee;
+    border-radius: 50%;
+    pointer-events: auto;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.sign-wrapper:hover .sign-resize-handle,
+.sign-wrapper.selected .sign-resize-handle {
+    opacity: 1;
+}
+
+.sign-resize-handle[data-dir="se"] {
+    bottom: -5px;
+    right: -5px;
+    cursor: se-resize;
+}
+
+.o_sign_placeholder {
+    display: inline-block;
+    vertical-align: top;
+    margin: 5px;
+}
+
+.previewing .sign-wrapper.selected {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.previewing .sign-toolbar,
+.previewing .sign-resize-handle {
+    display: none !important;
 }
