@@ -63,6 +63,7 @@ class Appointment(models.Model):
     duration = fields.Float(string='Duration (hours)',
                             compute='_compute_duration', store=True)
     slot_id = fields.Many2one('appointment.slot', string='Time Slot')
+    event_id = fields.Many2one('event.event', string='Event', readonly=True)
     timezone = fields.Selection(
         '_tz_get', string='Timezone',
         default=lambda self: self.env.user.tz or 'UTC'
@@ -235,6 +236,11 @@ class Appointment(models.Model):
             }
             event = self.env['calendar.event'].create(event_vals)
             record.calendar_event_id = event.id
+            if record.event_id:
+                self.env['event.registration'].create({
+                    'event_id': record.event_id.id,
+                    'partner_id': record.partner_id.id,
+                })
         for record in records:
             if record.state == 'confirmed':
                 if record.appointment_type_id.send_confirmation:
@@ -284,6 +290,8 @@ class Appointment(models.Model):
                 self.staff_id = slot.staff_id
             if slot.resource_id:
                 self.resource_id = slot.resource_id
+            if slot.event_id:
+                self.event_id = slot.event_id
 
     @api.onchange('start_datetime', 'appointment_type_id')
     def _onchange_start_datetime(self):

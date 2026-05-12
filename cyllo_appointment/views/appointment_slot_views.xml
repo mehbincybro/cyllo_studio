@@ -17,6 +17,7 @@
                     <group>
                         <group string="Slot Details">
                             <field name="appointment_type_id" domain="[('scheduling_type', '=', 'predefined')]"/>
+                            <field name="event_id" invisible="event_id == False"/>
                             <field name="start_datetime"/>
                             <field name="end_datetime"/>
                             <field name="duration" widget="float_time"/>

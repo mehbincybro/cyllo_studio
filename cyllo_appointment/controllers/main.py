@@ -67,13 +67,13 @@ class AppointmentWebsiteController(http.Controller):
                                  resource_id=None, **kw):
         """Returns available slots dynamically or predefined slots based on date."""
         target_date = datetime.strptime(date, "%Y-%m-%d").date()
+        now_utc = datetime.utcnow()
 
         if appointment_type.scheduling_type == 'predefined':
             # Predefined slots
             domain = [
                 ('appointment_type_id', '=', appointment_type.id),
-                ('start_datetime', '>=',
-                 datetime.combine(target_date, datetime.min.time())),
+                ('start_datetime', '>=', datetime.combine(target_date, datetime.min.time())),
                 ('end_datetime', '<=',
                  datetime.combine(target_date, datetime.max.time())),
             ]
@@ -95,6 +95,7 @@ class AppointmentWebsiteController(http.Controller):
                     'start_datetime': slot.start_datetime.strftime(
                         '%Y-%m-%d %H:%M:%S'),
                     'is_dynamic': False,
+                    'is_past': slot.start_datetime < now_utc,
                     'staff_id': slot.staff_id.id if slot.staff_id else False,
                     'resource_id': slot.resource_id.id if slot.resource_id else False,
                 })
@@ -154,6 +155,7 @@ class AppointmentWebsiteController(http.Controller):
                         'is_full': bool(overlapping),
                         'start_datetime': utc_start.strftime('%Y-%m-%d %H:%M:%S'),
                         'is_dynamic': True,
+                        'is_past': utc_start < now_utc,
                     })
                     current_time += timedelta(minutes=interval_minutes)
 
@@ -275,7 +277,6 @@ class AppointmentWebsiteController(http.Controller):
         appointment = self._get_appointment_by_token(token)
         if not appointment:
             return request.render('http_routing.403')
-
         now = fields.Datetime.now()
         atype = appointment.appointment_type_id
         can_reschedule = (
@@ -285,13 +286,13 @@ class AppointmentWebsiteController(http.Controller):
                  appointment.start_datetime - timedelta(
                             hours=atype.reschedule_deadline_hours) > now)
         )
-        can_cancel = (
-                atype.allow_cancel and
-                appointment.state == 'confirmed' and
-                (not atype.cancel_deadline_hours or
-                 appointment.start_datetime - timedelta(
-                            hours=atype.cancel_deadline_hours) > now)
-        )
+        can_cancel = False
+        if appointment.state == 'confirmed':
+            if atype.cancel_policy == 'anytime':
+                can_cancel = True
+            elif atype.cancel_policy == 'up_to':
+                deadline = appointment.start_datetime - timedelta(hours=atype.cancel_deadline_hours)
+                can_cancel = (now < deadline)
 
         return request.render('cyllo_appointment.appointment_manage', {
             'appointment': appointment,
@@ -307,15 +308,12 @@ class AppointmentWebsiteController(http.Controller):
         appointment = self._get_appointment_by_token(token)
         if not appointment or appointment.state != 'confirmed':
             return request.redirect('/appointment')
-
         atype = appointment.appointment_type_id
         if not atype.allow_reschedule:
             return request.redirect('/appointment/manage/' + token)
-
         staffs = False
         if atype.require_staff:
             staffs = atype.sudo().staff_ids or request.env['hr.employee'].sudo().search([])
-
         resources = False
         if atype.require_resource:
             resources = atype.sudo().resource_ids or request.env['appointment.resource'].sudo().search([])
@@ -404,13 +402,13 @@ class AppointmentWebsiteController(http.Controller):
                  appointment.start_datetime - timedelta(
                             hours=atype.reschedule_deadline_hours) > now)
         )
-        can_cancel = (
-                atype.allow_cancel and
-                appointment.state == 'confirmed' and
-                (not atype.cancel_deadline_hours or
-                 appointment.start_datetime - timedelta(
-                            hours=atype.cancel_deadline_hours) > now)
-        )
+        can_cancel = False
+        if appointment.state == 'confirmed':
+            if atype.cancel_policy == 'anytime':
+                can_cancel = True
+            elif atype.cancel_policy == 'up_to':
+                deadline = appointment.start_datetime - timedelta(hours=atype.cancel_deadline_hours)
+                can_cancel = (now < deadline)
 
         return request.render('cyllo_appointment.appointment_manage', {
             'appointment': appointment,
@@ -429,9 +427,9 @@ class AppointmentWebsiteController(http.Controller):
             return request.redirect('/appointment')
         atype = appointment.appointment_type_id
         now = fields.Datetime.now()
-        if not atype.allow_cancel:
+        if atype.cancel_policy == 'never':
             return request.redirect('/appointment/manage/' + token)
-        if atype.cancel_deadline_hours:
+        if atype.cancel_policy == 'up_to':
             deadline = appointment.start_datetime - timedelta(
                 hours=atype.cancel_deadline_hours)
             if now > deadline:

@@ -67,6 +67,7 @@
                             <field name="duration" widget="float_time" readonly="1"/>
                             <field name="timezone"/>
                             <field name="slot_id" string="Event / Slot" domain="[('state', '!=', 'fully_booked')]"/>
+                            <field name="event_id" invisible="event_id == False"/>
                         </group>
                     </group>
                     <group>
