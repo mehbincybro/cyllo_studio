@@ -32,18 +32,24 @@ class AppointmentSlot(models.Model):
 
     name = fields.Char(string='Slot Name', required=True)
     appointment_type_id = fields.Many2one(
-        'appointment.type', string='Appointment Type', required=True, ondelete='cascade'
+        'appointment.type', string='Appointment Type', required=True,
+        ondelete='cascade'
     )
-    event_id = fields.Many2one('event.event', string='Event', ondelete='cascade')
+    event_id = fields.Many2one('event.event', string='Event',
+                               ondelete='cascade')
     staff_domain = fields.Char(compute='_compute_staff_resource_domain')
     resource_domain = fields.Char(compute='_compute_staff_resource_domain')
     staff_id = fields.Many2one('hr.employee', string='Staff Member')
     resource_id = fields.Many2one('appointment.resource', string='Resource')
     start_datetime = fields.Datetime(string='Start', required=True)
-    end_datetime = fields.Datetime(string='End', required=True, compute='_compute_end_datetime', store=True, readonly=False)
-    duration = fields.Float(string='Duration (hours)', related='appointment_type_id.duration')
+    end_datetime = fields.Datetime(string='End', required=True,
+                                   compute='_compute_end_datetime', store=True,
+                                   readonly=False)
+    duration = fields.Float(string='Duration (hours)',
+                            related='appointment_type_id.duration')
     max_attendees = fields.Integer(
-        string='Max Attendees', related='appointment_type_id.max_attendees', store=True
+        string='Max Attendees', related='appointment_type_id.max_attendees',
+        store=True
     )
     booked_count = fields.Integer(
         string='Booked', compute='_compute_booked_count'
@@ -64,7 +70,8 @@ class AppointmentSlot(models.Model):
         'appointment.appointment', 'slot_id', string='Appointments'
     )
 
-    @api.depends('appointment_type_id', 'appointment_type_id.staff_ids', 'appointment_type_id.resource_ids')
+    @api.depends('appointment_type_id', 'appointment_type_id.staff_ids',
+                 'appointment_type_id.resource_ids')
     def _compute_staff_resource_domain(self):
         for rec in self:
             if rec.appointment_type_id and rec.appointment_type_id.staff_ids:
@@ -81,11 +88,13 @@ class AppointmentSlot(models.Model):
     def _compute_end_datetime(self):
         for rec in self:
             if rec.start_datetime and rec.duration:
-                rec.end_datetime = rec.start_datetime + timedelta(hours=rec.duration)
+                rec.end_datetime = rec.start_datetime + timedelta(
+                    hours=rec.duration)
             else:
                 rec.end_datetime = rec.start_datetime
 
-    @api.depends('appointment_ids', 'appointment_ids.state', 'appointment_ids.attendee_count', 'max_attendees')
+    @api.depends('appointment_ids', 'appointment_ids.state',
+                 'appointment_ids.attendee_count', 'max_attendees')
     def _compute_booked_count(self):
         for rec in self:
             active_appointments = rec.appointment_ids.filtered(
@@ -106,17 +115,21 @@ class AppointmentSlot(models.Model):
         for rec in self:
             if rec.start_datetime and rec.end_datetime:
                 if rec.end_datetime <= rec.start_datetime:
-                    raise ValidationError(_('End time must be after start time.'))
+                    raise ValidationError(
+                        _('End time must be after start time.'))
 
     @api.constrains('appointment_type_id', 'staff_id', 'resource_id')
     def _check_required_assignments(self):
         for rec in self:
             if rec.appointment_type_id.require_staff and not rec.staff_id:
-                raise ValidationError(_('A staff member must be assigned for this slot because its appointment type requires one.'))
+                raise ValidationError(
+                    _('A staff member must be assigned for this slot because its appointment type requires one.'))
             if rec.appointment_type_id.require_resource and not rec.resource_id:
-                raise ValidationError(_('A resource must be assigned for this slot because its appointment type requires one.'))
+                raise ValidationError(
+                    _('A resource must be assigned for this slot because its appointment type requires one.'))
 
-    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id', 'appointment_type_id')
+    @api.constrains('start_datetime', 'end_datetime', 'staff_id', 'resource_id',
+                    'appointment_type_id')
     def _check_working_hours(self):
         for rec in self:
             if not rec.start_datetime or not rec.end_datetime:
@@ -133,13 +146,17 @@ class AppointmentSlot(models.Model):
                 calendar = rec.appointment_type_id.working_hours_id
 
             if calendar:
-                user_tz = pytz.timezone(self.env.user.tz or self._context.get('tz') or 'UTC')
-                start_dt = pytz.utc.localize(rec.start_datetime).astimezone(user_tz)
+                user_tz = pytz.timezone(
+                    self.env.user.tz or self._context.get('tz') or 'UTC')
+                start_dt = pytz.utc.localize(rec.start_datetime).astimezone(
+                    user_tz)
                 end_dt = pytz.utc.localize(rec.end_datetime).astimezone(user_tz)
                 weekday = str(start_dt.weekday())
-                attendances = calendar.attendance_ids.filtered(lambda a: a.dayofweek == weekday)
+                attendances = calendar.attendance_ids.filtered(
+                    lambda a: a.dayofweek == weekday)
                 if not attendances:
-                    raise ValidationError(_("You cannot create slots on days where the assigned staff/resource has no working hours (e.g., weekends)."))
+                    raise ValidationError(
+                        _("You cannot create slots on days where the assigned staff/resource has no working hours (e.g., weekends)."))
                 # Further check if the time is within working hours
                 start_float = start_dt.hour + start_dt.minute / 60.0
                 end_float = end_dt.hour + end_dt.minute / 60.0
@@ -149,4 +166,5 @@ class AppointmentSlot(models.Model):
                         valid_time = True
                         break
                 if not valid_time:
-                    raise ValidationError(_("The selected time slot falls outside the working hours defined in the calendar."))
+                    raise ValidationError(
+                        _("The selected time slot falls outside the working hours defined in the calendar."))

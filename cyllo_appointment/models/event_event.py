@@ -49,12 +49,10 @@ class EventEvent(models.Model):
 
         slot_interval_minutes = int(self.appointment_type_id.slot_interval)
         duration_hours = self.appointment_type_id.duration
-        # Delete existing empty slots so we can regenerate safely
         empty_slots = self.appointment_slot_ids.filtered(lambda s: s.booked_count == 0)
         empty_slots.unlink()
-        # Event dates are stored in UTC. We'll work in UTC throughout.
-        event_start_utc = self.date_begin  # naive UTC datetime
-        event_end_utc = self.date_end      # naive UTC datetime
+        event_start_utc = self.date_begin
+        event_end_utc = self.date_end
         new_slots = []
         for staff in self.appointment_staff_ids:
             calendar = staff.resource_calendar_id
@@ -66,7 +64,7 @@ class EventEvent(models.Model):
             current_day = event_start_local.date()
             end_day = event_end_local.date()
             while current_day <= end_day:
-                weekday = str(current_day.weekday())  # '0'=Mon … '6'=Sun
+                weekday = str(current_day.weekday())
                 if calendar:
                     attendances = calendar.attendance_ids.filtered(
                         lambda a: a.dayofweek == weekday
@@ -81,7 +79,6 @@ class EventEvent(models.Model):
                 for att in attendances:
                     h_from, m_from = divmod(int(att.hour_from * 60), 60)
                     h_to, m_to = divmod(int(att.hour_to * 60), 60)
-
                     # Build window start/end in staff local time, then convert to UTC
                     window_start_local = staff_tz.localize(
                         datetime.combine(current_day, time(h_from, m_from))
@@ -89,7 +86,6 @@ class EventEvent(models.Model):
                     window_end_local = staff_tz.localize(
                         datetime.combine(current_day, time(h_to, m_to))
                     )
-                    # Clamp to the overall event boundaries
                     event_start_aware = pytz.utc.localize(event_start_utc)
                     event_end_aware = pytz.utc.localize(event_end_utc)
                     window_start = max(window_start_local, event_start_aware)
@@ -100,7 +96,6 @@ class EventEvent(models.Model):
                     slot_start = window_start
                     while slot_start + timedelta(hours=duration_hours) <= window_end:
                         slot_end = slot_start + timedelta(hours=duration_hours)
-                        # Store as naive UTC
                         start_utc = slot_start.astimezone(pytz.utc).replace(tzinfo=None)
                         end_utc = slot_end.astimezone(pytz.utc).replace(tzinfo=None)
                         # Skip if already exists (e.g. booked from previous generation)

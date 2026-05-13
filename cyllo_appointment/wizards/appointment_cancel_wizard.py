@@ -19,8 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models, _
+from odoo import api, fields, models, _
 import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class AppointmentCancelWizard(models.TransientModel):
@@ -39,6 +41,50 @@ class AppointmentCancelWizard(models.TransientModel):
         ('system', 'System'),
     ], string='Cancelled By', default='staff', required=True)
     send_notification = fields.Boolean(string='Notify Customer', default=True)
+    # Refund preview fields (all readonly/computed — no user input needed)
+    is_paid_appointment = fields.Boolean(
+        compute='_compute_refund_preview', string='Is Paid')
+    refund_policy = fields.Selection([
+        ('none', 'No Refund'),
+        ('full', 'Full Refund to Original Payment Method'),
+        ('partial', 'Partial Refund to Original Payment Method'),
+        ('credit', 'Credit Note (Redeemable on Future Appointments Only)'),
+    ], compute='_compute_refund_preview', string='Refund Policy')
+    expected_refund_percentage = fields.Float(
+        compute='_compute_refund_preview', string='Refund %')
+    expected_refund_amount = fields.Monetary(
+        compute='_compute_refund_preview', string='Estimated Refund',
+        currency_field='currency_id')
+    currency_id = fields.Many2one(
+        'res.currency',
+        related='appointment_id.company_id.currency_id',
+        readonly=True)
+
+    @api.depends('appointment_id')
+    def _compute_refund_preview(self):
+        for rec in self:
+            appt = rec.appointment_id
+            appt_type = appt.appointment_type_id
+            rec.is_paid_appointment = appt_type.is_paid
+            rec.refund_policy = appt_type.refund_policy
+            if not appt_type.is_paid or appt_type.refund_policy == 'none':
+                rec.expected_refund_percentage = 0.0
+                rec.expected_refund_amount = 0.0
+                continue
+            pct = appt_type.get_refund_percentage(
+                cancellation_datetime=fields.Datetime.now(),
+                appointment_start=appt.start_datetime,
+            )
+            rec.expected_refund_percentage = pct
+
+            invoice = appt._get_paid_invoice()
+            if invoice:
+                base_amount = invoice.amount_total
+            elif appt_type.product_id:
+                base_amount = appt_type.product_id.list_price
+            else:
+                base_amount = 0.0
+            rec.expected_refund_amount = base_amount * pct / 100.0 if base_amount else 0.0
 
     def action_confirm_cancel(self):
         self.ensure_one()
@@ -50,8 +96,7 @@ class AppointmentCancelWizard(models.TransientModel):
         })
         if self.send_notification:
             appt.message_post(
-                body=_(
-                    'Appointment cancelled. Reason: %s') % self.cancellation_reason,
+                body=_('Appointment cancelled. Reason: %s') % self.cancellation_reason,
                 subtype_xmlid='mail.mt_note'
             )
         # Send Staff Cancellation Email
@@ -64,7 +109,7 @@ class AppointmentCancelWizard(models.TransientModel):
                 try:
                     staff_tmpl.send_mail(appt.id, force_send=True)
                 except Exception as e:
-                    logging.getLogger(__name__).warning(
+                    _logger.warning(
                         "Failed to send staff cancellation email for %s: %s",
                         appt.name, str(e)
                     )

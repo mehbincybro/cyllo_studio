@@ -36,6 +36,14 @@
                                 <span class="o_stat_text">Rescheduled</span>
                             </div>
                         </button>
+                        <button class="oe_stat_button" type="object"
+                            name="action_view_refund_credit_note"
+                            icon="fa-file-text-o"
+                            invisible="refund_credit_note_id == False">
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Credit Note</span>
+                            </div>
+                        </button>
                     </div>
                     <!-- Priority & Reference -->
                     <div class="apt-form-header">
@@ -120,6 +128,19 @@
                             <group>
                                 <field name="cancelled_by" readonly="1"/>
                                 <field name="cancellation_reason" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Refund" name="refund"
+                            invisible="state != 'cancelled' or sale_order_id == False">
+                            <group>
+                                <group string="Refund Details">
+                                    <field name="refund_credit_note_id" readonly="1"
+                                        widget="many2one" string="Credit Note"/>
+                                    <field name="refund_status" readonly="1" string="Status"/>
+                                </group>
+                                <group string="Applied Policy">
+                                    <field name="appointment_type_id" readonly="1" string="Type"/>
+                                </group>
                             </group>
                         </page>
                     </notebook>
@@ -286,7 +307,6 @@
             </search>
         </field>
     </record>
-
     <!-- Main Action -->
     <record id="action_appointment" model="ir.actions.act_window">
         <field name="name">Appointments</field>
@@ -298,7 +318,6 @@
             <p>Schedule your first appointment.</p>
         </field>
     </record>
-
     <!-- Today's Appointments Action -->
     <record id="action_appointment_today" model="ir.actions.act_window">
         <field name="name">Today's Appointments</field>
@@ -307,7 +326,6 @@
         <field name="context">{'search_default_today': 1}</field>
         <field name="domain">[('state', 'not in', ['cancelled', 'rejected', 'no_show'])]</field>
     </record>
-
     <!-- Cancel Wizard View -->
     <record id="view_appointment_cancel_wizard_form" model="ir.ui.view">
         <field name="name">appointment.cancel.wizard.form</field>
@@ -320,6 +338,33 @@
                     <field name="cancelled_by"/>
                     <field name="send_notification"/>
                 </group>
+                 <!-- Refund preview — shown only for paid appointments -->
+                <group string="Refund Preview"
+                    invisible="refund_policy == 'none' or not is_paid_appointment">
+                    <field name="is_paid_appointment" invisible="1"/>
+                    <field name="refund_policy" readonly="1" string="Policy"/>
+                    <field name="expected_refund_percentage" readonly="1"
+                        string="Refund %"
+                        invisible="refund_policy == 'credit'"/>
+                    <field name="expected_refund_amount" readonly="1"
+                        string="Estimated Refund" widget="monetary"
+                        invisible="refund_policy == 'credit'"/>
+                    <field name="expected_refund_amount" readonly="1"
+                        string="Credit Note Amount" widget="monetary"
+                        invisible="refund_policy != 'credit'"/>
+                </group>
+                <!-- Alert outside the group so it spans full width -->
+                <div class="alert alert-info mt-2" role="alert"
+                    invisible="refund_policy == 'none' or not is_paid_appointment">
+                    <i class="fa fa-info-circle me-1"/>
+                    <span invisible="refund_policy != 'credit'">
+                        A credit note will be issued and kept open as a redeemable balance.
+                        No cash refund — the customer can use this against a future appointment.
+                    </span>
+                    <span invisible="refund_policy not in ['full', 'partial']">
+                        A credit note will be created and reconciled against the original payment.
+                    </span>
+                </div>
                 <footer>
                     <button name="action_confirm_cancel" type="object" string="Cancel Appointment"
                         class="btn-danger"/>
@@ -328,7 +373,6 @@
             </form>
         </field>
     </record>
-
     <!-- Reschedule Wizard View -->
     <record id="view_appointment_reschedule_wizard_form" model="ir.ui.view">
         <field name="name">appointment.reschedule.wizard.form</field>
