@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Green Metrics',
-    'version': '1.0.0',
+    'version': '1.0',
     'category': 'Sustainability',
     'summary': 'Carbon emission sources, factors, and assignment rules',
     'author': 'Cyllo',
@@ -29,7 +29,7 @@
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
     'depends': ['base', 'project', 'mrp', 'fleet', 'account', 'product'],
-    'icon': '/cyllo_green_metrics/static/description/cyllo_carbon_footprint.svg',
+    'icon': '/cyllo_green_metrics/static/description/cyllo_green_metrics.svg',
     'data': [
         'data/project_data.xml',
         'data/credit_product_data.xml',

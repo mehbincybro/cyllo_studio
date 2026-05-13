@@ -27,3 +27,4 @@ class CateringFoodCategory(models.Model):
     _description = 'Catering Food Category'
 
     name = fields.Char(string="Name", required=True)
+    product_ids = fields.Many2many('product.template', string="Products")

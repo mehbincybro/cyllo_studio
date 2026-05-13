@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Amenities -->
+        <record id="amenity_stage" model="amenities">
+            <field name="name">Stage</field>
+            <field name="amount">50.0</field>
+        </record>
+        <record id="amenity_sound" model="amenities">
+            <field name="name">Sound System</field>
+            <field name="amount">100.0</field>
+        </record>
+        <record id="amenity_lighting" model="amenities">
+            <field name="name">Professional Lighting</field>
+            <field name="amount">75.0</field>
+        </record>
+        <record id="amenity_wifi" model="amenities">
+            <field name="name">High-Speed WiFi</field>
+            <field name="amount">20.0</field>
+        </record>
+        <record id="amenity_projector" model="amenities">
+            <field name="name">4K Projector</field>
+            <field name="amount">40.0</field>
+        </record>
+
+        <!-- Venues -->
+        <record id="venue_ballroom" model="venue">
+            <field name="name">Grand Ballroom</field>
+            <field name="venue_type_id" ref="cyllo_occasion_management.venue_type1"/>
+            <field name="venue_location">Floor 1, East Wing</field>
+            <field name="capacity">500</field>
+            <field name="seating">400</field>
+            <field name="venue_charge_day">1500.0</field>
+            <field name="venue_charge_hour">200.0</field>
+            <field name="open_time">8.0</field>
+            <field name="closed_time">23.0</field>
+            <field name="venue_line_ids" eval="[
+                (0, 0, {'amenities_id': ref('amenity_stage'), 'quantity': 1}),
+                (0, 0, {'amenities_id': ref('amenity_sound'), 'quantity': 1}),
+                (0, 0, {'amenities_id': ref('amenity_lighting'), 'quantity': 1})
+            ]"/>
+        </record>
+
+        <record id="venue_rooftop" model="venue">
+            <field name="name">Sunset Rooftop Garden</field>
+            <field name="venue_type_id" ref="cyllo_occasion_management.venue_type8"/>
+            <field name="venue_location">Floor 10, Roof</field>
+            <field name="capacity">200</field>
+            <field name="seating">150</field>
+            <field name="venue_charge_day">1200.0</field>
+            <field name="venue_charge_hour">150.0</field>
+            <field name="open_time">16.0</field>
+            <field name="closed_time">2.0</field>
+            <field name="venue_line_ids" eval="[
+                (0, 0, {'amenities_id': ref('amenity_sound'), 'quantity': 1}),
+                (0, 0, {'amenities_id': ref('amenity_wifi'), 'quantity': 1})
+            ]"/>
+        </record>
+
+        <record id="venue_conference_room" model="venue">
+            <field name="name">Boardroom B</field>
+            <field name="venue_type_id" ref="cyllo_occasion_management.venue_type2"/>
+            <field name="venue_location">Floor 3, Room 302</field>
+            <field name="capacity">20</field>
+            <field name="seating">20</field>
+            <field name="venue_charge_day">400.0</field>
+            <field name="venue_charge_hour">60.0</field>
+            <field name="open_time">8.5</field>
+            <field name="closed_time">18.0</field>
+            <field name="venue_line_ids" eval="[
+                (0, 0, {'amenities_id': ref('amenity_projector'), 'quantity': 1}),
+                (0, 0, {'amenities_id': ref('amenity_wifi'), 'quantity': 1})
+            ]"/>
+        </record>
+
+        <!-- Platter Types -->
+        <record id="platter_wedding" model="platter.type">
+            <field name="name">Grand Wedding Buffet</field>
+            <field name="amount_per_person">55.0</field>
+            <field name="platter_food_line_ids" eval="[
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.food_cat_starter'),
+                    'food_ids': [(4, ref('cyllo_occasion_management.product_spring_rolls'))]
+                }),
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.food_cat_main'),
+                    'food_ids': [(4, ref('cyllo_occasion_management.product_biryani'))]
+                }),
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.food_cat_dessert'),
+                    'food_ids': [(4, ref('cyllo_occasion_management.product_ice_cream'))]
+                })
+            ]"/>
+            <field name="catering_member_ids" eval="[
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.staff_cat_chefs'),
+                    'count': 2
+                }),
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.staff_cat_servers'),
+                    'count': 10
+                })
+            ]"/>
+        </record>
+
+        <record id="platter_corporate" model="platter.type">
+            <field name="name">Corporate Lunch</field>
+            <field name="amount_per_person">35.0</field>
+            <field name="platter_food_line_ids" eval="[
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.food_cat_starter'),
+                    'food_ids': [(4, ref('cyllo_occasion_management.product_spring_rolls'))]
+                }),
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.food_cat_main'),
+                    'food_ids': [(4, ref('cyllo_occasion_management.product_biryani'))]
+                })
+            ]"/>
+            <field name="catering_member_ids" eval="[
+                (0, 0, {
+                    'category_id': ref('cyllo_occasion_management.staff_cat_servers'),
+                    'count': 4
+                })
+            ]"/>
+        </record>
+
+        <!-- Demo Venue Bookings -->
+        <record id="demo_booking_1" model="venue.booking">
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="venue_id" ref="venue_ballroom"/>
+            <field name="date" eval="datetime.now().strftime('%Y-%m-%d')"/>
+            <field name="start_date" eval="(datetime.now() + relativedelta(days=10, hours=10)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_date" eval="(datetime.now() + relativedelta(days=10, hours=22)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="booking_type">hour</field>
+            <field name="guest_count">300</field>
+            <field name="need_catering" eval="True"/>
+        </record>
+
+        <record id="demo_booking_2" model="venue.booking">
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="venue_id" ref="venue_conference_room"/>
+            <field name="date" eval="datetime.now().strftime('%Y-%m-%d')"/>
+            <field name="start_date" eval="(datetime.now() + relativedelta(days=5, hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_date" eval="(datetime.now() + relativedelta(days=5, hours=17)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="booking_type">day</field>
+            <field name="guest_count">15</field>
+        </record>
+
+        <!-- Demo Catering Bookings -->
+        <record id="demo_catering_1" model="catering.booking">
+            <field name="partner_id" ref="base.res_partner_2"/>
+            <field name="platter_type_id" ref="platter_wedding"/>
+            <field name="start_date" eval="(datetime.now() + relativedelta(days=10, hours=12)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_date" eval="(datetime.now() + relativedelta(days=10, hours=20)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="guest_count">300</field>
+            <field name="venue_booking_id" ref="demo_booking_1"/>
+            <field name="state">confirm</field>
+        </record>
+
+        <record id="demo_catering_2" model="catering.booking">
+            <field name="partner_id" ref="base.res_partner_1"/>
+            <field name="platter_type_id" ref="platter_corporate"/>
+            <field name="start_date" eval="(datetime.now() + relativedelta(days=7, hours=11)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="end_date" eval="(datetime.now() + relativedelta(days=7, hours=15)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="guest_count">50</field>
+        </record>
+
+        <!-- Demo Employees for Catering -->
+        <record id="employee_chef_1" model="hr.employee">
+            <field name="name">Gordon Ramsay</field>
+            <field name="job_title">Head Chef</field>
+            <field name="work_email">gordon@catering.example.com</field>
+        </record>
+        <record id="employee_chef_2" model="hr.employee">
+            <field name="name">Jamie Oliver</field>
+            <field name="job_title">Sous Chef</field>
+            <field name="work_email">jamie@catering.example.com</field>
+        </record>
+        <record id="employee_server_1" model="hr.employee">
+            <field name="name">John Doe</field>
+            <field name="job_title">Senior Server</field>
+        </record>
+        <record id="employee_server_2" model="hr.employee">
+            <field name="name">Jane Smith</field>
+            <field name="job_title">Server</field>
+        </record>
+
+        <!-- Update Catering Categories with Employees -->
+        <record id="cyllo_occasion_management.staff_cat_chefs" model="catering.category">
+            <field name="employee_ids" eval="[(4, ref('employee_chef_1')), (4, ref('employee_chef_2'))]"/>
+        </record>
+        <record id="cyllo_occasion_management.staff_cat_servers" model="catering.category">
+            <field name="employee_ids" eval="[(4, ref('employee_server_1')), (4, ref('employee_server_2'))]"/>
+        </record>
+
+        <!-- Demo Events -->
+        <record id="demo_event_1" model="event.event">
+            <field name="name">Global Tech Summit 2026</field>
+            <field name="date_begin" eval="(datetime.now() + relativedelta(days=15, hours=9)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_end" eval="(datetime.now() + relativedelta(days=15, hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="venue_id" ref="venue_ballroom"/>
+            <field name="organizer_id" ref="base.main_partner"/>
+            <field name="venue_booking_id" ref="demo_booking_1"/>
+        </record>
+
+        <record id="demo_event_2" model="event.event">
+            <field name="name">Product Launch 2026</field>
+            <field name="date_begin" eval="(datetime.now() + relativedelta(days=20, hours=18)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="date_end" eval="(datetime.now() + relativedelta(days=20, hours=22)).strftime('%Y-%m-%d %H:%M:%S')"/>
+            <field name="venue_id" ref="venue_rooftop"/>
+            <field name="organizer_id" ref="base.res_partner_1"/>
+        </record>
+
+    </data>
+</odoo>

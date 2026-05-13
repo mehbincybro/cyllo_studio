@@ -26,4 +26,4 @@ class ProductTemplate(models.Model):
     _inherit = 'product.template'
 
     is_catering_product = fields.Boolean(string="Is Catering Product", help="Check if this product is used for catering")
-    catering_food_category_id = fields.Many2one('catering.food.category', string="Catering Food Category")
+    catering_food_category_ids = fields.Many2many('catering.food.category', string="Catering Food Categories")

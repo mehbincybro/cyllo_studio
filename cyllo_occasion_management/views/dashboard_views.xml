@@ -7,7 +7,7 @@
     </record>
     <!-- Root menu for accessing dashboard features -->
     <menuitem id="dashboard_view_menu_action" name="Dashboard"
-              parent="cyllo_occasion_management.venue_booking_menu_root"
+              parent="cyllo_occasion_management.occasion_management_menu_root"
               sequence="1"/>
     <!-- Submenu to open venue booking management dashboard -->
     <menuitem id="venue_booking_management_dashboard_menu"

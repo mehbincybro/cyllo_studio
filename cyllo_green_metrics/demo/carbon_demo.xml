@@ -182,6 +182,7 @@
     <record id="carbon_calc_q1" model="carbon.calc">
         <field name="name">Q1 2026</field>
         <field name="date">2026-03-31</field>
+        <field name="state">approved</field>
     </record>
 
     <record id="carbon_activity_electricity" model="carbon.activity">

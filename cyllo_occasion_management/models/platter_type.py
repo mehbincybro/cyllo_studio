@@ -50,6 +50,7 @@ class PlatterMemberLine(models.Model):
     platter_id = fields.Many2one('platter.type', string="Platter Type")
     category_id = fields.Many2one('catering.category', string="Catering Category", required=True)
     employee_ids = fields.Many2many('hr.employee', string="Employees", compute='_compute_employee_ids', store=True, readonly=False)
+    available_employee_ids = fields.Many2many('hr.employee', compute='_compute_available_employee_ids')
     count = fields.Integer(string="Count", compute='_compute_count', store=True, readonly=False)
 
     _sql_constraints = [
@@ -70,6 +71,12 @@ class PlatterMemberLine(models.Model):
             line.count = len(line.employee_ids)
 
     @api.depends('category_id')
+    def _compute_available_employee_ids(self):
+        """Compute available employees based on selected catering category for domain filtering."""
+        for record in self:
+            record.available_employee_ids = record.category_id.employee_ids
+
+    @api.depends('category_id')
     def _compute_employee_ids(self):
         """Auto-fill employees based on selected catering category."""
         for line in self:
@@ -85,7 +92,7 @@ class PlatterFoodLine(models.Model):
 
     platter_id = fields.Many2one('platter.type', string="Platter Type")
     category_id = fields.Many2one('catering.food.category', string="Food Category", required=True)
-    food_ids = fields.Many2many('product.product', string="Foods", domain="[('is_catering_product', '=', True), ('catering_food_category_id', '=', category_id)]")
+    food_ids = fields.Many2many('product.product', string="Foods", domain="[('is_catering_product', '=', True), ('catering_food_category_ids', 'in', category_id)]")
 
     _sql_constraints = [
         ('unique_category', 'unique(platter_id, category_id)', 'A food category can only be added once per platter.')

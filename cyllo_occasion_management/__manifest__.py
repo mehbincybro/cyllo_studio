@@ -21,7 +21,7 @@
 ###############################################################################
 {
     'name': 'Occasion Management',
-    'version': '17.0.1.0.0',
+    'version': '1.0',
     'summary': 'All-in-One Venue, Catering, Transport and Event Booking System',
     'description': 'Manage Venue Booking, Catering Services, Transportation Services '
                'and Event Booking in one platform. Supports Event Planning, '
@@ -43,13 +43,13 @@
         'data/catering_sample_data.xml',
         'data/cancellation_email_template_data.xml',
         'data/confirmation_email_template_data.xml',
+        'views/venue_booking_views.xml',
+        'views/venue_type_views.xml',
         'views/catering_booking_views.xml',
         'views/catering_category_views.xml',
         'views/catering_food_category_views.xml',
         'views/platter_type_views.xml',
         'views/event_event_views.xml',
-        'views/venue_booking_views.xml',
-        'views/venue_type_views.xml',
         'views/amenities_views.xml',
         'views/product_template_views.xml',
         'views/venue_views.xml',
@@ -63,6 +63,9 @@
         'wizards/venue_booking_analysis_views.xml',
         'views/website_venue_booking_templates.xml',
         'views/website_portal_templates.xml',
+    ],
+    'demo': [
+        'demo/demo_data.xml',
     ],
     'assets': {
         'web.assets_frontend': [

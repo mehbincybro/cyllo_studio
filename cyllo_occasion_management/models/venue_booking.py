@@ -121,25 +121,16 @@ class VenueBooking(models.Model):
                                        help='Booking Line for the given venue')
     event_id = fields.Many2one('event.event', string="Event", readonly=True,
                                help="Event associated with this venue booking")
-    need_catering = fields.Boolean(string="Need Catering", help="Check if catering is needed for this venue booking")
+    need_catering = fields.Boolean(string="Need Catering",
+                                   help="Check if catering is needed for this venue booking")
     guest_count = fields.Integer(string="Number of Guests", default=1)
-    catering_ids = fields.Many2many('catering.booking', 'venue_catering_rel', 'venue_booking_id', 'catering_id', string="Catering Orders",
-                                  domain="[('state', '=', 'confirm'), ('event_id', '=', False), ('venue_booking_id', '=', False)]")
     catering_count = fields.Integer(string="Catering Count", compute='_compute_catering_count')
 
-    @api.depends('catering_ids')
     def _compute_catering_count(self):
         """Compute total catering bookings linked to the venue booking."""
         for record in self:
-            created_bookings = self.env['catering.booking'].search_count([('venue_booking_id', '=', record.id)])
-            record.catering_count = len(record.catering_ids) + created_bookings
-
-    @api.onchange('catering_ids')
-    def _onchange_catering_ids(self):
-        """Link selected catering orders to this venue booking"""
-        for catering in self.catering_ids:
-            if not catering.venue_booking_id:
-                catering.venue_booking_id = self.id
+            record.catering_count = self.env['catering.booking'].search_count(
+                [('venue_booking_id', '=', record.id)])
 
     def action_create_catering_booking(self):
         """Open form to create a catering booking linked to the venue booking."""
@@ -162,13 +153,15 @@ class VenueBooking(models.Model):
     def action_view_catering_booking(self):
         """View all catering bookings linked to the current venue booking."""
         self.ensure_one()
-        action = self.env["ir.actions.actions"]._for_xml_id("cyllo_occasion_management.catering_booking_action")
-        linked_ids = self.catering_ids.ids
-        created_ids = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
-        action['domain'] = [('id', 'in', list(set(linked_ids + created_ids)))]
-        return action
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Catering Bookings'),
+            'res_model': 'catering.booking',
+            'view_mode': 'list',
+            'domain': [('venue_booking_id', '=', self.id)],
+        }
 
-    @api.constrains('venue_booking_line_ids','amenity_line_ids')
+    @api.constrains('venue_booking_line_ids', 'amenity_line_ids')
     def _check_venue_booking_line_ids(self):
         """Check if the venue bookings line contains already taken amenities"""
         for rec in self:
@@ -258,10 +251,10 @@ class VenueBooking(models.Model):
 
     @api.depends('booking_charge', 'venue_id')
     def _compute_booking_charge(self):
-        """Calculate the total charge for all amenities in the booking"""
         """Compute booking charge for the given venue with the Amenities"""
         for rec in self:
-            rec.booking_charge = rec.venue_id.price_subtotal if rec.venue_id else 0.0
+            rec.booking_charge = sum(rec.venue_booking_line_ids.mapped(
+                'sub_total')) if rec.venue_booking_line_ids else 0.0
 
     @api.depends('venue_booking_line_ids', 'venue_booking_line_ids.state')
     def _compute_pending_invoice(self):
@@ -342,7 +335,8 @@ class VenueBooking(models.Model):
                 'venue_id': record.venue_id.id,
                 'need_venue': True,
                 'venue_booking_id': record.id,
-                'stage_id': self.env.ref('event.event_stage_new').id if self.env.ref('event.event_stage_new', raise_if_not_found=False) else False,
+                'stage_id': self.env.ref('event.event_stage_new').id if self.env.ref(
+                    'event.event_stage_new', raise_if_not_found=False) else False,
             }
             event = self.env['event.event'].create(event_vals)
             record.event_id = event.id
@@ -408,11 +402,13 @@ class VenueBooking(models.Model):
             add_charge(rec.amenity_id.name, rec.amount, rec.quantity)
 
         # Add Catering charges
-        linked_ids = self.catering_ids.ids
-        created_ids = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
-        all_catering = self.env['catering.booking'].browse(list(set(linked_ids + created_ids)))
+        # linked_ids = self.catering_ids.ids
+        # created_ids = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
+        # all_catering = self.env['catering.booking'].browse(list(set(linked_ids + created_ids)))
+        all_catering = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
         for catering in all_catering:
-            add_charge(_('Catering charge with %s') % catering.platter_type_id.name, catering.total_amount)
+            add_charge(_('Catering charge with %s') % catering.platter_type_id.name,
+                       catering.total_amount)
         if self.is_additional_charge:
             is_extra = self.env['ir.config_parameter'].sudo(). \
                 get_param('cyllo_occasion_management.is_extra')
@@ -467,6 +463,18 @@ class VenueBooking(models.Model):
             'target': 'current',
             'domain': [('invoice_origin', '=', self.ref)],
             'context': {"create": False},
+        }
+
+    def action_view_event(self):
+        """Smart button to view the Corresponding event for the
+        Venue Booking"""
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Event',
+            'view_mode': 'tree,form',
+            'res_model': 'event.event',
+            'target': 'current',
+            'domain': [('id', '=', self.event_id.id)],
         }
 
     def _compute_invoice_count(self):
