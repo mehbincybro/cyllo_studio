@@ -27,7 +27,7 @@ export class SignConfigureAction extends Component {
         this.resId = this.props.action?.params?.['res_id'] || this.props.res_id;
         this.pdf_url = this.getPdfUrl();
         this.pdfjs_url = "/web/static/lib/pdfjs/web/viewer.html?file=" + this.pdf_url;
-        if(!this.pdf_url){
+        if (!this.pdf_url) {
             this.action.doAction("cyllo_sign.action_view_templates", {
                 clearBreadcrumbs: true,
             });
@@ -50,7 +50,7 @@ export class SignConfigureAction extends Component {
         onWillStart(async () => {
             if (this.props.action) {
                 this.state.isRequestModel = this.props.action.context.active_model === 'sign.request' ||
-                this.props.action.context.active_model === 'sign.generate';
+                    this.props.action.context.active_model === 'sign.generate';
             }
             const isSigningMode = this.state.isRequestModel || this.props.portal;
             const requestId = isSigningMode ?
@@ -69,7 +69,7 @@ export class SignConfigureAction extends Component {
             if (isSigningMode) {
                 this.preventCurrentAction();
                 this.addFieldsForSignRequest(this.iframe.el.contentDocument);
-            }else{
+            } else {
                 this.initializeDragula();
                 this.waitForPDFPagesAndAddFields(this.iframe.el.contentDocument);
             }
@@ -91,12 +91,12 @@ export class SignConfigureAction extends Component {
                 }
             }
         };
-     }
+    }
     getPdfUrl() {
         var res_id = this.props.action?.params?.res_id || this.props.res_id
         var model = this.props.action?.params?.res_model || this.props.res_model
         if (model && res_id) {
-            return  "/web/content/" + model + "/" + res_id + "/data";
+            return "/web/content/" + model + "/" + res_id + "/data";
         }
     }
     async addFieldsForSignRequest(iframeDoc) {
@@ -509,13 +509,13 @@ export class SignConfigureAction extends Component {
         fieldElement.className = 'insertedField';
         let displayText;
         const isSigningMode = this.state.isRequestModel || this.props.portal;
-        displayText = fieldItemId.placeholder || el?.dataset.fieldPlaceholder || fieldItemId.name;
+        displayText = fieldItemId.placeholder || el?.dataset.fieldPlaceholder || fieldItemId.name || 'Sign';
         fieldElement.textContent = displayText;
         fieldElement.style.position = 'absolute';
         fieldElement.style.left = `${boundedX}%`;
         fieldElement.style.top = `${boundedY}%`;
-        fieldElement.style.width = fieldItemId.width ? `${fieldItemId.width}%`: '14%';
-        fieldElement.style.height = fieldItemId.height ? `${fieldItemId.height}%`: '5%';
+        fieldElement.style.width = fieldItemId.width ? `${fieldItemId.width}%` : '14%';
+        fieldElement.style.height = fieldItemId.height ? `${fieldItemId.height}%` : '5%';
         fieldElement.style.background = backgroundColor;
         if (fieldItemId.required) {
             fieldElement.style.border = '2px solid red';
@@ -580,7 +580,7 @@ export class SignConfigureAction extends Component {
                             } else {
                                 this.makeEditableField(fieldElement, fieldItemId, iframeDoc)
                             }
-                        }else if (fieldName === 'phone') {
+                        } else if (fieldName === 'phone') {
                             if (userPhone) {
                                 fieldElement.textContent = userPhone;
                                 fieldItemId.placeholder = userPhone;
@@ -700,7 +700,7 @@ export class SignConfigureAction extends Component {
                 const templateItems = this.state.signDatas.template_items || [];
                 this.state.signDatas.template_items = templateItems.map(item =>
                     (isSigningMode && item.request_item_id === itemToUpdate) ||
-                    (!isSigningMode && item.id === itemToUpdate)
+                        (!isSigningMode && item.id === itemToUpdate)
                         ? { ...item, value: updateData.value, placeholder: updateData.placeholder }
                         : item
                 );
@@ -785,7 +785,7 @@ export class SignConfigureAction extends Component {
         }
     }
 
-    onReloadingIframeContent(){
+    onReloadingIframeContent() {
         let printButton = this.iframe.el.contentDocument.querySelector('button[id="print"]');
         let presentationMode = this.iframe.el.contentDocument.querySelector('button[id="presentationMode"]');
         let openFile = this.iframe.el.contentDocument.querySelector('button[id="openFile"]');
@@ -802,16 +802,16 @@ export class SignConfigureAction extends Component {
             if (Math.abs(currentWidth - baseWidth) > 10) {
                 baseWidth = currentWidth;
                 this.action.doAction('soft_reload')
-                if(this.props.portal){
+                if (this.props.portal) {
                     this.addFieldsForSignRequest(this.iframe.el.contentDocument);
                 }
             }
         });
-        this.iframe.el.contentDocument.addEventListener( "click", (ev) => {
-            const zoomIds = ['zoomOut', 'zoomIn','scaleSelect'];
+        this.iframe.el.contentDocument.addEventListener("click", (ev) => {
+            const zoomIds = ['zoomOut', 'zoomIn', 'scaleSelect'];
             if (zoomIds.includes(ev.target.id)) {
                 this.action.doAction('soft_reload')
-                if(this.props.portal){
+                if (this.props.portal) {
                     this.addFieldsForSignRequest(this.iframe.el.contentDocument);
                 }
             }
@@ -843,11 +843,11 @@ export class SignConfigureAction extends Component {
     }
 
     goBack() {
-        if(!this.state.isRequestModel){
-            this.action.doAction("cyllo_sign.action_view_templates",{
+        if (!this.state.isRequestModel) {
+            this.action.doAction("cyllo_sign.action_view_templates", {
                 clearBreadcrumbs: true,
             });
-        }else{
+        } else {
             this.action.doAction({
                 type: 'ir.actions.act_window',
                 name: 'Sign Request',
@@ -856,12 +856,12 @@ export class SignConfigureAction extends Component {
                 res_model: 'sign.request',
                 views: [[false, 'form']],
             },
-            { clearBreadcrumbs: true });
+                { clearBreadcrumbs: true });
         }
 
     }
 
-    async sendPdf(){
+    async sendPdf() {
         try {
             const recordId = this.resId;
             const result = await this.orm.call("sign.template", "action_view_sign_generate", [recordId]);
@@ -869,7 +869,7 @@ export class SignConfigureAction extends Component {
                 this.action.doAction(result);
             }
         } catch (error) {
-            this.notification.add("You need to use dropped fields for sending documents!" , {
+            this.notification.add("You need to use dropped fields for sending documents!", {
                 type: "warning",
             });
         }
@@ -882,7 +882,7 @@ export class SignConfigureAction extends Component {
             (item) => item.required
         );
         if (hasRequiredField) {
-            if(hasRequiredField.value == false){
+            if (hasRequiredField.value == false) {
                 alert("** You need to fill the required fields!.");
                 return;
             }
@@ -891,9 +891,9 @@ export class SignConfigureAction extends Component {
             const result = await jsonrpc('/web/dataset/call_kw/sign.requester/action_sign', {
                 model: 'sign.requester', method: 'action_sign',
                 args: [this.requesterIds],
-                kwargs: {items: this.state.signDatas.template_items}
+                kwargs: { items: this.state.signDatas.template_items }
             }).then((data) => {
-                if(!this.props.portal){
+                if (!this.props.portal) {
                     this.action.doAction({
                         type: 'ir.actions.act_window',
                         name: 'Sign Request',
@@ -901,8 +901,8 @@ export class SignConfigureAction extends Component {
                         res_id: parseInt(this.props.action?.params.request_id),
                         res_model: 'sign.request',
                         views: [[false, 'form']],
-                    },{clearBreadcrumbs: true});
-                }else{
+                    }, { clearBreadcrumbs: true });
+                } else {
                     window.location.href = `/sign_request/details/${this.props.request_id}`;
                 }
             })
@@ -1022,10 +1022,10 @@ export class SignConfigureAction extends Component {
                     fieldElement.style.border = '1px solid black';
                 }
             }
-                $(this.FieldEditModal.el).modal('hide');
-                this.notification.add("Field updated successfully", {
-                    type: "success",
-                });
+            $(this.FieldEditModal.el).modal('hide');
+            this.notification.add("Field updated successfully", {
+                type: "success",
+            });
         } catch (error) {
             console.error("Failed to update field:", error);
             this.notification.add("Failed to update field", {

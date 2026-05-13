@@ -91,6 +91,7 @@ export class EditReport extends Component {
                 recent_scans: [],
             },
             hasQr: false,
+            hasSign: false,
         });
 
         // Promise resolver for the table config modal
@@ -253,11 +254,15 @@ export class EditReport extends Component {
     _setupReportFrame(arch) {
         this._loadedArch = arch;
         this._updateHasQr(arch);
+        this._updateHasSign(arch);
         this.reportFrameRef.el.innerHTML = arch;
         const editableArea = this.reportFrameRef.el;
 
         // Enrich existing DOM with Studio wrappers/handles
         this._enrichReportDOM(editableArea);
+
+        // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
+        this._updateHasSign();
 
         this.editor = null;
         $('[t-elif], [t-else]').hide();
@@ -505,6 +510,7 @@ export class EditReport extends Component {
 
     async _fetchPreviewData() {
         this._updateHasQr();
+        this._updateHasSign();
         const data = await this.rpc("/cyllo_studio/get_report_preview_data", {
             template: this._template,
             res_model: this._resModel,
@@ -742,6 +748,16 @@ export class EditReport extends Component {
             domain: [['report_id', '=', this.state.reportInfo.id]],
             target: 'current',
         });
+    }
+
+    _updateHasSign(arch = null) {
+        const targetArch = arch || this._loadedArch || '';
+        // Check in arch string
+        const hasSignInArch = /cy-type=['"]sign['"]|o_sign_placeholder|sign-wrapper|\[\[SIGN:/.test(targetArch);
+        // Check in live DOM
+        const signEls = this.reportFrameRef.el?.querySelectorAll('.sign-wrapper, [cy-type="sign"], .o_sign_placeholder');
+        const hasSignInDom = signEls && signEls.length > 0;
+        this.state.hasSign = hasSignInArch || hasSignInDom;
     }
 
     _updateHasQr(arch = null) {
@@ -1126,12 +1142,14 @@ export class EditReport extends Component {
                                     self.closeSignProps();
                                 }
                                 item.remove();
+                                self._updateHasSign();
                             },
                             cancel: () => { },
                         });
                     };
 
                     self._setupSignResizeHandles(item);
+                    self._updateHasSign();
                 }
 
                 self._refreshDragHandles();
@@ -1409,12 +1427,14 @@ export class EditReport extends Component {
                                     self.closeSignProps();
                                 }
                                 item.remove();
+                                self._updateHasSign();
                             },
                             cancel: () => { },
                         });
                     };
 
                     self._setupSignResizeHandles(item);
+                    self._updateHasSign();
                 }
                 // Re-initialize drag handles for the new zone content
                 self._refreshDragHandles();
@@ -2476,62 +2496,49 @@ export class EditReport extends Component {
                 let cfg = {};
                 try { cfg = JSON.parse(el.dataset.signConfig || '{}'); } catch (ex) { }
 
+                const role = cfg.role || 'customer';
+                const label = cfg.label || 'Authorized Signature';
+                const alignment = cfg.alignment || 'left';
+                const width = cfg.width || 200;
+
                 const section = document.createElement('div');
                 section.className = 'o_sign_placeholder';
                 if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
                 if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
-                section.setAttribute('data-role', cfg.role || 'customer');
+                section.setAttribute('data-role', role);
 
-                // Universal Anchor for backend detection - Tiny white text
-                const anchor = document.createElement('div');
-                anchor.setAttribute('style', 'color: white; font-size: 2pt; line-height: 1px; letter-spacing: normal !important; white-space: nowrap !important; overflow: hidden;');
-                anchor.innerText = `[[SIGN:${cfg.role || 'customer'}]]`;
+                // Style: width + alignment, clear box-model for PDF
+                let styleStr = `display:inline-block; width:${width}px; text-align:${alignment}; vertical-align:top; padding:4px 0;`;
+                section.setAttribute('style', styleStr);
+
+                // Invisible backend-detection anchor ([[SIGN:role]] in 2pt white text)
+                const anchor = document.createElement('span');
+                anchor.setAttribute('style', 'color:white;font-size:2pt;line-height:1px;display:block;overflow:hidden;height:1px;');
+                anchor.textContent = `[[SIGN:${role}]]`;
                 section.appendChild(anchor);
 
+                // Signature line (underscores) — clean static line, no t-if/t-else
+                const sigLine = document.createElement('div');
+                sigLine.setAttribute('style', 'border-bottom:1px solid #333;width:80%;margin:8px auto 4px;min-height:40px;');
+                section.appendChild(sigLine);
 
-
-
-
-                let styleStr = '';
-                if (cfg.width) styleStr += `width:${cfg.width}px;`;
-                if (cfg.alignment) styleStr += `text-align:${cfg.alignment};`;
-                if (styleStr) section.setAttribute('style', styleStr.trim());
-
-
-                // Add inner content
-                const imgContainer = document.createElement('div');
-                imgContainer.setAttribute('t-if', 'doc.signature');
-                const img = document.createElement('img');
-                img.setAttribute('t-att-src', "image_data_uri(doc.signature)");
-                img.setAttribute('style', 'max-height:50px; max-width:150px;');
-                imgContainer.appendChild(img);
-                section.appendChild(imgContainer);
-
-                const emptyLine = document.createElement('div');
-                emptyLine.setAttribute('t-else', '');
-                emptyLine.className = 'sign-empty-line';
-                emptyLine.innerText = '_________________';
-                section.appendChild(emptyLine);
-
+                // Label
                 const labelP = document.createElement('p');
-                labelP.className = 'sign-label';
-                labelP.innerText = cfg.label || 'Authorized Signature';
+                labelP.setAttribute('style', 'font-weight:bold;font-size:11pt;margin:2px 0 0;');
+                labelP.textContent = label;
                 section.appendChild(labelP);
 
                 if (cfg.show_date) {
                     const dateP = document.createElement('p');
-                    dateP.className = 'sign-date';
-                    // We must output exact HTML without escaping the attributes inappropriately.
-                    // The easiest way is innerHTML
-                    dateP.innerHTML = 'Date: <span t-field="doc.signed_on" t-options=\'{"widget":"date"}\'></span>';
+                    dateP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
+                    dateP.textContent = 'Date: _______________';
                     section.appendChild(dateP);
                 }
 
                 if (cfg.show_name) {
                     const nameP = document.createElement('p');
-                    nameP.className = 'sign-name';
-                    // Assuming doc.signed_by as the printed name field, if not specified in prompt
-                    nameP.innerHTML = 'Name: <span t-field="doc.signed_by"></span>';
+                    nameP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
+                    nameP.textContent = 'Name: _______________';
                     section.appendChild(nameP);
                 }
 
@@ -2671,6 +2678,79 @@ export class EditReport extends Component {
             if (qrConfig) {
                 this.insertQrBlock(qrDiv, qrConfig, 'enrich');
             }
+        });
+
+        // ── Enrich existing o_sign_placeholder from previous saves ──
+        container.querySelectorAll('div.o_sign_placeholder:not(.sign-wrapper)').forEach(placeholder => {
+            if (placeholder.closest('.sign-wrapper')) return;
+            const role = placeholder.dataset.role || 'customer';
+            // Parse existing cfg from style
+            const existingStyle = placeholder.getAttribute('style') || '';
+            const widthMatch = existingStyle.match(/width:\s*(\d+)px/);
+            const alignMatch = existingStyle.match(/text-align:\s*(\w+)/);
+            // Look for label in existing children
+            const labelEl = placeholder.querySelector('p');
+            const labelText = labelEl ? labelEl.textContent.trim() : 'Authorized Signature';
+
+            const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
+            const cfg = {
+                role,
+                label: labelText,
+                required: true,
+                show_date: false,
+                show_name: false,
+                width: widthMatch ? parseInt(widthMatch[1]) : 200,
+                height: 100,
+                alignment: alignMatch ? alignMatch[1] : 'left',
+            };
+
+            const wrapper = document.createElement('div');
+            wrapper.className = 'sign-wrapper';
+            wrapper.setAttribute('cy-type', 'sign');
+            if (placeholder.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', placeholder.getAttribute('cy-xpath'));
+            if (placeholder.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', placeholder.getAttribute('cy-template'));
+            wrapper.setAttribute('data-sign-id', signId);
+            wrapper.setAttribute('data-sign-config', JSON.stringify(cfg));
+            wrapper.dataset.role = role;
+            wrapper.style.width = cfg.width + 'px';
+            wrapper.style.height = cfg.height + 'px';
+            wrapper.style.cursor = 'default';
+            wrapper.style.textAlign = cfg.alignment;
+
+            wrapper.innerHTML = `
+                <div class="sign-toolbar" contenteditable="false">
+                    <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
+                </div>
+                <div class="sign-content-wrapper" style="pointer-events: none; border: 2px dashed #ccc; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; position: relative;">
+                    <div class="sign-watermark" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; font-size: 40px; color: #9ea700;"><i class="fa fa-pencil"></i></div>
+                    <div class="sign-role-badge" style="position: absolute; top: -10px; right: 10px; background: #9ea700; color: white; padding: 2px 6px; font-size: 10px; border-radius: 4px; text-transform: uppercase;">${role}</div>
+                    <div class="sign-empty-line" style="border-bottom: 1px solid #333; width: 80%; margin: 10px auto;"></div>
+                    <p class="sign-label" style="font-weight: bold; font-size: 14px; margin: 0;">${labelText}</p>
+                </div>
+                <div class="sign-resize-handles" contenteditable="false">
+                    <div class="sign-resize-handle" data-dir="se"></div>
+                </div>
+            `;
+
+            wrapper.querySelector('.sign-delete-btn').onclick = (e) => {
+                e.stopPropagation();
+                this.dialog.add(ConfirmationDialog, {
+                    body: 'Delete this Signature?',
+                    confirm: () => {
+                        if (this.state.showSignProps && this._selectedSignEl === wrapper) {
+                            this.closeSignProps();
+                        }
+                        wrapper.remove();
+                        this._updateHasSign();
+                    },
+                    cancel: () => { },
+                });
+            };
+
+            placeholder.parentNode.insertBefore(wrapper, placeholder);
+            placeholder.remove();
+            this._setupSignResizeHandles(wrapper);
         });
 
         const tables = container.querySelectorAll('table:not(.table-wrapper table)');
