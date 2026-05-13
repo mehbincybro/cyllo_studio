@@ -153,6 +153,17 @@ class Appointment(models.Model):
     calendar_event_id = fields.Many2one(
         'calendar.event',
         string='Calendar Event')
+    refund_credit_note_id = fields.Many2one(
+        'account.move', string='Refund Credit Note',
+        readonly=True, copy=False,
+        domain=[('move_type', '=', 'out_refund')]
+    )
+    refund_status = fields.Selection([
+        ('pending', 'Pending'),
+        ('issued', 'Issued'),
+        ('reconciled', 'Reconciled'),
+        ('none', 'No Refund'),
+    ], string='Refund Status', readonly=True, copy=False)
 
     @api.model
     def _tz_get(self):
@@ -181,7 +192,8 @@ class Appointment(models.Model):
             else:
                 rec.meeting_subject = customer or atype or ''
 
-    @api.depends('appointment_type_id.staff_ids', 'appointment_type_id.resource_ids')
+    @api.depends('appointment_type_id.staff_ids',
+                 'appointment_type_id.resource_ids')
     def _compute_staff_resource_domain(self):
         for rec in self:
             if rec.appointment_type_id and rec.appointment_type_id.staff_ids:
@@ -267,6 +279,8 @@ class Appointment(models.Model):
                     record._send_cancellation_email()
                 if record.appointment_type_id.send_whatsapp_cancellation and not record.whatsapp_cancellation_sent:
                     record._send_whatsapp_cancellation()
+                if record.appointment_type_id.is_paid:
+                    record._process_cancellation_refund()
         return res
 
     @api.onchange('appointment_type_id')
@@ -330,7 +344,6 @@ class Appointment(models.Model):
                 continue
             if not rec.start_datetime or not rec.end_datetime:
                 continue
-
             search_start = rec.start_datetime - timedelta(days=1)
             search_end = rec.end_datetime + timedelta(days=1)
             appt_domain = [
@@ -397,7 +410,7 @@ class Appointment(models.Model):
                 if total_attendees > rec.slot_id.max_attendees:
                     # Calculate spots before this appointment to show accurate error
                     spots_before_this = rec.slot_id.max_attendees - (
-                                total_attendees - rec.attendee_count)
+                            total_attendees - rec.attendee_count)
                     raise ValidationError(_(
                         'The selected slot "%s" does not have enough capacity for %s attendee(s). Only %s spot(s) remaining.'
                     ) % (rec.slot_id.name, rec.attendee_count,
@@ -427,6 +440,80 @@ class Appointment(models.Model):
             if rec.appointment_type_id.require_resource and not rec.resource_id:
                 raise ValidationError(
                     _('A resource must be assigned for this appointment type.'))
+
+    def _process_cancellation_refund(self):
+        self.ensure_one()
+        appt_type = self.appointment_type_id
+        if appt_type.refund_policy == 'none':
+            return
+        refund_pct = appt_type.get_refund_percentage(
+            cancellation_datetime=fields.Datetime.now(),
+            appointment_start=self.start_datetime,
+        )
+        if refund_pct <= 0:
+            self.message_post(body=_(
+                'Cancellation refund: No refund applicable based on policy and cancellation time.'))
+            return
+        invoice = self._get_paid_invoice()
+        if not invoice:
+            _logger.warning(
+                'Appointment %s: no paid invoice found, skipping refund.',
+                self.name)
+            return
+        credit_note = self._create_credit_note(invoice, refund_pct)
+        self.write({
+            'refund_credit_note_id': credit_note.id,
+            'refund_status': 'reconciled' if appt_type.refund_policy in ('full',
+                                                                         'partial') else 'issued',
+        })
+        if appt_type.refund_policy in ('full', 'partial'):
+            self._reconcile_credit_note(credit_note, invoice)
+        # 'credit' policy: left unreconciled
+        self.message_post(
+            body=_('Credit note %s created for %.0f%% refund (policy: %s).')
+                 % (credit_note.name, refund_pct, appt_type.refund_policy)
+        )
+
+    def _get_paid_invoice(self):
+        self.ensure_one()
+        if not self.sale_order_id:
+            return self.env['account.move'].browse()
+        return self.sale_order_id.invoice_ids.filtered(
+            lambda inv: inv.move_type == 'out_invoice'
+                        and inv.payment_state in ('paid', 'in_payment',
+                                                  'partial')
+        )[:1]
+
+    def _create_credit_note(self, invoice, refund_pct):
+        self.ensure_one()
+        move_reversal = self.env['account.move.reversal'].with_context(
+            active_ids=invoice.ids,
+            active_model='account.move',
+        ).create({
+            'reason': _('Cancellation of %s (%.0f%% refund)') % (self.name,
+                                                                 refund_pct),
+            'journal_id': invoice.journal_id.id,
+            'date': fields.Date.today(),
+        })
+        result = move_reversal.reverse_moves()
+        credit_note = self.env['account.move'].browse(result['res_id'])
+        if refund_pct < 100.0:
+            credit_note.button_draft()
+            for line in credit_note.invoice_line_ids:
+                line.price_unit = line.price_unit * (refund_pct / 100.0)
+            credit_note._recompute_dynamic_lines()
+        credit_note.action_post()
+        return credit_note
+
+    def _reconcile_credit_note(self, credit_note, invoice):
+        """Reconcile credit note against the original invoice's receivable lines."""
+        receivable_account = self.partner_id.property_account_receivable_id
+        lines_to_reconcile = (credit_note + invoice).line_ids.filtered(
+            lambda l: l.account_id == receivable_account
+                      and not l.reconciled
+        )
+        if lines_to_reconcile:
+            lines_to_reconcile.reconcile()
 
     def action_confirm(self):
         for rec in self:
@@ -532,7 +619,8 @@ class Appointment(models.Model):
             reminder_hours = [float(h.strip()) for h in
                               reminder_times_str.split(',') if h.strip()]
             sent_hours_str = appt.sent_reminder_hours or ''
-            sent_hours = [float(h.strip()) for h in sent_hours_str.split(',') if h.strip()]
+            sent_hours = [float(h.strip()) for h in sent_hours_str.split(',') if
+                          h.strip()]
             for hours in reminder_hours:
                 if hours in sent_hours:
                     continue
@@ -543,7 +631,8 @@ class Appointment(models.Model):
                                                              force_send=True)
                         appt.reminder_sent = True
                         sent_hours.append(hours)
-                        appt.sent_reminder_hours = ','.join(map(str, sent_hours))
+                        appt.sent_reminder_hours = ','.join(
+                            map(str, sent_hours))
                         if atype.send_sms_reminder and atype.sms_reminder_template_id:
                             appt._send_sms_reminder()
                         if atype.send_whatsapp_reminder and atype.whatsapp_reminder_template_id and not appt.whatsapp_reminder_sent:
@@ -654,3 +743,14 @@ class Appointment(models.Model):
                 _logger.warning(
                     'Failed to send WhatsApp cancellation for %s: %s',
                     self.name, str(e))
+
+    def action_view_refund_credit_note(self):
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Refund Credit Note'),
+            'res_model': 'account.move',
+            'res_id': self.refund_credit_note_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }

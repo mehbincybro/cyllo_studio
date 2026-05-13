@@ -66,12 +66,16 @@ class AppointmentType(models.Model):
             'cyllo_appointment.default_slot_interval', '30'),
         required=True)
     min_booking_notice = fields.Float(string='Minimum Booking Notice (hours)',
-                                      default=lambda self: float(self.env['ir.config_parameter'].sudo().get_param(
-                                          'cyllo_appointment.default_min_booking_notice', '1.0')),
+                                      default=lambda self: float(self.env[
+                                          'ir.config_parameter'].sudo().get_param(
+                                          'cyllo_appointment.default_min_booking_notice',
+                                          '1.0')),
                                       help='Minimum hours required in advance for booking an appointment')
     max_booking_days = fields.Integer(string='Max Booking Horizon (days)',
-                                      default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param(
-                                          'cyllo_appointment.default_max_booking_days', '60')),
+                                      default=lambda self: int(self.env[
+                                          'ir.config_parameter'].sudo().get_param(
+                                          'cyllo_appointment.default_max_booking_days',
+                                          '60')),
                                       help='How many days in advance can an appointment be booked')
     # Rescheduling
     allow_reschedule = fields.Boolean(string='Allow Rescheduling', default=True)
@@ -118,8 +122,10 @@ class AppointmentType(models.Model):
     )
     # Notification Settings
     send_confirmation = fields.Boolean(string='Send Confirmation Email',
-                                       default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
-                                           'cyllo_appointment.send_confirmation', 'True') == 'True')
+                                       default=lambda self: self.env[
+                                                                'ir.config_parameter'].sudo().get_param(
+                                           'cyllo_appointment.send_confirmation',
+                                           'True') == 'True')
     confirmation_template_id = fields.Many2one(
         'mail.template', string='Confirmation Email Template',
         domain=[('model', '=', 'appointment.appointment')]
@@ -131,8 +137,10 @@ class AppointmentType(models.Model):
         domain=[('model_id.model', '=', 'appointment.appointment')]
     )
     send_reminder = fields.Boolean(string='Send Reminders',
-                                   default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
-                                       'cyllo_appointment.send_reminder', 'True') == 'True')
+                                   default=lambda self: self.env[
+                                                            'ir.config_parameter'].sudo().get_param(
+                                       'cyllo_appointment.send_reminder',
+                                       'True') == 'True')
     reminder_hours_before = fields.Char(
         string='Reminder Times (hours before)',
         default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
@@ -156,11 +164,15 @@ class AppointmentType(models.Model):
         domain=[('model_id.model', '=', 'appointment.appointment')]
     )
     send_followup = fields.Boolean(string='Send Follow-up',
-                                   default=lambda self: self.env['ir.config_parameter'].sudo().get_param(
-                                       'cyllo_appointment.send_followup', 'False') == 'True')
+                                   default=lambda self: self.env[
+                                                            'ir.config_parameter'].sudo().get_param(
+                                       'cyllo_appointment.send_followup',
+                                       'False') == 'True')
     followup_hours_after = fields.Float(string='Follow-up After (hours)',
-                                        default=lambda self: float(self.env['ir.config_parameter'].sudo().get_param(
-                                            'cyllo_appointment.followup_hours', '24.0')))
+                                        default=lambda self: float(self.env[
+                                            'ir.config_parameter'].sudo().get_param(
+                                            'cyllo_appointment.followup_hours',
+                                            '24.0')))
     followup_template_id = fields.Many2one(
         'mail.template', string='Follow-up Email Template',
         domain=[('model', '=', 'appointment.appointment')]
@@ -188,6 +200,26 @@ class AppointmentType(models.Model):
     )
     upcoming_appointment_count = fields.Integer(
         string='Upcoming', compute='_compute_appointment_count'
+    )
+    # Refund Policy
+    refund_policy = fields.Selection([
+        ('none', 'No Refund'),
+        ('full', 'Full Refund to Original Payment Method'),
+        ('partial', 'Partial Refund to Original Payment Method'),
+        ('credit', 'Credit Note (Redeemable on Future Appointments Only)'),
+    ], string='Refund Policy', default='none', required=True)
+    refund_percentage = fields.Float(
+        string='Refund Percentage', default=100.0,
+        help='Percentage of the amount to refund (used when policy is Partial Refund)'
+    )
+    refund_tier_ids = fields.One2many(
+        'appointment.refund.tier', 'appointment_type_id',
+        string='Refund Tiers',
+        help='Define time-based refund tiers (e.g. 100% if cancelled 48h before, 50% within 24h)'
+    )
+    refund_validity_days = fields.Integer(
+        string='Credit Validity (days)', default=90,
+        help='How many days a store credit/voucher is valid for (used when policy is Store Credit)'
     )
 
     def _compute_website_url(self):
@@ -227,9 +259,53 @@ class AppointmentType(models.Model):
         for rec in self:
             if rec.reminder_hours_before:
                 try:
-                    [float(h.strip()) for h in rec.reminder_hours_before.split(',') if h.strip()]
+                    [float(h.strip()) for h in
+                     rec.reminder_hours_before.split(',') if h.strip()]
                 except ValueError:
-                    raise ValidationError(_("Reminder Times must be a comma-separated list of numbers (e.g., '24, 2')."))
+                    raise ValidationError(
+                        _("Reminder Times must be a comma-separated list of numbers (e.g., '24, 2')."))
+
+    @api.constrains('refund_policy', 'refund_percentage', 'is_paid')
+    def _check_refund_policy(self):
+        for rec in self:
+            if rec.refund_policy == 'partial':
+                if not (0.0 < rec.refund_percentage < 100.0):
+                    raise ValidationError(
+                        _('Partial refund percentage must be between 0 and 100 (exclusive).')
+                    )
+            if rec.refund_policy != 'none' and not rec.is_paid:
+                raise ValidationError(
+                    _('A refund policy only makes sense for paid appointments.')
+                )
+
+    def get_refund_percentage(self, cancellation_datetime, appointment_start):
+        """
+        Returns the applicable refund percentage given when the cancellation
+        occurs vs. when the appointment starts.
+        - 'full'    → always 100%, tiers ignored
+        - 'credit'  → always 100% (full value issued as a credit note), tiers ignored
+        - 'partial' → uses flat refund_percentage, or tiers if configured
+        - 'none'    → 0%
+        """
+        self.ensure_one()
+        if not self.is_paid or self.refund_policy == 'none':
+            return 0.0
+        if self.refund_policy in ('full', 'credit'):
+            return 100.0
+        # partial: tiers take priority over flat percentage
+        if self.refund_policy == 'partial':
+            if self.refund_tier_ids:
+                hours_until = (appointment_start - cancellation_datetime
+                               ).total_seconds() / 3600
+                applicable = self.refund_tier_ids.filtered(
+                    lambda t: hours_until >= t.hours_before
+                )
+                if applicable:
+                    return applicable.sorted('hours_before', reverse=True)[
+                        0].refund_percentage
+                return 0.0  # Cancelled too late — no refund
+            return self.refund_percentage
+        return 0.0
 
     def action_view_appointments(self):
         self.ensure_one()

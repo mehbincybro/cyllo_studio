@@ -53,6 +53,8 @@
         'web',
         'website',
         'website_sale',
+        'payment',
+        'account',
         'cyllo_whatsapp',
         'event',
     ],
@@ -76,6 +78,7 @@
         'views/portal_templates.xml',
         'views/sale_order_views.xml',
         'views/event_event_views.xml',
+        'views/appointment_refund_tier_views.xml',
     ],
     'assets': {
         'web.assets_backend': [

@@ -16,3 +16,5 @@ access_appointment_type_portal,appointment.type portal,model_appointment_type,ba
 access_appointment_slot_portal,appointment.slot portal,model_appointment_slot,base.group_portal,1,0,0,0
 access_appointment_resource_portal,appointment.resource portal,model_appointment_resource,base.group_portal,1,0,0,0
 access_appointment_portal,appointment.appointment portal,model_appointment_appointment,base.group_portal,1,0,0,0
+access_appointment_refund_tier_user,appointment.refund.tier user,model_appointment_refund_tier,cyllo_appointment.group_appointment_user,1,0,0,0
+access_appointment_refund_tier_manager,appointment.refund.tier manager,model_appointment_refund_tier,cyllo_appointment.group_appointment_manager,1,1,1,1

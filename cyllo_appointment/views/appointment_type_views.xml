@@ -146,6 +146,40 @@
                                     required="send_whatsapp_cancellation == True"/>
                             </group>
                         </page>
+                        <page string="Refund Policy" name="refund_policy"
+                            invisible="is_paid == False">
+                            <group>
+                                <group string="Refund Configuration">
+                                    <field name="refund_policy" widget="radio"/>
+                                    <field name="refund_percentage"
+                                           invisible="refund_policy not in ['partial']"
+                                           required="refund_policy == 'partial'"/>
+                                    <field name="refund_validity_days"
+                                           invisible="refund_policy != 'credit'"
+                                           required="refund_policy == 'credit'"/>
+                                </group>
+                                <group string="Policy Summary" invisible="refund_policy == 'none'">
+                                    <field name="cancel_policy" readonly="1" string="Cancellation Window"/>
+                                    <field name="cancel_deadline_hours" readonly="1"
+                                           invisible="cancel_policy != 'up_to'"/>
+                                </group>
+                            </group>
+                            <group string="Time-Based Refund Tiers"
+                                   invisible="refund_policy != 'partial'">
+                                <field name="refund_tier_ids" nolabel="1" colspan="2">
+                                    <tree editable="bottom">
+                                        <field name="name" placeholder="e.g. Full Refund"/>
+                                        <field name="hours_before" string="Cancelled More Than (hrs before)"/>
+                                        <field name="refund_percentage" string="Refund %"/>
+                                    </tree>
+                                </field>
+                                <div class="text-muted" style="margin-top: 4px;" colspan="2">
+                                    <i class="fa fa-info-circle"/> Tiers are evaluated from most to least generous.
+                                    If no tier matches, no refund is issued.
+                                    Leave empty to use the flat Refund Percentage above.
+                                </div>
+                            </group>
+                        </page>
                         <!-- Description Tab -->
                         <page string="Description" name="description">
                             <field name="description" widget="html" placeholder="Add a description for this appointment type..."/>

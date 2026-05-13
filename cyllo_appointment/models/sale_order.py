@@ -1,4 +1,7 @@
 from odoo import api, fields, models
+import logging
+
+_logger = logging.getLogger(__name__)
 
 
 class SaleOrder(models.Model):
@@ -30,10 +33,30 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super(SaleOrder, self).action_confirm()
         for order in self:
-            appointments = self.env['appointment.appointment'].sudo().search(
-                [('sale_order_id', '=', order.id),
-                 ('state', '=', 'pending_payment')]
+            if not order.appointment_ids:
+                continue
+            if order.invoice_status == 'to invoice':
+                try:
+                    invoices = order._create_invoices()
+                    invoices.action_post()
+                    _logger.info(
+                        'Auto-created invoice(s) %s for appointment '
+                        'order %s.', invoices.mapped('name'), order.name
+                    )
+                except Exception as e:
+                    _logger.warning(
+                        'Failed to auto-create invoice for appointment '
+                        'order %s: %s', order.name, str(e)
+                    )
+            pending = order.appointment_ids.filtered(
+                lambda a: a.state == 'pending_payment'
             )
-            for app in appointments:
-                app.action_confirm()
+            for appt in pending:
+                try:
+                    appt.action_confirm()
+                except Exception as e:
+                    _logger.warning(
+                        'Failed to confirm appointment %s: %s',
+                        appt.name, str(e)
+                    )
         return res

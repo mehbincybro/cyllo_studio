@@ -40,7 +40,7 @@ class AppointmentResource(models.Model):
     ], string='Type', default='room', required=True)
     description = fields.Text(string='Description')
     capacity = fields.Integer(string='Capacity', default=1,
-        help='Maximum number of people or units this resource can handle')
+                              help='Maximum number of people or units this resource can handle')
     location = fields.Char(string='Location')
     image = fields.Image(string='Image', max_width=256, max_height=256)
     # Availability
@@ -62,7 +62,8 @@ class AppointmentResource(models.Model):
     @api.depends('name')
     def _compute_appointment_count(self):
         for rec in self:
-            rec.appointment_count = self.env['appointment.appointment'].search_count([
+            rec.appointment_count = self.env[
+                'appointment.appointment'].search_count([
                 ('resource_id', '=', rec.id)
             ])
 

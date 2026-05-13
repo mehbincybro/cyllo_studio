@@ -27,3 +27,4 @@ from . import appointment
 from . import res_config_settings
 from . import sale_order
 from . import event_event
+from . import appointment_refund_tier
