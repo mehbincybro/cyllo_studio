@@ -19,8 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo.exceptions import ValidationError
 from odoo import api, fields, models, _
+from odoo.exceptions import ValidationError
 
 class CateringBooking(models.Model):
     """Model to manage dietary and banqueting requirements for events"""

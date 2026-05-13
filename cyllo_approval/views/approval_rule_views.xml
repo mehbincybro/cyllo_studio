@@ -67,9 +67,13 @@
                                 <!-- BUTTON FIELDS -->
                                 <group string="Button Configuration"
                                        invisible="rule_type != 'button'">
-                                    <field name="button_id"
-                                           required="rule_type == 'button'"
-                                           options="{'no_create': True, 'no_open': True}"/>
+                                    <label for="button_id"/>
+                                    <div class="o_row">
+                                        <field name="button_id"
+                                               options="{'no_create': True, 'no_open': True}"/>
+                                        <button name="action_sync_buttons"
+                                                type="object" class="fa fa-refresh"/>
+                                    </div>
                                 </group>
 
                                 <!-- SERVER ACTION FIELDS -->
@@ -108,21 +112,21 @@
                             </group>
                         </page>
 
-<!--                        &lt;!&ndash; APPROVAL HISTORY TAB &ndash;&gt;-->
-<!--                        <page string="Approval Requests">-->
-<!--                            <field name="request_ids" readonly="1">-->
-<!--                                <tree>-->
-<!--                                    <field name="create_date"/>-->
-<!--                                    <field name="res_model"/>-->
-<!--                                    <field name="res_id"/>-->
-<!--                                    <field name="state" decoration-success="state == 'approved'"-->
-<!--                                           decoration-danger="state == 'rejected'"-->
-<!--                                           decoration-warning="state == 'pending'"/>-->
-<!--                                    <field name="requested_by"/>-->
-<!--                                    <field name="approved_by"/>-->
-<!--                                </tree>-->
-<!--                            </field>-->
-<!--                        </page>-->
+                        <!--                        &lt;!&ndash; APPROVAL HISTORY TAB &ndash;&gt;-->
+                        <!--                        <page string="Approval Requests">-->
+                        <!--                            <field name="request_ids" readonly="1">-->
+                        <!--                                <tree>-->
+                        <!--                                    <field name="create_date"/>-->
+                        <!--                                    <field name="res_model"/>-->
+                        <!--                                    <field name="res_id"/>-->
+                        <!--                                    <field name="state" decoration-success="state == 'approved'"-->
+                        <!--                                           decoration-danger="state == 'rejected'"-->
+                        <!--                                           decoration-warning="state == 'pending'"/>-->
+                        <!--                                    <field name="requested_by"/>-->
+                        <!--                                    <field name="approved_by"/>-->
+                        <!--                                </tree>-->
+                        <!--                            </field>-->
+                        <!--                        </page>-->
                     </notebook>
                 </sheet>
             </form>

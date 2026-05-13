@@ -98,13 +98,13 @@
     <menuitem id="venue_booking_menu_report"
               name="Reporting" action="venue_booking_report_action"
               parent="occasion_management_menu_root"
-              groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"
+              groups="cyllo_occasion_management.occasion_management_group_venue_manager"
               sequence="40"/>
     <!-- Menu to access venue booking analysis report for venue managers -->
     <menuitem id="venue_booking_menu_report_sub_menu"
               name="Venue Booking Analysis"
               action="venue_booking_report_action"
               parent="venue_booking_menu_report"
-              groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"
+              groups="cyllo_occasion_management.occasion_management_group_venue_manager"
               sequence="10"/>
 </odoo>

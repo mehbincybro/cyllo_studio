@@ -51,13 +51,6 @@ class EventEvent(models.Model):
         """Open form to create a catering booking linked to the event."""
         self.ensure_one()
         if not self.catering_booking_id and not self.catering_id:
-            booking_vals = {
-                'partner_id': self.organizer_id.id or self.env.user.partner_id.id,
-                'start_date': self.date_begin,
-                'end_date': self.date_end,
-                'state': 'draft',
-                'event_id': self.id,
-            }
             return {
                 'type': 'ir.actions.act_window',
                 'name': _('Create Catering Booking'),

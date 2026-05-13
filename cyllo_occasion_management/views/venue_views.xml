@@ -130,7 +130,7 @@
                             <div>
                                 <button type="edit" string="Settings"
                                         class="button_background"
-                                        groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"
+                                        groups="cyllo_occasion_management.occasion_management_group_venue_manager"
                                         style="float: right;margin-top: 2px;background: none !important;border: none !IMPORTANT;FONT-SIZE: 16px;">
                                     <i class="fa fa-cog" title="setting"/>
                                 </button>
@@ -179,5 +179,5 @@
               name="Venue"
               parent="occasion_management_menu_root" sequence="10"
               action="venue_action"
-              groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"/>
+              groups="cyllo_occasion_management.occasion_management_group_venue_manager"/>
 </odoo>

@@ -124,10 +124,55 @@ h2.section-header {
     font-size: 1.5rem;
 }
 
+.filter-popup {
+    border: 1px solid #ddd;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    min-width: 300px;
+    transition: all 0.3s ease;
+}
+
+.filter-popup .form-label {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.filter-popup .form-select, .filter-popup .form-control {
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.filter-popup .btn-close:focus {
+    box-shadow: none;
+}
+
 .chart-container {
-    border-radius: 0.3rem;
-    padding: 1rem;
-    margin: 1rem auto;
+    position: relative;
+    height: 250px;
+    width: 100%;
+}
+
+.oh-card {
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.oh-card:hover {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1) !important;
+}
+
+.clickable-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.clickable-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background-color: #f8f9fa;
+}
+
+.select-wrapper:hover {
+    border-color: #BD85BA !important;
 }
 
 .chart-container.card-shadow {
