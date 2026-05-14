@@ -238,23 +238,16 @@ class Appointment(models.Model):
         records = super().create(vals_list)
         #Creating calendar event
         for record in records:
-            event_vals = {
-                'name': record.display_name or record.name,
-                'start': record.start_datetime,
-                'stop': record.end_datetime,
-                'partner_ids': [(4, record.partner_id.id)],
-                'description': record.customer_notes or '',
-                'user_id': record.staff_id.user_id.id if record.staff_id and record.staff_id.user_id else self.env.user.id,
-            }
-            event = self.env['calendar.event'].create(event_vals)
-            record.calendar_event_id = event.id
             if record.event_id:
                 self.env['event.registration'].create({
                     'event_id': record.event_id.id,
                     'partner_id': record.partner_id.id,
                 })
+            if record.appointment_type_id.is_paid and not record.sale_order_id:
+                record._create_sale_order()
         for record in records:
             if record.state == 'confirmed':
+                record._create_calendar_event()
                 if record.appointment_type_id.send_confirmation:
                     record._send_confirmation_email()
                 if record.appointment_type_id.send_whatsapp_confirmation and not record.whatsapp_confirmation_sent:
@@ -498,26 +491,66 @@ class Appointment(models.Model):
         result = move_reversal.reverse_moves()
         credit_note = self.env['account.move'].browse(result['res_id'])
         if refund_pct < 100.0:
-            credit_note.button_draft()
+            if credit_note.state != 'draft':
+                credit_note.button_draft()
             for line in credit_note.invoice_line_ids:
                 line.price_unit = line.price_unit * (refund_pct / 100.0)
-            credit_note._recompute_dynamic_lines()
         credit_note.action_post()
         return credit_note
 
     def _reconcile_credit_note(self, credit_note, invoice):
-        """Reconcile credit note against the original invoice's receivable lines."""
-        receivable_account = self.partner_id.property_account_receivable_id
-        lines_to_reconcile = (credit_note + invoice).line_ids.filtered(
-            lambda l: l.account_id == receivable_account
-                      and not l.reconciled
-        )
-        if lines_to_reconcile:
-            lines_to_reconcile.reconcile()
+        """Auto-generate an outbound refund payment to reconcile the credit note."""
+        self.ensure_one()
+        if credit_note.state != 'posted':
+            return
+        payment_register = self.env['account.payment.register'].with_context(
+            active_model='account.move',
+            active_ids=credit_note.ids,
+        ).create({})
+        payment_register._create_payments()
+
+    def _create_calendar_event(self):
+        """Create a calendar event linked to this appointment."""
+        print('_create_calendar_event')
+        self.ensure_one()
+        if self.calendar_event_id:
+            return
+        event = self.env['calendar.event'].create({
+            'name': self.display_name or self.name,
+            'start': self.start_datetime,
+            'stop': self.end_datetime,
+            'partner_ids': [(4, self.partner_id.id)],
+            'description': self.customer_notes or '',
+            'user_id': self.staff_id.user_id.id if self.staff_id and self.staff_id.user_id else self.env.user.id,
+        })
+        self.calendar_event_id = event.id
+
+    def _create_sale_order(self):
+        self.ensure_one()
+        appt_type = self.appointment_type_id
+        if not appt_type.is_paid or not appt_type.product_id:
+            return False
+
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner_id.id,
+            'company_id': self.company_id.id,
+            'origin': self.name,
+            'note': _('Sale order generated from appointment %s') % self.name,
+            'order_line': [(0, 0, {
+                'product_id': appt_type.product_id.id,
+                'name': appt_type.product_id.name,
+                'product_uom_qty': 1,
+                'price_unit': appt_type.product_id.lst_price,
+            })],
+        })
+        self.sale_order_id = sale_order.id
+        return sale_order
 
     def action_confirm(self):
         for rec in self:
             rec.state = 'confirmed'
+            if not rec.calendar_event_id:
+                rec._create_calendar_event()
             if rec.appointment_type_id.send_confirmation and not rec.confirmation_sent:
                 rec._send_confirmation_email()
             if rec.appointment_type_id.send_whatsapp_confirmation and not rec.whatsapp_confirmation_sent:

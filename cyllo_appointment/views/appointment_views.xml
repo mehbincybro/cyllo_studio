@@ -338,7 +338,7 @@
                     <field name="cancelled_by"/>
                     <field name="send_notification"/>
                 </group>
-                 <!-- Refund preview — shown only for paid appointments -->
+                 <!-- Refund preview -->
                 <group string="Refund Preview"
                     invisible="refund_policy == 'none' or not is_paid_appointment">
                     <field name="is_paid_appointment" invisible="1"/>
@@ -353,7 +353,6 @@
                         string="Credit Note Amount" widget="monetary"
                         invisible="refund_policy != 'credit'"/>
                 </group>
-                <!-- Alert outside the group so it spans full width -->
                 <div class="alert alert-info mt-2" role="alert"
                     invisible="refund_policy == 'none' or not is_paid_appointment">
                     <i class="fa fa-info-circle me-1"/>
