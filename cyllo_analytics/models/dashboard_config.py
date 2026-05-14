@@ -25,6 +25,8 @@ _logger = logging.getLogger(__name__)
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
+import uuid
+from datetime import timedelta
 
 
 class DashboardConfig(models.Model):
@@ -86,6 +88,15 @@ class DashboardConfig(models.Model):
     )
     company_id = fields.Many2one('res.company', string="Company")
 
+    share_link_ids = fields.One2many('dashboard.share.link', 'dashboard_id', string="Shareable Links")
+
+    def generate_share_link(self):
+        """Generate a new shareable link."""
+        self.env['dashboard.share.link'].create({
+            'dashboard_id': self.id,
+        })
+        return True
+
     skip_filter = fields.Boolean(
         "Skip filter",
         default=False
@@ -131,14 +142,20 @@ class DashboardConfig(models.Model):
             rec = get_a_sheet()
         theme_id = rec.theme_id or self.env.ref(
             'cyllo_analytics.dashboard_theme_walden')
+        # Get active links as a list for the frontend (exclude expired ones)
+        now = fields.Datetime.now()
+        active_links = rec.share_link_ids.filtered(
+            lambda l: l.is_active and (not l.expiry_date or l.expiry_date > now)
+        ).read(['access_url', 'expiry_date'])
+        
         return [rec.get_data(), rec.id, theme_id.read_theme(), rec.name or 'Dashboard',
-                rec.banner_id.read(['name', 'image_1920'])]
+                rec.banner_id.read(['name', 'image_1920']), active_links]
 
     def get_data(self, field_list=None):
         """Method to get data for the specified fields from associated sheets (optimized)."""
         if not field_list:
             # Need to explicitly request non-stored computed fields, otherwise Odoo skips them
-            field_list = ['name', 'query', 'dimension', 'measure', 'dimension_axis', 'type', 'limit']
+            field_list = ['name', 'query', 'dimension', 'measure', 'dimension_axis', 'type', 'limit', 'filter_ids', 'sheet_filter_ids', 'dashboard_sheet_option_ids']
 
         # Batch read sheets metadata
         sheets_data = self.sheet_ids.read(field_list)
@@ -229,9 +246,10 @@ class DashboardConfig(models.Model):
                 tables = re.findall(r'(?i)(?:FROM|JOIN)\s+([`"]?[\w\.]+[`"]?)', after)
                 models = self.env['ir.model'].search([('table_name', 'in', tables)]).mapped('model')
                 for model in models:
-                    model = self.env[model]
-                    query_obj = model._where_calc([])
-                    model._apply_ir_rules(query_obj, 'read')
+                    model_obj = self.env[model]
+                    query_obj = model_obj._where_calc([])
+                    if not self.env.context.get('bypass_dashboard_security'):
+                        model_obj._apply_ir_rules(query_obj, 'read')
 
                     # Convert domain to SQL clauses
                     from_clause, where_clause, where_params = query_obj.get_sql()

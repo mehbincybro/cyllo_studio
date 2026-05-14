@@ -326,6 +326,7 @@ Table.template = xml`
                     </tr>
                 </tbody>
             </table>
+            </div>
         </t>
         
     </div>

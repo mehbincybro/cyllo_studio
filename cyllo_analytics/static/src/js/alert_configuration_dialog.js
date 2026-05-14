@@ -33,14 +33,8 @@ export class AlertConfigurationDialog extends Component {
             userName: this.user.name,
             notify_users: [], // Selected users: { id, name }
 
-            // One row per measure: { alias, label, enabled, condition, value }
-            measureConditions: measureAxes.map(m => ({
-                alias: m.alias || m.name || '',
-                label: m.label || m.name || m.alias || '',
-                enabled: false,
-                condition: 'gt',
-                value: 0,
-            })),
+            // Dynamic list of conditions: { alias, label, condition, value }
+            measureConditions: [],
 
             // Dimension filter
             dimension_filter: false,
@@ -79,23 +73,20 @@ export class AlertConfigurationDialog extends Component {
                     );
                 }
 
-                // If saved condition_ids exist, re-enable the matching measure rows
+                // Populate measureConditions from saved condition_ids
                 if (alert.condition_ids && alert.condition_ids.length > 0) {
-                    const condRecs = await this.orm.read(
+                    this.state.measureConditions = await this.orm.read(
                         "dashboard.alert.condition",
                         alert.condition_ids,
                         ["measure_alias", "measure_label", "condition", "value"]
                     );
-                    condRecs.forEach(rec => {
-                        const row = this.state.measureConditions.find(
-                            r => r.alias === rec.measure_alias
-                        );
-                        if (row) {
-                            row.enabled = true;
-                            row.condition = rec.condition;
-                            row.value = rec.value;
-                        }
-                    });
+                    // Rename keys to match our internal format if necessary
+                    this.state.measureConditions = this.state.measureConditions.map(rec => ({
+                        alias: rec.measure_alias,
+                        label: rec.measure_label,
+                        condition: rec.condition,
+                        value: rec.value,
+                    }));
                 }
             }
         });
@@ -127,18 +118,26 @@ export class AlertConfigurationDialog extends Component {
         ];
     }
 
-    toggleMeasure(index) {
-        this.state.measureConditions[index].enabled =
-            !this.state.measureConditions[index].enabled;
+    addCondition() {
+        if (!this.hasMeasures) return;
+        const defaultMsr = this._measureAxes[0];
+        this.state.measureConditions.push({
+            alias: defaultMsr.alias || defaultMsr.name || '',
+            label: defaultMsr.label || defaultMsr.name || defaultMsr.alias || '',
+            condition: 'gt',
+            value: 0,
+        });
+    }
+
+    removeCondition(index) {
+        this.state.measureConditions.splice(index, 1);
     }
 
     async onSave() {
         try {
-            const enabled = this.state.measureConditions.filter(r => r.enabled);
-
-            if (enabled.length === 0) {
+            if (this.state.measureConditions.length === 0) {
                 this.notification.add(
-                    "Please enable at least one measure condition before saving.",
+                    "Please add at least one measure condition before saving.",
                     { type: "warning" }
                 );
                 return;
@@ -158,7 +157,7 @@ export class AlertConfigurationDialog extends Component {
                 // Replace all existing condition rows
                 condition_ids: [
                     [5, 0, 0],   // unlink all previous
-                    ...enabled.map(r => [0, 0, {
+                    ...this.state.measureConditions.map(r => [0, 0, {
                         measure_alias: r.alias,
                         measure_label: r.label,
                         condition: r.condition,
@@ -263,5 +262,34 @@ export class AlertConfigurationDialog extends Component {
     getConditionLabel(row) {
         const opt = this.conditionOptions.find(o => o.value === row.condition);
         return opt ? opt.label : "Select Condition...";
+    }
+
+    measureSources(row) {
+        return [{
+            options: (str) => {
+                const searchStr = (str || "").toLowerCase();
+                return this._measureAxes
+                    .map(m => ({
+                        alias: m.alias || m.name || '',
+                        label: m.label || m.name || m.alias || ''
+                    }))
+                    .filter(opt => opt.label.toLowerCase().includes(searchStr))
+                    .map(opt => ({
+                        label: opt.label,
+                        value: opt.alias,
+                        isSelected: row.alias === opt.alias
+                    }));
+            }
+        }];
+    }
+
+    onMeasureSelect(row, selected) {
+        row.alias = selected.value;
+        row.label = selected.label;
+    }
+
+    getMeasureLabel(row) {
+        const msr = this._measureAxes.find(m => (m.alias || m.name) === row.alias);
+        return msr ? (msr.label || msr.name || msr.alias) : "Select Measure...";
     }
 }

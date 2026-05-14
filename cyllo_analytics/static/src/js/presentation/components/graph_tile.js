@@ -376,7 +376,27 @@ export class GraphTile extends Component {
      */
     fetchData(item) {
         if (status(this) == "destroyed") return
-        var sql = item.query.replace(/\n/g, ' ');
+        let sql = item.query.replace(/\n/g, ' ');
+
+        // For Pie / Donut charts: if the saved query has no ORDER BY, append one
+        // on the dimension column so data rows always arrive in the same sequence.
+        // Without a stable order PostgreSQL can shuffle rows between calls,
+        // causing different slices to receive different colours.
+        const isPieType = ['pie', 'doughnut'].includes(item.type);
+        if (isPieType && item.dimension && !/ORDER\s+BY/i.test(sql)) {
+            // Strip trailing semicolon or whitespace before appending
+            sql = sql.replace(/;\s*$/, '').trimEnd();
+            // Respect any existing LIMIT so we append before it
+            const limitMatch = sql.match(/(\bLIMIT\s+\d+\s*)$/i);
+            if (limitMatch) {
+                const limitClause = limitMatch[1];
+                sql = sql.slice(0, sql.length - limitClause.length).trimEnd()
+                    + ` ORDER BY ${item.dimension} ${limitClause}`;
+            } else {
+                sql += ` ORDER BY ${item.dimension}`;
+            }
+        }
+
         this.orm.call("dashboard.config", "sql_execute", [sql]).then(async (res) => {
             if (!res || (res && res.__query_error__)) {
                 const msg = res && res.message ? res.message : 'The query returned no data.';

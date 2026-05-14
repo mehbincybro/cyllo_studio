@@ -166,7 +166,7 @@
                 </div>
                 <div class="main m-3 w-100">
                     <div class="cy-sheets-previewContainer pb-2">
-                        <div class="cy-note-hint-sidebar">
+                        <div class="cy-note-hint-sidebar" t-if="ChartData.generate">
                             <i class="ri-information-line" style="color: #4CAF50; font-size: 16px;"/>
                             <span>Tip: Double click on any chart point to add an independent business context note.</span>
                         </div>
@@ -609,7 +609,7 @@
                 </div>
             </div>
             <t t-if="state.can_select">
-                <Many2XAutocomplete resModel="'ir.model'" getDomain="getDomain"
+                <Many2XAutocomplete resModel="'ir.model'" getDomain.bind="getDomain"
                                     fieldString="'Models'"
                                     activeActions="{}" update.bind="onSelect"/>
             </t>

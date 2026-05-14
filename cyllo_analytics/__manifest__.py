@@ -38,7 +38,6 @@
         'security/ir.model.access.csv',
         'data/banner/dashboard_banner.xml',
         'data/dashboard_sheet_type_data.xml',
-        'data/calculation_preset_data.xml',
         'data/dashboard_global_filter_data.xml',
         'data/theme/dashboard_theme_cyllo.xml',
         'data/theme/dashboard_theme_walden.xml',

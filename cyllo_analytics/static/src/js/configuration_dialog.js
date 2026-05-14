@@ -1,12 +1,14 @@
 /** @odoo-module */
 import { Dialog } from "@web/core/dialog/dialog";
-import { Component, onWillStart } from "@odoo/owl";
+import { Component, onWillStart, useState } from "@odoo/owl";
 import { Record } from "@web/model/record";
 import { Many2OneField } from "@web/views/fields/many2one/many2one_field";
 import { CharField } from "@web/views/fields/char/char_field";
 import { Many2ManyTagsField } from "@web/views/fields/many2many_tags/many2many_tags_field";
 import { IntegerField } from "@web/views/fields/integer/integer_field";
 import { useService } from "@web/core/utils/hooks";
+import { X2ManyField } from "@web/views/fields/x2many/x2many_field";
+import { useRef } from "@odoo/owl";
 
 class DeleteOnlyMany2ManyTagsField extends Many2ManyTagsField {
     getTagProps(record) {
@@ -21,12 +23,17 @@ export class ConfigurationDialog extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
+        this.configRecord = useRef("configRecord");
         this.data = {}
+        this.state = useState({ links: [] });
         onWillStart(async() => {
             this.hasLinkedMenu = [];
             if (this.props.id) {
                 const data = await this.orm.read("dashboard.config", [this.props.id], ['ir_menu_ids'])
                 this.hasLinkedMenu = data[0]?.ir_menu_ids || []
+                
+                const sheets = await this.orm.call("dashboard.config", "get_sheets", [this.props.id]);
+                this.state.links = sheets[5] || [];
             }
         })
     }
@@ -100,7 +107,24 @@ export class ConfigurationDialog extends Component {
                 fields: related,
             },
         }
-         var fields = { theme_id, name, group_ids, user_ids, ir_menu_ids, banner_id, company_id }
+         var share_link_ids = {
+             type: "one2many",
+             string: "Sharing Links",
+             relation: "dashboard.share.link",
+             related: {
+                activeFields: { 
+                    access_url: { type: "char" }, 
+                    expiry_date: { type: "datetime" }, 
+                    is_active: { type: "boolean" } 
+                },
+                fields: { 
+                    access_url: { type: "char" }, 
+                    expiry_date: { type: "datetime" }, 
+                    is_active: { type: "boolean" } 
+                },
+             },
+         }
+         var fields = { theme_id, name, group_ids, user_ids, ir_menu_ids, banner_id, company_id, share_link_ids }
          var self = this
          return {
              mode: "edit",
@@ -124,7 +148,9 @@ export class ConfigurationDialog extends Component {
             if(this.data.theme_id){
                 this.props.applyTheme(this.data.theme_id)
             }
-            this.props.onClickSave(this.data)
+            if (this.props.onClickSave) {
+                await this.props.onClickSave(this.data);
+            }
             if (this.data.ir_menu_ids) {
                 this.action.doAction("reload_context");
             }
@@ -132,7 +158,10 @@ export class ConfigurationDialog extends Component {
             await this.orm.create("dashboard.config", [this.data])
             this.action.doAction('soft_reload')
         }
-        this.props.close()
+        // Force an immediate reload to refresh everything immediately after saving
+        setTimeout(() => {
+            window.location.reload();
+        }, 150);
     }
     get defaultConfProps() {
         return {
@@ -142,10 +171,30 @@ export class ConfigurationDialog extends Component {
         }
     }
 
+
+    async onRevokeLink(link) {
+        const linkId = link.resId || link.id;
+        await this.orm.call("dashboard.share.link", "revoke", [linkId]);
+        const sheets = await this.orm.call("dashboard.config", "get_sheets", [this.props.id]);
+        this.state.links = (sheets && sheets[5]) || [];
+        this.env.bus.trigger("REFRESH_LINKS");
+    }
+
+    async onExpiryChange(link, ev) {
+        const linkId = link.resId || link.id;
+        const newDate = ev.target.value;
+        await this.orm.write("dashboard.share.link", [linkId], {
+            expiry_date: newDate || false
+        });
+        const sheets = await this.orm.call("dashboard.config", "get_sheets", [this.props.id]);
+        this.state.links = (sheets && sheets[5]) || [];
+        this.env.bus.trigger("REFRESH_LINKS");
+    }
+
 }
 // Define the template and components for the ConfigurationDialog component
 ConfigurationDialog.template = "cyllo_analytics.ConfigurationDialog";
 ConfigurationDialog.defaultProps = {
     onClickSave: () => {}
 };
-ConfigurationDialog.components = { Dialog, Record, Many2OneField, CharField , Many2ManyTagsField, IntegerField, DeleteOnlyMany2ManyTagsField};
+ConfigurationDialog.components = { Dialog, Record, Many2OneField, CharField , Many2ManyTagsField, IntegerField, DeleteOnlyMany2ManyTagsField, X2ManyField};

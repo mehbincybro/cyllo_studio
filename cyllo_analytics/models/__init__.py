@@ -36,3 +36,4 @@ from . import res_config_settings
 from . import calculation_preset
 from . import custom_imported_table
 from . import dashboard_alert
+from . import dashboard_share_link

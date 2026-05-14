@@ -10,6 +10,32 @@
             </tile>
         </field>
     </record>
+
+    <record id="view_dashboard_sheet_form" model="ir.ui.view">
+        <field name="name">view.dashboard.sheet.form</field>
+        <field name="model">dashboard.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Dashboard Sheet">
+                <sheet>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Sheet Name..."/>
+                        </h1>
+                    </div>
+                    <notebook>
+                        <page name="config" string="Configuration">
+                            <group>
+                                <field name="type"/>
+                                <field name="sheet_type_id"/>
+                                <field name="limit"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
     <record id="action_view_sheets" model="ir.actions.act_window">
         <field name="name">Dashboard Sheet</field>
         <field name="res_model">dashboard.sheet</field>

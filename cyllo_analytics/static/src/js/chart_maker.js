@@ -236,12 +236,17 @@ export class ChartMaker {
                         fontSize: 10
                     }
                 },
-                itemStyle: {
-                    color: (params) => {
-                        const customColor = this.getPointColor(key, params.value);
-                        return customColor || params.color;
+                // For Bar, Line, etc., we apply a series-level color callback.
+                // For Pie, Donut, Funnel, Radar, we skip it here and handle it at the data-point level
+                // to avoid poisoning the multi-color palette.
+                ...(!['pie', 'doughnut', 'funnel', 'radar'].includes(this.type) ? {
+                    itemStyle: {
+                        color: (params) => {
+                            const customColor = this.getPointColor(key, params.value);
+                            return customColor || params.color;
+                        }
                     }
-                }
+                } : {})
             })
         })
 
@@ -340,13 +345,44 @@ export class ChartMaker {
             legendIconColor = '#ffffff';
         }
 
+        const ECHARTS_DEFAULT_PALETTE = [
+            '#5470c6', '#91cc75', '#fac858', '#ee6666',
+            '#73c0de', '#3ba272', '#fc8455', '#9a60b4'
+        ];
+        const themePalette = (this.params?.themeColor?.length > 0) ? this.params.themeColor : ECHARTS_DEFAULT_PALETTE;
+
         var legends = {
-            data: this.measures.map(key => this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key))
+            data: this.measures.map((key, index) => {
+                const label = this.params.measureNames && this.params.measureNames[key] ? this.params.measureNames[key] : convertToTitleCase(key);
+                const cmaps = (this.color_mappings || []).filter(m => m.measure_alias === key && m.color);
+                if (cmaps && cmaps.length > 0) {
+                    const baseColor = themePalette[index % themePalette.length];
+                    const allColors = [baseColor, ...cmaps.map(m => m.color)];
+                    const boxWidth = 24;
+                    const stripeWidth = boxWidth / allColors.length;
+                    
+                    let svg = `<svg width="${boxWidth}" height="14" xmlns="http://www.w3.org/2000/svg">`;
+                    allColors.forEach((color, i) => {
+                        svg += `<rect x="${i * stripeWidth}" y="0" width="${stripeWidth}" height="14" fill="${color}" />`;
+                    });
+                    // Apply heavy border around the full striped block
+                    svg += `<rect x="0" y="0" width="${boxWidth}" height="14" fill="none" stroke="#000000" stroke-width="1.5" />`;
+                    svg += `</svg>`;
+                    
+                    return {
+                        name: label,
+                        icon: 'image://data:image/svg+xml;base64,' + window.btoa(svg)
+                    };
+                }
+                return label;
+            })
         }
 
         let val = {
+            color: themePalette,
             legends,
             legend: {
+                data: legends.data,
                 type: 'scroll',
                 orient: 'horizontal',
                 right: 20,
@@ -397,6 +433,17 @@ export class ChartMaker {
     }
 
     pieAndDoughnutChart(val) {
+        // ECharts 5 default palette — pinned at the DATA-POINT level via
+        // itemStyle.color so colours are theme-independent.
+        // Setting val.color (option-level) is not enough because a registered
+        // ECharts theme can still win.  Point-level itemStyle.color is the
+        // highest-priority colour source in ECharts and always takes precedence.
+        const ECHARTS_DEFAULT_PALETTE = [
+            '#5470c6', '#91cc75', '#fac858', '#ee6666',
+            '#73c0de', '#3ba272', '#fc8455', '#9a60b4'
+        ];
+        val.color = ECHARTS_DEFAULT_PALETTE; // belt-and-suspenders fallback
+
         let axis = this.dimension_axis === "x" ? val.xAxis : val.yAxis
         let radius = this.type === 'doughnut' ? ["40%", "70%"] : '50%'
         this.data && this.data.forEach((item, mi) => {
@@ -409,10 +456,14 @@ export class ChartMaker {
                 if (this.hasItemStyle) {
                     data.itemStyle = item["itemStyle"]
                 }
+                // Determine the colour: indicator/color-mapping rules win,
+                // otherwise use the pinned palette by slice index.
                 const customColor = this.getPointColor(key, item[key]);
-                if (customColor) {
-                    data.itemStyle = { ...(data.itemStyle || {}), color: customColor };
-                }
+                const paletteColor = ECHARTS_DEFAULT_PALETTE[mi % ECHARTS_DEFAULT_PALETTE.length];
+                data.itemStyle = {
+                    ...(data.itemStyle || {}),
+                    color: customColor || paletteColor
+                };
                 val.series[i].data.push(data)
                 val.series[i].radius = radius
                 val.series[i].center = ['50%', '60%']
@@ -429,6 +480,7 @@ export class ChartMaker {
                 }
             })
         })
+
         delete val.xAxis
         delete val.yAxis
         val.tooltip.formatter = (params) => {
@@ -818,10 +870,15 @@ export class ChartMaker {
         const series = this.measures.map(measure => {
             return {
                 data: this.data.map(item => {
-                    return {
+                    const customColor = this.getPointColor(measure, item[measure]);
+                    const point = {
                         name: item[this.dimension],
                         value: item[measure]
+                    };
+                    if (customColor) {
+                        point.itemStyle = { color: customColor };
                     }
+                    return point;
                 }),
                 ...seriesData
             }

@@ -39,7 +39,12 @@ export class ModelViewer extends Component {
      * @returns {Array} - The domain for model selection.
      */
     getDomain() {
-        return [["transient", "=", false]]
+        var domain = [["transient", "=", false]];
+        if (this.state.models && this.state.models.length) {
+            var existing_models = this.state.models.map(m => m.model);
+            domain.push(["model", "not in", existing_models]);
+        }
+        return domain;
     }
     onRemoveModel(ev) {
         var indexToRemove = this.state.models.findIndex(item => item.id === ev.id)

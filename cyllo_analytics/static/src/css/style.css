@@ -945,7 +945,7 @@
 }
 
 .cy-new-chat-button {
-    background-color: var(--primary);
+    background-color: #9ea700;
     padding: 0.75rem 1.5rem 0.75rem 1.5rem;
     width: 100%;
     margin-top: 1rem;
@@ -960,6 +960,7 @@
 
 .cy-new-chat-button:hover {
     background-color: #849600;
+    color: white;
     -webkit-transition: all 0.4s ease-in-out;
     transition: all 0.4s ease-in-out;
 }
@@ -3971,4 +3972,43 @@ img.presentation_helper {
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 60px;
+}
+
+/* --- Public Dashboard Sharing Styles --- */
+.cy-share-popover {
+    top: 100%;
+    right: 0;
+    z-index: 1000;
+    width: 320px;
+    margin-top: 10px;
+    border: 1px solid #eee;
+}
+
+.share-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.cy-share-popover .cy-share-generate-btn {
+    color: white !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.02em;
+    padding: 10px !important;
+    transition: all 0.3s ease !important;
+    border: none !important;
+    background: #9ea700 !important;
+}
+
+.cy-share-generate-btn:hover {
+    background: #849600 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(158, 167, 0, 0.3);
+}
+
+.share-item {
+    transition: background 0.2s;
+}
+
+.share-item:hover {
+    background-color: #ededed !important;
 }

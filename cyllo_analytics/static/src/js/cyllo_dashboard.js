@@ -30,10 +30,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         this.filter_dropdown = useRef('filter_dropdown')
         this.graph = useRef('graph')
         this.container = useRef('chart-container')
+        this.share_container = useRef('share_container')
         this.items = []
         this.dialogService = useService("dialog")
         this.notification = useService("notification")
-        this.ui = useState(useService("ui"))
+        this.ui = useService("ui")
+        useExternalListener(window, "click", this.onWindowClick.bind(this));
         this.vals = []
         this.chartImages = {}
         this.refreshObject = {
@@ -60,10 +62,14 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         useEffect(() => {
             this.env.bus.trigger("REFRESH_GRAPH")
         }, () => [this.state.width, this.ui.size]);
+
+        useBus(this.env.bus, "REFRESH_LINKS", async () => {
+            await this.refreshData();
+        });
         useEffect(() => {
             const bannerEl = this.dashboard.el.querySelector('.o_pj_dashboard');
             var root = document.querySelector(':root');
-            if (this.bannerState.banner.length) {
+            if (this.bannerState.banner && this.bannerState.banner.length) {
                 const {
                     image_1920
                 } = this.bannerState.banner[0];
@@ -76,10 +82,15 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                     .then(svgData => {
                         const parser = new DOMParser();
                         const svgDoc = parser.parseFromString(svgData, 'image/svg+xml');
+                        if (!this.themeState.theme || !this.themeState.theme.theme_color_ids) {
+                            return;
+                        }
                         var {
                             theme_color_ids: newColors, title
                         } = this.themeState.theme
-                        newColors = newColors.slice(1, newColors.length - 1);
+                        if (newColors && newColors.length) {
+                            newColors = newColors.slice(1, newColors.length - 1);
+                        }
                         for (let i = 0; i <= 7; i++) {
                             const circles = svgDoc.querySelectorAll(`.st${i}`);
                             if (circles.length) {
@@ -100,14 +111,14 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             } else {
                 root?.style.setProperty('--banner-image-url', `url('')`);
             }
-        }, () => [this.bannerState.banner, this.themeState.theme?.theme_color_ids]);
+        }, () => [this.bannerState.banner, (this.themeState.theme && this.themeState.theme.theme_color_ids)]);
 
         this.is_subAction = this.props.action.context.is_subAction || false;
         onMounted(async () => {
             this.state.globalFilters = await this.orm.searchRead('dashboard.global.filter', [
                 ['dashboard_config_id', '=', this.id]
             ])
-            if (!this.sortedItems.length && !this.is_subAction) {
+            if (!(this.sortedItems && (this.sortedItems.length || 0)) && !this.is_subAction) {
                 this.state.showInfo = true;
             }
         })
@@ -126,7 +137,9 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         }
         this.firstLine = true
         useEffect(() => {
-            this.dashboard.el.style.backgroundColor = this.themeState.theme.background
+            if (this.themeState.theme && this.themeState.theme.background) {
+                this.dashboard.el.style.backgroundColor = this.themeState.theme.background
+            }
             if (this.ui.size > 3) {
                 var setTemplateId = setTimeout(() => {
                     if (this.hasAccess) {
@@ -139,15 +152,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             }
         }, () => [this.themeState.theme])
 
-        // Auto-refresh heartbeat every 2 minutes
-        useEffect(() => {
-            const interval = setInterval(() => {
-                if (status(this) !== "destroyed") {
-                    this.env.bus.trigger("REFRESH_GRAPH", { type: "refresh_graph" });
-                }
-            }, 120000);
-            return () => clearInterval(interval);
-        }, () => []);
+    }
+
+    onWindowClick(ev) {
+        if (this.state.showSharePopover && this.share_container.el && !this.share_container.el.contains(ev.target)) {
+            this.state.showSharePopover = false;
+        }
     }
 
     closeFilterSidebar() {
@@ -170,7 +180,7 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
         const element = this.graph.el.querySelector(".cy_dash-card_container")
         const canvas = await html2canvas(element)
         let imgData = canvas.toDataURL('image/png');
-        if (status(this) !== "destroyed") {
+        if (status(this) !== "destroyed" && this.id) {
             this.orm.write("dashboard.config", [this.id], {
                 image_1920: imgData.split(',')[1]
             })
@@ -420,6 +430,10 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
             const operator = filter.global_filter_id.operator;
             const val = this.filters[code];
             if (val !== undefined && val !== null && (Array.isArray(val) ? val.length : true)) {
+                // Normalize date strings for Odoo domains (YYYY-MM-DD)
+                if (typeof val === 'string' && val.includes('/')) {
+                    val = val.replace(/\//g, '-');
+                }
                 let field = filter.field;
                 if (field.includes('.')) {
                     const [table, col] = field.split('.');
@@ -868,7 +882,8 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
                 this.bannerState.banner = await this.orm.read('dashboard.banner', [changes.banner_id])
             } else this.bannerState.banner = [];
         }
-
+        await this.refreshData();
+        await this.onSetTemplate();
     }
 
     exportAsPNG(sheet) {
@@ -929,12 +944,12 @@ export class CylloDashboard extends CyAnalyticMixin(Component) {
 
     closeFilter() {
         this.filter_dropdown.el.classList.add("cy_filter_toggler")
-        this.dashboard.el.querySelector(".cy-churn-filter-btn").classList.remove("show")
+        this.dashboard.el.querySelector("#cydialogBtn").classList.remove("show")
     }
 
     onClickFilter() {
         this.filter_dropdown.el.classList.toggle("cy_filter_toggler")
-        this.dashboard.el.querySelector(".cy-churn-filter-btn").classList.toggle("show")
+        this.dashboard.el.querySelector("#cydialogBtn").classList.toggle("show")
     }
 
     applyFilter() {

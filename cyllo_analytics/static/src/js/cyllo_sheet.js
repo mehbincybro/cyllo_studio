@@ -626,7 +626,19 @@ export class CylloSheet extends Component {
         const join = query_data.join.join(' \n');
         const columnStr = columns.length ? columns.map(item => item.query).join(', ') : '';
         const groupBy = totalGroupBy.length ? '\n GROUP BY ' + totalGroupBy.join(', ') : '';
-        const orderBy = query_data.orderBy.length ? '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ') : '';
+        let orderBy;
+        if (query_data.orderBy.length) {
+            orderBy = '\n ORDER BY ' + query_data.orderBy.map(item => item.query).join(', ');
+        } else if (query_data.dimension.length) {
+            // Default: order by the dimension alias so data rows always arrive in
+            // the same sequence between the editor preview and the dashboard render.
+            // Without a stable ORDER BY, PostgreSQL can return rows in different
+            // orders on each call, shifting pie-slice colour assignments.
+            const dimAlias = query_data.dimension[0].alias;
+            orderBy = `\n ORDER BY ${dimAlias}`;
+        } else {
+            orderBy = '';
+        }
         const whereData = query_data.where.filter(item => item.active).map(item => item.domain);
         const where = whereData.length ? '\n WHERE ' + whereData.join(' AND ') : '';
 
@@ -1152,9 +1164,15 @@ export class CylloSheet extends Component {
                 // ids are not sent again on the next save.
                 this.unlinkList = { axis: [], tables: [], where: [], configs: [] }
             }
-            catch {
-                this.showMessage(`There was an error while saving the record`, "warning")
-                this.state.saveClicked = false
+            catch (error) {
+                let errorMsg = "There was an error while saving the record";
+                if (error && error.data && error.data.message) {
+                    errorMsg = error.data.message;
+                } else if (error && error.message) {
+                    errorMsg = error.message;
+                }
+                this.showMessage(errorMsg, "warning");
+                this.state.saveClicked = false;
             }
         }
         this.state.saveClicked = false
