@@ -28,7 +28,7 @@ from odoo.exceptions import ValidationError
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
 
-    # ✅ Handle dynamic approve/reject actions globally
+    # Handle dynamic approve/reject actions globally
     def action_dynamic_approve(self):
         """Called when clicking the dynamically injected Approve button."""
         self.ensure_one()
@@ -69,11 +69,11 @@ class BaseModel(models.AbstractModel):
     def action_request_approval(self):
         """Open wizard to request approval with sequencing support"""
 
-        ApprovalRule = self.env['approval.rule'].sudo()
-        ApprovalRequest = self.env['approval.request'].sudo()
+        approval_rule = self.env['approval.rule'].sudo()
+        approval_request = self.env['approval.request'].sudo()
 
         # Fetch all state rules for this model
-        rules = ApprovalRule.search([
+        rules = approval_rule.search([
             ('model_name', '=', self._name),
             ('rule_type', '=', 'state'),
         ])
@@ -87,7 +87,7 @@ class BaseModel(models.AbstractModel):
         next_rule = None
 
         for rule in ordered:
-            existing = ApprovalRequest.search([
+            existing = approval_request.search([
                 ('rule_id', '=', rule.id),
                 ('res_model', '=', self._name),
                 ('res_id', '=', self.id),
@@ -140,9 +140,9 @@ class BaseModel(models.AbstractModel):
     @api.model
     def _approval_request_count(self):
         """Compute count for stat button."""
-        ApprovalRequest = self.env["approval.request"]
+        approval_request = self.env["approval.request"]
         for rec in self:
-            rec.x_approval_request_count = ApprovalRequest.search_count([
+            rec.x_approval_request_count = approval_request.search_count([
                 ("res_model", "=", rec._name),
                 ("res_id", "=", rec.id)
             ])
@@ -156,10 +156,10 @@ class BaseModel(models.AbstractModel):
 
         user = self.env.user
         model_name = res.get('model')
-        ApprovalRule = self.env['approval.rule'].sudo()
+        approval_rule = self.env['approval.rule'].sudo()
 
         # Fetch ALL rules for this model (state or button)
-        rules = ApprovalRule.search([('model_name', '=', model_name)])
+        rules = approval_rule.search([('model_name', '=', model_name)])
 
         if not rules:
             return res

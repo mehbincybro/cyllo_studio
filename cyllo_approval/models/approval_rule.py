@@ -35,17 +35,26 @@ class ApprovalRule(models.Model):
     # ------------------------------------------------------------
     # BASIC FIELDS
     # ------------------------------------------------------------
-    name = fields.Char(required=True)
-    model_id = fields.Many2one('ir.model', string='Target Model')
-    model_name = fields.Char(related='model_id.model', store=True)
+    name = fields.Char(required=True, help="Display name for this approval rule.")
+    model_id = fields.Many2one('ir.model', string='Target Model',
+                               help="The Odoo model this rule applies to.")
+    model_name = fields.Char(related='model_id.model', store=True,
+                             help="Technical name of the target model.")
 
-    request_ids = fields.One2many('approval.request', 'rule_id')
+    request_ids = fields.One2many('approval.request', 'rule_id',
+                                  help="History of approval requests triggered by this rule.")
+
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company,
+                                 help="The company this approval rule belongs to.")
 
     rule_type = fields.Selection([
         ('button', 'Button'),
         ('state', 'State Change'),
         ('server', 'Server Action'),
-    ], required=True, default='button')
+    ], required=True, default='button',
+        help="Specify what triggers the approval: "
+             "clicking a button, changing a state/stage, or a server action.")
 
     # ------------------------------------------------------------
     # STATE FIELDS - IMPROVED APPROACH
@@ -53,7 +62,8 @@ class ApprovalRule(models.Model):
     state_field_id = fields.Many2one(
         'ir.model.fields',
         string='State Field',
-        domain="[('model_id', '=', model_id), ('name', 'in', ['state', 'stage_id'])]"
+        domain="[('model_id', '=', model_id), ('name', 'in', ['state', 'stage_id'])]",
+        help="The field that represents the state or stage in the target model."
     )
     state_field_name = fields.Char(related='state_field_id.name', store=True)
     state_field_type = fields.Selection(
@@ -70,7 +80,8 @@ class ApprovalRule(models.Model):
     state_to_selection_id = fields.Many2one(
         'ir.model.fields.selection',
         string="Target State (Selection)",
-        domain="[('field_id', '=', state_field_id)]"
+        domain="[('field_id', '=', state_field_id)]",
+        help="The specific selection value that requires approval when selected."
     )
 
     # For many2one states (stage_id, etc.)
@@ -83,36 +94,61 @@ class ApprovalRule(models.Model):
     state_to_m2o_value_id = fields.Many2one(
         'approval.state.value',
         string="Target State (Stage)",
-        domain="[('id', 'in', state_values_m2o_ids)]"
+        domain="[('id', 'in', state_values_m2o_ids)]",
+        help="The specific stage that requires approval when entered."
     )
 
     # ------------------------------------------------------------
     # APPROVERS
     # ------------------------------------------------------------
-    user_id = fields.Many2one('res.users', string='Approver', required=True)
-    group_id = fields.Many2one('res.groups', string='Approver Group')
+    user_id = fields.Many2one('res.users', string='Approver',
+                              help="Specific user assigned to approve requests from this rule.")
+    group_id = fields.Many2one('res.groups', string='Approver Group',
+                               help="Any member of this group can approve requests from this rule.")
 
     # ------------------------------------------------------------
     # TRIGGER FIELDS
     # ------------------------------------------------------------
     button_id = fields.Many2one('ir.buttons',
                                 domain="[('model_id','=',model_id)]",
-                                help="Select the button that need an approval."
-                                     "If the desired button is not found, try the refresh button.")
+                                help="Select the button that requires an approval."
+                                     "If not found, use the sync buttons action.")
 
     server_action_id = fields.Many2one(
         'ir.actions.server',
-        domain="[('model_id','=',model_id)]"
+        domain="[('model_id','=',model_id)]",
+        help="The server action that requires approval before execution."
     )
 
-    sequence = fields.Integer(default=1)
-    domain = fields.Char(default='[]')
+    sequence = fields.Integer(
+        default=1,
+        help="The order in which rules are processed if multiple rules apply."
+    )
 
-    is_comment = fields.Boolean('Allow Comment')
-    is_email = fields.Boolean('Notify Email')
-    is_email_request = fields.Boolean('Notify on Request')
-    is_email_approve = fields.Boolean('Notify on Approval')
-    is_email_reject = fields.Boolean('Notify on Rejection')
+    domain = fields.Char(
+        default='[]',
+        help="A Python domain to further filter which records this rule applies to."
+    )
+
+    is_comment = fields.Boolean(
+        'Allow Comment',
+        help="If checked, the requester can add a comment to the request."
+    )
+
+    is_email = fields.Boolean('Notify Email',
+                              help="Enable email notifications for this rule.")
+    is_email_request = fields.Boolean(
+        'Notify on Request',
+        help="Send an email to the approver when a request is created."
+    )
+    is_email_approve = fields.Boolean(
+        'Notify on Approval',
+        help="Send an email to the requester when the request is approved."
+    )
+    is_email_reject = fields.Boolean(
+        'Notify on Rejection',
+        help="Send an email to the requester when the request is rejected."
+    )
 
     @api.constrains('model_id')
     def _constraint_model_id(self):
@@ -465,7 +501,7 @@ class ApprovalRule(models.Model):
                                 ('res_model', '=', rec._name),
                                 ('res_id', '=', rec.id),
                                 ('state', '=', 'approved'),
-                            ]).sudo().write({'state': 'done'})
+                            ]).sudo().write({'is_used': True})
 
                 # If some records are left, update them
                 if records_to_process:

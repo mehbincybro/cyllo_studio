@@ -30,7 +30,9 @@
     'website': "https://www.cyllo.com",
     'depends': ['base','mail'],
     'data': [
+        'security/cyllo_approval_security.xml',
         'security/ir.model.access.csv',
+        'data/ir_sequence_data.xml',
         'data/mail_template_data.xml',
         'views/approval_rule_views.xml',
         'views/approval_request_views.xml',

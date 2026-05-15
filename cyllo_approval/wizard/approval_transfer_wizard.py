@@ -39,6 +39,7 @@ class ApprovalTransferWizard(models.TransientModel):
     )
 
     current_user_id = fields.Many2one('res.users')
+    note = fields.Text('Reason', required=True, help="Reason for transferring the approval.")
 
     def action_transfer_approval(self):
         """Transfer approval from one user to another."""
@@ -49,8 +50,11 @@ class ApprovalTransferWizard(models.TransientModel):
             raise UserError(
                 "Only the current approver can transfer this approval.")
 
-        # Update current approver
-        request.approver_id = self.user_id.id
+        # Update current approver and note
+        request.write({
+            'approver_id': self.user_id.id,
+            'note': self.note,
+        })
 
         model = request.res_model
         approval_record = self.env[model].browse(request.res_id)
@@ -58,11 +62,10 @@ class ApprovalTransferWizard(models.TransientModel):
             'x_current_approver_id': self.user_id.id,
         })
 
-        # # Chatter log
-        # request.message_post(
-        #     body=f"Approval transferred from {self.current_user_id.name} "
-        #          f"to {self.user_id.name}."
-        # )
-
+        # Chatter log
+        request.message_post(
+            body=f"Approval transferred from {self.current_user_id.name} "
+                 f"to {self.user_id.name}. Reason: {self.note}"
+        )
 
         return {'type': 'ir.actions.act_window_close'}

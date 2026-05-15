@@ -9,6 +9,7 @@
                     <field name="request_id" readonly="1"/>
                     <field name="current_user_id" readonly="1"/>
                     <field name="user_id" options="{'no_create': True}"/>
+                    <field name="note" placeholder="Reason for transfer..."/>
                 </group>
                 <footer>
                     <button string="Transfer" type="object" name="action_transfer_approval" class="btn-primary"/>

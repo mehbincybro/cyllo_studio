@@ -12,6 +12,7 @@
                 <field name="state_field_name" optional="hide"/>
                 <field name="user_id"/>
                 <field name="group_id" optional="hide"/>
+                <field name="company_id" groups="base.group_multi_company"/>
             </tree>
         </field>
     </record>
@@ -31,8 +32,9 @@
                             <field name="sequence"/>
                         </group>
                         <group>
-                            <field name="user_id"/>
-                            <field name="group_id"/>
+                            <field name="user_id" required="not group_id"/>
+                            <field name="group_id" required="not user_id"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
                         </group>
                     </group>
 
@@ -157,6 +159,8 @@
                             context="{'group_by': 'rule_type'}"/>
                     <filter string="Approver" name="group_user"
                             context="{'group_by': 'user_id'}"/>
+                    <filter string="Company" name="group_company"
+                            context="{'group_by': 'company_id'}" groups="base.group_multi_company"/>
                 </group>
             </search>
         </field>
