@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
@@ -73,3 +73,32 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='cyllo_appointment.followup_hours',
         default=24.0
     )
+    cal_client_id = fields.Char(
+        string='Client ID',
+        config_parameter='google_calendar_client_id',
+        default='',
+    )
+    google_calendar_installed = fields.Boolean(
+        string='Google Calendar Installed',
+    )
+    cal_client_secret = fields.Char(
+        string='Client Secret',
+        config_parameter='google_calendar_client_secret',
+        default='',
+    )
+    cal_sync_paused = fields.Boolean(
+        string='Pause Synchronization',
+        config_parameter='google_calendar_sync_paused',
+        help='Pause or resume automatic sync with Google Calendar.',
+    )
+
+    @api.model
+    def get_values(self):
+        res = super(ResConfigSettings, self).get_values()
+        google_cal = self.env['ir.module.module'].sudo().search_count(
+            [('name', '=', 'google_calendar'), ('state', '=', 'installed')]
+        )
+        res.update(
+            google_calendar_installed=bool(google_cal),
+        )
+        return res
