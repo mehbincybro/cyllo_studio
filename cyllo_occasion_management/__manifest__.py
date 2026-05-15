@@ -38,9 +38,8 @@
         'security/venue_booking_management_groups.xml',
         'security/venue_booking_secruity.xml',
         'security/ir.model.access.csv',
-        'data/venue_type_data.xml',
+        'data/venue_sequence_data.xml',
         'data/catering_booking_data.xml',
-        'data/catering_sample_data.xml',
         'data/cancellation_email_template_data.xml',
         'data/confirmation_email_template_data.xml',
         'views/venue_booking_views.xml',
@@ -65,6 +64,8 @@
         'views/website_portal_templates.xml',
     ],
     'demo': [
+        'demo/venue_type_demo_data.xml',
+        'demo/catering_sample_demo_data.xml',
         'demo/demo_data.xml',
     ],
     'assets': {

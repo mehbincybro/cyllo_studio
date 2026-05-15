@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import  fields, models
 from odoo.exceptions import UserError
 
@@ -19,6 +39,7 @@ class ApprovalTransferWizard(models.TransientModel):
     )
 
     current_user_id = fields.Many2one('res.users')
+    note = fields.Text('Reason', required=True, help="Reason for transferring the approval.")
 
     def action_transfer_approval(self):
         """Transfer approval from one user to another."""
@@ -29,8 +50,11 @@ class ApprovalTransferWizard(models.TransientModel):
             raise UserError(
                 "Only the current approver can transfer this approval.")
 
-        # Update current approver
-        request.approver_id = self.user_id.id
+        # Update current approver and note
+        request.write({
+            'approver_id': self.user_id.id,
+            'note': self.note,
+        })
 
         model = request.res_model
         approval_record = self.env[model].browse(request.res_id)
@@ -38,11 +62,10 @@ class ApprovalTransferWizard(models.TransientModel):
             'x_current_approver_id': self.user_id.id,
         })
 
-        # # Chatter log
-        # request.message_post(
-        #     body=f"Approval transferred from {self.current_user_id.name} "
-        #          f"to {self.user_id.name}."
-        # )
-
+        # Chatter log
+        request.message_post(
+            body=f"Approval transferred from {self.current_user_id.name} "
+                 f"to {self.user_id.name}. Reason: {self.note}"
+        )
 
         return {'type': 'ir.actions.act_window_close'}

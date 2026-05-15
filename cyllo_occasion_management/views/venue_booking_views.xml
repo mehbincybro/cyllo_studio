@@ -26,27 +26,46 @@
         <field name="name">venue.booking.view.kanban</field>
         <field name="model">venue.booking</field>
         <field name="arch" type="xml">
-            <kanban quick_create="false">
-                <field name="venue_type_id"/>
+            <kanban quick_create="false" class="o_kanban_mobile">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="venue_id"/>
+                <field name="date"/>
+                <field name="state"/>
+                <field name="total"/>
                 <templates>
                     <t t-name="kanban-box">
-                        <div t-attf-class="oe_kanban_global_click col-md-2 style_event">
-                            <div class="o_kanban_image" style="width:100%; ">
-                                <t>
-                                    <img t-att-src="kanban_image('venue.type', 'image', record.venue_type_id.raw_value)"
-                                         alt="type"
-                                         style="width:100%; border-radius: 23px;"/>
-                                </t>
-                            </div>
-                            <div class="oe_kanban_content"
-                                 style="padding-left:  0px !important;">
-                                <div style="text-align:  center;;font-size:15px;">
-                                    <strong>
-                                        <field name="name"/>
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-12">
+                                    <strong class="o_kanban_record_title">
+                                        <t t-esc="record.name.value"/>
                                     </strong>
                                 </div>
                             </div>
-                            <div class="oe_clear"/>
+                            <div class="row">
+                                <div class="col-12 text-muted">
+                                    <span>Customer: <t t-esc="record.partner_id.value"/></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 text-muted">
+                                    <span>Venue: <t t-esc="record.venue_id.value"/></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-6 text-muted">
+                                    <span>Date: <t t-esc="record.date.value"/></span>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <strong><t t-esc="record.total.value"/></strong>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_bottom">
+                                <div class="oe_kanban_bottom_left">
+                                    <field name="state" widget="label_selection" options="{'classes': {'draft': 'info', 'confirm': 'warning', 'invoice': 'success', 'close': 'default', 'cancel': 'danger'}}"/>
+                                </div>
+                            </div>
                         </div>
                     </t>
                 </templates>
@@ -67,7 +86,7 @@
                     <button name="action_booking_invoice_create"
                             string="Create Invoice" type="object"
                             class="oe_highlight"
-                            invisible="state not in ('confirm')"/>
+                            invisible="state == 'invoice' and not has_cancelled_invoice or state in ('draft','close','cancel')"/>
                     <button name="action_booking_cancel" string="Cancel"
                             type="object"
                             invisible="state in ('confirm','invoice','close','cancel')"/>
@@ -79,7 +98,9 @@
                             string="Send Mail"
                             type="object"
                             invisible="state in ('draft','invoice','close','cancel')"/>
-                    <button name="action_create_catering_booking" string="Create Catering Order" type="object" class="btn-primary" invisible="not need_catering"/>
+                    <button name="action_create_catering_booking" string="Create Catering Order"
+                            type="object" class="btn-primary"
+                            invisible="not need_catering or state not in ['confirm', 'draft']"/>
                     <button name="action_booking_close" string="Close"
                             type="object"
                             invisible="state in ('draft','confirm','cancel','close')"/>
@@ -87,6 +108,7 @@
                            statusbar_visible="draft,confirm,invoice,close"/>
                 </header>
                 <sheet>
+                    <field name="has_cancelled_invoice" invisible="1"/>
                     <div class="oe_button_box" name="button_box">
                         <button class="oe_stat_button" type="object"
                                 name="action_view_invoice"
@@ -104,7 +126,9 @@
                                 <span class="o_stat_text">Event</span>
                             </div>
                         </button>
-                        <button name="action_view_catering_booking" type="object" class="oe_stat_button" icon="fa-cutlery" invisible="catering_count == 0">
+                        <button name="action_view_catering_booking" type="object"
+                                class="oe_stat_button" icon="fa-cutlery"
+                                invisible="catering_count == 0">
                             <field name="catering_count" widget="statinfo" string="Catering"/>
                         </button>
                     </div>
@@ -119,7 +143,7 @@
                             <field name="venue_id"
                                    readonly="state not in ('draft')"/>
                             <field name="venue_type_id"
-                                   readonly="state not in ('draft')"/>
+                                   readonly="1" force_save="1"/>
                             <field name="booking_type" widget="radio"
                                    readonly="state not in ('draft','confirm')"/>
                             <field name="is_extra_check" invisible="1"/>
@@ -144,7 +168,6 @@
                                    invisible="booking_type == 'hour'"/>
                             <field name="booking_charge_per_hour"
                                    invisible="booking_type == 'day'"/>
-                            <field name="booking_charge"/>
                             <field name="guest_count"/>
                             <field name="event_id" invisible="1"/>
                         </group>
@@ -181,7 +204,8 @@
                             <field name="amenity_line_ids">
                                 <tree editable="bottom">
                                     <field name="allowed_amenity_ids" column_invisible="1"/>
-                                    <field name="amenity_id" domain="[('id', 'in', allowed_amenity_ids)]"/>
+                                    <field name="amenity_id"
+                                           domain="[('id', 'in', allowed_amenity_ids)]"/>
                                     <field name="quantity"/>
                                     <field name="amount"/>
                                     <field name="sub_total"/>
@@ -301,7 +325,7 @@
     <!--    MenuItems-->
     <menuitem id="occasion_management_menu_root"
               name="Occasion Management"
-              groups="cyllo_occasion_management.venue_booking_management_group_venue_manager,cyllo_occasion_management.venue_booking_management_group_venue_user"
+              groups="cyllo_occasion_management.occasion_management_group_venue_manager,cyllo_occasion_management.occasion_management_group_venue_user"
               web_icon="venue_booking_management,static/description/icon.png"
               sequence="20"/>
     <menuitem id="venue_menu_booking" name="Venue Booking"

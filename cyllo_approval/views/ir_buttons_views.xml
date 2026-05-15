@@ -4,10 +4,14 @@
         <field name="name">ir.buttons.view.list</field>
         <field name="model">ir.buttons</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree create="false">
+                <header>
+                    <button name="action_sync_buttons" string="Sync Buttons"
+                            type="object" class="oe_highlight"/>
+                </header>
                 <field name="name"/>
                 <field name="string"/>
-                <field name="model_id"  context="{'model': True}"/>
+                <field name="model_id" context="{'model': True}"/>
             </tree>
         </field>
     </record>

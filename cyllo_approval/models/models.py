@@ -1,6 +1,26 @@
 # -*- coding: utf-8 -*-
-from odoo import api,models
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from lxml import etree
+from odoo import api,models
 
 from odoo.exceptions import ValidationError
 
@@ -8,7 +28,7 @@ from odoo.exceptions import ValidationError
 class BaseModel(models.AbstractModel):
     _inherit = 'base'
 
-    # ✅ Handle dynamic approve/reject actions globally
+    # Handle dynamic approve/reject actions globally
     def action_dynamic_approve(self):
         """Called when clicking the dynamically injected Approve button."""
         self.ensure_one()
@@ -49,11 +69,11 @@ class BaseModel(models.AbstractModel):
     def action_request_approval(self):
         """Open wizard to request approval with sequencing support"""
 
-        ApprovalRule = self.env['approval.rule'].sudo()
-        ApprovalRequest = self.env['approval.request'].sudo()
+        approval_rule = self.env['approval.rule'].sudo()
+        approval_request = self.env['approval.request'].sudo()
 
         # Fetch all state rules for this model
-        rules = ApprovalRule.search([
+        rules = approval_rule.search([
             ('model_name', '=', self._name),
             ('rule_type', '=', 'state'),
         ])
@@ -63,26 +83,26 @@ class BaseModel(models.AbstractModel):
 
         ordered = rules.sorted(key=lambda r: r.sequence)
 
-        # 🔍 Find the NEXT rule that needs approval
+        # Find the NEXT rule that needs approval
         next_rule = None
 
         for rule in ordered:
-            existing = ApprovalRequest.search([
+            existing = approval_request.search([
                 ('rule_id', '=', rule.id),
                 ('res_model', '=', self._name),
                 ('res_id', '=', self.id),
             ], order="id desc", limit=1)
 
-            # ✅ Already approved → skip to next
+            # Already approved → skip to next
             if existing and existing.state == 'approved':
                 continue
 
-            # ⏳ Already pending → use this rule
+            # Already pending → use this rule
             if existing and existing.state == 'pending':
                 next_rule = rule
                 break
 
-            # 🎯 No request yet or rejected/done → this is the next one
+            # No request yet or rejected/done → this is the next one
             next_rule = rule
             break
 
@@ -120,9 +140,9 @@ class BaseModel(models.AbstractModel):
     @api.model
     def _approval_request_count(self):
         """Compute count for stat button."""
-        ApprovalRequest = self.env["approval.request"]
+        approval_request = self.env["approval.request"]
         for rec in self:
-            rec.x_approval_request_count = ApprovalRequest.search_count([
+            rec.x_approval_request_count = approval_request.search_count([
                 ("res_model", "=", rec._name),
                 ("res_id", "=", rec.id)
             ])
@@ -136,10 +156,10 @@ class BaseModel(models.AbstractModel):
 
         user = self.env.user
         model_name = res.get('model')
-        ApprovalRule = self.env['approval.rule'].sudo()
+        approval_rule = self.env['approval.rule'].sudo()
 
         # Fetch ALL rules for this model (state or button)
-        rules = ApprovalRule.search([('model_name', '=', model_name)])
+        rules = approval_rule.search([('model_name', '=', model_name)])
 
         if not rules:
             return res

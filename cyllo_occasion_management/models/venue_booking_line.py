@@ -25,7 +25,7 @@ from odoo import api, fields, models
 class VenueBookingLine(models.Model):
     """Model to manage the Venue Booking lines of the Venue Reservation"""
     _name = 'venue.booking.line'
-    _description = "Venue Booking"
+    _description = "Venue Booking Lines"
 
     venue_booking_id = fields.Many2one('venue.booking',
                                        string="Venue Booking",

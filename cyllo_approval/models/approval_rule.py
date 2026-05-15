@@ -1,8 +1,29 @@
 # -*- coding: utf-8 -*-
-from ast import literal_eval
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 import logging
+from ast import literal_eval
+
+from odoo import _, api, fields, models
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -14,17 +35,26 @@ class ApprovalRule(models.Model):
     # ------------------------------------------------------------
     # BASIC FIELDS
     # ------------------------------------------------------------
-    name = fields.Char(required=True)
-    model_id = fields.Many2one('ir.model', string='Target Model')
-    model_name = fields.Char(related='model_id.model', store=True)
+    name = fields.Char(required=True, help="Display name for this approval rule.")
+    model_id = fields.Many2one('ir.model', string='Target Model',
+                               help="The Odoo model this rule applies to.")
+    model_name = fields.Char(related='model_id.model', store=True,
+                             help="Technical name of the target model.")
 
-    request_ids = fields.One2many('approval.request', 'rule_id')
+    request_ids = fields.One2many('approval.request', 'rule_id',
+                                  help="History of approval requests triggered by this rule.")
+
+    company_id = fields.Many2one('res.company', string='Company', required=True,
+                                 default=lambda self: self.env.company,
+                                 help="The company this approval rule belongs to.")
 
     rule_type = fields.Selection([
         ('button', 'Button'),
         ('state', 'State Change'),
         ('server', 'Server Action'),
-    ], required=True, default='button')
+    ], required=True, default='button',
+        help="Specify what triggers the approval: "
+             "clicking a button, changing a state/stage, or a server action.")
 
     # ------------------------------------------------------------
     # STATE FIELDS - IMPROVED APPROACH
@@ -32,7 +62,8 @@ class ApprovalRule(models.Model):
     state_field_id = fields.Many2one(
         'ir.model.fields',
         string='State Field',
-        domain="[('model_id', '=', model_id), ('name', 'in', ['state', 'stage_id'])]"
+        domain="[('model_id', '=', model_id), ('name', 'in', ['state', 'stage_id'])]",
+        help="The field that represents the state or stage in the target model."
     )
     state_field_name = fields.Char(related='state_field_id.name', store=True)
     state_field_type = fields.Selection(
@@ -49,7 +80,8 @@ class ApprovalRule(models.Model):
     state_to_selection_id = fields.Many2one(
         'ir.model.fields.selection',
         string="Target State (Selection)",
-        domain="[('field_id', '=', state_field_id)]"
+        domain="[('field_id', '=', state_field_id)]",
+        help="The specific selection value that requires approval when selected."
     )
 
     # For many2one states (stage_id, etc.)
@@ -62,33 +94,61 @@ class ApprovalRule(models.Model):
     state_to_m2o_value_id = fields.Many2one(
         'approval.state.value',
         string="Target State (Stage)",
-        domain="[('id', 'in', state_values_m2o_ids)]"
+        domain="[('id', 'in', state_values_m2o_ids)]",
+        help="The specific stage that requires approval when entered."
     )
 
     # ------------------------------------------------------------
     # APPROVERS
     # ------------------------------------------------------------
-    user_id = fields.Many2one('res.users', string='Approver', required=True)
-    group_id = fields.Many2one('res.groups', string='Approver Group')
+    user_id = fields.Many2one('res.users', string='Approver',
+                              help="Specific user assigned to approve requests from this rule.")
+    group_id = fields.Many2one('res.groups', string='Approver Group',
+                               help="Any member of this group can approve requests from this rule.")
 
     # ------------------------------------------------------------
     # TRIGGER FIELDS
     # ------------------------------------------------------------
     button_id = fields.Many2one('ir.buttons',
-                                domain="[('model_id','=',model_id)]")
+                                domain="[('model_id','=',model_id)]",
+                                help="Select the button that requires an approval."
+                                     "If not found, use the sync buttons action.")
+
     server_action_id = fields.Many2one(
         'ir.actions.server',
-        domain="[('model_id','=',model_id)]"
+        domain="[('model_id','=',model_id)]",
+        help="The server action that requires approval before execution."
     )
 
-    sequence = fields.Integer(default=1)
-    domain = fields.Char(default='[]')
+    sequence = fields.Integer(
+        default=1,
+        help="The order in which rules are processed if multiple rules apply."
+    )
 
-    is_comment = fields.Boolean('Allow Comment')
-    is_email = fields.Boolean('Notify Email')
-    is_email_request = fields.Boolean('Notify on Request')
-    is_email_approve = fields.Boolean('Notify on Approval')
-    is_email_reject = fields.Boolean('Notify on Rejection')
+    domain = fields.Char(
+        default='[]',
+        help="A Python domain to further filter which records this rule applies to."
+    )
+
+    is_comment = fields.Boolean(
+        'Allow Comment',
+        help="If checked, the requester can add a comment to the request."
+    )
+
+    is_email = fields.Boolean('Notify Email',
+                              help="Enable email notifications for this rule.")
+    is_email_request = fields.Boolean(
+        'Notify on Request',
+        help="Send an email to the approver when a request is created."
+    )
+    is_email_approve = fields.Boolean(
+        'Notify on Approval',
+        help="Send an email to the requester when the request is approved."
+    )
+    is_email_reject = fields.Boolean(
+        'Notify on Rejection',
+        help="Send an email to the requester when the request is rejected."
+    )
 
     @api.constrains('model_id')
     def _constraint_model_id(self):
@@ -276,8 +336,10 @@ class ApprovalRule(models.Model):
 
             # Only search by res_id if trigger_value is numeric (Many2one)
             # This avoids ValueError when comparing string to integer field
-            if isinstance(trigger_value, int) or (isinstance(trigger_value, str) and trigger_value.isdigit()):
-                state_domain = ['|'] + state_domain + [('state_to_m2o_value_id.res_id', '=', int(trigger_value))]
+            if isinstance(trigger_value, int) or (
+                    isinstance(trigger_value, str) and trigger_value.isdigit()):
+                state_domain = ['|'] + state_domain + [
+                    ('state_to_m2o_value_id.res_id', '=', int(trigger_value))]
 
             domain += state_domain
 
@@ -285,70 +347,71 @@ class ApprovalRule(models.Model):
 
     def _patch_button_method(self, model):
         button = self.button_id
-        button_id = button.id
-        method_name = button.name
+        if button:
+            button_id = button.id
+            method_name = button.name
 
-        if not hasattr(model, method_name):
-            raise ValidationError(
-                f"Method '{method_name}' not found on model '{self.model_name}'.")
+            if not hasattr(model, method_name):
+                raise ValidationError(
+                    f"Method '{method_name}' not found on model '{self.model_name}'.")
 
-        if getattr(model.__class__, f"_approval_patched_{method_name}", False):
-            return
+            if getattr(model.__class__, f"_approval_patched_{method_name}", False):
+                return
 
-        original_method = getattr(model.__class__, method_name)
+            original_method = getattr(model.__class__, method_name)
 
-        def intercepted_method(record, *args, **kwargs):
-            Rule = record.env['approval.rule'].sudo()
-            rules = Rule._get_ordered_rules(
-                model_name=record._name,
-                trigger_type='button',
-                trigger_value=button_id
-            )
+            def intercepted_method(record, *args, **kwargs):
+                Rule = record.env['approval.rule'].sudo()
+                rules = Rule._get_ordered_rules(
+                    model_name=record._name,
+                    trigger_type='button',
+                    trigger_value=button_id
+                )
 
-            if rules:
-                Request = record.env['approval.request'].sudo()
+                if rules:
+                    Request = record.env['approval.request'].sudo()
 
-                for rule in rules:
-                    if not record.sudo().filtered_domain(
-                            literal_eval(rule.domain)):
-                        continue
-
-                    request = rule.request_ids.filtered(
-                        lambda x: x.res_id == record.id)
-                    if request:
-                        existing = request.sorted("id", reverse=True)[0]
-
-                        if existing.state == 'approved':
+                    for rule in rules:
+                        if not record.sudo().filtered_domain(
+                                literal_eval(rule.domain)):
                             continue
 
-                        if existing.state == 'pending':
-                            raise ValidationError(
-                                _("Approval '%s' (sequence %s) is pending.")
-                                % (rule.name, rule.sequence)
-                            )
+                        request = rule.request_ids.filtered(
+                            lambda x: x.res_id == record.id)
+                        if request:
+                            existing = request.sorted("id", reverse=True)[0]
 
-                        if existing.state == 'rejected' or existing.is_used:
-                            pass
+                            if existing.state == 'approved':
+                                continue
 
-                    return {
-                        'type': 'ir.actions.act_window',
-                        'res_model': 'approval.request.wizard',
-                        'view_mode': 'form',
-                        'target': 'new',
-                        'context': {
-                            'default_rule_id': rule.id,
-                            'default_res_model': record._name,
-                            'default_res_id': record.id,
-                        },
-                    }
+                            if existing.state == 'pending':
+                                raise ValidationError(
+                                    _("Approval '%s' (sequence %s) is pending.")
+                                    % (rule.name, rule.sequence)
+                                )
 
-                result = original_method(record, *args, **kwargs)
-                return result
+                            if existing.state == 'rejected' or existing.is_used:
+                                pass
 
-            return original_method(record, *args, **kwargs)
+                        return {
+                            'type': 'ir.actions.act_window',
+                            'res_model': 'approval.request.wizard',
+                            'view_mode': 'form',
+                            'target': 'new',
+                            'context': {
+                                'default_rule_id': rule.id,
+                                'default_res_model': record._name,
+                                'default_res_id': record.id,
+                            },
+                        }
 
-        setattr(model.__class__, method_name, intercepted_method)
-        setattr(model.__class__, f"_approval_patched_{method_name}", True)
+                    result = original_method(record, *args, **kwargs)
+                    return result
+
+                return original_method(record, *args, **kwargs)
+
+            setattr(model.__class__, method_name, intercepted_method)
+            setattr(model.__class__, f"_approval_patched_{method_name}", True)
 
     def _patch_state_change(self, model):
         if getattr(model.__class__, "_approval_patched_write", False):
@@ -368,7 +431,7 @@ class ApprovalRule(models.Model):
             if state_rules_for_model:
                 unique_state_fields = state_rules_for_model.mapped('state_field_name')
                 records_to_process = records
-                
+
                 for state_field_name in unique_state_fields:
                     new_state = vals.get(state_field_name)
                     if new_state is None:
@@ -420,7 +483,7 @@ class ApprovalRule(models.Model):
                                 })
                                 # Exclude this record from the final original_write call
                                 records_to_process = records_to_process - rec
-                                continue 
+                                continue
 
                             if rec.x_is_state_approval:
                                 raise ValidationError(
@@ -438,8 +501,8 @@ class ApprovalRule(models.Model):
                                 ('res_model', '=', rec._name),
                                 ('res_id', '=', rec.id),
                                 ('state', '=', 'approved'),
-                            ]).sudo().write({'state': 'done'})
-                
+                            ]).sudo().write({'is_used': True})
+
                 # If some records are left, update them
                 if records_to_process:
                     return original_write(records_to_process, vals)
@@ -449,6 +512,9 @@ class ApprovalRule(models.Model):
 
         setattr(model.__class__, 'write', intercepted_write)
         setattr(model.__class__, "_approval_patched_write", True)
+
+    def action_sync_buttons(self):
+        self.env['ir.buttons'].action_sync_buttons(self.model_id)
 
 
 class ApprovalStateValue(models.Model):

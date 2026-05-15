@@ -70,7 +70,7 @@
 
     <!-- Menu configuration for Event Logistics & Fleet -->
     <menuitem id="transport_menu_booking" name="Logistics"
-              parent="cyllo_occasion_management.venue_booking_menu_root"
+              parent="cyllo_occasion_management.occasion_management_menu_root"
               sequence="7"/>
     <!-- Menu item to access transport booking under parent menu -->
     <menuitem id="transport_menu_booking_child" name="Event Logistics &amp; Fleet"

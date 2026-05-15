@@ -29,7 +29,7 @@ class VenueBooking(models.Model):
     """Model for managing the Venue Booking"""
     _name = 'venue.booking'
     _inherit = ['mail.thread', 'mail.activity.mixin']
-    _description = 'Venue Reservation'
+    _description = 'Venue Booking'
 
     name = fields.Char(string="Name", help="Name of the venue type")
     ref = fields.Char(string='Ref', readonly=True,
@@ -95,10 +95,6 @@ class VenueBooking(models.Model):
                                            related='venue_id.venue_charge_hour',
                                            help='Field for adding Booking '
                                                 'Charge Per hour')
-    booking_charge = fields.Float(string="Venue Amenities Charge",
-                                  compute='_compute_booking_charge',
-                                  help='Compute the total Booking cost '
-                                       'includes the amenities')
     days_difference = fields.Integer(string='Days Difference',
                                      compute='_compute_days_difference',
                                      help='Number of Days to Booking the venue')
@@ -125,6 +121,14 @@ class VenueBooking(models.Model):
                                    help="Check if catering is needed for this venue booking")
     guest_count = fields.Integer(string="Number of Guests", default=1)
     catering_count = fields.Integer(string="Catering Count", compute='_compute_catering_count')
+    has_cancelled_invoice = fields.Boolean(compute='_compute_has_cancelled_invoice')
+
+    @api.depends('ref')
+    def _compute_has_cancelled_invoice(self):
+        """Check if there are any cancelled invoices for this booking."""
+        for record in self:
+            record.has_cancelled_invoice = self.env['account.move'].search_count(
+                [('invoice_origin', '=', record.ref), ('state', '=', 'cancel')]) > 0
 
     def _compute_catering_count(self):
         """Compute total catering bookings linked to the venue booking."""
@@ -157,7 +161,7 @@ class VenueBooking(models.Model):
             'type': 'ir.actions.act_window',
             'name': _('Catering Bookings'),
             'res_model': 'catering.booking',
-            'view_mode': 'list',
+            'view_mode': 'tree,form',
             'domain': [('venue_booking_id', '=', self.id)],
         }
 
@@ -249,13 +253,6 @@ class VenueBooking(models.Model):
             else:
                 record.days_difference = 0
 
-    @api.depends('booking_charge', 'venue_id')
-    def _compute_booking_charge(self):
-        """Compute booking charge for the given venue with the Amenities"""
-        for rec in self:
-            rec.booking_charge = sum(rec.venue_booking_line_ids.mapped(
-                'sub_total')) if rec.venue_booking_line_ids else 0.0
-
     @api.depends('venue_booking_line_ids', 'venue_booking_line_ids.state')
     def _compute_pending_invoice(self):
         """Compute function for finding the pending Invoices"""
@@ -280,7 +277,7 @@ class VenueBooking(models.Model):
                 total += (rec.booking_charge_per_hour * rec.days_difference)
                 if rec.venue_id.additional_charge_hour != 0.0:
                     total += rec.venue_id.additional_charge_hour
-            rec.total = total + rec.booking_charge
+            rec.total = total
 
     @api.constrains('start_date', 'end_date', 'venue_id')
     def check_date_overlap(self):
@@ -359,22 +356,28 @@ class VenueBooking(models.Model):
         self.state = "draft"
 
     def action_send_confirmation_mail(self):
-        """Button action to send confirmation mail"""
-        template = self.env.ref(
-            'cyllo_occasion_management.mail_template_notify_venue_booking').sudo()
-        template.send_mail(self._origin.id, force_send=True,
-                           email_values={
-                               'email_to': self.partner_id.email})
-        for rec in self:
-            body = Markup(
-                "<p>%(greeting)s<br/><br/>%(content)s<br/><br/>%(conclude)s<p>") % {
-                       'greeting': _("Dear %s", rec.partner_id.name),
-                       'content': _(
-                           "We have received a booking for the venue %s.Please proceed with necessary actions.",
-                           rec.venue_id.name),
-                       'conclude': _('Thank You'),
-                   }
-            rec.message_post(body=body)
+        """Open a window to compose a confirmation email."""
+        self.ensure_one()
+        template_id = self.env.ref(
+            'cyllo_occasion_management.mail_template_notify_venue_booking').id
+        compose_form_id = self.env.ref('mail.email_compose_message_wizard_form').id
+        ctx = dict(
+            default_model='venue.booking',
+            default_res_ids=self.ids,
+            default_template_id=template_id,
+            default_composition_mode='comment',
+            mark_so_as_sent=True,
+            force_email=True,
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(compose_form_id, 'form')],
+            'view_id': compose_form_id,
+            'target': 'new',
+            'context': ctx,
+        }
 
     def action_booking_invoice_create(self):
         """Generate a draft customer invoice for this booking"""
@@ -396,16 +399,12 @@ class VenueBooking(models.Model):
             total = self.booking_charge_per_hour + self.venue_id.additional_charge_hour
         else:
             total = 0
-        add_charge('Amenities charge', self.booking_charge)
         add_charge('Booking Charges', total)
         for rec in self.venue_booking_line_ids:
             add_charge(rec.amenity_id.name, rec.amount, rec.quantity)
 
         # Add Catering charges
-        # linked_ids = self.catering_ids.ids
-        # created_ids = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
-        # all_catering = self.env['catering.booking'].browse(list(set(linked_ids + created_ids)))
-        all_catering = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)]).ids
+        all_catering = self.env['catering.booking'].search([('venue_booking_id', '=', self.id)])
         for catering in all_catering:
             add_charge(_('Catering charge with %s') % catering.platter_type_id.name,
                        catering.total_amount)
@@ -574,50 +573,66 @@ class VenueBooking(models.Model):
         return {'name': customer, 'count': count}
 
     @api.model
-    def get_select_filter(self, option):
-        """Function to filter data on the bases of the year"""
-        if option == 'year':
-            create_date = '''create_date between (now() - interval '1 year') and now()'''
-        elif option == 'month':
-            create_date = '''create_date between (now() - interval '1 months') and now()'''
-        elif option == 'week':
-            create_date = '''create_date between (now() - interval '7 day') and now()'''
-        elif option == 'day':
-            create_date = '''create_date between (now() - interval '1 day') and now()'''
-        self.env.cr.execute('''select count(*) from venue_booking 
-                                    where %s''' % create_date)
+    def get_select_filter(self, option, start_date=None, end_date=None):
+        """Function to filter data on the bases of the year and custom date range"""
+        def get_where(alias, col):
+            if start_date and end_date:
+                return f"{alias}.{col} between '{start_date}' and '{end_date}'"
+            elif option == 'year':
+                return f"date_trunc('year', {alias}.{col}) = date_trunc('year', current_date)"
+            elif option == 'last_year':
+                return f"date_trunc('year', {alias}.{col}) = date_trunc('year', current_date - interval '1 year')"
+            elif option == 'month':
+                return f"date_trunc('month', {alias}.{col}) = date_trunc('month', current_date)"
+            elif option == 'last_month':
+                return f"date_trunc('month', {alias}.{col}) = date_trunc('month', current_date - interval '1 month')"
+            elif option == 'week':
+                return f"date_trunc('week', {alias}.{col}) = date_trunc('week', current_date)"
+            elif option == 'day':
+                return f"{alias}.{col} = current_date"
+            else:
+                return '1=1'
+
+        vb_where = get_where('venue_booking', 'date')
+        tb_where = get_where('tb', 'date')
+        venue_where = get_where('venue', 'create_date')
+
+        self.env.cr.execute(f"select count(*) from venue_booking where {vb_where}")
         booking = self.env.cr.dictfetchall()
-        self.env.cr.execute('''select sum(total) from venue_booking 
-                                    where %s''' % create_date)
+        
+        self.env.cr.execute(f"select sum(total) from venue_booking where {vb_where}")
         amount = self.env.cr.dictfetchall()
-        self.env.cr.execute('''select sum(total) from venue_booking
-                                        where state = 'invoice' and %s''' % create_date)
+        
+        self.env.cr.execute(f"select sum(total) from venue_booking where state = 'invoice' and {vb_where}")
         invoice = self.env.cr.dictfetchall()
-        self.env.cr.execute('''select count(*) from venue 
-                                    where %s''' % create_date)
+        
+        self.env.cr.execute(f"select count(*) from venue where {venue_where}")
         venue_count = self.env.cr.dictfetchall()
-        self.env.cr.execute('''SELECT fv.name, COUNT(tb.name) AS name_count
+        
+        self.env.cr.execute(f'''SELECT fv.name, COUNT(tb.name) AS name_count
                 FROM venue_booking AS tb
                 INNER JOIN venue AS fv ON fv.id = tb.venue_id
-                where tb.%s
+                where {tb_where}
                 GROUP BY fv.name
                 ORDER BY name_count DESC
-                LIMIT 10''' % create_date)
+                LIMIT 10''')
         venue = self.env.cr.dictfetchall()
-        self.env.cr.execute('''SELECT pr.name, COUNT(tb.name) AS name_count
+        
+        self.env.cr.execute(f'''SELECT pr.name, COUNT(tb.name) AS name_count
                 FROM venue_booking AS tb
                 INNER JOIN res_partner AS pr ON pr.id = tb.partner_id
-                where tb.%s
+                where {tb_where}
                 GROUP BY pr.name
                 ORDER BY name_count DESC
-                LIMIT 10''' % create_date)
+                LIMIT 10''')
         customer = self.env.cr.dictfetchall()
-        self.env.cr.execute('''SELECT pr.name, COUNT(pr.name) AS count, SUM(tb.total) AS total_sum
+        
+        self.env.cr.execute(f'''SELECT pr.name, COUNT(pr.name) AS count, SUM(tb.total) AS total_sum
                 FROM venue_booking AS tb
                 INNER JOIN res_partner AS pr ON pr.id = tb.partner_id
-                WHERE tb.%s
+                WHERE {tb_where}
                 GROUP BY pr.name
-                ''' % create_date)
+                ''')
         cust_invoice = self.env.cr.dictfetchall()
         cust_invoice_name = []
         cust_invoice_sum = []
@@ -625,19 +640,33 @@ class VenueBooking(models.Model):
         for record in cust_invoice:
             cust_invoice_name.append(record.get('name'))
             cust_invoice_count.append(record.get('count'))
-            cust_invoice_sum.append(record.get('sum'))
-        self.env.cr.execute('''SELECT fv.name, SUM(tb.total) AS total_sum
+            cust_invoice_sum.append(record.get('total_sum'))
+            
+        self.env.cr.execute(f'''SELECT fv.name, SUM(tb.total) AS total_sum
                 FROM venue_booking AS tb
                 INNER JOIN venue AS fv ON fv.id = tb.venue_id
-                where tb.%s
+                where {tb_where}
                 GROUP BY fv.name;
-                ''' % create_date)
+                ''')
         truck_invoice = self.env.cr.dictfetchall()
         truck_invoice_name = []
         truck_invoice_sum = []
         for record in truck_invoice:
             truck_invoice_name.append(record.get('name'))
             truck_invoice_sum.append(record.get('total_sum'))
+
+        # Get Booking states for the new chart
+        self.env.cr.execute(f'''SELECT state, count(*) as count 
+                                FROM venue_booking 
+                                WHERE {vb_where} 
+                                GROUP BY state''')
+        states_data = self.env.cr.dictfetchall()
+        state_names = []
+        state_counts = []
+        for s in states_data:
+            state_names.append(dict(self._fields['state'].selection).get(s['state'], s['state']))
+            state_counts.append(s['count'])
+
         return {'booking': booking, 'amount': amount,
                 'invoice': invoice, 'venue': venue, 'venue_count': venue_count,
                 'customer': customer,
@@ -645,4 +674,6 @@ class VenueBooking(models.Model):
                 'cust_invoice_count': cust_invoice_count, 'cust_invoice_sum':
                     cust_invoice_sum, 'truck_invoice_name': truck_invoice_name,
                 'truck_invoice_sum': truck_invoice_sum,
+                'state_names': state_names,
+                'state_counts': state_counts,
                 }

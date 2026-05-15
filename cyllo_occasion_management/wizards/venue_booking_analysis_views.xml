@@ -44,6 +44,6 @@
     <menuitem id="venue_booking_analysis_menu"
               name="Venue Booking Analysis Report"
               parent="venue_booking_menu_report"
-              groups="cyllo_occasion_management.venue_booking_management_group_venue_manager"
+              groups="cyllo_occasion_management.occasion_management_group_venue_manager"
               action="venue_booking_analysis_action" sequence="40"/>
 </odoo>

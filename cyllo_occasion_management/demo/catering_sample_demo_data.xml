@@ -24,22 +24,25 @@
         <record id="product_spring_rolls" model="product.product">
             <field name="name">Spring Rolls</field>
             <field name="is_catering_product" eval="True"/>
-            <field name="catering_food_category_id" ref="food_cat_starter"/>
-            <field name="lst_price">15.0</field>
+            <field name="catering_food_category_ids" eval="[
+            Command.link(ref('food_cat_starter'))]"/>
+            <field name="list_price">15.0</field>
             <field name="type">consu</field>
         </record>
         <record id="product_biryani" model="product.product">
             <field name="name">Chicken Biryani</field>
             <field name="is_catering_product" eval="True"/>
-            <field name="catering_food_category_id" ref="food_cat_main"/>
-            <field name="lst_price">45.0</field>
+            <field name="catering_food_category_ids" eval="[
+            Command.link(ref('food_cat_dessert'))]"/>
+            <field name="list_price">45.0</field>
             <field name="type">consu</field>
         </record>
         <record id="product_ice_cream" model="product.product">
             <field name="name">Vanilla Ice Cream</field>
             <field name="is_catering_product" eval="True"/>
-            <field name="catering_food_category_id" ref="food_cat_dessert"/>
-            <field name="lst_price">10.0</field>
+            <field name="catering_food_category_ids" eval="[
+            Command.link(ref('food_cat_starter'))]"/>
+            <field name="list_price">10.0</field>
             <field name="type">consu</field>
         </record>
     </data>
