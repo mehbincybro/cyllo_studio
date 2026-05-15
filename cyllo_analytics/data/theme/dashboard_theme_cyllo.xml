@@ -14,31 +14,31 @@
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line2" model="dashboard.theme.color">
-        <field name="name">#8cc63f</field>
+        <field name="name">#5470c6</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line3" model="dashboard.theme.color">
-        <field name="name">#98fb98</field>
+        <field name="name">#fac858</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line4" model="dashboard.theme.color">
-        <field name="name">#6b8e23</field>
+        <field name="name">#ee6666</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line5" model="dashboard.theme.color">
-        <field name="name">#556b2f</field>
+        <field name="name">#73c0de</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line6" model="dashboard.theme.color">
-        <field name="name">#66cdaa</field>
+        <field name="name">#3ba272</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line7" model="dashboard.theme.color">
-        <field name="name">#76a700</field>
+        <field name="name">#fc8455</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
     <record id="dashboard_theme_green_line8" model="dashboard.theme.color">
-        <field name="name">#2e8b57</field>
+        <field name="name">#9a60b4</field>
         <field name="theme_id" ref="dashboard_theme_cyllo"/>
     </record>
 </odoo>

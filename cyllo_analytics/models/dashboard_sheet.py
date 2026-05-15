@@ -22,7 +22,9 @@
 from openai import AuthenticationError, OpenAI
 from odoo import api, fields, models
 from odoo.http import request
-from odoo.exceptions import AccessError
+from odoo.exceptions import AccessError, ValidationError
+import uuid
+from datetime import timedelta
 from odoo.addons.iap.tools import iap_tools
 
 import tiktoken
@@ -298,6 +300,29 @@ class DashboardSheet(models.Model):
                 "kpi_target_perc": kpi.get("kpiTarget") if isinstance(kpi.get("kpiTarget"), (int, float)) else 0,
                 "kpi_icon": kpi.get("icon"),
             })
+
+        # --- Validation of required Axis parameters ---
+        ttype = vals.get("type")
+        if not ttype and data.get("id"):
+            ttype = self.browse(data["id"]).type
+            
+        dim = data.get("dimension")
+        msr = data.get("measure", [])
+        
+        if ttype not in ["kpi", "scorecard", "table"]:
+            if not dim and not msr:
+                raise ValidationError("Please provide both Dimension and Measure to save this chart.")
+            elif not dim:
+                raise ValidationError("Please provide a Dimension to save this chart.")
+            elif not msr:
+                raise ValidationError("Please provide a Measure to save this chart.")
+        elif ttype == "table":
+            if not dim and not msr:
+                raise ValidationError("Please provide at least one Dimension or Measure to save the table.")
+        elif ttype in ["kpi", "scorecard"]:
+            if not msr:
+                raise ValidationError("Please provide a Measure to save the KPI/Scorecard.")
+        # ----------------------------------------------
 
         if data.get("id"):
             rec = self.browse(data["id"])

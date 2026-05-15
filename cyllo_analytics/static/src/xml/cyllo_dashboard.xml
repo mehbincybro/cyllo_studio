@@ -50,7 +50,7 @@
                                 <i class="ri-search-line cy_analytic_i"></i>
                             </div>
                         </div>
-                        <t t-if="state.sources.length > 1">
+                        <t t-if="state.sources and state.sources.length > 1">
                             <div class="nav-item dropdown d-flex"
                                  t-if="!is_subAction">
                                 <button class="btn cy-button-primary-stroke cy-active-btn dropdown-toggle cy-dbselection_dropdowm-btn cy-select_board"
@@ -75,15 +75,57 @@
                                 </ul>
                             </div>
                         </t>
-                        <div class="d-flex gap-2 cy-filter-dropdown-container"
-                             t-on-blur="onFilterBlur">
+                        <div class="d-flex border-box-tools gap-1 align-items-center">
+                            <div class="d-flex gap-1 cy-filter-dropdown-container align-items-center" t-ref="share_container">
+                                <button class="cy-add-graph"
+                                    type="button"
+                                    title="Share Dashboard"
+                                    t-on-click="onClickShare">
+                                <i class="cy_icons ri-share-line inner-box"></i>
+                            </button>
+
+                            <!-- Sharing Popover -->
+                            <div t-if="state.showSharePopover" class="cy-share-popover position-absolute p-3 shadow rounded bg-white">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0 fw-bold">Live Sharing</h6>
+                                    <i class="ri-close-line cursor-pointer" t-on-click="() => state.showSharePopover = false"></i>
+                                </div>
+                                
+                                <t t-if="state.activeLinks and state.activeLinks.length">
+                                    <div class="share-list mb-3">
+                                        <t t-foreach="state.activeLinks" t-as="link" t-key="link_index">
+                                            <div class="share-item p-2 border rounded mb-2 bg-light">
+                                                <div class="d-flex justify-content-between align-items-center small mb-1">
+                                                    <span class="text-muted">Link <t t-esc="link_index + 1"/></span>
+                                                    <span class="text-info" t-if="link.expiry_date">Exp: <t t-esc="link.expiry_date.split(' ')[0]"/></span>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <input type="text" class="form-control form-control-sm bg-white" t-att-value="link.access_url" readonly="1"/>
+                                                    <button class="btn btn-sm btn-outline-primary" t-on-click="() => this.copyToClipboard(link.access_url)">
+                                                        <i class="ri-file-copy-line"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </t>
+                                <t t-else="">
+                                    <div class="text-center py-3 text-muted small">
+                                        <i class="ri-links-line d-block fs-3 mb-2"></i>
+                                        No active sharing links.
+                                    </div>
+                                </t>
+
+                                <button class="btn btn-primary btn-sm w-100 cy-share-generate-btn" t-on-click="generateNewLink">
+                                    <i class="ri-add-line"></i> Generate Share Link
+                                </button>
+                            </div>
                             <button id="cydialogBtn" t-ref="filterButton"
-                                    class="btn cy-button-primary-stroke cy-active-btn cy-churn-filter-btn dropdown-toggle cy-dash-filter-btn"
+                                    class="cy-add-graph"
                                     type="button"
                                     t-att-title="timFrameDisplayName"
                                     t-on-click="onClickFilter">
-                                <i class="cy_icons ri-filter-line cy-filter-line-top"></i>
-                                Filters
+                                <i class="cy_icons ri-filter-line inner-box"></i>
                             </button>
                             <div class="cy-marketing-auto_add-parent-container cy_filter_toggler"
                                  t-ref="filter_dropdown"
@@ -181,8 +223,6 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
-                    <div class="d-flex border-box-tools">
                         <button class="cy-add-graph pe-12px"
                                 t-att-class="{'jump-now': state.showInfo}"
                                 t-if="hasAccess and !is_subAction"
@@ -281,6 +321,7 @@
                             </DropdownItem>
                         </Dropdown>
                     </div>
+                    </div>
                 </div>
             </div>
             <div class="h-100 cy-dashboard-background cy-graph_filter justify-content-between position-relative"
@@ -329,7 +370,7 @@
                                     <t t-if="hasAccess" t-set-slot="footer">
                                         <div class="cy_options_container-tile">
                                             <Dropdown
-                                                    t-if="item.filter_ids.length and !isSearchMode">
+                                                    t-if="item.filter_ids and item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
                                                        title="Filter"></i>
@@ -385,7 +426,7 @@
                                     <t t-if="hasAccess" t-set-slot="footer">
                                          <div class="cy_options_container-tile cy-graph-option-container cy-table-container">
                                              <Dropdown
-                                                     t-if="item.filter_ids.length and !isSearchMode">
+                                                     t-if="item.filter_ids and item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
                                                        title="Filter"></i>
@@ -440,7 +481,7 @@
                                     <t t-set-slot="footer">
                                         <div class="cy_options_container-tile cy-graph-option-container">
                                              <Dropdown
-                                                     t-if="item.filter_ids.length and !isSearchMode">
+                                                     t-if="item.filter_ids and item.filter_ids.length and !isSearchMode">
                                                 <t t-set-slot="toggler">
                                                     <i class="ri-filter-2-line"
                                                        title="Filter"></i>

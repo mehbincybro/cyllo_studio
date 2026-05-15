@@ -11,5 +11,16 @@
             <field name="numbercall">-1</field>
             <field name="doall" eval="False"/>
         </record>
+
+        <record id="ir_cron_dashboard_share_link_purge" model="ir.cron">
+            <field name="name">Dashboard Sharing: Purge Expired Links</field>
+            <field name="model_id" ref="model_dashboard_share_link"/>
+            <field name="state">code</field>
+            <field name="code">model.purge_expired_links()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall" eval="False"/>
+        </record>
     </data>
 </odoo>

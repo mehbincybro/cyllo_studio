@@ -106,6 +106,43 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div class="col-12 px-2 mt-4">
+                                        <label class="form-label cy-modal-form_label">Live Sharing Links</label>
+                                        <div class="share-links-container p-3 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                                            <t t-if="state.links and state.links.length">
+                                                <div class="d-flex flex-column gap-2">
+                                                    <t t-foreach="state.links" t-as="link" t-key="link.id">
+                                                        <div class="d-flex justify-content-between align-items-center p-2 bg-white rounded border shadow-sm">
+                                                            <div class="d-flex flex-column flex-grow-1 overflow-hidden">
+                                                                <div class="small text-truncate fw-bold text-primary" t-att-title="link.access_url">
+                                                                    <t t-esc="link.access_url"/>
+                                                                </div>
+                                                                <div class="d-flex align-items-center mt-1" style="font-size: 11px;">
+                                                                    <span class="text-muted me-2">Expires:</span>
+                                                                    <input type="date" 
+                                                                           class="form-control form-control-sm p-0 px-1 border-0 bg-transparent"
+                                                                           style="font-size: 11px; width: 110px; height: auto;"
+                                                                           t-att-value="link.expiry_date ? link.expiry_date.split(' ')[0] : ''"
+                                                                           t-on-change="(ev) => this.onExpiryChange(link, ev)"/>
+                                                                </div>
+                                                            </div>
+                                                            <button class="btn btn-sm btn-link text-danger p-0 ms-2" 
+                                                                    title="Revoke This Link"
+                                                                    t-on-click="() => this.onRevokeLink(link)">
+                                                                <i class="ri-close-circle-line fs-5"></i>
+                                                            </button>
+                                                        </div>
+                                                    </t>
+                                                </div>
+                                            </t>
+                                            <t t-else="">
+                                                <div class="text-center py-3 text-muted small">
+                                                    <i class="ri-links-line d-block fs-4 mb-1"></i>
+                                                    No active sharing links found.
+                                                </div>
+                                            </t>
+                                        </div>
+                                    </div>
                                 </div>
                             </form>
                         </div>

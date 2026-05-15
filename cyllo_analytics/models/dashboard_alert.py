@@ -270,12 +270,12 @@ class DashboardAlert(models.Model):
                     continue
 
                 def _check(op, val, threshold):
-                    if op == 'gt': return val > threshold
-                    if op == 'ge': return val >= threshold
-                    if op == 'lt': return val < threshold
-                    if op == 'le': return val <= threshold
-                    if op == 'eq': return val == threshold
-                    return False
+                    if op == 'gt': return val > threshold, '>'
+                    if op == 'ge': return val >= threshold, '>='
+                    if op == 'lt': return val < threshold, '<'
+                    if op == 'le': return val <= threshold, '<='
+                    if op == 'eq': return val == threshold, '='
+                    return False, ''
 
                 # ── Evaluate each condition independently ──
                 # Each condition tracks its own is_met flag.
@@ -295,13 +295,16 @@ class DashboardAlert(models.Model):
                                 current_value = next(
                                     (v for v in row.values() if isinstance(v, (int, float))), None
                                 )
-                            if current_value is not None and _check(op, current_value, threshold):
+                            
+                            is_hit, symbol = _check(op, current_value, threshold)
+                            if current_value is not None and is_hit:
                                 hit_value = current_value
+                                op_symbol = symbol
                                 break
 
                         if hit_value is not None:          # condition is currently breached
                             if not cond_rec.is_met:        # only include if not already notified
-                                triggered_summaries.append(f"{cond_rec.measure_label or alias}: {hit_value}")
+                                triggered_summaries.append(f"{cond_rec.measure_label or alias} {op_symbol} {threshold}: {hit_value}")
                                 cond_rec.with_context(skip_alert_sync=True).write({'is_met': True})
                         else:
                             if cond_rec.is_met:
@@ -326,10 +329,11 @@ class DashboardAlert(models.Model):
                         alert.is_condition_met = False
 
                 if triggered_summaries:
-                    try:
-                        alert._send_notification("; ".join(triggered_summaries))
-                    except Exception as e:
-                        _logger.error(f"Notification Error: {str(e)}")
+                    for summary in triggered_summaries:
+                        try:
+                            alert._send_notification(summary)
+                        except Exception as e:
+                            _logger.error(f"Notification Error: {str(e)}")
 
                 # Real-time graph refresh signal
                 try:

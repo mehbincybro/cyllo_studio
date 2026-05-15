@@ -5,6 +5,7 @@ import {ThemeMaker} from "@cyllo_analytics/js/theme_maker";
 import {useSaveContext} from "@cyllo_analytics/js/useSaveContext";
 import {session} from "@web/session";
 import {standardActionServiceProps} from "@web/webclient/actions/action_service";
+import {_t} from "@web/core/l10n/translation";
 
 const TIMEFRAMES = {
     'This Week': 'week',
@@ -80,6 +81,8 @@ export function CyAnalyticMixin(CyComponent) {
                 user: []
             })
             this.dashboard = useRef('dashboard')
+            this.items = []
+            this.ChartData = useState({ items: [], data: [], loading: false })
             this.state = useState({
                 width: 0,
                 originalWidth: 0,
@@ -93,12 +96,20 @@ export function CyAnalyticMixin(CyComponent) {
                 previousSearch: " ", // default is ' '
                 showInfo: false,
                 darkMode: false,
+                isPublic: false,
+                accessUrl: false,
+                showSharePopover: false,
+                activeLinks: [],
+                banner: [],
+                name: "Dashboard",
+                sources: [],
             })
             onWillStart(this.onWillStart)
             useEffect(() => {
-                this.state.sortedItems = this.sortedItems
-                const filter = this.timFrameState.selected.split('_')
-                const flag = !Boolean(filter.length > 1)
+                this.state.sortedItems = this.sortedItems || []
+                const selected = this.timFrameState.selected || ""
+                const filter = selected.split('_')
+                const flag = !(filter && filter.length > 1)
                 this.dateOrder(flag, filter[0], true)
                 this.applyAllFilters()
             }, () => [this.ChartData.items])
@@ -109,8 +120,8 @@ export function CyAnalyticMixin(CyComponent) {
             }, () => [this.state.darkMode]);
             let firstTime = true
             useEffect(() => {
-                if (!this.edit && (this.state.search.length || this.state.previousSearch.length)) {
-                    const data = this.state.search.length > this.state.previousSearch.length ? this.state.sortedItems : this.items
+                if (!this.edit && ((this.state.search && this.state.search.length) || (this.state.previousSearch && this.state.previousSearch.length))) {
+                    const data = (this.state.search && this.state.search.length) > (this.state.previousSearch && this.state.previousSearch.length) ? (this.state.sortedItems || []) : (this.items || [])
                     const searchWord = this.state.search.toLowerCase().split(' ')
                     var filtered = data.filter(item => {
                         const names = item.name.toLowerCase().split(" ")
@@ -150,23 +161,44 @@ export function CyAnalyticMixin(CyComponent) {
             this.env.bus.trigger("REFRESH_GRAPH")
         }
 
-        async onWillStart() {
-            this.state.darkMode = await this.orm.call('res.users', 'get_active', [])
-            var data = await this.orm.call("dashboard.config", "get_sheets", [this.id])
-            this.items = data[0]
-            this.state.showInfo = !Boolean(this.items.length);
-            this.ChartData.items = data[0]
-            this.id = data[1]
-            this.name = data[3]
-            this.state.name = data[3]
-            this.themeState.theme = data[2]
-            this.bannerState.banner = data[4]
-            if (this.themeState.theme) {
-                this.themeState.theme_id = data[2].id
-                this.themeMaker = new ThemeMaker(this.themeState.theme)
-                this.themeState.currentTheme = this.themeMaker.getTheme()
+        async refreshData() {
+            if (!this.id) return;
+            try {
+                var data = await this.orm.call("dashboard.config", "get_sheets", [this.id])
+                if (data && Array.isArray(data) && data.length >= 6) {
+                    this.items = data[0] || []
+                    this.state.showInfo = !Boolean(this.items && this.items.length);
+                    this.ChartData.items = data[0] || []
+                    this.id = data[1]
+                    this.state.activeLinks = data[5] || []
+                    // Trigger chart refresh
+                    this.env.bus.trigger("REFRESH_GRAPH")
+                }
+            } catch (err) {
+                console.error("Critical: Failed to refresh dashboard data", err);
             }
-            this.fetchThemes()
+        }
+
+        async onWillStart() {
+            try {
+                this.state.darkMode = await this.orm.call('res.users', 'get_active', [])
+                await this.refreshData();
+                var data = await this.orm.call("dashboard.config", "get_sheets", [this.id])
+                if (data && data.length >= 4) {
+                    this.name = data[3]
+                    this.state.name = data[3]
+                    this.themeState.theme = data[2]
+                    this.bannerState.banner = data[4]
+                }
+                if (this.themeState.theme) {
+                    this.themeState.theme_id = data[2].id
+                    this.themeMaker = new ThemeMaker(this.themeState.theme)
+                    this.themeState.currentTheme = this.themeMaker.getTheme()
+                }
+                this.fetchThemes()
+            } catch (err) {
+                console.error("Critical: Failed to initialize dashboard", err);
+            }
         }
 
         onClickSearch() {
@@ -180,6 +212,27 @@ export function CyAnalyticMixin(CyComponent) {
             }
             this.state.search = ""
             this.state.previousSearch = ""
+        }
+
+        async onClickShare() {
+            this.state.showSharePopover = !this.state.showSharePopover;
+        }
+
+        async generateNewLink() {
+            if (!this.id) return;
+            await this.orm.call("dashboard.config", "generate_share_link", [this.id]);
+            const data = await this.orm.call("dashboard.config", "get_sheets", [this.id]);
+            this.state.activeLinks = data[5] || [];
+            this.notification.add(_t("New share link generated!"), {
+                type: 'success',
+            });
+        }
+
+        copyToClipboard(url) {
+            navigator.clipboard.writeText(url);
+            this.notification.add(_t("Link copied to clipboard!"), {
+                type: 'success',
+            });
         }
 
         onMessage({detail: notifications}) {
@@ -293,15 +346,16 @@ export function CyAnalyticMixin(CyComponent) {
                 target: item.kpi_target,
                 measureView: item.kpi_view,
                 icon: item.kpi_icon,
-                model: item.table_ids[0].model
+                model: (item.table_ids && item.table_ids.length > 0) ? item.table_ids[0].model : false
             }
         }
 
         get sortedItems() {
+            if (!this.items || !Array.isArray(this.items)) return [];
             const copiedItems = this.items.slice();
             const value = copiedItems.sort((a, b) => {
-                const aValue = a.dashboard_sheet_option_ids.length ? a.dashboard_sheet_option_ids[0].attributes : {};
-                const bValue = b.dashboard_sheet_option_ids.length ? b.dashboard_sheet_option_ids[0].attributes : {};
+                const aValue = (a && a.dashboard_sheet_option_ids && a.dashboard_sheet_option_ids.length) ? a.dashboard_sheet_option_ids[0].attributes : {};
+                const bValue = (b && b.dashboard_sheet_option_ids && b.dashboard_sheet_option_ids.length) ? b.dashboard_sheet_option_ids[0].attributes : {};
                 // Compare y values first
                 if (aValue.y !== undefined && bValue.y !== undefined) {
                     if (aValue.y < bValue.y) return -1;
