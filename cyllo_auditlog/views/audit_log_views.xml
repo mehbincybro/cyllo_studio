@@ -5,11 +5,13 @@
         <field name="name">audit.log.tree</field>
         <field name="model">audit.log</field>
         <field name="arch" type="xml">
-            <tree decoration-muted="log_level == 'info'"
-                  decoration-warning="log_level == 'warning'"
-                  decoration-danger="log_level == 'critical'"
-                  create="false" edit="false" sample="1">
-                <field name="create_date" widget="datetime" string="Date" optional="show"/>
+            <tree create="false" edit="false" sample="1">
+                <field name="create_date" widget="datetime"
+                       string="Date"
+                       optional="show"
+                       decoration-info="log_level == 'info'"
+                       decoration-warning="log_level == 'warning'"
+                       decoration-danger="log_level == 'critical'"/>
                 <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <field name="model_id" optional="show"/>
                 <field name="record_name" string="Record" class="fw-bold"/>
@@ -36,7 +38,8 @@
         <field name="name">audit.session.tree</field>
         <field name="model">audit.session</field>
         <field name="arch" type="xml">
-            <tree decoration-info="is_active" decoration-muted="not is_active" create="false" edit="false" sample="1">
+            <tree decoration-info="is_active"
+                  decoration-muted="not is_active" create="false" edit="false" sample="1">
                 <field name="login_time" string="Start"/>
                 <field name="user_id" widget="many2one_avatar_user"/>
                 <field name="name" string="Session ID" optional="hide"/>
@@ -300,9 +303,9 @@
     </record>
 
 
-    <!-- Dashboard Action -->
-    <record id="action_audit_dashboard" model="ir.actions.act_window">
-        <field name="name">Log Dashboard</field>
+    <!-- Report Action -->
+    <record id="action_audit_report" model="ir.actions.act_window">
+        <field name="name">Log Report</field>
         <field name="res_model">audit.log</field>
         <field name="view_mode">graph,pivot</field>
         <field name="help" type="html">

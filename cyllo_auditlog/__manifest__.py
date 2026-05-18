@@ -33,7 +33,7 @@
         - User/group-based tracking filters
         - Session and HTTP request logging
         - Retention policy with manual cleanup support
-        - Dashboard and reporting views
+        - Reporting view
         - Multi-company visibility control using company-specific rules
     """,
     'author': "Cyllo",
@@ -50,6 +50,9 @@
         'views/audit_rule_views.xml',
         'views/auditlog_http_request_views.xml',
         'views/audit_menus.xml'
+    ],
+    'demo': [
+        'demo/audit_rule_demo.xml',
     ],
     'assets': {
         'web.assets_backend': [
