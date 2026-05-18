@@ -15,6 +15,7 @@
                 <field name="track_write" widget="boolean_toggle" optional="show"/>
                 <field name="track_read" widget="boolean_toggle" optional="show"/>
                 <field name="track_unlink" widget="boolean_toggle" optional="show"/>
+                <field name="company_id" optional="hide" readonly="1"/>
                 <field name="log_count" sum="Total Logs"/>
                 <field name="active" widget="boolean_toggle"/>
             </tree>
@@ -152,6 +153,9 @@
                 <field name="name"/>
                 <field name="model_id"/>
                 <field name="user_ids"/>
+                <separator/>
+                <filter name="filter_active" string="Active" domain="[('active', '=', True)]"/>
+                <filter name="filter_inactive" string="Deactivated" domain="[('active', '=', False)]"/>
                 <group expand="0" string="Group By">
                     <filter name="group_model" string="Model" context="{'group_by': 'model_id'}"/>
                     <filter name="group_level" string="Log Level" context="{'group_by': 'log_level'}"/>
@@ -166,6 +170,7 @@
         <field name="name">Audit Rules</field>
         <field name="res_model">audit.rule</field>
         <field name="view_mode">tree,form</field>
+        <field name="context">{'active_test': False}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Define your first audit rule!

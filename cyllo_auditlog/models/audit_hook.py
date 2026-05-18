@@ -49,7 +49,9 @@ class BaseAuditHook(models.AbstractModel):
         try:
             request_context.audit_internal_call = True
             rules = self.env['audit.rule'].sudo().search([
-                ('model_id.model', '=', self._name), ('active', '=', True)
+                ('model_id.model', '=', self._name),
+                ('active', '=', True),
+                '|', ('company_id', '=', False), ('company_id', '=', self.env.company.id)
             ])
             request_context.audit_rules_cache[self._name] = rules
             return rules

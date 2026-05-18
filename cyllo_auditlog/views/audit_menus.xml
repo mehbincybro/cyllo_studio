@@ -38,11 +38,11 @@
               sequence="4"
               groups="cyllo_auditlog.group_cyllo_audit_log_users,cyllo_auditlog.group_cyllo_audit_log_admin"/>
 
-    <!-- Dashboard Menu -->
-    <menuitem id="menu_audit_dashboard"
-              name="Dashboard"
+    <!-- Reporting Menu -->
+    <menuitem id="menu_audit_report"
+              name="Log Report"
               parent="menu_audit_root"
-              action="action_audit_dashboard"
+              action="action_audit_report"
               sequence="5"
               groups="cyllo_auditlog.group_cyllo_audit_log_users,cyllo_auditlog.group_cyllo_audit_log_admin"/>
 
