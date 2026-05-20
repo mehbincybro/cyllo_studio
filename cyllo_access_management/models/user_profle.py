@@ -19,32 +19,37 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api,fields,models
+from odoo import api, fields, models
+
 
 class UserProfile(models.Model):
     _name = 'user.profile'
     _description = 'User Profile'
     _inherit = 'mail.thread'
 
-    name = fields.Char('Name',required=True,tracking=True)
-    user_ids = fields.Many2many('res.users',string='User',
-                               domain=[('share','=',False)],required=True)
-    color = fields.Integer('Color')
+    name = fields.Char('Name', required=True, tracking=True, help="Name of the user profile.")
+    user_ids = fields.Many2many('res.users', string='User',
+                                domain=[('share', '=', False)], required=True,
+                                help="Internal Odoo users assigned to this profile.")
+    color = fields.Integer('Color',
+                           help="Associated color index for the profile tags in views.")
     group_ids = fields.Many2many('res.groups',
-                                 default=lambda self:[fields.Command.link(
-                                     self.env.ref('base.group_user').id)])
+                                 default=lambda self: [fields.Command.link(
+                                     self.env.ref('base.group_user').id)],
+                                 help="Associated Odoo security groups for this profile.")
     access_count = fields.Integer('# Access Rights',
-                                    help='Number of access rights that apply '
-                                         'to the current user profile',
-                                    compute='_compute_accesses_count',
-                                    compute_sudo=True)
+                                  help='Number of access rights that apply '
+                                       'to the current user profile',
+                                  compute='_compute_accesses_count',
+                                  compute_sudo=True)
     rule_count = fields.Integer('# Record Rules',
-                                 help='Number of record rules that apply to '
-                                      'the current user profile',
-                                 compute='_compute_accesses_count',
-                                 compute_sudo=True)
+                                help='Number of record rules that apply to '
+                                     'the current user profile',
+                                compute='_compute_accesses_count',
+                                compute_sudo=True)
+
     @api.model_create_multi
-    def create(self,vals):
+    def create(self, vals):
         res = super().create(vals)
         current_group_ids = res.group_ids.filtered(lambda x: x.id != 1)
         commands = []
@@ -56,7 +61,7 @@ class UserProfile(models.Model):
         return res
 
     def write(self, vals):
-        previous_group_ids = self.group_ids.filtered(lambda x:x.id != 1)
+        previous_group_ids = self.group_ids.filtered(lambda x: x.id != 1)
         previous_user_ids = self.user_ids
         res = super().write(vals)
         if 'user_ids' in vals:
@@ -80,7 +85,7 @@ class UserProfile(models.Model):
                 removed_user_ids.write({"groups_id": commands})
 
         if 'group_ids' in vals:
-            current_group_ids = self.group_ids.filtered(lambda x:x.id != 1)
+            current_group_ids = self.group_ids.filtered(lambda x: x.id != 1)
 
             remove_group_ids = previous_group_ids - current_group_ids
             add_group_ids = current_group_ids - previous_group_ids
@@ -110,7 +115,6 @@ class UserProfile(models.Model):
         self.user_ids.write({"groups_id": commands})
 
         return super().unlink()
-
 
     @api.depends('group_ids')
     def _compute_accesses_count(self):

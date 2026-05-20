@@ -19,5 +19,25 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import models
-from . import controllers
+{
+    'name': 'Cyllo UI Component',
+    'description': 'Module for getting UI components, defining IR model extension structures (buttons, tabs, filters).',
+    'summary': 'Module for getting structures (buttons, tabs, filters).',
+    'version': '1.0',
+    'author': 'Cyllo',
+    'company': 'Cyllo',
+    'maintainer': 'Cyllo',
+    'website': 'https://www.cyllo.com',
+    'depends': ['base', 'web'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/ir_model_buttons_views.xml',
+        'views/ir_model_tabs_views.xml',
+        'views/ir_model_filters_views.xml',
+    ],
+    'license': 'LGPL-3',
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+    'post_init_hook': 'post_init_hook',
+}

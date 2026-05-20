@@ -25,8 +25,9 @@ from odoo.exceptions import AccessDenied
 class ResUsers(models.Model):
     _inherit = "res.users"
 
-    profile_ids = fields.Many2many('user.profile',string='Profiles',
-                                   )
+    profile_ids = fields.Many2many('user.profile',
+                                   string='Profiles',
+                                   help="User access profiles assigned to this user.")
 
     def write(self, vals):
         previous_group_ids = self.profile_ids.group_ids.filtered(lambda x:

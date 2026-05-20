@@ -19,5 +19,6 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import models
-from . import controllers
+from . import ir_model_buttons
+from . import ir_model_tabs
+from . import ir_model_filters

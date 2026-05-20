@@ -25,7 +25,7 @@
                     <group>
                         <field name="model_id"  context="{'model': True}"/>
                         <field name="model_name"  invisible="1"/>
-                        <field name="field_id"/>
+                        <field name="field_id" domain="[('model_id','=',model_id)]"/>
                     </group>
                     <group>
                         <field name="field_attribute"/>

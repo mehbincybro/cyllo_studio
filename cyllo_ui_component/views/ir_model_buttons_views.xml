@@ -8,17 +8,17 @@
                 <field name="name"/>
                 <field name="string"/>
                 <field name="type"/>
-                <field name="model_id"  context="{'model': True}"/>
+                <field name="model_id" context="{'model': True}"/>
             </tree>
         </field>
     </record>
 
-      <record id="action_ir_model_buttons" model="ir.actions.act_window">
+    <record id="action_ir_model_buttons" model="ir.actions.act_window">
         <field name="name">Buttons</field>
         <field name="res_model">ir.model.buttons</field>
         <field name="view_mode">tree</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face"></p>
         </field>
-      </record>
+    </record>
 </odoo>

@@ -19,37 +19,37 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api,fields,models
+from odoo import _, api, fields, models
 
 class ProfileManagement(models.Model):
     _name = 'profile.management'
     _description = 'Profile Management'
     _inherit = 'mail.thread'
 
-    name = fields.Char('Name',required=True,tracking=True)
-    company_ids = fields.Many2many('res.company',string='Companies')
+    name = fields.Char('Name',required=True,tracking=True, help="Descriptive name of the profile management record.")
+    company_ids = fields.Many2many('res.company',string='Companies', help="Optional companies this profile management rule applies to (leave empty for all).")
     profile_ids = fields.Many2many('user.profile',string='Profiles',
-                                   required=True)
-    is_readonly = fields.Boolean('Profile System Readonly')
-    disable_chatter = fields.Boolean('Disable Chatter')
-    disable_debug_mode = fields.Boolean('Disable Debug Mode')
-    disable_login = fields.Boolean('Disable Login')
-    menu_ids = fields.Many2many('ir.ui.menu',string='Menus')
+                                   required=True, help="User profiles that will inherit these configuration rules.")
+    is_readonly = fields.Boolean('Profile System Readonly', help="Make the entire system read-only for users with this profile.")
+    disable_chatter = fields.Boolean('Disable Chatter', help="Disable chatter and messaging logs on all document views.")
+    disable_debug_mode = fields.Boolean('Disable Debug Mode', help="Prevent users from activating developer debug modes.")
+    disable_login = fields.Boolean('Disable Login', help="Prevent users in this profile from logging into the database.")
+    menu_ids = fields.Many2many('ir.ui.menu',string='Menus', help="Restrict and hide specific menu items from users.")
     hide_buttons_tabs_ids = fields.One2many('hide.buttons.tabs',
-                                            'profile_management_id',
-                                            string='Hide Buttons and Tabs')
+                                             'profile_management_id',
+                                             string='Hide Buttons and Tabs', help="Rules to hide specific XML buttons and tabs.")
     hide_filters_ids = fields.One2many('hide.filters',
                                    'profile_management_id',
-                                   string='Hide Filters and Groups')
+                                   string='Hide Filters and Groups', help="Rules to hide specific search view filters and grouping choices.")
     field_access_ids = fields.One2many('field.access',
                                        'profile_management_id',
-                                       string='Field Access')
+                                       string='Field Access', help="Rules to customize field-level permissions (readonly, required, invisible, links).")
     model_access_ids = fields.One2many('model.access',
                                        'profile_management_id',
-                                       string='Model Access')
+                                       string='Model Access', help="Rules to customize model-level permissions (readonly, hide create/edit/delete/export/duplicate/actions).")
     domain_access_ids = fields.One2many('domain.access',
                                        'profile_management_id',
-                                       string='Domain Access')
+                                       string='Domain Access', help="Rules to apply conditional record-level filtering domains.")
     access_count = fields.Integer('# Access Rights',
                                     help='Number of access rights that apply '
                                          'to the current user profile',
@@ -65,7 +65,9 @@ class ProfileManagement(models.Model):
                                      'the current user profile management',
                                 compute='_compute_user_count',
                                 )
-    is_activated = fields.Boolean('Active',default=True)
+    is_activated = fields.Boolean('Active',
+                                  default=True,
+                                  help="Enable or disable this profile management rule.")
 
     @api.depends('profile_ids')
     def _compute_accesses_count(self):
@@ -117,6 +119,25 @@ class ProfileManagement(models.Model):
             'domain': [('id', 'in',
                         self.profile_ids.group_ids.rule_groups.ids)],
             'target': 'current',
+        }
+
+    @api.model
+    def _load_ui_components(self):
+        self.env['ir.model.buttons'].sudo().load_buttons_from_views()
+        self.env['ir.model.tabs'].sudo().load_tabs_from_views()
+        self.env['ir.model.filters'].sudo().load_filters_from_views()
+        return True
+
+    def action_refresh_ui_components(self):
+        self._load_ui_components()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'type': 'success',
+                'message': _('Buttons, tabs, filters, and groups refreshed.'),
+                'sticky': False,
+            },
         }
 
     @api.model

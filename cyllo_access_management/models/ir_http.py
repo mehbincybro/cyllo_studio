@@ -114,5 +114,6 @@ class IrHttp(models.AbstractModel):
                 ], limit=1)
                 if access_mgmt:
                     is_readonly = True
+                    user.toggle_auto_edit(False)
             res['is_profile_readonly'] = is_readonly
         return res

@@ -20,4 +20,11 @@
 #
 #############################################################################
 from . import models
-from . import controllers
+
+def post_init_hook(env):
+    """
+    Load existing buttons, tabs, and filters from views upon installation
+    """
+    env['ir.model.buttons'].load_buttons_from_views()
+    env['ir.model.tabs'].load_tabs_from_views()
+    env['ir.model.filters'].load_filters_from_views()
