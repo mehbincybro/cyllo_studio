@@ -29,20 +29,17 @@ class HideFiltersTabs(models.Model):
     _rec_name = 'model_id'
 
     profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
+                                            string='Profile Management ID',
+                                            help="The profile management record this rule belongs to.")
     model_id = fields.Many2one('ir.model', string='Model',
                                required=True, ondelete='cascade',
-                               )
+                               help="The target Odoo model containing the filters or groups.")
     filter_ids = fields.Many2many('ir.model.filters',
                                   'hide_filters_rel','hide_id',
-                                  'filter_id',string='Hide Filters')
+                                  'filter_id',string='Hide Filters',
+                                  help="Choose search filters to hide for this profile.")
 
     group_ids = fields.Many2many('ir.model.filters',
                                  'hide_groups_rel','hide_id',
-                                 'filter_id',string='Hide Groups')
-
-    @api.constrains('filter_ids', 'group_ids')
-    def _constraint_filter_ids_group_ids(self):
-        for record in self:
-            if not (record.filter_ids or record.group_ids):
-                raise ValidationError('Provide at least one filter or group')
+                                 'filter_id',string='Hide Groups',
+                                 help="Choose search group-by options to hide for this profile.")

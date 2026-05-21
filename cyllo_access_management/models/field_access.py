@@ -19,7 +19,8 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields,models
+from odoo import fields, models
+
 
 class FieldAccess(models.Model):
     _name = 'field.access'
@@ -27,20 +28,24 @@ class FieldAccess(models.Model):
     _rec_name = 'model_id'
 
     profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model',
-                               required=True,ondelete='cascade',
-                               )
-    model_name = fields.Char(related='model_id.model', string='Model Name')
-    field_id = fields.Many2one('ir.model.fields',string='Field',
-                               required=True,ondelete='cascade',)
+                                            string='Profile Management ID',
+                                            help="The profile management record this field access rule belongs to.")
+    model_id = fields.Many2one('ir.model', string='Model',
+                               required=True, ondelete='cascade',
+                               help="The Odoo model containing the target field.")
+    model_name = fields.Char(related='model_id.model', string='Model Name',
+                             help="Technical name of the target Odoo model.")
+    field_id = fields.Many2one('ir.model.fields', string='Field',
+                               required=True, ondelete='cascade',
+                               help="The specific field to which access rules apply.")
     field_attribute = fields.Selection(string="Field Attribute",
-                                       selection=[('readonly','Readonly'),
-                                                  ('invisible','Invisible'),
+                                       selection=[('readonly', 'Readonly'),
+                                                  ('invisible', 'Invisible'),
                                                   ('required', 'Required'),
                                                   ('remove_link', 'Remove External Link'),
                                                   ],
                                        default='readonly',
                                        required=True,
-                                       )
-    domain = fields.Text(default='[]', string='Domain')
+                                       help="Action to apply to the field: Readonly, Invisible, Required, or Remove External Link.")
+    domain = fields.Text(default='[]', string='Domain',
+                         help="Optional Python/domain expression to conditionally apply this rule.")

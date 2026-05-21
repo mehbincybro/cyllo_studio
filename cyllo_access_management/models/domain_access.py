@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import api,fields,models
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
@@ -28,12 +28,22 @@ class DomainAccess(models.Model):
     _description = 'Domain Access'
     _rec_name = 'model_id'
 
-    profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
-    model_id = fields.Many2one('ir.model',string='Model',
-                               required=True, ondelete='cascade')
-    model_name = fields.Char(related='model_id.model',string='Model Name')
-    domain = fields.Text(default='[]', string='Domain',)
+    profile_management_id = fields.Many2one(
+        'profile.management',
+        string='Profile Management ID',
+        help="The profile management record this domain rule belongs to."
+    )
+    model_id = fields.Many2one(
+        'ir.model', string='Model',
+        required=True, ondelete='cascade',
+        help="The Odoo model to which this domain rule applies."
+    )
+    model_name = fields.Char(related='model_id.model', string='Model Name',
+                             help="Technical name of the target Odoo model.")
+    domain = fields.Text(
+        default='[]', string='Domain',
+        help="Python/domain expression to filter records (e.g. [('state', '=', 'draft')])."
+    )
 
     @api.constrains('domain')
     def _constraint_domain(self):

@@ -1,21 +1,56 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
+    <!-- Root Menu for the entire Access Management App -->
+    <menuitem name="Access Management" 
+              id="menu_access_management_root" 
+              groups="cyllo_access_management.group_access_management_admin" 
+              sequence="90"/>
 
-    <menuitem name="User Profiles" id="user_profile_menu"
-              action="action_user_profile"  parent="base.menu_users" />
-    <menuitem name="Profile Management" id="profile_management_menu"
-              action="action_profile_management"  parent="base.menu_users" />
-    <menuitem name = "Buttons" action="action_ir_model_buttons" id="menu_buttons" parent="base.next_id_9"/>
-    <menuitem name = "Tabs" action="action_ir_model_tabs" id="menu_tabs" parent="base.next_id_9"/>
-    <menuitem name = "Filters" action="action_ir_model_filters" id="menu_filters" parent="base.next_id_9"/>
-    <menuitem name = "Hide Buttons and Tabs" action="action_hide_buttons_tabs"
-              id="menu_hide_buttons_tabs" parent="base.menu_security"/>
-    <menuitem name = "Hide Filters" action="action_hide_filters"
-              id="menu_hide_filters" parent="base.menu_security"/>
-    <menuitem name = "Field Access" action="action_field_access"
-              id="menu_field_access" parent="base.menu_security"/>
-    <menuitem name = "Model Access" action="action_model_access"
-              id="menu_model_access" parent="base.menu_security"/>
-    <menuitem name = "Domain Access" action="action_domain_access"
-              id="menu_domain_access" parent="base.menu_security"/>
+    <!-- Sub-menus -->
+    <menuitem name="Profiles" 
+              id="menu_profiles_parent" 
+              parent="menu_access_management_root" 
+              sequence="10"/>
+
+    <menuitem name="UI Elements" 
+              id="menu_technical_parent" 
+              parent="menu_access_management_root" 
+              sequence="20"/>
+
+    <menuitem name="Access Rules" 
+              id="menu_rules_parent" 
+              parent="menu_access_management_root" 
+              sequence="30"/>
+
+    <!-- Profiles Menu Items -->
+    <menuitem name="User Profiles" 
+              id="user_profile_menu"
+              action="action_user_profile" 
+              parent="menu_profiles_parent" 
+              sequence="10"/>
+
+    <menuitem name="Profile Management" 
+              id="profile_management_menu"
+              action="action_profile_management" 
+              parent="menu_profiles_parent" 
+              sequence="20"/>
+
+    <!-- UI Elements Menu Items -->
+    <menuitem name="Buttons" 
+              id="menu_buttons" 
+              action="cyllo_ui_component.action_ir_model_buttons"
+              parent="menu_technical_parent" 
+              sequence="10"/>
+
+    <menuitem name="Tabs" 
+              id="menu_tabs" 
+              action="cyllo_ui_component.action_ir_model_tabs"
+              parent="menu_technical_parent" 
+              sequence="20"/>
+
+    <menuitem name="Filters" 
+              id="menu_filters" 
+              action="cyllo_ui_component.action_ir_model_filters"
+              parent="menu_technical_parent" 
+              sequence="30"/>
 </odoo>

@@ -29,17 +29,15 @@ class HideButtonsTabs(models.Model):
     _rec_name = 'model_id'
 
     profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
+                                            string='Profile Management ID',
+                                            help="The profile management record this rule belongs to.")
     model_id = fields.Many2one('ir.model', string='Model',
                                required=True, ondelete='cascade',
-                               )
+                               help="The target Odoo model containing the buttons or tabs.")
     button_ids = fields.Many2many('ir.model.buttons',
-                                 string='Hide Buttons')
+                                 string='Hide Buttons',
+                                 help="Choose which model buttons to hide for this profile.")
     tab_ids = fields.Many2many('ir.model.tabs',
-                                 string='Hide Tabs')
+                                 string='Hide Tabs',
+                                 help="Choose which model notebook tabs to hide for this profile.")
 
-    @api.constrains('button_ids','tab_ids')
-    def _constraint_button_ids_tab_ids(self):
-        for record in self:
-            if not(record.button_ids or record.tab_ids):
-                raise ValidationError('Provide at least one button or tab')

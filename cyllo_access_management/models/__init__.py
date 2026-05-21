@@ -24,9 +24,6 @@ from . import field_access
 from . import hide_buttons_tabs
 from . import hide_filters
 from . import ir_http
-from . import ir_model_buttons
-from . import ir_model_filters
-from . import ir_model_tabs
 from . import ir_ui_menu
 from . import model_access
 from . import models

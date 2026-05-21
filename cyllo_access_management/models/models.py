@@ -84,9 +84,9 @@ class BaseModel(models.AbstractModel):
         arch = etree.fromstring(res['arch'])
 
         if is_profile_readonly:
-            arch.set("edit", "false")
-            arch.set("create", "false")
-            arch.set("delete", "false")
+            arch.set("edit", "0")
+            arch.set("create", "0")
+            arch.set("delete", "0")
 
         if disable_chatter:
             chatter_nodes = arch.xpath("//chatter") + arch.xpath(
@@ -192,24 +192,24 @@ class BaseModel(models.AbstractModel):
 
         if model_rules:
             if any(model_rules.mapped('is_readonly')):
-                arch.set("edit", "false")
-                arch.set("create", "false")
-                arch.set("delete", "false")
+                arch.set("edit", "0")
+                arch.set("create", "0")
+                arch.set("delete", "0")
 
             if any(model_rules.mapped('hide_create')):
-                arch.set("create", "false")
+                arch.set("create", "0")
 
             if any(model_rules.mapped('hide_edit')):
-                arch.set("edit", "false")
+                arch.set("edit", "0")
 
             if any(model_rules.mapped('hide_delete')):
-                arch.set("delete", "false")
+                arch.set("delete", "0")
 
             if any(model_rules.mapped('hide_archive')):
-                arch.set("archive", "false")
+                arch.set("archive", "0")
 
             if any(model_rules.mapped('hide_duplicate')):
-                arch.set("duplicate", "false")
+                arch.set("duplicate", "0")
 
         res['arch'] = etree.tostring(arch, encoding="unicode")
         return res

@@ -29,18 +29,20 @@ class ModelAccess(models.Model):
     _rec_name = 'model_id'
 
     profile_management_id = fields.Many2one('profile.management',
-                                            string='Profile Management ID')
+                                            string='Profile Management ID',
+                                            help="The profile management record this rule belongs to.")
     model_id = fields.Many2one('ir.model', string='Model',
-                               required=True, ondelete='cascade')
-    is_readonly = fields.Boolean('Read-only')
-    hide_create = fields.Boolean('Hide Create')
-    hide_edit = fields.Boolean('Hide Edit')
-    hide_delete = fields.Boolean('Hide Delete')
-    hide_archive = fields.Boolean('Hide Archive/Unarchive')
-    hide_duplicate = fields.Boolean('Hide Duplicate')
-    hide_export = fields.Boolean('Hide Export')
-    hide_reports = fields.Boolean('Hide Reports')
-    hide_actions = fields.Boolean('Hide Actions')
+                               required=True, ondelete='cascade',
+                               help="The target Odoo model for access control rules.")
+    is_readonly = fields.Boolean('Read-only', help="Make this model entirely read-only for the profile.")
+    hide_create = fields.Boolean('Hide Create', help="Hide the Create/New action button for this model.")
+    hide_edit = fields.Boolean('Hide Edit', help="Hide the Edit action button for this model.")
+    hide_delete = fields.Boolean('Hide Delete', help="Disable and hide record deletion capabilities for this model.")
+    hide_archive = fields.Boolean('Hide Archive/Unarchive', help="Hide Archive and Unarchive actions on records.")
+    hide_duplicate = fields.Boolean('Hide Duplicate', help="Hide the Duplicate action on records.")
+    hide_export = fields.Boolean('Hide Export', help="Disable and hide data export functionality for this model.")
+    hide_reports = fields.Boolean('Hide Reports', help="Hide reports / print menu options for this model.")
+    hide_actions = fields.Boolean('Hide Actions', help="Hide contextual actions / gear menu for this model.")
 
     @api.constrains('is_readonly','hide_create','hide_edit','hide_delete',
                     'hide_archive','hide_duplicate','hide_export','hide_reports','hide_actions')
