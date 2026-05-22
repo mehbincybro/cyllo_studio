@@ -35,18 +35,12 @@ export class RepairFloorDashboard extends Component {
     }
 
     async loadEmployees() {
-        this.state.employees = await this.orm.searchRead("hr.employee", [], ["id", "name"]);
-        const currentUserEmp = await this.orm.searchRead(
-            "hr.employee",
-            [["user_id", "=", this.user.userId]],
-            ["id", "name"],
-            {limit: 1}
-        );
-        if (currentUserEmp.length > 0) {
-            this.state.selectedEmployee = currentUserEmp[0];
-        } else if (this.state.employees.length > 0) {
-            this.state.selectedEmployee = this.state.employees[0];
-        }
+        this.state.employees = await this.orm.searchRead(
+            "hr.employee", [], ["id", "name", "user_id"]);
+        const currentUserEmployee = this.state.employees.find(
+            employee => employee.user_id?.[0] == this.user.userId)
+        this.state.selectedEmployee = currentUserEmployee
+            ? currentUserEmployee : this.state.employees?.[0]
     }
 
     selectEmployee(employee) {

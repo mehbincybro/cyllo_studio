@@ -26,6 +26,7 @@
     'summary': 'Tablet-friendly interface for Repair Technicians',
     'depends': ['cyllo_repair', 'repair'],
     'data': [
+        'security/shopfloor_repair_security.xml',
         'security/ir.model.access.csv',
         'views/repair_floor_action.xml',
         'views/repair_order_views.xml',

@@ -12,17 +12,22 @@
 
                     <div class="d-flex align-items-center">
 
-                        <i t-if="props.record.under_warranty" class="fa fa-shield text-success fs-5 me-2"
+                        <i t-if="props.record.under_warranty"
+                           class="fa fa-shield text-success fs-5 me-2"
                            title="Under Warranty"/>
 
                         <t t-if="props.record.state === 'under_repair'">
-                            <i t-if="props.record.is_timer_running" class="fa fa-clock-o fa-spin text-success fs-5 me-2"
+                            <i t-if="props.record.is_timer_running"
+                               class="fa fa-clock-o fa-spin text-success fs-5 me-2"
                                title="In Progress..."/>
-                            <i t-else="" class="fa fa-pause-circle text-warning fs-5 me-2" title="Paused"/>
+                            <i t-else="" class="fa fa-pause-circle text-warning fs-5 me-2"
+                               title="Paused"/>
                         </t>
 
-                        <div class="dropdown" t-if="props.isManager || props.record.state !== 'draft'">
-                            <button class="btn btn-sm text-muted p-0 border-0" type="button" data-bs-toggle="dropdown"
+                        <div class="dropdown"
+                             t-if="props.isManager || props.record.state !== 'draft'">
+                            <button class="btn btn-sm text-muted p-0 border-0" type="button"
+                                    data-bs-toggle="dropdown"
                                     t-on-click.stop="">
                                 <i class="fa fa-ellipsis-v fs-5 px-2"/>
                             </button>
@@ -33,6 +38,26 @@
                                                 t-on-click.stop="openRepairOrder">
                                             <i class="fa fa-external-link-square me-2"/>
                                             Open Repair Order
+                                        </button>
+                                    </li>
+                                </t>
+
+                                <t t-if="props.record.state === 'draft' and props.isManager">
+                                    <li>
+                                        <button class="dropdown-item py-2 fw-bold text-success"
+                                                t-on-click.stop="confirmRepairOrder">
+                                            <i class="fa fa-check me-2"/>
+                                            Confirm Repair Order
+                                        </button>
+                                    </li>
+                                </t>
+
+                                <t t-if="props.record.state !== 'done' and props.record.state !== 'cancel' and props.isManager">
+                                    <li>
+                                        <button class="dropdown-item py-2 fw-bold text-danger"
+                                                t-on-click.stop="cancelRepairOrder">
+                                            <i class="fa fa-times me-2"/>
+                                            Cancel Repair Order
                                         </button>
                                     </li>
                                 </t>

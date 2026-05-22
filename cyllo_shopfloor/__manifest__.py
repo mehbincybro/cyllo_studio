@@ -26,6 +26,7 @@
     'summary': 'Shopfloor Interface',
     'depends': ['mrp', 'bus', 'web'],
     'data': [
+        'security/cyllo_shopfloor_security.xml',
         'security/ir.model.access.csv',
         'data/automated_mo_crone.xml',
 

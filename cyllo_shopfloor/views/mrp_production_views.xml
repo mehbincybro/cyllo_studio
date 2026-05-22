@@ -23,7 +23,8 @@
                         type="object"
                         class="oe_stat_button"
                         icon="fa-industry"
-                        invisible="state == 'draft' or state == 'cancel'">
+                        invisible="state == 'draft' or state == 'cancel'"
+                        groups="cyllo_shopfloor.group_cyllo_shopfloor_user">
                     <div class="o_stat_info">
                         <span class="o_stat_text">Shopfloor</span>
                     </div>
