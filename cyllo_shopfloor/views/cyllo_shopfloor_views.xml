@@ -38,6 +38,7 @@
     <menuitem id="menu_shopfloor_root"
               name="Shopfloor"
               sequence="10"
-              action="action_shopfloor"/>
+              action="action_shopfloor"
+              groups="cyllo_shopfloor.group_cyllo_shopfloor_user"/>
 
 </odoo>

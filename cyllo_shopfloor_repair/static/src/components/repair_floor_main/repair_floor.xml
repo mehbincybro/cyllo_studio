@@ -14,9 +14,12 @@
 
                 <div class="d-flex align-items-center gap-4">
                     <div class="d-flex align-items-center">
-                        <div class="dropdown me-3 shadow-sm rounded">
+                        <div class="dropdown me-3 shadow-sm rounded"
+                             t-att-class="state.isManager ? '' : 'opacity-75'">
                             <button class="btn btn-outline-secondary dropdown-toggle fw-bold d-flex align-items-center bg-white py-1"
                                     type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                    t-att-disabled="!state.isManager"
+                                    t-att-aria-disabled="state.isManager ? 'false' : 'true'"
                                     style="font-size: 0.85rem; border-color: #dee2e6;">
                                 <i class="fa fa-user-circle me-2 fs-5 text-primary"/>
                                 <t t-if="state.selectedEmployee">

@@ -41,6 +41,24 @@ export class RepairCard extends Component {
         }
     }
 
+    async confirmRepairOrder() {
+        const result = await this.orm.call("repair.order", "action_validate", [this.props.record.id]);
+        if (result && typeof result === "object" && result.type) {
+            this.action.doAction(result, {
+                onClose: () => {
+                    this.props.onUpdate();
+                },
+            });
+        } else {
+            this.props.onUpdate();
+        }
+    }
+
+    async cancelRepairOrder() {
+        await this.orm.call("repair.order", "action_repair_cancel", [this.props.record.id]);
+        this.props.onUpdate();
+    }
+
     async editRepairLine() {
         this.action.doAction("cyllo_shopfloor_repair.action_edit_repair_line_wizard", {
             additionalContext: {default_repair_id: this.props.record.id},
