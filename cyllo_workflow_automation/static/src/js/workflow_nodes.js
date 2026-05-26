@@ -20,6 +20,8 @@ import {
     loopFields,
     reusableAutomationFields,
     windowFields,
+    duplicateFields,
+    webhookFields,
 } from "./fields";
 import {
     icons,
@@ -43,6 +45,8 @@ import { removeNodeIdFromVariables } from "./utils/utils"
 import { LoopNode } from "./components/loopNode/loopNode";
 import { ReusableAutomationNode } from "./components/reusableAutomationNode/reusableAutomationNode";
 import { WindowNode } from "./components/windowNode/windowNode";
+import { DuplicateNode } from "./components/DuplicateNode/duplicateNode";
+import { WebhookNode } from "./components/webhookNode/webhookNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -104,6 +108,14 @@ const MODAL_CONFIGS = {
     'Window': {
         component: WindowNode,
         fields: windowFields,
+    },
+    'Duplicate': {
+        component: DuplicateNode,
+        fields: duplicateFields,
+    },
+    'Webhook': {
+        component: WebhookNode,
+        fields: webhookFields,
     },
 };
 
@@ -404,6 +416,8 @@ export class ModelComponent extends Component {
             } else if (this.props.name === "Activity") {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Activity Modal enables users to manage Activity"
+            } else if (this.props.name === 'Webhook') {
+                props.display_name = "The Webhook Node allows you to send data to external APIs via HTTP requests."
             } else if (this.props.name === 'Loop') {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Loop Node iterates over a recordset field or variable, executing child nodes for each record in turn.";
@@ -419,6 +433,46 @@ export class ModelComponent extends Component {
                 props.onEditReusableFlow = async () => {
                     await this.editReusableAutomationFlow();
                 };
+            } else if (this.props.name === 'Duplicate') {
+                props.primaryModelId = this.props.primary_model_id;
+                props.display_name = "The Duplicate Node copies a record and optionally overrides specific fields on the copy. Use the result variable to pass the copy to downstream nodes.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    if (fieldState.duplicate_result_variable && fieldState.duplicate_record) {
+                        const recVar = this.variableContext.variables.find(v => v.id === fieldState.duplicate_record.value);
+                        if (recVar) {
+                            const varName = fieldState.duplicate_result_variable.trim();
+                            const varId = `dup_var_${this.props.nodeId}`;
+                            const existingVars = this.variableContext.variables;
+                            const alreadyRegistered = existingVars.find(v => v.id === varId);
+                            if (!alreadyRegistered) {
+                                this.env.variables.setContext({
+                                    variables: [
+                                        ...existingVars,
+                                        owl.reactive({
+                                            id: varId,
+                                            variable_name: varName,
+                                            variable_type: recVar.variable_type,
+                                            modelId: recVar.modelId,
+                                            modelName: recVar.modelName,
+                                            scopeId: this.props.nodeId,
+                                            usedIn: [],
+                                            class: this.buttonClass,
+                                        })
+                                    ]
+                                });
+                            } else {
+                                alreadyRegistered.variable_name = varName;
+                                alreadyRegistered.variable_type = recVar.variable_type;
+                                alreadyRegistered.modelId = recVar.modelId;
+                                alreadyRegistered.modelName = recVar.modelName;
+                            }
+                            this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+                        }
+                    }
+                };
+            } else if (this.props.name === 'Webhook') {
+                props.display_name = "The Webhook Node allows you to send data to external APIs via HTTP requests.";
             }
             this.dialogService.add(component, props);
         } else {

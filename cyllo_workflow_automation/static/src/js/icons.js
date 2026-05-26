@@ -19,4 +19,6 @@ export const icons = {
     'Activity': 'cyllo_workflow_automation/static/src/img/routine-cl.svg',
     'Loop': 'cyllo_workflow_automation/static/src/img/node-icons/iteration.svg',
     'Window': 'cyllo_workflow_automation/static/src/img/node-icons/window.svg',
+    'Duplicate': 'cyllo_workflow_automation/static/src/img/node-icons/duplicate.svg',
+    'Webhook': 'cyllo_workflow_automation/static/src/img/node-icons/webhook.svg',
 };

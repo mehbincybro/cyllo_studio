@@ -409,6 +409,22 @@
                                                      alt=""/>
                                                 <p>Window</p>
                                             </div>
+                                            <div class="collapse_btn "
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'duplicate')"
+                                                 draggable="true" data-node="Duplicate">
+												<img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/duplicate.svg"
+                                                     alt=""/>
+                                                <p>Duplicate</p>
+											</div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'webhook')"
+                                                 data-node="Webhook">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/webhook.svg"
+                                                     alt=""/>
+                                                <p>Webhook</p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

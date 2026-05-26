@@ -129,7 +129,7 @@
                 <div class="mb-3" t-if="getAttachmentMode === 'static'">
                     <label class="form-label cy-modal-form_label">Upload Files</label>
                     <small class="text-muted d-block mb-2">
-                        Files uploaded here are stored in Odoo and sent whenever this node runs.
+                        Files uploaded here are stored in the system and sent whenever this node runs.
                     </small>
 
                     <div t-if="getStaticAttachments.length" class="mb-2">

@@ -71,3 +71,21 @@ export const windowFields = [
     { name: 'window_domain', type: 'char' },
     { name: 'window_context', type: 'char' },
 ];
+
+export const duplicateFields = [
+    { name: 'model_id', type: 'many2One' },
+    { name: 'label', type: 'char' },
+    { name: 'duplicate_record', type: 'char' },
+    { name: 'duplicate_field_overrides', type: 'char' },
+    { name: 'duplicate_result_variable', type: 'char' },
+    { name: 'used_variables', type: 'json' },
+];
+
+export const webhookFields = [
+    { name: 'label', type: 'char' },
+    { name: 'webhook_method', type: 'selection' },
+    { name: 'webhook_url', type: 'char' },
+    { name: 'webhook_headers', type: 'char' },
+    { name: 'webhook_payload', type: 'text' },
+    { name: 'webhook_actions', type: 'json' },
+];

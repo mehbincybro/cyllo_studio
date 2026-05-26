@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="WebhookNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="py-2">
+
+                <!-- Label -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Label</label>
+                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.label" t-on-change="(ev) => this.setLabel(ev.target.value)"/>
+                </div>
+
+                <!-- Webhook Method -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">HTTP Method</label>
+                    <select class="form-select cy-modal-form_input" t-model="fieldState.webhook_method">
+                        <t t-foreach="getMethodOptions" t-as="option" t-key="option.value">
+                            <option t-att-value="option.value" t-att-selected="option.value === fieldState.webhook_method"><t t-esc="option.label"/></option>
+                        </t>
+                    </select>
+                </div>
+
+                <!-- Webhook URL -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Webhook URL</label>
+                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.webhook_url"/>
+                </div>
+
+                <!-- Headers -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Headers (JSON)</label>
+                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.webhook_headers"/>
+                </div>
+
+                <!-- Payload -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Payload (JSON)</label>
+                    <textarea class="form-control cy-modal-form_input" t-model="fieldState.webhook_payload" rows="6"></textarea>
+                </div>
+
+                <!-- Post-Webhook Actions -->
+                <div class="mb-3 mt-4">
+                    <h6 class="border-bottom pb-2 mb-3">Response Actions</h6>
+                    <p class="text-muted small mb-3">Process API responses automatically. Extract data, update fields, or redirect users.</p>
+                    <div class="list-group mb-3">
+                        <t t-foreach="fieldState.webhook_actions || []" t-as="action" t-key="action.id">
+                            <div class="list-group-item bg-light border">
+                                <div class="row g-2 align-items-center">
+                                    <div class="col-md-3">
+                                        <select class="form-select form-select-sm" t-model="action.type">
+                                            <option value="extract">Extract Variable</option>
+                                            <option value="update_record">Update Record</option>
+                                            <option value="chatter">Log Chatter</option>
+                                            <option value="activity">Create Activity</option>
+                                            <option value="email">Send Email</option>
+                                            <option value="redirect">Redirect URL</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control form-control-sm" placeholder="JSON Path (e.g. data.id)" t-model="action.json_path"/>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <t t-if="action.type === 'extract'">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Target Variable" t-model="action.target"/>
+                                        </t>
+                                        <t t-if="action.type === 'update_record'">
+                                            <input type="text" class="form-control form-control-sm" placeholder="Target Field (e.g. state)" t-model="action.target"/>
+                                        </t>
+                                        <t t-if="action.type === 'email'">
+                                            <MailRecordPathSelector
+                                                    value="action.target_obj || {record: false, path: ''}"
+                                                    variables="this.variables"
+                                                    fieldInfo="{resModel: '', fieldDef: {type: 'many2one', relation: ['res.partner', 'res.users']}}"
+                                                    update="(val) => { action.target_obj = val }"
+                                                    operator="'='"
+                                            />
+                                        </t>
+                                        <t t-if="action.type === 'chatter' || action.type === 'activity' || action.type === 'email'">
+                                            <input type="text" class="form-control form-control-sm mt-1" placeholder="Message (use {{value}})" t-model="action.message"/>
+                                        </t>
+                                        <t t-if="action.type === 'redirect'">
+                                            <span class="text-muted small">Redirect to extracted URL</span>
+                                        </t>
+                                    </div>
+                                    <div class="col-md-1 text-end">
+                                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeAction(action.id)">
+                                            <i class="fa fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                        <t t-if="!fieldState.webhook_actions || fieldState.webhook_actions.length === 0">
+                            <div class="text-muted small text-center p-2">No response actions configured.</div>
+                        </t>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" t-on-click="addAction">
+                        <i class="fa fa-plus me-1"></i> Add Action
+                    </button>
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

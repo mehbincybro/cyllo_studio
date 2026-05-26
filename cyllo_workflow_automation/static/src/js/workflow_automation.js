@@ -60,6 +60,8 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Loop: ['label', 'loop_collection', 'loop_variable_name'],
     'Reuse Automation': ['label', 'reused_work_auto_id', 'reused_variable'],
     Window: ['label', 'window_action_id'],
+    Duplicate: ['label', 'duplicate_record', 'duplicate_field_overrides'],
+    Webhook: ['label', 'webhook_url', 'webhook_method', 'webhook_headers', 'webhook_payload', 'webhook_actions'],
 };
 
 const GLOBAL_IMPORTS = [{
@@ -503,7 +505,7 @@ export class WorkFlowAuto extends Component {
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).find(
                     (item) => item.id === parseInt(input_id)
                 );
-                if (node && await this.shouldAutoOpenConfigModal(node)) {
+                if (node && (node.data.name === 'Webhook' || await this.shouldAutoOpenConfigModal(node))) {
                     const name = node.data.name;
                     const nodeId = node.data.nodeId;
                     this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
@@ -2379,9 +2381,9 @@ export class WorkFlowAuto extends Component {
                 // For generic reusable automations, model_name may be empty.
                 // Fall back to records directly so current_record = records works.
                 if (this.state.model_name) {
-                    codeLines.push(`${variable.variable_name} = records if records else env['${this.state.model_name}'].browse()`);
+                    codeLines.push(`${variable.variable_name} = records[:1] if records else env['${this.state.model_name}'].browse()`);
                 } else {
-                    codeLines.push(`${variable.variable_name} = records`);
+                    codeLines.push(`${variable.variable_name} = records[:1]`);
                 }
             } else {
                 codeLines.push(`${variable.variable_name} = ${variable.variable_value}`);
@@ -2875,6 +2877,8 @@ export class WorkFlowAuto extends Component {
             case 'Mapped':
             case 'Assignment':
             case 'Window':
+            case 'Duplicate':
+            case 'Webhook':
                 specificProps.type = "action_to_do";
                 break;
             case 'Warning':

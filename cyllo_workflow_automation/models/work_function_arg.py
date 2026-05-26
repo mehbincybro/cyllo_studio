@@ -20,12 +20,14 @@
 #
 #############################################################################
 import base64
+import json as _json_lib
 import os
 import time
 import types
 from collections import defaultdict
 import logging
 
+import requests as _requests_lib
 from lxml import etree
 
 from dateutil.relativedelta import relativedelta
@@ -140,7 +142,7 @@ class WorkFunction(models.Model):
         Fields:
             name (Char): A human-readable name for the function.
             func_name (Char): The internal name of the function (used in function generation).
-            decorator (Char): The name of the Odoo decorator (e.g., `@api.model`, `@api.multi`, etc.).
+            decorator (Char): The name of the decorator (e.g., `@api.model`, `@api.multi`, etc.).
             model_id (Many2one): A reference to the `ir.model` the function belongs to.
             make_function (Text): Optional field for manually providing the function code.
             arg_ids (One2many): Arguments associated with this function, linked to `work.function.arg`.
@@ -1010,6 +1012,10 @@ class WorkAuto(models.Model):
                 if not _is_empty(node.followers):
                     return 'success', _("Followers configured.")
                 return 'error', _("Select at least one follower.")
+            if node_name == 'Duplicate':
+                if not _is_empty(node.duplicate_record):
+                    return 'success', _("Duplicate record configured.")
+                return 'error', _("Select a record to duplicate.")
             if node.code and node.code.strip():
                 return 'success', _("%s configured.") % label
             return 'error', _("%s is not configured.") % label
@@ -1133,16 +1139,17 @@ class WorkAuto(models.Model):
         """
         Register workflow automation hooks on target models.
 
-        On Field Change  — uses the SAME mechanism as @api.onchange:
-          Model._onchange_methods[field_name].append(handler)
-          Model._onchange_methods is a plain dict built once at class-creation
-          time by Odoo's metaclass. It is the SAME dict object on every access,
-          so appending to it mutates it in place and the handler persists.
-          Odoo's onchange() RPC calls every handler in that list when the user
-          changes the watched field in the form view (fires before saving).
-          This is exactly what the original working single-trigger version did.
+        Model._onchange_methods is initialized once during model class creation
+        and shared across runtime access, so appending handlers updates the
+        registry in place and keeps the trigger active.
 
-        On Create / Write / Unlink — patch the ORM method on ModelClass.
+            Model._onchange_methods[field_name].append(handler)
+
+        When a watched field changes in the form view, all registered handlers
+        for that field are executed automatically before record persistence.
+
+        On Create / Write / Unlink — patch the corresponding ORM methods on
+        the target ModelClass.
         """
         patched_models = defaultdict(set)
         patched_function_ids = set()
@@ -1164,12 +1171,17 @@ class WorkAuto(models.Model):
                     return False
                 automation_ids = self.env['work.auto']._get_actions(self, func_name)
                 before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
+                action_result = False
                 for automation in before_ids.with_context(old_values=None):
-                    automation._process({'records': self, 'trigger_type': 'button_click'})
+                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                    if isinstance(res, dict) and 'type' in res:
+                        action_result = res
                 after_ids = automation_ids - before_ids
                 for automation in after_ids.with_context(old_values=None):
-                    automation._process({'records': self, 'trigger_type': 'button_click'})
-                return False
+                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                    if isinstance(res, dict) and 'type' in res:
+                        action_result = res
+                return action_result or False
 
             button_click.__name__ = func_name
             return button_click
@@ -1375,8 +1387,19 @@ class WorkAuto(models.Model):
             records = self.env[model_name].search([])
             args = dict(args, records=records, current_record=records)
 
+        # ── Empty recordset safety guard ──────────────────────────────────────
+        # Skip execution of triggers if the recordset is empty (no records).
+        # This prevents Expected singleton or access errors in downstream nodes
+        # when background actions write to empty recordsets.
+        if hasattr(records, '_name') and not records:
+            _logger.info(
+                "Skipping workflow automation '%s' (ID %d) because the target recordset is empty.",
+                self.name, self.id
+            )
+            return
+
         # ── Transaction-level dedup (create / write / unlink only) ────────────
-        # Prevents N duplicate actions when Odoo calls write() multiple times
+        # Prevents N duplicate actions when write() is triggered multiple times
         # per single form save (computed fields, chatter, state machine).
         # field_change is deliberately excluded — it fires from the onchange
         # RPC which is a single call per user interaction.
@@ -1466,8 +1489,17 @@ class WorkAuto(models.Model):
         if self.code:
             code_obj = compile(self.code.strip(), "", 'exec')
             try:
-                eval(code_obj, context, {})
+                local_dict = {}
+                eval(code_obj, context, local_dict)
+                if 'action' in local_dict:
+                    context['action'] = local_dict['action']
             except Exception as e:
+                import traceback as _tb
+                _logger.error(
+                    "Workflow '%s' code execution error:\n%s",
+                    getattr(self, 'name', '?'),
+                    _tb.format_exc()
+                )
                 err_str = str(e)
                 if 'mail_activity_check_res_id_is_set' in err_str or (
                     'mail_activity' in err_str and 'res_id' in err_str
@@ -1491,6 +1523,8 @@ class WorkAuto(models.Model):
                     raise
                 raise exceptions.ValidationError(e)
 
+            return context.get('action')
+
     def get_context(self, records=None):
         """
             Build execution context for workflow evaluation.
@@ -1512,9 +1546,16 @@ class WorkAuto(models.Model):
             model = self.env[self.model_id.sudo().model]
         else:
             model = self.env['res.partner']  # safe fallback
+        rec = records if records else model.browse()
+        if hasattr(rec, '_name') and len(rec) > 1:
+            rec = rec[:1]
+
         return {
             'env': self.env,
             'model': model,
+            'records': records,
+            'record': rec,
+            'current_record': rec,
             'UserError': exceptions.UserError,
             'ValidationError': exceptions.ValidationError,
             'uid': self._uid,
@@ -1525,6 +1566,8 @@ class WorkAuto(models.Model):
             'relativedelta': relativedelta,
             'fields': fields,
             '_logger': _logger,
+            'requests': _requests_lib,
+            'json': _json_lib,
         }
 
     @api.model
@@ -1646,7 +1689,7 @@ class WorkAuto(models.Model):
 
     def _update_registry(self):
         """
-            Refresh the Odoo registry for workflow changes.
+            Refresh the registry for workflow changes.
 
             Re-registers hooks and marks the registry as invalidated
             to apply updates.
