@@ -234,10 +234,34 @@ class NodeStruct(models.Model):
         help="Optional context dict to pass to the window action, e.g. {'default_partner_id': 1}",
     )
 
+    # Webhook block fields
+    webhook_method = fields.Selection([
+        ('GET', 'GET'),
+        ('POST', 'POST'),
+        ('PUT', 'PUT'),
+        ('DELETE', 'DELETE')
+    ], string="Webhook Method", default='POST')
+    webhook_url = fields.Char(string="Webhook URL")
+    webhook_headers = fields.Char(string="Headers (JSON)", default='{"Content-Type": "application/json"}')
+    webhook_payload = fields.Text(string="Payload (JSON)")
+    webhook_actions = fields.Json(string="Webhook Response Actions")
+
     # FollowersNode block fields
     isRemoveFollower = fields.Json()
     followers = fields.Json()
     follower_record = fields.Json()
+
+    # DuplicateNode block fields
+    duplicate_record = fields.Json(string="Duplicate Record Variable")
+    duplicate_field_overrides = fields.Char(
+        string="Field Overrides",
+        default="[]",
+        help="JSON list of {path, value, selectionType} to override on the copy"
+    )
+    duplicate_result_variable = fields.Char(
+        string="Result Variable Name",
+        help="Optional variable name to store the duplicated record(s) for use in downstream nodes"
+    )
 
     # ActivityNode block fields
     activity_record = fields.Json()
