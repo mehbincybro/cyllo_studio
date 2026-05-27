@@ -444,23 +444,30 @@ export class ConditionNode extends ConfigurationBase {
                             default:
                                 return '';
                         }
-                    case 'date':
-                    case 'datetime':
+                    case 'date': {
+                        // Only parse static strings with strptime(); variable/record
+                        // right-hand sides are already Python date objects.
+                        const isStaticDate = cond.value.fieldType === 'static';
+                        const parsedDateRight = isStaticDate
+                            ? `datetime.strptime(${rightField}, "%Y-%m-%d").date()`
+                            : rightField;
                         switch (cond.operator) {
                             case '=':
-                                return `${leftField} == ${rightField}`;
+                                return `${leftField} == ${parsedDateRight}`;
                             case '!=':
-                                return `${leftField} != ${rightField}`;
+                                return `${leftField} != ${parsedDateRight}`;
                             case '>':
-                                return `${leftField} > ${rightField}`;
+                                return `${leftField} > ${parsedDateRight}`;
                             case '>=':
-                                return `${leftField} >= ${rightField}`;
+                                return `${leftField} >= ${parsedDateRight}`;
                             case '<':
-                                return `${leftField} < ${rightField}`;
+                                return `${leftField} < ${parsedDateRight}`;
                             case '<=':
-                                return `${leftField} <= ${rightField}`;
+                                return `${leftField} <= ${parsedDateRight}`;
                             case 'between':
-                                return `datetime.strptime(${rightField}[0], "%Y-%m-%d %H:%M:%S") <= ${leftField} <= datetime.strptime(${rightField}[1], "%Y-%m-%d %H:%M:%S")`;
+                                return isStaticDate
+                                    ? `datetime.strptime(${rightField}[0], "%Y-%m-%d").date() <= ${leftField} <= datetime.strptime(${rightField}[1], "%Y-%m-%d").date()`
+                                    : `${rightField}[0] <= ${leftField} <= ${rightField}[1]`;
                             case 'set':
                                 return `${leftField} is not None`;
                             case 'not_set':
@@ -468,6 +475,39 @@ export class ConditionNode extends ConfigurationBase {
                             default:
                                 return '';
                         }
+                    }
+                    case 'datetime': {
+                        // Only parse static strings with strptime(); variable/record
+                        // right-hand sides are already Python datetime objects.
+                        const isStaticDatetime = cond.value.fieldType === 'static';
+                        const parsedDatetimeRight = isStaticDatetime
+                            ? `datetime.strptime(${rightField}, "%Y-%m-%d %H:%M:%S")`
+                            : rightField;
+                        switch (cond.operator) {
+                            case '=':
+                                return `${leftField} == ${parsedDatetimeRight}`;
+                            case '!=':
+                                return `${leftField} != ${parsedDatetimeRight}`;
+                            case '>':
+                                return `${leftField} > ${parsedDatetimeRight}`;
+                            case '>=':
+                                return `${leftField} >= ${parsedDatetimeRight}`;
+                            case '<':
+                                return `${leftField} < ${parsedDatetimeRight}`;
+                            case '<=':
+                                return `${leftField} <= ${parsedDatetimeRight}`;
+                            case 'between':
+                                return isStaticDatetime
+                                    ? `datetime.strptime(${rightField}[0], "%Y-%m-%d %H:%M:%S") <= ${leftField} <= datetime.strptime(${rightField}[1], "%Y-%m-%d %H:%M:%S")`
+                                    : `${rightField}[0] <= ${leftField} <= ${rightField}[1]`;
+                            case 'set':
+                                return `${leftField} is not None`;
+                            case 'not_set':
+                                return `${leftField} is None`;
+                            default:
+                                return '';
+                        }
+                    }
                     case 'record':
                     case 'many2one':
                         switch (cond.operator) {

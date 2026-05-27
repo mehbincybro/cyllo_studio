@@ -1522,7 +1522,7 @@ class WorkAuto(models.Model):
                 ):
                     raise
                 raise exceptions.ValidationError(e)
-
+            
             return context.get('action')
 
     def get_context(self, records=None):
