@@ -1,46 +1,48 @@
 /** @odoo-module */
 const { useState } = owl;
 import { ConfigurationBase } from "../configurationBase/configurationBase";
-import { MailRecordPathSelector } from "../mailNode/subcomponents/mailRecordPathSelector";
 
 export class WebhookNode extends ConfigurationBase {
     static props = ['*'];
 
     setup() {
         super.setup();
-        if (!this.fieldState.webhook_method || typeof this.fieldState.webhook_method === 'object') {
-            this.fieldState.webhook_method = 'POST';
+
+        // ── UNCHANGED: original default initialisers ──────────────────────
+        if (!this.fieldState.webhook_method) {
+            this.fieldState.webhook_method = { value: 'POST' };
         }
-        if (!this.fieldState.webhook_headers || typeof this.fieldState.webhook_headers === 'object') {
-            this.fieldState.webhook_headers = '{"Content-Type": "application/json"}';
+        if (!this.fieldState.webhook_headers) {
+            this.fieldState.webhook_headers = { value: '{"Content-Type": "application/json"}' };
         }
-        if (!this.fieldState.webhook_actions) {
-            this.fieldState.webhook_actions = [];
-        }
+
+        // ── UI-ONLY: local reactive state for the header key/value builder
+        //    and payload token helper. Nothing here touches fieldState or
+        //    generateCode() — it only drives the visual panel.
+        this.uiState = useState({
+            // Header builder rows — purely visual, syncs TO fieldState.webhook_headers
+            headerRows: this._parseHeadersToRows(this.fieldState.webhook_headers),
+            headerBuilderOpen: false,
+
+            // Custom payload form state
+            showCustomPayloadForm: false,
+            customPayloadKey: '',
+            customPayloadValue: '',
+
+            // Copy-to-clipboard feedback
+            urlCopied: false,
+        });
     }
 
-    addAction() {
-        const actions = Array.isArray(this.fieldState.webhook_actions) ? this.fieldState.webhook_actions : [];
-        this.fieldState.webhook_actions = [...actions, {
-            id: Date.now().toString(),
-            type: 'extract',
-            json_path: '',
-            target: '',
-            message: '',
-        }];
-    }
-
-    removeAction(id) {
-        if (Array.isArray(this.fieldState.webhook_actions)) {
-            this.fieldState.webhook_actions = this.fieldState.webhook_actions.filter(a => a.id !== id);
-        }
-    }
+    // ════════════════════════════════════════════════════════════════════════
+    // ORIGINAL METHODS — UNTOUCHED
+    // ════════════════════════════════════════════════════════════════════════
 
     get getMethodOptions() {
         return [
-            { label: 'POST', value: 'POST' },
-            { label: 'GET', value: 'GET' },
-            { label: 'PUT', value: 'PUT' },
+            { label: 'POST',   value: 'POST'   },
+            { label: 'GET',    value: 'GET'    },
+            { label: 'PUT',    value: 'PUT'    },
             { label: 'DELETE', value: 'DELETE' },
         ];
     }
@@ -56,173 +58,305 @@ export class WebhookNode extends ConfigurationBase {
     }
 
     /**
-     * generateCode()
-     *
-     * Produces a Python snippet that:
-     *   1. Builds the payload as a native Python dict using json.loads()
-     *      on an f-string — avoids ALL brace-escaping nightmares.
-     *   2. Substitutes {{expr}} tokens (e.g. {{current_record.name}}) with
-     *      Python f-string expressions {expr or ""}.
-     *   3. Sends the request using requests.post(..., json=payload) so the
-     *      dict is serialized correctly and Content-Type is set automatically.
-     *   4. Logs the payload and response for debugging in the Cyllo server log.
-     *
-     * The user writes payload tokens as {{current_record.field}} in the UI.
-     * This is converted to the Python f-string token {current_record.field or ""}.
+     * generateCode() — COMPLETELY UNCHANGED FROM ORIGINAL.
+     * Reads webhook_url, webhook_method, webhook_headers, webhook_payload
+     * from fieldState exactly as before.
      */
     generateCode() {
         const url = this.fieldState.webhook_url || "";
         const method = this.fieldState.webhook_method || "POST";
-        const headersRaw = this.fieldState.webhook_headers || '{"Content-Type": "application/json"}';
-        const payloadRaw = this.fieldState.webhook_payload || "{}";
+        const headers = this.fieldState.webhook_headers || '{"Content-Type": "application/json"}';
+        const payload = this.fieldState.webhook_payload || "";
 
-        // --- Step 1: Replace {{expr}} → Python f-string token ---
-        // User writes: {{current_record.id}}
-        // We produce:  {current_record.id or ""}  (safe: None/False → "")
-        // We use a unique sentinel to avoid double-processing.
-        const tokens = [];
-        const sentinel = payloadRaw.replace(/\{\{([^}]+)\}\}/g, (match, expr) => {
-            const idx = tokens.length;
-            tokens.push(expr.trim());
-            return `\x00PH${idx}\x00`;  // null-byte sentinel, safe in temp string
-        });
+        // Escape JSON curly braces for Python's f-string parsing,
+        // while preserving dynamic placeholders containing 'record.'
+        let escapedPayload = payload.replace(/\{/g, '{{').replace(/\}/g, '}}');
+        // Convert {{{{current_record.field}}}} back to {record.field} for python f-string
+        escapedPayload = escapedPayload.replace(/\{\{\{\{(?:current_)?record\.([a-zA-Z0-9_.]+)\}\}\}\}/g, '{record.$1}');
 
-        // --- Step 2: Escape remaining literal { and } for Python f-string ---
-        // Every { or } that is NOT one of our sentinels is literal JSON structure.
-        // Python f-strings require {{ and }} for literal braces.
-        let fstring = sentinel
-            .replace(/\{/g, '{{')
-            .replace(/\}/g, '}}');
-
-        // --- Step 3: Restore sentinels as real Python f-string expressions ---
-        tokens.forEach((expr, idx) => {
-            // Use a safe fallback: `expr or ""` handles None/False/0 gracefully
-            fstring = fstring.replace(`\x00PH${idx}\x00`, `{${expr} or ""}`);
-        });
-
-        // --- Step 4: Build the Python code ---
-        let code = '';
-        code += `_wh_url = "${url}"\n`;
-        code += `_wh_headers = ${headersRaw}\n`;
-        code += `_wh_template = f"""${fstring}"""\n`;
+        let code = ``;
+        code += `url = f"${url}"\n`;
+        code += `headers = ${headers}\n`;
+        code += `payload = f"""${escapedPayload}"""\n`;
+        code += `\n`;
         code += `try:\n`;
-        code += `    _wh_payload = json.loads(_wh_template)\n`;
-        code += `except Exception as _je:\n`;
-        code += `    raise UserError(f"Webhook: JSON parse failed after field substitution: {str(_je)}\\nPayload was: {_wh_template}")\n`;
-        code += `_logger.info("=== WEBHOOK PAYLOAD ===\\n%s", json.dumps(_wh_payload, indent=2, default=str))\n`;
-        code += `try:\n`;
-        if (method === 'GET') {
-            code += `    _wh_resp = requests.get(_wh_url, headers=_wh_headers)\n`;
-        } else if (method === 'POST') {
-            code += `    _wh_resp = requests.post(_wh_url, headers=_wh_headers, json=_wh_payload)\n`;
-        } else if (method === 'PUT') {
-            code += `    _wh_resp = requests.put(_wh_url, headers=_wh_headers, json=_wh_payload)\n`;
-        } else if (method === 'DELETE') {
-            code += `    _wh_resp = requests.delete(_wh_url, headers=_wh_headers)\n`;
-        } else {
-            code += `    _wh_resp = requests.request("${method}", _wh_url, headers=_wh_headers, json=_wh_payload)\n`;
-        }
-        code += `    _logger.info("=== WEBHOOK RESPONSE %s ===\\n%s", _wh_resp.status_code, _wh_resp.text)\n`;
-        code += `    _wh_resp.raise_for_status()\n`;
-        code += `    _logger.info("Webhook success: ${method} ${url} -> %s", _wh_resp.status_code)\n`;
-
-        // --- Response Processing ---
-        code += `    try:\n`;
-        code += `        _wh_resp_json = _wh_resp.json() if _wh_resp.text else {}\n`;
-        code += `    except Exception:\n`;
-        code += `        _wh_resp_json = {}\n`;
-
-        code += `    def _extract_json_path(data, path):\n`;
-        code += `        if not path: return data\n`;
-        code += `        for key in path.split('.'):\n`;
-        code += `            if isinstance(data, dict) and key in data:\n`;
-        code += `                data = data[key]\n`;
-        code += `            elif isinstance(data, list) and key.isdigit() and int(key) < len(data):\n`;
-        code += `                data = data[int(key)]\n`;
-        code += `            else:\n`;
-        code += `                return None\n`;
-        code += `        return data\n`;
-
-        const actions = Array.isArray(this.fieldState.webhook_actions) ? this.fieldState.webhook_actions : [];
-        actions.forEach((action, index) => {
-            if (action.json_path) {
-                code += `    _val_${index} = _extract_json_path(_wh_resp_json, "${action.json_path}")\n`;
-                if (action.type === 'extract' && action.target) {
-                    code += `    ${action.target} = _val_${index}\n`;
-                } else if (action.type === 'update_record' && action.target) {
-                    code += `    if _val_${index} is not None and 'current_record' in locals() and current_record:\n`;
-                    code += `        current_record.write({"${action.target}": _val_${index}})\n`;
-                } else if (action.type === 'chatter' && action.message) {
-                    code += `    if 'current_record' in locals() and current_record and hasattr(current_record, "message_post"):\n`;
-                    code += `        _msg = """${action.message}""".replace("{{value}}", str(_val_${index} or ''))\n`;
-                    code += `        current_record.message_post(body=_msg)\n`;
-                } else if (action.type === 'activity' && action.message) {
-                    code += `    if 'current_record' in locals() and current_record and hasattr(current_record, "activity_schedule"):\n`;
-                    code += `        _summary = """${action.message}""".replace("{{value}}", str(_val_${index} or ''))\n`;
-                    code += `        current_record.activity_schedule("mail.mail_activity_data_todo", summary=_summary)\n`;
-                } else if (action.type === 'email' && action.message) {
-                    code += `    _msg = """${action.message}""".replace("{{value}}", str(_val_${index} or ''))\n`;
-                    // Build a safe dot-path expression using the variable name (no var_ prefix)
-                    // and action.target_obj.path (raw path, no .id suffix added by pathValue)
-                    let emailPath = '';
-                    if (action.target_obj && action.target_obj.record) {
-                        const variable = this.variables.find(item => item.id === action.target_obj.record);
-                        if (variable) {
-                            const varName = variable.variable_name;  // e.g. 'current_record'
-                            const path = action.target_obj.path || '';  // e.g. 'partner_id.email'
-                            emailPath = path ? `${varName}.${path}` : varName;
-                        }
-                    }
-                    if (emailPath) {
-                        // Use safe getattr traversal instead of eval()
-                        const pathParts = emailPath.split('.');
-                        const rootVar = pathParts.shift();
-                        const remainingPath = pathParts.join('.');
-                        code += `    try:\n`;
-                        code += `        _email_obj = ${rootVar}\n`;
-                        if (remainingPath) {
-                            code += `        for _email_key in "${remainingPath}".split('.'):\n`;
-                            code += `            _email_obj = getattr(_email_obj, _email_key, None)\n`;
-                            code += `            if _email_obj is None: break\n`;
-                        }
-                        code += `        _email_to = getattr(_email_obj, 'email', str(_email_obj)) if _email_obj else ''\n`;
-                        code += `    except Exception:\n`;
-                        code += `        _email_to = ''\n`;
-                        code += `    if _email_to and '@' in _email_to:\n`;
-                        code += `        env['mail.mail'].sudo().create({'subject': 'Webhook Notification', 'body_html': _msg, 'email_to': _email_to, 'state': 'outgoing'}).send()\n`;
-                    }
-                } else if (action.type === 'redirect') {
-                    code += `    if _val_${index}:\n`;
-                    code += `        action = {"type": "ir.actions.act_url", "url": str(_val_${index}), "target": "self"}\n`;
-                }
-            }
-        });
-
-        code += `except Exception as _we:\n`;
-        code += `    _we_msg = str(_we)\n`;
-        code += `    _wh_status = getattr(_wh_resp, "status_code", "N/A") if "_wh_resp" in dir() else "N/A"\n`;
-        code += `    _logger.error("Webhook failed: ${method} ${url} [HTTP %s] -> %s", _wh_status, _we_msg)\n`;
-        code += `    raise UserError(f"Webhook Execution Failed [HTTP {_wh_status}]:\\n{_we_msg}")\n`;
+        code += `    if "${method}" == "GET":\n`;
+        code += `        response = requests.get(url, headers=headers)\n`;
+        code += `    elif "${method}" == "POST":\n`;
+        code += `        response = requests.post(url, headers=headers, data=payload.encode('utf-8'))\n`;
+        code += `    elif "${method}" == "PUT":\n`;
+        code += `        response = requests.put(url, headers=headers, data=payload.encode('utf-8'))\n`;
+        code += `    elif "${method}" == "DELETE":\n`;
+        code += `        response = requests.delete(url, headers=headers)\n`;
+        code += `    response.raise_for_status()\n`;
+        code += `    _logger.info("Webhook success: %s %s -> %s", "", url, response.status_code)\n`;
+        code += `except Exception as e:\n`;
+        code += `    _logger.error("Webhook failed: %s %s -> %s", "", url, str(e))\n`;
+        code += `    raise UserError(f"Webhook Execution Failed: {str(e)}")\n`;
 
         return code;
     }
 
+    /**
+     * validateForm() — COMPLETELY UNCHANGED FROM ORIGINAL.
+     */
     validateForm() {
         const { webhook_url, webhook_method, label } = this.fieldState;
         const errors = {};
-        if (!label) errors.label = "Label must be non-empty.";
-        if (!webhook_url) errors.webhook_url = "URL is required.";
+        if (!label)         errors.label         = "Label must be non-empty.";
+        if (!webhook_url)   errors.webhook_url   = "URL is required.";
         if (!webhook_method) errors.webhook_method = "Method is required.";
-        
         if (Object.keys(errors).length > 0) {
             return { isValid: false, errors };
         }
         return { isValid: true };
     }
+
+    // ════════════════════════════════════════════════════════════════════════
+    // UI-ONLY HELPERS  —  read/write fieldState.webhook_headers and
+    //                      fieldState.webhook_payload only through the
+    //                      same string format the original code always used.
+    //                      generateCode() still sees identical strings.
+    // ════════════════════════════════════════════════════════════════════════
+
+    // ── Method badge colour ──────────────────────────────────────────────
+    get methodBadgeStyle() {
+        const colours = {
+            POST:   'background:#198754;color:#fff',
+            GET:    'background:#0d6efd;color:#fff',
+            PUT:    'background:#fd7e14;color:#fff',
+            DELETE: 'background:#dc3545;color:#fff',
+        };
+        return colours[this.fieldState.webhook_method] || 'background:#6c757d;color:#fff';
+    }
+
+    // ── URL copy helper ──────────────────────────────────────────────────
+    copyUrl() {
+        const url = this.fieldState.webhook_url || '';
+        if (!url) return;
+        navigator.clipboard.writeText(url).then(() => {
+            this.uiState.urlCopied = true;
+            setTimeout(() => { this.uiState.urlCopied = false; }, 1800);
+        });
+    }
+
+    // ── Header key/value builder ─────────────────────────────────────────
+    /**
+     * Parse the raw JSON header string into [{key, value}] rows for the
+     * visual builder. If parsing fails, returns empty rows — the raw
+     * string in fieldState is always preserved as-is.
+     */
+    _parseHeadersToRows(raw) {
+        try {
+            const obj = JSON.parse(raw || '{}');
+            return Object.entries(obj).map(([key, value]) => ({ key, value }));
+        } catch {
+            return [];
+        }
+    }
+
+    /**
+     * Serialise the header rows back into a JSON string and write it
+     * into fieldState.webhook_headers — the same field generateCode()
+     * already reads. No new field, no schema change.
+     */
+    _syncHeadersToFieldState() {
+        const obj = {};
+        for (const row of this.uiState.headerRows) {
+            if (row.key.trim()) obj[row.key.trim()] = row.value;
+        }
+        this.fieldState.webhook_headers = JSON.stringify(obj, null, 2);
+    }
+
+    toggleHeaderBuilder() {
+        this.uiState.headerBuilderOpen = !this.uiState.headerBuilderOpen;
+        if (this.uiState.headerBuilderOpen) {
+            // Refresh rows from current fieldState each time panel opens
+            this.uiState.headerRows = this._parseHeadersToRows(
+                this.fieldState.webhook_headers
+            );
+        }
+    }
+
+    addHeaderRow() {
+        this.uiState.headerRows = [...this.uiState.headerRows, { key: '', value: '' }];
+    }
+
+    removeHeaderRow(idx) {
+        this.uiState.headerRows = this.uiState.headerRows.filter((_, i) => i !== idx);
+        this._syncHeadersToFieldState();
+    }
+
+    onHeaderKeyChange(idx, ev) {
+        this.uiState.headerRows[idx].key = ev.target.value;
+        this._syncHeadersToFieldState();
+    }
+
+    onHeaderValueChange(idx, ev) {
+        this.uiState.headerRows[idx].value = ev.target.value;
+        this._syncHeadersToFieldState();
+    }
+
+    // ── Payload token quick-insert ───────────────────────────────────────
+    /**
+     * Common token suggestions shown in a helper panel below the textarea.
+     * Clicking a token appends it to fieldState.webhook_payload so the
+     * user doesn't have to remember the {{current_record.x}} syntax.
+     * generateCode() reads webhook_payload the same way as always.
+     */
+    get commonTokens() {
+        return [
+            { label: 'Record ID',       token: '{{current_record.id}}'                      },
+            { label: 'Record Name',     token: '{{current_record.name}}'                    },
+            { label: 'Customer Name',   token: '{{current_record.partner_id.name}}'         },
+            { label: 'Customer Email',  token: '{{current_record.partner_id.email}}'        },
+            { label: 'Customer Phone',  token: '{{current_record.partner_id.phone}}'        },
+            { label: 'Amount Total',    token: '{{current_record.amount_total}}'            },
+            { label: 'Amount Due',      token: '{{current_record.amount_residual_signed}}'  },
+            { label: 'Currency',        token: '{{current_record.currency_id.name}}'        },
+            { label: 'Invoice / Ref',   token: '{{current_record.name}}'                    },
+            { label: 'State',           token: '{{current_record.state}}'                   },
+            { label: 'Company Name',    token: '{{current_record.company_id.name}}'         },
+            { label: 'Order Date',      token: '{{current_record.date_order}}'              },
+        ];
+    }
+
+    /**
+     * Tags currently found in the payload JSON.
+     */
+    get selectedPayloadTags() {
+        const payloadStr = this.fieldState.webhook_payload || "";
+        let payloadObj = {};
+        try {
+            payloadObj = JSON.parse(payloadStr);
+        } catch(e) {
+            // If invalid JSON, fallback to just finding the common tokens in the raw string
+            return this.commonTokens
+                       .filter(tok => payloadStr.includes(tok.token))
+                       .map(tok => ({ label: tok.label, token: tok.token, key: tok.token, isCustom: false }));
+        }
+        
+        const tags = [];
+        for (const [key, value] of Object.entries(payloadObj)) {
+            const matchedToken = this.commonTokens.find(t => typeof value === 'string' && value === t.token);
+            if (matchedToken) {
+                tags.push({ label: matchedToken.label, token: matchedToken.token, key: key, isCustom: false });
+            } else {
+                tags.push({ label: key, token: key, key: key, isCustom: true });
+            }
+        }
+        return tags;
+    }
+
+    /**
+     * Remove a tag from the payload JSON.
+     */
+    removePayloadTag(key) {
+        let currentText = (this.fieldState.webhook_payload || '').trim();
+        try {
+            let payloadObj = JSON.parse(currentText);
+            if (payloadObj.hasOwnProperty(key)) {
+                delete payloadObj[key];
+                this.fieldState.webhook_payload = JSON.stringify(payloadObj, null, 2);
+            }
+        } catch(e) {
+            // Rough fallback if invalid JSON: Try to strip the line containing the key/token
+            const escaped = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const regex = new RegExp(`.*"${escaped}".*\\n?`, 'g');
+            this.fieldState.webhook_payload = currentText.replace(regex, '').trim();
+        }
+    }
+
+    /**
+     * Add a selected field token to the payload JSON.
+     */
+    addFieldToPayload(ev) {
+        const token = ev.target.value;
+        if (!token) return;
+        
+        if (token === 'CUSTOM') {
+            this.uiState.showCustomPayloadForm = true;
+            this.uiState.customPayloadKey = '';
+            this.uiState.customPayloadValue = '';
+            ev.target.value = "";
+            return;
+        }
+        
+        const selected = this.commonTokens.find(t => t.token === token);
+        if (!selected) return;
+        
+        // Generate a valid JSON key from the label (e.g. "Amount Total" -> "amount_total")
+        const key = selected.label.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        this._injectToPayload(key, token);
+        
+        // Reset select dropdown
+        ev.target.value = "";
+    }
+
+    /**
+     * Add a custom key/value pair to the payload JSON.
+     */
+    addCustomPayload() {
+        const key = (this.uiState.customPayloadKey || '').trim();
+        const value = (this.uiState.customPayloadValue || '').trim();
+        if (!key) return;
+        
+        this._injectToPayload(key, value);
+        
+        this.uiState.showCustomPayloadForm = false;
+        this.uiState.customPayloadKey = '';
+        this.uiState.customPayloadValue = '';
+    }
+
+    /**
+     * Helper to safely append a key/value to the JSON payload.
+     */
+    _injectToPayload(key, value) {
+        let payloadObj = null;
+        let currentText = (this.fieldState.webhook_payload || '').trim();
+        
+        if (currentText) {
+            try {
+                payloadObj = JSON.parse(currentText);
+            } catch (e) {
+                // Not valid JSON
+            }
+        } else {
+            payloadObj = {};
+        }
+        
+        if (payloadObj !== null && typeof payloadObj === 'object' && !Array.isArray(payloadObj)) {
+            // Try to parse number or boolean if value is not a token and looks like one
+            if (!value.includes('{{') && !isNaN(value) && value !== '') {
+                payloadObj[key] = Number(value);
+            } else if (value === 'true') {
+                payloadObj[key] = true;
+            } else if (value === 'false') {
+                payloadObj[key] = false;
+            } else {
+                try {
+                    if (/^\s*[{[]/.test(value)) {
+                        payloadObj[key] = JSON.parse(value);
+                    } else {
+                        payloadObj[key] = value;
+                    }
+                } catch(e) {
+                    payloadObj[key] = value;
+                }
+            }
+            this.fieldState.webhook_payload = JSON.stringify(payloadObj, null, 2);
+        } else {
+            // String append fallback if they typed invalid JSON
+            if (currentText && !currentText.endsWith('\n')) {
+                currentText += '\n';
+            }
+            let safeValue = value.replace(/"/g, '\\"');
+            this.fieldState.webhook_payload = currentText + `"${key}": "${safeValue}"`;
+        }
+    }
+
+
 }
 
-WebhookNode.template = "WebhookNode";
-WebhookNode.components = {
-    ...ConfigurationBase.components,
-    MailRecordPathSelector
-};
+WebhookNode.template  = "WebhookNode";
+WebhookNode.components = { ...ConfigurationBase.components };

@@ -4,99 +4,171 @@
         <xpath expr="//div[hasclass('modal-body')]" position="inside">
             <div class="py-2">
 
-                <!-- Label -->
+                <!-- ══════════════════════════════════════════════════════════
+                     LABEL  (unchanged field: fieldState.label)
+                ══════════════════════════════════════════════════════════ -->
                 <div class="mb-3">
                     <label class="form-label cy-modal-form_label">Label</label>
-                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.label" t-on-change="(ev) => this.setLabel(ev.target.value)"/>
+                    <input type="text"
+                           class="form-control cy-modal-form_input"
+                           t-model="fieldState.label"
+                           t-on-change="(ev) => this.setLabel(ev.target.value)"
+                           placeholder="e.g. Notify MultiSafepay"/>
                 </div>
 
-                <!-- Webhook Method -->
+                <!-- ══════════════════════════════════════════════════════════
+                     METHOD (tags widget) + URL
+                ══════════════════════════════════════════════════════════ -->
                 <div class="mb-3">
-                    <label class="form-label cy-modal-form_label">HTTP Method</label>
-                    <select class="form-select cy-modal-form_input" t-model="fieldState.webhook_method">
+                    <label class="form-label cy-modal-form_label">Method</label>
+                    <div class="d-flex flex-wrap gap-2 mb-2">
                         <t t-foreach="getMethodOptions" t-as="option" t-key="option.value">
-                            <option t-att-value="option.value" t-att-selected="option.value === fieldState.webhook_method"><t t-esc="option.label"/></option>
-                        </t>
-                    </select>
-                </div>
-
-                <!-- Webhook URL -->
-                <div class="mb-3">
-                    <label class="form-label cy-modal-form_label">Webhook URL</label>
-                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.webhook_url"/>
-                </div>
-
-                <!-- Headers -->
-                <div class="mb-3">
-                    <label class="form-label cy-modal-form_label">Headers (JSON)</label>
-                    <input type="text" class="form-control cy-modal-form_input" t-model="fieldState.webhook_headers"/>
-                </div>
-
-                <!-- Payload -->
-                <div class="mb-3">
-                    <label class="form-label cy-modal-form_label">Payload (JSON)</label>
-                    <textarea class="form-control cy-modal-form_input" t-model="fieldState.webhook_payload" rows="6"></textarea>
-                </div>
-
-                <!-- Post-Webhook Actions -->
-                <div class="mb-3 mt-4">
-                    <h6 class="border-bottom pb-2 mb-3">Response Actions</h6>
-                    <p class="text-muted small mb-3">Process API responses automatically. Extract data, update fields, or redirect users.</p>
-                    <div class="list-group mb-3">
-                        <t t-foreach="fieldState.webhook_actions || []" t-as="action" t-key="action.id">
-                            <div class="list-group-item bg-light border">
-                                <div class="row g-2 align-items-center">
-                                    <div class="col-md-3">
-                                        <select class="form-select form-select-sm" t-model="action.type">
-                                            <option value="extract">Extract Variable</option>
-                                            <option value="update_record">Update Record</option>
-                                            <option value="chatter">Log Chatter</option>
-                                            <option value="activity">Create Activity</option>
-                                            <option value="email">Send Email</option>
-                                            <option value="redirect">Redirect URL</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <input type="text" class="form-control form-control-sm" placeholder="JSON Path (e.g. data.id)" t-model="action.json_path"/>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <t t-if="action.type === 'extract'">
-                                            <input type="text" class="form-control form-control-sm" placeholder="Target Variable" t-model="action.target"/>
-                                        </t>
-                                        <t t-if="action.type === 'update_record'">
-                                            <input type="text" class="form-control form-control-sm" placeholder="Target Field (e.g. state)" t-model="action.target"/>
-                                        </t>
-                                        <t t-if="action.type === 'email'">
-                                            <MailRecordPathSelector
-                                                    value="action.target_obj || {record: false, path: ''}"
-                                                    variables="this.variables"
-                                                    fieldInfo="{resModel: '', fieldDef: {type: 'many2one', relation: ['res.partner', 'res.users']}}"
-                                                    update="(val) => { action.target_obj = val }"
-                                                    operator="'='"
-                                            />
-                                        </t>
-                                        <t t-if="action.type === 'chatter' || action.type === 'activity' || action.type === 'email'">
-                                            <input type="text" class="form-control form-control-sm mt-1" placeholder="Message (use {{value}})" t-model="action.message"/>
-                                        </t>
-                                        <t t-if="action.type === 'redirect'">
-                                            <span class="text-muted small">Redirect to extracted URL</span>
-                                        </t>
-                                    </div>
-                                    <div class="col-md-1 text-end">
-                                        <button class="btn btn-sm btn-outline-danger" t-on-click="() => this.removeAction(action.id)">
-                                            <i class="fa fa-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </t>
-                        <t t-if="!fieldState.webhook_actions || fieldState.webhook_actions.length === 0">
-                            <div class="text-muted small text-center p-2">No response actions configured.</div>
+                            <span t-att-style="fieldState.webhook_method === option.value ? 'background-color: #9ea700; color: white; border: 1px solid #9ea700; padding: 4px 12px; font-size: 12px; cursor: pointer;' : 'background-color: transparent; color: #9ea700; border: 1px solid #9ea700; padding: 4px 12px; font-size: 12px; cursor: pointer;'"
+                                  class="badge rounded-pill"
+                                  t-on-click="() => this.fieldState.webhook_method = option.value">
+                                <t t-esc="option.label"/>
+                            </span>
                         </t>
                     </div>
-                    <button class="btn btn-sm btn-outline-primary" t-on-click="addAction">
-                        <i class="fa fa-plus me-1"></i> Add Action
-                    </button>
+
+                    <label class="form-label cy-modal-form_label mt-1">URL</label>
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control cy-modal-form_input"
+                               t-model="fieldState.webhook_url"
+                               placeholder="https://api.example.com/v1/endpoint"/>
+                        <!-- Copy URL button (UI-only, no fieldState change) -->
+                        <button type="button"
+                                class="btn"
+                                style="border: 1px solid #ced4da; color: #9ea700; background: white;"
+                                title="Copy URL"
+                                t-on-click="copyUrl">
+                            <t t-if="uiState.urlCopied">✓</t>
+                            <t t-else="">⎘</t>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     HEADERS  (unchanged field: fieldState.webhook_headers)
+                     Two modes: raw JSON textarea (original) + visual
+                     key/value builder that syncs back to the same field.
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label cy-modal-form_label mb-0">
+                            Headers
+                            <span class="text-muted ms-1" style="font-size:11px;font-weight:normal;">
+                                (JSON)
+                            </span>
+                        </label>
+                        <!-- Toggle between raw JSON and visual builder -->
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 text-decoration-none"
+                                style="font-size:12px; color: #9ea700;"
+                                t-on-click="toggleHeaderBuilder">
+                            <t t-if="uiState.headerBuilderOpen">
+                                ✎ Edit as JSON
+                            </t>
+                            <t t-else="">
+                                ⊞ Visual Builder
+                            </t>
+                        </button>
+                    </div>
+
+                    <!-- Original raw JSON input (always present, always synced) -->
+                    <input type="text"
+                           class="form-control cy-modal-form_input font-monospace"
+                           style="font-size:12px;"
+                           t-model="fieldState.webhook_headers"
+                           t-att-class="uiState.headerBuilderOpen ? 'd-none' : ''"
+                           placeholder='{"Content-Type": "application/json", "api_key": "YOUR_KEY"}'/>
+
+                    <!-- Visual key/value builder (UI-only panel) -->
+                    <t t-if="uiState.headerBuilderOpen">
+                        <div class="border rounded p-2 bg-light">
+                            <t t-foreach="uiState.headerRows" t-as="row" t-key="row_index">
+                                <div class="d-flex align-items-center mb-1 gap-1">
+                                    <input type="text"
+                                           class="form-control form-control-sm font-monospace"
+                                           placeholder="Key"
+                                           t-att-value="row.key"
+                                           t-on-input="(ev) => this.onHeaderKeyChange(row_index, ev)"/>
+                                    <span class="text-muted px-1">:</span>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           placeholder="Value"
+                                           t-att-value="row.value"
+                                           t-on-input="(ev) => this.onHeaderValueChange(row_index, ev)"/>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-danger"
+                                            style="flex-shrink:0;"
+                                            t-on-click="() => this.removeHeaderRow(row_index)">
+                                        ×
+                                    </button>
+                                </div>
+                            </t>
+                            <button type="button"
+                                    class="btn btn-sm mt-1"
+                                    style="border: 1px solid #9ea700; color: #9ea700; background: transparent;"
+                                    t-on-click="addHeaderRow">
+                                + Add Header
+                            </button>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     PAYLOAD  (unchanged field: fieldState.webhook_payload)
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label cy-modal-form_label mb-0">
+                            Payload (JSON)
+                        </label>
+                    </div>
+
+                    <!-- M2M-like field selector to generate JSON payload -->
+                    <div class="mb-2 border rounded p-1 bg-white cy-w-o-input" style="min-height: 38px; height: auto;">
+                        <div class="d-flex flex-wrap align-items-center gap-1">
+                            <!-- Selected Tags -->
+                            <t t-foreach="selectedPayloadTags" t-as="tag" t-key="tag.key">
+                                <span class="badge rounded-pill" style="background:#f5f6e6;color:#9ea700;border:1px solid #9ea700;font-size:11px;font-weight:normal;padding:4px 8px;">
+                                    <t t-esc="tag.label"/>
+                                    <i class="fa fa-times ms-1 cursor-pointer" t-on-click="() => this.removePayloadTag(tag.key)" title="Remove"></i>
+                                </span>
+                            </t>
+                            <!-- Dropdown for new fields -->
+                            <select class="border-0 flex-grow-1" style="outline:none; min-width: 180px; background:transparent; font-size: 12px; color: #4d5572;" t-on-change="(ev) => this.addFieldToPayload(ev)">
+                                <option value="" selected="selected">Add field to payload...</option>
+                                <t t-foreach="commonTokens" t-as="tok" t-key="tok.token">
+                                    <t t-if="!this.selectedPayloadTags.some(t => t.token === tok.token)">
+                                        <option t-att-value="tok.token"><t t-esc="tok.label"/></option>
+                                    </t>
+                                </t>
+                                <option disabled="disabled">──────────</option>
+                                <option value="CUSTOM">Add Custom Value...</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Custom Payload Value Form -->
+                    <t t-if="uiState.showCustomPayloadForm">
+                        <div class="d-flex align-items-center gap-2 mb-2 p-2 border rounded bg-light" style="font-size:12px;">
+                            <input type="text" class="form-control form-control-sm" placeholder="Key (e.g. custom_id)" t-model="uiState.customPayloadKey"/>
+                            <input type="text" class="form-control form-control-sm" placeholder="Value (e.g. 12345 or string)" t-model="uiState.customPayloadValue"/>
+                            <button type="button" class="btn btn-sm" style="background:#9ea700; color:white; white-space: nowrap;" t-on-click="addCustomPayload">Add</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.uiState.showCustomPayloadForm = false">Cancel</button>
+                        </div>
+                    </t>
+
+                    <!-- Original textarea — fieldState.webhook_payload, rows unchanged -->
+                    <textarea class="form-control cy-modal-form_input font-monospace mt-2"
+                              style="font-size:12px;"
+                              t-model="fieldState.webhook_payload"
+                              rows="8"
+                              placeholder='{"record_name": "{{current_record.name}}"}'>
+                    </textarea>
                 </div>
 
             </div>
