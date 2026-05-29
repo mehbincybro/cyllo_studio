@@ -843,7 +843,7 @@ class WorkAuto(models.Model):
                 flow_nodes[int(struct_id)] = node_data
         graph_issues = self._get_test_graph_issues()
 
-        external_nodes = {'Mail', 'SMS', 'WhatsApp', 'Window'}
+        external_nodes = {'Mail', 'SMS', 'WhatsApp', 'Window', 'Webhook'}
         trigger_labels = {'On Create', 'On Write', 'On Unlink', 'On Field Change', 'On Time'}
 
         def _is_empty(value):
@@ -1016,6 +1016,15 @@ class WorkAuto(models.Model):
                 if not _is_empty(node.duplicate_record):
                     return 'success', _("Duplicate record configured.")
                 return 'error', _("Select a record to duplicate.")
+            if node_name == 'Webhook':
+                if _is_empty(node.webhook_url):
+                    return 'error', _("Webhook URL is required.")
+                action_count = len(node.webhook_actions or [])
+                if action_count:
+                    return 'success', _(
+                        "Webhook configured with %d response action(s)."
+                    ) % action_count
+                return 'success', _("Webhook configured (no response actions).")
             if node.code and node.code.strip():
                 return 'success', _("%s configured.") % label
             return 'error', _("%s is not configured.") % label

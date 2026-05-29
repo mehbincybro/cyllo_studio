@@ -171,6 +171,209 @@
                     </textarea>
                 </div>
 
+                <!-- ══════════════════════════════════════════════════════════
+                     RESPONSE ACTIONS — fieldState.webhook_actions (JSON array)
+                     Zero platform-specific logic: purely data-driven dispatch.
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+
+                    <!-- Section header / toggle -->
+                    <div class="d-flex align-items-center justify-content-between mb-2"
+                         style="border-bottom: 2px solid #9ea700; padding-bottom: 6px;">
+                        <label class="form-label cy-modal-form_label mb-0" style="font-size:13px; font-weight:600; color:#9ea700;">
+                            ⚡ Response Actions
+                            <span class="text-muted ms-1" style="font-size:11px; font-weight:normal;">
+                                — what to do with the API response
+                            </span>
+                        </label>
+                        <button type="button"
+                                class="btn btn-link btn-sm p-0 text-decoration-none"
+                                style="font-size:12px; color:#9ea700;"
+                                t-on-click="toggleResponseActions">
+                            <t t-if="uiState.responseActionsOpen">▲ Collapse</t>
+                            <t t-else="">▼ Expand</t>
+                        </button>
+                    </div>
+
+                    <t t-if="uiState.responseActionsOpen">
+
+                        <!-- Quick-tip banner -->
+                        <div class="alert alert-info py-2 px-3 mb-2" style="font-size:11px; background:#f5f6e6; border:1px solid #9ea700; color:#5a5a2a; border-radius:6px;">
+                            💡 Add one action per field you want to extract from the API response.
+                            Use <strong>dot notation</strong> for nested paths, e.g.
+                            <code>data.payment_url</code> or <code>links.0.href</code>.
+                            Actions run in order after every successful webhook call.
+                        </div>
+
+                        <!-- Saved actions list -->
+                        <t t-if="responseActions.length === 0">
+                            <div class="text-muted text-center py-3" style="font-size:12px; border:1px dashed #ced4da; border-radius:6px;">
+                                No response actions configured yet.<br/>
+                                Click <strong>+ Add Action</strong> below to start.
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div class="mb-2">
+                                <t t-foreach="responseActions" t-as="act" t-key="act_index">
+                                    <div class="d-flex align-items-start gap-2 mb-2 p-2 border rounded"
+                                         style="background:#fafafa; font-size:12px;">
+                                        <!-- Reorder buttons -->
+                                        <div class="d-flex flex-column" style="gap:2px; flex-shrink:0;">
+                                            <button type="button" class="btn btn-sm p-0 border-0"
+                                                    style="line-height:1; color:#9ea700;"
+                                                    t-on-click="() => this.moveActionUp(act_index)"
+                                                    title="Move Up">▲</button>
+                                            <button type="button" class="btn btn-sm p-0 border-0"
+                                                    style="line-height:1; color:#9ea700;"
+                                                    t-on-click="() => this.moveActionDown(act_index)"
+                                                    title="Move Down">▼</button>
+                                        </div>
+                                        <!-- Action details -->
+                                        <div class="flex-grow-1">
+                                            <div style="font-weight:600; color:#333;">
+                                                <t t-esc="actionTypeLabel(act.action_type)"/>
+                                            </div>
+                                            <div class="text-muted mt-1" style="font-size:11px;">
+                                                <t t-esc="actionSummary(act)"/>
+                                            </div>
+                                        </div>
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-secondary me-1"
+                                                style="flex-shrink:0;"
+                                                t-on-click="() => this.editResponseAction(act_index)"
+                                                title="Edit Action">✎</button>
+                                        <!-- Remove -->
+                                        <button type="button"
+                                                class="btn btn-sm btn-outline-danger"
+                                                style="flex-shrink:0;"
+                                                t-on-click="() => this.removeResponseAction(act_index)"
+                                                title="Remove Action">×</button>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+
+                        <!-- ── Add-action form ─────────────────────────────── -->
+                        <t t-if="uiState.showAddActionForm">
+                            <div class="border rounded p-3 mb-2" style="background:#f5f6e6; font-size:12px;">
+                                <div class="fw-semibold mb-2" style="color:#5a5a2a; font-size:13px;">
+                                    <t t-if="uiState.editingActionIndex !== null">Edit Response Action</t>
+                                    <t t-else="">New Response Action</t>
+                                </div>
+
+                                <!-- Action Type -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Action Type</label>
+                                    <select class="form-select form-select-sm"
+                                            t-model="uiState.newActionType">
+                                        <t t-foreach="actionTypeOptions" t-as="opt" t-key="opt.value">
+                                            <option t-att-value="opt.value"><t t-esc="opt.label"/></option>
+                                        </t>
+                                    </select>
+                                </div>
+
+                                <!-- Extract Path -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                        Response Path
+                                        <span class="text-muted fw-normal">(dot-path into the JSON response)</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control form-control-sm font-monospace"
+                                           placeholder="e.g. data.payment_url  or  links.0.href"
+                                           t-model="uiState.newActionExtractPath"/>
+                                </div>
+
+                                <!-- Label -->
+                                <div class="mb-2">
+                                    <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                        Label
+                                        <span class="text-muted fw-normal">(shown in chatter / email)</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control form-control-sm"
+                                           placeholder="e.g. Payment URL"
+                                           t-model="uiState.newActionLabel"/>
+                                </div>
+
+                                <!-- Conditional extra fields -->
+                                <t t-if="uiState.newActionType === 'write_field'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                            Field Technical Name
+                                            <span class="text-muted fw-normal">(on the trigger record)</span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control form-control-sm font-monospace"
+                                               placeholder="e.g. payment_url"
+                                               t-model="uiState.newActionFieldToWrite"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'store_variable'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Variable Name</label>
+                                        <input type="text"
+                                               class="form-control form-control-sm font-monospace"
+                                               placeholder="e.g. payment_url"
+                                               t-model="uiState.newActionVariableName"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'send_email'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">
+                                            Recipients
+                                            <span class="text-muted fw-normal">(leave blank to use record partner email)</span>
+                                        </label>
+                                        <input type="text"
+                                               class="form-control form-control-sm"
+                                               placeholder="email@example.com, another@example.com"
+                                               t-model="uiState.newActionEmailRecipients"/>
+                                    </div>
+                                </t>
+
+                                <t t-if="uiState.newActionType === 'redirect_url'">
+                                    <div class="mb-2">
+                                        <label class="form-label mb-1" style="font-size:11px; font-weight:600;">Open In</label>
+                                        <select class="form-select form-select-sm"
+                                                t-model="uiState.newActionTarget">
+                                            <option value="new">New Tab</option>
+                                            <option value="self">Same Tab</option>
+                                        </select>
+                                    </div>
+                                </t>
+
+                                <!-- Form buttons -->
+                                <div class="d-flex gap-2 mt-2">
+                                    <button type="button"
+                                            class="btn btn-sm"
+                                            style="background:#9ea700; color:white;"
+                                            t-on-click="saveResponseAction">
+                                        ✓ Add Action
+                                    </button>
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary"
+                                            t-on-click="cancelAddAction">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Show form trigger -->
+                        <t t-if="!uiState.showAddActionForm">
+                            <button type="button"
+                                    class="btn btn-sm mt-1"
+                                    style="border:1px solid #9ea700; color:#9ea700; background:transparent;"
+                                    t-on-click="openAddActionForm">
+                                + Add Action
+                            </button>
+                        </t>
+
+                    </t><!-- /responseActionsOpen -->
+                </div>
+
             </div>
         </xpath>
     </t>

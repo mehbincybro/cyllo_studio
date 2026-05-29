@@ -25,4 +25,5 @@ from . import ir_actions_act_window_view
 from . import ir_ui_view
 from . import  chat_bot
 from . import wa_executor
+from . import webhook_response
 from . import work_function_arg

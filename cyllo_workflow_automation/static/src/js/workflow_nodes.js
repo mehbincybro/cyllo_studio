@@ -487,7 +487,7 @@ export class ModelComponent extends Component {
     updateLoopVariable(fieldState, modelInfo = {}) {
         const varName = fieldState.loop_variable_name;
         if (!varName) return;
-        const existingVars = this.variableContext.variables;
+        const existingVars = this.env.variables.context.variables || [];
         const nodeId = this.props.nodeId;
         const varId = `loop_var_${nodeId}`;
         const alreadyRegistered = existingVars.find(v => v.id === varId);
@@ -542,13 +542,15 @@ export class ModelComponent extends Component {
 
     updateVariable(fieldState) {
         const { model_id, search_variable } = fieldState;
-        const variable = this.variableContext.variables.find(item => item.id === search_variable.id);
+        if (!search_variable) return;
+        const existingVars = this.env.variables.context.variables || [];
+        const variable = existingVars.find(item => item.id === search_variable.id);
         if (variable) {
             variable.modelId = model_id;
             variable.variable_type = search_variable.variable_type;
             variable.variable_name = search_variable.variable_name;
         } else {
-            this.env.variables.setContext({ variables: [...this.variableContext.variables || [], owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass })] })
+            this.env.variables.setContext({ variables: [...existingVars, owl.reactive({ ...search_variable, scopeId: this.props.nodeId, class: this.buttonClass })] })
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
@@ -619,7 +621,7 @@ export class ModelComponent extends Component {
             if (variableName && modelName) {
                 const complementName = `${variableName}_complement`;
                 const complementId = `${this.props.nodeId}_complement`;
-                const existingVars = this.variableContext.variables;
+                const existingVars = this.env.variables.context.variables || [];
                 const alreadyRegistered = existingVars.find(v => v.id === complementId);
                 if (!alreadyRegistered) {
                     this.env.variables.setContext({

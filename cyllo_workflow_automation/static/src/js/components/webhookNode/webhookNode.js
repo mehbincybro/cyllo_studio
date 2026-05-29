@@ -8,20 +8,9 @@ export class WebhookNode extends ConfigurationBase {
     setup() {
         super.setup();
 
-        // ── UNCHANGED: original default initialisers ──────────────────────
-        if (!this.fieldState.webhook_method) {
-            this.fieldState.webhook_method = { value: 'POST' };
-        }
-        if (!this.fieldState.webhook_headers) {
-            this.fieldState.webhook_headers = { value: '{"Content-Type": "application/json"}' };
-        }
-
-        // ── UI-ONLY: local reactive state for the header key/value builder
-        //    and payload token helper. Nothing here touches fieldState or
-        //    generateCode() — it only drives the visual panel.
         this.uiState = useState({
             // Header builder rows — purely visual, syncs TO fieldState.webhook_headers
-            headerRows: this._parseHeadersToRows(this.fieldState.webhook_headers),
+            headerRows: [], // Initialised properly in fetchData()
             headerBuilderOpen: false,
 
             // Custom payload form state
@@ -31,7 +20,50 @@ export class WebhookNode extends ConfigurationBase {
 
             // Copy-to-clipboard feedback
             urlCopied: false,
+
+            // Response Actions panel
+            responseActionsOpen: true,
+            showAddActionForm: false,
+            newActionExtractPath: '',
+            newActionType: 'chatter_link',
+            newActionLabel: '',
+            newActionFieldToWrite: '',
+            newActionVariableName: '',
+            newActionEmailRecipients: '',
+            newActionTarget: 'new',
+            editingActionIndex: null,
         });
+
+        // Ensure webhook_actions is always an array
+        if (!Array.isArray(this.fieldState.webhook_actions)) {
+            this.fieldState.webhook_actions = [];
+        }
+    }
+
+    async fetchData() {
+        await super.fetchData();
+
+        // ── Ensure sane defaults AFTER fetching from database ──────────
+        // (If it's a new node, the DB returns false/null for empty fields)
+        if (!this.fieldState.webhook_method || typeof this.fieldState.webhook_method === 'object') {
+            this.fieldState.webhook_method = 'POST';
+        }
+        if (!this.fieldState.webhook_headers || typeof this.fieldState.webhook_headers === 'object') {
+            this.fieldState.webhook_headers = '{"Content-Type": "application/json"}';
+        }
+
+        // Ensure actions is always a clean array, even if DB returned a string or false
+        let actions = this.fieldState.webhook_actions;
+        if (typeof actions === 'string') {
+            try { actions = JSON.parse(actions); } catch (e) { actions = []; }
+        }
+        if (!Array.isArray(actions)) {
+            actions = [];
+        }
+        this.fieldState.webhook_actions = actions;
+
+        // Sync header rows using the actual DB value / defaults
+        this.uiState.headerRows = this._parseHeadersToRows(this.fieldState.webhook_headers);
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -69,15 +101,27 @@ export class WebhookNode extends ConfigurationBase {
         const payload = this.fieldState.webhook_payload || "";
 
         // Escape JSON curly braces for Python's f-string parsing,
-        // while preserving dynamic placeholders containing 'record.'
+        // while preserving dynamic placeholders.
         let escapedPayload = payload.replace(/\{/g, '{{').replace(/\}/g, '}}');
-        // Convert {{{{current_record.field}}}} back to {record.field} for python f-string
-        escapedPayload = escapedPayload.replace(/\{\{\{\{(?:current_)?record\.([a-zA-Z0-9_.]+)\}\}\}\}/g, '{record.$1}');
+        
+        // The user writes {{ expression }}, which became {{{{ expression }}}}.
+        // We revert the outer 4 braces to 1 brace so Python's f-string evaluates it.
+        // Also map 'current_record' to 'record' for convenience.
+        escapedPayload = escapedPayload.replace(/\{\{\{\{(.+?)\}\}\}\}/g, (match, expression) => {
+            return '{' + expression.replace(/current_record\./g, 'record.') + '}';
+        });
+
+        // Serialise the response actions config (may be empty list / null)
+        const rawActions = this.fieldState.webhook_actions;
+        const actionsJson = (rawActions && Array.isArray(rawActions) && rawActions.length > 0)
+            ? JSON.stringify(rawActions)
+            : '[]';
 
         let code = ``;
         code += `url = f"${url}"\n`;
         code += `headers = ${headers}\n`;
         code += `payload = f"""${escapedPayload}"""\n`;
+        code += `_webhook_response_actions = ${actionsJson}\n`;
         code += `\n`;
         code += `try:\n`;
         code += `    if "${method}" == "GET":\n`;
@@ -88,11 +132,30 @@ export class WebhookNode extends ConfigurationBase {
         code += `        response = requests.put(url, headers=headers, data=payload.encode('utf-8'))\n`;
         code += `    elif "${method}" == "DELETE":\n`;
         code += `        response = requests.delete(url, headers=headers)\n`;
-        code += `    response.raise_for_status()\n`;
+        code += `    if not response.ok:\n`;
+        code += `        err_msg = f"HTTP {response.status_code} Error: {response.text}"\n`;
+        code += `        _logger.error("Webhook HTTP failure: %s -> %s", url, err_msg)\n`;
+        code += `        raise UserError(f"Webhook Execution Failed: {err_msg}")\n`;
         code += `    _logger.info("Webhook success: %s %s -> %s", "", url, response.status_code)\n`;
+        code += `    # ── Generic response action processing ──────────────────────\n`;
+        code += `    if _webhook_response_actions:\n`;
+        code += `        try:\n`;
+        code += `            _resp_json = response.json()\n`;
+        code += `        except Exception:\n`;
+        code += `            _resp_json = {"_raw": response.text}\n`;
+        code += `        _resp_action = env['webhook.response.processor'].process_response_actions(\n`;
+        code += `            response_data=_resp_json,\n`;
+        code += `            actions=_webhook_response_actions,\n`;
+        code += `            record=current_record,\n`;
+        code += `            context_vars=locals(),\n`;
+        code += `        )\n`;
+        code += `        if _resp_action:\n`;
+        code += `            action = _resp_action\n`;
         code += `except Exception as e:\n`;
-        code += `    _logger.error("Webhook failed: %s %s -> %s", "", url, str(e))\n`;
-        code += `    raise UserError(f"Webhook Execution Failed: {str(e)}")\n`;
+        code += `    _logger.error("Webhook execution error: %s", str(e))\n`;
+        code += `    if isinstance(e, UserError):\n`;
+        code += `        raise e\n`;
+        code += `    raise UserError(f"Webhook Execution Error: {str(e)}")\n`;
 
         return code;
     }
@@ -355,7 +418,130 @@ export class WebhookNode extends ConfigurationBase {
         }
     }
 
+    // ════════════════════════════════════════════════════════════════════════
+    // RESPONSE ACTIONS PANEL
+    // Stores configuration in fieldState.webhook_actions (JSON array).
+    // generateCode() serialises it into the emitted Python so the backend
+    // WebhookResponseProcessor can execute it without any hardcoded logic.
+    // ════════════════════════════════════════════════════════════════════════
 
+    get actionTypeOptions() {
+        return [
+            { value: 'chatter_link',    label: '💬 Post Link in Chatter' },
+            { value: 'chatter_message', label: '📝 Post Message in Chatter' },
+            { value: 'write_field',     label: '✏️ Write to Record Field' },
+            { value: 'send_email',      label: '📧 Send Email Notification' },
+            { value: 'redirect_url',    label: '🔗 Redirect User to URL' },
+            { value: 'store_variable',  label: '📦 Store in Variable' },
+            { value: 'log_info',        label: '🪵 Log to Server Log' },
+        ];
+    }
+
+    get responseActions() {
+        return Array.isArray(this.fieldState.webhook_actions)
+            ? this.fieldState.webhook_actions
+            : [];
+    }
+
+    /** Human-readable label for a saved action type. */
+    actionTypeLabel(type) {
+        const opt = this.actionTypeOptions.find(o => o.value === type);
+        return opt ? opt.label : type;
+    }
+
+    /** Brief summary shown in the saved-action chip. */
+    actionSummary(action) {
+        const parts = [];
+        if (action.extract_path) parts.push(`path: ${action.extract_path}`);
+        if (action.field_to_write) parts.push(`→ ${action.field_to_write}`);
+        if (action.variable_name) parts.push(`var: ${action.variable_name}`);
+        if (action.label) parts.push(`"${action.label}"`);
+        return parts.join(' · ') || '(no details)';
+    }
+
+    toggleResponseActions() {
+        this.uiState.responseActionsOpen = !this.uiState.responseActionsOpen;
+    }
+
+    openAddActionForm() {
+        this.uiState.showAddActionForm = true;
+        this.uiState.editingActionIndex = null;
+        this.uiState.newActionExtractPath = '';
+        this.uiState.newActionType = 'chatter_link';
+        this.uiState.newActionLabel = '';
+        this.uiState.newActionFieldToWrite = '';
+        this.uiState.newActionVariableName = '';
+        this.uiState.newActionEmailRecipients = '';
+        this.uiState.newActionTarget = 'new';
+    }
+
+    editResponseAction(index) {
+        const act = this.responseActions[index];
+        if (!act) return;
+        this.uiState.showAddActionForm = true;
+        this.uiState.editingActionIndex = index;
+        this.uiState.newActionExtractPath = act.extract_path || '';
+        this.uiState.newActionType = act.action_type || 'chatter_link';
+        this.uiState.newActionLabel = act.label || '';
+        this.uiState.newActionFieldToWrite = act.field_to_write || '';
+        this.uiState.newActionVariableName = act.variable_name || '';
+        this.uiState.newActionEmailRecipients = act.email_recipients || '';
+        this.uiState.newActionTarget = act.target || 'new';
+    }
+
+    cancelAddAction() {
+        this.uiState.showAddActionForm = false;
+        this.uiState.editingActionIndex = null;
+    }
+
+    saveResponseAction() {
+        const path = (this.uiState.newActionExtractPath || '').trim();
+        const type = (this.uiState.newActionType || '').trim();
+        if (!type) return;
+
+        const entry = { action_type: type };
+        if (path) entry.extract_path = path;
+        if (this.uiState.newActionLabel.trim())
+            entry.label = this.uiState.newActionLabel.trim();
+        if (type === 'write_field' && this.uiState.newActionFieldToWrite.trim())
+            entry.field_to_write = this.uiState.newActionFieldToWrite.trim();
+        if (type === 'store_variable' && this.uiState.newActionVariableName.trim())
+            entry.variable_name = this.uiState.newActionVariableName.trim();
+        if (type === 'send_email' && this.uiState.newActionEmailRecipients.trim())
+            entry.email_recipients = this.uiState.newActionEmailRecipients.trim();
+        if (type === 'redirect_url')
+            entry.target = this.uiState.newActionTarget || 'new';
+
+        const current = [...this.responseActions];
+        if (this.uiState.editingActionIndex !== null) {
+            current[this.uiState.editingActionIndex] = entry;
+        } else {
+            current.push(entry);
+        }
+        
+        this.fieldState.webhook_actions = current;
+        this.uiState.showAddActionForm = false;
+        this.uiState.editingActionIndex = null;
+    }
+
+    removeResponseAction(index) {
+        const updated = this.responseActions.filter((_, i) => i !== index);
+        this.fieldState.webhook_actions = updated;
+    }
+
+    moveActionUp(index) {
+        if (index === 0) return;
+        const arr = [...this.responseActions];
+        [arr[index - 1], arr[index]] = [arr[index], arr[index - 1]];
+        this.fieldState.webhook_actions = arr;
+    }
+
+    moveActionDown(index) {
+        const arr = [...this.responseActions];
+        if (index >= arr.length - 1) return;
+        [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+        this.fieldState.webhook_actions = arr;
+    }
 }
 
 WebhookNode.template  = "WebhookNode";
