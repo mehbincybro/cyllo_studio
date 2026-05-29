@@ -26,5 +26,4 @@ from . import plm_eco
 from . import mrp_bom
 from . import product_template
 from . import document_file
-from . import plm_eco_compare_wizard
 

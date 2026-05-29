@@ -25,15 +25,15 @@
     'category': 'Manufacturing',
     'summary': 'Manage product lifecycle changes through Engineering Change Orders (ECO)',
     'description': """
-Product Lifecycle Management (PLM) Core Foundation:
-- Engineering Change Orders (ECO) workflow.
-- ECO Types (Product and BoM).
-- Stage progression (New, In Progress, Effective).
-- Version control tracking on Bills of Materials and Products.
-- Integration with Manufacturing.
-- BoM comparison structure placeholder.
-    """,
-    'author': 'Cyllo,Cyllo',
+        Product Lifecycle Management (PLM) Core Foundation:
+        - Engineering Change Orders (ECO) workflow.
+        - ECO Types (Product and BoM).
+        - Stage progression (New, In Progress, Effective).
+        - Version control tracking on Bills of Materials and Products.
+        - Integration with Manufacturing.
+        - BoM comparison structure placeholder.
+            """,
+    'author': 'Cyllo',
     'company': 'Cyllo',
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
@@ -43,6 +43,7 @@ Product Lifecycle Management (PLM) Core Foundation:
         'product',
         'cyllo_documents',
     ],
+    'icon': '/cyllo_plm/static/description/plm_icon.svg',
     'data': [
         'security/cyllo_plm_security.xml',
         'security/ir.model.access.csv',
@@ -55,10 +56,13 @@ Product Lifecycle Management (PLM) Core Foundation:
         'views/plm_eco_type_views.xml',
         'views/plm_eco_stage_views.xml',
         'views/plm_eco_views.xml',
-        'views/plm_eco_compare_wizard_views.xml',
         'views/mrp_bom_views.xml',
         'views/product_template_views.xml',
         'views/plm_menus.xml',
+        'wizards/plm_eco_compare_wizard_views.xml'
+    ],
+    'demo': [
+        'demo/plm_eco_demo.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

@@ -24,7 +24,6 @@ from odoo import api, fields, models
 
 
 class ProductTemplate(models.Model):
-    """ Inherited model for product.template to track versions and linked ECOs. """
     _inherit = 'product.template'
 
     version = fields.Char(

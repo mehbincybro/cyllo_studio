@@ -20,31 +20,6 @@
 #
 #############################################################################
 
-from odoo import fields, models
-
-
-class PlmEcoType(models.Model):
-    _name = 'plm.eco.type'
-    _description = 'ECO Type'
-    _inherit = ['mail.thread', 'mail.activity.mixin']
-
-    name = fields.Char(
-        string='Name',
-        required=True,
-        tracking=True,
-    )
-    eco_type = fields.Selection(
-        [('product', 'Product'), ('bom', 'BoM')],
-        string='Type',
-        required=True,
-        default='product',
-        tracking=True,
-    )
-    description = fields.Text(
-        string='Description',
-    )
-
-    company_id = fields.Many2one(
-        "res.company",
-        string="Company",
-        default= lambda self : self.env.company)
+from . import test_plm_eco_type
+from . import test_plm_eco_stage
+from . import test_plm_eco

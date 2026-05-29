@@ -24,7 +24,6 @@ from odoo import api, fields, models, _
 
 
 class MrpBom(models.Model):
-    """ Inherited model for mrp.bom to track version and linked ECOs. """
     _inherit = 'mrp.bom'
 
     version = fields.Char(

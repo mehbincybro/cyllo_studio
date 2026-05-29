@@ -25,7 +25,6 @@ from odoo.exceptions import ValidationError
 
 
 class PlmEcoStage(models.Model):
-    """ Model representing stages in the ECO lifecycle workflow. """
     _name = 'plm.eco.stage'
     _description = 'ECO Stage'
     _order = 'sequence, id'
@@ -58,6 +57,7 @@ class PlmEcoStage(models.Model):
 
     @api.constrains('done')
     def _check_done_stage(self):
+        """ Ensure that only one stage can be marked as 'Done' (completed) in the system. """
         for stage in self:
             if stage.done:
                 other_done_stages = self.search([('done', '=', True), ('id', '!=', stage.id)])
@@ -66,6 +66,7 @@ class PlmEcoStage(models.Model):
 
     @api.constrains('cancelled')
     def _check_cancelled_stage(self):
+        """ Ensure that only one stage can be marked as 'Cancelled' in the system. """
         for stage in self:
             if stage.cancelled:
                 other_cancelled_stages = self.search([('cancelled', '=', True), ('id', '!=', stage.id)])
@@ -74,6 +75,7 @@ class PlmEcoStage(models.Model):
 
     @api.constrains('in_progress', 'done', 'cancelled')
     def _check_stage_type_exclusive(self):
+        """ Ensure a stage is exclusively marked as either 'In Progress', 'Done', or 'Cancelled'. """
         for stage in self:
             if sum([stage.in_progress, stage.done, stage.cancelled]) > 1:
                 raise ValidationError(_("A stage can only be marked as one of 'In Progress', 'Done', or 'Cancelled'."))

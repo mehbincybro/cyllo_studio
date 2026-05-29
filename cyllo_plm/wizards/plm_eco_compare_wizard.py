@@ -20,13 +20,11 @@
 #
 #############################################################################
 
-from odoo import api, fields, models
-# from .plm_eco import TRACKED_PRODUCT_FIELDS
 import json
+from odoo import api, fields, models
 
 
 class PlmEcoCompareWizard(models.TransientModel):
-    """ Transient model to compute and display comparison between original and revised BoMs. """
     _name = 'plm.eco.compare.wizard'
     _description = 'ECO Compare Wizard'
 
@@ -35,6 +33,7 @@ class PlmEcoCompareWizard(models.TransientModel):
 
     @api.model
     def default_get(self, fields_list):
+        """ Fetch default values for the wizard, computing/loading the HTML diff snapshot if not already saved. """
         res = super(PlmEcoCompareWizard, self).default_get(fields_list)
         eco_id = self.env.context.get('active_id')
         if eco_id:
@@ -47,12 +46,12 @@ class PlmEcoCompareWizard(models.TransientModel):
         return res
 
     def _generate_html_diff(self, eco):
+        """ Generate an HTML representation comparing the original and revised BoM, or product templates. """
         if not eco:
             return "<h3>No ECO loaded.</h3>"
 
         html = []
         if eco.apply_on == 'bom':
-            # Compare BoM
             bom_orig = eco.original_bom_id
             bom_rev = eco.comparison_bom_id
 
@@ -61,9 +60,8 @@ class PlmEcoCompareWizard(models.TransientModel):
             if not bom_rev:
                 return "<div class='alert alert-warning'>Revised BoM has not been created yet. (Move ECO to 'In Progress' to create revised BoM).</div>"
 
-            # Compare Components
-            orig_lines = {l.product_id.id: l for l in bom_orig.bom_line_ids}
-            rev_lines = {l.product_id.id: l for l in bom_rev.bom_line_ids}
+            orig_lines = {line.product_id.id: line for line in bom_orig.bom_line_ids}
+            rev_lines = {line.product_id.id: line for line in bom_rev.bom_line_ids}
 
             added_comp = []
             removed_comp = []
@@ -71,44 +69,39 @@ class PlmEcoCompareWizard(models.TransientModel):
 
             all_products = set(orig_lines.keys()) | set(rev_lines.keys())
             for prod_id in all_products:
-                orig_l = orig_lines.get(prod_id)
-                rev_l = rev_lines.get(prod_id)
+                orig_line = orig_lines.get(prod_id)
+                rev_line = rev_lines.get(prod_id)
 
-                if orig_l and not rev_l:
-                    removed_comp.append(orig_l)
-                elif rev_l and not orig_l:
-                    added_comp.append(rev_l)
+                if orig_line and not rev_line:
+                    removed_comp.append(orig_line)
+                elif rev_line and not orig_line:
+                    added_comp.append(rev_line)
                 else:
-                    # both exist, check changes in qty or uom
-                    if orig_l.product_qty != rev_l.product_qty or orig_l.product_uom_id != rev_l.product_uom_id:
-                        modified_comp.append((orig_l, rev_l))
-            # Compare Operations
-            orig_ops = {o.name: o for o in bom_orig.operation_ids}
-            rev_ops = {o.name: o for o in bom_rev.operation_ids}
+                    if orig_line.product_qty != rev_line.product_qty or orig_line.product_uom_id != rev_line.product_uom_id:
+                        modified_comp.append((orig_line, rev_line))
+            orig_ops = {operation.name: operation for operation in bom_orig.operation_ids}
+            rev_ops = {operation.name: operation for operation in bom_rev.operation_ids}
             added_ops = []
             removed_ops = []
             modified_ops = []
 
             all_ops = set(orig_ops.keys()) | set(rev_ops.keys())
             for op_name in all_ops:
-                orig_o = orig_ops.get(op_name)
-                rev_o = rev_ops.get(op_name)
+                orig_operation = orig_ops.get(op_name)
+                rev_operation = rev_ops.get(op_name)
 
-                if orig_o and not rev_o:
-                    removed_ops.append(orig_o)
-                elif rev_o and not orig_o:
-                    added_ops.append(rev_o)
+                if orig_operation and not rev_operation:
+                    removed_ops.append(orig_operation)
+                elif rev_operation and not orig_operation:
+                    added_ops.append(rev_operation)
                 else:
-                    # check workcenter or time changes
-                    if orig_o.workcenter_id != rev_o.workcenter_id or orig_o.time_cycle != rev_o.time_cycle:
-                        modified_ops.append((orig_o, rev_o))
+                    if orig_operation.workcenter_id != rev_operation.workcenter_id or orig_operation.time_cycle != rev_operation.time_cycle:
+                        modified_ops.append((orig_operation, rev_operation))
 
-            # Render HTML report
             html.append("<div style='font-family: sans-serif;'>")
             html.append(f"<h3 style='color: #202124; margin-bottom: 20px;'>BoM Revision Comparison</h3>")
             html.append(f"<p class='text-muted'>Comparing <b>{bom_orig.display_name} (v{bom_orig.version or '1'})</b> vs <b>{bom_rev.display_name} (v{bom_rev.version or '2'})</b></p>")
 
-            # Components Section
             html.append("<div class='card mb-4 shadow-sm' style='border-radius: 8px;'>")
             html.append("<div class='card-header bg-light'><b>Component Changes</b></div>")
             html.append("<div class='card-body p-0'>")
@@ -118,16 +111,15 @@ class PlmEcoCompareWizard(models.TransientModel):
                 html.append("<table class='table table-hover mb-0'>")
                 html.append("<thead class='table-light'><tr><th>Component</th><th>Change Type</th><th>Original Qty</th><th>New Qty</th></tr></thead>")
                 html.append("<tbody>")
-                for l in added_comp:
-                    html.append(f"<tr class='table-success'><td style='font-weight: 500; color: #1e7e34;'>{l.product_id.display_name}</td><td><span class='badge bg-success'>Added</span></td><td>-</td><td>{l.product_qty} {l.product_uom_id.name}</td></tr>")
-                for l in removed_comp:
-                    html.append(f"<tr class='table-danger'><td style='font-weight: 500; color: #bd2130; text-decoration: line-through;'>{l.product_id.display_name}</td><td><span class='badge bg-danger'>Removed</span></td><td>{l.product_qty} {l.product_uom_id.name}</td><td>-</td></tr>")
+                for line in added_comp:
+                    html.append(f"<tr class='table-success'><td style='font-weight: 500; color: #1e7e34;'>{line.product_id.display_name}</td><td><span class='badge bg-success'>Added</span></td><td>-</td><td>{line.product_qty} {line.product_uom_id.name}</td></tr>")
+                for line in removed_comp:
+                    html.append(f"<tr class='table-danger'><td style='font-weight: 500; color: #bd2130; text-decoration: line-through;'>{line.product_id.display_name}</td><td><span class='badge bg-danger'>Removed</span></td><td>{line.product_qty} {line.product_uom_id.name}</td><td>-</td></tr>")
                 for orig, rev in modified_comp:
                     html.append(f"<tr class='table-warning'><td style='font-weight: 500; color: #d39e00;'>{orig.product_id.display_name}</td><td><span class='badge bg-warning text-dark'>Quantity Changed</span></td><td>{orig.product_qty} {orig.product_uom_id.name}</td><td style='font-weight: bold;'>{rev.product_qty} {rev.product_uom_id.name}</td></tr>")
                 html.append("</tbody></table>")
             html.append("</div></div>")
 
-            # Operations Section
             html.append("<div class='card mb-4 shadow-sm' style='border-radius: 8px;'>")
             html.append("<div class='card-header bg-light'><b>Operation Changes</b></div>")
             html.append("<div class='card-body p-0'>")
@@ -137,10 +129,10 @@ class PlmEcoCompareWizard(models.TransientModel):
                 html.append("<table class='table table-hover mb-0'>")
                 html.append("<thead class='table-light'><tr><th>Operation</th><th>Change Type</th><th>Original Details</th><th>New Details</th></tr></thead>")
                 html.append("<tbody>")
-                for o in added_ops:
-                    html.append(f"<tr class='table-success'><td style='font-weight: 500; color: #1e7e34;'>{o.name}</td><td><span class='badge bg-success'>Added</span></td><td>-</td><td>Work Center: {o.workcenter_id.name}<br/>Duration: {o.time_cycle} min</td></tr>")
-                for o in removed_ops:
-                    html.append(f"<tr class='table-danger'><td style='font-weight: 500; color: #bd2130; text-decoration: line-through;'>{o.name}</td><td><span class='badge bg-danger'>Removed</span></td><td>Work Center: {o.workcenter_id.name}<br/>Duration: {o.time_cycle} min</td><td>-</td></tr>")
+                for op in added_ops:
+                    html.append(f"<tr class='table-success'><td style='font-weight: 500; color: #1e7e34;'>{op.name}</td><td><span class='badge bg-success'>Added</span></td><td>-</td><td>Work Center: {op.workcenter_id.name}<br/>Duration: {op.time_cycle} min</td></tr>")
+                for op in removed_ops:
+                    html.append(f"<tr class='table-danger'><td style='font-weight: 500; color: #bd2130; text-decoration: line-through;'>{op.name}</td><td><span class='badge bg-danger'>Removed</span></td><td>Work Center: {op.workcenter_id.name}<br/>Duration: {op.time_cycle} min</td><td>-</td></tr>")
                 for orig, rev in modified_ops:
                     orig_details = []
                     rev_details = []
@@ -185,9 +177,9 @@ class PlmEcoCompareWizard(models.TransientModel):
 
 
             changes = [
-                (f, before[f], after[f])
-                for f in before
-                if f in after and before[f] != after[f]
+                (field_name, before[field_name], after[field_name])
+                for field_name in before
+                if field_name in after and before[field_name] != after[field_name]
             ]
 
             html = []

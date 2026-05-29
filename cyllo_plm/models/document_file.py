@@ -21,7 +21,6 @@
 #############################################################################
 
 from odoo import fields, models, api
-from odoo.api import ondelete
 from odoo.http import request
 
 
@@ -37,7 +36,9 @@ class DocumentFile(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        # Try to get eco_id from context first
+        """ Create document files and link them to the active Engineering Change Order (ECO)
+        and default PLM workspace if applicable.
+        """
         eco_id = self.env.context.get('default_eco_id')
         if not eco_id and self.env.context.get('active_model') == 'plm.eco':
             eco_id = self.env.context.get('active_id')
@@ -47,8 +48,7 @@ class DocumentFile(models.Model):
                     eco_id = request.session.get('active_eco_id')
             except Exception:
                 pass
-        # Determine PLM workspace
-        plm_workspace = self.env.ref("cyllo_plm.document_workspace_plma", raise_if_not_found=False)
+        plm_workspace = self.env.ref("cyllo_plm.document_workspace_plm", raise_if_not_found=False)
         plm_workspace_id = plm_workspace.id if plm_workspace else False
         for vals in vals_list:
             if eco_id:

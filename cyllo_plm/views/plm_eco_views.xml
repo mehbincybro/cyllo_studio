@@ -10,7 +10,7 @@
                 <field name="product_id"/>
                 <field name="bom_id"/>
                 <field name="type_id"/>
-                <field name="requested_by"/>
+                <field name="user_id"/>
                 <field name="stage_id"/>
             </tree>
         </field>
@@ -71,14 +71,17 @@
                         <group>
                             <field name="type_id" options="{'no_create': True}"/>
                             <field name="apply_on"/>
-                            <field name="product_id" placeholder="Select Product..." invisible="apply_on != 'product'" required = "apply_on == 'product'"/>
-                            <field name="bom_id" placeholder="Select Bill of Materials..." invisible="apply_on != 'bom'" required="apply_on == 'bom'"/>
+                            <field name="product_id" placeholder="Select Product..."
+                                   invisible="apply_on != 'product'"
+                                   required = "apply_on == 'product'"/>
+                            <field name="bom_id" placeholder="Select Bill of Materials..."
+                                   invisible="apply_on != 'bom'" required="apply_on == 'bom'"/>
                             <field name="eco_type" invisible="1"/>
                             <field name="revised_bom_id" invisible="1"/>
                         </group>
                         <group>
 
-                            <field name="requested_by" readonly="1"/>
+                            <field name="user_id" readonly="1"/>
                             <field name="company_id"/>
 
                         </group>
@@ -107,6 +110,7 @@
             <kanban default_group_by="stage_id" class="o_kanban_small_column" quick_create="false">
                 <field name="name"/>
                 <field name="product_id"/>
+                <field name="apply_on"/>
                 <field name="type_id"/>
                 <field name="stage_id"/>
                 <field name="activity_ids"/>
@@ -120,17 +124,32 @@
                                         <strong class="o_kanban_record_title"><field name="name"/></strong>
                                     </div>
                                 </div>
-                                <div class="o_kanban_record_body">
-                                    <div>Product: <field name="product_id"/></div>
-                                    <div>Type: <field name="type_id"/></div>
-<!--                                    <div t-if="record.version.raw_value">Version: <field name="version"/></div>-->
-                                </div>
+                                 <div class="o_kanban_record_body">
+
+                        <t t-if="record.apply_on.raw_value == 'product'">
+                            <div>Product:
+                                <field name="product_id"/>
+                            </div>
+                        </t>
+
+                        <t t-if="record.apply_on.raw_value == 'bom'">
+                            <div>BoM:
+                                <field name="bom_id"/>
+                            </div>
+                        </t>
+
+                        <div>
+                            Type:
+                            <field name="type_id"/>
+                        </div>
+
+                    </div>
                                 <div class="o_kanban_record_bottom">
                                     <div class="oe_kanban_bottom_left">
                                         <field name="activity_ids" widget="kanban_activity"/>
                                     </div>
                                     <div class="oe_kanban_bottom_right">
-                                        <field name="requested_by" widget="many2one_avatar_user"/>
+                                        <field name="user_id" widget="many2one_avatar_user"/>
                                     </div>
                                 </div>
                             </div>
@@ -151,7 +170,6 @@
                 <field name="product_id"/>
                 <field name="bom_id"/>
                 <field name="type_id"/>
-<!--                <field name="assigned_to"/>-->
                 <filter string="My ECOs" name="my_ecos" />
                 <filter string="Draft/New" name="draft_new" domain="[('stage_id.in_progress', '=', False), ('stage_id.done', '=', False), ('stage_id.cancelled', '=', False)]"/>
                 <filter string="In Progress" name="progress" domain="[('stage_id.in_progress', '=', True)]"/>
@@ -215,14 +233,14 @@
             <search string="Product ECO Analysis Search">
                 <field name="product_id"/>
                 <field name="type_id"/>
-                <field name="requested_by"/>
+                <field name="user_id"/>
                 <field name="stage_id"/>
                 <field name="create_date" string="Date"/>
-                <filter string="My ECOs" name="my_ecos" domain="[('requested_by', '=', uid)]"/>
+                <filter string="My ECOs" name="my_ecos" domain="[('user_id', '=', uid)]"/>
                 <group expand="0" string="Group By">
                     <filter string="Product" name="group_by_product" context="{'group_by': 'product_id'}"/>
                     <filter string="ECO Type" name="group_by_type" context="{'group_by': 'type_id'}"/>
-                    <filter string="Requested By" name="group_by_requested_by" context="{'group_by': 'requested_by'}"/>
+                    <filter string="Requested By" name="group_by_requested_by" context="{'group_by': 'user_id'}"/>
                     <filter string="Stage" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'create_date'}"/>
                 </group>
@@ -281,15 +299,15 @@
                 <field name="product_id"/>
                 <field name="type_id"/>
                 <field name="stage_id"/>
-                <field name="requested_by"/>
+                <field name="user_id"/>
                 <field name="create_date" string="Date"/>
-                <filter string="My ECOs" name="my_ecos" domain="[('requested_by', '=', uid)]"/>
+                <filter string="My ECOs" name="my_ecos" domain="[('user_id', '=', uid)]"/>
                 <group expand="0" string="Group By">
                     <filter string="BoM" name="group_by_bom" context="{'group_by': 'bom_id'}"/>
                     <filter string="Product" name="group_by_product" context="{'group_by': 'product_id'}"/>
                     <filter string="ECO Type" name="group_by_type" context="{'group_by': 'type_id'}"/>
                     <filter string="Stage" name="group_by_stage" context="{'group_by': 'stage_id'}"/>
-                    <filter string="Requested By" name="group_by_requested_by" context="{'group_by': 'requested_by'}"/>
+                    <filter string="Requested By" name="group_by_requested_by" context="{'group_by': 'user_id'}"/>
                     <filter string="Date" name="group_by_date" context="{'group_by': 'create_date'}"/>
                 </group>
             </search>
