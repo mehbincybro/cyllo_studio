@@ -19,26 +19,5 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': "Base Project",
-    'description': 'base module for project',
-    'summary': 'base module for project',
-    'version': '1.0',
-    'author': 'Cyllo',
-    'company': 'Cyllo',
-    'maintainer': 'Cyllo',
-    'website': 'https://www.cyllo.com',
-    'depends': ['cyllo_base', 'project'],
-    'data': [
-        'views/res_config_settings_views.xml',
-    ],
-    'assets': {
-        'web.assets_backend': [
-            'cyllo_project_base/static/src/**'
-        ],
-    },
-    'license': 'LGPL-3',
-    'installable': True,
-    'application': False,
-    'auto_install': True
-}
+from . import models
+from . import wizard

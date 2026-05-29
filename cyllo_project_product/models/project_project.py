@@ -19,26 +19,18 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': "Base Project",
-    'description': 'base module for project',
-    'summary': 'base module for project',
-    'version': '1.0',
-    'author': 'Cyllo',
-    'company': 'Cyllo',
-    'maintainer': 'Cyllo',
-    'website': 'https://www.cyllo.com',
-    'depends': ['cyllo_base', 'project'],
-    'data': [
-        'views/res_config_settings_views.xml',
-    ],
-    'assets': {
-        'web.assets_backend': [
-            'cyllo_project_base/static/src/**'
-        ],
-    },
-    'license': 'LGPL-3',
-    'installable': True,
-    'application': False,
-    'auto_install': True
-}
+from odoo import fields, models
+
+class ProjectProject(models.Model):
+    _inherit = 'project.project'
+
+    allow_task_products = fields.Boolean(
+        string="Products on Tasks",
+        help="Track the material used to complete tasks",
+        default=False,
+    )
+    allow_extra_quotations = fields.Boolean(
+        string="Extra Quotations",
+        help="Create new quotations directly from tasks",
+        default=False,
+    )

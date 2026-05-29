@@ -20,25 +20,29 @@
 #
 #############################################################################
 {
-    'name': "Base Project",
-    'description': 'base module for project',
-    'summary': 'base module for project',
+    'name': "Cyllo Project Product",
+    'description': 'Add Products to Project Tasks',
+    'summary': 'Add Products to Project Tasks and link with Sale Order',
     'version': '1.0',
     'author': 'Cyllo',
     'company': 'Cyllo',
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
-    'depends': ['cyllo_base', 'project'],
+    'category': 'Services/Project',
+    'depends': ['cyllo_project_base', 'sale_project'],
     'data': [
-        'views/res_config_settings_views.xml',
+        'security/ir.model.access.csv',
+        'wizard/project_task_product_catalog_wizard_views.xml',
+        'views/project_project_views.xml',
+        'views/project_task_views.xml',
     ],
     'assets': {
         'web.assets_backend': [
-            'cyllo_project_base/static/src/**'
+            'cyllo_project_product/static/src/js/product_catalog_patch.js',
         ],
     },
     'license': 'LGPL-3',
     'installable': True,
     'application': False,
-    'auto_install': True
+    'auto_install': False,
 }
