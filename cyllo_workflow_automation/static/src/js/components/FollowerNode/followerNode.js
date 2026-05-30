@@ -121,7 +121,9 @@ export class FollowerNode extends ConfigurationBase {
     }
 
     toggleIncludeVariable(type, index) {
-        if(![type, undefined].includes(this.fieldState.followers[index].selectionType)) {
+        if (!this.fieldState.followers[index] || typeof this.fieldState.followers[index] !== 'object') {
+            this.fieldState.followers[index] = {value: [], selectionType: type};
+        } else if(![type, undefined].includes(this.fieldState.followers[index].selectionType)) {
             this.fieldState.followers[index] = {value: [], selectionType: type}
         }else this.fieldState.followers[index].selectionType = type
     }

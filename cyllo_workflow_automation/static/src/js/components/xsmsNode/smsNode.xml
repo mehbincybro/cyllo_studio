@@ -49,15 +49,27 @@
                 </div>
                 <div>
                     <div t-if="!getType">
-                        <label for="from-subject" class="form-label">
+                        <label for="from-subject" class="form-label cy-modal-form_label">
                             Message
                         </label>
-                        <textarea
-                                class="form-control bg-view px-3 border-1 text-body"
-                                style="border:1px solid #4b464645"
-                                t-on-focusout="(ev) => this.updateMessage(ev.target.value)"
-                                t-att-value="getMessage"
-                        />
+                        <div class="position-relative">
+                            <textarea
+                                    t-ref="messageTextarea"
+                                    class="form-control bg-view px-3 border-1 text-body"
+                                    style="border:1px solid #4b464645"
+                                    rows="4"
+                                    t-on-focusout="(ev) => this.updateMessage(ev.target.value)"
+                                    t-att-value="getMessage"
+                            />
+                            <div class="position-absolute" style="top: 10px; right: 10px;">
+                                <button class="btn btn-sm btn-primary shadow-sm d-flex align-items-center" 
+                                        style="font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px; letter-spacing: 0.3px;" 
+                                        t-on-click.prevent="openVariablePicker">
+                                    <span class="me-2 bg-white text-primary rounded px-1" style="font-family: monospace; font-size: 12px;">{}</span>
+                                    Insert Variable
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="d-flex align-items-end gap-3 overflow-hidden cy-variable-toggle" t-if="getType">

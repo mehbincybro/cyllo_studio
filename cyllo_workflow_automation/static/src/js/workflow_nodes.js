@@ -119,6 +119,82 @@ const MODAL_CONFIGS = {
     },
 };
 
+
+/**
+ * _registerWebhookResponseVariables
+ *
+ * Registers any webhook `store_variable` response actions as workflow
+ * variables so they appear in the Variables panel and are selectable
+ * in all following nodes (Code, Mail, SMS, etc.).
+ *
+ * Called from the webhook node's onConfirm handler in the two
+ * workflow_nodes.js Webhook branches.
+ *
+ * @param {object} fieldState   - The confirmed field state from the webhook node
+ * @param {object} variableCtx  - The result of this.variableContext
+ * @param {object} env          - The OWL environment (this.env)
+ * @param {string|number} nodeId - The nodeId of the webhook node (this.props.nodeId)
+ */
+function _registerWebhookResponseVariables(fieldState, variableCtx, env, nodeId) {
+    const actions = Array.isArray(fieldState.webhook_actions) ? fieldState.webhook_actions : [];
+    const storeActions = actions.filter(a => a && a.action_type === 'store_variable');
+    if (!storeActions.length) return;
+
+    const BUTTON_CLASSES = ['btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'];
+    const randomClass = BUTTON_CLASSES[Math.floor(Math.random() * BUTTON_CLASSES.length)];
+
+    const existingVars = (variableCtx && variableCtx.variables) ? variableCtx.variables : [];
+
+    const newVars = [];
+    for (let idx = 0; idx < storeActions.length; idx++) {
+        const action = storeActions[idx];
+        const varName = (action.variable_name || '').trim();
+        if (!varName) continue;
+
+        // Build a stable ID so re-confirming the node updates in-place
+        const varId = `wh_var_${nodeId}_${varName}`;
+        const existing = existingVars.find(v => v.id === varId);
+
+        if (existing) {
+            // Update in-place (name may have changed for existing slot)
+            existing.variable_name = varName;
+            existing.webhook_extract_path = action.extract_path || '';
+        } else {
+            newVars.push(owl.reactive({
+                id: varId,
+                variable_name: varName,
+                variable_type: 'string',
+                variable_value: '',
+                // Metadata — used for cleanup and display
+                source: 'webhook',
+                webhook_node_id: nodeId,
+                webhook_extract_path: action.extract_path || '',
+                // Required by the variable context / selector UI
+                scopeId: nodeId,
+                usedIn: [],
+                class: randomClass,
+                delete: false,
+            }));
+        }
+    }
+
+    // Remove stale webhook vars from THIS node that no longer have a matching action
+    const activeVarNames = new Set(storeActions.map(a => (a.variable_name || '').trim()).filter(Boolean));
+    const withoutStale = existingVars.filter(v => {
+        if (v.source !== 'webhook' || String(v.webhook_node_id) !== String(nodeId)) return true;
+        return activeVarNames.has(v.variable_name);
+    });
+
+    if (newVars.length > 0 || withoutStale.length !== existingVars.length) {
+        try {
+            env.variables.setContext({ variables: [...withoutStale, ...newVars] });
+            env.bus.trigger("UPDATE-VARIABLE-STATE");
+        } catch (err) {
+            console.error("WebhookNode: failed to register response variables:", err);
+        }
+    }
+}
+
 export class ModelComponent extends Component {
     setup() {
         this.action = useService("action");
@@ -417,7 +493,16 @@ export class ModelComponent extends Component {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Activity Modal enables users to manage Activity"
             } else if (this.props.name === 'Webhook') {
-                props.display_name = "The Webhook Node allows you to send data to external APIs via HTTP requests."
+                props.display_name = "The Webhook Node allows you to send data to external APIs via HTTP requests.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    _registerWebhookResponseVariables(
+                        fieldState,
+                        this.variableContext,
+                        this.env,
+                        this.props.nodeId,
+                    );
+                };
             } else if (this.props.name === 'Loop') {
                 props.primaryModelId = this.props.primary_model_id;
                 props.display_name = "The Loop Node iterates over a recordset field or variable, executing child nodes for each record in turn.";
@@ -473,6 +558,15 @@ export class ModelComponent extends Component {
                 };
             } else if (this.props.name === 'Webhook') {
                 props.display_name = "The Webhook Node allows you to send data to external APIs via HTTP requests.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    _registerWebhookResponseVariables(
+                        fieldState,
+                        this.variableContext,
+                        this.env,
+                        this.props.nodeId,
+                    );
+                };
             }
             this.dialogService.add(component, props);
         } else {

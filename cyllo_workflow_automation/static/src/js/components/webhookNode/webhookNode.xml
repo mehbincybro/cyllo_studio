@@ -138,29 +138,44 @@
                                     <i class="fa fa-times ms-1 cursor-pointer" t-on-click="() => this.removePayloadTag(tag.key)" title="Remove"></i>
                                 </span>
                             </t>
-                            <!-- Dropdown for new fields -->
-                            <select class="border-0 flex-grow-1" style="outline:none; min-width: 180px; background:transparent; font-size: 12px; color: #4d5572;" t-on-change="(ev) => this.addFieldToPayload(ev)">
-                                <option value="" selected="selected">Add field to payload...</option>
-                                <t t-foreach="commonTokens" t-as="tok" t-key="tok.token">
-                                    <t t-if="!this.selectedPayloadTags.some(t => t.token === tok.token)">
-                                        <option t-att-value="tok.token"><t t-esc="tok.label"/></option>
-                                    </t>
-                                </t>
-                                <option disabled="disabled">──────────</option>
-                                <option value="CUSTOM">Add Custom Value...</option>
-                            </select>
                         </div>
                     </div>
-                    
-                    <!-- Custom Payload Value Form -->
-                    <t t-if="uiState.showCustomPayloadForm">
-                        <div class="d-flex align-items-center gap-2 mb-2 p-2 border rounded bg-light" style="font-size:12px;">
+                    <!-- Payload Mode Toggle and Inputs -->
+                    <div class="d-flex flex-column gap-2 mb-2 p-2 border rounded bg-light">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="text-muted" style="font-size:12px; font-weight:600;">Add to Payload:</span>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn" t-att-class="uiState.payloadMode === 'fields' ? 'btn-primary' : 'btn-outline-primary'" t-on-click="() => this.uiState.payloadMode = 'fields'">Fields</button>
+                                <button type="button" class="btn" t-att-class="uiState.payloadMode === 'custom' ? 'btn-primary' : 'btn-outline-primary'" t-on-click="() => this.uiState.payloadMode = 'custom'">Custom</button>
+                            </div>
+                        </div>
+
+                        <!-- Fields Mode -->
+                        <div t-if="uiState.payloadMode === 'fields'" class="d-flex align-items-center gap-2">
+                            <t t-if="currentRecordModelName">
+                                <div class="flex-grow-1 bg-white border rounded">
+                                    <ModelFieldSelector
+                                        readonly="false"
+                                        path="uiState.payloadFieldPath"
+                                        resModel="currentRecordModelName"
+                                        update.bind="updatePayloadFieldPath"
+                                        showSearchInput="true"
+                                    />
+                                </div>
+                                <button type="button" class="btn btn-sm btn-primary text-white" t-on-click="addFieldPathToPayload" t-att-disabled="!uiState.payloadFieldPath">Add</button>
+                            </t>
+                            <t t-else="">
+                                <div class="text-muted fst-italic" style="font-size:12px;">Model not available.</div>
+                            </t>
+                        </div>
+
+                        <!-- Custom Mode -->
+                        <div t-if="uiState.payloadMode === 'custom'" class="d-flex align-items-center gap-2">
                             <input type="text" class="form-control form-control-sm" placeholder="Key (e.g. custom_id)" t-model="uiState.customPayloadKey"/>
                             <input type="text" class="form-control form-control-sm" placeholder="Value (e.g. 12345 or string)" t-model="uiState.customPayloadValue"/>
-                            <button type="button" class="btn btn-sm" style="background:#9ea700; color:white; white-space: nowrap;" t-on-click="addCustomPayload">Add</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary" t-on-click="() => this.uiState.showCustomPayloadForm = false">Cancel</button>
+                            <button type="button" class="btn btn-sm btn-primary text-white" t-on-click="addCustomPayload" t-att-disabled="!uiState.customPayloadKey">Add</button>
                         </div>
-                    </t>
+                    </div>
 
                     <!-- Original textarea — fieldState.webhook_payload, rows unchanged -->
                     <textarea class="form-control cy-modal-form_input font-monospace mt-2"
@@ -230,8 +245,14 @@
                                         </div>
                                         <!-- Action details -->
                                         <div class="flex-grow-1">
-                                            <div style="font-weight:600; color:#333;">
+                                            <div style="font-weight:600; color:#333;" class="d-flex align-items-center flex-wrap gap-2">
                                                 <t t-esc="actionTypeLabel(act.action_type)"/>
+                                                <t t-if="act.action_type === 'store_variable' and act.variable_name">
+                                                    <span style="display:inline-flex;align-items:center;gap:4px;background:#e8f5e9;color:#2e7d32;border:1px solid #a5d6a7;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:600;">
+                                                        &#128230; <t t-esc="act.variable_name"/>
+                                                        <span style="font-weight:normal;color:#66bb6a;">&#8212; accessible in following nodes</span>
+                                                    </span>
+                                                </t>
                                             </div>
                                             <div class="text-muted mt-1" style="font-size:11px;">
                                                 <t t-esc="actionSummary(act)"/>
@@ -370,6 +391,47 @@
                                 + Add Action
                             </button>
                         </t>
+
+                    <!-- ═══════════════════════════════════════════════════════
+                         Variables Created by This Webhook
+                         Shown only when store_variable actions exist.
+                         Gives users a clear view of which variables will be
+                         registered and accessible in following nodes.
+                    ══════════════════════════════════════════════════════════ -->
+                    <t t-if="storeVariableActions.length">
+                        <div style="margin-top:12px;border:1px solid #a5d6a7;border-radius:8px;overflow:hidden;">
+                            <div style="background:#e8f5e9;padding:8px 12px;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:16px;">&#128230;</span>
+                                <span style="font-weight:600;color:#2e7d32;font-size:13px;">Variables Created by This Webhook</span>
+                                <span style="font-size:11px;color:#66bb6a;margin-left:auto;">These will be accessible in all following nodes</span>
+                            </div>
+                            <div style="background:#fff;padding:8px 12px;">
+                                <t t-foreach="storeVariableActions" t-as="sv" t-key="sv_index">
+                                    <div style="display:flex;align-items:center;gap:10px;padding:6px 0;
+                                                border-bottom:1px solid #f0f0f0;" t-att-style="sv_last ? 'border-bottom:none;' : ''">
+                                        <!-- Variable name pill -->
+                                        <span style="background:#2e7d32;color:#fff;border-radius:6px;
+                                                     padding:3px 10px;font-size:12px;font-weight:700;
+                                                     font-family:monospace;white-space:nowrap;">
+                                            <t t-esc="sv.variable_name"/>
+                                        </span>
+                                        <!-- Arrow -->
+                                        <span style="color:#9e9e9e;font-size:12px;">&#8592;</span>
+                                        <!-- Extract path -->
+                                        <span style="font-size:11px;color:#555;font-family:monospace;">
+                                            response.<t t-esc="sv.extract_path or '(whole response)'"/>
+                                        </span>
+                                        <!-- Usage hint -->
+                                        <span style="margin-left:auto;font-size:10px;color:#9e9e9e;">Use in Code: </span>
+                                        <code style="font-size:11px;background:#f5f5f5;padding:2px 6px;
+                                                     border-radius:4px;color:#2e7d32;">
+                                            <t t-esc="sv.variable_name"/>
+                                        </code>
+                                    </div>
+                                </t>
+                            </div>
+                        </div>
+                    </t>
 
                     </t><!-- /responseActionsOpen -->
                 </div>

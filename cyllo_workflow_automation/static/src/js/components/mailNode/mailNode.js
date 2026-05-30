@@ -1,5 +1,6 @@
 /** @odoo-module */
 const {useState, onWillStart, useEffect} = owl;
+import {useService} from "@web/core/utils/hooks";
 import {_t} from "@web/core/l10n/translation";
 import {Record} from "@web/model/record";
 import {Many2OneField} from "@web/views/fields/many2one/many2one_field";
@@ -17,11 +18,14 @@ import {FieldTypeDropdown} from "../Assists/fieldTypeDropdown/fieldTypeDropDown"
 import {CustomDropdown} from "../Assists/dropdown/CustomDropdown";
 import {MailRecordPathSelector} from "./subcomponents/mailRecordPathSelector";
 import {MultiDataSelector} from "../FollowerNode/subComponents/multiDataSelector";
+import {VariablePickerDialog} from "../Assists/variablePickerDialog/variablePickerDialog";
 
 export class MailNode extends ConfigurationBase {
     static props = ['*'];
     setup() {
         super.setup();
+        this.messageTextareaRef = owl.useRef("messageTextarea");
+        this.dialogService = useService("dialog");
         this.emailState = useState({
             mailTemp: ""
         })
@@ -72,7 +76,33 @@ export class MailNode extends ConfigurationBase {
     }
 
     setMessageValue(ev) {
-        this.fieldState.mail_body = ev
+        this.fieldState.mail_body = ev;
+    }
+
+    openVariablePicker() {
+        this.dialogService.add(VariablePickerDialog, {
+            variables: this.props.variables,
+            modelState: this.modelState,
+            onInsert: (expression) => {
+                const textarea = this.messageTextareaRef.el;
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = this.getMessage;
+                    const before = text.substring(0, start);
+                    const after = text.substring(end, text.length);
+                    const newText = before + expression + after;
+                    this.setMessageValue(newText);
+                    setTimeout(() => {
+                        textarea.value = newText;
+                        textarea.focus();
+                        textarea.setSelectionRange(start + expression.length, start + expression.length);
+                    }, 0);
+                } else {
+                    this.setMessageValue(this.getMessage + expression);
+                }
+            }
+        });
     }
 
     getDomain() {
@@ -245,11 +275,15 @@ export class MailNode extends ConfigurationBase {
     }
     toggleIncludeVariable(value, field, index) {
         if (field === 'recipient') {
-            if (![value, undefined].includes(this.fieldState.mail_to[index].selectionType)) {
+            if (!this.fieldState.mail_to[index] || typeof this.fieldState.mail_to[index] !== 'object') {
+                this.fieldState.mail_to[index] = {value: [], selectionType: value};
+            } else if (![value, undefined].includes(this.fieldState.mail_to[index].selectionType)) {
                 this.fieldState.mail_to[index] = {value: [], selectionType: value}
             }else this.fieldState.mail_to[index].selectionType = value
         } else if (field === 'subject') {
-            if (![value, undefined].includes(this.fieldState.mail_subject.selectionType)) {
+            if (!this.fieldState.mail_subject || typeof this.fieldState.mail_subject !== 'object') {
+                this.fieldState.mail_subject = {value: '', selectionType: value};
+            } else if (![value, undefined].includes(this.fieldState.mail_subject.selectionType)) {
                 this.fieldState.mail_subject = {value: '', selectionType: value}
             }else this.fieldState.mail_subject.selectionType = value
         }
@@ -316,7 +350,8 @@ export class MailNode extends ConfigurationBase {
         if (mail_isTemplate) {
             code = `template = env["mail.template"].browse(${mail_template.id})\ntemplate.send_mail(${Record?.variable_name}.id,force_send=True)`
         } else {
-            code = `to = env["res.partner"].browse([${email_to}]).mapped('email')\nemail = env['ir.mail_server'].build_email(email_from=env.user.email,email_to=list(set(to)),subject=${email_subject}, body="""${mail_body}""")\nenv['ir.mail_server'].send_email(email)`
+            const processed_mail_body = (mail_body || "").replace(/\{\{\s*/g, '{').replace(/\s*\}\}/g, '}');
+            code = `to = env["res.partner"].browse([${email_to}]).mapped('email')\nemail = env['ir.mail_server'].build_email(email_from=env.user.email,email_to=list(set(to)),subject=${email_subject}, body=f"""${processed_mail_body}""")\nenv['ir.mail_server'].send_email(email)`
         }
         return code || "";
     }

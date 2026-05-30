@@ -1,6 +1,7 @@
 /** @odoo-module */
 const { useState } = owl;
 import { ConfigurationBase } from "../configurationBase/configurationBase";
+import { ModelFieldSelector } from "@web/core/model_field_selector/model_field_selector";
 
 export class WebhookNode extends ConfigurationBase {
     static props = ['*'];
@@ -14,7 +15,9 @@ export class WebhookNode extends ConfigurationBase {
             headerBuilderOpen: false,
 
             // Custom payload form state
-            showCustomPayloadForm: false,
+            // Custom payload form state
+            payloadMode: 'fields',
+            payloadFieldPath: '',
             customPayloadKey: '',
             customPayloadValue: '',
 
@@ -77,6 +80,14 @@ export class WebhookNode extends ConfigurationBase {
             { label: 'PUT',    value: 'PUT'    },
             { label: 'DELETE', value: 'DELETE' },
         ];
+    }
+
+    get currentRecordModelName() {
+        if (this.modelState.model && this.modelState.model.model) {
+            return this.modelState.model.model;
+        }
+        const recordVar = this.props.variables?.find(v => v.variable_name === 'current_record' || v.variable_type === 'record');
+        return recordVar?.modelName || recordVar?.model_name || "";
     }
 
     get getLabel() {
@@ -147,10 +158,24 @@ export class WebhookNode extends ConfigurationBase {
         code += `            response_data=_resp_json,\n`;
         code += `            actions=_webhook_response_actions,\n`;
         code += `            record=current_record,\n`;
-        code += `            context_vars=locals(),\n`;
+        code += `            context_vars=globals(),\n`;
         code += `        )\n`;
         code += `        if _resp_action:\n`;
         code += `            action = _resp_action\n`;
+        code += `        # -- Inject store_variable values into shared execution context --\n`;
+        code += `        for _wh_sv in [a for a in _webhook_response_actions if a.get('action_type') == 'store_variable']:\n`;
+        code += `            _wh_vn = (_wh_sv.get('variable_name') or '').strip()\n`;
+        code += `            if not _wh_vn: continue\n`;
+        code += `            _wh_vv = _resp_json\n`;
+        code += `            for _wh_k in (_wh_sv.get('extract_path') or '').split('.'):\n`;
+        code += `                if not _wh_k: break\n`;
+        code += `                if isinstance(_wh_vv, dict): _wh_vv = _wh_vv.get(_wh_k)\n`;
+        code += `                elif isinstance(_wh_vv, list):\n`;
+        code += `                    try: _wh_vv = _wh_vv[int(_wh_k)]\n`;
+        code += `                    except: _wh_vv = None; break\n`;
+        code += `                else: _wh_vv = None; break\n`;
+        code += `            globals()[_wh_vn] = _wh_vv\n`;
+        code += `            _logger.info('Webhook variable injected: %s = %r', _wh_vn, _wh_vv)\n`;
         code += `except Exception as e:\n`;
         code += `    _logger.error("Webhook execution error: %s", str(e))\n`;
         code += `    if isinstance(e, UserError):\n`;
@@ -366,9 +391,21 @@ export class WebhookNode extends ConfigurationBase {
         
         this._injectToPayload(key, value);
         
-        this.uiState.showCustomPayloadForm = false;
         this.uiState.customPayloadKey = '';
         this.uiState.customPayloadValue = '';
+    }
+
+    updatePayloadFieldPath(path) {
+        this.uiState.payloadFieldPath = path;
+    }
+
+    addFieldPathToPayload() {
+        if (!this.uiState.payloadFieldPath) return;
+        const path = this.uiState.payloadFieldPath;
+        const key = path.replace(/\./g, '_');
+        const token = `{{current_record.${path}}}`;
+        this._injectToPayload(key, token);
+        this.uiState.payloadFieldPath = '';
     }
 
     /**
@@ -542,7 +579,33 @@ export class WebhookNode extends ConfigurationBase {
         [arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
         this.fieldState.webhook_actions = arr;
     }
+    /**
+     * Returns only the store_variable actions from webhook_actions.
+     * Used by the XML template to render the "Variables Created" panel.
+     */
+    get storeVariableActions() {
+        const actions = Array.isArray(this.fieldState.webhook_actions)
+            ? this.fieldState.webhook_actions : [];
+        return actions.filter(a => a && a.action_type === 'store_variable' && a.variable_name);
+    }
+
+    /**
+     * Returns a formatted summary string for an action (used in the list).
+     * Extended to include the variable name prominently for store_variable.
+     */
+    actionSummaryExtended(act) {
+        if (!act) return '';
+        const path = act.extract_path ? `from: ${act.extract_path}` : '';
+        if (act.action_type === 'store_variable') {
+            return `${act.variable_name || '(unnamed)'}  ${path}`;
+        }
+        return this.actionSummary ? this.actionSummary(act) : path;
+    }
+
 }
 
-WebhookNode.template  = "WebhookNode";
-WebhookNode.components = { ...ConfigurationBase.components };
+WebhookNode.template = "WebhookNode";
+WebhookNode.components = {
+    ...ConfigurationBase.components,
+    ModelFieldSelector
+};
