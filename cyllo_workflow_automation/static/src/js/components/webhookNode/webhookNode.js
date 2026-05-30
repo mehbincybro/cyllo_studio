@@ -285,30 +285,6 @@ export class WebhookNode extends ConfigurationBase {
         this._syncHeadersToFieldState();
     }
 
-    // ── Payload token quick-insert ───────────────────────────────────────
-    /**
-     * Common token suggestions shown in a helper panel below the textarea.
-     * Clicking a token appends it to fieldState.webhook_payload so the
-     * user doesn't have to remember the {{current_record.x}} syntax.
-     * generateCode() reads webhook_payload the same way as always.
-     */
-    get commonTokens() {
-        return [
-            { label: 'Record ID',       token: '{{current_record.id}}'                      },
-            { label: 'Record Name',     token: '{{current_record.name}}'                    },
-            { label: 'Customer Name',   token: '{{current_record.partner_id.name}}'         },
-            { label: 'Customer Email',  token: '{{current_record.partner_id.email}}'        },
-            { label: 'Customer Phone',  token: '{{current_record.partner_id.phone}}'        },
-            { label: 'Amount Total',    token: '{{current_record.amount_total}}'            },
-            { label: 'Amount Due',      token: '{{current_record.amount_residual_signed}}'  },
-            { label: 'Currency',        token: '{{current_record.currency_id.name}}'        },
-            { label: 'Invoice / Ref',   token: '{{current_record.name}}'                    },
-            { label: 'State',           token: '{{current_record.state}}'                   },
-            { label: 'Company Name',    token: '{{current_record.company_id.name}}'         },
-            { label: 'Order Date',      token: '{{current_record.date_order}}'              },
-        ];
-    }
-
     /**
      * Tags currently found in the payload JSON.
      */
@@ -318,20 +294,12 @@ export class WebhookNode extends ConfigurationBase {
         try {
             payloadObj = JSON.parse(payloadStr);
         } catch(e) {
-            // If invalid JSON, fallback to just finding the common tokens in the raw string
-            return this.commonTokens
-                       .filter(tok => payloadStr.includes(tok.token))
-                       .map(tok => ({ label: tok.label, token: tok.token, key: tok.token, isCustom: false }));
+            return [];
         }
         
         const tags = [];
         for (const [key, value] of Object.entries(payloadObj)) {
-            const matchedToken = this.commonTokens.find(t => typeof value === 'string' && value === t.token);
-            if (matchedToken) {
-                tags.push({ label: matchedToken.label, token: matchedToken.token, key: key, isCustom: false });
-            } else {
-                tags.push({ label: key, token: key, key: key, isCustom: true });
-            }
+            tags.push({ label: key, token: value, key: key, isCustom: true });
         }
         return tags;
     }
@@ -348,37 +316,10 @@ export class WebhookNode extends ConfigurationBase {
                 this.fieldState.webhook_payload = JSON.stringify(payloadObj, null, 2);
             }
         } catch(e) {
-            // Rough fallback if invalid JSON: Try to strip the line containing the key/token
             const escaped = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
             const regex = new RegExp(`.*"${escaped}".*\\n?`, 'g');
             this.fieldState.webhook_payload = currentText.replace(regex, '').trim();
         }
-    }
-
-    /**
-     * Add a selected field token to the payload JSON.
-     */
-    addFieldToPayload(ev) {
-        const token = ev.target.value;
-        if (!token) return;
-        
-        if (token === 'CUSTOM') {
-            this.uiState.showCustomPayloadForm = true;
-            this.uiState.customPayloadKey = '';
-            this.uiState.customPayloadValue = '';
-            ev.target.value = "";
-            return;
-        }
-        
-        const selected = this.commonTokens.find(t => t.token === token);
-        if (!selected) return;
-        
-        // Generate a valid JSON key from the label (e.g. "Amount Total" -> "amount_total")
-        const key = selected.label.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
-        this._injectToPayload(key, token);
-        
-        // Reset select dropdown
-        ev.target.value = "";
     }
 
     /**
