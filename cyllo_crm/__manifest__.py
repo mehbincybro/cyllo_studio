@@ -33,7 +33,6 @@
     'data': [
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
-        'data/crm_lost_reason_data.xml',
         'data/mail_template.xml',
         'data/crm_get_customer_local_time.xml',
         'data/crm_setup_automated_action.xml',

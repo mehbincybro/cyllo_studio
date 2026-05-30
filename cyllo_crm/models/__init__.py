@@ -30,4 +30,3 @@ from . import crm_recent_summary
 from . import mail_message
 from . import res_partner
 from . import base_automation
-

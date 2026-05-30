@@ -21,20 +21,17 @@
 #############################################################################
 import logging
 from datetime import date, datetime, timedelta
+from zoneinfo import ZoneInfo
 
+import pytz
 from dateutil.relativedelta import relativedelta
+from langchain_core.messages import HumanMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
+from lxml import html
 from markupsafe import Markup
-
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
-import datetime
 from odoo.http import request
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage
-from datetime import datetime
-from zoneinfo import ZoneInfo
-import pytz
-from lxml import html
 
 _logger = logging.getLogger(__name__)
 
@@ -330,6 +327,26 @@ class CrmLead(models.Model):
 
         return dashboard_data
 
+    def _get_company_currency_sale_revenue(self, leads):
+        """Return confirmed sales revenue converted to current company currency."""
+        company_id = self.env.company
+        revenue = 0
+        label = "Total Revenue"
+        if 'order_ids' in self.env['crm.lead']._fields:
+            sale_orders = leads.order_ids.filtered(
+                lambda order: order.state == 'sale') if leads else []
+            for order_id in sale_orders:
+                revenue += order_id.currency_id._convert(
+                    order_id.amount_total,
+                    company_id.currency_id,
+                    company_id,
+                    fields.Date.to_date(order_id.date_order),
+                )
+        else:
+            revenue = sum(leads.mapped('expected_revenue')) if leads else 0
+            label = "Total Expected Revenue"
+        return revenue, label
+
     def _get_metrics_data(self, domain=None, daterange=None):
         """Calculate key metrics with month-over-month comparison"""
         start_date = next(
@@ -384,12 +401,10 @@ class CrmLead(models.Model):
             lambda r: not r.stage_id.is_won) if prev_leads else []
 
         # Calculate metrics
-        current_revenue = sum(
-            current_won_leads.mapped('expected_revenue') or [
-                0]) if current_won_leads else 0
-        last_month_revenue = sum(
-            previous_won_leads.mapped('expected_revenue') or [
-                0]) if previous_won_leads else 0
+        current_revenue, label = self._get_company_currency_sale_revenue(
+            current_won_leads)
+        last_month_revenue, label = self._get_company_currency_sale_revenue(
+            previous_won_leads)
 
         active_leads_count = len(current_active_leads)
         last_month_active_leads = len(previous_active_leads)
@@ -415,11 +430,13 @@ class CrmLead(models.Model):
         return {
             'total_revenue': {
                 'value': current_revenue,
+                'label': label,
                 'change': revenue_change
             },
             'active_leads': {
                 'value': active_leads_count,
-                'change': leads_change
+                'change': leads_change,
+                'records': current_active_leads.ids
             },
             'conversion_rate': {
                 'value': round(current_conversion_rate, 1),
@@ -427,7 +444,8 @@ class CrmLead(models.Model):
             },
             'deals_closed': {
                 'value': deals_closed_count,
-                'change': deals_change
+                'change': deals_change,
+                'records': current_won_leads.ids
             }
         }
 
@@ -465,7 +483,7 @@ class CrmLead(models.Model):
             # Get leads created in the month
             leads_created = self.search(leads_created_domain)
 
-            revenue = sum(won_leads.mapped('expected_revenue') or [0])
+            revenue = sum(won_leads.mapped('order_ids.amount_total') or [0])
             leads_count = len(leads_created)
 
             data.append({

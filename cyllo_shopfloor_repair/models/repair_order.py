@@ -49,4 +49,3 @@ class RepairOrder(models.Model):
             'views': [(notes_view_id, 'form')],
             'target': 'new',
         }
-

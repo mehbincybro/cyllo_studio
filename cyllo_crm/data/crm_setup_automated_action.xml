@@ -9,7 +9,7 @@
         <field name="binding_view_types">form</field>
         <field name="state">code</field>
         <field name="code">
-action = records.action_create_automation()
+            action = records.action_create_automation()
         </field>
     </record>
 </odoo>
