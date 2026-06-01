@@ -436,7 +436,7 @@ class CrmLead(models.Model):
             'active_leads': {
                 'value': active_leads_count,
                 'change': leads_change,
-                'records': current_active_leads.ids
+                'records': current_active_leads.ids if current_active_leads else []
             },
             'conversion_rate': {
                 'value': round(current_conversion_rate, 1),
@@ -445,7 +445,7 @@ class CrmLead(models.Model):
             'deals_closed': {
                 'value': deals_closed_count,
                 'change': deals_change,
-                'records': current_won_leads.ids
+                'records': current_won_leads.ids if current_won_leads else []
             }
         }
 

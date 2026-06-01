@@ -65,11 +65,11 @@
                         </div>
                     </setting>
                     <setting
-                            id="module_crm_survey_setting"
+                            id="module_cyllo_crm_survey_setting"
                             help="Enable CRM Survey to create, manage, and analyze customer surveys directly within the CRM.">
-                        <field name="module_crm_survey"/>
+                        <field name="module_cyllo_crm_survey"/>
                         <div class="content-group"
-                             invisible="not module_crm_survey">
+                             invisible="not module_cyllo_crm_survey">
                             <span>
                                 When enabled, users can create and manage
                                 customer surveys,

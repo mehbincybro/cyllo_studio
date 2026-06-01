@@ -56,10 +56,10 @@ class ResConfigSettings(models.TransientModel):
         help="Enable digitization of visiting cards to automatically extract contact details and create CRM leads.",
         config_parameter="cyllo_crm.module_cyllo_visiting_card_digitization"
     )
-    module_crm_survey = fields.Boolean(
+    module_cyllo_crm_survey = fields.Boolean(
         string="CRM Survey",
         help="Enable CRM Survey to create, manage, and analyze customer surveys directly within the CRM.",
-        config_parameter="cyllo_crm.module_crm_survey"
+        config_parameter="cyllo_crm.module_cyllo_crm_survey"
     )
 
     module_cyllo_crm_google_form = fields.Boolean(
@@ -112,7 +112,7 @@ class ResConfigSettings(models.TransientModel):
                 visiting_card_module.button_immediate_install()
 
         # Install CRM Survey module
-        if self.module_crm_survey:
+        if self.module_cyllo_crm_survey:
             crm_survey_module = Module.search(
                 [('name', '=', 'crm_survey'),
                  ('state', '!=', 'installed')],

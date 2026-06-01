@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-name="crm_dashboard.crm_dashboard_template">
-        <div class="o_crm_dashboard">
+        <div t-att-class="'o_crm_dashboard' + (state.isSampleData ? ' sample-data-mode' : '')">
             <!-- Header Section -->
             <div class="dashboard-header">
                 <div class="header-content">
@@ -12,173 +12,176 @@
                 </div>
                 <div class="dashboard-filters-section">
 
-                <div class="filters-header" t-att-style="state.showFilters ? 'border-radius: 12px 12px 0 0'  : 'border-radius: 12px'">
-                    <h3 class="filters-title">
-                        <i class="ri-filter-line"/>
-                        Filters
-                    </h3>
-                    <div class="filters-actions">
-                        <button class="btn btn-primary btn-sm d-flex justify-content-center align-items-center cy-filter-toggle-btn"
-                                t-on-click="onToggleFilters">
-                            <i t-att-class="state.showFilters ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"/>
-                            <span t-if="state.showFilters">Hide Filters</span>
-                            <span t-else="">Show Filters</span>
-                        </button>
-                        <button class="btn btn-secondary btn-sm"
-                                t-on-click="onResetFilters">
-                            <i class="ri-refresh-line"/>
-                            Reset
-                        </button>
-                    </div>
-                </div>
-
-                <div class="filters-content" t-if="state.showFilters">
-                    <!-- Main filter row - all filters in one row -->
-                    <div class="filter-row">
-                        <!-- Date Range Filter -->
-                        <div class="filter-item">
-                            <label class="filter-label">
-                                <i class="fa fa-calendar"/>
-                                Date Range
-                            </label>
-                            <div class="filter-control">
-                                <select class="form-select"
-                                        t-model="state.filters.dateRange"
-                                        t-on-change="onDateRangeChange">
-                                    <option value="today">Today</option>
-                                    <option value="this_week">This Week</option>
-                                    <option value="this_month"
-                                            selected="selected">This Month
-                                    </option>
-                                    <option value="this_quarter">This Quarter
-                                    </option>
-                                    <option value="this_year">This Year</option>
-                                    <!--                                    <option value="last_month">Last Month</option>-->
-                                    <!--                                    <option value="last_quarter">Last Quarter</option>-->
-                                    <!--                                    <option value="last_year">Last Year</option>-->
-                                    <option value="custom">Custom Range</option>
-                                </select>
-                            </div>
+                    <div class="filters-header"
+                         t-att-style="state.showFilters ? 'border-radius: 12px 12px 0 0'  : 'border-radius: 12px'">
+                        <h3 class="filters-title">
+                            <i class="ri-filter-line"/>
+                            Filters
+                        </h3>
+                        <div class="filters-actions">
+                            <button class="btn btn-primary btn-sm d-flex justify-content-center align-items-center cy-filter-toggle-btn"
+                                    t-on-click="onToggleFilters">
+                                <i t-att-class="state.showFilters ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"/>
+                                <span t-if="state.showFilters">Hide Filters</span>
+                                <span t-else="">Show Filters</span>
+                            </button>
+                            <button class="btn btn-secondary btn-sm"
+                                    t-on-click="onResetFilters">
+                                <i class="ri-refresh-line"/>
+                                Reset
+                            </button>
                         </div>
+                    </div>
 
-                        <!-- Sales Team Filter -->
-                        <div class="filter-item">
-                            <label class="filter-label">
-                                <i class="fa fa-users"/>
-                                Sales Team
-                            </label>
-                            <div class="filter-control">
-                                <select class="form-select"
-                                        t-model="state.filters.salesTeam"
-                                        t-on-change="onSalesTeamChange">
-                                    <option value="">All Teams</option>
-                                    <t t-if="state.salesTeams">
-                                        <t t-foreach="state.salesTeams"
-                                           t-as="team" t-key="team.id">
-                                            <option t-att-value="team.id"
-                                                    t-esc="team.name"/>
+                    <div class="filters-content" t-if="state.showFilters">
+                        <!-- Main filter row - all filters in one row -->
+                        <div class="filter-row">
+                            <!-- Date Range Filter -->
+                            <div class="filter-item">
+                                <label class="filter-label">
+                                    <i class="fa fa-calendar"/>
+                                    Date Range
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.dateRange"
+                                            t-on-change="onDateRangeChange">
+                                        <option value="today">Today</option>
+                                        <option value="this_week">This Week</option>
+                                        <option value="this_month"
+                                                selected="selected">This Month
+                                        </option>
+                                        <option value="this_quarter">This Quarter
+                                        </option>
+                                        <option value="this_year">This Year</option>
+                                        <option value="custom">Custom Range</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Sales Team Filter -->
+                            <div class="filter-item">
+                                <label class="filter-label">
+                                    <i class="fa fa-users"/>
+                                    Sales Team
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.salesTeam"
+                                            t-on-change="onSalesTeamChange">
+                                        <option value="">All Teams</option>
+                                        <t t-if="state.salesTeams">
+                                            <t t-foreach="state.salesTeams"
+                                               t-as="team" t-key="team.id">
+                                                <option t-att-value="team.id"
+                                                        t-esc="team.name"/>
+                                            </t>
                                         </t>
-                                    </t>
-                                </select>
+                                    </select>
+                                </div>
                             </div>
-                        </div>
 
-                        <!-- Salesperson Filter -->
-                        <div class="filter-item">
-                            <label class="filter-label">
-                                <i class="fa fa-user"/>
-                                Salesperson
-                            </label>
-                            <div class="filter-control">
-                                <select class="form-select"
-                                        t-model="state.filters.salesperson"
-                                        t-on-change="onSalespersonChange">
-                                    <option value="">All Salespersons</option>
-                                    <t t-if="state.salespersons">
-                                        <t t-foreach="state.salespersons"
-                                           t-as="person" t-key="person.id">
-                                            <option t-att-value="person.id"
-                                                    t-esc="person.name"/>
+                            <!-- Salesperson Filter -->
+                            <div class="filter-item">
+                                <label class="filter-label">
+                                    <i class="fa fa-user"/>
+                                    Salesperson
+                                </label>
+                                <div class="filter-control">
+                                    <select class="form-select"
+                                            t-model="state.filters.salesperson"
+                                            t-on-change="onSalespersonChange">
+                                        <option value="">All Salespersons</option>
+                                        <t t-if="state.salespersons">
+                                            <t t-foreach="state.salespersons"
+                                               t-as="person" t-key="person.id">
+                                                <option t-att-value="person.id"
+                                                        t-esc="person.name"/>
+                                            </t>
                                         </t>
-                                    </t>
-                                </select>
+                                    </select>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Custom Date Range (appears when custom is selected) -->
-                    <div class="custom-date-section"
-                         t-if="state.filters.dateRange === 'custom'">
-                        <div class="date-inputs">
-                            <div class="date-input-group">
-                                <label class="date-label">From Date</label>
-                                <input type="date" class=" date-input"
-                                       t-model="state.filters.dateFrom"
-                                       t-att-max="state.filters.dateTo"
-                                       t-on-change="onCustomDateChange"/>
-                            </div>
-                            <div class="date-separator">
-                                <i class="fa fa-arrow-right"/>
-                            </div>
-                            <div class="date-input-group">
-                                <label class="date-label">To Date</label>
-                                <input type="date" class="date-input"
-                                       t-model="state.filters.dateTo"
-                                       t-att-min="state.filters.dateFrom"
-                                       t-on-change="onCustomDateChange"/>
+                        <!-- Custom Date Range (appears when custom is selected) -->
+                        <div class="custom-date-section"
+                             t-if="state.filters.dateRange === 'custom'">
+                            <div class="date-inputs">
+                                <div class="date-input-group">
+                                    <label class="date-label">From Date</label>
+                                    <input type="date" class=" date-input"
+                                           t-model="state.filters.dateFrom"
+                                           t-att-max="state.filters.dateTo"
+                                           t-on-change="onCustomDateChange"/>
+                                </div>
+                                <div class="date-separator">
+                                    <i class="fa fa-arrow-right"/>
+                                </div>
+                                <div class="date-input-group">
+                                    <label class="date-label">To Date</label>
+                                    <input type="date" class="date-input"
+                                           t-model="state.filters.dateTo"
+                                           t-att-min="state.filters.dateFrom"
+                                           t-on-change="onCustomDateChange"/>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Active Filters Display -->
-                    <div class="active-filters-section"
-                         t-if="hasActiveFilters()">
-                        <div class="active-filters-header">
-                            <span class="active-filters-label">
-                                <i class="fa fa-tag"/>
-                                Active Filters
-                            </span>
-                        </div>
-                        <div class="filter-tags">
-                            <span class="filter-tag"
-                                  t-if="state.filters.dateRange !== 'this_month'">
-                                <span class="tag-content"
-                                      t-esc="getDateRangeLabel()"/>
-                                <i class="fa fa-times tag-remove"
-                                   t-on-click="clearDateFilter"/>
-                            </span>
-                            <span class="filter-tag"
-                                  t-if="state.filters.salesTeam">
-                                <span class="tag-content"
-                                      t-esc="'Team: ' + getSalesTeamName()"/>
-                                <i class="fa fa-times tag-remove"
-                                   t-on-click="clearSalesTeamFilter"/>
-                            </span>
-                            <span class="filter-tag"
-                                  t-if="state.filters.salesperson">
-                                <span class="tag-content"
-                                      t-esc="'Person: ' + getSalespersonName()"/>
-                                <i class="fa fa-times tag-remove"
-                                   t-on-click="clearSalespersonFilter"/>
-                            </span>
-                            <span class="filter-tag" t-if="state.filters.stage">
-                                <span class="tag-content"
-                                      t-esc="'Stage: ' + getStageName()"/>
-                                <i class="fa fa-times tag-remove"
-                                   t-on-click="clearStageFilter"/>
-                            </span>
+                        <!-- Active Filters Display -->
+                        <div class="active-filters-section"
+                             t-if="hasActiveFilters()">
+                            <div class="active-filters-header">
+                                <span class="active-filters-label">
+                                    <i class="fa fa-tag"/>
+                                    Active Filters
+                                </span>
+                            </div>
+                            <div class="filter-tags">
+                                <span class="filter-tag"
+                                      t-if="state.filters.dateRange !== 'this_month'">
+                                    <span class="tag-content"
+                                          t-esc="getDateRangeLabel()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearDateFilter"/>
+                                </span>
+                                <span class="filter-tag"
+                                      t-if="state.filters.salesTeam">
+                                    <span class="tag-content"
+                                          t-esc="'Team: ' + getSalesTeamName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearSalesTeamFilter"/>
+                                </span>
+                                <span class="filter-tag"
+                                      t-if="state.filters.salesperson">
+                                    <span class="tag-content"
+                                          t-esc="'Person: ' + getSalespersonName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearSalespersonFilter"/>
+                                </span>
+                                <span class="filter-tag" t-if="state.filters.stage">
+                                    <span class="tag-content"
+                                          t-esc="'Stage: ' + getStageName()"/>
+                                    <i class="fa fa-times tag-remove"
+                                       t-on-click="clearStageFilter"/>
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            </div>
 
+            <div class="sample-data-banner" t-if="state.isSampleData">
+                <i class="ri-information-line"/>
+                <span>No data found. Showing sample data.</span>
+            </div>
 
             <!-- Key Metrics Cards -->
             <div class="metrics-grid">
                 <t t-foreach="state.metrics" t-as="metric" t-key="metric_index">
                     <div class="metric-card"
-                         t-att-class="'metric-card-' + metric.type">
+                         t-att-data-metric-type="metric.type"
+                         t-on-click="() => onMetricClick(metric, this.action)">
                         <div class="metric-content">
                             <div class="metric-info">
                                 <p class="metric-label" t-esc="metric.label"/>
@@ -259,20 +262,6 @@
                     <div class="chart-container">
                         <canvas t-ref="activitiesChart"/>
                     </div>
-                    <!--                    <div class="activities-legend">-->
-                    <!--                        <div class="legend-item">-->
-                    <!--                            <span class="legend-color calls-color"/>-->
-                    <!--                            <span class="legend-text">Calls</span>-->
-                    <!--                        </div>-->
-                    <!--                        <div class="legend-item">-->
-                    <!--                            <span class="legend-color emails-color"/>-->
-                    <!--                            <span class="legend-text">Emails</span>-->
-                    <!--                        </div>-->
-                    <!--                        <div class="legend-item">-->
-                    <!--                            <span class="legend-color meetings-color"/>-->
-                    <!--                            <span class="legend-text">Meetings</span>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
                 </div>
 
                 <!-- Top Performers -->
@@ -321,13 +310,6 @@
                                 <t t-esc="state.unreadVisibleCount"/>
                             </span>
                         </div>
-                        <!--                        <div class="notifications-actions">-->
-                        <!--                            &lt;!&ndash; Refresh Button &ndash;&gt;-->
-                        <!--                            <button class="btn btn-refresh" t-on-click="onRefreshNotifications">-->
-                        <!--                                <i class="fa fa-sync-alt me-1"/>-->
-                        <!--                                <span>Refresh</span>-->
-                        <!--                            </button>-->
-                        <!--                        </div>-->
                     </div>
 
                     <div class="notifications-content">
@@ -359,7 +341,7 @@
 
                                     <!-- Notification Content -->
                                     <div class="notification-content">
-                                         <div class="notification-header">
+                                        <div class="notification-header">
                                             <div class="notification-meta">
                                             </div>
                                         </div>
@@ -410,73 +392,6 @@
                     </div>
                 </div>
 
-                <!--                &lt;!&ndash; Activities Status Chart Section &ndash;&gt;-->
-                <!--                <div class="activities-status-section">-->
-                <!--                    <div class="chart-header">-->
-                <!--                        <h3 class="chart-title">-->
-                <!--                            <i class="fa fa-tasks"/>-->
-                <!--                            Activities Status-->
-                <!--                        </h3>-->
-                <!--                        <div class="chart-actions">-->
-                <!--                            <button class="btn btn-sm btn-secondary" t-on-click="onExportChart" data-chart="activities-status">-->
-                <!--                                <i class="fa fa-download"/>-->
-                <!--                            </button>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-
-                <!--                    <div class="chart-container">-->
-                <!--                        <canvas t-ref="activitiesStatusChart"/>-->
-                <!--                    </div>-->
-
-                <!--                    &lt;!&ndash; Status Summary Cards &ndash;&gt;-->
-                <!--                    <div class="status-summary">-->
-                <!--                        <div class="status-card pending-card">-->
-                <!--                            <div class="status-info">-->
-                <!--                                <div class="status-number" t-esc="state.activitiesStatus.pending || 0"/>-->
-                <!--                                <div class="status-label">Pending</div>-->
-                <!--                            </div>-->
-                <!--                            <div class="status-icon">-->
-                <!--                                <i class="fa fa-clock"/>-->
-                <!--                            </div>-->
-                <!--                        </div>-->
-
-                <!--                        <div class="status-card completed-card">-->
-                <!--                            <div class="status-info">-->
-                <!--                                <div class="status-number" t-esc="state.activitiesStatus.completed || 0"/>-->
-                <!--                                <div class="status-label">Completed</div>-->
-                <!--                            </div>-->
-                <!--                            <div class="status-icon">-->
-                <!--                                <i class="fa fa-check-circle"/>-->
-                <!--                            </div>-->
-                <!--                        </div>-->
-
-                <!--                        <div class="status-card overdue-card" t-if="state.activitiesStatus.overdue">-->
-                <!--                            <div class="status-info">-->
-                <!--                                <div class="status-number" t-esc="state.activitiesStatus.overdue || 0"/>-->
-                <!--                                <div class="status-label">Overdue</div>-->
-                <!--                            </div>-->
-                <!--                            <div class="status-icon">-->
-                <!--                                <i class="fa fa-exclamation-triangle"/>-->
-                <!--                            </div>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-
-                <!--                    &lt;!&ndash; Chart Legend &ndash;&gt;-->
-                <!--                    <div class="chart-legend">-->
-                <!--                        <div class="legend-item">-->
-                <!--                            <span class="legend-color pending-color"/>-->
-                <!--                            <span class="legend-text">Pending Activities</span>-->
-                <!--                        </div>-->
-                <!--                        <div class="legend-item">-->
-                <!--                            <span class="legend-color completed-color"/>-->
-                <!--                            <span class="legend-text">Completed Activities</span>-->
-                <!--                        </div>-->
-                <!--                        <div class="legend-item" t-if="state.activitiesStatus.overdue">-->
-                <!--                            <span class="legend-color overdue-color"/>-->
-                <!--                            <span class="legend-text">Overdue Activities</span>-->
-                <!--                        </div>-->
-                <!--                    </div>-->
-                <!--                </div>-->
             </div>
             <br></br>
 
