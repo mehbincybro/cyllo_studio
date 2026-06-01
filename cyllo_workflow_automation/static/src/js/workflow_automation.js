@@ -161,7 +161,7 @@ export class WorkFlowAuto extends Component {
 
         this.env.bus.addEventListener("UPDATE-CODE", this.updateCode.bind(this));
         this.env.bus.addEventListener("UPDATE-VARIABLE-STATE", () => {
-            this.state.variables = [...this.env.variables.context.variables]
+            this.state.variables = [...(this.env.variables.context.variables || [])]
         });
 
         this.env.bus.addEventListener("DELETE:NODE:BY:CLICK", ({detail}) => {

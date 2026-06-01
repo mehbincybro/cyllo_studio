@@ -17,12 +17,15 @@ import {FieldTypeDropdown} from "../Assists/fieldTypeDropdown/fieldTypeDropDown"
 import {MailRecordPathSelector} from "../mailNode/subcomponents/mailRecordPathSelector";
 import {MultiDataSelector} from "../FollowerNode/subComponents/multiDataSelector";
 import {_t} from "@web/core/l10n/translation";
+import {VariablePickerDialog} from "../Assists/variablePickerDialog/variablePickerDialog";
 
 export class SmsNode extends ConfigurationBase {
     static props = ['*'];
 
     setup() {
         super.setup();
+        this.messageTextareaRef = owl.useRef("messageTextarea");
+        this.dialogService = useService("dialog");
     }
 
     get getEmailTypes() {
@@ -57,6 +60,32 @@ export class SmsNode extends ConfigurationBase {
 
     updateMessage(message) {
         this.fieldState.sms_message = message
+    }
+
+    openVariablePicker() {
+        this.dialogService.add(VariablePickerDialog, {
+            variables: this.props.variables,
+            modelState: this.modelState,
+            onInsert: (expression) => {
+                const textarea = this.messageTextareaRef.el;
+                if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const text = this.getMessage;
+                    const before = text.substring(0, start);
+                    const after = text.substring(end, text.length);
+                    const newText = before + expression + after;
+                    this.updateMessage(newText);
+                    setTimeout(() => {
+                        textarea.value = newText;
+                        textarea.focus();
+                        textarea.setSelectionRange(start + expression.length, start + expression.length);
+                    }, 0);
+                } else {
+                    this.updateMessage(this.getMessage + expression);
+                }
+            }
+        });
     }
 
     setInputValue(ev) {
@@ -158,7 +187,9 @@ export class SmsNode extends ConfigurationBase {
     }
 
     toggleIncludeVariable(value, index) {
-        if (![value, undefined].includes(this.fieldState.sms_partner_ids[index].selectionType)) {
+        if (!this.fieldState.sms_partner_ids[index] || typeof this.fieldState.sms_partner_ids[index] !== 'object') {
+            this.fieldState.sms_partner_ids[index] = {value: [], selectionType: value};
+        } else if (![value, undefined].includes(this.fieldState.sms_partner_ids[index].selectionType)) {
             this.fieldState.sms_partner_ids[index] = {value: [], selectionType: value}
         } else this.fieldState.sms_partner_ids[index].selectionType = value
     }
@@ -220,7 +251,8 @@ export class SmsNode extends ConfigurationBase {
         if (sms_isTemplate) {
             code = `template = env["sms.template"].browse(${sms_template.id})\n${record.variable_name}._message_sms_with_template(template=template,partner_ids=${sms_to})`
         } else {
-            code = `recipients =env["res.partner"].browse(${sms_to})\nsms_values = [{'body': '${sms_message || ''}', 'number':recipient.phone,'partner_id':recipient.id} for recipient in recipients]\nrecords.env['sms.sms'].sudo().create(sms_values).send()`
+            const processed_sms_message = (sms_message || "").replace(/\{\{\s*/g, '{').replace(/\s*\}\}/g, '}');
+            code = `recipients =env["res.partner"].browse(${sms_to})\nsms_values = [{'body': f"""${processed_sms_message}""", 'number':recipient.phone,'partner_id':recipient.id} for recipient in recipients]\nrecords.env['sms.sms'].sudo().create(sms_values).send()`
         }
         return code || "";
     }
