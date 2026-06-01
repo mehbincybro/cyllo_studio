@@ -31,7 +31,6 @@ class TourInquiry(models.Model):
     
     name = fields.Char(string='Inquiry Reference', required=True, copy=False, readonly=True,
                        index=True, default=lambda self: _('New'))
-    
     # Customer Information
     partner_id = fields.Many2one('res.partner', string='Customer', tracking=True)
     customer_name = fields.Char(string='Name', required=True, tracking=True)
@@ -39,28 +38,23 @@ class TourInquiry(models.Model):
     customer_phone = fields.Char(string='Phone', tracking=True)
     customer_mobile = fields.Char(string='Mobile')
     customer_address = fields.Text(string='Address')
-    
     # Package Details
     package_id = fields.Many2one('tour.package', string='Tour Package', required=True, 
                                   tracking=True, ondelete='restrict')
     package_name = fields.Char(related='package_id.name', string='Package', readonly=True)
-    
     # Inquiry Details
     inquiry_date = fields.Datetime(string='Inquiry Date', default=fields.Datetime.now, 
                                     required=True, tracking=True)
     preferred_date = fields.Date(string='Preferred Travel Date', tracking=True)
-    
     # Passenger Details
     num_adults = fields.Integer(string='Number of Adults', default=1)
     num_children = fields.Integer(string='Number of Children', default=0)
     num_infants = fields.Integer(string='Number of Infants', default=0)
-    total_persons = fields.Integer(compute='_compute_total_persons', string='Total Persons')
-    
+    total_persons = fields.Integer(compute='_compute_total_persons', string='Total Persons', store=True)
     # Inquiry Content
     subject = fields.Char(string='Subject')
     message = fields.Text(string='Message/Requirements', required=True)
     special_requirements = fields.Text(string='Special Requirements')
-    
     # Price Estimate
     estimated_price = fields.Monetary(
         string='Estimated Price',
@@ -72,7 +66,6 @@ class TourInquiry(models.Model):
     )
     currency_id = fields.Many2one('res.currency', string='Currency',
                                    default=lambda self: self.env.company.currency_id)
-    
     # Status and Assignment
     state = fields.Selection([
         ('new', 'New'),
@@ -81,21 +74,23 @@ class TourInquiry(models.Model):
         ('converted', 'Converted to Booking'),
         ('rejected', 'Rejected'),
     ], string='Status', default='new', required=True, tracking=True)
-    
     user_id = fields.Many2one('res.users', string='Assigned To', tracking=True,
                               default=lambda self: self.env.user)
     team_id = fields.Many2one('crm.team', string='Sales Team', tracking=True)
-    
     # CRM Integration
     lead_id = fields.Many2one('crm.lead', string='Lead/Opportunity', tracking=True)
-    
     # Booking Conversion
     booking_id = fields.Many2one('tour.booking', string='Converted Booking', readonly=True)
+    sale_order_id = fields.Many2one('sale.order', string='Quotation', readonly=True, copy=False)
+    sale_order_count = fields.Integer(compute='_compute_sale_order_count', string='Quotation Count')
+
+    def _compute_sale_order_count(self):
+        for inquiry in self:
+            inquiry.sale_order_count = 1 if inquiry.sale_order_id else 0
     
     # Company
     company_id = fields.Many2one('res.company', string='Company',
                                   default=lambda self: self.env.company)
-    
     # Source
     source = fields.Selection([
         ('website', 'Website'),
@@ -105,10 +100,8 @@ class TourInquiry(models.Model):
         ('referral', 'Referral'),
         ('other', 'Other'),
     ], string='Source')
-    
     # Notes
     notes = fields.Text(string='Internal Notes')
-    
     # Priority
     priority = fields.Selection([
         ('0', 'Low'),
@@ -127,7 +120,6 @@ class TourInquiry(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('tour.inquiry') or _('New')
-            
             # Create partner if doesn't exist
             if not vals.get('partner_id') and vals.get('customer_email'):
                 partner = self.env['res.partner'].search([
@@ -141,16 +133,26 @@ class TourInquiry(models.Model):
                         'mobile': vals.get('customer_mobile'),
                     })
                 vals['partner_id'] = partner.id
-        
+            # Explicitly calculate estimated price if creating from website
+            if 'estimated_price' not in vals and vals.get('package_id'):
+                package = self.env['tour.package'].browse(vals['package_id'])
+                if package.exists():
+                    adults = vals.get('num_adults', 1)
+                    children = vals.get('num_children', 0)
+                    infants = vals.get('num_infants', 0)
+                    if package.price_type == 'per_person':
+                        vals['estimated_price'] = (adults * (package.adult_price or package.base_price)) + \
+                                                  (children * (package.child_price or 0)) + \
+                                                  (infants * (package.infant_price or 0))
+                    else:
+                        vals['estimated_price'] = package.base_price
         inquiries = super().create(vals_list)
-        
         # Send auto-reply email
         for inquiry in inquiries:
             inquiry._send_acknowledgment_email()
             # Create CRM lead if configured
             if inquiry.company_id.tour_auto_create_lead:
                 inquiry._create_crm_lead()
-        
         return inquiries
     
     def write(self, vals):
@@ -204,15 +206,75 @@ class TourInquiry(models.Model):
                 inquiry.lead_id.message_post(body=_('Tour inquiry marked as In Progress'))
     
     def action_quote(self):
-        """Send quote and update CRM lead"""
-        self.write({'state': 'quoted'})
+        """Generate quotation, send quote and update CRM lead"""
         for inquiry in self:
+            if not inquiry.sale_order_id and inquiry.package_id:
+                # Generate a draft sale order
+                product = inquiry.package_id.product_id
+                if not product:
+                    product = self.env.ref('cyllo_vacations.product_tour_booking', raise_if_not_found=False)
+                if product:
+                    order_lines = []
+                    description_lines = [
+                        f"Tour Package: {inquiry.package_name}",
+                        f"Destination: {inquiry.package_id.destination}",
+                        f"Duration: {inquiry.package_id.duration_days} Days / {inquiry.package_id.duration_nights} Nights",
+                    ]
+                    if inquiry.preferred_date:
+                        description_lines.append(f"Travel Date: {inquiry.preferred_date}")
+                    base_description = '\n'.join(description_lines)
+                    if inquiry.package_id.price_type == 'per_person':
+                        if inquiry.num_adults:
+                            order_lines.append((0, 0, {
+                                'product_id': product.id,
+                                'name': f"{inquiry.package_name} - Adult x{inquiry.num_adults}\n{base_description}",
+                                'product_uom_qty': inquiry.num_adults,
+                                'price_unit': inquiry.package_id.adult_price or inquiry.package_id.base_price,
+                            }))
+                        if inquiry.num_children and inquiry.package_id.child_price:
+                            order_lines.append((0, 0, {
+                                'product_id': product.id,
+                                'name': f"{inquiry.package_name} - Child x{inquiry.num_children}",
+                                'product_uom_qty': inquiry.num_children,
+                                'price_unit': inquiry.package_id.child_price,
+                            }))
+                        if inquiry.num_infants and inquiry.package_id.infant_price:
+                            order_lines.append((0, 0, {
+                                'product_id': product.id,
+                                'name': f"{inquiry.package_name} - Infant x{inquiry.num_infants}",
+                                'product_uom_qty': inquiry.num_infants,
+                                'price_unit': inquiry.package_id.infant_price,
+                            }))
+                    else:
+                        order_lines.append((0, 0, {
+                            'product_id': product.id,
+                            'name': f"{inquiry.package_name}\n{base_description}",
+                            'product_uom_qty': 1,
+                            'price_unit': inquiry.package_id.base_price,
+                        }))
+                    order_vals = {
+                        'partner_id': inquiry.partner_id.id,
+                        'partner_invoice_id': inquiry.partner_id.id,
+                        'partner_shipping_id': inquiry.partner_id.id,
+                        'date_order': fields.Datetime.now(),
+                        'validity_date': inquiry.preferred_date,
+                        'user_id': inquiry.user_id.id,
+                        'team_id': inquiry.team_id.id if inquiry.team_id else False,
+                        'order_line': order_lines,
+                        'client_order_ref': inquiry.name,
+                        'note': f"Quotation for Tour Inquiry: {inquiry.name}",
+                        'currency_id': inquiry.currency_id.id,
+                    }
+                    sale_order = self.env['sale.order'].sudo().create(order_vals)
+                    inquiry.sale_order_id = sale_order.id
+                    inquiry.message_post(body=_('Quotation created: %s', sale_order.name))
             # Update CRM lead expected revenue
             if inquiry.lead_id:
                 inquiry.lead_id.write({
                     'expected_revenue': inquiry.estimated_price,
                 })
                 inquiry.lead_id.message_post(body=_('Quote sent to customer. Estimated price: %s', inquiry.estimated_price))
+        self.write({'state': 'quoted'})
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
@@ -256,10 +318,8 @@ class TourInquiry(models.Model):
     def action_create_booking_direct(self):
         """Directly create booking from inquiry without wizard"""
         self.ensure_one()
-        
         if self.booking_id:
             raise ValidationError(_('A booking already exists for this inquiry.'))
-        
         booking_vals = {
             'package_id': self.package_id.id,
             'partner_id': self.partner_id.id,
@@ -273,20 +333,17 @@ class TourInquiry(models.Model):
             'user_id': self.user_id.id,
             'team_id': self.team_id.id if self.team_id else False,
             'inquiry_id': self.id,
+            'sale_order_id': self.sale_order_id.id if self.sale_order_id else False,
         }
-        
         booking = self.env['tour.booking'].create(booking_vals)
         self.write({
             'state': 'converted',
             'booking_id': booking.id,
         })
-        
         # Update CRM lead
         if self.lead_id:
             self.lead_id.message_post(body=_('Converted to Booking: %s', booking.name))
-        
         self.message_post(body=_('Booking created: %s', booking.name))
-        
         return {
             'type': 'ir.actions.act_window',
             'name': _('Booking'),
@@ -305,6 +362,20 @@ class TourInquiry(models.Model):
             'name': _('CRM Lead'),
             'res_model': 'crm.lead',
             'res_id': self.lead_id.id,
+            'view_mode': 'form',
+            'target': 'current',
+        }
+    
+    def action_view_sale_order(self):
+        """View related quotation"""
+        self.ensure_one()
+        if not self.sale_order_id:
+            raise ValidationError(_('No quotation linked to this inquiry.'))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Quotation'),
+            'res_model': 'sale.order',
+            'res_id': self.sale_order_id.id,
             'view_mode': 'form',
             'target': 'current',
         }

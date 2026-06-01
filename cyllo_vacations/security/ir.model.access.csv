@@ -48,4 +48,5 @@ access_tour_passenger_user,tour.passenger.user,model_tour_passenger,group_cyllo_
 access_tour_passenger_manager,tour.passenger.manager,model_tour_passenger,group_cyllo_vacations_manager,1,1,1,1
 access_tour_package_pricing_rule_user,tour.package.pricing.rule.user,model_tour_package_pricing_rule,group_cyllo_vacations_user,1,1,1,1
 access_tour_package_pricing_rule_manager,tour.package.pricing.rule.manager,model_tour_package_pricing_rule,group_cyllo_vacations_manager,1,1,1,1
-
+access_tour_booking_wizard_user,tour.booking.wizard.user,model_tour_booking_wizard,group_cyllo_vacations_user,1,1,1,1
+access_tour_booking_wizard_manager,tour.booking.wizard.manager,model_tour_booking_wizard,group_cyllo_vacations_manager,1,1,1,1

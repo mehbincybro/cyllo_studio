@@ -58,6 +58,7 @@ class TourBookingWizard(models.TransientModel):
             'customer_notes': self.customer_notes,
             'special_requirements': self.special_requirements,
             'inquiry_id': self.inquiry_id.id if self.inquiry_id else False,
+            'sale_order_id': self.inquiry_id.sale_order_id.id if self.inquiry_id and self.inquiry_id.sale_order_id else False,
             'state': 'draft',
         }
         # Copy data from inquiry if available

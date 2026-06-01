@@ -318,21 +318,42 @@
                             </t>
                         </div>
                         
-                        <!-- Terms and Conditions -->
+                        <!-- Terms and Conditions & Cancellation Policy -->
                         <t t-if="package.terms_conditions or package.cancellation_policy">
-                            <div class="card mb-4">
-                                <div class="card-header">
-                                    <h5 class="mb-0"><i class="fa fa-file-text-o"/> Terms &amp; Conditions</h5>
-                                </div>
-                                <div class="card-body">
-                                    <t t-if="package.terms_conditions">
-                                        <t t-raw="package.terms_conditions"/>
-                                    </t>
-                                    <t t-if="package.cancellation_policy">
-                                        <hr/>
-                                        <h6>Cancellation Policy</h6>
-                                        <t t-raw="package.cancellation_policy"/>
-                                    </t>
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card tour-policy-card">
+                                        <div class="card-body p-4">
+                                            <ul class="nav nav-tabs mb-3" id="policyTabs" role="tablist">
+                                                <t t-if="package.terms_conditions">
+                                                    <li class="nav-item" role="presentation">
+                                                        <button class="nav-link active tour-policy-tab-link" id="terms-tab" data-bs-toggle="tab" data-bs-target="#terms-content" type="button" role="tab" aria-controls="terms-content" aria-selected="true">
+                                                            <i class="fa fa-file-text-o me-2"/>Terms &amp; Conditions
+                                                        </button>
+                                                    </li>
+                                                </t>
+                                                <t t-if="package.cancellation_policy">
+                                                    <li class="nav-item" role="presentation">
+                                                        <button t-attf-class="nav-link tour-policy-tab-link #{'active' if not package.terms_conditions else ''}" id="cancel-tab" data-bs-toggle="tab" data-bs-target="#cancel-content" type="button" role="tab" aria-controls="cancel-content" aria-selected="false">
+                                                            <i class="fa fa-ban me-2"/>Cancellation Policy
+                                                        </button>
+                                                    </li>
+                                                </t>
+                                            </ul>
+                                            <div class="tab-content" id="policyTabContent">
+                                                <t t-if="package.terms_conditions">
+                                                    <div class="tab-pane fade show active" id="terms-content" role="tabpanel" aria-labelledby="terms-tab">
+                                                        <t t-raw="package.terms_conditions"/>
+                                                    </div>
+                                                </t>
+                                                <t t-if="package.cancellation_policy">
+                                                    <div t-attf-class="tab-pane fade #{'show active' if not package.terms_conditions else ''}" id="cancel-content" role="tabpanel" aria-labelledby="cancel-tab">
+                                                        <t t-raw="package.cancellation_policy"/>
+                                                    </div>
+                                                </t>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </t>

@@ -183,6 +183,9 @@
                             </group>
                         </page>
                         <page string="Expenses" name="expenses">
+                            <div class="mb-2">
+                                <button name="action_generate_estimated_expenses" type="object" string="Generate Estimated Expenses" class="btn-secondary" icon="fa-calculator" title="Automatically generate draft expenses based on the selected package services (hotels, transport, meals, and attractions). Any existing draft expenses will be updated."/>
+                            </div>
                             <field name="expense_ids" context="{'default_booking_id': id}">
                                 <tree editable="bottom">
                                     <field name="date"/>

@@ -74,7 +74,7 @@
         
         <t t-if="object.package_id">
         <div style="text-align: center; margin: 30px 0;">
-            <a t-attf-href="/tour/booking/{{ object.package_id.slug or object.package_id.id }}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Book Now</a>
+            <a t-attf-href="/tour/booking/{{ object.package_id.id }}" style="background-color: #28a745; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">Book Now</a>
         </div>
         </t>
         
