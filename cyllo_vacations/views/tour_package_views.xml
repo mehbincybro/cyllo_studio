@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- Tour Package Tree View -->
+    <record id="tour_package_view_tree" model="ir.ui.view">
+        <field name="name">tour.package.view.tree</field>
+        <field name="model">tour.package</field>
+        <field name="arch" type="xml">
+            <tree string="Tour Packages" sample="1">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="code"/>
+                <field name="destination"/>
+                <field name="category_id"/>
+                <field name="duration_days"/>
+                <field name="base_price" widget="monetary"/>
+                <field name="currency_id" column_invisible="1"/>
+                <field name="state" decoration-success="state=='published'" decoration-info="state=='draft'" decoration-muted="state=='archived'"/>
+                <field name="is_published" widget="boolean_toggle"/>
+                <field name="booking_count"/>
+                <field name="inquiry_count"/>
+                <field name="view_count"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- Tour Package Form View -->
+    <record id="tour_package_view_form" model="ir.ui.view">
+        <field name="name">tour.package.view.form</field>
+        <field name="model">tour.package</field>
+        <field name="arch" type="xml">
+            <form string="Tour Package">
+                <header>
+                    <button name="action_publish" type="object" string="Publish" class="oe_highlight" invisible="state == 'published'"/>
+                    <button name="action_apply_pricing_rules" type="object" string="Apply Pricing Rules" class="btn-secondary" invisible="state == 'archived'"/>
+                    <button name="action_draft" type="object" string="Set to Draft" invisible="state == 'draft'"/>
+                    <button name="action_archive" type="object" string="Archive" invisible="state == 'archived'"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,published"/>
+                </header>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" string="Package Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. 7 Days Paris Tour"/>
+                        </h1>
+                        <div class="d-flex align-items-center gap-4 mt-2">
+                            <field name="code" readonly="1" class="fw-bold mb-0"/>
+                            <div class="d-flex align-items-center gap-2" title="Highlight this package prominently as a featured offering.">
+                                <field name="is_featured" widget="boolean_toggle" nolabel="1" class="mb-0"/>
+                                <label for="is_featured" class="mb-0 fw-normal text-nowrap"/>
+                            </div>
+                            <div class="d-flex align-items-center gap-2" title="Mark this package as a popular choice among customers.">
+                                <field name="is_popular" widget="boolean_toggle" nolabel="1" class="mb-0"/>
+                                <label for="is_popular" class="mb-0 fw-normal text-nowrap"/>
+                            </div>
+                        </div>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="category_id"/>
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}"/>
+                            <field name="destination"/>
+                            <field name="country_id"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="duration_days"/>
+                            <field name="duration_nights"/>
+                            <field name="sequence"/>
+                            <field name="active" invisible="1"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description" name="description">
+                            <div class="mb-4">
+                                <label for="short_description" class="fw-bold fs-6 mb-2" title="This text appears on the tour package preview cards and list views on the website."/>
+                                <field name="short_description" placeholder="Brief summary of the tour..." nolabel="1"/>
+                            </div>
+                            <div class="mb-4">
+                                <label for="description" class="fw-bold fs-6 mb-2" title="This is the full, detailed overview shown on the main tour package page."/>
+                                <field name="description" widget="html" placeholder="Detailed package overview..." nolabel="1"/>
+                            </div>
+                        </page>
+                        <page string="Pricing" name="pricing">
+                            <group>
+                                <group>
+                                    <field name="price_type"/>
+                                    <field name="currency_id"/>
+                                    <field name="base_price" widget="monetary"/>
+                                </group>
+                                <group invisible="price_type != 'per_person'">
+                                    <field name="adult_price" widget="monetary"/>
+                                    <field name="child_price" widget="monetary"/>
+                                    <field name="infant_price" widget="monetary"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Itinerary" name="itinerary">
+                            <field name="itinerary_ids" context="{'default_package_id': id}">
+                                <tree>
+                                    <field name="day_number"/>
+                                    <field name="name"/>
+                                    <field name="location"/>
+                                    <field name="start_time" widget="float_time"/>
+                                    <field name="end_time" widget="float_time"/>
+                                    <field name="hotel_id"/>
+                                    <field name="transportation_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Inclusions &amp; Exclusions" name="inclusions">
+                            <group>
+                                <group string="Inclusions">
+                                    <field name="inclusion_ids" nolabel="1" colspan="2" context="{'default_package_id': id}">
+                                        <tree editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name"/>
+                                            <field name="icon"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                                <group string="Exclusions">
+                                    <field name="exclusion_ids" nolabel="1" colspan="2" context="{'default_package_id': id}">
+                                        <tree editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name"/>
+                                            <field name="icon"/>
+                                        </tree>
+                                    </field>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Services" name="services">
+                            <group>
+                                <group string="Hotels">
+                                    <field name="hotel_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
+                                </group>
+                                <group string="Transportation">
+                                    <field name="transportation_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                            <group>
+                                <group string="Meals">
+                                    <field name="meal_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
+                                </group>
+                                <group string="Attractions">
+                                    <field name="attraction_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Availability" name="availability">
+                            <group>
+                                <group>
+                                    <field name="available_from"/>
+                                    <field name="available_to"/>
+                                </group>
+                                <group>
+                                    <field name="min_persons"/>
+                                    <field name="max_persons"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Images" name="images">
+                            <field name="image_ids" context="{'default_package_id': id}">
+                                <kanban>
+                                    <field name="id"/>
+                                    <field name="name"/>
+                                    <field name="image_1920"/>
+                                    <templates>
+                                        <t t-name="kanban-box">
+                                            <div class="oe_kanban_global_click">
+                                                <div class="o_kanban_image">
+                                                    <img t-att-src="kanban_image('tour.package.image', 'image_1920', record.id.raw_value)" alt="Package Image"/>
+                                                </div>
+                                                <div class="oe_kanban_details">
+                                                    <strong><field name="name"/></strong>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                        <page string="Pricing Rules" name="pricing_rules">
+                            <field name="pricing_rule_ids" context="{'default_package_id': id}">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="rule_type"/>
+                                    <field name="valid_from" required="rule_type == 'seasonal'" invisible="rule_type != 'seasonal'"/>
+                                    <field name="valid_to" required="rule_type == 'seasonal'" invisible="rule_type != 'seasonal'"/>
+                                    <field name="factor" required="rule_type == 'seasonal'" invisible="rule_type != 'seasonal'"/>
+                                    <field name="min_group" required="rule_type == 'group_size'" invisible="rule_type != 'group_size'"/>
+                                    <field name="max_group" required="rule_type == 'group_size'" invisible="rule_type != 'group_size'"/>
+                                    <field name="days_before" required="rule_type == 'early_bird'" invisible="rule_type != 'early_bird'"/>
+                                    <field name="discount_type" required="rule_type in ['group_size', 'early_bird']" invisible="rule_type not in ['group_size', 'early_bird']"/>
+                                    <field name="discount_value" required="rule_type in ['group_size', 'early_bird']" invisible="rule_type not in ['group_size', 'early_bird']"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Terms &amp; Conditions" name="terms">
+                            <div class="mb-3">
+                                <label for="terms_conditions" class="fw-bold fs-6 mb-2"/>
+                                <field name="terms_conditions" widget="html" nolabel="1"/>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cancellation_policy" class="fw-bold fs-6 mb-2"/>
+                                <field name="cancellation_policy" widget="html" nolabel="1"/>
+                            </div>
+                        </page>
+                        <page string="Sales Integration" name="sales">
+                            <group>
+                                <field name="product_id"/>
+                            </group>
+                        </page>
+                        <page string="Statistics" name="statistics">
+                            <group>
+                                <group>
+                                    <field name="view_count"/>
+                                    <field name="inquiry_count"/>
+                                    <field name="booking_count"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+    
+    <!-- Tour Package Kanban View -->
+    <record id="tour_package_view_kanban" model="ir.ui.view">
+        <field name="name">tour.package.view.kanban</field>
+        <field name="model">tour.package</field>
+        <field name="arch" type="xml">
+            <kanban sample="1" class="o_kanban_mobile">
+                <field name="id"/>
+                <field name="name"/>
+                <field name="destination"/>
+                <field name="base_price"/>
+                <field name="currency_id"/>
+                <field name="state"/>
+                <field name="image_512"/>
+                <field name="booking_count"/>
+                <field name="inquiry_count"/>
+                <field name="duration_days"/>
+                <field name="duration_nights"/>
+                <field name="category_id"/>
+                <field name="is_featured"/>
+                <field name="is_popular"/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_global_click o_kanban_record_has_image_fill"
+                             style="border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.05); padding: 0; background: #ffffff; transition: transform 0.2s, box-shadow 0.2s; min-height: 290px;">
+                            
+                            <!-- Card Image Area with overlay badges -->
+                            <div style="position: relative; height: 145px; overflow: hidden; background: #eef2f5;">
+                                <img t-att-src="kanban_image('tour.package', 'image_512', record.id.raw_value)"
+                                     alt="Package"
+                                     style="width: 100%; height: 100%; object-fit: cover; display: block;"/>
+
+                                <!-- Glassmorphic Duration Badge on bottom-left -->
+                                <div style="position: absolute; bottom: 8px; left: 8px; background: rgba(0, 0, 0, 0.55); backdrop-filter: blur(4px); color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                                    <i class="fa fa-clock-o"/>
+                                    <span>
+                                        <t t-esc="record.duration_days.raw_value"/>D / <t t-esc="record.duration_nights.raw_value"/>N
+                                    </span>
+                                </div>
+
+                                <!-- Left overlay badges (Featured / Popular) -->
+                                <div style="position: absolute; top: 8px; left: 8px; display: flex; flex-direction: column; gap: 4px;">
+                                    <t t-if="record.is_featured.raw_value">
+                                        <span style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; background: linear-gradient(135deg, #FFD700, #FFA500); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <i class="fa fa-star" style="margin-right: 2px;"/>Featured
+                                        </span>
+                                    </t>
+                                    <t t-if="record.is_popular.raw_value">
+                                        <span style="font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; padding: 3px 8px; border-radius: 4px; background: linear-gradient(135deg, #FF416C, #FF4B2B); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            <i class="fa fa-fire" style="margin-right: 2px;"/>Popular
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <!-- State Badge on top-right -->
+                                <div style="position: absolute; top: 8px; right: 8px;">
+                                    <t t-if="record.state.raw_value == 'published'">
+                                        <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(40, 167, 69, 0.9); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            Active
+                                        </span>
+                                    </t>
+                                    <t t-if="record.state.raw_value == 'draft'">
+                                        <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(108, 117, 125, 0.9); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            Draft
+                                        </span>
+                                    </t>
+                                    <t t-if="record.state.raw_value == 'archived'">
+                                        <span style="font-size: 10px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: rgba(220, 53, 69, 0.9); color: #fff; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                            Archived
+                                        </span>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <!-- Card Body -->
+                            <div style="padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; min-height: 145px;">
+                                <div>
+                                    <!-- Category Badge / Text -->
+                                    <div style="margin-bottom: 4px;">
+                                        <t t-if="record.category_id.raw_value">
+                                            <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #007bff; letter-spacing: 0.5px;">
+                                                <t t-esc="record.category_id.value"/>
+                                            </span>
+                                        </t>
+                                        <t t-if="!record.category_id.raw_value">
+                                            <span style="font-size: 10px; font-weight: 700; text-transform: uppercase; color: #6c757d; letter-spacing: 0.5px;">
+                                                General
+                                            </span>
+                                        </t>
+                                    </div>
+
+                                    <!-- Title -->
+                                    <div style="font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1.35; margin-bottom: 6px; height: 38px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
+                                        <t t-esc="record.name.value"/>
+                                    </div>
+
+                                    <!-- Destination -->
+                                    <div style="display: flex; align-items: center; gap: 4px; font-size: 11px; color: #64748b; margin-bottom: 8px;">
+                                        <i class="fa fa-map-marker" style="color: #ef4444; font-size: 12px;"/>
+                                        <span style="font-weight: 500;"><t t-esc="record.destination.value"/></span>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <!-- Divider line -->
+                                    <div style="border-top: 1px dashed #e2e8f0; margin-bottom: 8px;"/>
+
+                                    <!-- Footer section with Price and Stats -->
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                                        <!-- Price -->
+                                        <div>
+                                            <span style="font-size: 9px; text-transform: uppercase; color: #94a3b8; font-weight: 600; display: block; margin-bottom: -1px;">From</span>
+                                            <span style="font-size: 16px; font-weight: 800; color: #0f172a;">
+                                                <field name="base_price" widget="monetary"/>
+                                            </span>
+                                        </div>
+
+                                        <!-- Stats Counter Badge -->
+                                        <div style="display: flex; gap: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 3px; font-size: 11px; color: #64748b; background: #f8fafc; padding: 3px 6px; border-radius: 4px; border: 1px solid #f1f5f9;"
+                                                 title="Bookings">
+                                                <i class="fa fa-calendar-check-o" style="color: #10b981;"/>
+                                                <span style="font-weight: 600;"><t t-esc="record.booking_count.raw_value"/></span>
+                                            </div>
+                                            <div style="display: flex; align-items: center; gap: 3px; font-size: 11px; color: #64748b; background: #f8fafc; padding: 3px 6px; border-radius: 4px; border: 1px solid #f1f5f9;"
+                                                 title="Inquiries">
+                                                <i class="fa fa-envelope-o" style="color: #3b82f6;"/>
+                                                <span style="font-weight: 600;"><t t-esc="record.inquiry_count.raw_value"/></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+    
+    <!-- Tour Package Search View -->
+    <record id="tour_package_view_search" model="ir.ui.view">
+        <field name="name">tour.package.view.search</field>
+        <field name="model">tour.package</field>
+        <field name="arch" type="xml">
+            <search string="Search Tour Packages">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="destination"/>
+                <field name="category_id"/>
+                <field name="tag_ids"/>
+                <filter string="Published" name="published" domain="[('state', '=', 'published')]"/>
+                <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                <filter string="Featured" name="featured" domain="[('is_featured', '=', True)]"/>
+                <filter string="Popular" name="popular" domain="[('is_popular', '=', True)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="category" context="{'group_by': 'category_id'}"/>
+                    <filter string="Destination" name="destination" context="{'group_by': 'destination'}"/>
+                    <filter string="State" name="state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- Tour Package Actions -->
+    <record id="action_tour_package" model="ir.actions.act_window">
+        <field name="name">Tour Packages</field>
+        <field name="res_model">tour.package</field>
+        <field name="view_mode">kanban,list,form</field>
+        <field name="context">{'search_default_published': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first tour package!
+            </p>
+            <p>
+                Set up tour packages with itineraries, pricing, and all the details your customers need.
+            </p>
+        </field>
+    </record>
+    
+    <!-- Tour Package Category Views -->
+    <record id="tour_package_category_view_tree" model="ir.ui.view">
+        <field name="name">tour.package.category.view.tree</field>
+        <field name="model">tour.package.category</field>
+        <field name="arch" type="xml">
+            <tree string="Package Categories">
+                <field name="name"/>
+                <field name="package_count"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="tour_package_category_view_form" model="ir.ui.view">
+        <field name="name">tour.package.category.view.form</field>
+        <field name="model">tour.package.category</field>
+        <field name="arch" type="xml">
+            <form string="Package Category">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Category Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="description" placeholder="Category description..."/>
+                        <field name="active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    
+    <record id="action_tour_package_category" model="ir.actions.act_window">
+        <field name="name">Package Categories</field>
+        <field name="res_model">tour.package.category</field>
+        <field name="view_mode">list,form</field>
+    </record>
+    
+    <!-- Tour Package Tag Views -->
+    <record id="tour_package_tag_view_tree" model="ir.ui.view">
+        <field name="name">tour.package.tag.view.tree</field>
+        <field name="model">tour.package.tag</field>
+        <field name="arch" type="xml">
+            <tree string="Package Tags" editable="bottom">
+                <field name="name"/>
+                <field name="color" widget="color_picker"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+    
+    <record id="action_tour_package_tag" model="ir.actions.act_window">
+        <field name="name">Package Tags</field>
+        <field name="res_model">tour.package.tag</field>
+        <field name="view_mode">list</field>
+    </record>
+    
+</odoo>
+
