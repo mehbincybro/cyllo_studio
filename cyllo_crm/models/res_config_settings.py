@@ -135,9 +135,8 @@ class ResConfigSettings(models.TransientModel):
         if self.module_cyllo_google_meet:
             crm_google_meet_module = Module.search(
                 [('name', '=', 'cyllo_google_meet'),
-                 # ✅ fixed: removed 'module_' prefix
                  ('state', '!=', 'installed')],
-                limit=1  # ✅ fixed: added limit=1
+                limit=1
             )
             if crm_google_meet_module:
                 crm_google_meet_module.button_immediate_install()
@@ -146,9 +145,8 @@ class ResConfigSettings(models.TransientModel):
         if self.module_cyllo_zoom:
             crm_module_cyllo_zoom = Module.search(
                 [('name', '=', 'cyllo_zoom'),
-                 # ✅ fixed: removed 'module_' prefix
                  ('state', '!=', 'installed')],
-                limit=1  # ✅ fixed: added limit=1
+                limit=1
             )
             if crm_module_cyllo_zoom:
                 crm_module_cyllo_zoom.button_immediate_install()

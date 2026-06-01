@@ -21,6 +21,62 @@ html, body {
     position: relative;
 }
 
+.o_crm_dashboard.sample-data-mode {
+    background: #f5f7fb;
+}
+
+.o_crm_dashboard .sample-data-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    border-left: 4px solid #6b7280;
+    border-radius: 8px;
+    background: #f9fafb;
+    color: #4b5563;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.o_crm_dashboard .sample-data-banner i {
+    font-size: 1.1rem;
+}
+
+.o_crm_dashboard.sample-data-mode .metric-card,
+.o_crm_dashboard.sample-data-mode .chart-card,
+.o_crm_dashboard.sample-data-mode .activities-card,
+.o_crm_dashboard.sample-data-mode .performers-card,
+.o_crm_dashboard.sample-data-mode .notifications-section,
+.o_crm_dashboard.sample-data-mode .actions-card {
+    background: #f9fafb;
+    border-color: #e5e7eb;
+    box-shadow: none;
+    filter: grayscale(0.35);
+    opacity: 0.72;
+}
+
+.o_crm_dashboard.sample-data-mode .metric-card:hover,
+.o_crm_dashboard.sample-data-mode .performer-item:hover {
+    box-shadow: none;
+    transform: none;
+}
+
+.o_crm_dashboard.sample-data-mode .metric-value,
+.o_crm_dashboard.sample-data-mode .chart-title,
+.o_crm_dashboard.sample-data-mode .performer-name,
+.o_crm_dashboard.sample-data-mode .performer-amount {
+    color: #4b5563;
+}
+
+.o_crm_dashboard.sample-data-mode .positive-change,
+.o_crm_dashboard.sample-data-mode .negative-change,
+.o_crm_dashboard.sample-data-mode .legend-text,
+.o_crm_dashboard.sample-data-mode .performer-deals {
+    color: #6b7280;
+}
+
 /* Header Styles */
 .o_crm_dashboard .dashboard-header {
     margin-bottom: 32px;
@@ -72,6 +128,7 @@ html, body {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
     transition: all 0.3s ease;
     border: 1px solid #f3f4f6;
+    cursor: pointer;
 }
 
 .o_crm_dashboard .metric-card:hover {
