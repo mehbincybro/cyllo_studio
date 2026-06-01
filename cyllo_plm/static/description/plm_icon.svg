@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 680" width="680" height="680">
+  <defs>
+    <clipPath id="bounds">
+      <rect width="680" height="680" rx="100" ry="100"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#bounds)">
+    <!-- Left D -->
+    <path d="M80,190 L80,490 C80,490 290,490 290,340 C290,190 80,190 80,190 Z"
+          fill="#d4d870" opacity="0.9"/>
+
+    <!-- Middle D -->
+    <path d="M260,190 L260,490 C260,490 470,490 470,340 C470,190 260,190 260,190 Z"
+          fill="#9ca000" opacity="0.9"/>
+
+    <!-- Right D -->
+    <path d="M440,190 L440,490 C440,490 650,490 650,340 C650,190 440,190 440,190 Z"
+          fill="#6b6e00" opacity="0.9"/>
+  </g>
+
+</svg>
