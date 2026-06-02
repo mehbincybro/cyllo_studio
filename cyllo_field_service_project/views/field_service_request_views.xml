@@ -8,8 +8,9 @@
         <field name="priority" eval="8"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='sale_order_id']" position="after">
-                <field name="project_id" invisible="state in ['draft','submit']"/>
-                <field name="task_id" invisible="state in ['draft','submit']"/>
+                <field name="available_task_ids" invisible="1"/>
+                <field name="project_id" readonly="state in ['completed', 'cancel']" domain="[('is_fsm', '=', True)]"/>
+                <field name="task_id" readonly="state in ['completed', 'cancel']" domain="[('id', 'in', available_task_ids)]"/>
                 <field name="workers_ids" invisible="1"/>
                 <field name="is_invoiced" invisible="1"/>
             </xpath>

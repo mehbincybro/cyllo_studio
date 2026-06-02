@@ -21,4 +21,5 @@
 #############################################################################
 from . import account_analytic_line
 from . import field_service_request
+from . import project_project
 from . import project_task

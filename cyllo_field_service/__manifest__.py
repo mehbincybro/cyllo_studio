@@ -41,7 +41,6 @@
         'data/ir_sequence_data.xml',
         'data/product_data.xml',
         'views/field_service_skill_category_views.xml',
-        'views/field_service_template_views.xml',
         'views/field_service_request_views.xml',
         'views/field_service_request_form_template.xml',
         'views/fs_service_request_portal_template.xml',

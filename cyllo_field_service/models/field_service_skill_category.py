@@ -38,3 +38,8 @@ class FieldServiceSkillCategory(models.Model):
     company_id = fields.Many2one('res.company', required=True,
                                  default=lambda self: self.env.company,
                                  help="Company name")
+    service_checklist_ids = fields.One2many("field.service.skill.category.line",
+                                            'skill_category_id',
+                                            string="Service Checklists",
+                                            help="Service request checklists")
+

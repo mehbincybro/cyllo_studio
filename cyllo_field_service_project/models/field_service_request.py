@@ -21,7 +21,10 @@
 #############################################################################
 from datetime import date
 
-from odoo import api, fields, models
+
+from odoo.exceptions import ValidationError
+from odoo import api, fields, models,_
+
 
 
 class FieldServiceRequest(models.Model):
@@ -31,16 +34,23 @@ class FieldServiceRequest(models.Model):
             """
     _inherit = 'field.service.request'
 
-    task_id = fields.Many2one('project.task', readonly=True,
-                              help="Task which related to this request",copy=False)
-    project_id = fields.Many2one('project.project',
-                                 related="task_id.project_id",
+    task_id = fields.Many2one('project.task', string="Task",
+                              help="Task which related to this request",
+                              copy=False,
+                              domain="[('id', 'in', available_task_ids)]")
+    project_id = fields.Many2one('project.project', string="Project",
+                                 domain="[('is_fsm', '=', True)]",
                                  help="Project of the request")
     timesheet_ids = fields.One2many(related='task_id.timesheet_ids',
                                     readonly=False)
     workers_ids = fields.Many2many('hr.employee',
                                    compute='compute_workers_ids')
     is_invoiced = fields.Boolean(default=False)
+    available_task_ids = fields.Many2many(
+        'project.task',
+        compute='_compute_available_task_ids',
+        help="Tasks not already linked to another active field service request",
+    )
 
     @api.depends('field_service_worker_ids.employee_id')
     def compute_workers_ids(self):
@@ -49,23 +59,83 @@ class FieldServiceRequest(models.Model):
         for rec in self:
             rec.workers_ids = rec.field_service_worker_ids.employee_id.ids
 
+    @api.depends('project_id')
+    def _compute_available_task_ids(self):
+        for rec in self:
+            print('ggg',rec)
+            used_task_ids = self.env['field.service.request'].search([
+                ('task_id', '!=', False),
+                ('state', '!=', 'cancel')
+            ]).mapped('task_id').ids
+            domain = [('id', 'not in', used_task_ids)]
+            if rec.project_id:
+                domain.append(('project_id', '=', rec.project_id.id))
+            rec.available_task_ids = self.env['project.task'].search(domain)
+
+    @api.constrains('task_id')
+    def _check_unique_task_id(self):
+        for rec in self:
+            if not rec.task_id:
+                continue
+            duplicate = self.env['field.service.request'].search([
+                ('task_id', '=', rec.task_id.id),
+                ('state', '!=', 'cancel'),
+                ('id', '!=', rec.id),
+            ], limit=1)
+            if duplicate:
+                raise ValidationError(
+                    (_("Task '%s' is already linked to Field Service Request "
+                      "'%s'. A task can only be assigned to one active request "
+                      "at a time."))
+                    % (rec.task_id.name, duplicate.name or ('New'))
+                )
+
+    @api.onchange('task_id')
+    def _onchange_task_id(self):
+        if self.task_id and self.task_id.project_id:
+            self.project_id = self.task_id.project_id
+            sale_order = False
+            if hasattr(self.task_id, 'sale_order_id') and self.task_id.sale_order_id:
+                sale_order = self.task_id.sale_order_id
+            elif hasattr(self.task_id, 'sale_line_id') and self.task_id.sale_line_id.order_id:
+                sale_order = self.task_id.sale_line_id.order_id
+            elif hasattr(self.task_id.project_id, 'sale_order_id') and self.task_id.project_id.sale_order_id:
+                sale_order = self.task_id.project_id.sale_order_id
+            
+            if sale_order:
+                self.sale_order_id = sale_order.id
+
+    @api.onchange('project_id')
+    def _onchange_project_id(self):
+        if self.project_id and self.task_id and self.task_id.project_id != self.project_id:
+            self.task_id = False
+
     def action_assign_workers(self):
         """Override method to create project and task for field service"""
         res = super(FieldServiceRequest, self).action_assign_workers()
         if not res:
             employee_ids = self.field_service_worker_ids.mapped('employee_id').ids
-            task_id = self.env['project.task'].create({
-                'name': self.name,
-                'project_id': self.env.ref(
-                    'cyllo_field_service_project.project_project_field_service').id,
-                'partner_id': self.partner_id.id,
-                'date_assign': date.today(),
-                'employee_ids': employee_ids,
-                'company_id': self.company_id.id,
-            })
-            self.sudo().write({
-                'task_id': task_id.id,
-            })
+            if not self.task_id:
+                project = self.project_id or self.env.ref(
+                    'cyllo_field_service_project.project_project_field_service')
+                task_id = self.env['project.task'].with_context(
+                    skip_fsm_request_creation=True
+                ).create({
+                    'name': self.name,
+                    'project_id': project.id,
+                    'partner_id': self.partner_id.id,
+                    'date_assign': date.today(),
+                    'employee_ids': employee_ids,
+                    'company_id': self.company_id.id,
+                })
+                self.sudo().write({
+                    'task_id': task_id.id,
+                    'project_id': project.id,
+                })
+            else:
+                self.task_id.write({
+                    'employee_ids': [fields.Command.set(employee_ids)],
+                })
         return res
 
     def action_create_invoices(self, type, total_amount = None):

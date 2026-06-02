@@ -159,3 +159,36 @@ class TestFieldServiceRequest(TransactionCase):
         # Method may legally return None
         if action:
             self.assertIn(action['type'], ['ir.actions.act_window'])
+
+    def test_onchange_task_id(self):
+        """
+        Test that selecting task_id correctly suggests/populates sale_order_id.
+        """
+        # Create a test project and sales order
+        project = self.env['project.project'].create({
+            'name': 'Test Project',
+            'is_fsm': True,
+        })
+        sale_order = self.env['sale.order'].create({
+            'partner_id': self.partner.id,
+        })
+        
+        # Link sales order to the project
+        project.write({'sale_order_id': sale_order.id})
+        
+        # Create a task linked to the project
+        task = self.env['project.task'].create({
+            'name': 'Test Task',
+            'project_id': project.id,
+        })
+        
+        # Instantiate field service request and trigger onchange
+        request = self.env['field.service.request'].new({
+            'partner_id': self.partner.id,
+        })
+        request.task_id = task
+        request._onchange_task_id()
+        
+        self.assertEqual(request.project_id, project)
+        self.assertEqual(request.sale_order_id, sale_order)
+

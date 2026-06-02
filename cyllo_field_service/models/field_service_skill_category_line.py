@@ -22,22 +22,22 @@
 from odoo import api, fields, models
 
 
-class FieldServiceTemplateLine(models.Model):
+class FieldServiceSkillCategoryLine(models.Model):
     """In this class we are defining the fields required for the model
-    field.service.template.line
+    field.service.skill.category.line
     """
-    _name = "field.service.template.line"
-    _description = "Field Service Checklist Line"
+    _name = "field.service.skill.category.line"
+    _description = "Field Service Skill Category Line"
 
     product_id = fields.Many2one("product.product", required=True,
                                  help="Name of checklist",
                                  domain=[('detailed_type', '=', 'service')])
-    required = fields.Boolean(help="Boolean to specify whether this checklist compulsory  or not")
+    required = fields.Boolean(help="Boolean to specify whether this checklist compulsory or not")
     time_required = fields.Float(string="Required Time",
                                  help="Time required to complete the task")
-    field_service_template_id = fields.Many2one('field.service.template',
-                                                string="Service Request Template",
-                                                help="Service request template")
+    skill_category_id = fields.Many2one('field.service.skill.category',
+                                        string="Skill Category",
+                                        help="Field service skill category")
     currency_id = fields.Many2one('res.currency',
                                   default=lambda self: self.env.company.currency_id)
     service_cost = fields.Monetary(currency_field='currency_id', default=0)

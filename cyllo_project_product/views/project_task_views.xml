@@ -16,36 +16,8 @@
             <!-- Smart buttons -->
             <div name="button_box" position="inside">
                 <field name="allow_task_products" invisible="1"/>
-                <field name="product_sale_order_id" invisible="1"/>
-                <field name="display_sale_order_button" invisible="1"/>
                 <field name="sale_line_id" invisible="1"/>
-                <!-- Products smart button -->
-                <button name="action_view_task_products" 
-                        type="object" 
-                        class="oe_stat_button" 
-                        icon="fa-shopping-cart"
-                        invisible="not allow_task_products">
-                    <div class="o_field_widget o_stat_info">
-                        <span class="o_stat_value">
-                            <field name="products_count"/> Products
-                        </span>
-                        <span class="o_stat_text" invisible="products_amount == 0">
-                            <field name="products_amount" widget="monetary" options="{'currency_field': 'currency_id'}"/>
-                        </span>
-                    </div>
-                </button>
-                <!-- Sales Order smart button -->
-                <button name="action_view_task_sale_order" 
-                        type="object" 
-                        class="oe_stat_button" 
-                        icon="fa-dollar"
-                        invisible="not allow_task_products or not display_sale_order_button or sale_line_id">
-                    <div class="o_stat_info">
-                        <span class="o_stat_text">
-                            Sales Order
-                        </span>
-                    </div>
-                </button>
+
                 <!-- Extra Quotations smart button -->
                 <button name="action_view_extra_quotations"
                         type="object"
@@ -60,6 +32,22 @@
                     </div>
                 </button>
             </div>
+
+            <xpath expr="//field[@name='tag_ids']" position="after">
+                <field name="extra_quotation_ids" invisible="1"/>
+                <label for="related_sale_order_id"/>
+                    <div class="o_row">
+                    <field name="related_sale_order_id"
+                       domain="[('id', 'in', [project_sale_order_id] + extra_quotation_ids)]"/>
+                    <button name="action_view_task_products"
+                            type="object"
+                            icon="fa-shopping-cart"
+                            class="oe_highlight"
+                            invisible="not allow_task_products"
+                    />
+                    </div>
+            </xpath>
+
         </field>
     </record>
 </odoo>

@@ -20,30 +20,13 @@
 #
 #############################################################################
 from odoo import api, fields, models, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
+
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
-    product_line_ids = fields.One2many(
-        'sale.order.line', 'project_task_product_id', 
-        string='Products'
-    )
-    products_count = fields.Integer(
-        compute='_compute_products_count', 
-        string='Products Count'
-    )
-    products_amount = fields.Monetary(
-        compute='_compute_products_amount', 
-        string='Products Amount',
-        currency_field='currency_id'
-    )
-    product_sale_order_id = fields.Many2one('sale.order', string="Product Sales Order", copy=False)
-    currency_id = fields.Many2one(
-        'res.currency',
-        compute='_compute_product_currency_id',
-        string='Currency'
-    )
+
     allow_task_products = fields.Boolean(
         related='project_id.allow_task_products'
     )
@@ -59,63 +42,28 @@ class ProjectTask(models.Model):
         compute='_compute_extra_quotation_count',
         string="Quotation Count",
     )
-    display_sale_order_button = fields.Boolean(
-        compute='_compute_display_sale_order_button'
-    )
 
-    @api.depends('sale_order_id', 'product_sale_order_id')
-    def _compute_display_sale_order_button(self):
-        for task in self:
-            task.display_sale_order_button = bool(task.sale_order_id or task.product_sale_order_id)
+    related_sale_order_id = fields.Many2one("sale.order", string="Consume products in")
 
-    @api.depends('sale_order_id.currency_id', 'product_sale_order_id.currency_id', 'project_id.currency_id')
-    def _compute_product_currency_id(self):
-        for task in self:
-            task.currency_id = task.sale_order_id.currency_id or task.product_sale_order_id.currency_id or task.project_id.currency_id or task.company_id.currency_id
-
-    @api.depends('product_line_ids')
-    def _compute_products_count(self):
-        for task in self:
-            task.products_count = len(task.product_line_ids)
-
-    @api.depends('product_line_ids.price_subtotal')
-    def _compute_products_amount(self):
-        for task in self:
-            task.products_amount = sum(task.product_line_ids.mapped('price_subtotal'))
 
     @api.depends('extra_quotation_ids')
     def _compute_extra_quotation_count(self):
         for task in self:
             task.extra_quotation_count = len(task._get_task_extra_quotations())
 
+
     def action_view_task_products(self):
         self.ensure_one()
-        return {
-            'name': _('Add Products to Quotation / Sales Order'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'project.task.product.catalog.wizard',
-            'view_mode': 'form',
-            'target': 'new',
-            'context': {
-                'default_task_id': self.id,
-            },
-        }
+        if not self.related_sale_order_id:
+            raise ValidationError("Choose a Sale order or Quotation to consume the Products.")
 
-    def _get_product_catalog_sale_orders(self):
-        self.ensure_one()
-        return (self.sale_order_id | self.product_sale_order_id | self._get_task_extra_quotations()).filtered(
-            lambda order: order.state != 'cancel'
-        )
+        return self.related_sale_order_id.with_context(
+            {},
+            order_id=self.related_sale_order_id.id,
+            default_project_task_product_id=self.id,
+        ).action_add_from_catalog()
 
-    def _get_product_catalog_orders_by_type(self, order_type):
-        self.ensure_one()
-        if order_type == 'quotation':
-            return self._get_task_extra_quotations().filtered(lambda order: order.state in ('draft', 'sent'))
-        if order_type == 'sale_order':
-            return (self.sale_order_id | self.product_sale_order_id).filtered(
-                lambda order: order.state != 'cancel'
-            )
-        return self.env['sale.order']
+
 
     def _get_task_extra_quotations(self):
         self.ensure_one()
@@ -132,20 +80,6 @@ class ProjectTask(models.Model):
             'analytic_account_id': self.project_id.analytic_account_id.id if self.project_id.analytic_account_id else False,
         }
 
-    def action_view_task_sale_order(self):
-        self.ensure_one()
-        sale_order = self.sale_order_id or self.product_sale_order_id
-        if not sale_order:
-            return {'type': 'ir.actions.act_window_close'}
-        
-        return {
-            'name': _('Sales Order'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'sale.order',
-            'views': [[False, 'form']],
-            'view_mode': 'form',
-            'res_id': sale_order.id,
-        }
 
     def action_task_new_quotation(self):
         self.ensure_one()

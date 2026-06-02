@@ -19,20 +19,21 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo.addons.cyllo_field_service.tests.common import TestCylloFieldService
+from odoo import models
 
 
-class TestFsServiceTemplateLine(TestCylloFieldService):
+class ProjectProject(models.Model):
+    """When is_fsm is enabled on a project, auto-create field.service.request
+    records for all existing tasks of that project."""
 
-    def test_onchange_product_id(self):
-        """Testcase for onchange_product_id"""
-        template_line = self.env['field.service.template.line'].create({
-            'required': True,
-            'time_required': 2.0,
-            'service_cost': '',
-            'currency_id': self.currency.id,
-            'product_id': self.product.id
-        })
-        template_line._onchange_product_id()
-        self.assertEqual(template_line.service_cost, self.product.lst_price,
-                         msg="Error in _onchange_product_id")
+    _inherit = 'project.project'
+
+    def write(self, vals):
+        res = super().write(vals)
+        if vals.get('is_fsm'):
+            for project in self.filtered('is_fsm'):
+                tasks = self.env['project.task'].search([
+                    ('project_id', '=', project.id),
+                ])
+                tasks._create_fsm_request()
+        return res

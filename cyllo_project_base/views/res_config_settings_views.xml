@@ -9,6 +9,9 @@
                 <setting id="module_cyllo_project_product_setting" help="Add products/materials to project tasks">
                     <field name="module_cyllo_project_product"/>
                 </setting>
+                <setting id="module_cyllo_field_service_project_setting" help="Manage tasks in the Field Service module">
+                    <field name="module_cyllo_field_service_project"/>
+                </setting>
             </xpath>
         </field>
     </record>

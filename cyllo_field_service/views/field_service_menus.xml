@@ -49,10 +49,7 @@
     <menuitem id="menu_skills" name="Skills"
               parent="cyllo_field_service.menu_configuration_categ"
               action="action_view_skills"/>
-    <!-- Menu to display Service Template-->
-    <menuitem id="menu_service_template" name="Service Template"
-              parent="cyllo_field_service.menu_configuration_categ"
-              action="action_view_service_template"/>
+
 
     <!-- Reporting Menu -->
     <menuitem id="menu_reporting_categ" name="Reporting"

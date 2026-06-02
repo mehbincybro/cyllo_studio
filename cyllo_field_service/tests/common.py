@@ -76,10 +76,6 @@ class TestCylloFieldService(common.TransactionCase):
             'name': 'Employee 2',
             'skill_ids': [(4, cls.hr_skill_2.id)]
         })
-        cls.service_template = cls.env['field.service.template'].create({
-            'name': 'Test template',
-            'company_id': cls.company.id
-        })
         cls.service_request = cls.env['field.service.request'].create({
             'name': 'FS00001',
             'partner_id': cls.partner.id,
@@ -88,7 +84,6 @@ class TestCylloFieldService(common.TransactionCase):
             'state': 'draft',
             'submit_date': '2023-11-30',
             'hr_skill_ids': cls.skill_category.ids,
-            'field_service_template_id': cls.service_template.id
         })
         cls.field_service_worker = cls.env['field.service.worker'].create({
             'field_service_request_id': cls.service_request.id,
@@ -157,7 +152,6 @@ class TestCylloFieldService(common.TransactionCase):
             'service_checklist_ids': cls.checklist2.ids,
             'move_ids': cls.account_move.ids,
             'ready_to_invoice': False,
-            'field_service_template_id': cls.service_template.id
         })
         cls.service_request4 = cls.env['field.service.request'].create({
             'name': 'FS00004',
@@ -170,5 +164,4 @@ class TestCylloFieldService(common.TransactionCase):
             'service_checklist_ids': cls.checklist2.ids,
             'move_ids': cls.account_move.ids,
             'ready_to_invoice': False,
-            'field_service_template_id': cls.service_template.id
         })

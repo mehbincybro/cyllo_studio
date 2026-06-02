@@ -38,7 +38,8 @@
         'data/project_data.xml',
         'views/project_task_views.xml',
         'views/field_service_request_views.xml',
-        'wizards/field_service_invoice_views.xml'
+        'views/project_project_views.xml',
+        'wizards/field_service_invoice_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,

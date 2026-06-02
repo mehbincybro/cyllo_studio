@@ -403,12 +403,6 @@
                                     <span t-field="object.date_deadline"/>
                                 </div>
                                 <div class="col-md-3 mt-2 mb-2"
-                                     t-if="object.field_service_template_id">
-                                    <strong>Template</strong>
-                                    <br/>
-                                    <span t-field="object.field_service_template_id"/>
-                                </div>
-                                <div class="col-md-3 mt-2 mb-2"
                                      t-if="object.priority">
                                     <strong>Priority</strong>
                                     <br/>

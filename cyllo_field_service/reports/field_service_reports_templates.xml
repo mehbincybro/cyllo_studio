@@ -58,12 +58,7 @@
                                     </span>
                                 </t>
                             </div>
-                            <div class="col-auto col-3 mw-100 mb-2 oe_inline">
-                                <strong>Service Template:</strong>
-                                <br/>
-                                <span class="m-0"
-                                      t-field="o.field_service_template_id.name"/>
-                            </div>
+
                             <br/>
                         </div>
                         <div class="row mt-4 mb-2" id="other_informations">
