@@ -71,7 +71,9 @@ def _extract_value(response_data, path):
     _extract_value({'links': [{'rel': 'redirect', 'href': 'https://...'}]}, 'links.0.href')
     → 'https://...'
     """
-    if not path or not isinstance(response_data, (dict, list)):
+    if not path or path == '.':
+        return response_data
+    if not isinstance(response_data, (dict, list)):
         return None
     parts = path.split('.')
     current = response_data

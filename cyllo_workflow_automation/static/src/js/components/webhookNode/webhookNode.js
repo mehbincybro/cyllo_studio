@@ -117,9 +117,10 @@ export class WebhookNode extends ConfigurationBase {
         
         // The user writes {{ expression }}, which became {{{{ expression }}}}.
         // We revert the outer 4 braces to 1 brace so Python's f-string evaluates it.
-        // Also map 'current_record' to 'record' for convenience.
+        // We safely escape the evaluated string using chr() to prevent double-quote and newline syntax errors inside JSON strings.
         escapedPayload = escapedPayload.replace(/\{\{\{\{(.+?)\}\}\}\}/g, (match, expression) => {
-            return '{' + expression.replace(/current_record\./g, 'record.') + '}';
+            const exp = expression.replace(/current_record\./g, 'record.');
+            return `{str(${exp}).replace(chr(92), chr(92)+chr(92)).replace(chr(34), chr(92)+chr(34)).replace(chr(10), chr(92)+'n').replace(chr(13), chr(92)+'r').replace(chr(9), chr(92)+'t') if ${exp} else ""}`;
         });
 
         // Serialise the response actions config (may be empty list / null)

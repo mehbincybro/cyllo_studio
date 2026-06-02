@@ -89,3 +89,11 @@ export const webhookFields = [
     { name: 'webhook_payload', type: 'text' },
     { name: 'webhook_actions', type: 'json' },
 ];
+
+export const tryCatchFields = [
+    { name: 'label', type: 'char' },
+    { name: 'tc_error_handling_mode', type: 'selection' },
+    { name: 'tc_catch_filters', type: 'json' },
+    { name: 'tc_try_node_ids', type: 'json' },
+    { name: 'tc_catch_node_ids', type: 'json' },
+];

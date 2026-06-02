@@ -296,6 +296,15 @@
                                                      alt=""/>
                                                 <p>Loop</p>
                                         </div>
+                                        <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'tryCatch')"
+                                                 data-node="TryCatch">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/condition.svg"
+                                                     alt=""
+                                                     style="filter: hue-rotate(90deg);"/>
+                                                <p>Try / Catch</p>
+                                        </div>
                                         </div>
 								    </div>
 							    </div>
