@@ -44,13 +44,20 @@
                         </div>
                         <div class="cy-components-column column-2">
                             <div class="cy-components-span">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="38px" viewBox="0 0 512 512" fill="none">
-                                    <rect x="79" y="124" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="267" y="124" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="79" y="220" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="267" y="220" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="79" y="316" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
-                                    <rect x="267" y="316" width="166" height="72" rx="6" stroke="#000000" stroke-width="8"/>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="30px" height="38px" viewBox="0 0 512 512"
+                                     fill="none">
+                                    <rect x="79" y="124" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="267" y="124" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="79" y="220" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="267" y="220" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="79" y="316" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
+                                    <rect x="267" y="316" width="166" height="72" rx="6" stroke="#000000"
+                                          stroke-width="8"/>
                                 </svg>
                             </div>
                             <div class="cy-components-text">Double</div>
@@ -61,7 +68,9 @@
                         <div class="cy-studio-columns" id="cyComponents-elements-1">
                             <div class="cy-components-column tab">
                                 <div class="cy-components-span">
-                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="28px" viewBox="0 0 512 512">
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="28px"
+                                         viewBox="0 0 512 512">
                                         <path d="M477.867 0H34.133C15.282 0 0 15.282 0 34.133v443.733C0 496.718 15.282 512 34.133 512h443.733C496.718 512 512 496.718 512 477.867V34.133C512 15.282 496.718 0 477.867 0zm17.066 34.133v51.2h-93.867V17.067h76.8c9.426 0 17.067 7.641 17.067 17.066zm-204.8 51.2V17.067H384v68.267h-93.867zm-102.4 0A8.533 8.533 0 0 1 179.2 76.8V34.133a33.775 33.775 0 0 0-4.745-17.067h98.611v68.267zm290.134 409.6H34.133c-9.426 0-17.067-7.641-17.067-17.067V34.133c0-9.426 7.641-17.067 17.067-17.067h110.933c9.426 0 17.067 7.641 17.067 17.067V76.8c0 14.138 11.462 25.6 25.6 25.6h307.2v375.467c0 9.425-7.641 17.066-17.066 17.066z"/>
                                     </svg>
                                 </div>
@@ -69,7 +78,9 @@
                             </div>
                             <div class="cy-components-column field">
                                 <div class="cy-components-span">
-                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px" viewBox="0 0 24 24">
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"
+                                         viewBox="0 0 24 24">
                                         <path d="M10 3.75a.75.75 0 1 0 0-1.5H6a.75.75 0 0 0 0 1.5h1.25v2.5H4A2.75 2.75 0 0 0 1.25 9v6A2.75 2.75 0 0 0 4 17.75h3.25v2.5H6a.75.75 0 1 0 0 1.5h4a.75.75 0 1 0 0-1.5H8.75V3.75zm-2.75 12.5H4A1.25 1.25 0 0 1 2.75 15V9A1.25 1.25 0 0 1 4 7.75h3.25zM22.75 9v6A2.75 2.75 0 0 1 20 17.75h-8a.75.75 0 1 1 0-1.5h8A1.25 1.25 0 0 0 21.25 15V9A1.25 1.25 0 0 0 20 7.75h-8a.75.75 0 1 1 0-1.5h8A2.75 2.75 0 0 1 22.75 9z"/>
                                     </svg>
                                 </div>
@@ -77,9 +88,13 @@
                             </div>
                         </div>
                         <div class="cy-studio-columns" id="cyComponents-elements-2">
-                            <div class="cy-components-column chatter" t-att-class="state.isChatterAvailable ? '' : 'cy-chatter-exist'" t-att-style="props.sheet ? 'opacity: 50%; pointer-events: none;' : ''">
+                            <div class="cy-components-column chatter"
+                                 t-att-class="state.isChatterAvailable ? '' : 'cy-chatter-exist'"
+                                 t-att-style="props.sheet ? 'opacity: 50%; pointer-events: none;' : ''">
                                 <div class="cy-components-span">
-                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px" viewBox="0 0 512 512">
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"
+                                         viewBox="0 0 512 512">
                                         <path d="M432 0H80C35.817 0 0 35.817 0 80v256c0 44.183 35.817 80 80 80h313.44l91.2 91.36A15.999 15.999 0 0 0 496 512c8.837 0 16-7.163 16-16V80c0-44.183-35.817-80-80-80zm48 457.44-68.64-68.8A15.997 15.997 0 0 0 400 384H80c-26.51 0-48-21.49-48-48V80c0-26.51 21.49-48 48-48h352c26.51 0 48 21.49 48 48v377.44z"/>
                                         <circle cx="256" cy="208" r="32"/>
                                         <circle cx="368" cy="208" r="32"/>
@@ -90,7 +105,9 @@
                             </div>
                             <div class="cy-components-column tree">
                                 <div class="cy-components-span">
-                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px" viewBox="0 0 24 24">
+                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"
+                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"
+                                         viewBox="0 0 24 24">
                                         <path d="M21 21.75H3A1.752 1.752 0 0 1 1.25 20V4A1.752 1.752 0 0 1 3 2.25h18A1.752 1.752 0 0 1 22.75 4v16A1.752 1.752 0 0 1 21 21.75zm-18-18a.25.25 0 0 0-.25.25v16a.25.25 0 0 0 .25.25h18a.25.25 0 0 0 .25-.25V4a.25.25 0 0 0-.25-.25z"/>
                                         <path d="M18 16.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>
                                         <circle cx="6" cy="16" r="1"/>
@@ -102,50 +119,51 @@
                                 </div>
                                 <div class="cy-components-text">Tree</div>
                             </div>
-<!--                              <div class="cy-components-column field">-->
-<!--                                <div class="cy-components-span">-->
-<!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
-<!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
-<!--                                         viewBox="0 0 24 24">-->
-<!--                                        <path d="M10 3.75a.75.75 0 1 0 0-1.5H6a.75.75 0 0 0 0 1.5h1.25v2.5H4A2.75 2.75 0 0 0 1.25 9v6A2.75 2.75 0 0 0 4 17.75h3.25v2.5H6a.75.75 0 1 0 0 1.5h4a.75.75 0 1 0 0-1.5H8.75V3.75zm-2.75 12.5H4A1.25 1.25 0 0 1 2.75 15V9A1.25 1.25 0 0 1 4 7.75h3.25zM22.75 9v6A2.75 2.75 0 0 1 20 17.75h-8a.75.75 0 1 1 0-1.5h8A1.25 1.25 0 0 0 21.25 15V9A1.25 1.25 0 0 0 20 7.75h-8a.75.75 0 1 1 0-1.5h8A2.75 2.75 0 0 1 22.75 9z"/>-->
-<!--                                    </svg>-->
-<!--                                </div>-->
-<!--                                <div class="cy-components-text">Kanban</div>-->
-<!--                            </div>-->
+                            <!--                              <div class="cy-components-column field">-->
+                            <!--                                <div class="cy-components-span">-->
+                            <!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
+                            <!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
+                            <!--                                         viewBox="0 0 24 24">-->
+                            <!--                                        <path d="M10 3.75a.75.75 0 1 0 0-1.5H6a.75.75 0 0 0 0 1.5h1.25v2.5H4A2.75 2.75 0 0 0 1.25 9v6A2.75 2.75 0 0 0 4 17.75h3.25v2.5H6a.75.75 0 1 0 0 1.5h4a.75.75 0 1 0 0-1.5H8.75V3.75zm-2.75 12.5H4A1.25 1.25 0 0 1 2.75 15V9A1.25 1.25 0 0 1 4 7.75h3.25zM22.75 9v6A2.75 2.75 0 0 1 20 17.75h-8a.75.75 0 1 1 0-1.5h8A1.25 1.25 0 0 0 21.25 15V9A1.25 1.25 0 0 0 20 7.75h-8a.75.75 0 1 1 0-1.5h8A2.75 2.75 0 0 1 22.75 9z"/>-->
+                            <!--                                    </svg>-->
+                            <!--                                </div>-->
+                            <!--                                <div class="cy-components-text">Kanban</div>-->
+                            <!--                            </div>-->
 
-                                 <div class="cy-components-column kanban">
+                            <div class="cy-components-column kanban">
                                 <div class="cy-components-span">
-<!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
-<!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
-<!--                                         viewBox="0 0 24 24">-->
-<!--                                        <path d="M21 21.75H3A1.752 1.752 0 0 1 1.25 20V4A1.752 1.752 0 0 1 3 2.25h18A1.752 1.752 0 0 1 22.75 4v16A1.752 1.752 0 0 1 21 21.75zm-18-18a.25.25 0 0 0-.25.25v16a.25.25 0 0 0 .25.25h18a.25.25 0 0 0 .25-.25V4a.25.25 0 0 0-.25-.25z"/>-->
-<!--                                        <path d="M18 16.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
-<!--                                        <circle cx="6" cy="16" r="1"/>-->
-<!--                                        <path d="M18 12.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
-<!--                                        <circle cx="6" cy="12" r="1"/>-->
-<!--                                        <path d="M18 8.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
-<!--                                        <circle cx="6" cy="8" r="1"/>-->
-<!--                                    </svg>-->
+                                    <!--                                    <svg xmlns="http://www.w3.org/2000/svg" version="1.1"-->
+                                    <!--                                         xmlns:xlink="http://www.w3.org/1999/xlink" width="25px" height="38px"-->
+                                    <!--                                         viewBox="0 0 24 24">-->
+                                    <!--                                        <path d="M21 21.75H3A1.752 1.752 0 0 1 1.25 20V4A1.752 1.752 0 0 1 3 2.25h18A1.752 1.752 0 0 1 22.75 4v16A1.752 1.752 0 0 1 21 21.75zm-18-18a.25.25 0 0 0-.25.25v16a.25.25 0 0 0 .25.25h18a.25.25 0 0 0 .25-.25V4a.25.25 0 0 0-.25-.25z"/>-->
+                                    <!--                                        <path d="M18 16.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+                                    <!--                                        <circle cx="6" cy="16" r="1"/>-->
+                                    <!--                                        <path d="M18 12.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+                                    <!--                                        <circle cx="6" cy="12" r="1"/>-->
+                                    <!--                                        <path d="M18 8.75H9a.75.75 0 0 1 0-1.5h9a.75.75 0 0 1 0 1.5z"/>-->
+                                    <!--                                        <circle cx="6" cy="8" r="1"/>-->
+                                    <!--                                    </svg>-->
                                     <i class="ri-bar-chart-2-line" style="font-size:24px;"></i>
                                 </div>
                                 <div class="cy-components-text">Kanban</div>
                             </div>
-                                  <div class="cy-components-column cy-studio-ribbon">
+                            <div class="cy-components-column cy-studio-ribbon">
                                 <div class="cy-components-span">
-                                   	<svg width="30px" height="40px" viewBox="0 0 512 512" fill="none"
-                                 xmlns="http://www.w3.org/2000/svg">
-								<path d="M95 133H417C420.866 133 424 136.134 424 140V372C424 375.866 420.866 379 417 379H95C91.134 379 88 375.866 88 372V140C88 136.134 91.134 133 95 133Z"
-                                      stroke="black" stroke-width="26"/>
-                                <g clip-path="url(#clip0_7354_4862)">
-									<rect x="268.424" y="97.9961" width="275.267" height="60"
-                                          transform="rotate(45 268.424 97.9961)" fill="black"/>
-								</g>
-                                <defs>
-									<clipPath id="clip0_7354_4862">
-										<rect width="240" height="240" fill="white" transform="translate(197 120)"/>
-									</clipPath>
-								</defs>
-							</svg>
+                                    <svg width="30px" height="40px" viewBox="0 0 512 512" fill="none"
+                                         xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M95 133H417C420.866 133 424 136.134 424 140V372C424 375.866 420.866 379 417 379H95C91.134 379 88 375.866 88 372V140C88 136.134 91.134 133 95 133Z"
+                                              stroke="black" stroke-width="26"/>
+                                        <g clip-path="url(#clip0_7354_4862)">
+                                            <rect x="268.424" y="97.9961" width="275.267" height="60"
+                                                  transform="rotate(45 268.424 97.9961)" fill="black"/>
+                                        </g>
+                                        <defs>
+                                            <clipPath id="clip0_7354_4862">
+                                                <rect width="240" height="240" fill="white"
+                                                      transform="translate(197 120)"/>
+                                            </clipPath>
+                                        </defs>
+                                    </svg>
                                 </div>
                                 <div class="cy-components-text">Ribbon</div>
                             </div>
@@ -211,7 +229,7 @@
                             <span class="label-text">Show Invisible Elements</span>
                         </label>
                     </div>
-                                        <div class="checkbox-item">
+                    <div class="checkbox-item">
                         <input class="checkbox-input d-none ViewCheck" type="checkbox" id="buttonLimit"
                                name="checkbox4" t-att-checked="state.buttonLimitEnabled"
                                t-model="state.buttonLimitEnabled"
@@ -226,21 +244,21 @@
                         </label>
                     </div>
                     <div class="px-2" t-if="state.buttonLimitEnabled">
-                            <label for="buttonLimitInput" style="font-size: 11px;
-            color: #9aa07a;
-            margin: 0 0 6px 0;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: 600;
-        ">Button Limit Value
-                            </label>
-                            <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
-                                   reqired="true"
-                                   type="number" id="buttonLimitInput" name="buttonLimitValue"
-                                   placeholder="Eg: 5"
-                                   autocomplete="off" t-model="state.buttonLimitValue"
-                                   t-on-change="(ev) => this.updateButtonLimitValue(ev)"
-                                   t-on-keyup="(ev) => this.updateButtonLimitValue(ev)"/>
+                        <label for="buttonLimitInput" style="font-size: 11px;
+                            color: #9aa07a;
+                            margin: 0 0 6px 0;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            font-weight: 600;
+                        ">Button Limit Value
+                        </label>
+                        <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
+                               reqired="true"
+                               type="number" id="buttonLimitInput" name="buttonLimitValue"
+                               placeholder="Eg: 5"
+                               autocomplete="off" t-model="state.buttonLimitValue"
+                               t-on-change="(ev) => this.updateButtonLimitValue(ev)"
+                               t-on-keyup="(ev) => this.updateButtonLimitValue(ev)"/>
                     </div>
 
                 </div>
