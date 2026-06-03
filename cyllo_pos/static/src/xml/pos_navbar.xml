@@ -12,5 +12,14 @@
                          alt="Logo"/>
                 </div>
         </xpath>
+        <xpath expr="//li[@t-on-click=&quot;() => pos.toggleImages('category')&quot;]"
+               position="after">
+            <li class="menu-item navbar-button"
+                t-on-click="() => this.createProduct()">
+                <a class="dropdown-item py-2">
+                    Create Product
+                </a>
+            </li>
+        </xpath>
     </t>
 </template>

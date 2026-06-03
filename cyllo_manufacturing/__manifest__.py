@@ -25,7 +25,9 @@
     'summary': 'Central Module for MRP features',
     'depends': ['mrp'],
     'data': [
+        'security/ir.model.access.csv',
         'views/res_config_settings_views.xml',
+        'views/bom_stock_report_views.xml',
     ],
     'installable': True,
     'auto_install': True,

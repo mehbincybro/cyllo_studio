@@ -20,3 +20,5 @@
 #
 #############################################################################
 from . import res_config_settings
+from . import bom_stock_report
+
