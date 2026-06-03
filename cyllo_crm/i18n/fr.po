@@ -278,13 +278,6 @@ msgstr "CRM avancé"
 
 #. module: cyllo_crm
 #. odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "All Opportunities"
-msgstr "Toutes les opportunités"
-
-#. module: cyllo_crm
-#. odoo-javascript
 #: code:addons/cyllo_crm/static/src/xml/dashboard.xml:0
 #, python-format
 msgid "All Salespersons"
@@ -551,14 +544,6 @@ msgid "Dissimilar Fields"
 msgstr "Champs différents"
 
 #. module: cyllo_crm
-#: odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "Due Today"
-msgstr "Échéance aujourd'hui"
-
-#. module: cyllo_crm
 #: model:ir.model,name:cyllo_crm.model_crm_compare_record
 msgid "Duplicate Lead/Opportunity Record"
 msgstr "Enregistrement de piste/opportunité dupliqué"
@@ -655,13 +640,6 @@ msgstr "Jours inactifs"
 #, python-format
 msgid "Idle leads"
 msgstr "Pistes inactives"
-
-#. module: cyllo_crm
-#. odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "Idle opportunities"
-msgstr "Opportunités inactives"
 
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_mail_activity__is_dismissed_notification
@@ -786,13 +764,6 @@ msgstr "Mon tableau de bord"
 
 #. module: cyllo_crm
 #. odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "My Opportuities with no activity"
-msgstr "Mes opportunités sans activité"
-
-#. module: cyllo_crm
-#. odoo-javascript
 #: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
 #, python-format
 msgid "My activities"
@@ -860,24 +831,9 @@ msgid "Note: Each stage can only have one exit criteria."
 msgstr "Remarque : Chaque étape ne peut avoir qu'un seul critère de sortie."
 
 #. module: cyllo_crm
-#. odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "Ongoing activities"
-msgstr "Activités en cours"
-
-#. module: cyllo_crm
 #: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_stage__type__opportunity
 msgid "Opportunity Only"
 msgstr "Opportunité uniquement"
-
-#. module: cyllo_crm
-#. odoo-javascript
-#: code:addons/cyllo_crm/static/src/xml/crm_lead_dashboard_templates.xml:0
-#: code:addons/cyllo_crm/static/src/xml/crm_opportunity_dashboard_template.xml:0
-#, python-format
-msgid "Overdue"
-msgstr "Dépassé"
 
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_dissimilar_fields__compare_id
