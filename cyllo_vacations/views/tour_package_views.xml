@@ -39,6 +39,14 @@
                     <field name="state" widget="statusbar" statusbar_visible="draft,published"/>
                 </header>
                 <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_inquiries" type="object" class="oe_stat_button" icon="fa-envelope-o">
+                            <field name="inquiry_count" widget="statinfo" string="Inquiries"/>
+                        </button>
+                        <button name="action_view_bookings" type="object" class="oe_stat_button" icon="fa-calendar-check-o">
+                            <field name="booking_count" widget="statinfo" string="Bookings"/>
+                        </button>
+                    </div>
                     <field name="image_1920" widget="image" class="oe_avatar"/>
                     <div class="oe_title">
                         <label for="name" string="Package Name"/>

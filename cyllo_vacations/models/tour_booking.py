@@ -334,18 +334,28 @@ class TourBooking(models.Model):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
                 vals['name'] = self.env['ir.sequence'].next_by_code('tour.booking') or _('New')
-            # Set prices from package
-            if vals.get('package_id') and not vals.get('adult_price'):
+            # Set prices and services from package
+            if vals.get('package_id'):
                 package = self.env['tour.package'].browse(vals['package_id'])
-                vals['adult_price'] = package.adult_price or package.base_price
-                vals['child_price'] = package.child_price or 0
-                vals['infant_price'] = package.infant_price or 0
+                if not vals.get('adult_price'):
+                    vals['adult_price'] = package.adult_price or package.base_price
+                    vals['child_price'] = package.child_price or 0
+                    vals['infant_price'] = package.infant_price or 0
+                if 'hotel_ids' not in vals:
+                    vals['hotel_ids'] = [(6, 0, package.hotel_ids.ids)]
+                if 'transportation_ids' not in vals:
+                    vals['transportation_ids'] = [(6, 0, package.transportation_ids.ids)]
+                if 'meal_ids' not in vals:
+                    vals['meal_ids'] = [(6, 0, package.meal_ids.ids)]
+                if 'attraction_ids' not in vals:
+                    vals['attraction_ids'] = [(6, 0, package.attraction_ids.ids)]
         bookings = super().create(vals_list)
         for booking in bookings:
             # Generate access token for portal
             booking._portal_ensure_token()
             # Send confirmation email
-            booking._send_booking_confirmation()
+            if booking.state == 'confirmed':
+                booking._send_booking_confirmation()
             # Create calendar event
             if booking.company_id.tour_create_calendar_event:
                 booking._create_calendar_event()
@@ -411,9 +421,7 @@ class TourBooking(models.Model):
                             'stage_id': won_stage.id,
                             'expected_revenue': booking.price_total,
                         })
-            # Send confirmation notification
-            booking._send_booking_confirmation()
-    
+
     def action_start(self):
         """Start tour and update related documents"""
         self.write({'state': 'in_progress'})
@@ -1321,6 +1329,79 @@ class TourBooking(models.Model):
             'params': {
                 'title': _('Apply Pricing Rules'),
                 'message': _('Pricing rules evaluated and applied successfully.'),
+                'sticky': False,
+                'type': 'success',
+            }
+        }
+
+    def action_generate_estimated_expenses(self):
+        """Generate draft expenses based on standard cost of services configured on the booking"""
+        self.ensure_one()
+        expense_model = self.env['tour.expense']
+        # Clean existing draft expenses to prevent duplicates
+        existing_drafts = self.expense_ids.filtered(lambda e: e.state == 'draft')
+        if existing_drafts:
+            existing_drafts.unlink()
+        # 1. Hotels Cost
+        nights = max(1, self.package_id.duration_days - 1)
+        for hotel in self.hotel_ids:
+            amount = hotel.price_per_night * nights
+            expense_model.create({
+                'name': f"Estimated Hotel Cost: {hotel.name} ({nights} night(s))",
+                'booking_id': self.id,
+                'package_id': self.package_id.id,
+                'expense_type': 'hotel',
+                'amount': amount,
+                'state': 'draft',
+                'notes': f"Generated automatically based on standard hotel rate of {hotel.price_per_night}/night.",
+            })
+        # 2. Transportation Cost
+        days = max(1, self.package_id.duration_days)
+        for transport in self.transportation_ids:
+            amount = transport.cost_per_unit or (transport.price_per_day * days)
+            expense_model.create({
+                'name': f"Estimated Transportation Cost: {transport.name}",
+                'booking_id': self.id,
+                'package_id': self.package_id.id,
+                'expense_type': 'transportation',
+                'amount': amount,
+                'state': 'draft',
+                'notes': f"Generated automatically based on standard transport pricing.",
+            })
+            
+        # 3. Meals Cost
+        persons = self.total_persons or 1
+        for meal in self.meal_ids:
+            amount = meal.cost_per_person * persons
+            expense_model.create({
+                'name': f"Estimated Meal Cost: {meal.name} for {persons} person(s)",
+                'booking_id': self.id,
+                'package_id': self.package_id.id,
+                'expense_type': 'meal',
+                'amount': amount,
+                'state': 'draft',
+                'notes': f"Generated automatically based on meal cost per person of {meal.cost_per_person}.",
+            })
+            
+        # 4. Attraction Cost
+        for attraction in self.attraction_ids:
+            amount = attraction.entry_fee * persons
+            expense_model.create({
+                'name': f"Estimated Entry Cost: {attraction.name} for {persons} person(s)",
+                'booking_id': self.id,
+                'package_id': self.package_id.id,
+                'expense_type': 'attraction',
+                'amount': amount,
+                'state': 'draft',
+                'notes': f"Generated automatically based on entry fee of {attraction.entry_fee} per person.",
+            })
+            
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('Generate Estimated Expenses'),
+                'message': _('Estimated expenses have been successfully generated as Draft.'),
                 'sticky': False,
                 'type': 'success',
             }

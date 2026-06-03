@@ -33,7 +33,7 @@
                     <button name="action_in_progress" type="object" string="In Progress" class="oe_highlight" invisible="state != 'new'"/>
                     <button name="action_quote" type="object" string="Send Quotation" class="oe_highlight" invisible="state not in ['new','in_progress']"/>
                     <button name="action_create_booking_direct" type="object" string="Create Booking" class="oe_highlight" invisible="state in ['rejected','converted'] or booking_id"/>
-                    <button name="action_convert_to_booking" type="object" string="Convert (Wizard)" invisible="state in ['rejected','converted'] or booking_id"/>
+                    <button name="action_convert_to_booking" type="object" string="Customize &amp; Book" invisible="state in ['rejected','converted'] or booking_id"/>
                     <button name="action_reject" type="object" string="Reject" invisible="state in ['rejected','converted']"/>
                     <field name="state" widget="statusbar" statusbar_visible="new,in_progress,quoted,converted"/>
                 </header>
@@ -43,6 +43,9 @@
                             <div class="o_field_widget o_stat_info">
                                 <span class="o_stat_text">CRM Lead</span>
                             </div>
+                        </button>
+                        <button name="action_view_sale_order" type="object" class="oe_stat_button" icon="fa-usd" invisible="sale_order_count == 0">
+                            <field name="sale_order_count" widget="statinfo" string="Quotation"/>
                         </button>
                         <button name="action_view_booking" type="object" class="oe_stat_button" icon="fa-plane" invisible="not booking_id">
                             <div class="o_field_widget o_stat_info">
@@ -109,7 +112,12 @@
                         </page>
                     </notebook>
                 </sheet>
-                <chatter/>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+
             </form>
         </field>
     </record>

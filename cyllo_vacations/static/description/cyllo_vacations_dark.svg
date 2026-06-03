@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 850 850">
-  <style>
-    * { transition: none !important; }
-    path { fill: #969686 !important; }
-    path + path { fill: #BCBBA7 !important; }
-  </style>
+
   <!-- Dark rounded background matching user icon style -->
   <rect width="850" height="850" rx="72.61" ry="72.61" fill="#26261A" style="fill: #26261A !important;"/>
 
