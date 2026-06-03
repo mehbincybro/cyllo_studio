@@ -246,6 +246,30 @@ class NodeStruct(models.Model):
     webhook_payload = fields.Text(string="Payload (JSON)")
     webhook_actions = fields.Json(string="Webhook Response Actions")
 
+    # Try/Catch Scope node fields
+    tc_error_handling_mode = fields.Selection([
+        ('stop',                'Stop Workflow'),
+        ('catch',               'Execute Catch Branch'),
+        ('continue',            'Continue Workflow'),
+        ('catch_then_continue', 'Execute Catch Branch Then Continue'),
+    ], string="Error Handling Mode", default='catch')
+    tc_catch_filters = fields.Json(
+        string="Error Filters",
+        help="List of exception class names to catch. Empty = catch all.",
+    )
+    tc_try_node_ids = fields.Many2many(
+        'node.struct',
+        'node_struct_tc_try_rel',
+        'scope_id', 'child_id',
+        string="TRY Branch Node IDs",
+    )
+    tc_catch_node_ids = fields.Many2many(
+        'node.struct',
+        'node_struct_tc_catch_rel',
+        'scope_id', 'child_id',
+        string="CATCH Branch Node IDs",
+    )
+
     # FollowersNode block fields
     isRemoveFollower = fields.Json()
     followers = fields.Json()

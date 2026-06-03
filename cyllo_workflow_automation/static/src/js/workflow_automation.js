@@ -62,6 +62,7 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Window: ['label', 'window_action_id'],
     Duplicate: ['label', 'duplicate_record', 'duplicate_field_overrides'],
     Webhook: ['label', 'webhook_url', 'webhook_method', 'webhook_headers', 'webhook_payload', 'webhook_actions'],
+    TryCatch: ['label', 'tc_error_handling_mode', 'tc_catch_filters', 'tc_try_node_ids', 'tc_catch_node_ids'],
 };
 
 const GLOBAL_IMPORTS = [{
@@ -505,7 +506,7 @@ export class WorkFlowAuto extends Component {
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).find(
                     (item) => item.id === parseInt(input_id)
                 );
-                if (node && (node.data.name === 'Webhook' || await this.shouldAutoOpenConfigModal(node))) {
+                if (node && (node.data.name === 'Webhook' || node.data.name === 'TryCatch' || await this.shouldAutoOpenConfigModal(node))) {
                     const name = node.data.name;
                     const nodeId = node.data.nodeId;
                     this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
@@ -956,7 +957,8 @@ export class WorkFlowAuto extends Component {
         const createdNode = flowNodes.find(node => node.id === id);
         if (!createdNode) return;
         const nodeId = createdNode.data.nodeId;
-        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop"
+        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "TryCatch";
+        const isTryCatch = createdNode.name === "TryCatch";
         //TODO: Handle Context
         const currentContext = this.env.context.context
         const nodes = currentContext?.nodes || []
@@ -975,6 +977,7 @@ export class WorkFlowAuto extends Component {
                 child2: null,
                 isParent,
                 isLoop,
+                isTryCatch,
                 code: "",
                 type: createdNode.data.type,
                 trigger_type: createdNode.data.trigger_type,
@@ -2427,7 +2430,7 @@ export class WorkFlowAuto extends Component {
         if (flowRoots.length) {
             codeLines.push("");
             flowRoots.forEach((root, index) => {
-                const flowLines = this.buildFlowLines(root, variables);
+                const flowLines = this.buildFlowLines(root, variables, flowData);
                 if (!flowLines.length) {
                     return;
                 }
@@ -2475,7 +2478,7 @@ export class WorkFlowAuto extends Component {
         return fallbackRoots.length ? fallbackRoots : [];
     }
 
-    buildFlowLines(startNode, variables) {
+    buildFlowLines(startNode, variables, flowData = {}) {
         if (!startNode) {
             return [];
         }
@@ -2503,18 +2506,58 @@ export class WorkFlowAuto extends Component {
                 const children2 = Array.isArray(node.child2) ? node.child2 : (node.child2 ? [node.child2] : []);
                 const nextNodes = Array.isArray(node.right) ? node.right : (node.right ? [node.right] : []);
 
-                // Branch 1 (IF / Loop Body)
-                if (children1.length > 0) {
-                    children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
-                } else if (node.isLoop) {
-                    // Empty loop body?
+                // Branch 1 (IF / Loop Body / TRY Branch)
+                if (node.isTryCatch) {
+                    lines.push(`${indentationLevel}try:`);
+                    if (children1.length > 0) {
+                        children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
                 } else {
-                    // Logic requires something in the IF block if it's a condition
-                    lines.push(`${indentationLevel}    pass`);
+                    if (children1.length > 0) {
+                        children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                    } else if (node.isLoop) {
+                        // Empty loop body?
+                    } else {
+                        // Logic requires something in the IF block if it's a condition
+                        lines.push(`${indentationLevel}    pass`);
+                    }
                 }
 
-                // Branch 2 (ELSE)
-                if (children2.length > 0 || node.else_setup_code) {
+                // Branch 2 (ELSE / CATCH Branch)
+                if (node.isTryCatch) {
+                    const canvasNode = Object.values(flowData).find(n => n.data?.nodeId === node.nodeId);
+                    const filters = canvasNode?.data?.tc_catch_filters || [];
+                    const mode = canvasNode?.data?.tc_error_handling_mode || 'catch';
+                    
+                    let exceptClause = "except Exception as _wf_error:";
+                    if (filters.length > 0) {
+                        exceptClause = `except (${filters.join(', ')}) as _wf_error:`;
+                    }
+                    lines.push(`${indentationLevel}${exceptClause}`);
+                    
+                    if (mode === 'stop') {
+                        lines.push(`${indentationLevel}    raise`);
+                    } else if (mode === 'continue') {
+                        lines.push(`${indentationLevel}    pass`);
+                    } else {
+                        // catch or catch_then_continue
+                        lines.push(`${indentationLevel}    import traceback as _wf_tb`);
+                        lines.push(`${indentationLevel}    import datetime as _wf_dt`);
+                        lines.push(`${indentationLevel}    error_message = str(_wf_error)`);
+                        lines.push(`${indentationLevel}    error_type = type(_wf_error).__name__`);
+                        lines.push(`${indentationLevel}    error_traceback = _wf_tb.format_exc()`);
+                        lines.push(`${indentationLevel}    error_timestamp = _wf_dt.datetime.now().isoformat()`);
+                        lines.push(`${indentationLevel}    status_code = getattr(_wf_error, 'status_code', None)`);
+                        lines.push(`${indentationLevel}    response_body = getattr(_wf_error, 'response_body', None)`);
+                        if (children2.length > 0) {
+                            children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                        } else {
+                            lines.push(`${indentationLevel}    pass`);
+                        }
+                    }
+                } else if (children2.length > 0 || node.else_setup_code) {
                     if (node.else_setup_code) {
                         lines.push(`${indentationLevel}${node.else_setup_code}`);
                         const complementVar = node.else_setup_code.split('=')[0].trim();
@@ -2880,6 +2923,10 @@ export class WorkFlowAuto extends Component {
             case 'Duplicate':
             case 'Webhook':
                 specificProps.type = "action_to_do";
+                break;
+            case 'TryCatch':
+                specificProps.type = "action_to_do";
+                right = 2;  // Port 1 = TRY ✅, Port 2 = CATCH 🚨
                 break;
             case 'Warning':
                 specificProps.type = "action_to_do";

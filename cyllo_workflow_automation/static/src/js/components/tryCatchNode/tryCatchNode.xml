@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="TryCatchNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
+        <xpath expr="//div[hasclass('modal-body')]" position="inside">
+            <div class="py-2">
+
+                <!-- ══════════════════════════════════════════════════════════
+                     LABEL
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">Label</label>
+                    <input type="text"
+                           class="form-control cy-modal-form_input"
+                           t-model="fieldState.label"
+                           placeholder="e.g. Try / Catch: Send Payment Webhook"/>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     SCOPE HEADER BANNER
+                ══════════════════════════════════════════════════════════ -->
+                <div class="rounded-3 mb-3 px-3 py-2 d-flex align-items-center gap-2"
+                     style="background:linear-gradient(135deg,#e8f5e9 0%,#ffebee 100%);border:1.5px solid #9ea700;">
+                    <span style="font-size:22px;">🛡️</span>
+                    <div>
+                        <div style="font-weight:700;font-size:13px;color:#3a3a00;">Try / Catch Scope</div>
+                        <div style="font-size:11px;color:#666;">
+                            Connect nodes to the <strong style="color:#2e7d32;">TRY ✅</strong> port and
+                            <strong style="color:#c62828;">CATCH 🚨</strong> port on the canvas.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     TAB NAVIGATION
+                ══════════════════════════════════════════════════════════ -->
+                <ul class="nav nav-tabs mb-3" style="border-bottom:2px solid #9ea700;">
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-3"
+                           style="cursor:pointer;font-size:13px;"
+                           t-att-class="uiState.activeTab === 'settings' ? 'active fw-semibold' : 'text-secondary'"
+                           t-on-click="() => this.uiState.activeTab = 'settings'">
+                            ⚙️ Settings
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-3"
+                           style="cursor:pointer;font-size:13px;color:#2e7d32;"
+                           t-att-class="uiState.activeTab === 'try' ? 'active fw-semibold' : ''"
+                           t-on-click="() => this.uiState.activeTab = 'try'">
+                            ✅ TRY Branch
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 px-3"
+                           style="cursor:pointer;font-size:13px;color:#c62828;"
+                           t-att-class="uiState.activeTab === 'catch' ? 'active fw-semibold' : ''"
+                           t-on-click="() => this.uiState.activeTab = 'catch'">
+                            🚨 CATCH Branch
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     SETTINGS TAB
+                ══════════════════════════════════════════════════════════ -->
+                <div t-if="uiState.activeTab === 'settings'">
+
+                    <!-- Error Handling Mode -->
+                    <div class="mb-4">
+                        <label class="form-label cy-modal-form_label">Error Handling Mode</label>
+                        <div class="d-flex flex-column gap-2 mt-1">
+                            <t t-foreach="errorHandlingOptions" t-as="opt" t-key="opt.value">
+                                <label class="d-flex align-items-center gap-2 rounded-2 px-3 py-2"
+                                       style="cursor:pointer;border:1.5px solid;"
+                                       t-att-style="fieldState.tc_error_handling_mode === opt.value
+                                           ? 'border-color:#9ea700;background:#f5f6e6;'
+                                           : 'border-color:#dee2e6;background:#fff;'">
+                                    <input type="radio"
+                                           class="form-check-input m-0"
+                                           name="tc_error_handling_mode"
+                                           t-model="fieldState.tc_error_handling_mode"
+                                           t-att-value="opt.value"/>
+                                    <span style="font-size:13px;"><t t-esc="opt.label"/></span>
+                                </label>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- Error Filters -->
+                    <div class="mb-3">
+                        <label class="form-label cy-modal-form_label">
+                            Catch Only These Errors
+                            <span class="text-muted ms-1" style="font-size:11px;font-weight:normal;">
+                                (leave all unchecked = catch ALL exceptions)
+                            </span>
+                        </label>
+                        <div class="d-flex flex-wrap gap-2 mt-1">
+                            <t t-foreach="catchFilterOptions" t-as="opt" t-key="opt.value">
+                                <label class="d-flex align-items-center gap-1 rounded-pill px-3 py-1"
+                                       style="cursor:pointer;font-size:12px;border:1.5px solid;"
+                                       t-att-style="isCatchFilterSelected(opt.value)
+                                           ? 'border-color:#c62828;background:#ffebee;color:#c62828;'
+                                           : 'border-color:#dee2e6;background:#f8f9fa;color:#555;'">
+                                    <input type="checkbox"
+                                           class="form-check-input m-0"
+                                           t-att-checked="isCatchFilterSelected(opt.value)"
+                                           t-on-click="() => this.toggleCatchFilter(opt.value)"/>
+                                    <t t-esc="opt.label"/>
+                                </label>
+                            </t>
+                        </div>
+                        <div class="mt-2 text-muted" style="font-size:11px;">
+                            Active: <strong><t t-esc="filterSummary"/></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     TRY BRANCH TAB
+                ══════════════════════════════════════════════════════════ -->
+                <div t-if="uiState.activeTab === 'try'">
+                    <div class="rounded-3 p-3 mb-3"
+                         style="background:#e8f5e9;border:1.5px solid #a5d6a7;">
+                        <div class="fw-semibold mb-1" style="color:#1b5e20;font-size:13px;">
+                            ✅ How to wire the TRY branch
+                        </div>
+                        <ol style="font-size:12px;color:#333;padding-left:18px;margin:0;">
+                            <li>Close this dialog and return to the canvas.</li>
+                            <li>Drag the green <strong>TRY ✅</strong> output port of this node.</li>
+                            <li>Connect it to any node(s) you want to attempt (Webhook, Create, Mail, etc.).</li>
+                            <li>If any connected node raises an exception, execution jumps to the CATCH branch.</li>
+                        </ol>
+                    </div>
+                    <div class="rounded-3 p-3"
+                         style="background:#f5f6e6;border:1px solid #d4d400;font-size:12px;">
+                        <div class="fw-semibold mb-1" style="color:#3a3a00;">
+                            📦 Error variables available in CATCH nodes:
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <t t-foreach="['error_message','error_type','error_traceback','error_timestamp','status_code','response_body']" t-as="v" t-key="v">
+                                <code style="background:#fff;border:1px solid #c8c800;padding:1px 6px;border-radius:4px;font-size:11px;">
+                                    <t t-esc="v"/>
+                                </code>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
+                     CATCH BRANCH TAB
+                ══════════════════════════════════════════════════════════ -->
+                <div t-if="uiState.activeTab === 'catch'">
+                    <div class="rounded-3 p-3 mb-3"
+                         style="background:#ffebee;border:1.5px solid #ef9a9a;">
+                        <div class="fw-semibold mb-1" style="color:#b71c1c;font-size:13px;">
+                            🚨 How to wire the CATCH branch
+                        </div>
+                        <ol style="font-size:12px;color:#333;padding-left:18px;margin:0;">
+                            <li>Close this dialog and return to the canvas.</li>
+                            <li>Drag the red <strong>CATCH 🚨</strong> output port of this node.</li>
+                            <li>Connect it to recovery nodes (Send Email, Log, Activity, etc.).</li>
+                            <li>All CATCH nodes automatically receive the error context variables below.</li>
+                        </ol>
+                    </div>
+
+                    <div class="fw-semibold mb-2" style="font-size:13px;color:#333;">
+                        Auto-injected error variables (usable in all CATCH nodes):
+                    </div>
+                    <table class="table table-sm table-bordered" style="font-size:12px;">
+                        <thead style="background:#f5f6e6;">
+                            <tr>
+                                <th style="width:180px;">Variable</th>
+                                <th>Contains</th>
+                                <th style="width:100px;">Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>error_message</code></td>
+                                <td>Human-readable exception message</td>
+                                <td><em>No email address found.</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>error_type</code></td>
+                                <td>Exception class name</td>
+                                <td><em>UserError</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>error_traceback</code></td>
+                                <td>Full Python traceback string</td>
+                                <td><em>Traceback (most recent…)</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>error_timestamp</code></td>
+                                <td>ISO 8601 datetime of failure</td>
+                                <td><em>2025-06-02T10:30:00</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>status_code</code></td>
+                                <td>HTTP status code (webhooks only)</td>
+                                <td><em>503</em></td>
+                            </tr>
+                            <tr>
+                                <td><code>response_body</code></td>
+                                <td>HTTP response body (webhooks only)</td>
+                                <td><em>{"error": "…"}</em></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="rounded-3 p-2 mt-2"
+                         style="background:#f5f6e6;border:1px solid #9ea700;font-size:11px;">
+                        💡 <strong>Example:</strong> In a Mail CATCH node, set the body to:<br/>
+                        <code>Node failed: {{ error_type }} — {{ error_message }} at {{ error_timestamp }}</code>
+                    </div>
+                </div>
+
+            </div>
+        </xpath>
+    </t>
+</templates>

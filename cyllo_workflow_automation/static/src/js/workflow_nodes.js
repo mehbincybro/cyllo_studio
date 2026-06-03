@@ -22,6 +22,7 @@ import {
     windowFields,
     duplicateFields,
     webhookFields,
+    tryCatchFields,
 } from "./fields";
 import {
     icons,
@@ -47,6 +48,7 @@ import { ReusableAutomationNode } from "./components/reusableAutomationNode/reus
 import { WindowNode } from "./components/windowNode/windowNode";
 import { DuplicateNode } from "./components/DuplicateNode/duplicateNode";
 import { WebhookNode } from "./components/webhookNode/webhookNode";
+import { TryCatchNode } from "./components/tryCatchNode/tryCatchNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -116,6 +118,10 @@ const MODAL_CONFIGS = {
     'Webhook': {
         component: WebhookNode,
         fields: webhookFields,
+    },
+    'TryCatch': {
+        component: TryCatchNode,
+        fields: tryCatchFields,
     },
 };
 
@@ -191,6 +197,54 @@ function _registerWebhookResponseVariables(fieldState, variableCtx, env, nodeId)
             env.bus.trigger("UPDATE-VARIABLE-STATE");
         } catch (err) {
             console.error("WebhookNode: failed to register response variables:", err);
+        }
+    }
+}
+
+/**
+ * _registerTryCatchErrorVariables
+ *
+ * Registers the standard error context variables into the frontend variable
+ * context so they are selectable in all nodes inside the CATCH branch.
+ * These variables mirror the ones auto-injected by _generate_try_catch_code().
+ *
+ * @param {string|number} nodeId - The nodeId of the TryCatch node
+ * @param {object} env           - The OWL environment (this.env)
+ */
+function _registerTryCatchErrorVariables(nodeId, env) {
+    const ERROR_VAR_NAMES = [
+        'error_message',
+        'error_type',
+        'error_traceback',
+        'error_timestamp',
+        'status_code',
+        'response_body',
+    ];
+    const existingVars = (env.variables?.context?.variables) || [];
+    const newVars = [];
+    for (const name of ERROR_VAR_NAMES) {
+        const varId = `tc_var_${nodeId}_${name}`;
+        if (!existingVars.find(v => v.id === varId)) {
+            newVars.push(owl.reactive({
+                id: varId,
+                variable_name: name,
+                variable_type: 'string',
+                variable_value: '',
+                source: 'try_catch',
+                tc_node_id: nodeId,
+                scopeId: nodeId,
+                usedIn: [],
+                class: 'btn-danger',
+                delete: false,
+            }));
+        }
+    }
+    if (newVars.length) {
+        try {
+            env.variables.setContext({ variables: [...existingVars, ...newVars] });
+            env.bus.trigger("UPDATE-VARIABLE-STATE");
+        } catch (err) {
+            console.error("TryCatchNode: failed to register error variables:", err);
         }
     }
 }
@@ -567,6 +621,12 @@ export class ModelComponent extends Component {
                         this.props.nodeId,
                     );
                 };
+            } else if (this.props.name === 'TryCatch') {
+                props.display_name = "The Try/Catch Scope Node wraps workflow branches in centralized error handling. Connect nodes to the TRY port and recovery nodes to the CATCH port.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    _registerTryCatchErrorVariables(this.props.nodeId, this.env);
+                };
             }
             this.dialogService.add(component, props);
         } else {
@@ -925,6 +985,12 @@ export class ModelComponent extends Component {
                     <span>Success</span>
                     <span>Failed</span>
                     <span>Default</span>
+                </div>
+            </t>
+            <t t-if="props.name === 'TryCatch' or state.model.display_name === 'TryCatch'">
+                <div class="trycatch-tooltip-container">
+                    <span>TRY Branch</span>
+                    <span>CATCH Branch</span>
                 </div>
             </t>
         </div>`;
