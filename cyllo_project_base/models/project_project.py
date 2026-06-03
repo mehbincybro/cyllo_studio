@@ -19,10 +19,16 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import field_service_checklist
-from . import field_service_request
-from . import field_service_skill_category
-from . import field_service_skill_category_line
-from . import field_service_worker
-from . import hr_employee
-from . import res_config_settings
+from odoo import fields, models
+
+
+class ProjectProject(models.Model):
+    """Extends project.project to add Field Service integration flag."""
+    _inherit = 'project.project'
+
+    is_fsm = fields.Boolean(
+        string="Field Service",
+        default=False,
+        help="When enabled, tasks of this project will appear in the "
+             "Field Service module under Operations ",
+    )

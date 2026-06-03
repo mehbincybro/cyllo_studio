@@ -43,7 +43,7 @@ class FieldServiceRequest(models.Model):
     name = fields.Char(string="Number", default=_('New'), readonly=True,
                        copy=False,
                        help="Sequence number of current request")
-    partner_id = fields.Many2one("res.partner", required=True,
+    partner_id = fields.Many2one("res.partner",
                                  help="The name of the customer who is making the request.",
                                  string="Customer")
     description = fields.Html(help="Description about the service request")
@@ -54,13 +54,10 @@ class FieldServiceRequest(models.Model):
     company_id = fields.Many2one("res.company", required=True,
                                  default=lambda self: self.env.company,
                                  help="Current company")
-    field_service_template_id = fields.Many2one("field.service.template",
-                                                string="Service Template",
-                                                ondelete="restrict", copy=False,
-                                                help="Service request template for this service request")
+
     skill_category_id = fields.Many2one("field.service.skill.category",
                                         string="Category", tracking=True,
-                                        required=True, ondelete="restrict",
+                                        ondelete="restrict", required=False,
                                         help="Skill categories to represent skills needed to complete the request ")
     hr_skill_ids = fields.Many2many(related='skill_category_id.hr_skill_ids',
                                     help="Skill required to complete the task")
@@ -107,6 +104,17 @@ class FieldServiceRequest(models.Model):
     is_manager = fields.Boolean(compute="_compute_is_manager")
     is_invoiced = fields.Boolean(default=False)
 
+    @api.onchange('skill_category_id', 'hr_skill_ids')
+    def _onchange_hr_skill_ids(self):
+        """Keep selected workers aligned with the current required skills."""
+        for request in self:
+            if not request.hr_skill_ids:
+                continue
+            request.field_service_worker_ids = request.field_service_worker_ids.filtered(
+                lambda worker: worker.employee_id
+                and worker.employee_id.skill_ids & request.hr_skill_ids
+            )
+
     def _compute_ready_to_invoice(self):
         """Function to compute the visibility of invoice button"""
         for fields_service in self:
@@ -145,20 +153,23 @@ class FieldServiceRequest(models.Model):
         for request in self:
             request.access_url = f'/field_service_request/{request.id}'
 
-    @api.onchange('field_service_template_id')
-    def _onchange_field_service_template_id(self):
-        """This function is used to fetch the categories, skills and checklist regarding the template to the
+    @api.onchange('skill_category_id')
+    def _onchange_skill_category_id(self):
+        """This function is used to fetch the categories, skills and checklist regarding the skill category to the
         request form"""
         for line in self.service_checklist_ids:
             if not line.required:
                 line.unlink()
-        for line in self.field_service_template_id.service_checklist_ids:
-            self.write({'service_checklist_ids': [fields.Command.create({
-                'required': line.required,
-                'service_cost': line.service_cost,
-                'time_required': line.time_required,
-                'product_id': line.product_id.id,
-                'field_service_request_id': self._origin.id})]})
+        if self.skill_category_id:
+            for line in self.skill_category_id.service_checklist_ids:
+                if not line.product_id:
+                    continue
+                self.write({'service_checklist_ids': [fields.Command.create({
+                    'required': line.required,
+                    'service_cost': line.service_cost,
+                    'time_required': line.time_required,
+                    'product_id': line.product_id.id,
+                    'field_service_request_id': self._origin.id})]})
 
     @api.onchange( 'date_assigned', 'date_deadline')
     def _onchange_date_assigned(self):
@@ -278,13 +289,13 @@ class FieldServiceRequest(models.Model):
     def action_assign_workers(self):
         """Function for sending notification to assigned workers, adding workers to the followers and  move request to
          assigned state."""
-        if not self.field_service_template_id:
+        if not self.skill_category_id:
             return {
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                    'title': _("Missing Checklist Template"),
-                    'message': _("Please Add Service Checklist Template."),
+                    'title': _("Missing Skill Category"),
+                    'message': _("Please Add Skill Category."),
                     'sticky': False,
                     'type': 'warning',
                 }
@@ -420,6 +431,7 @@ class FieldServiceRequest(models.Model):
             :return: The created invoice.
             :rtype: account.move
             """
+        print("creatingggg")
         invoice = self.env['account.move'].create({
             'move_type': 'out_invoice',
             'partner_id': self.partner_id.id,

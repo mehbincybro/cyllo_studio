@@ -25,13 +25,7 @@
             ['|',('company_id','=',False),('company_id', 'in', company_ids)]
         </field>
     </record>
-    <record id="rule_field_service_template_company" model="ir.rule">
-        <field name="name">Field Service Multi-Company</field>
-        <field name="model_id" ref="model_field_service_template"/>
-        <field name="domain_force">
-            ['|',('company_id','=',False),('company_id', 'in', company_ids)]
-        </field>
-    </record>
+
     <record id="rule_field_service_skill_category_company" model="ir.rule">
         <field name="name">Field Service Multi-Company</field>
         <field name="model_id" ref="model_field_service_skill_category"/>

@@ -114,14 +114,12 @@ class FieldServiceRequestPortal(portal.PaymentPortal):
         domain = [('company_id', '=', request.env.company.id)]
         categories = request.env['field.service.skill.category'].sudo().search(
             domain)
-        templates = request.env['field.service.template'].sudo().search(domain)
         return http.request.render(
             'cyllo_field_service.fs_service_request_form', {
                 'partners': partners,
                 'sale_orders': sale_orders,
                 'categories': categories,
                 'today': date.today(),
-                'templates': templates,
             })
 
     @http.route(['/fs_request/form/action_complete'], type='json')

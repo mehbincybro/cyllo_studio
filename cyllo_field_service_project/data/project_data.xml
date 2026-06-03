@@ -20,5 +20,6 @@
         <field name="type_ids"
                eval="[Command.link(ref('cyllo_field_service_project.project_task_type_running')),Command.link(ref('cyllo_field_service_project.project_task_type_done'))]"/>
         <field name="privacy_visibility">portal</field>
+        <field name="is_fsm" eval="True"/>
     </record>
 </odoo>

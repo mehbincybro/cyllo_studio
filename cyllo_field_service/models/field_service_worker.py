@@ -34,7 +34,7 @@ class FieldServiceWorker(models.Model):
                                                ondelete='cascade')
     employee_id = fields.Many2one('hr.employee', string='Worker',
                                   help="Employee name", required=True, )
-    employee_ids = fields.Many2many('hr.employee', store=True,
+    employee_ids = fields.Many2many('hr.employee',
                                     compute="_compute_employee_ids")
     mobile_number = fields.Char(string='Mobile',
                                 related='employee_id.work_phone',
@@ -46,7 +46,7 @@ class FieldServiceWorker(models.Model):
     )
 
     @api.depends('field_service_request_id',
-                 'field_service_request_id.skill_category_id',
+                 'field_service_request_id.hr_skill_ids',
                  'field_service_request_id.state', 'employee_id',
                  'field_service_request_id.field_service_worker_ids.employee_id')
     def _compute_employee_ids(self):

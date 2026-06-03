@@ -31,16 +31,9 @@
     'category': 'Services/Project',
     'depends': ['cyllo_project_base', 'sale_project'],
     'data': [
-        'security/ir.model.access.csv',
-        'wizard/project_task_product_catalog_wizard_views.xml',
         'views/project_project_views.xml',
         'views/project_task_views.xml',
     ],
-    'assets': {
-        'web.assets_backend': [
-            'cyllo_project_product/static/src/js/product_catalog_patch.js',
-        ],
-    },
     'license': 'LGPL-3',
     'installable': True,
     'application': False,

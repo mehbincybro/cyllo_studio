@@ -21,7 +21,7 @@
 #############################################################################
 from . import common
 from . import test_fs_service_checklist
-from . import test_fs_service_template_line
+from . import test_fs_skill_category_line
 from . import test_fs_service_request
 from . import test_fs_worker
 from . import test_hr_employee

@@ -19,4 +19,20 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import project_task_product_catalog_wizard
+from odoo.addons.cyllo_field_service.tests.common import TestCylloFieldService
+
+
+class TestFsSkillCategoryLine(TestCylloFieldService):
+
+    def test_onchange_product_id(self):
+        """Testcase for onchange_product_id"""
+        category_line = self.env['field.service.skill.category.line'].create({
+            'required': True,
+            'time_required': 2.0,
+            'service_cost': '',
+            'currency_id': self.currency.id,
+            'product_id': self.product.id
+        })
+        category_line._onchange_product_id()
+        self.assertEqual(category_line.service_cost, self.product.lst_price,
+                         msg="Error in _onchange_product_id")

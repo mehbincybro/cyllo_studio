@@ -64,9 +64,14 @@ class FieldServiceInvoice(models.TransientModel):
             total_amount = sum(self.timesheet_ids.mapped('total'))
             invoice = fs_request.action_create_invoices('service_timesheet', total_amount)
 
-        if invoice:
-            invoice_action['res_id'] = invoice.id
-            return invoice_action
+        if not invoice:
+            raise ValidationError(
+                "No invoice could be created. Please ensure that:\n"
+                "- The Service Checklist has at least one item marked as 'Completed' with a cost greater than 0, if invoicing for Service.\n"
+                "- Timesheet entries exist with hours and cost recorded, if invoicing for Timesheet."
+            )
+        invoice_action['res_id'] = invoice.id
+        return invoice_action
 
 class FieldServiceInvoiceLine(models.TransientModel):
     _name = 'field.service.invoice.line'

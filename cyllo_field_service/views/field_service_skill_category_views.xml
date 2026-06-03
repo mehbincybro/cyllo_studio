@@ -26,6 +26,17 @@
                         <page name="category_skill" string="Skills">
                             <field name="hr_skill_ids"/>
                         </page>
+                        <page name="service_checklist" string="Service Checklist">
+                            <field name="service_checklist_ids" nolabel="1">
+                                <tree editable="bottom">
+                                    <field name="product_id"/>
+                                    <field name="required"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="service_cost"/>
+                                    <field name="time_required" widget="float_time"/>
+                                </tree>
+                            </field>
+                        </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">

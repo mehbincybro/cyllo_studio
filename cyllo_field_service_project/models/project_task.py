@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class ProjectTask(models.Model):
@@ -50,5 +50,48 @@ class ProjectTask(models.Model):
         self.service_id = False
         for rec in self:
             service = self.env['field.service.request'].search(
-                [('task_id', '=', rec.id)])
+                [('task_id', '=', rec.id)], limit=1)
             rec.service_id = service.id
+
+    def _create_fsm_request(self):
+        """Create a draft field.service.request for tasks that:
+        - belong to an is_fsm project
+        - have a customer (partner_id) set
+        - don't already have a linked request
+        skill_category_id is required on field.service.request, so we fetch
+        the first available category; if none exists the creation is skipped.
+        """
+        if self.env.context.get('skip_fsm_request_creation'):
+            return
+        FSR = self.env['field.service.request'].sudo()
+        for task in self:
+            # Must belong to an FSM project
+            if not task.project_id or not task.project_id.is_fsm:
+                continue
+            # Skip if a request already exists for this task
+            if FSR.search([('task_id', '=', task.id)], limit=1):
+                continue
+            # Resolve customer: task partner → project partner
+            partner = task.partner_id or task.project_id.partner_id
+            FSR.create({
+                'name': task.name or 'New',
+                'task_id': task.id,
+                'project_id': task.project_id.id,
+                'partner_id': partner.id if partner else False,
+                # 'skill_category_id': category.id,
+                'company_id': self.env.company.id,
+                'state': 'draft',
+            })
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        tasks = super().create(vals_list)
+        tasks._create_fsm_request()
+        return tasks
+
+    def write(self, vals):
+        res = super().write(vals)
+        # Re-check if project changed or partner was set for the first time
+        if 'project_id' in vals or 'partner_id' in vals:
+            self._create_fsm_request()
+        return res

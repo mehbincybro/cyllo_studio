@@ -90,11 +90,11 @@ class TestServiceRequest(TestCylloFieldService):
         self.service_request.field_service_worker_ids = self.field_service_worker.ids
         self.service_request.action_assign_workers()
         self.assertEqual(self.service_request.state, 'assigned')
-        self.service_request.field_service_template_id = ''
+        self.service_request.skill_category_id = False
         notification = self.service_request.action_assign_workers()
-        self.assertEqual("Missing Checklist Template",
+        self.assertEqual("Missing Skill Category",
                          notification['params']['title'],
-                         msg="Notification title should indicate missing checklist template.")
+                         msg="Notification title should indicate missing skill category.")
 
     def test_action_draft(self):
         self.service_request2.action_draft()
@@ -147,10 +147,10 @@ class TestServiceRequest(TestCylloFieldService):
                                msg="You can delete requests in draft state only"):
             self.service_request3._unlink_except_posted()
 
-    def test_onchange_fs_service_template_id(self):
-        """service_checklist_ids' changes with field_service_template_id"""
-        service_template = self.env['field.service.template'].create({
-            'name': 'Test template',
+    def test_onchange_skill_category_id(self):
+        """service_checklist_ids' changes with skill_category_id"""
+        skill_category = self.env['field.service.skill.category'].create({
+            'name': 'Test category',
             'company_id': self.company.id,
             'service_checklist_ids': [(fields.Command.create({
                 'product_id': self.product2.id
@@ -160,18 +160,16 @@ class TestServiceRequest(TestCylloFieldService):
             'name': 'FS00003',
             'partner_id': self.partner.id,
             'user_id': self.user.id,
-            'skill_category_id': self.skill_category.id,
             'state': 'submit',
             'submit_date': '2023-11-30',
             'hr_skill_ids': self.skill_category.ids,
-            'service_checklist_ids': self.checklist2.ids,
             'move_ids': self.account_move.ids,
             'ready_to_invoice': False,
-            'field_service_template_id': service_template.id
+            'skill_category_id': skill_category.id
         })
-        service_request._onchange_field_service_template_id()
+        service_request._onchange_skill_category_id()
         self.assertEqual(service_request.service_checklist_ids.product_id,
-                         service_template.service_checklist_ids.product_id,
+                         skill_category.service_checklist_ids.product_id,
                          )
 
     def test_onchange_date_assigned(self):

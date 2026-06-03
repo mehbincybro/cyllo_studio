@@ -70,12 +70,11 @@
                                    readonly="state not in ['draft']"
                                    placeholder="Type to find a customer..."
                                    options='{"always_reload": True, "no_quick_create": True}'/>
-                            <field name="skill_category_id"
-                                   readonly="state not in ['draft']"/>
+                            <field name="skill_category_id"/>
                             <field name="hr_skill_ids"
                                    widget="many2many_tags"
                                    invisible="state == 'draft'"
-                                   readonly="state not in ['draft']"/>
+                                   readonly="0"/>
                             <field name="priority" widget="priority"
                                    readonly="state not in ['draft']"
                                    string="Priority"/>
@@ -87,10 +86,7 @@
                                    readonly="state not in ['draft','submit','assigned']"/>
                             <field name="sale_order_id" string="Sale Order"
                                    readonly="state == 'completed'"/>
-                            <field name="field_service_template_id"
-                                   invisible="state == 'draft'"
-                                   readonly="state in ['assigned', 'in_progress', 'completed']"
-                                   groups="cyllo_field_service.group_cyllo_field_service_manager"/>
+
                         </group>
                     </group>
                     <notebook>
@@ -215,9 +211,7 @@
                             context="{'group_by':'partner_id'}"/>
                     <filter string="Category" name="skill_category_id"
                             context="{'group_by':'skill_category_id'}"/>
-                    <filter string="Service Template"
-                            name="field_service_template_id"
-                            context="{'group_by':'field_service_template_id'}"/>
+
                     <filter string="State"
                             name="state"
                             context="{'group_by':'state'}"/>

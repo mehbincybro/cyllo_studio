@@ -25,3 +25,4 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     module_cyllo_project_product = fields.Boolean("Task Products")
+    module_cyllo_field_service_project = fields.Boolean("Field Service")
