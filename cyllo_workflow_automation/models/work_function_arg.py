@@ -1025,11 +1025,16 @@ class WorkAuto(models.Model):
                         "Webhook configured with %d response action(s)."
                     ) % action_count
                 return 'success', _("Webhook configured (no response actions).")
-            if node_name == 'TryCatch':
-                mode = node.tc_error_handling_mode or 'catch'
-                filters = node.tc_catch_filters or []
-                filter_label = f" | Filters: {', '.join(filters)}" if filters else " | Catching all exceptions"
-                return 'success', _("Try/Catch configured. Mode: %s%s") % (mode, filter_label)
+            if node_name == 'Try Catch':
+                err_var = (node.try_catch_error_variable or '').strip()
+                err_types = (node.try_catch_error_types or '').strip()
+                if not err_var:
+                    return 'error', _("Set an error variable name for the Try/Catch node.")
+                if not err_types:
+                    return 'error', _("Specify at least one exception type to catch.")
+                return 'success', _(
+                    "Try/Catch configured — catches %s as '%s'."
+                ) % (err_types, err_var)
             if node.code and node.code.strip():
                 return 'success', _("%s configured.") % label
             return 'error', _("%s is not configured.") % label
@@ -1538,101 +1543,6 @@ class WorkAuto(models.Model):
                 raise exceptions.ValidationError(e)
             
             return context.get('action')
-
-    def _generate_try_catch_code(self, tc_node):
-        """
-        Generate a Python try/except block that wraps the TRY branch nodes
-        and optionally executes the CATCH branch nodes on failure.
-
-        This method is called during workflow code generation when a node
-        with name='TryCatch' is encountered. It produces a self-contained
-        Python code snippet that is embedded into the workflow's main code string.
-
-        Error context variables automatically injected into the CATCH scope:
-            error_message, error_type, error_traceback, error_timestamp,
-            status_code, response_body
-
-        Args:
-            tc_node (node.struct): The TryCatch node record.
-
-        Returns:
-            str: A Python code string with try/except structure.
-        """
-        import textwrap
-
-        # ── Build except clause (filter or catch-all) ─────────────────────
-        filters = tc_node.tc_catch_filters or []
-        if filters and isinstance(filters, list):
-            valid_filters = [f for f in filters if f and isinstance(f, str)]
-            if valid_filters:
-                exc_types = ', '.join(valid_filters)
-                except_clause = f"except ({exc_types}) as _wf_error:"
-            else:
-                except_clause = "except Exception as _wf_error:"
-        else:
-            except_clause = "except Exception as _wf_error:"
-
-        # ── Collect TRY branch code ────────────────────────────────────────
-        try_parts = []
-        for child in tc_node.tc_try_node_ids.sorted('id'):
-            if child.code and child.code.strip():
-                try_parts.append(child.code.strip())
-        try_body = "\n".join(try_parts) if try_parts else "pass  # (empty TRY branch)"
-
-        # ── Collect CATCH branch code ──────────────────────────────────────
-        catch_parts = []
-        for child in tc_node.tc_catch_node_ids.sorted('id'):
-            if child.code and child.code.strip():
-                catch_parts.append(child.code.strip())
-        catch_body = "\n".join(catch_parts) if catch_parts else "pass  # (empty CATCH branch)"
-
-        # ── Error context auto-injection (prepended to CATCH body) ─────────
-        error_ctx = textwrap.dedent("""\
-            import traceback as _wf_tb
-            import datetime as _wf_dt
-            error_message = str(_wf_error)
-            error_type = type(_wf_error).__name__
-            error_traceback = _wf_tb.format_exc()
-            error_timestamp = _wf_dt.datetime.now().isoformat()
-            status_code = getattr(_wf_error, 'status_code', None)
-            response_body = getattr(_wf_error, 'response_body', None)
-        """)
-
-        # ── Assemble per handling mode ─────────────────────────────────────
-        mode = tc_node.tc_error_handling_mode or 'catch'
-        try_indented = textwrap.indent(try_body, "    ")
-        error_ctx_indented = textwrap.indent(error_ctx, "    ")
-        catch_indented = textwrap.indent(catch_body, "    ")
-
-        if mode == 'stop':
-            code = (
-                f"try:\n{try_indented}\n"
-                f"{except_clause}\n"
-                f"    raise\n"
-            )
-        elif mode == 'continue':
-            code = (
-                f"try:\n{try_indented}\n"
-                f"{except_clause}\n"
-                f"    pass  # (continue after error)\n"
-            )
-        elif mode == 'catch_then_continue':
-            code = (
-                f"try:\n{try_indented}\n"
-                f"{except_clause}\n"
-                f"{error_ctx_indented}"
-                f"{catch_indented}\n"
-                f"    # (workflow continues after catch)\n"
-            )
-        else:  # 'catch' (default)
-            code = (
-                f"try:\n{try_indented}\n"
-                f"{except_clause}\n"
-                f"{error_ctx_indented}"
-                f"{catch_indented}\n"
-            )
-
-        return code
 
     def get_context(self, records=None):
         """

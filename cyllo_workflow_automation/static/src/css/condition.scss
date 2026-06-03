@@ -104,9 +104,10 @@
     height: 24px;
 }
 
-.drawflow .drawflow-node.Condition.selected .condition-tooltip-container  {
+.drawflow .drawflow-node.Condition.selected .condition-tooltip-container,
+.drawflow .drawflow-node.Try.Catch.selected .condition-tooltip-container {
     display: block;
-    }
+}
 
 .condition-tooltip-container {
      position: absolute;

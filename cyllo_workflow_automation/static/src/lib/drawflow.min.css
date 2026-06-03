@@ -123,6 +123,19 @@
     background: #b47706 !important;
 }
 
+/* Try Catch node output ports */
+.drawflow .drawflow-node.Try.Catch .output_1 {
+    background: #28a745 !important; /* TRY branch (Green) */
+}
+
+.drawflow .drawflow-node.Try.Catch .output_2 {
+    background: #ff4d4d !important; /* CATCH branch (Red) */
+}
+
+.drawflow .drawflow-node.Try.Catch .output_3 {
+    background: #b47706 !important; /* Continue branch (Orange) */
+}
+
 
 
 .drawflow svg {
