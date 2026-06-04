@@ -4,7 +4,7 @@
         <xpath expr="//div[hasclass('modal-body')]" position="inside">
             <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
                 <t t-foreach="variables" t-as="variable" t-key="variable.id">
-                    <div t-att-class="'variable-pill d-flex align-items-center mb-2 btn-sm '+ variable.class"
+                    <div t-att-class="'variable-pill d-flex align-items-center mb-2'"
                          title="Click to copy — use inside f&quot;&quot;&quot; &quot;&quot;&quot; for string interpolation">
                         <span class="variable-name px-2 " t-out="variable.variable_name" />
                         <span class=" px-1 py-2 d-flex align-items-center" t-on-click="(ev) => this.copyToClipboard(ev, variable.variable_name)">
@@ -14,7 +14,7 @@
                 </t>
                 <t t-if="variables and variables.length">
                     <small class="text-muted ms-1 mb-2" style="font-size:0.78rem;">
-                        💡 Use variables in strings with Python f-strings: <code>f"text {var_error}"</code>
+                        Use variables in strings with Python f-strings: <code>f"text {var_error}"</code>
                     </small>
                 </t>
             </div>

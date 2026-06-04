@@ -105,8 +105,6 @@ export async function settingInitialContext() {
 
     this.env.context.setContext({ nodes: [...contextNodes] });
 
-    // ── Bug 4 fix: re-register Try Catch error variables after page reload ────
-    // On reload onConfirm never fires, so we must seed env.variables here.
     const existingVars = this.env.variables.context.variables || [];
     const newVars = [];
     const BUTTON_CLASSES = ['btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'];
@@ -117,13 +115,6 @@ export async function settingInitialContext() {
         const nodeStruct = codeArray.find(item => item.id === nodeId);
         const rawVarName = (nodeStruct?.try_catch_error_variable || '').trim();
         if (!rawVarName) return;
-
-        // Bug 1 fix: register as var_<name> so processValue("variable") output
-        // (which emits "var_<varName>") matches the Python variable name generated
-        // by traverse(). The except clause writes "except ... as <rawVarName>:"
-        // which means we also need to store var_<rawVarName> as the Python identifier.
-        // We handle this by keeping the raw except clause name (no var_ prefix) in
-        // else_setup_code and exposing the var_ prefixed version to UI pickers.
         const varId = `${nodeId}_error`;
         const alreadyRegistered = existingVars.find(v => v.id === varId);
         const displayVarName = `var_${rawVarName}`;
