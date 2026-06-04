@@ -7,7 +7,7 @@
         <field name="binding_view_types">form</field>
         <field name="state">code</field>
         <field name="code">
-action = records.action_create_survey()
+            action = records.action_create_survey()
         </field>
     </record>
 </odoo>

@@ -251,7 +251,6 @@ msgid "Activity"
 msgstr "Actividad"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__activity_due
 msgid "Activity Due"
 msgstr "Actividad vencida"
 
@@ -343,7 +342,6 @@ msgid "CRM: deal reminder"
 msgstr "CRM: recordatorio de transacción"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__call
 msgid "Call"
 msgstr "Llamada"
 
@@ -437,7 +435,6 @@ msgstr "País"
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__create_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__create_uid
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__create_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__create_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__create_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__create_uid
@@ -448,7 +445,6 @@ msgstr "Creado por"
 
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__create_date
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__create_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__create_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__create_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__create_date
@@ -473,7 +469,6 @@ msgid "Crm Subscription Report"
 msgstr "Reporte de suscripción del CRM"
 
 #. module: cyllo_crm
-#: model:ir.model,name:cyllo_crm.model_crm_lead_notification
 msgid "CrmLeadNotification"
 msgstr "NotificaciónLeadCRM"
 
@@ -497,7 +492,6 @@ msgid "Date Range"
 msgstr "Rango de fechas"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__lost
 msgid "Deal Lost"
 msgstr "Transacción perdida"
 
@@ -508,7 +502,6 @@ msgid "Deal Reminder"
 msgstr "Recordatorio de transacción"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__won
 msgid "Deal Won"
 msgstr "Transacción ganada"
 
@@ -527,7 +520,6 @@ msgstr "Notificación descartada"
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__display_name
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__display_name
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__display_name
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__display_name
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__display_name
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__display_name
@@ -554,7 +546,6 @@ msgstr "Leads duplicados"
 
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__email_from
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__email
 msgid "Email"
 msgstr "Correo electrónico"
 
@@ -611,14 +602,12 @@ msgid "Hide Filters"
 msgstr "Ocultar filtros"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__high
 msgid "High"
 msgstr "Alta"
 
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__id
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__id
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__id
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__id
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__id
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__id
@@ -661,7 +650,6 @@ msgid "Is Marked As Read"
 msgstr "Es marcado como leído"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__is_read
 msgid "Is Read"
 msgstr "Es leído"
 
@@ -673,7 +661,6 @@ msgstr "Puesto de trabajo"
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__write_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__write_uid
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__write_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__write_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__write_uid
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__write_uid
@@ -685,7 +672,6 @@ msgstr "Última actualización por"
 #. module: cyllo_crm
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_fields__write_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_compare_record__write_date
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__write_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_activity__write_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria__write_date
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage_exit_criteria_line__write_date
@@ -705,7 +691,6 @@ msgid "Lead Only"
 msgstr "Solo lead"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__lead_updated
 msgid "Lead Updated"
 msgstr "Lead actualizado"
 
@@ -715,7 +700,6 @@ msgid "Lead/Opportunity"
 msgstr "Lead/Oportunidad"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__low
 msgid "Low"
 msgstr "Baja"
 
@@ -725,7 +709,6 @@ msgid "Mandatory Followups for activities in leads/Opportunity"
 msgstr "Seguimientos obligatorios para actividades en leads/Oportunidades"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__is_marked_notification
 msgid "Marked Notification"
 msgstr "Notificación marcada"
 
@@ -735,12 +718,10 @@ msgid "Marked as Read"
 msgstr "Marcado como leído"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__meeting
 msgid "Meeting"
 msgstr "Reunión"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__message
 msgid "Message"
 msgstr "Mensaje"
 
@@ -787,7 +768,6 @@ msgid "Name already exist"
 msgstr "El nombre ya existe"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__new_lead
 msgid "New Lead"
 msgstr "Nuevo lead"
 
@@ -820,7 +800,6 @@ msgid "No subscriptions found. Create the first one!"
 msgstr "No se encontraron suscripciones. ¡Crea la primera!"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__priority__normal
 msgid "Normal"
 msgstr "Normal"
 
@@ -845,7 +824,6 @@ msgid "Phone"
 msgstr "Teléfono"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__priority
 msgid "Priority"
 msgstr "Prioridad"
 
@@ -862,7 +840,6 @@ msgid "Reference Model"
 msgstr "Modelo de referencia"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__lead_id
 msgid "Related Lead"
 msgstr "Lead relacionado"
 
@@ -1004,7 +981,6 @@ msgid "Stage Activity"
 msgstr "Actividad de etapa"
 
 #. module: cyllo_crm
-#: model:ir.model.fields.selection,name:cyllo_crm.selection__crm_lead_notification__notification_type__stage_changed
 msgid "Stage Changed"
 msgstr "Etapa cambió"
 
@@ -1075,7 +1051,6 @@ msgstr ""
 
 #. module: cyllo_crm
 #: model:ir.model.fields,help:cyllo_crm.field_crm_lead__is_marked_as_read
-#: model:ir.model.fields,help:cyllo_crm.field_crm_lead_notification__is_marked_notification
 msgid ""
 "This field is used to indicate if the notification for this lead has been "
 "marked as read by the user."
@@ -1084,7 +1059,6 @@ msgstr ""
 "notificación para este lead."
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__title
 msgid "Title"
 msgstr "Título"
 
@@ -1110,13 +1084,11 @@ msgid "Top Performers"
 msgstr "Mejores rendimientos"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__notification_type
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_stage__type
 msgid "Type"
 msgstr "Tipo"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__unread_visible
 msgid "Unread Visible"
 msgstr "No leído visible"
 
@@ -1128,7 +1100,6 @@ msgid "Updates"
 msgstr "Actualizaciones"
 
 #. module: cyllo_crm
-#: model:ir.model.fields,field_description:cyllo_crm.field_crm_lead_notification__user_id
 #: model:ir.model.fields,field_description:cyllo_crm.field_crm_subscription_report__user_id
 msgid "User"
 msgstr "Usuario"

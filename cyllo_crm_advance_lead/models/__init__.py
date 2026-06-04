@@ -19,6 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+from . import base_automation
 from . import crm_lead
 from . import product_wishlist
 from . import res_config_settings

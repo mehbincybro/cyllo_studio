@@ -6,6 +6,16 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.crm_lead_view_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_schedule_meeting']"
+                   position="after">
+                <button name="action_get_automation" type="object"
+                        class="oe_stat_button"
+                        invisible="not is_installed or count == 0"
+                        icon="fa-cogs"
+                        string="Automation">
+                    <field name="count" string="Automation" widget="statinfo"/>
+                </button>
+            </xpath>
             <button name="action_schedule_meeting" position="after">
                 <button name="action_view_wishlist_products" type="object"
                         class="oe_stat_button"
