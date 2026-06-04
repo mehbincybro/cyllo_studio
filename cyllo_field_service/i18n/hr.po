@@ -1,10 +1,10 @@
-# Translation of Odoo Server.
+# Translation of Cyllo Server.
 # This file contains the translation of the following modules:
 # 	* cyllo_field_service
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Odoo Server 17.0\n"
+"Project-Id-Version: Cyllo Server 1.0\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2024-12-26 08:57+0000\n"
 "PO-Revision-Date: 2024-12-26 08:57+0000\n"
@@ -601,7 +601,7 @@ msgid "Assign To Workers"
 msgstr "Dodijeliti radnicima"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Assign Workers"
@@ -1074,7 +1074,7 @@ msgid "Field Service Report"
 msgstr "Izvještaj terenske usluge"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/wizards/field_service_report.py:0
 #, python-format
 msgid "Field Service Report - %s To %s"
@@ -1093,7 +1093,7 @@ msgid "Field Service Request Deadline"
 msgstr "Rok za zahtjev za terensku uslugu"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/wizards/field_service_report.py:0
 #: model:ir.actions.act_window,name:cyllo_field_service.action_view_reports
 #: model:ir.actions.report,name:cyllo_field_service.report_field_service_request_pdf
@@ -1377,7 +1377,7 @@ msgid "Messages"
 msgstr "Poruke"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Missing Checklist Template"
@@ -1440,7 +1440,7 @@ msgid "Name of employee"
 msgstr "Ime zaposlenika"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "New"
@@ -1468,7 +1468,7 @@ msgid "Next Activity Type"
 msgstr "Sljedeća vrsta aktivnosti"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "No Workers where assigned to perform this service"
@@ -1523,7 +1523,7 @@ msgid "Number of messages with delivery error"
 msgstr "Broj poruka s pogreškom isporuke"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Only the workers or managers allowed to start the service"
@@ -1567,28 +1567,28 @@ msgid "Phone Number"
 msgstr "Telefonski broj"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Please Add Service Checklist Template."
 msgstr "Dodajte predložak popisa servisa."
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Please choose a deadline that is later than the assigned date."
 msgstr "Odaberite rok koji je kasnije od dodijeljenog datuma."
 
 #. module: cyllo_field_service
-#. odoo-javascript
+#. cyllo-javascript
 #: code:addons/cyllo_field_service/static/src/js/fieldServicePublicWidget.js:0
 #, python-format
 msgid "Please complete the required steps."
 msgstr "Molimo ispunite potrebne korake."
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "Please select the workers."
@@ -1633,7 +1633,7 @@ msgid "Project in Field Service"
 msgstr "Projekt u terenskoj usluzi"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/wizards/field_service_report.py:0
 #: code:addons/cyllo_field_service/wizards/field_service_report.py:0
 #, python-format
@@ -2003,14 +2003,14 @@ msgid "The name of the customer who is making the request."
 msgstr "Naziv kupca koji podnosi zahtjev."
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "There are no employees who possess this skill"
 msgstr "Nema zaposlenika koji posjeduju ovu vještinu"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "There are still pending checklist items that require completion"
@@ -2036,7 +2036,7 @@ msgid "To Date"
 msgstr "Do danas"
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_checklist.py:0
 #, python-format
 msgid "To mark job as done, assign workers and start service"
@@ -2073,7 +2073,7 @@ msgid "User"
 msgstr "Korisnik"
 
 #. module: cyllo_field_service
-#. odoo-javascript
+#. cyllo-javascript
 #: code:addons/cyllo_field_service/static/src/js/fieldServicePublicWidget.js:0
 #, python-format
 msgid "User Error"
@@ -2148,7 +2148,7 @@ msgid "You can create/view skills from here."
 msgstr "Vještine možete stvoriti/pogledati odavde."
 
 #. module: cyllo_field_service
-#. odoo-python
+#. cyllo-python
 #: code:addons/cyllo_field_service/models/field_service_request.py:0
 #, python-format
 msgid "You can delete requests in draft state only."
