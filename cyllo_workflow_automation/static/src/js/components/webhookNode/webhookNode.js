@@ -46,7 +46,7 @@ export class WebhookNode extends ConfigurationBase {
     async fetchData() {
         await super.fetchData();
 
-        // ── Ensure sane defaults AFTER fetching from database ──────────
+        // Ensure sane defaults AFTER fetching from database
         // (If it's a new node, the DB returns false/null for empty fields)
         if (!this.fieldState.webhook_method || typeof this.fieldState.webhook_method === 'object') {
             this.fieldState.webhook_method = 'POST';
@@ -149,7 +149,7 @@ export class WebhookNode extends ConfigurationBase {
         code += `        _logger.error("Webhook HTTP failure: %s -> %s", url, err_msg)\n`;
         code += `        raise UserError(f"Webhook Execution Failed: {err_msg}")\n`;
         code += `    _logger.info("Webhook success: %s %s -> %s", "", url, response.status_code)\n`;
-        code += `    # ── Generic response action processing ──────────────────────\n`;
+        code += `    # Generic response action processing\n`;
         code += `    if _webhook_response_actions:\n`;
         code += `        try:\n`;
         code += `            _resp_json = response.json()\n`;
@@ -208,7 +208,7 @@ export class WebhookNode extends ConfigurationBase {
     //                      generateCode() still sees identical strings.
     // ════════════════════════════════════════════════════════════════════════
 
-    // ── Method badge colour ──────────────────────────────────────────────
+    // Method badge colour
     get methodBadgeStyle() {
         const colours = {
             POST:   'background:#198754;color:#fff',
@@ -219,7 +219,7 @@ export class WebhookNode extends ConfigurationBase {
         return colours[this.fieldState.webhook_method] || 'background:#6c757d;color:#fff';
     }
 
-    // ── URL copy helper ──────────────────────────────────────────────────
+    // URL copy helper
     copyUrl() {
         const url = this.fieldState.webhook_url || '';
         if (!url) return;
@@ -229,7 +229,7 @@ export class WebhookNode extends ConfigurationBase {
         });
     }
 
-    // ── Header key/value builder ─────────────────────────────────────────
+    // Header key/value builder
     /**
      * Parse the raw JSON header string into [{key, value}] rows for the
      * visual builder. If parsing fails, returns empty rows — the raw

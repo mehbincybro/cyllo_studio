@@ -23,6 +23,7 @@ import {
     duplicateFields,
     webhookFields,
     tryCatchFields,
+    approvalFields,
 } from "./fields";
 import {
     icons,
@@ -49,6 +50,7 @@ import { WindowNode } from "./components/windowNode/windowNode";
 import { DuplicateNode } from "./components/DuplicateNode/duplicateNode";
 import { WebhookNode } from "./components/webhookNode/webhookNode";
 import { TryCatchNode } from "./components/tryCatchNode/tryCatchNode";
+import { ApprovalNode } from "./components/approvalNode/approvalNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -122,6 +124,10 @@ const MODAL_CONFIGS = {
     'Try Catch': {
         component: TryCatchNode,
         fields: tryCatchFields,
+    },
+    'Approval': {
+        component: ApprovalNode,
+        fields: approvalFields,
     },
 };
 
@@ -579,6 +585,13 @@ export class ModelComponent extends Component {
                     this.onConfirm(fieldState, code, usedVariables);
                     this.updateTryCatchVariable(fieldState);
                 };
+            } else if (this.props.name === 'Approval') {
+                props.primaryModelId = this.props.primary_model_id;
+                props.display_name = "The Approval Node pauses the workflow and waits for a human to approve or reject via a secure email link. Routes to Approved, Rejected, or Timeout branches.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    this.updateApprovalVariable(fieldState);
+                };
             }
             this.dialogService.add(component, props);
         } else {
@@ -652,6 +665,41 @@ export class ModelComponent extends Component {
             });
         } else {
             alreadyRegistered.variable_name = displayVarName;
+        }
+        this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+    }
+
+    /**
+     * Registers the Approval result variable into the frontend variable context
+     * so downstream nodes can read the approval status ('approved'/'rejected'/'timeout').
+     */
+    updateApprovalVariable(fieldState) {
+        const varName = (fieldState.approval_result_variable || '').trim();
+        if (!varName) return;
+        const existingVars = this.env.variables.context.variables || [];
+        const nodeId = this.props.nodeId;
+        const varId = `approval_var_${nodeId}`;
+        const alreadyRegistered = existingVars.find(v => v.id === varId);
+        if (!alreadyRegistered) {
+            this.env.variables.setContext({
+                variables: [
+                    ...existingVars,
+                    owl.reactive({
+                        id: varId,
+                        variable_name: varName,
+                        variable_type: 'string',
+                        variable_value: '',
+                        delete: false,
+                        modelName: '',
+                        modelId: '',
+                        scopeId: nodeId,
+                        usedIn: [],
+                        class: this.buttonClass || '',
+                    })
+                ]
+            });
+        } else {
+            alreadyRegistered.variable_name = varName;
         }
         this.env.bus.trigger("UPDATE-VARIABLE-STATE");
     }
@@ -981,6 +1029,13 @@ export class ModelComponent extends Component {
                     <span>TRY Branch</span>
                     <span>CATCH Branch</span>
                     <span>Continue</span>
+                </div>
+            </t>
+            <t t-if="state.model.display_name === 'Approval'">
+                <div class="condition-tooltip-container" style="right: -100%; top: -50%;">
+                    <span>Approved</span>
+                    <span>Rejected</span>
+                    <span>Timeout</span>
                 </div>
             </t>
         </div>`;

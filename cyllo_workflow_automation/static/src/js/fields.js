@@ -95,3 +95,18 @@ export const webhookFields = [
     { name: 'webhook_payload', type: 'text' },
     { name: 'webhook_actions', type: 'json' },
 ];
+
+export const approvalFields = [
+    { name: 'label', type: 'char' },
+    { name: 'approval_approver_type', type: 'selection' },
+    { name: 'approval_approver_id', type: 'many2One' },
+    { name: 'approval_approver_group_id', type: 'many2One' },
+    { name: 'approval_approver_field', type: 'char' },
+    { name: 'approval_subject', type: 'char' },
+    { name: 'approval_message', type: 'text' },
+    { name: 'approval_notify_email', type: 'boolean' },
+    { name: 'approval_notify_inbox', type: 'boolean' },
+    { name: 'approval_expire_after', type: 'float' },
+    { name: 'approval_auto_rule', type: 'char' },
+    { name: 'approval_result_variable', type: 'char' },
+];

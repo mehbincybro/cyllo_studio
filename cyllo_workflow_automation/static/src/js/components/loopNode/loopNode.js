@@ -38,7 +38,7 @@ export class LoopNode extends ConfigurationBase {
         });
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // Helpers
 
     /** Recordset / record variables available when sourceType === 'variable' */
     get recordsetVariables() {
@@ -59,7 +59,7 @@ export class LoopNode extends ConfigurationBase {
         return `current_record.${this.loopState.collection}`;
     }
 
-    // ── Handlers ─────────────────────────────────────────────────────────────
+    // Handlers
 
     setSourceType(type) {
         this.loopState.sourceType = type;
@@ -85,7 +85,7 @@ export class LoopNode extends ConfigurationBase {
         this.env.bus.trigger("CHANGE-LABEL", { label: value, nodeId });
     }
 
-    // ── Validation ───────────────────────────────────────────────────────────
+    // Validation
 
     validateForm() {
         const errors = {};
@@ -112,7 +112,7 @@ export class LoopNode extends ConfigurationBase {
         return { isValid: Object.keys(errors).length === 0, errors };
     }
 
-    // ── Code Generation ──────────────────────────────────────────────────────
+    // Code Generation
 
     generateCode() {
         const varName = this.loopState.loopVariableName.trim();
@@ -120,7 +120,7 @@ export class LoopNode extends ConfigurationBase {
         return `for ${varName} in ${collection}:`;
     }
 
-    // ── Confirm ──────────────────────────────────────────────────────────────
+    // Confirm
 
     async onConfirm() {
         const { isValid, errors } = this.validateForm();

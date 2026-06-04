@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!--
+            Public portal template for workflow approval decisions.
+            Served at /workflow/approval/<token>
+            Supports: normal form, already-decided state, expired state,
+                       error messages, and success confirmation.
+        -->
+        <template id="approval_portal_template" name="Workflow Approval Portal">
+            <t t-call="web.layout">
+                <t t-set="head_title">Workflow Approval</t>
+                <div class="container mt-5" style="max-width:600px;">
+
+                    <!-- Logo / branding -->
+                    <div class="text-center mb-4">
+                        <h3 class="fw-bold text-primary">
+                            <i class="fa fa-check-circle me-2"/>
+                            Workflow Approval
+                        </h3>
+                        <p class="text-muted" t-if="workflow_name">
+                            <t t-esc="workflow_name"/>
+                        </p>
+                    </div>
+
+                    <!-- ERROR STATE -->
+                    <t t-if="error">
+                        <div class="alert alert-danger text-center" role="alert">
+                            <i class="fa fa-exclamation-triangle me-2"/>
+                            <strong>Invalid Request</strong>
+                            <p class="mb-0 mt-2">
+                                <t t-esc="error"/>
+                            </p>
+                        </div>
+                    </t>
+
+                    <!-- ALREADY DECIDED -->
+                    <t t-elif="already_decided">
+                        <div t-attf-class="alert alert-#{state == 'approved' and 'success' or 'danger'} text-center">
+                            <i t-attf-class="fa fa-#{state == 'approved' and 'check' or 'times'}-circle me-2"/>
+                            <strong>This request has already been <t t-esc="state"/>.</strong>
+                            <p class="mb-0 mt-2 text-muted">No further action is needed.</p>
+                        </div>
+                    </t>
+
+                    <!-- EXPIRED -->
+                    <t t-elif="expired">
+                        <div class="alert alert-warning text-center">
+                            <i class="fa fa-clock-o me-2"/>
+                            <strong>This approval request has expired.</strong>
+                            <p class="mb-0 mt-2 text-muted">The workflow has been automatically routed via the Timeout branch.</p>
+                        </div>
+                    </t>
+
+                    <!-- SUCCESS (post decision) -->
+                    <t t-elif="success">
+                        <div t-attf-class="alert alert-#{decision == 'approve' and 'success' or 'danger'} text-center">
+                            <i t-attf-class="fa fa-#{decision == 'approve' and 'thumbs-up' or 'thumbs-down'} me-2 fa-2x"/>
+                            <h4 class="mt-2">
+                                Request <strong><t t-esc="decision == 'approve' and 'Approved' or 'Rejected'"/></strong>
+                            </h4>
+                            <p class="mb-0 text-muted">
+                                The workflow has been notified and will continue accordingly.
+                            </p>
+                        </div>
+                    </t>
+
+                    <!-- NORMAL DECISION FORM -->
+                    <t t-else="">
+                        <div class="card shadow-sm">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="fa fa-user-check me-2"/>
+                                    Approval Required
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-3">
+                                    Hello <strong><t t-esc="approver_name"/></strong>,
+                                    your approval is required for the workflow
+                                    <strong><t t-esc="workflow_name"/></strong>.
+                                </p>
+
+                                <t t-if="expiration">
+                                    <div class="alert alert-warning py-2">
+                                        <i class="fa fa-clock-o me-1"/>
+                                        <strong>Expires at:</strong>
+                                        <t t-esc="expiration"/>
+                                    </div>
+                                </t>
+
+                                <!-- Approve form -->
+                                <form method="POST"
+                                      t-attf-action="/workflow/approval/#{token}/approve"
+                                      class="mb-3">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <label for="approve_comment" class="form-label fw-semibold">
+                                            Comment (optional)
+                                        </label>
+                                        <textarea id="approve_comment"
+                                                  name="comment"
+                                                  class="form-control"
+                                                  rows="3"
+                                                  placeholder="Add a comment for your decision…"/>
+                                    </div>
+                                    <div class="d-flex gap-3">
+                                        <button type="submit"
+                                                class="btn btn-success flex-fill">
+                                            <i class="fa fa-thumbs-up me-1"/>
+                                            Approve
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <!-- Reject form (separate form so each has its own submit button) -->
+                                <form method="POST"
+                                      t-attf-action="/workflow/approval/#{token}/reject">
+                                    <input type="hidden" name="csrf_token"
+                                           t-att-value="request.csrf_token()"/>
+                                    <div class="mb-3">
+                                        <label for="reject_comment" class="form-label fw-semibold">
+                                            Rejection reason (optional)
+                                        </label>
+                                        <textarea id="reject_comment"
+                                                  name="comment"
+                                                  class="form-control"
+                                                  rows="2"
+                                                  placeholder="Reason for rejection…"/>
+                                    </div>
+                                    <button type="submit"
+                                            class="btn btn-danger w-100">
+                                        <i class="fa fa-thumbs-down me-1"/>
+                                        Reject
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="card-footer text-muted text-center small">
+                                Powered by Cyllo Workflow Automation
+                            </div>
+                        </div>
+                    </t>
+
+                </div>
+            </t>
+        </template>
+    </data>
+</odoo>

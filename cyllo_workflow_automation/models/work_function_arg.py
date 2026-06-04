@@ -436,7 +436,7 @@ class WorkAuto(models.Model):
         t_ttype = 'before' if ttype else 'after'
         trigger_function_ids = kwargs.get('trigger_function_ids', []) or []
 
-        # ── Link Detached Nodes ───────────────────────────────────────────────
+        # Link Detached Nodes
         # When a new automation is created, node.struct records are created first
         # with work_auto_id=False. We must link them now.
         node_ids = []
@@ -1035,6 +1035,15 @@ class WorkAuto(models.Model):
                 return 'success', _(
                     "Try/Catch configured — catches %s as '%s'."
                 ) % (err_types, err_var)
+            if node_name == 'Approval':
+                a_type = node.approval_approver_type or 'user'
+                if a_type == 'user' and not node.approval_approver_id:
+                    return 'error', _("Select an approver user for the Approval node.")
+                if a_type == 'group' and not node.approval_approver_group_id:
+                    return 'error', _("Select an approver group for the Approval node.")
+                if a_type == 'dynamic' and not (node.approval_approver_field or '').strip():
+                    return 'error', _("Enter a dynamic approver field expression.")
+                return 'success', _("Approval node configured.")
             if node.code and node.code.strip():
                 return 'success', _("%s configured.") % label
             return 'error', _("%s is not configured.") % label
@@ -1218,7 +1227,7 @@ class WorkAuto(models.Model):
                 )
                 continue
 
-            # ── On Field Change ───────────────────────────────────────────────
+            # On Field Change
             field_change_functions = functions.filtered(
                 lambda f: f.trigger_type == 'field_change'
             )
@@ -1279,7 +1288,7 @@ class WorkAuto(models.Model):
                         make_onchange_fn(auto, field_name)
                     )
 
-            # ── Create / Write / Unlink and other ORM triggers ────────────────
+            # Create / Write / Unlink and other ORM triggers
             for function in functions.filtered(
                 lambda f: f.trigger_type not in ('field_change', 'time')
             ):
@@ -1370,7 +1379,7 @@ class WorkAuto(models.Model):
             Raises:
                 ValidationError: If execution fails or circular dependency is detected.
             """
-        # ── Active guard for reuse calls ──────────────────────────────────────
+        # Active guard for reuse calls
         # If this automation is invoked as a reusable automation from another
         # workflow, check self.active first. If it has been deactivated, skip
         # silently so the parent workflow continues uninterrupted.
@@ -1383,7 +1392,7 @@ class WorkAuto(models.Model):
             )
             return
 
-        # ── Reuse-guard: block circular automation chains ─────────────────────
+        # Reuse-guard: block circular automation chains
         stack = args.get('__workflow_stack__', [])
         if not isinstance(stack, list):
             stack = list(stack)
@@ -1397,7 +1406,7 @@ class WorkAuto(models.Model):
         incoming_trigger = args.get('trigger_type', '')
         records = args.get('records', False)
 
-        # ── Normalise time-trigger args ───────────────────────────────────────
+        # Normalise time-trigger args
         # Scheduled workflows are attached to a model but don't receive an
         # incoming recordset from ir.cron. Resolve the workflow model records so
         # downstream nodes such as Activity can operate on actual records.
@@ -1406,7 +1415,7 @@ class WorkAuto(models.Model):
             records = self.env[model_name].search([])
             args = dict(args, records=records, current_record=records)
 
-        # ── Empty recordset safety guard ──────────────────────────────────────
+        # Empty recordset safety guard
         # Skip execution of triggers if the recordset is empty (no records).
         # This prevents Expected singleton or access errors in downstream nodes
         # when background actions write to empty recordsets.
@@ -1417,7 +1426,7 @@ class WorkAuto(models.Model):
             )
             return
 
-        # ── Transaction-level dedup (create / write / unlink only) ────────────
+        # Transaction-level dedup (create / write / unlink only)
         # Prevents N duplicate actions when write() is triggered multiple times
         # per single form save (computed fields, chatter, state machine).
         # field_change is deliberately excluded — it fires from the onchange
@@ -1439,7 +1448,7 @@ class WorkAuto(models.Model):
                 return
             cr._workflow_done.add(dedup_key)
 
-        # ── Access check (skip for field_change and unlink) ───────────────────
+        # Access check (skip for field_change and unlink)
         # field_change passes a virtual onchange record — checking write access
         # on a virtual record raises errors. Skip it.
         if records and incoming_trigger not in ('field_change', 'unlink'):
@@ -1453,7 +1462,7 @@ class WorkAuto(models.Model):
                 )
                 raise
 
-        # ── Normalise field_change args ───────────────────────────────────────
+        # Normalise field_change args
         # on_change_field passes {'record': rec} (singular).
         # Inject 'records' and 'current_record' so the generated code can use
         # either alias.
@@ -1463,7 +1472,7 @@ class WorkAuto(models.Model):
             args['records'] = single_record
             args['current_record'] = single_record
 
-        # ── Reuse call trigger override ───────────────────────────────────────
+        # Reuse call trigger override
         # When this automation is called as a reuse call from another workflow,
         # the frontend sends the REUSED automation's own trigger_type as a
         # literal string (e.g. 'create' for an On-Create automation).
@@ -1628,7 +1637,7 @@ class WorkAuto(models.Model):
             Raises:
                 ValidationError: If attempting to deactivate a reused workflow.
             """
-        # ── Guard: cannot deactivate a reusable automation that is in use ──
+        # Guard: cannot deactivate a reusable automation that is in use
         # Only raises if active is explicitly set to False AND the automation
         # is reusable AND other active workflows depend on it.
         if vals.get('active') is False:

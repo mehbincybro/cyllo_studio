@@ -63,6 +63,11 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Duplicate: ['label', 'duplicate_record', 'duplicate_field_overrides'],
     Webhook: ['label', 'webhook_url', 'webhook_method', 'webhook_headers', 'webhook_payload', 'webhook_actions'],
     'Try Catch': ['label', 'try_catch_error_variable', 'try_catch_error_types'],
+    'Approval': [
+        'label', 'approval_approver_type', 'approval_approver_id', 'approval_approver_group_id',
+        'approval_approver_field', 'approval_subject', 'approval_message', 'approval_notify_email',
+        'approval_notify_inbox', 'approval_expire_after', 'approval_auto_rule', 'approval_result_variable'
+    ],
 };
 
 const GLOBAL_IMPORTS = [{
@@ -506,7 +511,7 @@ export class WorkFlowAuto extends Component {
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).find(
                     (item) => item.id === parseInt(input_id)
                 );
-                if (node && (node.data.name === 'Webhook' || node.data.name === 'Try Catch' || await this.shouldAutoOpenConfigModal(node))) {
+                if (node && (node.data.name === 'Webhook' || node.data.name === 'Try Catch' || node.data.name === 'Approval' || await this.shouldAutoOpenConfigModal(node))) {
                     const name = node.data.name;
                     const nodeId = node.data.nodeId;
                     this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
@@ -957,7 +962,7 @@ export class WorkFlowAuto extends Component {
         const createdNode = flowNodes.find(node => node.id === id);
         if (!createdNode) return;
         const nodeId = createdNode.data.nodeId;
-        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "Try Catch"
+        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "Try Catch" || createdNode.name === "Approval";
         //TODO: Handle Context
         const currentContext = this.env.context.context
         const nodes = currentContext?.nodes || []
@@ -978,6 +983,7 @@ export class WorkFlowAuto extends Component {
                 isParent,
                 isLoop,
                 isTryCatch,
+                isApproval: createdNode.name === "Approval",
                 code: "",
                 type: createdNode.data.type,
                 trigger_type: createdNode.data.trigger_type,
@@ -2506,9 +2512,32 @@ export class WorkFlowAuto extends Component {
                 const children2 = Array.isArray(node.child2) ? node.child2 : (node.child2 ? [node.child2] : []);
                 const nextNodes = Array.isArray(node.right) ? node.right : (node.right ? [node.right] : []);
 
-                if (node.isTryCatch) {
-                    // ── Try block ────────────────────────────────────────────
-                    // node.code already contains "try:"
+                if (node.isApproval) {
+                    // Port 1: Approved
+                    lines.push(`${indentationLevel}if approval_branch == 'approved':`);
+                    if (children1.length > 0) {
+                        children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+                    
+                    // Port 2: Rejected
+                    lines.push(`${indentationLevel}elif approval_branch == 'rejected':`);
+                    if (children2.length > 0) {
+                        children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                    // Port 3: Timeout (using right branch)
+                    lines.push(`${indentationLevel}elif approval_branch == 'timeout':`);
+                    if (nextNodes.length > 0) {
+                        nextNodes.forEach(next => traverse(next, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                } else if (node.isTryCatch) {
                     if (children1.length > 0) {
                         const lenBefore = lines.length;
                         children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
@@ -2519,12 +2548,8 @@ export class WorkFlowAuto extends Component {
                         lines.push(`${indentationLevel}    pass`);
                     }
 
-                    // ── Except / Catch block ──────────────────────────────────
-                    // else_setup_code holds "except SomeError as err:"
                     const exceptHeader = node.else_setup_code || "except Exception as error:";
                     lines.push(`${indentationLevel}${exceptHeader}`);
-                    // Bug 1 fix: inject "var_<name> = <name>" alias so that processValue
-                    // token output (var_error) resolves correctly at Python runtime.
                     const exceptVarMatch = exceptHeader.match(/as\s+(\w+)\s*:/);
                     if (exceptVarMatch) {
                         const rawErrVar = exceptVarMatch[1];
@@ -2540,7 +2565,7 @@ export class WorkFlowAuto extends Component {
                         lines.push(`${indentationLevel}    pass`);
                     }
 
-                    // ── Continue after try/except ────────────────────────────
+                    // Continue after try/except
                     nextNodes.forEach(next => traverse(next, indentationLevel, parentArray));
 
                 } else {
@@ -2573,6 +2598,7 @@ export class WorkFlowAuto extends Component {
                     // Continue after the branch
                     nextNodes.forEach(next => traverse(next, indentationLevel, parentArray));
                 }
+
 
             } else {
                 // Regular node
@@ -2931,6 +2957,7 @@ export class WorkFlowAuto extends Component {
             case 'Condition':
             case 'Loop':
             case 'Try Catch':
+            case 'Approval':
                 specificProps.type = "action_to_do";
                 right = 3;
                 break;

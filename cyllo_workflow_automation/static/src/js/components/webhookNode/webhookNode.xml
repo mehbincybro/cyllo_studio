@@ -274,7 +274,7 @@
                             </div>
                         </t>
 
-                        <!-- ── Add-action form ─────────────────────────────── -->
+                        <!-- Add-action form -->
                         <t t-if="uiState.showAddActionForm">
                             <div class="border rounded p-3 mb-2" style="background:#f5f6e6; font-size:12px;">
                                 <div class="fw-semibold mb-2" style="color:#5a5a2a; font-size:13px;">

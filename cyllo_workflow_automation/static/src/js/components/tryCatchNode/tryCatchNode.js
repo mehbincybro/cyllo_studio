@@ -44,7 +44,7 @@ export class TryCatchNode extends ConfigurationBase {
         });
     }
 
-    // ── Handlers ─────────────────────────────────────────────────────────────
+    // Handlers
 
     setLabel(value) {
         this.fieldState.label = value;
@@ -65,7 +65,7 @@ export class TryCatchNode extends ConfigurationBase {
         this.tryCatchState.typesError = false;
     }
 
-    // ── Validation ───────────────────────────────────────────────────────────
+    // Validation
 
     validateForm() {
         const errors = {};
@@ -95,7 +95,7 @@ export class TryCatchNode extends ConfigurationBase {
         return { isValid: Object.keys(errors).length === 0, errors };
     }
 
-    // ── Code Generation ───────────────────────────────────────────────────────
+    // Code Generation
 
     /**
      * Generate the opening "try:" line that goes into node.code.
@@ -110,8 +110,9 @@ export class TryCatchNode extends ConfigurationBase {
     /**
      * Build the "except <Types> as <var>:" line stored in else_setup_code.
      * The traverse() function already renders else_setup_code when child2
-     * is present, but for the try/catch we need the except syntax, not "else:".
-     * We store a special marker that generateExceptHeader() will produce at
+     * is present, but for the try/catch an `except` clause is required
+     * instead of an `else:` block.
+     * Store a special marker that generateExceptHeader() will produce at
      * code-generation time.
      */
     generateExceptHeader() {
@@ -126,7 +127,7 @@ export class TryCatchNode extends ConfigurationBase {
         return `except ${typesPart} as ${varName}:`;
     }
 
-    // ── Confirm ──────────────────────────────────────────────────────────────
+    // Confirm
 
     async onConfirm() {
         const { isValid, errors } = this.validateForm();

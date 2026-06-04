@@ -218,7 +218,7 @@ export class WorkflowCard extends Component {
 
         const newActive = !this.isActive;
 
-        // ── Hard block: deactivating a reusable automation that is in use ────
+        // Hard block: deactivating a reusable automation that is in use
         // If this automation is reusable AND other active workflows reference
         // it via a "Reuse Automation" node, we BLOCK the deactivation entirely
         // and show a warning popup listing the dependent workflows.

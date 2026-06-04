@@ -12,7 +12,7 @@ export function removeNodeIdFromVariables(contextVariables, nodeId) {
 }
 
 export async function settingInitialContext() {
-    // Fetch all fields we need from node.struct for every node in this automation.
+    // Fetch all fields from node.struct for every node in this automation.
     // else_setup_code  - Condition cron complement OR Try Catch except header.
     // try_catch_error_variable / try_catch_error_types - needed to derive the
     //   except header on page-reload when else_setup_code wasn't stored yet.
@@ -22,7 +22,7 @@ export async function settingInitialContext() {
         ["code", "else_setup_code", "try_catch_error_variable", "try_catch_error_types"]
     );
 
-    // Guard: flow_data may be null on a brand-new workflow (no nodes saved yet).
+
     const homeData = this.editorValue[0]?.flow_data?.drawflow?.Home;
     const data = homeData?.data || null;
     const nodes = data ? Object.values(data) : [];
@@ -39,7 +39,7 @@ export async function settingInitialContext() {
 
         // Derive else_setup_code:
         // - For Try Catch: reconstruct from stored error variable + types if the
-        //   DB value is empty (backwards-compat with records saved before this fix).
+        //   DB value is empty.
         // - For Condition cron nodes: use the stored value directly.
         let else_setup_code = nodeStruct?.else_setup_code || null;
         if (isTryCatch && !else_setup_code) {

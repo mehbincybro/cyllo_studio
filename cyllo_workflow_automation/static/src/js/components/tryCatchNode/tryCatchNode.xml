@@ -4,7 +4,7 @@
         <xpath expr="//div[hasclass('modal-body')]" position="inside">
             <div class="try-catch-node">
 
-                <!-- ── Info Banner ───────────────────────────────────────────── -->
+                <!-- Info Banner -->
                 <div class="alert alert-info small py-2 mb-3 d-flex align-items-start gap-2">
                     <i class="fa fa-shield mt-1"/>
                     <span>
@@ -16,7 +16,7 @@
                     </span>
                 </div>
 
-                <!-- ── Label ────────────────────────────────────────────────── -->
+                <!-- Label -->
                 <div class="mb-3">
                     <label class="form-label mb-1 fw-semibold">Node Label</label>
                     <input
@@ -34,7 +34,7 @@
                     </div>
                 </div>
 
-                <!-- ── Exception Types ───────────────────────────────────────── -->
+                <!-- Exception Types -->
                 <div class="mb-3">
                     <label class="form-label mb-1 fw-semibold">Exception Types to Catch</label>
                     <input
@@ -55,7 +55,7 @@
                     </div>
                 </div>
 
-                <!-- ── Error Variable ────────────────────────────────────────── -->
+                <!-- Error Variable -->
                 <div class="mb-3">
                     <label class="form-label mb-1 fw-semibold">Error Variable Name</label>
                     <input
@@ -76,7 +76,7 @@
                     </div>
                 </div>
 
-                <!-- ── Port Summary ──────────────────────────────────────────── -->
+                <!-- Port Summary -->
                 <div class="border rounded p-2 bg-light small mb-1">
                     <div class="fw-semibold mb-1">Output Ports</div>
                     <div class="d-flex flex-column gap-1">
