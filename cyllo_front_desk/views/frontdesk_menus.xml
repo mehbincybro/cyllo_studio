@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Root Menu -->
+    <menuitem id="menu_frontdesk_root"
+              name="Front Desk"
+              sequence="85"/>
+
+    <!-- Top level menus -->
+    <menuitem id="menu_frontdesk_dashboard"
+              name="Stations"
+              parent="menu_frontdesk_root"
+              action="action_frontdesk_frontdesk"
+              sequence="10"/>
+
+    <menuitem id="menu_frontdesk_visitor"
+              name="Visitors"
+              parent="menu_frontdesk_root"
+              action="action_frontdesk_visitor"
+              sequence="20"/>
+
+    <menuitem id="menu_frontdesk_reporting"
+              name="Reporting"
+              parent="menu_frontdesk_root"
+              action="action_frontdesk_visitor_reporting"
+              sequence="30"/>
+
+    <!-- Configuration Menu -->
+    <menuitem id="menu_frontdesk_configuration"
+              name="Configuration"
+              parent="menu_frontdesk_root"
+              sequence="100"/>
+
+    <menuitem id="menu_frontdesk_config_stations"
+              name="Stations"
+              parent="menu_frontdesk_configuration"
+              action="action_frontdesk_frontdesk"
+              sequence="10"/>
+
+    <menuitem id="menu_frontdesk_config_drinks"
+              name="Drinks"
+              parent="menu_frontdesk_configuration"
+              action="action_frontdesk_drink"
+              sequence="20"/>
+</odoo>
