@@ -28,14 +28,12 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm', 'crm_iap_enrich', 'web',
-                'base_automation'],
+    'depends': ['cyllo_base', 'crm', 'crm_iap_enrich', 'web'],
     'data': [
         'security/ir.model.access.csv',
         'data/ir_cron_data.xml',
         'data/mail_template.xml',
         'data/crm_get_customer_local_time.xml',
-        'data/crm_setup_automated_action.xml',
         'wizard/crm_leads_to_change_views.xml',
         'views/res_config_settings_views.xml',
         'views/crm_stage_views.xml',
@@ -48,7 +46,6 @@
         'views/crm_stage_activity_view.xml',
         'wizard/crm_leads_to_change_views.xml',
         'wizard/crm_stage_exit_criteria_views.xml',
-        'views/base_automation_views.xml',
         # 'views/mail_activity_view.xml',
 
     ],
@@ -63,6 +60,7 @@
             'cyllo_crm/static/src/js/crm_lead_dashboard.js',
             'cyllo_crm/static/src/xml/crm_lead_list_view_templates.xml',
             'cyllo_crm/static/src/js/crm_lead_list_view.js',
+            'cyllo_crm/static/src/css/message.css',
 
             # Dashboard
             'cyllo_crm/static/src/css/dashboard_style.css',

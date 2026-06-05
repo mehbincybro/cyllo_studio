@@ -28,10 +28,12 @@
     'company': "Cyllo",
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
-    'depends': ['cyllo_base', 'crm', 'website_sale_wishlist'],
+    'depends': ['cyllo_base', 'crm', 'website_sale_wishlist', 'base_automation'],
     'data': [
         'data/ir_cron_data.xml',
         'data/mail_template.xml',
+        'data/crm_setup_automated_action.xml',
+        'views/base_automation_views.xml',
         'views/crm_lead_views.xml',
         'views/res_config_settings_views.xml',
         'views/referral_template.xml',

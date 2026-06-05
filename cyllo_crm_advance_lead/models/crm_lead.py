@@ -19,7 +19,7 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from odoo import Command, fields, models
+from odoo import _, Command, fields, models
 
 
 class CrmLead(models.Model):
@@ -38,6 +38,9 @@ class CrmLead(models.Model):
                                             column1='lead_id',
                                             column2='product_id', )
     referral_product_count = fields.Integer(string='Count')
+    count = fields.Integer(compute='_compute_count',
+                           string="Count",
+                           help="Total number of Automations")
 
     def _prepare_opportunity_quotation_context(self):
         """ Extend the context to include default sale order lines from CRM lead. """
@@ -54,6 +57,20 @@ class CrmLead(models.Model):
                 }))
         quotation_context['default_order_line'] = order_lines
         return quotation_context
+
+    def _compute_count(self):
+        """Function for finding the count of automations"""
+        if self.is_installed:
+            model = self.env['ir.model'].search(
+                [('model', '=', self._name)],
+                limit=1
+            )
+            domain = f"[('id', '=', {self.id})]"
+            self.count = self.env['base.automation'].search_count(
+                [('filter_pre_domain', '=', domain),
+                 ('model_id', '=', model.id)])
+        else:
+            self.count = 0
 
     def action_view_abandoned_sale_quotation(self):
         """Action to view abandoned sale orders"""
@@ -102,6 +119,55 @@ class CrmLead(models.Model):
                 'res_id': self.referral_product_ids.id,
             })
         return action
+
+    def action_create_automation(self):
+        """function for creating automation"""
+        model = self.env['ir.model'].search(
+            [('model', '=', self._name)],
+            limit=1
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Create Automation'),
+            'res_model': 'base.automation',
+            'view_mode': 'form',
+            'target': 'new',
+            'views': [(
+                self.env.ref(
+                    'cyllo_crm_advance_lead.view_base_automation_quick_form'
+                ).id,
+                'form'
+            )],
+            'context': {
+                'default_model_id': model.id if model else False,
+                'default_trigger': 'on_time',
+                'default_filter_pre_domain': "[('id', '=', %d)]" % self.id,
+                'default_temporary_filter_pre_domain': "[('id', '=', %d)]" % self.id,
+            },
+        }
+
+    def action_get_automation(self):
+        """Action for getting the popup view of all related changes of current lead"""
+        model = self.env['ir.model'].search(
+            [('model', '=', self._name)],
+            limit=1
+        )
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Automation'),
+            'res_model': 'base.automation',
+            'domain': [
+                ('filter_pre_domain', '=', "[('id', '=', %d)]" % self.id),
+                ('model_id', '=', model.id)],
+            'view_mode': 'tree',
+            'target': 'current',
+            'order': 'id asc',
+            'context': {
+                'create': False,
+                'edit': False,
+                'delete': False,
+            },
+        }
 
     def _create_lead_for_wishlist_products(self):
         """ Daily job for check and create lead for abandoned wishlist"""

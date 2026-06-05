@@ -87,9 +87,6 @@ class CrmLead(models.Model):
         default=False,
         compute='_compute_is_installed'
     )
-    count = fields.Integer(compute='_compute_count',
-                           string="Count",
-                           help="Total number of Automations")
 
     has_activities = fields.Boolean(
         string='Has Activities',
@@ -1119,55 +1116,6 @@ class CrmLead(models.Model):
 
         return result
 
-    def action_create_automation(self):
-        """function for creating automation"""
-        model = self.env['ir.model'].search(
-            [('model', '=', self._name)],
-            limit=1
-        )
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Create Automation'),
-            'res_model': 'base.automation',
-            'view_mode': 'form',
-            'target': 'new',
-            'views': [(
-                self.env.ref(
-                    'cyllo_crm.view_base_automation_quick_form'
-                ).id,
-                'form'
-            )],
-            'context': {
-                'default_model_id': model.id if model else False,
-                'default_trigger': 'on_time',
-                'default_filter_pre_domain': "[('id', '=', %d)]" % self.id,
-                'default_temporary_filter_pre_domain': "[('id', '=', %d)]" % self.id,
-            },
-        }
-
-    def action_get_automation(self):
-        """Action for getting the popup view of all related changes of current lead"""
-        model = self.env['ir.model'].search(
-            [('model', '=', self._name)],
-            limit=1
-        )
-        return {
-            'type': 'ir.actions.act_window',
-            'name': _('Automation'),
-            'res_model': 'base.automation',
-            'domain': [
-                ('filter_pre_domain', '=', "[('id', '=', %d)]" % self.id),
-                ('model_id', '=', model.id)],
-            'view_mode': 'tree',
-            'target': 'current',
-            'order': 'id asc',
-            'context': {
-                'create': False,
-                'edit': False,
-                'delete': False,
-            },
-        }
-
     def _compute_is_installed(self):
         """Function for checking is installed automation"""
         is_installed = self.env['ir.module.module'].search([
@@ -1178,20 +1126,6 @@ class CrmLead(models.Model):
             self.is_installed = True
         else:
             self.is_installed = False
-
-    def _compute_count(self):
-        """Function for finding the count of automations"""
-        if self.is_installed:
-            model = self.env['ir.model'].search(
-                [('model', '=', self._name)],
-                limit=1
-            )
-            domain = f"[('id', '=', {self.id})]"
-            self.count = self.env['base.automation'].search_count(
-                [('filter_pre_domain', '=', domain),
-                 ('model_id', '=', model.id)])
-        else:
-            self.count = 0
 
     def action_open_activity_graph(self):
         """Open activity graph for the current lead"""

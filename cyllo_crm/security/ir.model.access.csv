@@ -5,7 +5,6 @@ access_dissimilar_fields,access_dissimilar_fields,model_dissimilar_fields,base.g
 access_crm_recent_summary,access_crm_recent_summary,model_crm_recent_summary,base.group_user,1,1,1,1
 access_crm_lead_activity_graph_wizard,access_crm_lead_activity_graph_wizard,model_crm_lead_activity_graph_wizard,base.group_user,1,1,1,1
 
-access_crm_lead_notification,access_crm_lead_notification,model_crm_lead_notification,base.group_user,1,1,1,1
 access_crm_subscription_report,access_crm_subscription_report,model_crm_subscription_report,base.group_user,1,1,1,1
 
 access_crm_stage_exit_criteria,access_crm_stage_exit_criteria,model_crm_stage_exit_criteria,base.group_user,1,1,1,1

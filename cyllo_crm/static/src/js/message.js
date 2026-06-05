@@ -5,11 +5,10 @@ import { messageActionsRegistry } from "@mail/core/common/message_actions";
 
 messageActionsRegistry.add("pin_message", {
     sequence: 15,
-    icon: "fa-thumb-tack",
+    icon: (component) =>
+        component.props.message?.is_pinned ? "fa-thumb-tack diagonal-strike" : "fa-thumb-tack",
     title: (component) =>
         component.props.message?.is_pinned ? _t("Unpin") : _t("Pin"),
-    iconClass: (component) =>
-        component.props.message?.is_pinned ? "text-primary" : "",
     condition: (component) => Boolean(component.props?.message?.id),
 
     async onClick(component) {

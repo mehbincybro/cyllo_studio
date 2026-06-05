@@ -16,8 +16,8 @@
             <xpath expr="//button[@name='action_schedule_meeting']"
                    position="after">
                 <button name="action_open_task" type="object"
-                        class="oe_stat_button" icon="fa-check" invisible="not task_id"
-                        string="Tasks"/>
+                        class="oe_stat_button" icon="fa-check-circle" invisible="not task_id"
+                        string="Task"/>
             </xpath>
             <xpath expr="//field[@name='name']" position="after">
                 <div style="
