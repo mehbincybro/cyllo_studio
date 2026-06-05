@@ -62,7 +62,12 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Window: ['label', 'window_action_id'],
     Duplicate: ['label', 'duplicate_record', 'duplicate_field_overrides'],
     Webhook: ['label', 'webhook_url', 'webhook_method', 'webhook_headers', 'webhook_payload', 'webhook_actions'],
-    TryCatch: ['label', 'tc_error_handling_mode', 'tc_catch_filters', 'tc_try_node_ids', 'tc_catch_node_ids'],
+    'Try Catch': ['label', 'try_catch_error_variable', 'try_catch_error_types'],
+    'Approval': [
+        'label', 'approval_approver_type', 'approval_approver_id', 'approval_approver_group_id',
+        'approval_approver_field', 'approval_subject', 'approval_message', 'approval_notify_email',
+        'approval_notify_inbox', 'approval_expire_after', 'approval_auto_rule', 'approval_result_variable'
+    ],
 };
 
 const GLOBAL_IMPORTS = [{
@@ -506,7 +511,7 @@ export class WorkFlowAuto extends Component {
                 const node = Object.values(this.editor.drawflow.drawflow.Home.data).find(
                     (item) => item.id === parseInt(input_id)
                 );
-                if (node && (node.data.name === 'Webhook' || node.data.name === 'TryCatch' || await this.shouldAutoOpenConfigModal(node))) {
+                if (node && (node.data.name === 'Webhook' || node.data.name === 'Try Catch' || node.data.name === 'Approval' || await this.shouldAutoOpenConfigModal(node))) {
                     const name = node.data.name;
                     const nodeId = node.data.nodeId;
                     this.env.bus.trigger("OPEN:MODAL", {name, nodeId});
@@ -957,12 +962,12 @@ export class WorkFlowAuto extends Component {
         const createdNode = flowNodes.find(node => node.id === id);
         if (!createdNode) return;
         const nodeId = createdNode.data.nodeId;
-        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "TryCatch";
-        const isTryCatch = createdNode.name === "TryCatch";
+        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "Try Catch" || createdNode.name === "Approval";
         //TODO: Handle Context
         const currentContext = this.env.context.context
         const nodes = currentContext?.nodes || []
         const isLoop = createdNode.name === "Loop";
+        const isTryCatch = createdNode.name === "Try Catch";
         this.env.context.setContext({
             nodes: [...nodes, {
                 nodeId,
@@ -978,6 +983,7 @@ export class WorkFlowAuto extends Component {
                 isParent,
                 isLoop,
                 isTryCatch,
+                isApproval: createdNode.name === "Approval",
                 code: "",
                 type: createdNode.data.type,
                 trigger_type: createdNode.data.trigger_type,
@@ -2430,7 +2436,7 @@ export class WorkFlowAuto extends Component {
         if (flowRoots.length) {
             codeLines.push("");
             flowRoots.forEach((root, index) => {
-                const flowLines = this.buildFlowLines(root, variables, flowData);
+                const flowLines = this.buildFlowLines(root, variables);
                 if (!flowLines.length) {
                     return;
                 }
@@ -2478,7 +2484,7 @@ export class WorkFlowAuto extends Component {
         return fallbackRoots.length ? fallbackRoots : [];
     }
 
-    buildFlowLines(startNode, variables, flowData = {}) {
+    buildFlowLines(startNode, variables) {
         if (!startNode) {
             return [];
         }
@@ -2501,20 +2507,69 @@ export class WorkFlowAuto extends Component {
             }
 
             if (node.isParent) {
-                // Handle Condition/Loop nodes
+                // Handle Condition/Loop/TryCatch nodes
                 const children1 = Array.isArray(node.child1) ? node.child1 : (node.child1 ? [node.child1] : []);
                 const children2 = Array.isArray(node.child2) ? node.child2 : (node.child2 ? [node.child2] : []);
                 const nextNodes = Array.isArray(node.right) ? node.right : (node.right ? [node.right] : []);
 
-                // Branch 1 (IF / Loop Body / TRY Branch)
-                if (node.isTryCatch) {
-                    lines.push(`${indentationLevel}try:`);
+                if (node.isApproval) {
+                    // Port 1: Approved
+                    lines.push(`${indentationLevel}if approval_branch == 'approved':`);
                     if (children1.length > 0) {
                         children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
                     } else {
                         lines.push(`${indentationLevel}    pass`);
                     }
+                    
+                    // Port 2: Rejected
+                    lines.push(`${indentationLevel}elif approval_branch == 'rejected':`);
+                    if (children2.length > 0) {
+                        children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                    // Port 3: Timeout (using right branch)
+                    lines.push(`${indentationLevel}elif approval_branch == 'timeout':`);
+                    if (nextNodes.length > 0) {
+                        nextNodes.forEach(next => traverse(next, indentationLevel + "    ", [...parentArray, node]));
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                } else if (node.isTryCatch) {
+                    if (children1.length > 0) {
+                        const lenBefore = lines.length;
+                        children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                        if (lines.length === lenBefore) {
+                            lines.push(`${indentationLevel}    pass`);
+                        }
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                    const exceptHeader = node.else_setup_code || "except Exception as error:";
+                    lines.push(`${indentationLevel}${exceptHeader}`);
+                    const exceptVarMatch = exceptHeader.match(/as\s+(\w+)\s*:/);
+                    if (exceptVarMatch) {
+                        const rawErrVar = exceptVarMatch[1];
+                        lines.push(`${indentationLevel}    var_${rawErrVar} = ${rawErrVar}`);
+                    }
+                    if (children2.length > 0) {
+                        const lenBefore = lines.length;
+                        children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
+                        if (lines.length === lenBefore) {
+                            lines.push(`${indentationLevel}    pass`);
+                        }
+                    } else {
+                        lines.push(`${indentationLevel}    pass`);
+                    }
+
+                    // Continue after try/except
+                    nextNodes.forEach(next => traverse(next, indentationLevel, parentArray));
+
                 } else {
+                    // Branch 1 (IF / Loop Body)
                     if (children1.length > 0) {
                         children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
                     } else if (node.isLoop) {
@@ -2523,57 +2578,27 @@ export class WorkFlowAuto extends Component {
                         // Logic requires something in the IF block if it's a condition
                         lines.push(`${indentationLevel}    pass`);
                     }
-                }
 
-                // Branch 2 (ELSE / CATCH Branch)
-                if (node.isTryCatch) {
-                    const canvasNode = Object.values(flowData).find(n => n.data?.nodeId === node.nodeId);
-                    const filters = canvasNode?.data?.tc_catch_filters || [];
-                    const mode = canvasNode?.data?.tc_error_handling_mode || 'catch';
-                    
-                    let exceptClause = "except Exception as _wf_error:";
-                    if (filters.length > 0) {
-                        exceptClause = `except (${filters.join(', ')}) as _wf_error:`;
-                    }
-                    lines.push(`${indentationLevel}${exceptClause}`);
-                    
-                    if (mode === 'stop') {
-                        lines.push(`${indentationLevel}    raise`);
-                    } else if (mode === 'continue') {
-                        lines.push(`${indentationLevel}    pass`);
-                    } else {
-                        // catch or catch_then_continue
-                        lines.push(`${indentationLevel}    import traceback as _wf_tb`);
-                        lines.push(`${indentationLevel}    import datetime as _wf_dt`);
-                        lines.push(`${indentationLevel}    error_message = str(_wf_error)`);
-                        lines.push(`${indentationLevel}    error_type = type(_wf_error).__name__`);
-                        lines.push(`${indentationLevel}    error_traceback = _wf_tb.format_exc()`);
-                        lines.push(`${indentationLevel}    error_timestamp = _wf_dt.datetime.now().isoformat()`);
-                        lines.push(`${indentationLevel}    status_code = getattr(_wf_error, 'status_code', None)`);
-                        lines.push(`${indentationLevel}    response_body = getattr(_wf_error, 'response_body', None)`);
+                    // Branch 2 (ELSE)
+                    if (children2.length > 0 || node.else_setup_code) {
+                        if (node.else_setup_code) {
+                            lines.push(`${indentationLevel}${node.else_setup_code}`);
+                            const complementVar = node.else_setup_code.split('=')[0].trim();
+                            lines.push(`${indentationLevel}if ${complementVar}:`);
+                        } else {
+                            lines.push(`${indentationLevel}else:`);
+                        }
                         if (children2.length > 0) {
                             children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
                         } else {
                             lines.push(`${indentationLevel}    pass`);
                         }
                     }
-                } else if (children2.length > 0 || node.else_setup_code) {
-                    if (node.else_setup_code) {
-                        lines.push(`${indentationLevel}${node.else_setup_code}`);
-                        const complementVar = node.else_setup_code.split('=')[0].trim();
-                        lines.push(`${indentationLevel}if ${complementVar}:`);
-                    } else {
-                        lines.push(`${indentationLevel}else:`);
-                    }
-                    if (children2.length > 0) {
-                        children2.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
-                    } else {
-                        lines.push(`${indentationLevel}    pass`);
-                    }
+
+                    // Continue after the branch
+                    nextNodes.forEach(next => traverse(next, indentationLevel, parentArray));
                 }
 
-                // Continue after the branch
-                nextNodes.forEach(next => traverse(next, indentationLevel, parentArray));
 
             } else {
                 // Regular node
@@ -2924,10 +2949,6 @@ export class WorkFlowAuto extends Component {
             case 'Webhook':
                 specificProps.type = "action_to_do";
                 break;
-            case 'TryCatch':
-                specificProps.type = "action_to_do";
-                right = 2;  // Port 1 = TRY ✅, Port 2 = CATCH 🚨
-                break;
             case 'Warning':
                 specificProps.type = "action_to_do";
                 left = 1;
@@ -2935,6 +2956,8 @@ export class WorkFlowAuto extends Component {
                 break;
             case 'Condition':
             case 'Loop':
+            case 'Try Catch':
+            case 'Approval':
                 specificProps.type = "action_to_do";
                 right = 3;
                 break;

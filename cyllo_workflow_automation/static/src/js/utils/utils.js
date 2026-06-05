@@ -12,26 +12,45 @@ export function removeNodeIdFromVariables(contextVariables, nodeId) {
 }
 
 export async function settingInitialContext() {
-    // else_setup_code is only set on cron-mode Condition nodes; it carries
-    // the complement recordset search line that the code engine injects at
-    // the start of the ELSE block so both branches execute independently.
-    const codeArray = await this.orm.searchRead("node.struct", [["work_auto_id", "=", this.id]], ["code", "else_setup_code"])
+    // Fetch all fields from node.struct for every node in this automation.
+    // else_setup_code  - Condition cron complement OR Try Catch except header.
+    // try_catch_error_variable / try_catch_error_types - needed to derive the
+    //   except header on page-reload when else_setup_code wasn't stored yet.
+    const codeArray = await this.orm.searchRead(
+        "node.struct",
+        [["work_auto_id", "=", this.id]],
+        ["code", "else_setup_code", "try_catch_error_variable", "try_catch_error_types"]
+    );
 
-    // Guard: flow_data may be null on a brand-new workflow (no nodes saved yet).
+
     const homeData = this.editorValue[0]?.flow_data?.drawflow?.Home;
     const data = homeData?.data || null;
     const nodes = data ? Object.values(data) : [];
 
     const contextNodes = nodes.map(node => {
-        const isParent = node.name === "Condition" || node.name === "Loop" || node.name === "TryCatch";
-        const isTryCatch = node.name === "TryCatch";
+        const isParent = node.name === "Condition" || node.name === "Loop" || node.name === "Try Catch";
         const isLoop = node.name === "Loop";
+        const isTryCatch = node.name === "Try Catch";
         const nodeStruct = codeArray.find(item => item.id === node.data.nodeId);
-        const code = nodeStruct?.code || ""
-        const else_setup_code = nodeStruct?.else_setup_code || null;
+        const code = nodeStruct?.code || "";
         const type = nodeStruct?.type || node.data.type || "node";
         const trigger_type = nodeStruct?.trigger_type || node.data.trigger_type || null;
         const ttype = nodeStruct?.ttype || node.data.ttype || null;
+
+        // Derive else_setup_code:
+        // - For Try Catch: reconstruct from stored error variable + types if the
+        //   DB value is empty.
+        // - For Condition cron nodes: use the stored value directly.
+        let else_setup_code = nodeStruct?.else_setup_code || null;
+        if (isTryCatch && !else_setup_code) {
+            const errVar  = (nodeStruct?.try_catch_error_variable || 'error').trim();
+            const errTypes = (nodeStruct?.try_catch_error_types || 'Exception').trim();
+            const types = errTypes.split(',')
+                .map(t => t.trim()).filter(Boolean).join(', ');
+            const typesPart = types && types !== 'Exception' ? `(${types})` : (types || 'Exception');
+            else_setup_code = `except ${typesPart} as ${errVar}:`;
+        }
+
         return {
             nodeId: node.data.nodeId,
             parent: null,
@@ -40,16 +59,15 @@ export async function settingInitialContext() {
             child1: isParent ? { left: null, right: null, code: "pass" } : null,
             child2: null,
             isParent,
-            isTryCatch,
             isLoop,
+            isTryCatch,
             code,
             else_setup_code,
             type,
             trigger_type,
             ttype,
-        }
-    })
-
+        };
+    });
 
     contextNodes.forEach(node => {
         const dNode = nodes.find(item => item.data.nodeId === node.nodeId);
@@ -76,13 +94,52 @@ export async function settingInitialContext() {
         }
 
         if (dNode.inputs?.input_1?.connections?.length > 0) {
-            const inputId = dNode.inputs.input_1.connections[0].node
+            const inputId = dNode.inputs.input_1.connections[0].node;
             const inPutNode = nodes.find(item => item.id == inputId);
             if (inPutNode) {
                 const inPutNodeCtx = contextNodes.find((item => item.nodeId === inPutNode.data.nodeId));
                 node.left = inPutNodeCtx || null;
             }
         }
-    })
-    this.env.context.setContext({ nodes: [...contextNodes] })
+    });
+
+    this.env.context.setContext({ nodes: [...contextNodes] });
+
+    const existingVars = this.env.variables.context.variables || [];
+    const newVars = [];
+    const BUTTON_CLASSES = ['btn-info', 'btn-primary', 'btn-warning', 'btn-secondary', 'btn-success', 'btn-danger'];
+
+    nodes.forEach(node => {
+        if (node.name !== 'Try Catch') return;
+        const nodeId = node.data.nodeId;
+        const nodeStruct = codeArray.find(item => item.id === nodeId);
+        const rawVarName = (nodeStruct?.try_catch_error_variable || '').trim();
+        if (!rawVarName) return;
+        const varId = `${nodeId}_error`;
+        const alreadyRegistered = existingVars.find(v => v.id === varId);
+        const displayVarName = `var_${rawVarName}`;
+
+        if (alreadyRegistered) {
+            alreadyRegistered.variable_name = displayVarName;
+        } else {
+            const randomClass = BUTTON_CLASSES[Math.floor(Math.random() * BUTTON_CLASSES.length)];
+            newVars.push(owl.reactive({
+                id: varId,
+                variable_name: displayVarName,
+                variable_type: 'string',
+                variable_value: '',
+                delete: false,
+                modelName: '',
+                modelId: '',
+                scopeId: nodeId,
+                usedIn: [],
+                class: '',
+            }));
+        }
+    });
+
+    if (newVars.length > 0) {
+        this.env.variables.setContext({ variables: [...existingVars, ...newVars] });
+        this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+    }
 }

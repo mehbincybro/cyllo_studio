@@ -47,7 +47,7 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
-# ── Supported action type identifiers ──────────────────────────────────────────
+# Supported action type identifiers
 ACTION_TYPES = {
     'chatter_link',
     'chatter_message',
@@ -159,7 +159,7 @@ class WebhookResponseProcessor(models.AbstractModel):
                 )
                 continue
 
-            # ── Extract value from response ────────────────────────────────────
+            # Extract value from response
             extracted = _extract_value(response_data, extract_path) if extract_path else response_data
             if extracted is None:
                 _logger.info(
@@ -221,7 +221,7 @@ class WebhookResponseProcessor(models.AbstractModel):
                 'target': action_cfg.get('target', 'new'),
             }
 
-        # ── Actions that need a valid record ──────────────────────────────────
+        # Actions that need a valid record
         if record is None or not hasattr(record, '_name'):
             _logger.warning(
                 "WebhookResponseProcessor: action %r requires a record but none was provided.",
@@ -252,7 +252,7 @@ class WebhookResponseProcessor(models.AbstractModel):
 
         return None
 
-    # ── Individual action handlers ────────────────────────────────────────────
+    # Individual action handlers
 
     @api.model
     def _action_chatter_link(self, record, url, label, action_cfg):

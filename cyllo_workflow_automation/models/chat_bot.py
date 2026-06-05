@@ -27,7 +27,7 @@ from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
 
-# ── Validation constants ─────────────────────────────────────────────────────
+# Validation constants
 _REQUIRED_KEYS      = {'object', 'trigger', 'conditions', 'actions'}
 _VALID_TRIGGERS     = {'On Create', 'On Write', 'On Unlink'}
 _VALID_ACTION_TYPES = {'Warning', 'Mail', 'SMS', 'Activity', 'Write', 'Reuse Automation'}

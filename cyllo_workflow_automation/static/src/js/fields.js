@@ -81,6 +81,12 @@ export const duplicateFields = [
     { name: 'used_variables', type: 'json' },
 ];
 
+export const tryCatchFields = [
+    { name: 'label', type: 'char' },
+    { name: 'try_catch_error_variable', type: 'char' },
+    { name: 'try_catch_error_types', type: 'char' },
+];
+
 export const webhookFields = [
     { name: 'label', type: 'char' },
     { name: 'webhook_method', type: 'selection' },
@@ -90,10 +96,17 @@ export const webhookFields = [
     { name: 'webhook_actions', type: 'json' },
 ];
 
-export const tryCatchFields = [
+export const approvalFields = [
     { name: 'label', type: 'char' },
-    { name: 'tc_error_handling_mode', type: 'selection' },
-    { name: 'tc_catch_filters', type: 'json' },
-    { name: 'tc_try_node_ids', type: 'json' },
-    { name: 'tc_catch_node_ids', type: 'json' },
+    { name: 'approval_approver_type', type: 'selection' },
+    { name: 'approval_approver_id', type: 'many2One' },
+    { name: 'approval_approver_group_id', type: 'many2One' },
+    { name: 'approval_approver_field', type: 'char' },
+    { name: 'approval_subject', type: 'char' },
+    { name: 'approval_message', type: 'text' },
+    { name: 'approval_notify_email', type: 'boolean' },
+    { name: 'approval_notify_inbox', type: 'boolean' },
+    { name: 'approval_expire_after', type: 'float' },
+    { name: 'approval_auto_rule', type: 'char' },
+    { name: 'approval_result_variable', type: 'char' },
 ];

@@ -3,7 +3,7 @@ import { registry } from "@web/core/registry";
 import { WorkFlowAuto } from "@cyllo_workflow_automation/js/workflow_automation";
 const { onMounted, onWillUnmount } = owl;
 
-// ─── Global variable IDs (must match what WorkFlowAuto seeds into env.globalVariables) ───
+// Global variable IDs (must match what WorkFlowAuto seeds into env.globalVariables)
 const CURRENT_RECORD_VAR_ID   = "global/variable/current/rec";
 const CURRENT_RECORD_VAR_NAME = "current_record";
 const CURRENT_USER_VAR_ID     = "global/variable/current/user";
@@ -21,13 +21,6 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
 
     setup() {
         super.setup();
-
-        // ── Fix: redirect to card view when opened with no record context ─────
-        // useSaveContext stores the last-visited record id in sessionStorage.
-        // When the user navigates via the menu (action_work_auto → workflowCard),
-        // the stale id makes this component render the canvas instead of the list.
-        // We detect this by checking whether the current action context actually
-        // supplied an id; if not, clear the stale session entry and redirect.
         const actionContext = this.props?.action?.context;
         const hasContextId  = actionContext && (actionContext.rec_id || actionContext.id);
         if (!hasContextId && this.id) {
@@ -65,14 +58,9 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         });
     }
 
-    // ─── Size constants (kept in one place for JS + XML consistency) ─────────
-    // Fix 2: Increase panel dimensions (was 340×440)
     static ICON_SIZE = 56;
     static BOX_W     = 520;
     static BOX_H     = 620;
-
-    // ─── Panel header drag — drags the entire panel + keeps icon centred ─────
-    // Fix 3: Whole panel is draggable via its header bar
 
     _onPanelHeaderMouseDown(ev) {
         if (ev.button !== 0) return;
@@ -109,7 +97,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         window.addEventListener('mouseup',   onUp);
     }
 
-    // ─── Icon click/drag — click toggles chat; drag moves icon + panel ───────
+    // Icon click/drag — click toggles chat; drag moves icon + panel
 
     _onIconMouseDown(ev) {
         if (ev.button !== 0) return;
@@ -176,9 +164,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         this.state.aiChatOpen = false;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // UI helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     _pushAiMessage(text, options = {}) {
         const { type = 'info' } = options;
@@ -480,9 +466,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return createdNodeDfIds;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Canvas helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _addNode(name, posX, posY, selectedValue, record, action, type, triggerType) {
         const before = new Set(
@@ -545,9 +529,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         }));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Field definitions cache
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _getModelFieldDefs(modelName) {
         if (!modelName) return {};
@@ -572,7 +554,6 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return null;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Resolve a dotted field path to its final fieldDef
     // e.g. "order_line.product_uom_qty" on "sale.order"
     //   -> walks: sale.order.order_line (one2many -> sale.order.line)
@@ -580,7 +561,6 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
     //   -> returns { type: 'float', name: 'product_uom_qty',
     //                resModel: 'sale.order.line',
     //                fullPath: 'order_line.product_uom_qty' }
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _resolveFieldPath(rootModel, fieldPath) {
         const parts = fieldPath.split('.');
@@ -634,9 +614,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return resolvedFieldDef || { type: 'char', name: parts[parts.length - 1], resModel: rootModel, fullPath: fieldPath };
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Activity type resolver
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _resolveActivityType(act) {
         const typeName = (act.activity_type_name || '').trim();
@@ -685,9 +663,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return await trySearch([]);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Condition tree builder — handles both simple and dotted field paths
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _buildConditionTreeValue(aiConditions, modelName, fieldDefs = {}) {
         if (!aiConditions || !aiConditions.length) return null;
@@ -762,9 +738,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return operator;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Selection / variable builders
-    // ─────────────────────────────────────────────────────────────────────────
 
     _currentRecordRef() {
         return { value: CURRENT_RECORD_VAR_ID, label: CURRENT_RECORD_VAR_NAME };
@@ -810,9 +784,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         };
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Recipient / assignee / deadline resolvers
-    // ─────────────────────────────────────────────────────────────────────────
 
     _normalizeText(value) {
         return String(value || '').toLowerCase();
@@ -909,9 +881,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return this._buildVariableSelection(CURRENT_DATE_VAR_ID, CURRENT_DATE_VAR_NAME);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Node data builders (one per action type)
-    // ─────────────────────────────────────────────────────────────────────────
 
     _buildWarningNodeData(act) {
         const warningType = act.warning_type || 'error';
@@ -1023,9 +993,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         return [...new Set(resolvedIds)];
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Reuse Automation resolver — finds the work.auto ID by name
-    // ─────────────────────────────────────────────────────────────────────────
 
     async _resolveReusableAutomationId(act) {
         const searchName = (act.reuse_automation_name || '').trim();
@@ -1120,9 +1088,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Enter-key handler for the chat input
-    // ─────────────────────────────────────────────────────────────────────────
 
     onAiInputKeydown(ev) {
         if (ev.key === 'Enter' && !ev.shiftKey) {
@@ -1131,9 +1097,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Main send handler
-    // ─────────────────────────────────────────────────────────────────────────
 
     async sendAiMessage() {
         const userQuery = (this.state.aiInput || '').trim();
@@ -1178,7 +1142,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
         }
 
         try {
-            // ── Step 1: Call AI backend ──────────────────────────────────────
+            // Call AI backend
             try {
                 const aiContext = updateContext || reusableCreateContext || null;
                 const result = await this.orm.call('chat.bot', 'my_python_method', [userQuery, aiContext]);
@@ -1189,7 +1153,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
                 return;
             }
 
-            // ── Step 2: Validate AI response ─────────────────────────────────
+            // Validate AI response
             if (!aiData || typeof aiData !== "object") {
                 this._showAiError(null, "The AI returned an invalid response. Please try again.");
                 return;
@@ -1233,7 +1197,6 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
             const createdNodeDfIds = [];
 
             if (!reusableCreateContext) {
-                // ── Step 3: Resolve Odoo model ───────────────────────────────────
                 const modelName = aiData.object.trim();
                 let res;
                 try {
@@ -1255,10 +1218,10 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
                 modelTechnicalName = res[0].model;
                 modelDisplayName = res[0].display_name;
 
-                // ── Step 4: Fetch field definitions ───────────────────────────────
+                // Fetch field definitions
                 modelFieldDefs = await this._getModelFieldDefs(modelTechnicalName);
 
-                // ── Step 5: Set up the primary model node ─────────────────────────
+                // Set up the primary model node
                 try {
                     await this.onSelectPrimary([{ id: modelId, display_name: modelDisplayName, model: modelTechnicalName }]);
                 } catch (e) {
@@ -1273,7 +1236,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
                 if (modelDfId) createdNodeDfIds.push(modelDfId);
             }
 
-            // ── Step 6: Resolve trigger work.function ─────────────────────────
+            // Resolve trigger work.function
             const TRIGGER_FUNC_NAMES = { 'On Create': 'create', 'On Write': 'write', 'On Unlink': 'unlink' };
             const funcName = TRIGGER_FUNC_NAMES[aiData.trigger] || 'create';
 
@@ -1296,7 +1259,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
             const actionId    = String(triggerFn.id);
             const triggerType = triggerFn.trigger_type;
 
-            // ── Step 7: Add trigger node ──────────────────────────────────────
+            // Add trigger node
             this.state.nodeDetails = this.state.nodeDetails || [];
             let triggerDfId;
             try {
@@ -1311,11 +1274,11 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
             }
             await new Promise(r => setTimeout(r, 100));
 
-            // ── Step 8: Connect model → trigger ───────────────────────────────
+            // Connect model → trigger
             if (modelDfId && triggerDfId) this._connectNodes(modelDfId, triggerDfId);
             await new Promise(r => setTimeout(r, 80));
 
-            // ── Step 9: Add Condition node ─────────────────────────────────────
+            // Add Condition node
             let conditionDfId   = null;
             let conditionNodeId = null;
 
@@ -1352,7 +1315,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
                 }
             }
 
-            // ── Step 10: Add action nodes ──────────────────────────────────────
+            // Add action nodes
             const actionParentDfId = conditionDfId ?? triggerDfId;
             const actions          = aiData.actions || [];
 
@@ -1424,7 +1387,7 @@ class WorkFlowAutoOverride extends WorkFlowAuto {
                 await new Promise(r => setTimeout(r, 60));
             }
 
-            // ── Step 11: Success message ───────────────────────────────────────
+            // Success message
             const condCount = aiData.conditions?.length ?? 0;
             const actCount  = actions.length;
             const summary =

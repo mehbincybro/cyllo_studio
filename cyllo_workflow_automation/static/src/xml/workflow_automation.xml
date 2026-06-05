@@ -296,15 +296,6 @@
                                                      alt=""/>
                                                 <p>Loop</p>
                                         </div>
-                                        <div class="collapse_btn" draggable="true"
-                                                 t-on-dragstart="(ev) => this.dragStart(ev,'tryCatch')"
-                                                 data-node="TryCatch">
-                                                <img draggable="false"
-                                                     src="cyllo_workflow_automation/static/src/img/node-icons/condition.svg"
-                                                     alt=""
-                                                     style="filter: hue-rotate(90deg);"/>
-                                                <p>Try / Catch</p>
-                                        </div>
                                         </div>
 								    </div>
 							    </div>
@@ -433,6 +424,24 @@
                                                      src="cyllo_workflow_automation/static/src/img/node-icons/webhook.svg"
                                                      alt=""/>
                                                 <p>Webhook</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'try_catch')"
+                                                 data-node="Try Catch"
+                                                 data-type="action_to_do">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/try-catch.svg"
+                                                     alt=""/>
+                                                <p>Try Catch</p>
+                                            </div>
+                                            <div class="collapse_btn" draggable="true"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'approval')"
+                                                 data-node="Approval"
+                                                 data-type="action_to_do">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/approval.svg"
+                                                     alt=""/>
+                                                <p>Approval</p>
                                             </div>
                                         </div>
                                     </div>

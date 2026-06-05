@@ -21,5 +21,6 @@ export const icons = {
     'Window': 'cyllo_workflow_automation/static/src/img/node-icons/window.svg',
     'Duplicate': 'cyllo_workflow_automation/static/src/img/node-icons/duplicate.svg',
     'Webhook': 'cyllo_workflow_automation/static/src/img/node-icons/webhook.svg',
-    'TryCatch': 'cyllo_workflow_automation/static/src/img/node-icons/condition.svg',
+    'Try Catch': 'cyllo_workflow_automation/static/src/img/node-icons/try-catch.svg',
+    'Approval': 'cyllo_workflow_automation/static/src/img/node-icons/approval.svg',
 };

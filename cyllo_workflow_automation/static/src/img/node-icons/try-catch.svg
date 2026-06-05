@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Shield / try block -->
+  <path d="M12 2L4 6v5c0 4.5 3.4 8.7 8 9.9C17.6 19.7 21 15.5 21 11V6L12 2z" stroke="#4C72B0" fill="#E8EEF8"/>
+  <!-- Checkmark inside shield (try success) -->
+  <polyline points="9 12 11 14 15 10" stroke="#4C72B0" stroke-width="1.8"/>
+  <!-- Catch arc underneath -->
+  <path d="M7 21 Q12 18 17 21" stroke="#E05C5C" stroke-width="1.8" fill="none"/>
+  <!-- Small x for catch error -->
+  <line x1="11" y1="22" x2="13" y2="24" stroke="#E05C5C" stroke-width="1.5"/>
+  <line x1="13" y1="22" x2="11" y2="24" stroke="#E05C5C" stroke-width="1.5"/>
+</svg>

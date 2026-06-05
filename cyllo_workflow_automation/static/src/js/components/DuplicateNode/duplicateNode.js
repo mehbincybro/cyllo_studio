@@ -22,7 +22,7 @@ export class DuplicateNode extends ConfigurationBase {
         });
     }
 
-    // ── Label ────────────────────────────────────────────────────────────
+    // Label
 
     get getLabel() {
         return this.fieldState.label || "";
@@ -34,7 +34,7 @@ export class DuplicateNode extends ConfigurationBase {
         this.env.bus.trigger("CHANGE-LABEL", { label, nodeId });
     }
 
-    // ── Record selector ──────────────────────────────────────────────────
+    // Record selector
 
     get getRecords() {
         return this.variables
@@ -58,7 +58,7 @@ export class DuplicateNode extends ConfigurationBase {
         await this.loadModelFromRecord();
     }
 
-    // ── Model resolution (mirrors WriteNode.settingModel) ────────────────
+    // Model resolution (mirrors WriteNode.settingModel)
 
     async loadModelFromRecord() {
         const raw = this.fieldState.duplicate_record;
@@ -74,7 +74,7 @@ export class DuplicateNode extends ConfigurationBase {
         }
     }
 
-    // ── Field overrides tree (mirrors WriteNode pattern) ─────────────────
+    // Field overrides tree (mirrors WriteNode pattern)
 
     loadTreeFromFieldState() {
         const raw = this.fieldState.duplicate_field_overrides;
@@ -147,7 +147,7 @@ export class DuplicateNode extends ConfigurationBase {
         this.settingFieldState(filtered);
     }
 
-    // ── Code generation ──────────────────────────────────────────────────
+    // Code generation
 
     generateCode() {
         const { duplicate_record, duplicate_field_overrides, duplicate_result_variable } = this.fieldState;
@@ -195,7 +195,7 @@ export class DuplicateNode extends ConfigurationBase {
         return '';
     }
 
-    // ── Validation ───────────────────────────────────────────────────────
+    // Validation
 
     validateForm() {
         const { duplicate_record, label } = this.fieldState;

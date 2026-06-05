@@ -23,6 +23,7 @@ import {
     duplicateFields,
     webhookFields,
     tryCatchFields,
+    approvalFields,
 } from "./fields";
 import {
     icons,
@@ -49,6 +50,7 @@ import { WindowNode } from "./components/windowNode/windowNode";
 import { DuplicateNode } from "./components/DuplicateNode/duplicateNode";
 import { WebhookNode } from "./components/webhookNode/webhookNode";
 import { TryCatchNode } from "./components/tryCatchNode/tryCatchNode";
+import { ApprovalNode } from "./components/approvalNode/approvalNode";
 
 const MODAL_CONFIGS = {
     'Warning': {
@@ -119,9 +121,13 @@ const MODAL_CONFIGS = {
         component: WebhookNode,
         fields: webhookFields,
     },
-    'TryCatch': {
+    'Try Catch': {
         component: TryCatchNode,
         fields: tryCatchFields,
+    },
+    'Approval': {
+        component: ApprovalNode,
+        fields: approvalFields,
     },
 };
 
@@ -197,54 +203,6 @@ function _registerWebhookResponseVariables(fieldState, variableCtx, env, nodeId)
             env.bus.trigger("UPDATE-VARIABLE-STATE");
         } catch (err) {
             console.error("WebhookNode: failed to register response variables:", err);
-        }
-    }
-}
-
-/**
- * _registerTryCatchErrorVariables
- *
- * Registers the standard error context variables into the frontend variable
- * context so they are selectable in all nodes inside the CATCH branch.
- * These variables mirror the ones auto-injected by _generate_try_catch_code().
- *
- * @param {string|number} nodeId - The nodeId of the TryCatch node
- * @param {object} env           - The OWL environment (this.env)
- */
-function _registerTryCatchErrorVariables(nodeId, env) {
-    const ERROR_VAR_NAMES = [
-        'error_message',
-        'error_type',
-        'error_traceback',
-        'error_timestamp',
-        'status_code',
-        'response_body',
-    ];
-    const existingVars = (env.variables?.context?.variables) || [];
-    const newVars = [];
-    for (const name of ERROR_VAR_NAMES) {
-        const varId = `tc_var_${nodeId}_${name}`;
-        if (!existingVars.find(v => v.id === varId)) {
-            newVars.push(owl.reactive({
-                id: varId,
-                variable_name: name,
-                variable_type: 'string',
-                variable_value: '',
-                source: 'try_catch',
-                tc_node_id: nodeId,
-                scopeId: nodeId,
-                usedIn: [],
-                class: 'btn-danger',
-                delete: false,
-            }));
-        }
-    }
-    if (newVars.length) {
-        try {
-            env.variables.setContext({ variables: [...existingVars, ...newVars] });
-            env.bus.trigger("UPDATE-VARIABLE-STATE");
-        } catch (err) {
-            console.error("TryCatchNode: failed to register error variables:", err);
         }
     }
 }
@@ -621,11 +579,18 @@ export class ModelComponent extends Component {
                         this.props.nodeId,
                     );
                 };
-            } else if (this.props.name === 'TryCatch') {
-                props.display_name = "The Try/Catch Scope Node wraps workflow branches in centralized error handling. Connect nodes to the TRY port and recovery nodes to the CATCH port.";
+            } else if (this.props.name === 'Try Catch') {
+                props.display_name = "The Try Catch Node handles exceptions during execution, allowing you to gracefully catch errors and continue the workflow.";
                 props.onConfirm = (fieldState, code, usedVariables) => {
                     this.onConfirm(fieldState, code, usedVariables);
-                    _registerTryCatchErrorVariables(this.props.nodeId, this.env);
+                    this.updateTryCatchVariable(fieldState);
+                };
+            } else if (this.props.name === 'Approval') {
+                props.primaryModelId = this.props.primary_model_id;
+                props.display_name = "The Approval Node pauses the workflow and waits for a human to approve or reject via a secure email link. Routes to Approved, Rejected, or Timeout branches.";
+                props.onConfirm = (fieldState, code, usedVariables) => {
+                    this.onConfirm(fieldState, code, usedVariables);
+                    this.updateApprovalVariable(fieldState);
                 };
             }
             this.dialogService.add(component, props);
@@ -658,6 +623,78 @@ export class ModelComponent extends Component {
                         scopeId: nodeId,
                         usedIn: [],
                         class: this.buttonClass,
+                    })
+                ]
+            });
+        } else {
+            alreadyRegistered.variable_name = varName;
+        }
+        this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+    }
+
+    /**
+     * Registers the Try Catch error variable into the frontend variable context
+     * so nodes inside the catch branch can select it from their variable dropdowns.
+     * The variable is stored as "var_<rawName>" matching processValue() output.
+     */
+    updateTryCatchVariable(fieldState) {
+        const rawVarName = (fieldState.try_catch_error_variable || '').trim();
+        if (!rawVarName) return;
+        const existingVars = this.env.variables.context.variables || [];
+        const nodeId = this.props.nodeId;
+        const varId = `${nodeId}_error`;
+        const displayVarName = `var_${rawVarName}`;
+        const alreadyRegistered = existingVars.find(v => v.id === varId);
+        if (!alreadyRegistered) {
+            this.env.variables.setContext({
+                variables: [
+                    ...existingVars,
+                    owl.reactive({
+                        id: varId,
+                        variable_name: displayVarName,
+                        variable_type: 'string',
+                        variable_value: '',
+                        delete: false,
+                        modelName: '',
+                        modelId: '',
+                        scopeId: nodeId,
+                        usedIn: [],
+                        class: '',
+                    })
+                ]
+            });
+        } else {
+            alreadyRegistered.variable_name = displayVarName;
+        }
+        this.env.bus.trigger("UPDATE-VARIABLE-STATE");
+    }
+
+    /**
+     * Registers the Approval result variable into the frontend variable context
+     * so downstream nodes can read the approval status ('approved'/'rejected'/'timeout').
+     */
+    updateApprovalVariable(fieldState) {
+        const varName = (fieldState.approval_result_variable || '').trim();
+        if (!varName) return;
+        const existingVars = this.env.variables.context.variables || [];
+        const nodeId = this.props.nodeId;
+        const varId = `approval_var_${nodeId}`;
+        const alreadyRegistered = existingVars.find(v => v.id === varId);
+        if (!alreadyRegistered) {
+            this.env.variables.setContext({
+                variables: [
+                    ...existingVars,
+                    owl.reactive({
+                        id: varId,
+                        variable_name: varName,
+                        variable_type: 'string',
+                        variable_value: '',
+                        delete: false,
+                        modelName: '',
+                        modelId: '',
+                        scopeId: nodeId,
+                        usedIn: [],
+                        class: this.buttonClass || '',
                     })
                 ]
             });
@@ -987,10 +1024,18 @@ export class ModelComponent extends Component {
                     <span>Default</span>
                 </div>
             </t>
-            <t t-if="props.name === 'TryCatch' or state.model.display_name === 'TryCatch'">
-                <div class="trycatch-tooltip-container">
+            <t t-if="state.model.display_name === 'Try Catch'">
+                <div class="condition-tooltip-container" style="right: -100%; top: -50%;">
                     <span>TRY Branch</span>
                     <span>CATCH Branch</span>
+                    <span>Continue</span>
+                </div>
+            </t>
+            <t t-if="state.model.display_name === 'Approval'">
+                <div class="condition-tooltip-container" style="right: -100%; top: -50%;">
+                    <span>Approved</span>
+                    <span>Rejected</span>
+                    <span>Timeout</span>
                 </div>
             </t>
         </div>`;

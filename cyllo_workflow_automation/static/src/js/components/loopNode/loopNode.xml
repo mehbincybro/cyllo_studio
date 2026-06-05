@@ -4,7 +4,7 @@
         <xpath expr="//div[hasclass('modal-body')]" position="inside">
             <div class="loop-node">
 
-                <!-- ── Label ────────────────────────────────────────────────── -->
+                <!-- Label -->
                 <div class="mb-3">
                     <label for="labelInput" class="form-label mb-1 fw-semibold">Loop Label</label>
                     <input
@@ -22,7 +22,7 @@
                     </div>
                 </div>
 
-                <!-- ── How to explain the loop ──────────────────────────────── -->
+                <!-- How to explain the loop -->
                 <div class="alert alert-info small py-2 mb-3">
                     <i class="ri-information-line me-1"/>
                     The Loop node iterates over a <strong>One2Many / Many2Many field</strong>
@@ -30,7 +30,7 @@
                     executing the nodes connected below for <em>each</em> record in turn.
                 </div>
 
-                <!-- ── Source Type ──────────────────────────────────────────── -->
+                <!-- Source Type -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Iterate over</label>
                     <div class="d-flex gap-3">
@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <!-- ── Collection: Field Name ───────────────────────────────── -->
+                <!-- Collection: Field Name -->
                 <t t-if="loopState.sourceType === 'field'">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Field Name</label>
@@ -87,7 +87,7 @@
                     </div>
                 </t>
 
-                <!-- ── Collection: Variable Dropdown ────────────────────────── -->
+                <!-- Collection: Variable Dropdown -->
                 <t t-else="">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Select Variable</label>
@@ -118,7 +118,7 @@
                     </div>
                 </t>
 
-                <!-- ── Loop Variable Name ───────────────────────────────────── -->
+                <!-- Loop Variable Name -->
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Loop Variable Name</label>
                     <input
@@ -140,7 +140,7 @@
                     </div>
                 </div>
 
-                <!-- ── Live Code Preview ────────────────────────────────────── -->
+                <!-- Live Code Preview -->
                 <t t-if="loopState.loopVariableName and loopState.collection">
                     <div class="mb-3 p-2 bg-dark text-light rounded small font-monospace">
                         <div class="text-success fw-semibold mb-1">Generated code preview:</div>
@@ -160,7 +160,7 @@
                     </div>
                 </t>
 
-                <!-- ── Port Guide ───────────────────────────────────────────── -->
+                <!-- Port Guide -->
                 <div class="mt-1 mb-2 small text-muted border-top pt-2">
                     <strong>Connection guide:</strong><br/>
                     <span class="badge bg-success me-1">output 1</span> → Loop body (first node inside loop)<br/>

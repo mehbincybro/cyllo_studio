@@ -153,34 +153,8 @@ export class ReusableAutomationNode extends ConfigurationBase {
         const parentId = Number(this.props.work_auto_id || 0);
         const stackLines = parentId > 0 ? [`    cy_w_stack.append(${parentId})`] : [];
 
-        // Use the selected variable as the record source, or fall back to
-        // current_record (always available from the calling workflow's context).
         const recordsExpr = variable ? this.getRecordsExpression(variable) : 'current_record';
-
-        // ── KEY FIX ──────────────────────────────────────────────────────────
-        // The reused automation's generated Python code wraps its logic in a
-        // trigger-type guard:
-        //
-        //   if trigger_type == 'create':   # Workflow A's guard
-        //       schedule_activity(...)
-        //
-        // If we naively pass the CALLING workflow's trigger_type (e.g. 'write'
-        // from Workflow B), the guard in Workflow A evaluates to False and
-        // nothing runs — the automation silently does nothing.
-        //
-        // Fix: pass the REUSED automation's OWN trigger_type as a literal
-        // string so its internal guard always matches.
-        //
-        // For generic reusables (reuse_scope='generic'), trigger_type is ''
-        // and their code is generated WITHOUT a trigger guard, so we pass
-        // the special sentinel '__reuse__'. The backend _process() will detect
-        // this and execute the code unconditionally (no guard to match).
-        // ─────────────────────────────────────────────────────────────────────
         const reusedTriggerType = this.selectedAutomationTriggerType;
-
-        // If the reused automation has a known trigger type, pass it as a
-        // literal. If it has none (generic reusable), pass the special sentinel
-        // '__reuse__' so the backend knows to skip any trigger guard.
         const triggerTypeLiteral = reusedTriggerType
             ? `'${reusedTriggerType}'`
             : `'__reuse__'`;

@@ -48,7 +48,7 @@ class NodeStruct(models.Model):
     condition_tree_value = fields.Json("condition_tree_value")
     else_setup_code = fields.Text(string="Else Setup Code")
 
-    # warning block fields
+    # Warning block fields
     warning = fields.Selection(
         string="Warning",
         selection=[('UserError', 'User Error'),
@@ -64,7 +64,7 @@ class NodeStruct(models.Model):
     notification_title = fields.Char(string="Notification Title")
     notification_sticky = fields.Boolean(string="Sticky Notification", default=False)
 
-    #search block fields
+    # Search block fields
     search_domain = fields.Char()
     search_limit = fields.Integer()
     search_order = fields.Selection(
@@ -91,24 +91,24 @@ class NodeStruct(models.Model):
         help="Name of the loop iteration variable (e.g. current_line)."
     )
 
-    # create block fields
+    # Create block fields
     create_name = fields.Char()
     create_model_field_value = fields.Char(default="[]")
     create_req_fields_values = fields.Json("createFields")
     create_tree_fields_values = fields.Json("createTreeFields")
     create_required_field = fields.Json("createRequiredField")
 
-    #Write block fields
+    # Write block fields
     write_field_value = fields.Char(default="[]")
     write_selected_record = fields.Json("Record")
 
-    #Function call block fields
+    # Function call block fields
     function_name = fields.Json("Function Name")
     function_type = fields.Char(string="Function Type", default="server_action")
     function_record = fields.Json()
     function_args = fields.Json("Function Arguments", default={})
 
-    #Variables block fields
+    # Variables block fields
     variable_name = fields.Char("Variable Name")
     variable_type = fields.Selection(
         string="Variable Type",
@@ -133,17 +133,12 @@ class NodeStruct(models.Model):
             ('recordset', 'RecordSet'),
         ])
 
-    # loop block fields
-    loop_source_type = fields.Selection(
-        selection=[('field', 'Record Field'), ('variable', 'Variable')],
-        string="Source Type", default='field')
-    loop_collection = fields.Char(string="Collection")
-    loop_variable_name = fields.Char(string="Loop Variable Name")
 
-    #codeNode block fields
+
+    # Code block fields
     code_code = fields.Char(string="Code")
 
-    # mailNode block fields
+    # Mail block fields
     mailCustomData = fields.Json(string="Mail Custom Data")
     mail_record = fields.Json(string="MailRecord")
     mail_template = fields.Json(string="MailTemplate")
@@ -153,7 +148,7 @@ class NodeStruct(models.Model):
     mail_subject = fields.Json(string="MailSubject")
     mail_body = fields.Json(string="MailBody")
 
-    # smsNode block fields
+    # SMS block fields
     sms_record = fields.Json(string="sms record")
     sms_template = fields.Json(string="sms template")
     sms_partner_ids = fields.Json(string="Recipients")
@@ -161,7 +156,7 @@ class NodeStruct(models.Model):
     sms_isTemplate = fields.Boolean(string="SMSIsTemplate")
     sms_message = fields.Char(string="smsMessage")
 
-    # WhatsApp node block fields
+    # WhatsApp block fields
     wa_record = fields.Json(string="WA Record Variable")
     wa_is_template = fields.Boolean(string="Use WA Template", default=True)
     wa_template = fields.Json(string="WA Template")
@@ -195,7 +190,7 @@ class NodeStruct(models.Model):
         ondelete='set null',
     )
 
-    # Window node block fields
+    # Window block fields
     window_action_id = fields.Many2one(
         'ir.actions.act_window',
         string="Window Action",
@@ -246,36 +241,12 @@ class NodeStruct(models.Model):
     webhook_payload = fields.Text(string="Payload (JSON)")
     webhook_actions = fields.Json(string="Webhook Response Actions")
 
-    # Try/Catch Scope node fields
-    tc_error_handling_mode = fields.Selection([
-        ('stop',                'Stop Workflow'),
-        ('catch',               'Execute Catch Branch'),
-        ('continue',            'Continue Workflow'),
-        ('catch_then_continue', 'Execute Catch Branch Then Continue'),
-    ], string="Error Handling Mode", default='catch')
-    tc_catch_filters = fields.Json(
-        string="Error Filters",
-        help="List of exception class names to catch. Empty = catch all.",
-    )
-    tc_try_node_ids = fields.Many2many(
-        'node.struct',
-        'node_struct_tc_try_rel',
-        'scope_id', 'child_id',
-        string="TRY Branch Node IDs",
-    )
-    tc_catch_node_ids = fields.Many2many(
-        'node.struct',
-        'node_struct_tc_catch_rel',
-        'scope_id', 'child_id',
-        string="CATCH Branch Node IDs",
-    )
-
-    # FollowersNode block fields
+    # Followers block fields
     isRemoveFollower = fields.Json()
     followers = fields.Json()
     follower_record = fields.Json()
 
-    # DuplicateNode block fields
+    # Duplicate block fields
     duplicate_record = fields.Json(string="Duplicate Record Variable")
     duplicate_field_overrides = fields.Char(
         string="Field Overrides",
@@ -287,7 +258,70 @@ class NodeStruct(models.Model):
         help="Optional variable name to store the duplicated record(s) for use in downstream nodes"
     )
 
-    # ActivityNode block fields
+    # TryCatch block fields
+    try_catch_error_variable = fields.Char(
+        string="Error Variable Name",
+        default="error",
+        help="Python variable name that will hold the caught exception object.",
+    )
+    try_catch_error_types = fields.Char(
+        string="Exception Types",
+        default="Exception",
+        help="Comma-separated exception class names to catch, e.g. 'UserError, ValidationError'.",
+    )
+
+    # Approval block fields
+    approval_approver_type = fields.Selection(
+        selection=[
+            ('user', 'Specific User'),
+            ('group', 'User Group'),
+            ('dynamic', 'Dynamic Field (e.g. record.manager_id)'),
+        ],
+        string="Approver Type",
+        default='user',
+    )
+    approval_approver_id = fields.Many2one(
+        'res.users',
+        string="Approver User",
+        ondelete='set null',
+    )
+    approval_approver_group_id = fields.Many2one(
+        'res.groups',
+        string="Approver Group",
+        ondelete='set null',
+    )
+    approval_approver_field = fields.Char(
+        string="Approver Field",
+        help="Python expression resolving to a res.users record, e.g. record.user_id",
+    )
+    approval_subject = fields.Char(
+        string="Approval Subject",
+        default="Your Approval is Required",
+    )
+    approval_message = fields.Text(
+        string="Approval Message",
+        help="Message body sent to the approver. Supports Jinja2 placeholders.",
+    )
+    approval_notify_email = fields.Boolean(string="Notify by Email", default=True)
+    approval_notify_inbox = fields.Boolean(string="Notify in Odoo Inbox", default=True)
+    approval_expire_after = fields.Float(
+        string="Expire After (hours)",
+        default=0.0,
+        help="Set > 0 to automatically expire the approval request after this many hours. "
+             "0 means no expiry.",
+    )
+    approval_auto_rule = fields.Char(
+        string="Auto-Approve Rule",
+        help="Python expression. If it evaluates to True the approval is auto-approved, "
+             "skipping the human step. Example: record.amount_total < 1000",
+    )
+    approval_result_variable = fields.Char(
+        string="Result Variable Name",
+        help="Optional variable name to store the approval status string "
+             "('approved', 'rejected', 'timeout') for use in downstream nodes.",
+    )
+
+    # Activity block fields
     activity_record = fields.Json()
     activity_summary = fields.Char()
     activity_user = fields.Json()
