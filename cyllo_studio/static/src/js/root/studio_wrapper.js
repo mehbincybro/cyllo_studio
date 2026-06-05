@@ -77,9 +77,6 @@ export function RemoveSessions() {
  */
 
 export function validateEdit(state, notification, field, type = "Editing") {
-    console.log("this tested",state)
-    console.log("fields",field)
-    console.log("this tested11",!state?.[field])
     if (!state?.[field]) return true;
 
     notification.add({

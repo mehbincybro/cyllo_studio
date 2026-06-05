@@ -21,8 +21,9 @@
 #############################################################################
 
 import re
+import secrets
 
-from odoo import _, exceptions, fields, models
+from odoo import _, api, exceptions, fields, models
 
 
 class NodeStruct(models.Model):
@@ -133,6 +134,12 @@ class NodeStruct(models.Model):
             ('recordset', 'RecordSet'),
         ])
 
+    # loop block fields
+    loop_source_type = fields.Selection(
+        selection=[('field', 'Record Field'), ('variable', 'Variable')],
+        string="Source Type", default='field')
+    loop_collection = fields.Char(string="Collection")
+    loop_variable_name = fields.Char(string="Loop Variable Name")
 
 
     # Code block fields
@@ -240,6 +247,36 @@ class NodeStruct(models.Model):
     webhook_headers = fields.Char(string="Headers (JSON)", default='{"Content-Type": "application/json"}')
     webhook_payload = fields.Text(string="Payload (JSON)")
     webhook_actions = fields.Json(string="Webhook Response Actions")
+    webhook_secret_token = fields.Char(
+        string="Webhook Secret Token",
+        copy=False,
+        index=True,
+        help="URL-safe random token that uniquely identifies this webhook receiver endpoint."
+             " Auto-generated on record creation. Regenerate to invalidate the old URL.",
+    )
+    # Try/Catch Scope node fields
+    tc_error_handling_mode = fields.Selection([
+        ('stop',                'Stop Workflow'),
+        ('catch',               'Execute Catch Branch'),
+        ('continue',            'Continue Workflow'),
+        ('catch_then_continue', 'Execute Catch Branch Then Continue'),
+    ], string="Error Handling Mode", default='catch')
+    tc_catch_filters = fields.Json(
+        string="Error Filters",
+        help="List of exception class names to catch. Empty = catch all.",
+    )
+    tc_try_node_ids = fields.Many2many(
+        'node.struct',
+        'node_struct_tc_try_rel',
+        'scope_id', 'child_id',
+        string="TRY Branch Node IDs",
+    )
+    tc_catch_node_ids = fields.Many2many(
+        'node.struct',
+        'node_struct_tc_catch_rel',
+        'scope_id', 'child_id',
+        string="CATCH Branch Node IDs",
+    )
 
     # Followers block fields
     isRemoveFollower = fields.Json()
@@ -377,6 +414,52 @@ class NodeStruct(models.Model):
         default=True,
         help="When enabled, the workflow also creates the regular chatter activity reminder.",
     )
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Override create to auto-generate a unique webhook secret token for every
+        new node.struct record that does not already carry one.
+
+        Args:
+            vals_list (list[dict]): List of field-value dicts for new records.
+
+        Returns:
+            node.struct: The newly created recordset.
+        """
+        for vals in vals_list:
+            if not vals.get('webhook_secret_token'):
+                vals['webhook_secret_token'] = secrets.token_urlsafe(32)
+        return super().create(vals_list)
+
+    def action_regenerate_webhook_token(self):
+        """
+        Regenerate the webhook secret token for this node, invalidating the old
+        Secret URL immediately.
+
+        Called by the frontend "Regenerate" button via a JSON-RPC controller
+        endpoint.  The caller is responsible for showing a confirmation dialog
+        *before* invoking this method.
+
+        Returns:
+            dict: A dict containing:
+                - ``token`` (str): The newly generated token.
+                - ``url``   (str): The full new Secret URL (base_url + route).
+
+        Raises:
+            exceptions.UserError: If the record does not exist.
+        """
+        self.ensure_one()
+        new_token = secrets.token_urlsafe(32)
+        self.write({'webhook_secret_token': new_token})
+        base_url = (
+            self.env['ir.config_parameter']
+            .sudo()
+            .get_param('web.base.url', default='')
+            .rstrip('/')
+        )
+        secret_url = f"{base_url}/cyllo_webhook/trigger/{new_token}"
+        return {'token': new_token, 'url': secret_url}
 
     def save_data(self, data):
         """

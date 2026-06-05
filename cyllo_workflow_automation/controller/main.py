@@ -19,8 +19,10 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import json
 import mimetypes
 import inspect
+import secrets
 
 from odoo import http
 from odoo.http import request
@@ -182,4 +184,180 @@ class CylloAutoWorkController(http.Controller):
         return {
             'ok': True,
             **payload,
+        }
+
+    # ── Secret URL — Inbound Public Trigger ───────────────────────────────────
+
+    @http.route(
+        '/cyllo_webhook/trigger/<string:token>',
+        type='http',
+        auth='public',
+        methods=['GET', 'POST'],
+        csrf=False,
+        save_session=False,
+    )
+    def inbound_webhook_trigger(self, token, **kwargs):
+        """
+        Public endpoint that external systems call to trigger a webhook node's
+        configured response actions.
+
+        The ``token`` path segment is matched against ``node.struct.
+        webhook_secret_token``.  An HTTP 404 is returned when no matching
+        record is found so that token enumeration is not practical.
+
+        Supported request formats
+        --------------------------
+        - **POST** with ``Content-Type: application/json`` — body parsed as
+          JSON dict and passed as ``payload``.
+        - **POST** with form data — form fields used as ``payload`` dict.
+        - **GET** — query-string parameters used as ``payload`` dict.
+
+        Args:
+            token (str): The URL-safe secret token embedded in the route path.
+            **kwargs (dict): Query-string / form parameters.
+
+        Returns:
+            werkzeug.wrappers.Response: JSON response body.
+                - Success: ``{"ok": true, "message": "Webhook executed."}``
+                - Not found: HTTP 404 ``{"ok": false, "error": "Not found."}``
+                - Error:     HTTP 500 ``{"ok": false, "error": "<message>"}``
+        """
+        env = request.env
+
+        # ── Resolve node by token ─────────────────────────────────────────
+        node = env['node.struct'].sudo().search(
+            [('webhook_secret_token', '=', token)], limit=1
+        )
+        if not node:
+            return request.make_json_response(
+                {'ok': False, 'error': 'Not found.'},
+                status=404,
+            )
+
+        # ── Parse inbound payload ─────────────────────────────────────────
+        payload = {}
+        if request.httprequest.method == 'POST':
+            content_type = request.httprequest.content_type or ''
+            if 'application/json' in content_type:
+                try:
+                    raw_body = request.httprequest.get_data(as_text=True)
+                    payload = json.loads(raw_body) if raw_body else {}
+                except Exception:
+                    payload = {}
+            else:
+                payload = dict(kwargs)
+        else:
+            payload = dict(kwargs)
+
+        # ── Execute configured response actions ───────────────────────────
+        actions = node.webhook_actions
+        if not isinstance(actions, list):
+            actions = []
+
+        try:
+            env['webhook.response.processor'].sudo().process_response_actions(
+                response_data=payload,
+                actions=actions,
+                record=None,
+                context_vars={},
+            )
+        except Exception as exc:
+            return request.make_json_response(
+                {'ok': False, 'error': str(exc)},
+                status=500,
+            )
+
+        return request.make_json_response(
+            {'ok': True, 'message': 'Webhook executed.'},
+            status=200,
+        )
+
+    # ── Secret URL — Internal RPC Endpoints ───────────────────────────────────
+
+    @http.route(
+        '/cyllo_workflow/webhook_secret_url/<int:node_id>',
+        type='json',
+        auth='user',
+        methods=['GET', 'POST'],
+        csrf=False,
+    )
+    def get_webhook_secret_url(self, node_id, **kwargs):
+        """
+        Return the current Secret URL for a given ``node.struct`` record.
+
+        The URL is assembled at read time from the live ``web.base.url`` system
+        parameter so it always reflects the current server address even when
+        the base URL has been changed since the token was generated.
+
+        Args:
+            node_id (int): The database ID of the ``node.struct`` record.
+            **kwargs: Unused; present for Odoo JSON-RPC compatibility.
+
+        Returns:
+            dict:
+                - ``url`` (str):   The full Secret URL, or ``""`` if the node
+                  has no token yet.
+                - ``token`` (str): The raw secret token value.
+        """
+        node = request.env['node.struct'].sudo().browse(node_id)
+        if not node.exists():
+            return {'url': '', 'token': ''}
+
+        # Lazy Generation: if an existing record doesn't have a token, generate it now.
+        token = node.webhook_secret_token or ''
+        if not token:
+            token = secrets.token_urlsafe(32)
+            node.webhook_secret_token = token
+
+        base_url = (
+            request.env['ir.config_parameter']
+            .sudo()
+            .get_param('web.base.url', default='')
+            .rstrip('/')
+        )
+        secret_url = f"{base_url}/cyllo_webhook/trigger/{token}"
+        print(secret_url,token)
+        return {'url': secret_url, 'token': token}
+
+    @http.route(
+        '/cyllo_workflow/regenerate_webhook_token',
+        type='json',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
+    def regenerate_webhook_token(self, node_struct_id, **kwargs):
+        """
+        Regenerate the secret token for a ``node.struct`` webhook record.
+
+        This endpoint is called by the frontend "Regenerate" button *after* the
+        user has confirmed the confirmation dialog.  The old Secret URL becomes
+        invalid immediately upon this call.
+
+        Args:
+            node_struct_id (int): The database ID of the ``node.struct`` record
+                whose token should be regenerated.
+            **kwargs: Unused; present for Odoo JSON-RPC compatibility.
+
+        Returns:
+            dict:
+                - ``ok``    (bool): ``True`` on success.
+                - ``url``   (str):  The new full Secret URL.
+                - ``token`` (str):  The new raw token value.
+                - ``error`` (str):  Present only on failure; contains the
+                  error message.
+        """
+        node = request.env['node.struct'].sudo().browse(int(node_struct_id))
+        if not node.exists():
+            return {'ok': False, 'error': 'node.struct record not found.'}
+
+        try:
+            result = node.action_regenerate_webhook_token()
+        except Exception as exc:
+            return {'ok': False, 'error': str(exc)}
+
+        return {
+            'ok': True,
+            'url': result['url'],
+            'token': result['token'],
         }

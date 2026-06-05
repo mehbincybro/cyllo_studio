@@ -24,6 +24,11 @@ export class WebhookNode extends ConfigurationBase {
             // Copy-to-clipboard feedback
             urlCopied: false,
 
+            // Secret URL state
+            secretUrl: '',
+            secretUrlCopied: false,
+            regenerating: false,
+
             // Response Actions panel
             responseActionsOpen: true,
             showAddActionForm: false,
@@ -67,6 +72,25 @@ export class WebhookNode extends ConfigurationBase {
 
         // Sync header rows using the actual DB value / defaults
         this.uiState.headerRows = this._parseHeadersToRows(this.fieldState.webhook_headers);
+
+        // ── Fetch the Secret URL from the controller (assembles live base URL) ──────
+        const nodeId = this.props.id || this.props.nodeId;
+        if (nodeId) {
+            try {
+                const result = await this.env.services.rpc(
+                    `/cyllo_workflow/webhook_secret_url/${nodeId}`, {}
+                );
+                if (result && result.url) {
+                    this.uiState.secretUrl = result.url;
+                    // Also keep the raw token in fieldState so save_data persists it
+                    if (result.token) {
+                        this.fieldState.webhook_secret_token = result.token;
+                    }
+                }
+            } catch (err) {
+                console.warn('WebhookNode: could not fetch secret URL:', err);
+            }
+        }
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -229,7 +253,62 @@ export class WebhookNode extends ConfigurationBase {
         });
     }
 
-    // Header key/value builder
+    // ── Secret URL helpers ─────────────────────────────────────────
+
+    /**
+     * Copy the read-only Secret URL to the system clipboard and briefly show
+     * a ✓ confirmation indicator on the copy button.
+     */
+    copySecretUrl() {
+        const url = this.uiState.secretUrl || '';
+        if (!url) return;
+        navigator.clipboard.writeText(url).then(() => {
+            this.uiState.secretUrlCopied = true;
+            setTimeout(() => { this.uiState.secretUrlCopied = false; }, 1800);
+        });
+    }
+
+    /**
+     * Ask the user to confirm, then call the regenerate RPC endpoint to issue
+     * a new secret token.  The old Secret URL stops working immediately.
+     *
+     * Confirmation is handled via a native browser ``window.confirm()`` dialog
+     * so no additional Odoo dialog dependency is required.
+     */
+    async regenerateSecretUrl() {
+        const confirmed = window.confirm(
+            'Regenerating will permanently invalidate the current Secret URL.\n' +
+            'Any external systems using it must be updated to the new URL.\n\n' +
+            'Continue?'
+        );
+        if (!confirmed) return;
+
+        const nodeId = this.props.id || this.props.nodeId;
+        if (!nodeId) {
+            console.warn('WebhookNode.regenerateSecretUrl: no nodeId available.');
+            return;
+        }
+
+        this.uiState.regenerating = true;
+        try {
+            const result = await this.env.services.rpc(
+                '/cyllo_workflow/regenerate_webhook_token',
+                { node_struct_id: nodeId }
+            );
+            if (result && result.ok && result.url) {
+                this.uiState.secretUrl = result.url;
+                this.fieldState.webhook_secret_token = result.token || '';
+            } else {
+                console.error('WebhookNode: regenerate failed:', result && result.error);
+            }
+        } catch (err) {
+            console.error('WebhookNode: regenerate RPC error:', err);
+        } finally {
+            this.uiState.regenerating = false;
+        }
+    }
+
+    // ── Header key/value builder ─────────────────────────────────────────
     /**
      * Parse the raw JSON header string into [{key, value}] rows for the
      * visual builder. If parsing fails, returns empty rows — the raw
