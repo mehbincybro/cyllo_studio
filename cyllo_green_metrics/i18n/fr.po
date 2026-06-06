@@ -1,0 +1,1264 @@
+# Translation of Cyllo Server.
+# This file contains the translation of the following modules:
+# 	* cyllo_green_metrics
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Cyllo Server 1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-05 11:08+0000\n"
+"PO-Revision-Date: 2026-06-05 11:08+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_duration__half_yearly
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_duration__half_yearly
+msgid "6 Months"
+msgstr "6 Mois"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_company_form_inherit_carbon
+msgid "<span>/</span>"
+msgstr "<span>/</span>"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.fleet_vehicle_model_form_inherit_sound
+msgid "<span>dB</span>"
+msgstr "<span>dB</span>"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "<strong>Date:</strong>"
+msgstr "<strong>Date :</strong>"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "<strong>Name:</strong>"
+msgstr "<strong>Nom :</strong>"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "<strong>Total Emissions:</strong>"
+msgstr "<strong>Émissions totales :</strong>"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__active
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__active
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__active
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__active
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__active
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__active
+msgid "Active"
+msgstr "Actif"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_activity
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__activity_ids
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_activity
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+msgid "Activities"
+msgstr "Activités"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Activity"
+msgstr "Activité"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__activity_unit
+msgid "Activity Unit"
+msgstr "Unité d'activité"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_factor__type__air
+msgid "Air"
+msgstr "Air"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__air_factor_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_source_form
+msgid "Air Factors"
+msgstr "Facteurs air"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Allocated Cap"
+msgstr "Plafond alloué"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__water_cap
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__water_cap
+#, python-format
+msgid "Allocated Water"
+msgstr "Eau allouée"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Allocation"
+msgstr "Allocation"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_project_task__recycled_water
+msgid "Amount of recycled/recovered water in this task."
+msgstr "Quantité d'eau recyclée/récupérée dans cette tâche."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__apply_rules
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_activity_form
+msgid "Apply Rules"
+msgstr "Appliquer les règles"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+msgid "Approve"
+msgstr "Approuver"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_calc__state__approved
+msgid "Approved"
+msgstr "Approuvé"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_rule
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_rule
+msgid "Assignation Rules"
+msgstr "Règles d'assignation"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_company__mrp_integration
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_config_settings__mrp_integration
+msgid ""
+"Automatically calculate carbon emissions based on manufacturing order "
+"operations"
+msgstr "Calculer automatiquement les émissions de carbone basées sur les opérations d'ordre de fabrication"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Automatically calculate carbon emissions from Work Order operations."
+msgstr "Calculer automatiquement les émissions de carbone à partir des opérations d'ordre de travail."
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Available Credit"
+msgstr "Crédit disponible"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_buy_credit
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_credit_buy
+msgid "Buy Credit"
+msgstr "Acheter des crédits"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.actions.act_window,help:cyllo_green_metrics.action_buy_credit
+msgid "Buy environmental credits."
+msgstr "Acheter des crédits environnementaux."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__calculation_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__calculation_id
+msgid "Calculation"
+msgstr "Calcul"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_calc
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_calc
+msgid "Calculations"
+msgstr "Calculs"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_compute_wizard_form
+msgid "Cancel"
+msgstr "Annuler"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workorder__carbon_activity_ids
+msgid "Carbon Activities"
+msgstr "Activités carbone"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_activity
+msgid "Carbon Activity"
+msgstr "Activité carbone"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_calc
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Carbon Calculation"
+msgstr "Calcul carbone"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__carbon_cap
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__carbon_cap
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Carbon Cap"
+msgstr "Plafond carbone"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_gas
+msgid "Carbon Gas"
+msgstr "Gaz carbonique"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_unit
+msgid "Carbon Unit"
+msgstr "Unité carbone"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__category
+msgid "Category"
+msgstr "Catégorie"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__code
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__code
+msgid "Code"
+msgstr "Code"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_res_company
+msgid "Companies"
+msgstr "Sociétés"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_activity_form
+msgid "Compute"
+msgstr "Calculer"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_compute_wizard
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_compute_wizard_form
+msgid "Compute Emissions"
+msgstr "Calculer les émissions"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_compute_wizard
+msgid "Compute Emissions Wizard"
+msgstr "Assistant de calcul des émissions"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_res_config_settings
+msgid "Config Settings"
+msgstr "Paramètres de configuration"
+
+#. module: cyllo_green_metrics
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_config
+msgid "Configuration"
+msgstr "Configuration"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__cost_total
+msgid "Cost"
+msgstr "Coût"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Create Initiative"
+msgstr "Créer une initiative"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__create_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__create_uid
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__create_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__create_date
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: cyllo_green_metrics
+#: model:product.template,name:cyllo_green_metrics.product_credit_product_template
+msgid "Credit"
+msgstr "Crédit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_bank_statement_line__credit_product_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_move__credit_product_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_payment__credit_product_id
+msgid "Credit Product"
+msgstr "Produit crédit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__enable_credit_transfer
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Credit Transfer"
+msgstr "Transfert de crédit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__currency_id
+msgid "Currency"
+msgstr "Devise"
+
+#. module: cyllo_green_metrics
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_dashboard
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__date
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Date"
+msgstr "Date"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Date Range"
+msgstr "Plage de dates"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__description
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__description
+msgid "Description"
+msgstr "Description"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_assign_rule__method__direct
+msgid "Direct"
+msgstr "Direct"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__display_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__display_name
+msgid "Display Name"
+msgstr "Nom affiché"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__domain
+msgid "Domain"
+msgstr "Domaine"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_carbon_assign_rule__domain
+msgid "Domain string applied to target records."
+msgstr "Chaîne de domaine appliquée aux enregistrements cibles."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_activity__state__done
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_calc__state__done
+msgid "Done"
+msgstr "Terminé"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Done ✅"
+msgstr "Terminé ✅"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:project.task.type,name:cyllo_green_metrics.stage_green_done
+#, python-format
+msgid "Done 🌲"
+msgstr "Terminé 🌲"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_activity__state__draft
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_calc__state__draft
+msgid "Draft"
+msgstr "Brouillon"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__carbon_duration
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__water_duration
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__carbon_duration
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__water_duration
+msgid "Duration"
+msgstr "Durée"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_assign_rule
+msgid "Emission Assignation Rule"
+msgstr "Règle d'assignation des émissions"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_factor
+msgid "Emission Factor"
+msgstr "Facteur d'émission"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_scope
+msgid "Emission Scope"
+msgstr "Portée des émissions"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_carbon_source
+msgid "Emission Source"
+msgstr "Source d'émission"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_source
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_source
+msgid "Emission Sources"
+msgstr "Sources d'émissions"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__emission_total
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.mrp_production_workorder_form_view_inherit_green
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Emissions"
+msgstr "Émissions"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Enable buying and selling environmental credits."
+msgstr "Activer l'achat et la vente de crédits environnementaux."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__energy
+msgid "Energy"
+msgstr "Énergie"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.client,name:cyllo_green_metrics.action_carbon_dashboard_owl
+msgid "Environment Metrics Dashboard"
+msgstr "Tableau de bord des métriques environnementales"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Environment Metrics Overview"
+msgstr "Vue d'ensemble des métriques environnementales"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__factor_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__factor_id
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_assign_rule__method__factor
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Factor"
+msgstr "Facteur"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__factor_count
+msgid "Factor Count"
+msgstr "Nombre de facteurs"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__factor_value
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__factor_value
+msgid "Factor Value"
+msgstr "Valeur du facteur"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Filters:"
+msgstr "Filtres :"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__fleet_integration
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__fleet_integration
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Fleet Integration"
+msgstr "Intégration flotte"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__formula
+msgid "Formula"
+msgstr "Formule"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__full_name
+msgid "Full Name"
+msgstr "Nom complet"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__gwp
+msgid "GWP"
+msgstr "PRG"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__gas_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__gas_id
+msgid "Gas"
+msgstr "Gaz"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.constraint,message:cyllo_green_metrics.constraint_carbon_gas_carbon_gas_code_uniq
+msgid "Gas code must be unique."
+msgstr "Le code du gaz doit être unique."
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_gas
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_gas
+msgid "Gases"
+msgstr "Gaz"
+
+#. module: cyllo_green_metrics
+#: model:project.project,name:cyllo_green_metrics.project_green_initiatives
+msgid "Green Initiatives"
+msgstr "Initiatives vertes"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_routing_workcenter__carbon_line_ids
+#: model:ir.module.category,name:cyllo_green_metrics.module_category_green_metrics
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_root
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Green Metrics"
+msgstr "Métriques vertes"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.server,name:cyllo_green_metrics.ir_cron_calculate_fleet_emissions_ir_actions_server
+msgid "Green Metrics: Calculate Fleet Emissions"
+msgstr "Métriques vertes : Calculer les émissions de la flotte"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Green Projects"
+msgstr "Projets verts"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__id
+msgid "ID"
+msgstr "ID"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:project.task.type,name:cyllo_green_metrics.stage_green_ideas
+#, python-format
+msgid "Ideas 🌱"
+msgstr "Idées 🌱"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Ideas 💧"
+msgstr "Idées 💧"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Ideas 📢"
+msgstr "Idées 📢"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "In Progress 🌊"
+msgstr "En cours 🌊"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:project.task.type,name:cyllo_green_metrics.stage_green_progress
+#, python-format
+msgid "In Progress 🌳"
+msgstr "En cours 🌳"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "In Progress 🔊"
+msgstr "En cours 🔊"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Integrate fleet odometer readings with green metrics."
+msgstr "Intégrer les relevés d'odomètre de la flotte avec les métriques vertes."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_company__fleet_integration
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_config_settings__fleet_integration
+msgid "Integrate fleet with green metrics"
+msgstr "Intégrer la flotte avec les métriques vertes"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_product_product__is_credit_product
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_product_template__is_credit_product
+msgid "Is Credit Product"
+msgstr "Est un produit crédit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_bank_statement_line__is_credit_transfer
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_move__is_credit_transfer
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_account_payment__is_credit_transfer
+msgid "Is Credit Transfer"
+msgstr "Est un transfert de crédit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_project_task__is_green_project
+msgid "Is Green Project"
+msgstr "Est un projet vert"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_project_task__is_water_project
+msgid "Is Water Project"
+msgstr "Est un projet eau"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_account_move
+msgid "Journal Entry"
+msgstr "Pièce comptable"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_unit__kl
+msgid "KL"
+msgstr "KL"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__write_uid
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__write_uid
+msgid "Last Updated by"
+msgstr "Dernière mise à jour par"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__write_date
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__write_date
+msgid "Last Updated on"
+msgstr "Dernière mise à jour le"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__mrp_integration
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "MRP Integration"
+msgstr "Intégration MRP"
+
+#. module: cyllo_green_metrics
+#: model:res.groups,name:cyllo_green_metrics.group_carbon_manager
+msgid "Manager"
+msgstr "Responsable"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__mrp_integration
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Manufacturing Integration"
+msgstr "Intégration fabrication"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_mrp_workcenter_carbon
+msgid "Manufacturing Operation Carbon Line"
+msgstr "Ligne carbone d'opération de fabrication"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_compute_wizard__mark_done
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+msgid "Mark Done"
+msgstr "Marquer comme terminé"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__materials
+msgid "Materials"
+msgstr "Matériaux"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Max allowed carbon emissions for the selected duration."
+msgstr "Émissions de carbone maximales autorisées pour la durée sélectionnée."
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Max allowed water usage for the selected duration."
+msgstr "Utilisation d'eau maximale autorisée pour la durée sélectionnée."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_company__carbon_cap
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_config_settings__carbon_cap
+msgid "Maximum allowed carbon emissions"
+msgstr "Émissions de carbone maximales autorisées"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_company__water_cap
+#: model:ir.model.fields,help:cyllo_green_metrics.field_res_config_settings__water_cap
+msgid "Maximum allowed water usage"
+msgstr "Utilisation d'eau maximale autorisée"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__method
+msgid "Method"
+msgstr "Méthode"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__model_id
+msgid "Model"
+msgstr "Modèle"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_fleet_vehicle_model
+msgid "Model of a vehicle"
+msgstr "Modèle d'un véhicule"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_duration__monthly
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_duration__monthly
+#, python-format
+msgid "Monthly"
+msgstr "Mensuel"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__source_id
+msgid "Name"
+msgstr "Nom"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Net Recovered Water"
+msgstr "Eau nette récupérée"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "No Scope"
+msgstr "Aucune portée"
+
+#. module: cyllo_green_metrics
+#. cyllo-python
+#: code:addons/cyllo_green_metrics/models/account_move.py:0
+#, python-format
+msgid "Not enough available credits to sell. Current balance: %s"
+msgstr "Crédits disponibles insuffisants pour vendre. Solde actuel : %s"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__note
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__note
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__note
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__note
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__note
+msgid "Note"
+msgstr "Note"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_source_form
+msgid "Notes"
+msgstr "Notes"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__operation_id
+msgid "Operation"
+msgstr "Opération"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__other
+msgid "Other"
+msgstr "Autre"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Overall Gas Emissions"
+msgstr "Émissions globales de gaz"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__priority
+msgid "Priority"
+msgstr "Priorité"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_product_template
+msgid "Product"
+msgstr "Produit"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__provider
+msgid "Provider"
+msgstr "Fournisseur"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__quantity
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Quantity"
+msgstr "Quantité"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_duration__quarterly
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_duration__quarterly
+#, python-format
+msgid "Quarterly"
+msgstr "Trimestriel"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_project_task__recycled_water
+msgid "Recycled Water (KL)"
+msgstr "Eau recyclée (KL)"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_project_task__reduced_emissions
+msgid "Reduced Emissions (kgCO²e)"
+msgstr "Émissions réduites (kgCO²e)"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__region
+msgid "Region"
+msgstr "Région"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+msgid "Reset to Draft"
+msgstr "Réinitialiser en brouillon"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_compute_wizard_form
+msgid "Run"
+msgstr "Exécuter"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__scope_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__scope_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_project_task__scope_id
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Scope"
+msgstr "Portée"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.constraint,message:cyllo_green_metrics.constraint_carbon_scope_carbon_scope_code_uniq
+msgid "Scope code must be unique."
+msgstr "Le code de portée doit être unique."
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_scope
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_scope
+msgid "Scopes"
+msgstr "Portées"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Select All"
+msgstr "Tout sélectionner"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_sell_credit
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_credit_sell
+msgid "Sell Credit"
+msgstr "Vendre des crédits"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.actions.act_window,help:cyllo_green_metrics.action_sell_credit
+msgid "Sell environmental credits."
+msgstr "Vendre des crédits environnementaux."
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_scope__sequence
+msgid "Sequence"
+msgstr "Séquence"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__services
+msgid "Services"
+msgstr "Services"
+
+#. module: cyllo_green_metrics
+#: model:ir.actions.act_window,name:cyllo_green_metrics.action_carbon_config_settings
+#: model:ir.ui.menu,name:cyllo_green_metrics.menu_carbon_settings
+msgid "Settings"
+msgstr "Paramètres"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_factor__type__sound
+msgid "Sound"
+msgstr "Son"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Sound Analysis (4 Months)"
+msgstr "Analyse sonore (4 mois)"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_fleet_vehicle_model__default_sound
+msgid "Sound Emission"
+msgstr "Émission sonore"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__sound_factor_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_source_form
+msgid "Sound Factors"
+msgstr "Facteurs sonores"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:project.project,name:cyllo_green_metrics.project_sound_initiatives
+#, python-format
+msgid "Sound Initiatives"
+msgstr "Initiatives sonores"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_fleet_vehicle_model__default_sound_unit
+msgid "Sound Unit"
+msgstr "Unité sonore"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,help:cyllo_green_metrics.field_fleet_vehicle_model__default_sound
+msgid "Sound emission in dB"
+msgstr "Émission sonore en dB"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__source_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_assign_rule__source_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__source_id
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.report_carbon_calc_document_green
+msgid "Source"
+msgstr "Source"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.mrp_routing_workcenter_form_view_inherit
+msgid "Sources"
+msgstr "Sources"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__state
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__state
+msgid "State"
+msgstr "État"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_calc_form
+msgid "Submit"
+msgstr "Soumettre"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_calc__state__submitted
+msgid "Submitted"
+msgstr "Soumis"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_unit__symbol
+msgid "Symbol"
+msgstr "Symbole"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_project_task
+msgid "Task"
+msgstr "Tâche"
+
+#. module: cyllo_green_metrics
+#: model:project.project,label_tasks:cyllo_green_metrics.project_green_initiatives
+#: model:project.project,label_tasks:cyllo_green_metrics.project_sound_initiatives
+#: model:project.project,label_tasks:cyllo_green_metrics.project_water_initiatives
+msgid "Tasks"
+msgstr "Tâches"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Today"
+msgstr "Aujourd'hui"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Total"
+msgstr "Total"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_calc__total_emissions
+msgid "Total Emissions"
+msgstr "Émissions totales"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__transport
+msgid "Transport"
+msgstr "Transport"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__type
+msgid "Type"
+msgstr "Type"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__uom_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__unit_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_gas__unit_name
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_mrp_workcenter_carbon__unit_id
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__carbon_unit
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_company__water_unit
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__carbon_unit
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_res_config_settings__water_unit
+msgid "Unit"
+msgstr "Unité"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.constraint,message:cyllo_green_metrics.constraint_carbon_unit_carbon_unit_name_uniq
+msgid "Unit name must be unique."
+msgstr "Le nom de l'unité doit être unique."
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Usage amount exceeds allocated cap!"
+msgstr "La quantité utilisée dépasse le plafond alloué !"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Used Amount"
+msgstr "Quantité utilisée"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Used Water"
+msgstr "Eau utilisée"
+
+#. module: cyllo_green_metrics
+#: model:res.groups,name:cyllo_green_metrics.group_carbon_user
+msgid "User"
+msgstr "Utilisateur"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__valid_from
+msgid "Valid From"
+msgstr "Valide à partir du"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_factor__valid_to
+msgid "Valid To"
+msgstr "Valide jusqu'au"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_fleet_vehicle
+msgid "Vehicle"
+msgstr "Véhicule"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Warning:"
+msgstr "Avertissement :"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_source__category__waste
+msgid "Waste"
+msgstr "Déchets"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__carbon_factor__type__water
+msgid "Water"
+msgstr "Eau"
+
+#. module: cyllo_green_metrics
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.res_config_settings_view_form
+msgid "Water Cap"
+msgstr "Plafond eau"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_source__water_factor_ids
+#: model_terms:ir.ui.view,arch_db:cyllo_green_metrics.view_carbon_source_form
+msgid "Water Factors"
+msgstr "Facteurs eau"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:project.project,name:cyllo_green_metrics.project_water_initiatives
+#, python-format
+msgid "Water Initiatives"
+msgstr "Initiatives eau"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Water Pollution (Latest 3m)"
+msgstr "Pollution de l'eau (3 derniers mois)"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "Water usage exceeds allocated amount!"
+msgstr "L'utilisation d'eau dépasse la quantité allouée !"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_mrp_routing_workcenter
+msgid "Work Center Usage"
+msgstr "Utilisation du poste de travail"
+
+#. module: cyllo_green_metrics
+#: model:ir.model,name:cyllo_green_metrics.model_mrp_workorder
+#: model:ir.model.fields,field_description:cyllo_green_metrics.field_carbon_activity__workorder_id
+msgid "Work Order"
+msgstr "Ordre de travail"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_duration__yearly
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_duration__yearly
+#, python-format
+msgid "Yearly"
+msgstr "Annuel"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__fleet_vehicle_model__default_sound_unit__db
+msgid "dB"
+msgstr "dB"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_unit__kg
+msgid "kg CO2e"
+msgstr "kg CO2e"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "monthly"
+msgstr "mensuel"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "quarterly"
+msgstr "trimestriel"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "range"
+msgstr "plage"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__carbon_unit__t
+msgid "t CO2e"
+msgstr "t CO2e"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "to"
+msgstr "à"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "today"
+msgstr "aujourd'hui"
+
+#. module: cyllo_green_metrics
+#: model:ir.model.fields.selection,name:cyllo_green_metrics.selection__res_company__water_unit__tonnes
+msgid "tonnes"
+msgstr "tonnes"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "yearly"
+msgstr "annuel"
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "🌍 Carbon Emission Allocations ("
+msgstr "🌍 Allocations d'émissions de carbone ("
+
+#. module: cyllo_green_metrics
+#. cyllo-javascript
+#: code:addons/cyllo_green_metrics/static/src/xml/green_dashboard.xml:0
+#, python-format
+msgid "💧 Water Allocations ("
+msgstr "💧 Allocations d'eau ("
