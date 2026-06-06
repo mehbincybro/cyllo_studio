@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -20,34 +20,29 @@
 #
 #############################################################################
 {
-    'name': 'Front Desk',
+    'name': 'Front Desk - Appointment Integration',
     'version': '1.0.0',
     'category': 'Human Resources',
-    'summary': """Manage reception desks, visitor check-ins, notifications, and refreshment requests""",
+    'summary': """Bridge module to auto-create visitors from confirmed appointments and sync check-in/out with appointment state""",
     'description': """
-Cyllo Front Desk manages front desk operations:
-- Setup Multiple Stations (Front Desks)
-- Log and track visitors check-in and check-out
-- Automatically notify hosts via Email and Discuss
-- Manage refreshment configuration and notification for visitor requests
+Cyllo Front Desk - Appointment Integration:
+- Automatically creates a Front Desk visitor when an appointment is confirmed
+- Visitor check-in pushes the linked appointment to In Progress
+- Visitor check-out marks the linked appointment as Done
+- Maps appointment partner, staff, and schedule to visitor fields
     """,
     'author': 'Cyllo',
     'company': 'Cyllo',
     'maintainer': 'Cyllo',
     'website': 'https://www.cyllo.com',
-    'depends': ['hr', 'mail'],
+    'depends': ['cyllo_front_desk', 'cyllo_appointment'],
     'data': [
-        'security/frontdesk_security.xml',
-        'security/ir.model.access.csv',
-        'views/frontdesk_drink_views.xml',
-        'views/frontdesk_frontdesk_views.xml',
         'views/frontdesk_visitor_views.xml',
-        'views/frontdesk_enquiry_views.xml',
-        'views/res_config_settings_views.xml',
-        'views/frontdesk_menus.xml',
+        'views/appointment_views.xml',
+        'views/frontdesk_views.xml',
     ],
     'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
-    'application': True,
+    'application': False,
 }

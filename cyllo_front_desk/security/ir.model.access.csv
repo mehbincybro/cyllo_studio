@@ -5,3 +5,5 @@ access_frontdesk_frontdesk_user,frontdesk.frontdesk.user,model_frontdesk_frontde
 access_frontdesk_frontdesk_admin,frontdesk.frontdesk.admin,model_frontdesk_frontdesk,group_frontdesk_admin,1,1,1,1
 access_frontdesk_visitor_user,frontdesk.visitor.user,model_frontdesk_visitor,group_frontdesk_user,1,1,1,1
 access_frontdesk_visitor_admin,frontdesk.visitor.admin,model_frontdesk_visitor,group_frontdesk_admin,1,1,1,1
+access_frontdesk_enquiry_user,frontdesk.enquiry.user,model_frontdesk_enquiry,group_frontdesk_user,1,1,1,0
+access_frontdesk_enquiry_admin,frontdesk.enquiry.admin,model_frontdesk_enquiry,group_frontdesk_admin,1,1,1,1
