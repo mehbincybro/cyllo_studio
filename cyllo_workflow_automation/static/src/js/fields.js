@@ -89,6 +89,7 @@ export const tryCatchFields = [
 
 export const webhookFields = [
     { name: 'label', type: 'char' },
+    { name: 'webhook_secret_token', type: 'char' },
     { name: 'webhook_method', type: 'selection' },
     { name: 'webhook_url', type: 'char' },
     { name: 'webhook_headers', type: 'char' },

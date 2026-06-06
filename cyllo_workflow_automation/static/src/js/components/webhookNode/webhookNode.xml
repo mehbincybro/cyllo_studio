@@ -17,6 +17,56 @@
                 </div>
 
                 <!-- ══════════════════════════════════════════════════════════
+                     SECRET URL  (read-only, auto-generated inbound trigger)
+                ══════════════════════════════════════════════════════════ -->
+                <div class="mb-3">
+                    <label class="form-label cy-modal-form_label">
+                        Secret URL
+                        <span class="text-muted ms-1" style="font-size:11px; font-weight:normal;">
+                            — share with external systems to trigger this webhook
+                        </span>
+                    </label>
+                    <div class="input-group">
+                        <!-- Read-only URL display -->
+                        <input type="text"
+                               readonly="readonly"
+                               class="form-control cy-modal-form_input font-monospace"
+                               style="font-size:11px; background:#f8f9fa; color:#495057; cursor:default;"
+                               t-att-value="uiState.secretUrl || '(generating…)'"
+                               title="Secret inbound URL — copy and share with external callers"/>
+
+                        <!-- Copy to clipboard -->
+                        <button type="button"
+                                class="btn"
+                                style="border: 1px solid #ced4da; color: #9ea700; background: white;"
+                                title="Copy Secret URL"
+                                t-att-disabled="!uiState.secretUrl"
+                                t-on-click="copySecretUrl">
+                            <t t-if="uiState.secretUrlCopied">✓</t>
+                            <t t-else="">⎘</t>
+                        </button>
+
+                        <!-- Regenerate token -->
+                        <button type="button"
+                                class="btn btn-outline-warning"
+                                style="font-size:12px; white-space:nowrap;"
+                                title="Generate a new Secret URL — the old one will stop working immediately"
+                                t-att-disabled="uiState.regenerating"
+                                t-on-click="regenerateSecretUrl">
+                            <t t-if="uiState.regenerating">
+                                <span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"/>
+                                Regenerating…
+                            </t>
+                            <t t-else="">↺ Regenerate</t>
+                        </button>
+                    </div>
+                    <div class="text-muted mt-1" style="font-size:10px; color:#856404 !important;">
+                        ⚠ Regenerating immediately invalidates the current Secret URL.
+                        Update any external callers before regenerating.
+                    </div>
+                </div>
+
+                <!-- ══════════════════════════════════════════════════════════
                      METHOD (tags widget) + URL
                 ══════════════════════════════════════════════════════════ -->
                 <div class="mb-3">

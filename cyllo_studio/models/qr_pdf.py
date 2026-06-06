@@ -44,3 +44,16 @@ class QrScanEvent(models.Model):
     scanned_at = fields.Datetime(string='Scanned At', default=fields.Datetime.now)
     ip_address = fields.Char(string='IP Address')
     user_agent = fields.Text(string='User Agent')
+    record_ref = fields.Char(string='Record Reference', compute='_compute_record_ref')
+
+    @api.depends('record_id', 'report_id.model')
+    def _compute_record_ref(self):
+        for rec in self:
+            if rec.record_id and rec.report_id and rec.report_id.model:
+                try:
+                    record = self.env[rec.report_id.model].sudo().browse(rec.record_id)
+                    rec.record_ref = record.display_name if record.exists() else f"ID: {rec.record_id}"
+                except Exception:
+                    rec.record_ref = f"ID: {rec.record_id}"
+            else:
+                rec.record_ref = "Unknown"
