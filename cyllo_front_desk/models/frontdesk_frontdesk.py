@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 class FrontdeskFrontdesk(models.Model):
     _name = 'frontdesk.frontdesk'
@@ -18,11 +19,23 @@ class FrontdeskFrontdesk(models.Model):
     drink_selection_ids = fields.Many2many('frontdesk.drink', string='Drinks Offered')
     visitor_ids = fields.One2many('frontdesk.visitor', 'station_id', string='Visitors')
     visitor_count = fields.Integer(string='Visitor Count', compute='_compute_visitor_count')
+    has_emergency_alert = fields.Boolean(
+        string='Has Emergency Alert',
+        compute='_compute_has_emergency_alert',
+    )
     
     @api.depends('visitor_ids')
     def _compute_visitor_count(self):
         for station in self:
             station.visitor_count = len(station.visitor_ids.filtered(lambda v: v.state in ('planned', 'checked_in')))
+
+    def _compute_has_emergency_alert(self):
+        alert_model = self.env['frontdesk.emergency.alert']
+        for station in self:
+            station.has_emergency_alert = bool(station.id and alert_model.search_count([
+                ('active', '=', True),
+                ('station_ids', 'in', station.id),
+            ]))
 
     def action_open_visitors(self):
         self.ensure_one()
@@ -53,4 +66,19 @@ class FrontdeskFrontdesk(models.Model):
             'res_model': 'frontdesk.drink',
             'view_mode': 'tree,form',
             'target': 'current',
+        }
+
+    def action_trigger_emergency(self):
+        self.ensure_one()
+        if not self.has_emergency_alert:
+            raise UserError(_("No emergency alert is configured for this station."))
+        return {
+            'name': 'Trigger Emergency Alert',
+            'type': 'ir.actions.act_window',
+            'res_model': 'frontdesk.emergency.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_station_id': self.id,
+            }
         }

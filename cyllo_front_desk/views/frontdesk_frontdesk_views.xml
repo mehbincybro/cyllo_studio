@@ -10,6 +10,7 @@
                 <field name="name"/>
                 <field name="responsible_ids"/>
                 <field name="visitor_count"/>
+                <field name="has_emergency_alert"/>
                 <templates>
                     <t t-name="kanban-box">
                         <div class="oe_kanban_global_click" style="border-radius: 8px; border-left: 5px solid #7C5BBA; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 16px;">
@@ -30,13 +31,20 @@
                                     <field name="responsible_ids" widget="many2many_tags"/>
                                 </div>
                             </div>
-                            <div class="o_kanban_card_manage_pane mt-3" style="display: flex; gap: 8px;">
-                                <button name="action_open_visitors" type="object" class="btn btn-sm btn-secondary" style="flex: 1;">
-                                    <span class="fa fa-eye mr-1"/> View Visitors
-                                </button>
-                                <button name="action_quick_register_visitor" type="object" class="btn btn-sm btn-primary" style="flex: 1;">
-                                    <span class="fa fa-plus mr-1"/> New Visitor
-                                </button>
+                            <div class="o_kanban_card_manage_pane mt-3" style="display: flex; flex-direction: column; gap: 8px;">
+                                <div style="display: flex; gap: 8px;">
+                                    <button name="action_open_visitors" type="object" class="btn btn-sm btn-secondary" style="flex: 1;">
+                                        <span class="fa fa-eye mr-1"/> View Visitors
+                                    </button>
+                                    <button name="action_quick_register_visitor" type="object" class="btn btn-sm btn-primary" style="flex: 1;">
+                                        <span class="fa fa-plus mr-1"/> New Visitor
+                                    </button>
+                                </div>
+                                <t t-if="record.has_emergency_alert.raw_value">
+                                    <button name="action_trigger_emergency" type="object" class="btn btn-sm btn-danger mt-1" style="width: 100%; border-radius: 6px; font-weight: bold; background-color: #dc3545; border-color: #dc3545;">
+                                        <span class="fa fa-exclamation-triangle mr-1"/> Trigger Emergency
+                                    </button>
+                                </t>
                             </div>
                         </div>
                     </t>
@@ -66,6 +74,10 @@
         <field name="model">frontdesk.frontdesk</field>
         <field name="arch" type="xml">
             <form string="Front Desk Station">
+                <header>
+                    <field name="has_emergency_alert" invisible="1"/>
+                    <button name="action_trigger_emergency" type="object" string="Trigger Emergency Alert" class="btn-danger" icon="fa-exclamation-triangle" style="font-weight: bold;" invisible="not has_emergency_alert"/>
+                </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button name="action_open_visitors" type="object" class="oe_stat_button" icon="fa-users">
