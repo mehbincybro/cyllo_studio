@@ -92,6 +92,7 @@ export class EditReport extends Component {
             },
             hasQr: false,
             hasSign: false,
+            hasOverflow: false
         });
 
         // Promise resolver for the table config modal
@@ -263,6 +264,8 @@ export class EditReport extends Component {
 
         // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
         this._updateHasSign();
+
+        this._startOverflowGuardObserver();
 
         this.editor = null;
         $('[t-elif], [t-else]').hide();
@@ -572,6 +575,10 @@ export class EditReport extends Component {
 
         if (this.state.previewMode) {
             await this._fetchPreviewData();
+        }
+        else {
+            // Paper format changed — re-evaluate overflow boundary immediately
+            requestAnimationFrame(() => this._updateOverflowGuard());
         }
     }
 
@@ -2116,6 +2123,15 @@ export class EditReport extends Component {
     }
 
     async save_changes(component) {
+        if (component.state.hasOverflow) {
+                    component.notification.add(
+                        "Cannot save: content exceeds the page boundary. " +
+                        "Remove or resize elements above the red line first.",
+                        { type: "danger", sticky: true }
+                    );
+                    // this.action.doAction("studio_reload");
+                    return;
+            }
         if (component.state.isSaving) return;
         component.state.isSaving = true;
         try {
@@ -2858,6 +2874,69 @@ export class EditReport extends Component {
      * Stores result back into data-box-config.
      */
 
+    _buildNewNodesXpath(change, newNodes) {
+        if (!newNodes || !newNodes.length) return "";
+        const children = Array.from(change.el.children);
+        let xpathBlock = "";
+        let currentGroup = [];
+
+        const processGroup = (group) => {
+            if (!group.length) return;
+            let groupContent = "";
+            group.forEach(node => {
+                const cloned = node.cloneNode(true);
+                const cleaned = this._cleanStudioAttrs(cloned);
+                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                groupContent += content;
+            });
+
+            const firstNodeIndex = children.indexOf(group[0]);
+            const lastNodeIndex = children.indexOf(group[group.length - 1]);
+
+            // Find next sibling with cy-xpath
+            let nextSibling = null;
+            for (let i = lastNodeIndex + 1; i < children.length; i++) {
+                if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
+                    nextSibling = children[i];
+                    break;
+                }
+            }
+
+            if (nextSibling) {
+                xpathBlock += `<xpath expr="${nextSibling.getAttribute('cy-xpath')}" position="before">${groupContent}</xpath>`;
+                return;
+            }
+
+            // Find prev sibling with cy-xpath
+            let prevSibling = null;
+            for (let i = firstNodeIndex - 1; i >= 0; i--) {
+                if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
+                    prevSibling = children[i];
+                    break;
+                }
+            }
+
+            if (prevSibling) {
+                xpathBlock += `<xpath expr="${prevSibling.getAttribute('cy-xpath')}" position="after">${groupContent}</xpath>`;
+                return;
+            }
+
+            // Fallback to parent inside
+            xpathBlock += `<xpath expr="${change.xpath}" position="inside">${groupContent}</xpath>`;
+        };
+
+        children.forEach(child => {
+            if (child.classList.contains('c_new') && !child.hasAttribute('cy-xpath')) {
+                currentGroup.push(child);
+            } else {
+                processGroup(currentGroup);
+                currentGroup = [];
+            }
+        });
+        processGroup(currentGroup);
+        return xpathBlock;
+    }
+
     buildInheritanceXML(changes) {
         let new_inherits = [];
         for (const [key, items] of Object.entries(groupBy(changes, 'template'))) {
@@ -2895,15 +2974,8 @@ export class EditReport extends Component {
                     ));
 
                     if (hasStructuralDescendant || hasConditionalChainChild || hasQwebTable) {
-                        // Fall back to saving only genuinely new user-added nodes
-                        if (newNodes.length) {
-                            newNodes.forEach(node => {
-                                const cloned = node.cloneNode(true);
-                                const cleaned = this._cleanStudioAttrs(cloned);
-                                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
-                                xpathBlock += `<xpath expr="${change.xpath}" position="inside">${content}</xpath>`;
-                            });
-                        }
+                        // Fall back to saving only genuinely new user-added nodes with precise sibling positioning
+                        xpathBlock += this._buildNewNodesXpath(change, newNodes);
                         return;
                     }
 
@@ -2916,12 +2988,7 @@ export class EditReport extends Component {
 
 
                 if (newNodes.length) {
-                    newNodes.forEach(node => {
-                        const cloned = node.cloneNode(true);
-                        const cleaned = this._cleanStudioAttrs(cloned);
-                        let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
-                        xpathBlock += `<xpath expr="${change.xpath}" position="inside">${content}</xpath>`;
-                    });
+                    xpathBlock += this._buildNewNodesXpath(change, newNodes);
                     return;
                 }
 
@@ -2943,6 +3010,153 @@ export class EditReport extends Component {
     }
 
     _setupTextNodeEvents(textNode) { }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Overflow Guard – Page Boundary Indicator
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Inject (or move) the red page-boundary line inside the paper container
+     * and show/hide the sticky overflow warning based on whether content
+     * exceeds the boundary.
+     *
+     * The boundary is calculated from the current paper format height minus
+     * the top padding (20mm default), converted to pixels via the container's
+     * own pixel height / mm ratio so it is always accurate regardless of zoom.
+     */
+
+    _updateOverflowGuard() {
+        if (this.state.previewMode) return;
+
+        const container = this.reportFrameRef.el?.closest('.cyllo-studio-report-container');
+        const editableArea = this.reportFrameRef.el;
+        if (!container || !editableArea) return;
+
+        // ── 1. Calculate boundary position in px ────────────────────────────
+        const fmt = this.currentPaperFormat;
+        const pageHeightMm = fmt ? fmt.page_height : 297;
+
+        // The container is sized in mm via inline style; measure its rendered height
+        // to derive the px-per-mm ratio reliably (handles any zoom/dpi).
+        const containerRect = container.getBoundingClientRect();
+        const containerHeightPx = containerRect.height;
+
+        // Guard: container must have been laid out already
+        if (containerHeightPx < 10) return;
+
+        // Ratio: px per mm inside this container element
+        const pxPerMm = containerHeightPx / pageHeightMm;
+
+        // Top padding of the editable area (20mm as set in the template inline style)
+        const PADDING_MM = 20;
+        const paddingPx = PADDING_MM * pxPerMm;
+
+        // Usable content height in px (page height minus top+bottom padding)
+        const contentHeightPx = (pageHeightMm - PADDING_MM * 2) * pxPerMm;
+
+        // Boundary Y measured from the TOP of the container element
+        const boundaryFromContainerTopPx = paddingPx + contentHeightPx;
+
+        // ── 2. Create / update the boundary line DOM element ─────────────────
+        let line = container.querySelector('.cy-page-overflow-line');
+        if (!line) {
+            line = document.createElement('div');
+            line.className = 'cy-page-overflow-line';
+            // Insert at the beginning of the container so it sits behind content
+            container.insertBefore(line, container.firstChild);
+        }
+        line.style.top = `${boundaryFromContainerTopPx}px`;
+
+        // ── 3. Determine if any content crosses the boundary ─────────────────
+        const editableAreaRect = editableArea.getBoundingClientRect();
+        const boundaryAbsoluteY = containerRect.top + boundaryFromContainerTopPx;
+
+        let overflowing = false;
+        const allNodes = editableArea.querySelectorAll(
+            '[cy-template], table, .table-wrapper, .field-block, .text-node, p, h1, h2, h3, h4, h5, h6, div[cy-xpath]'
+        );
+
+        allNodes.forEach(node => {
+            const rect = node.getBoundingClientRect();
+            const crossesBoundary = rect.bottom > boundaryAbsoluteY + 2; // 2px tolerance
+            if (crossesBoundary) {
+                node.classList.add('cy-overflowing');
+                overflowing = true;
+            } else {
+                node.classList.remove('cy-overflowing');
+            }
+        });
+
+        // ── 4. Show / hide the sticky warning banner ──────────────────────────
+        const mainArea = container.closest('.flex-grow-1.overflow-auto') ||
+                         container.parentElement;
+        if (!mainArea) return;
+
+        let warning = mainArea.querySelector('.cy-overflow-warning');
+        if (!warning) {
+            warning = document.createElement('div');
+            warning.className = 'cy-overflow-warning hidden';
+            warning.innerHTML = `
+                <span class="cy-overflow-warning-icon">
+                    <i class="fa fa-exclamation-triangle"></i>
+                </span>
+                <div class="cy-overflow-warning-text">
+                    Content exceeds the page boundary
+                    <div class="cy-overflow-warning-sub">
+                        Some elements extend beyond the printable area and may be cut off in the PDF.
+                        Reduce content or switch to a larger paper format.
+                    </div>
+                </div>`;
+            // Insert the warning just after the paper container
+            container.insertAdjacentElement('afterend', warning);
+        }
+        this.state.hasOverflow = overflowing;
+        if (overflowing) {
+            warning.classList.remove('hidden');
+        } else {
+            warning.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Attach a MutationObserver to the report frame so the overflow guard
+     * re-evaluates automatically whenever content changes.
+     * Called once from _setupReportFrame.
+     */
+    _startOverflowGuardObserver() {
+        if (this._overflowObserver) {
+            this._overflowObserver.disconnect();
+        }
+
+        const editableArea = this.reportFrameRef.el;
+        if (!editableArea) return;
+
+        // Debounce to avoid flooding on heavy DOM mutations
+        let debounceTimer = null;
+        const check = () => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => this._updateOverflowGuard(), 150);
+        };
+
+        this._overflowObserver = new MutationObserver(check);
+        this._overflowObserver.observe(editableArea, {
+            childList: true,
+            subtree: true,
+            characterData: true,
+            attributes: true,
+            attributeFilter: ['style', 'class'],
+        });
+
+        // Also re-check whenever the window is resized (zoom change, etc.)
+        if (this._overflowResizeHandler) {
+            window.removeEventListener('resize', this._overflowResizeHandler);
+        }
+        this._overflowResizeHandler = check;
+        window.addEventListener('resize', this._overflowResizeHandler);
+
+        // Initial check after the frame is painted
+        requestAnimationFrame(() => this._updateOverflowGuard());
+    }
 }
 
 // ── Apply focused mixins ─────────────────────────────────────────────────────
