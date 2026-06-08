@@ -1,5 +1,6 @@
 /** @odoo-module */
 const { useState, useRef, onMounted } = owl;
+const { onWillStart } = owl;
 import { ConfigurationBase } from "../configurationBase/configurationBase";
 
 /**
@@ -28,6 +29,7 @@ import { ConfigurationBase } from "../configurationBase/configurationBase";
  *   - resultVariable          — variable name to store approval status.
  */
 export class ApprovalNode extends ConfigurationBase {
+    static props = ['*'];
     setup() {
         super.setup();
         this.labelInput = useRef("labelInput");
@@ -46,23 +48,53 @@ export class ApprovalNode extends ConfigurationBase {
             resultVariable: "",
             labelError: false,
             approverError: false,
+            users: [],
+            groups: [],
+        });
+
+        onWillStart(async () => {
+            try {
+                this.approvalState.users = await this.orm.searchRead(
+                    "res.users",
+                    [["active", "=", true], ["share", "=", false]],
+                    ["id", "name"],
+                    { limit: 200, order: "name asc" }
+                );
+                this.approvalState.users = this.approvalState.users.map(u => [u.id, u.name]);
+            } catch (e) {
+                console.warn("ApprovalNode: could not load users", e);
+                this.approvalState.users = [];
+            }
+
+            try {
+                this.approvalState.groups = await this.orm.searchRead(
+                    "res.groups",
+                    [],
+                    ["id", "name"],
+                    { limit: 200, order: "name asc" }
+                );
+                this.approvalState.groups = this.approvalState.groups.map(g => [g.id, g.name]);
+            } catch (e) {
+                console.warn("ApprovalNode: could not load groups", e);
+                this.approvalState.groups = [];
+            }
         });
 
         onMounted(() => {
             if (this.labelInput.el) this.labelInput.el.focus();
             // Restore saved values
             const fs = this.fieldState;
-            this.approvalState.approverType     = fs.approval_approver_type    || "user";
-            this.approvalState.approverId       = fs.approval_approver_id      || null;
-            this.approvalState.approverGroupId  = fs.approval_approver_group_id || null;
-            this.approvalState.approverField    = fs.approval_approver_field   || "";
-            this.approvalState.subject          = fs.approval_subject          || "Your Approval is Required";
-            this.approvalState.message          = fs.approval_message          || "";
-            this.approvalState.notifyEmail      = fs.approval_notify_email !== false;
-            this.approvalState.notifyInbox      = fs.approval_notify_inbox !== false;
-            this.approvalState.expireAfter      = fs.approval_expire_after     || 0;
-            this.approvalState.autoRule         = fs.approval_auto_rule        || "";
-            this.approvalState.resultVariable   = fs.approval_result_variable  || "";
+            this.approvalState.approverType = fs.approval_approver_type || "user";
+            this.approvalState.approverId = fs.approval_approver_id || null;
+            this.approvalState.approverGroupId = fs.approval_approver_group_id || null;
+            this.approvalState.approverField = fs.approval_approver_field || "";
+            this.approvalState.subject = fs.approval_subject || "Your Approval is Required";
+            this.approvalState.message = fs.approval_message || "";
+            this.approvalState.notifyEmail = fs.approval_notify_email !== false;
+            this.approvalState.notifyInbox = fs.approval_notify_inbox !== false;
+            this.approvalState.expireAfter = fs.approval_expire_after || 0;
+            this.approvalState.autoRule = fs.approval_auto_rule || "";
+            this.approvalState.resultVariable = fs.approval_result_variable || "";
         });
     }
 
@@ -79,6 +111,19 @@ export class ApprovalNode extends ConfigurationBase {
 
     setApproverType(value) {
         this.approvalState.approverType = value;
+        this.approvalState.approverId = null;
+        this.approvalState.approverGroupId = null;
+        this.approvalState.approverField = "";
+        this.approvalState.approverError = false;
+    }
+
+    onUserSelected(rawValue) {
+        this.approvalState.approverId = parseInt(rawValue) || null;
+        this.approvalState.approverError = false;
+    }
+
+    onGroupSelected(rawValue) {
+        this.approvalState.approverGroupId = parseInt(rawValue) || null;
         this.approvalState.approverError = false;
     }
 
@@ -86,6 +131,14 @@ export class ApprovalNode extends ConfigurationBase {
         this.approvalState.approverField = value;
         this.approvalState.approverError = false;
     }
+
+    setSubject(value) { this.approvalState.subject = value; }
+    setMessage(value) { this.approvalState.message = value; }
+    setNotifyEmail(checked) { this.approvalState.notifyEmail = checked; }
+    setNotifyInbox(checked) { this.approvalState.notifyInbox = checked; }
+    setExpireAfter(value) { this.approvalState.expireAfter = parseFloat(value) || 0; }
+    setAutoRule(value) { this.approvalState.autoRule = value; }
+    setResultVariable(value) { this.approvalState.resultVariable = value.trim(); }
 
     // Validation
 
@@ -128,7 +181,7 @@ export class ApprovalNode extends ConfigurationBase {
      * into the context so the three output-port branches can route correctly.
      */
     generateCode() {
-        const aType   = this.approvalState.approverType;
+        const aType = this.approvalState.approverType;
         const subject = (this.approvalState.subject || "Your Approval is Required").replace(/'/g, "\\'");
         const expireH = parseFloat(this.approvalState.expireAfter) || 0;
         const autoRule = (this.approvalState.autoRule || "").trim();
@@ -136,7 +189,8 @@ export class ApprovalNode extends ConfigurationBase {
         const notifyEmail = this.approvalState.notifyEmail;
         const notifyInbox = this.approvalState.notifyInbox;
 
-        let approverResolutionCode = "";
+        // Approver resolution line
+        let approverResolutionCode = "_approval_approver = False";
         if (aType === "user" && this.approvalState.approverId) {
             approverResolutionCode = `_approval_approver = env['res.users'].browse(${this.approvalState.approverId})`;
         } else if (aType === "group" && this.approvalState.approverGroupId) {
@@ -146,105 +200,86 @@ export class ApprovalNode extends ConfigurationBase {
             approverResolutionCode = `_approval_approver = (${field})`;
         }
 
-        let autoRuleLine = "";
-        if (autoRule) {
-            autoRuleLine = `
-if (${autoRule}):
-    approval_branch = 'approved'
-    approval_status = 'approved'
-else:`;
-        }
+        // Expiration
+        const expireLine = expireH > 0
+            ? `fields.Datetime.now() + relativedelta(hours=${expireH})`
+            : "None";
 
-        let expireLine = "None";
-        if (expireH > 0) {
-            expireLine = `fields.Datetime.now() + relativedelta(hours=${expireH})`;
-        }
+        // Result variable line
+        const resultVarLine = resultVar ? `\n${resultVar} = approval_branch` : "";
 
-        let resultVarLine = "";
-        if (resultVar) {
-            resultVarLine = `\n${resultVar} = approval_branch`;
-        }
-
-        const baseCode = [
-            "# Approval node",
-            approverResolutionCode,
-            `_approval_subject = '${subject}'`,
-            `_approval_notify_email = ${notifyEmail ? 'True' : 'False'}`,
-            `_approval_notify_inbox = ${notifyInbox ? 'True' : 'False'}`,
-            `_approval_expiration = ${expireLine}`,
-            "",
-            "# Persist approval request",
-            "_approval_ctx = {",
-            "    'res_model': current_record._name if current_record else '',",
-            "    'res_id': current_record.id if current_record else 0,",
-            "    'trigger_type': trigger_type,",
-            "}",
-            "_approval_req = env['workflow.approval.request'].sudo().create({",
-            "    'workflow_id': env['work.auto'].browse(work_auto_id).id if env.context.get('work_auto_id') else False,",
-            "    'approver_id': _approval_approver.id if _approval_approver else False,",
-            "    'approver_name': _approval_approver.name if _approval_approver else '',",
-            "    'approver_email': _approval_approver.email if _approval_approver else '',",
-            "    'res_model': _approval_ctx.get('res_model', ''),",
-            "    'res_id': _approval_ctx.get('res_id', 0),",
-            "    'execution_context': _approval_ctx,",
-            "    'expiration': _approval_expiration,",
-            "    'state': 'pending',",
-            "})",
-            "env['workflow.approval.log'].sudo().create({",
-            "    'request_id': _approval_req.id,",
-            "    'event': 'created',",
-            "    'user_id': env.uid,",
-            "})",
-            "",
-            "# Build approval URL",
-            "_approval_base_url = env['ir.config_parameter'].sudo().get_param('web.base.url', '')",
-            "_approval_url = f'{_approval_base_url}/workflow/approval/{_approval_req.token}'",
-            "",
-            "# Send notifications",
-            "if _approval_notify_email and _approval_approver and _approval_approver.email:",
-            "    _approval_body = f'''<p>Hello {_approval_approver.name},</p>",
-            "    <p>Your approval is required. Please click the link below:</p>",
-            "    <p><a href=\"{_approval_url}\" style=\"background:#875a7b;color:white;padding:8px 20px;",
-            "    border-radius:4px;text-decoration:none;\">Review & Approve</a></p>",
-            "    <p>Subject: {_approval_subject}</p>'''",
-            "    env['mail.mail'].sudo().create({",
-            "        'subject': _approval_subject,",
-            "        'body_html': _approval_body,",
-            "        'email_to': _approval_approver.email,",
-            "    }).send()",
+        // Core "create request + notify + pause" block.
+        // Wrapped in `if not __approval_resume__:` so on resume (when the
+        // approver clicks Approve/Reject) this block is skipped and execution
+        // falls through to the if/elif approval_branch routing below.
+        const pauseBlock = [
+            "if not __approval_resume__:",
+            `    ${approverResolutionCode}`,
+            `    _approval_subject = '${subject}'`,
+            `    _approval_notify_email = ${notifyEmail ? 'True' : 'False'}`,
+            `    _approval_notify_inbox = ${notifyInbox ? 'True' : 'False'}`,
+            `    _approval_expiration = ${expireLine}`,
+            "    _approval_req = env['workflow.approval.request'].sudo().create({",
+            "        'workflow_id': _workflow_auto_id,",
+            "        'approver_id': _approval_approver.id if _approval_approver else False,",
+            "        'approver_name': _approval_approver.name if _approval_approver else '',",
+            "        'approver_email': _approval_approver.email if _approval_approver else '',",
+            "        'res_model': _approval_res_model or False,",
+            "        'res_id': _approval_res_id or False,",
+            "        'expiration': _approval_expiration,",
+            "        'state': 'pending',",
+            "    })",
             "    env['workflow.approval.log'].sudo().create({",
             "        'request_id': _approval_req.id,",
-            "        'event': 'notified',",
+            "        'event': 'created',",
             "        'user_id': env.uid,",
-            "        'comment': 'Email sent to ' + _approval_approver.email,",
             "    })",
-            "if _approval_notify_inbox and _approval_approver:",
-            "    try:",
-            "        _approval_approver.sudo().notify_warning(",
-            "            _approval_subject,",
-            "            f'Approval required. Open: {_approval_url}',",
+            "    _approval_base_url = env['ir.config_parameter'].sudo().get_param('web.base.url', '')",
+            "    _approval_url = f'{_approval_base_url}/workflow/approval/{_approval_req.token}'",
+            "    if _approval_notify_email and _approval_approver and _approval_approver.email:",
+            "        _approval_body = (",
+            "            f'<p>Hello {_approval_approver.name},</p>'",
+            "            f'<p>Your approval is required: <strong>{_approval_subject}</strong></p>'",
+            "            f'<p><a href=\"{_approval_url}\" style=\"background:#875a7b;color:white;padding:8px 20px;border-radius:4px;text-decoration:none;\">Review &amp; Approve</a></p>'",
             "        )",
-            "    except Exception:",
-            "        pass",
-            "",
-            "# Pause execution",
-            "raise WorkflowApprovalPause(_approval_req.id, _approval_req.token)",
+            "        env['mail.mail'].sudo().create({",
+            "            'subject': _approval_subject,",
+            "            'body_html': _approval_body,",
+            "            'email_to': _approval_approver.email,",
+            "        }).send()",
+            "        env['workflow.approval.log'].sudo().create({",
+            "            'request_id': _approval_req.id,",
+            "            'event': 'notified',",
+            "            'user_id': env.uid,",
+            "            'comment': 'Email sent to ' + _approval_approver.email,",
+            "        })",
+            "    if _approval_notify_inbox and _approval_approver and _approval_approver.partner_id:",
+            "        try:",
+            "            env['mail.message'].sudo().create({",
+            "                'message_type': 'notification',",
+            "                'partner_ids': [(4, _approval_approver.partner_id.id)],",
+            "                'subject': _approval_subject,",
+            "                'body': f'Approval required: {_approval_subject}<br/><a href=\"{_approval_url}\">Open Approval Request</a>',",
+            "            })",
+            "        except Exception:",
+            "            pass",
+            "    raise WorkflowApprovalPause(_approval_req.id, _approval_req.token)",
         ].join("\n");
 
+        // Auto-approval rule: wraps everything in its own first-run guard
         if (autoRule) {
             return (
-                `# Auto-approval rule check\n` +
-                `if (${autoRule}):\n` +
-                `    approval_branch = 'approved'\n` +
-                `    approval_status = 'approved'\n` +
-                resultVarLine.replace(/^/gm, "    ") +
-                `\nelse:\n` +
-                baseCode.split("\n").map(l => `    ${l}`).join("\n") +
-                (resultVar ? `\n    ${resultVar} = approval_branch` : "")
+                "if not __approval_resume__:\n" +
+                `    if (${autoRule}):\n` +
+                `        approval_branch = 'approved'\n` +
+                `        approval_status = 'approved'\n` +
+                (resultVar ? `        ${resultVar} = approval_branch\n` : "") +
+                `    else:\n` +
+                pauseBlock.split("\n").map(l => `        ${l}`).join("\n")
             );
         }
 
-        return baseCode + resultVarLine;
+        return pauseBlock + resultVarLine;
     }
 
     // Confirm
@@ -263,17 +298,17 @@ else:`;
         }
 
         // Persist config into fieldState
-        this.fieldState.approval_approver_type     = this.approvalState.approverType;
-        this.fieldState.approval_approver_id       = this.approvalState.approverId;
+        this.fieldState.approval_approver_type = this.approvalState.approverType;
+        this.fieldState.approval_approver_id = this.approvalState.approverId;
         this.fieldState.approval_approver_group_id = this.approvalState.approverGroupId;
-        this.fieldState.approval_approver_field    = this.approvalState.approverField;
-        this.fieldState.approval_subject           = this.approvalState.subject;
-        this.fieldState.approval_message           = this.approvalState.message;
-        this.fieldState.approval_notify_email      = this.approvalState.notifyEmail;
-        this.fieldState.approval_notify_inbox      = this.approvalState.notifyInbox;
-        this.fieldState.approval_expire_after      = this.approvalState.expireAfter;
-        this.fieldState.approval_auto_rule         = this.approvalState.autoRule;
-        this.fieldState.approval_result_variable   = this.approvalState.resultVariable;
+        this.fieldState.approval_approver_field = this.approvalState.approverField;
+        this.fieldState.approval_subject = this.approvalState.subject;
+        this.fieldState.approval_message = this.approvalState.message;
+        this.fieldState.approval_notify_email = this.approvalState.notifyEmail;
+        this.fieldState.approval_notify_inbox = this.approvalState.notifyInbox;
+        this.fieldState.approval_expire_after = this.approvalState.expireAfter;
+        this.fieldState.approval_auto_rule = this.approvalState.autoRule;
+        this.fieldState.approval_result_variable = this.approvalState.resultVariable;
 
         const code = this.generateCode();
         this.state.used_variables = {};

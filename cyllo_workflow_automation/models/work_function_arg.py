@@ -37,6 +37,11 @@ from odoo.exceptions import AccessError
 from odoo.tools import file_open
 from odoo.tools.safe_eval import _BUILTINS, safe_eval
 
+# Lazy import to avoid circular dependency — resolved at runtime
+def _get_approval_pause_cls():
+    from .workflow_approval_request import WorkflowApprovalPause  # noqa
+    return WorkflowApprovalPause
+
 _logger = logging.getLogger(__name__)
 
 
@@ -1192,6 +1197,7 @@ class WorkAuto(models.Model):
 
         def make_button_click_method(function):
             func_name = function.func_name
+            _WAPause = _get_approval_pause_cls()
 
             def button_click(self, *args, **kwargs):
                 guard_key = f'_workflow_{func_name}_running_' + self._name
@@ -1201,14 +1207,27 @@ class WorkAuto(models.Model):
                 before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
                 action_result = False
                 for automation in before_ids.with_context(old_values=None):
-                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
-                    if isinstance(res, dict) and 'type' in res:
-                        action_result = res
+                    try:
+                        res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                        if isinstance(res, dict) and 'type' in res:
+                            action_result = res
+                    except _WAPause:
+                        # Workflow paused for human approval — not an error
+                        _logger.info(
+                            "Automation '%s' paused for human approval on '%s'.",
+                            automation.name, self._name,
+                        )
                 after_ids = automation_ids - before_ids
                 for automation in after_ids.with_context(old_values=None):
-                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
-                    if isinstance(res, dict) and 'type' in res:
-                        action_result = res
+                    try:
+                        res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                        if isinstance(res, dict) and 'type' in res:
+                            action_result = res
+                    except _WAPause:
+                        _logger.info(
+                            "Automation '%s' paused for human approval on '%s'.",
+                            automation.name, self._name,
+                        )
                 return action_result or False
 
             button_click.__name__ = func_name
@@ -1419,7 +1438,9 @@ class WorkAuto(models.Model):
         # Skip execution of triggers if the recordset is empty (no records).
         # This prevents Expected singleton or access errors in downstream nodes
         # when background actions write to empty recordsets.
-        if hasattr(records, '_name') and not records:
+        # EXCEPTION: approval resume calls must always proceed even if the
+        # original record was deleted — the workflow code handles missing records.
+        if hasattr(records, '_name') and not records and not args.get('__approval_resume__'):
             _logger.info(
                 "Skipping workflow automation '%s' (ID %d) because the target recordset is empty.",
                 self.name, self.id
@@ -1434,8 +1455,12 @@ class WorkAuto(models.Model):
         # Only dedup top-level automations (direct ORM triggers).
         # Reusable automations called from another automation have a non-empty
         # __workflow_stack__ — skip dedup for them so they always execute.
+        # Approval resume calls (__approval_resume__=True) MUST always bypass
+        # dedup — they run in a separate HTTP request from the original trigger,
+        # so the dedup set has been reset, but to be safe we skip explicitly.
         is_reuse_call = len(stack) > 1  # stack has at least [parent_id, self.id]
-        if records and incoming_trigger and incoming_trigger != 'field_change' and not is_reuse_call:
+        is_approval_resume = bool(args.get('__approval_resume__'))
+        if records and incoming_trigger and incoming_trigger != 'field_change' and not is_reuse_call and not is_approval_resume:
             cr = self.env.cr
             if not hasattr(cr, '_workflow_done'):
                 cr._workflow_done = set()
@@ -1514,6 +1539,23 @@ class WorkAuto(models.Model):
 
         context['_safe_schedule_activity'] = _safe_schedule_activity
 
+        # Inject the WorkflowApprovalPause class so generated Approval node
+        # code can raise it, and inject the current workflow/record identity
+        # so the request record can be linked back.
+        _WAPause = _get_approval_pause_cls()
+        context['WorkflowApprovalPause'] = _WAPause
+        context['_workflow_auto_id'] = self.id
+        _resolved_records = args.get('records', False)
+        context['_approval_res_model'] = (
+            self.model_id.sudo().model if self.model_id else
+            (getattr(_resolved_records, '_name', None) if _resolved_records else False)
+        )
+        context['_approval_res_id'] = (
+            _resolved_records.id
+            if _resolved_records and hasattr(_resolved_records, 'id') and len(_resolved_records) == 1
+            else False
+        )
+
         if self.code:
             code_obj = compile(self.code.strip(), "", 'exec')
             try:
@@ -1523,6 +1565,36 @@ class WorkAuto(models.Model):
                     context['action'] = local_dict['action']
             except Exception as e:
                 import traceback as _tb
+
+                # WorkflowApprovalPause is the intentional "pause" signal —
+                # store the execution context in the approval request record
+                # then let it propagate so the calling code can swallow it.
+                if isinstance(e, _WAPause):
+                    try:
+                        req = self.env['workflow.approval.request'].sudo().browse(e.approval_id)
+                        if req.exists() and not req.execution_context:
+                            # trigger_type MUST be saved here so that
+                            # _resume_workflow can pass it back to _process and the
+                            # generated trigger guard (e.g. `if trigger_type == 'create':`)
+                            # succeeds, allowing approval_branch routing to execute.
+                            saved_trigger = context.get('trigger_type') or ''
+                            req.write({
+                                'workflow_id': self.id,
+                                'res_model': context.get('_approval_res_model') or False,
+                                'res_id': context.get('_approval_res_id') or False,
+                                'execution_context': {
+                                    'res_model': context.get('_approval_res_model') or False,
+                                    'res_id': context.get('_approval_res_id') or False,
+                                    'trigger_type': saved_trigger,
+                                },
+                            })
+                    except Exception as _store_err:
+                        _logger.warning(
+                            "Workflow '%s': could not persist approval context: %s",
+                            self.name, _store_err,
+                        )
+                    raise  # let it bubble up to the call-site handler
+
                 _logger.error(
                     "Workflow '%s' code execution error:\n%s",
                     getattr(self, 'name', '?'),
@@ -1596,6 +1668,9 @@ class WorkAuto(models.Model):
             '_logger': _logger,
             'requests': _requests_lib,
             'json': _json_lib,
+            'approval_branch': '',
+            'approval_status': '',
+            'approval_comment': '',
         }
 
     @api.model

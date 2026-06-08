@@ -291,12 +291,18 @@ class WorkflowApprovalRequest(models.Model):
             except Exception:
                 records = False
 
+        # Restore the trigger_type that was active when the workflow paused.
+        # Without this the generated trigger guard (`if trigger_type == 'create':`)
+        # never matches on resume, so approval_branch routing code never executes.
+        resume_trigger = ctx.get('trigger_type') or ''
+
         try:
             workflow._process({
                 **ctx,
                 'records': records,
                 'current_record': records[:1] if records else False,
                 '__approval_resume__': True,
+                'trigger_type': resume_trigger,
             })
         except Exception as exc:
             _logger.error(
