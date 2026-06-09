@@ -2433,3 +2433,91 @@ span.badge.rounded-pill.bg-primary {
 .previewing .sign-resize-handle {
     display: none !important;
 }
+/* ===================================================
+   Overflow Guard – Page Boundary Indicator
+   =================================================== */
+
+/* ── Red dashed line at the page boundary ─────────── */
+.cy-page-overflow-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 0;
+    border-top: 2px dashed #e53935;
+    pointer-events: none;
+    z-index: 50;
+    transition: top 0.2s ease;
+}
+
+/* Label badge sitting on the red line */
+.cy-page-overflow-line::after {
+    content: 'Page boundary';
+    position: absolute;
+    right: 12px;
+    top: -11px;
+    background: #e53935;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    padding: 2px 7px;
+    border-radius: 3px;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ── Sticky overflow warning banner ───────────────── */
+.cy-overflow-warning {
+    position: sticky;
+    bottom: 16px;
+    left: 0;
+    right: 0;
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #fff3f3;
+    border: 1.5px solid #e53935;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 0 24px 0 24px;
+    box-shadow: 0 4px 16px rgba(229, 57, 53, 0.18);
+    animation: cy-overflow-fadein 0.25s ease;
+    pointer-events: none;
+}
+
+.cy-overflow-warning.hidden {
+    display: none;
+}
+
+@keyframes cy-overflow-fadein {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+.cy-overflow-warning-icon {
+    color: #e53935;
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.cy-overflow-warning-text {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    color: #b71c1c;
+    line-height: 1.4;
+}
+
+.cy-overflow-warning-sub {
+    font-weight: 400;
+    color: #c62828;
+    font-size: 11px;
+}
+
+/* ── Highlight elements that cross the boundary ───── */
+.cy-overflowing {
+    outline: 2px solid #e53935 !important;
+    outline-offset: 2px !important;
+    background-color: rgba(229, 57, 53, 0.05) !important;
+}
