@@ -159,7 +159,6 @@ class CrmLead(models.Model):
     @api.model
     def _read_group_stage_ids(self, stages, domain, order):
         """Override to filter stages based on lead/opportunity type"""
-        search_domain = []
         lead_type = self._context.get('default_type')
         if lead_type == 'lead':
             search_domain = [('type', 'in', ['lead', 'both']),
@@ -167,7 +166,6 @@ class CrmLead(models.Model):
         elif lead_type == 'opportunity':
             search_domain = [('type', 'in', ['opportunity', 'both'])]
         else:
-            # Ensure 'both' stages are included when type is not explicitly set
             search_domain = [('type', 'in', ['lead', 'opportunity', 'both'])]
 
         stage_ids = stages._search(search_domain, order=order,
