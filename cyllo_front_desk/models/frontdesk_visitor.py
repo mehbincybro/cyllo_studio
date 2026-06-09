@@ -8,10 +8,32 @@ class FrontdeskVisitor(models.Model):
     _description = 'Frontdesk Visitor'
     _order = 'check_in desc, id desc'
 
-    name = fields.Char(string='Visitor Name', required=True, tracking=True)
+    name = fields.Char(
+        string='Reference',
+        required=True, copy=False, readonly=True,
+        default=lambda self: _('New'),
+        tracking=True,
+    )
+    visitor_type = fields.Selection([
+        ('meeting', 'Meeting'),
+        ('enquiry', 'Enquiry'),
+    ], string='Visitor Type', default='meeting', required=True, tracking=True)
+
+    partner_id = fields.Many2one('res.partner', string='Customer/Partner',
+                                 tracking=True)
+    visitor_name = fields.Char(string='Visitor Name', required=True,
+                               tracking=True)
+
     phone = fields.Char(string='Phone', tracking=True)
     email = fields.Char(string='Email', tracking=True)
     company = fields.Char(string='Company', tracking=True)
+    enquiry_id = fields.Many2one(
+        'frontdesk.enquiry',
+        string='Enquiry Reference',
+        readonly=True,
+        copy=False,
+        tracking=True,
+    )
     host_id = fields.Many2one('hr.employee', string='Host', help='Employee being visited', tracking=True)
     station_id = fields.Many2one('frontdesk.frontdesk', string='Station', required=True, tracking=True)
     is_host = fields.Boolean(related='station_id.is_host', string='Host Selection', readonly=True)
@@ -37,16 +59,31 @@ class FrontdeskVisitor(models.Model):
             if not self.station_id.is_drink:
                 self.drink_id = False
 
+    @api.onchange('partner_id')
+    def _onchange_partner_id(self):
+        if self.partner_id:
+            self.visitor_name = self.partner_id.name
+            self.phone = self.partner_id.phone or self.partner_id.mobile
+            self.email = self.partner_id.email
+            self.company = self.partner_id.parent_id.name if self.partner_id.parent_id else (
+                self.partner_id.name if self.partner_id.is_company else False
+            )
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
+            if vals.get('name', _('New')) == _('New'):
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'frontdesk.visitor') or _('New')
             if vals.get('station_id'):
-                station = self.env['frontdesk.frontdesk'].browse(vals['station_id'])
+                station = self.env['frontdesk.frontdesk'].browse(
+                    vals['station_id'])
                 if not station.is_host:
                     vals['host_id'] = False
                 if not station.is_drink:
                     vals['drink_id'] = False
         return super().create(vals_list)
+
 
     def write(self, vals):
         if any(f in vals for f in ('station_id', 'host_id', 'drink_id')):
@@ -104,6 +141,29 @@ class FrontdeskVisitor(models.Model):
         for visitor in self:
             visitor.write({'drink_served': True})
             visitor.message_post(body=_("Drink served: %s") % (visitor.drink_id.name or _("N/A")))
+
+    def action_create_enquiry(self):
+        self.ensure_one()
+        if self.visitor_type != 'enquiry':
+            raise UserError(_("Only enquiry visitors can create an enquiry."))
+        if self.enquiry_id:
+            raise UserError(_("An enquiry is already linked to this visitor."))
+        return {
+            'name': _('Create Enquiry'),
+            'type': 'ir.actions.act_window',
+            'res_model': 'frontdesk.visitor.enquiry.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_visitor_id': self.id,
+                'default_visitor_name': self.name,
+                'default_phone': self.phone,
+                'default_email': self.email,
+                'default_company': self.company,
+                'default_station_id': self.station_id.id,
+                'default_handled_by': self.host_id.id,
+            },
+        }
 
     def _send_notifications(self):
         """Send notifications to host and/or station responsibles upon visitor check-in."""

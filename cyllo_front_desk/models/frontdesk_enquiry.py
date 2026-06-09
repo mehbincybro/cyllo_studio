@@ -176,7 +176,7 @@ class FrontdeskEnquiry(models.Model):
 
         # Create the visitor record
         visitor = self.env['frontdesk.visitor'].create({
-            'name': self.visitor_name,
+            'visitor_name': self.visitor_name,
             'phone': self.phone,
             'email': self.email,
             'company': self.company,

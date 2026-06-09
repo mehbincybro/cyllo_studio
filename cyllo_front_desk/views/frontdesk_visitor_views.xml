@@ -9,8 +9,11 @@
                   decoration-success="state == 'checked_in'"
                   decoration-muted="state in ('checked_out', 'cancelled')">
                 <field name="name"/>
+                <field name="visitor_name"/>
+                <field name="visitor_type"/>
                 <field name="company"/>
                 <field name="phone"/>
+                <field name="enquiry_id" optional="hide"/>
                 <field name="host_id"/>
                 <field name="check_in"/>
                 <field name="duration" widget="float_time"/>
@@ -46,6 +49,9 @@
                             invisible="state != 'checked_in'"/>
                     <button name="action_cancel" string="Cancel" type="object"
                             invisible="state in ('checked_out', 'cancelled')"/>
+                    <button name="action_create_enquiry" string="Create Enquiry"
+                            type="object" class="btn-primary"
+                            invisible="visitor_type != 'enquiry' or enquiry_id"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="planned,checked_in,checked_out,cancelled"/>
                 </header>
@@ -53,7 +59,7 @@
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only"/>
                         <h1>
-                            <field name="name" placeholder="Visitor's Name"/>
+                            <field name="name" readonly="1"/>
                         </h1>
                     </div>
                     <group>
@@ -61,6 +67,10 @@
                             <field name="is_drink" invisible="1"/>
                             <field name="drink_selection_ids"
                                    widget="many2many_tags" invisible="1"/>
+                            <field name="partner_id" options="{'no_create': False}"/>
+                            <field name="visitor_name"/>
+                            <field name="visitor_type"/>
+                            <field name="enquiry_id" readonly="1" invisible="not enquiry_id"/>
                             <field name="company" placeholder="e.g. Acme Corp"/>
                             <field name="phone" placeholder="e.g. +1 555-0199"/>
                             <field name="email"
@@ -101,7 +111,11 @@
         <field name="arch" type="xml">
             <search string="Search Visitors">
                 <field name="name"/>
+                <field name="visitor_name"/>
+                <field name="partner_id"/>
                 <field name="company"/>
+                <field name="visitor_type"/>
+                <field name="enquiry_id"/>
                 <field name="host_id"/>
                 <field name="station_id"/>
                 <separator/>
@@ -111,8 +125,12 @@
                         domain="[('state', '=', 'checked_in')]"/>
                 <filter string="Checked Out" name="checked_out"
                         domain="[('state', '=', 'checked_out')]"/>
-                <filter string="Cancelled" name="cancelled"
-                        domain="[('state', '=', 'cancelled')]"/>
+                    <filter string="Cancelled" name="cancelled"
+                            domain="[('state', '=', 'cancelled')]"/>
+                <filter string="Meeting" name="meeting"
+                        domain="[('visitor_type', '=', 'meeting')]"/>
+                <filter string="Enquiry" name="enquiry"
+                        domain="[('visitor_type', '=', 'enquiry')]"/>
                 <separator/>
                 <filter string="Today's Visits" name="today"
                         domain="[('check_in', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')), ('check_in', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
@@ -123,6 +141,8 @@
                             context="{'group_by': 'host_id'}"/>
                     <filter string="Company" name="group_by_company"
                             context="{'group_by': 'company'}"/>
+                    <filter string="Visitor Type" name="group_by_visitor_type"
+                            context="{'group_by': 'visitor_type'}"/>
                     <filter string="Status" name="group_by_state"
                             context="{'group_by': 'state'}"/>
                 </group>
