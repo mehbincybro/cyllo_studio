@@ -38,9 +38,6 @@ from odoo.tools import file_open
 from odoo.tools.safe_eval import _BUILTINS, safe_eval
 
 # Lazy import to avoid circular dependency — resolved at runtime
-def _get_approval_pause_cls():
-    from .workflow_approval_request import WorkflowApprovalPause  # noqa
-    return WorkflowApprovalPause
 
 _logger = logging.getLogger(__name__)
 
@@ -400,6 +397,103 @@ class WorkAuto(models.Model):
         default=lambda self: self.env.company
     )
     is_record_saved = fields.Boolean(default=False)
+
+    pending_approval_node_ids = fields.Many2many(
+        'node.struct',
+        string="Pending Approval Nodes",
+        help="Nodes that are currently waiting for human approval.",
+    )
+
+    def _run_from_node(self, node_id, record_model, record_id, approval_branch, approval_comment=''):
+        """
+        Resume workflow execution from a specific node's output port.
+        Used by the Human Approval node after an Approve/Reject/Timeout decision.
+        """
+        self.ensure_one()
+        try:
+            record = self.env[record_model].browse(record_id)
+        except Exception as e:
+            _logger.error("Could not find resume record %s,%s: %s", record_model, record_id, e)
+            return False
+
+        if not self.flow_data:
+            return False
+
+        nodes = self.flow_data.get('drawflow', {}).get('Home', {}).get('data', {})
+        # DrawFlow stores node IDs as string keys — try both str and the raw value.
+        start_node = nodes.get(str(node_id)) or nodes.get(node_id)
+        if not start_node:
+            _logger.warning(
+                "Workflow '%s': node_id=%s not found in flow_data on resume "
+                "(continuing with full-code re-run).",
+                self.name, node_id,
+            )
+            # Do not abort — full code re-run with __approval_resume__=True still works.
+
+        _logger.info("Resuming workflow %s from node %s with branch %s", self.id, node_id, approval_branch)
+
+        exec_code = self.code
+        if not exec_code:
+            return False
+
+        # Build the FULL execution context (same as _process) so branch code
+        # has access to all helpers: _logger, UserError, current_record, etc.
+        from odoo.tools.safe_eval import _BUILTINS
+
+        # Build the env that execute() will read via self.env.context
+        resume_env = self.env(context=dict(
+            self.env.context,
+            __approval_resume__=True,
+            approval_branch=approval_branch,
+            approval_comment=approval_comment or '',
+        ))
+
+        context = self.with_env(resume_env).get_context(records=record)
+        context.update(_BUILTINS)
+        context['_workflow_auto_id'] = self.id
+
+        # Restore trigger_type so the trigger guard in the compiled code passes.
+        # Prefer the value passed in via with_context() by _approval_resume;
+        # fall back to the related field on work.auto.
+        context['trigger_type'] = (
+            self.env.context.get('trigger_type')
+            or self.trigger_type
+            or ''
+        )
+
+        context['record'] = record
+        context['current_record'] = record
+        context['records'] = record
+        context['approval_branch'] = approval_branch
+        context['approval_status'] = approval_branch
+        context['approval_comment'] = approval_comment or ''
+        context['__approval_resume__'] = True
+
+        # Override 'env' in the eval globals so any ORM call inside the branch
+        # code (e.g. current_record.button_confirm()) also runs in the resume env.
+        context['env'] = resume_env
+
+        def _safe_schedule_activity(rec, **kwargs):
+            if not rec:
+                return False
+            valid = rec.filtered(lambda r: isinstance(r.id, int) and r.id > 0)
+            return valid.activity_schedule(**kwargs) if valid else False
+        context['_safe_schedule_activity'] = _safe_schedule_activity
+
+        # Run it
+        try:
+            code_obj = compile(exec_code.strip(), '<approval_resume>', 'exec')
+            local_dict = {}
+            eval(code_obj, context, local_dict)
+        except Exception as e:
+            import traceback as _tb
+            _logger.error(
+                "Workflow '%s' approval resume error (branch=%s):\n%s",
+                self.name, approval_branch, _tb.format_exc()
+            )
+            return False
+            
+        return True
 
     def _archive_workflows_with_whatsapp_nodes(self):
         """
@@ -1197,7 +1291,6 @@ class WorkAuto(models.Model):
 
         def make_button_click_method(function):
             func_name = function.func_name
-            _WAPause = _get_approval_pause_cls()
 
             def button_click(self, *args, **kwargs):
                 guard_key = f'_workflow_{func_name}_running_' + self._name
@@ -1207,27 +1300,14 @@ class WorkAuto(models.Model):
                 before_ids = automation_ids.filtered(lambda x: x.ttype == 'before')
                 action_result = False
                 for automation in before_ids.with_context(old_values=None):
-                    try:
-                        res = automation._process({'records': self, 'trigger_type': 'button_click'})
-                        if isinstance(res, dict) and 'type' in res:
-                            action_result = res
-                    except _WAPause:
-                        # Workflow paused for human approval — not an error
-                        _logger.info(
-                            "Automation '%s' paused for human approval on '%s'.",
-                            automation.name, self._name,
-                        )
+                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                    if isinstance(res, dict) and 'type' in res:
+                        action_result = res
                 after_ids = automation_ids - before_ids
                 for automation in after_ids.with_context(old_values=None):
-                    try:
-                        res = automation._process({'records': self, 'trigger_type': 'button_click'})
-                        if isinstance(res, dict) and 'type' in res:
-                            action_result = res
-                    except _WAPause:
-                        _logger.info(
-                            "Automation '%s' paused for human approval on '%s'.",
-                            automation.name, self._name,
-                        )
+                    res = automation._process({'records': self, 'trigger_type': 'button_click'})
+                    if isinstance(res, dict) and 'type' in res:
+                        action_result = res
                 return action_result or False
 
             button_click.__name__ = func_name
@@ -1538,12 +1618,6 @@ class WorkAuto(models.Model):
             return valid.activity_schedule(**kwargs)
 
         context['_safe_schedule_activity'] = _safe_schedule_activity
-
-        # Inject the WorkflowApprovalPause class so generated Approval node
-        # code can raise it, and inject the current workflow/record identity
-        # so the request record can be linked back.
-        _WAPause = _get_approval_pause_cls()
-        context['WorkflowApprovalPause'] = _WAPause
         context['_workflow_auto_id'] = self.id
         _resolved_records = args.get('records', False)
         context['_approval_res_model'] = (
@@ -1565,36 +1639,6 @@ class WorkAuto(models.Model):
                     context['action'] = local_dict['action']
             except Exception as e:
                 import traceback as _tb
-
-                # WorkflowApprovalPause is the intentional "pause" signal —
-                # store the execution context in the approval request record
-                # then let it propagate so the calling code can swallow it.
-                if isinstance(e, _WAPause):
-                    try:
-                        req = self.env['workflow.approval.request'].sudo().browse(e.approval_id)
-                        if req.exists() and not req.execution_context:
-                            # trigger_type MUST be saved here so that
-                            # _resume_workflow can pass it back to _process and the
-                            # generated trigger guard (e.g. `if trigger_type == 'create':`)
-                            # succeeds, allowing approval_branch routing to execute.
-                            saved_trigger = context.get('trigger_type') or ''
-                            req.write({
-                                'workflow_id': self.id,
-                                'res_model': context.get('_approval_res_model') or False,
-                                'res_id': context.get('_approval_res_id') or False,
-                                'execution_context': {
-                                    'res_model': context.get('_approval_res_model') or False,
-                                    'res_id': context.get('_approval_res_id') or False,
-                                    'trigger_type': saved_trigger,
-                                },
-                            })
-                    except Exception as _store_err:
-                        _logger.warning(
-                            "Workflow '%s': could not persist approval context: %s",
-                            self.name, _store_err,
-                        )
-                    raise  # let it bubble up to the call-site handler
-
                 _logger.error(
                     "Workflow '%s' code execution error:\n%s",
                     getattr(self, 'name', '?'),

@@ -169,117 +169,11 @@ export class ApprovalNode extends ConfigurationBase {
 
     /**
      * Generate the Python code injected into the workflow execution context.
-     *
-     * The generated code:
-     *  1. Evaluates the auto-approval rule (if any).
-     *  2. Resolves the approver from the configured type.
-     *  3. Creates a workflow.approval.request record.
-     *  4. Sends notifications.
-     *  5. Raises WorkflowApprovalPause to freeze execution.
-     *
-     * On resume, the engine injects `approval_branch` ('approved'|'rejected'|'timeout')
-     * into the context so the three output-port branches can route correctly.
      */
     generateCode() {
-        const aType = this.approvalState.approverType;
-        const subject = (this.approvalState.subject || "Your Approval is Required").replace(/'/g, "\\'");
-        const expireH = parseFloat(this.approvalState.expireAfter) || 0;
-        const autoRule = (this.approvalState.autoRule || "").trim();
         const resultVar = (this.approvalState.resultVariable || "").trim();
-        const notifyEmail = this.approvalState.notifyEmail;
-        const notifyInbox = this.approvalState.notifyInbox;
-
-        // Approver resolution line
-        let approverResolutionCode = "_approval_approver = False";
-        if (aType === "user" && this.approvalState.approverId) {
-            approverResolutionCode = `_approval_approver = env['res.users'].browse(${this.approvalState.approverId})`;
-        } else if (aType === "group" && this.approvalState.approverGroupId) {
-            approverResolutionCode = `_approval_approver = env['res.groups'].browse(${this.approvalState.approverGroupId}).users[:1]`;
-        } else if (aType === "dynamic") {
-            const field = (this.approvalState.approverField || "record.user_id").trim();
-            approverResolutionCode = `_approval_approver = (${field})`;
-        }
-
-        // Expiration
-        const expireLine = expireH > 0
-            ? `fields.Datetime.now() + relativedelta(hours=${expireH})`
-            : "None";
-
-        // Result variable line
         const resultVarLine = resultVar ? `\n${resultVar} = approval_branch` : "";
-
-        // Core "create request + notify + pause" block.
-        // Wrapped in `if not __approval_resume__:` so on resume (when the
-        // approver clicks Approve/Reject) this block is skipped and execution
-        // falls through to the if/elif approval_branch routing below.
-        const pauseBlock = [
-            "if not __approval_resume__:",
-            `    ${approverResolutionCode}`,
-            `    _approval_subject = '${subject}'`,
-            `    _approval_notify_email = ${notifyEmail ? 'True' : 'False'}`,
-            `    _approval_notify_inbox = ${notifyInbox ? 'True' : 'False'}`,
-            `    _approval_expiration = ${expireLine}`,
-            "    _approval_req = env['workflow.approval.request'].sudo().create({",
-            "        'workflow_id': _workflow_auto_id,",
-            "        'approver_id': _approval_approver.id if _approval_approver else False,",
-            "        'approver_name': _approval_approver.name if _approval_approver else '',",
-            "        'approver_email': _approval_approver.email if _approval_approver else '',",
-            "        'res_model': _approval_res_model or False,",
-            "        'res_id': _approval_res_id or False,",
-            "        'expiration': _approval_expiration,",
-            "        'state': 'pending',",
-            "    })",
-            "    env['workflow.approval.log'].sudo().create({",
-            "        'request_id': _approval_req.id,",
-            "        'event': 'created',",
-            "        'user_id': env.uid,",
-            "    })",
-            "    _approval_base_url = env['ir.config_parameter'].sudo().get_param('web.base.url', '')",
-            "    _approval_url = f'{_approval_base_url}/workflow/approval/{_approval_req.token}'",
-            "    if _approval_notify_email and _approval_approver and _approval_approver.email:",
-            "        _approval_body = (",
-            "            f'<p>Hello {_approval_approver.name},</p>'",
-            "            f'<p>Your approval is required: <strong>{_approval_subject}</strong></p>'",
-            "            f'<p><a href=\"{_approval_url}\" style=\"background:#875a7b;color:white;padding:8px 20px;border-radius:4px;text-decoration:none;\">Review &amp; Approve</a></p>'",
-            "        )",
-            "        env['mail.mail'].sudo().create({",
-            "            'subject': _approval_subject,",
-            "            'body_html': _approval_body,",
-            "            'email_to': _approval_approver.email,",
-            "        }).send()",
-            "        env['workflow.approval.log'].sudo().create({",
-            "            'request_id': _approval_req.id,",
-            "            'event': 'notified',",
-            "            'user_id': env.uid,",
-            "            'comment': 'Email sent to ' + _approval_approver.email,",
-            "        })",
-            "    if _approval_notify_inbox and _approval_approver and _approval_approver.partner_id:",
-            "        try:",
-            "            env['mail.message'].sudo().create({",
-            "                'message_type': 'notification',",
-            "                'partner_ids': [(4, _approval_approver.partner_id.id)],",
-            "                'subject': _approval_subject,",
-            "                'body': f'Approval required: {_approval_subject}<br/><a href=\"{_approval_url}\">Open Approval Request</a>',",
-            "            })",
-            "        except Exception:",
-            "            pass",
-            "    raise WorkflowApprovalPause(_approval_req.id, _approval_req.token)",
-        ].join("\n");
-
-        // Auto-approval rule: wraps everything in its own first-run guard
-        if (autoRule) {
-            return (
-                "if not __approval_resume__:\n" +
-                `    if (${autoRule}):\n` +
-                `        approval_branch = 'approved'\n` +
-                `        approval_status = 'approved'\n` +
-                (resultVar ? `        ${resultVar} = approval_branch\n` : "") +
-                `    else:\n` +
-                pauseBlock.split("\n").map(l => `        ${l}`).join("\n")
-            );
-        }
-
-        return pauseBlock + resultVarLine;
+        return "__approval_node_pause__" + resultVarLine;
     }
 
     // Confirm
@@ -307,6 +201,7 @@ export class ApprovalNode extends ConfigurationBase {
         this.fieldState.approval_notify_email = this.approvalState.notifyEmail;
         this.fieldState.approval_notify_inbox = this.approvalState.notifyInbox;
         this.fieldState.approval_expire_after = this.approvalState.expireAfter;
+        this.fieldState.approval_timeout_hours = this.approvalState.expireAfter;
         this.fieldState.approval_auto_rule = this.approvalState.autoRule;
         this.fieldState.approval_result_variable = this.approvalState.resultVariable;
 

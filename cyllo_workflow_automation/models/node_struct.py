@@ -321,6 +321,52 @@ class NodeStruct(models.Model):
              "('approved', 'rejected', 'timeout') for use in downstream nodes.",
     )
 
+    approval_rule_id = fields.Integer(
+        string="Approval Rule ID",
+        copy=False,
+        help="Optional server-type approval rule. If not set, one is auto-created.",
+    )
+    approval_timeout_hours = fields.Float(
+        string="Timeout (hours)",
+        default=24.0,
+        help="Auto-reject after this many hours. Set to 0 to disable timeout.",
+    )
+    approval_token = fields.Char(
+        string="Approval Token",
+        copy=False,
+        index=True,
+        help="Secure random token embedded in the approval URL.",
+    )
+    approval_request_id = fields.Integer(
+        string="Approval Request ID",
+        copy=False,
+    )
+    approval_resume_work_auto_id = fields.Many2one(
+        'work.auto',
+        string="Resuming Workflow",
+        ondelete='set null',
+        copy=False,
+    )
+    approval_resume_record_model = fields.Char(
+        string="Resume Record Model",
+        copy=False,
+    )
+    approval_resume_record_id = fields.Integer(
+        string="Resume Record ID",
+        copy=False,
+    )
+    approval_draw_node_id = fields.Char(
+        string="Draw Node ID",
+        copy=False,
+        help="Drawflow node key used to find the correct output port on resume.",
+    )
+    approval_timeout_cron_id = fields.Many2one(
+        'ir.cron',
+        string="Timeout Cron",
+        ondelete='set null',
+        copy=False,
+    )
+
     # Activity block fields
     activity_record = fields.Json()
     activity_summary = fields.Char()
@@ -408,6 +454,12 @@ class NodeStruct(models.Model):
 
         if 'wa_auto_report_id' in data and isinstance(data['wa_auto_report_id'], dict):
             data['wa_auto_report_id'] = data['wa_auto_report_id'].get('id') or False
+
+        if 'approval_approver_id' in data and isinstance(data['approval_approver_id'], dict):
+            data['approval_approver_id'] = data['approval_approver_id'].get('id') or False
+
+        if 'approval_rule_id' in data and isinstance(data['approval_rule_id'], dict):
+            data['approval_rule_id'] = data['approval_rule_id'].get('id') or False
 
         if not self:
             struct_node_id = self.create(data)

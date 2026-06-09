@@ -28,9 +28,10 @@ export async function settingInitialContext() {
     const nodes = data ? Object.values(data) : [];
 
     const contextNodes = nodes.map(node => {
-        const isParent = node.name === "Condition" || node.name === "Loop" || node.name === "Try Catch";
+        const isParent = node.name === "Condition" || node.name === "Loop" || node.name === "Try Catch" || node.name === "Approval";
         const isLoop = node.name === "Loop";
         const isTryCatch = node.name === "Try Catch";
+        const isApproval = node.name === "Approval";
         const nodeStruct = codeArray.find(item => item.id === node.data.nodeId);
         const code = nodeStruct?.code || "";
         const type = nodeStruct?.type || node.data.type || "node";
@@ -61,6 +62,7 @@ export async function settingInitialContext() {
             isParent,
             isLoop,
             isTryCatch,
+            isApproval,
             code,
             else_setup_code,
             type,
