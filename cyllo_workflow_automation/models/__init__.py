@@ -26,5 +26,6 @@ from . import ir_ui_view
 from . import  chat_bot
 from . import wa_executor
 from . import webhook_response
-from . import workflow_approval_request
 from . import work_function_arg
+from . import wa_approval_node
+from . import approval_request_extend

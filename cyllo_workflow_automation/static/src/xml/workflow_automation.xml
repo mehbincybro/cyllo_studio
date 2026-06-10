@@ -434,15 +434,17 @@
                                                      alt=""/>
                                                 <p>Try Catch</p>
                                             </div>
-                                            <div class="collapse_btn" draggable="true"
-                                                 t-on-dragstart="(ev) => this.dragStart(ev,'approval')"
-                                                 data-node="Approval"
-                                                 data-type="action_to_do">
-                                                <img draggable="false"
-                                                     src="cyllo_workflow_automation/static/src/img/node-icons/approval.svg"
-                                                     alt=""/>
-                                                <p>Approval</p>
-                                            </div>
+                                            <t t-if="state.hasApprovalModule">
+                                                <div class="collapse_btn" draggable="true"
+                                                     t-on-dragstart="(ev) => this.dragStart(ev,'approval')"
+                                                     data-node="Approval"
+                                                     data-type="action_to_do">
+                                                    <img draggable="false"
+                                                         src="cyllo_workflow_automation/static/src/img/node-icons/approval.svg"
+                                                         alt=""/>
+                                                    <p>Approval</p>
+                                                </div>
+                                            </t>
                                         </div>
                                     </div>
                                 </div>
