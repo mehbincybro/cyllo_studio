@@ -2521,3 +2521,123 @@ span.badge.rounded-pill.bg-primary {
     outline-offset: 2px !important;
     background-color: rgba(229, 57, 53, 0.05) !important;
 }
+
+/* ===================================================
+   Block Settings Popup & Visibility
+   =================================================== */
+
+.cy-medium-settings-popup {
+    position: absolute;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border: 1px solid #e2e8f0;
+    width: 340px;
+    z-index: 2000;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #334155;
+    font-size: 13px;
+    overflow: hidden;
+}
+
+.cy-medium-settings-popup .settings-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.cy-medium-settings-popup .settings-header h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.cy-medium-settings-popup .settings-header .close-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #64748b;
+    line-height: 1;
+}
+
+.cy-medium-settings-popup .settings-body {
+    max-height: 350px;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.cy-medium-settings-popup .settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.cy-medium-settings-popup .settings-section h5 {
+    margin: 0;
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+}
+
+.cy-medium-settings-popup .settings-section div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.cy-medium-settings-popup .settings-section div label {
+    flex: 0 0 70px;
+    margin: 0;
+    font-size: 12px;
+    color: #475569;
+}
+
+.cy-medium-settings-popup .settings-section div input[type="text"] {
+    flex: 1;
+    min-width: 0;
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    background: #fff;
+}
+
+.cy-medium-settings-popup .settings-section label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    margin: 0;
+    font-size: 13px;
+}
+
+.cy-block-hidden {
+    opacity: 0.5 !important;
+    position: relative;
+    border: 1px dashed rgba(0,0,0,0.2) !important;
+}
+
+.cy-block-hidden::before {
+    content: 'Hidden';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: #e2e8f0;
+    color: #475569;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 10;
+    pointer-events: none;
+}

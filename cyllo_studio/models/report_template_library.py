@@ -19,17 +19,24 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-from . import assetsbundle
-from . import default_widgets
-from . import ir_actions_act_window_view
-from . import ir_actions_report
-from . import ir_http
-from . import ir_model
-from . import ir_model_access
-from . import ir_model_fields
-from . import ir_qweb
-from . import ir_rule
-from . import ir_ui_menu
-from . import ir_ui_view
-from . import qr_pdf
-from . import report_template_library
+from odoo import fields, models
+
+
+class CylloReportTemplate(models.Model):
+    _name = 'cyllo.report.template'
+    _description = 'Cyllo Report Template'
+    _order = 'write_date desc, name'
+
+    name = fields.Char(required=True, index=True)
+    description = fields.Text()
+    category = fields.Char(index=True)
+    source_report_id = fields.Many2one(
+        'ir.actions.report',
+        string='Source Report',
+        ondelete='set null',
+    )
+    source_model = fields.Char(string='Source Model')
+    source_template = fields.Char(string='Source Template')
+    doc_template = fields.Char(string='Document Template')
+    payload_json = fields.Text(string='Template Payload')
+    active = fields.Boolean(default=True)

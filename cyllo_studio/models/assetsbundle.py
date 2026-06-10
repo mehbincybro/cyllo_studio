@@ -41,17 +41,20 @@ def __init__(self, name, files, external_assets=(), env=None, css=True, js=True,
     :param css: if css is True, the stylesheets files are added to the bundle
     :param js: if js is True, the javascript files are added to the bundle
     """
-    studio = request.session.studio
-    studio_mode = studio == '1' and name == 'web.assets_web'
+    active_env = request.env if env is None else env
+    session = getattr(request, 'session', None)
+    studio = getattr(session, 'studio', None)
+    is_pdf = active_env.context.get('report_type') == 'pdf'
+    studio_mode = studio == '1' and name == 'web.assets_web' and not is_pdf
     asset_paths = []
     if not studio_mode:
-        ir_asset = request.env['ir.asset']
+        ir_asset = active_env['ir.asset']
         asset_params = ir_asset._get_asset_params()
         asset_paths = ir_asset._get_asset_paths('cyllo_studio.assets_backend', asset_params)
         asset_paths = [asset[0] for asset in asset_paths]
 
     self.name = name
-    self.env = request.env if env is None else env
+    self.env = active_env
     self.javascripts = []
     self.templates = []
     self.stylesheets = []

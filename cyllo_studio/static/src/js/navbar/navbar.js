@@ -140,7 +140,15 @@ export class CylloNavBar extends NavBar {
     }
     /** Open report view for the current model. */
     async ReportClick() {
-        const resModel = this.action.currentController.action.res_model;
+        const currentController = this.action.currentController;
+        console.log('hiiii',currentController)
+        const resModel = currentController.action.res_model;
+        if (resModel && resModel !== 'ir.actions.report') {
+            sessionStorage.setItem('cy_report_editor_origin', JSON.stringify({
+                res_model: resModel,
+                view_type: currentController.env?.config?.viewType || 'list',
+            }));
+        }
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.actions.report']);
 
         const action = {
@@ -200,6 +208,24 @@ export class CylloNavBar extends NavBar {
         localStorage.setItem("cy_selected_app", appId || false)
         sessionStorage.removeItem("invisible");
         const currentUrl = new URL(window.location.href);
+        const currentModel = this.action.currentController?.action?.res_model;
+        if (currentModel === 'ir.actions.report') {
+            let origin = null;
+            try {
+                origin = JSON.parse(sessionStorage.getItem('cy_report_editor_origin') || 'null');
+            } catch (_) {
+                origin = null;
+            }
+            if (origin?.res_model) {
+                const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ""));
+                hashParams.set("model", origin.res_model);
+                hashParams.set("view_type", origin.view_type || "list");
+                hashParams.delete("id");
+                hashParams.delete("action");
+                currentUrl.hash = hashParams.toString();
+            }
+            sessionStorage.removeItem('cy_report_editor_origin');
+        }
         const studio = currentUrl.searchParams.get("studio");
         if (studio === "1") {
             currentUrl.searchParams.delete("studio");

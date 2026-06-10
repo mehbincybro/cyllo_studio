@@ -12,6 +12,7 @@ import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_d
 import { QrMixin } from "@cyllo_studio/js/custom_report/studio_report_qr";
 import { BoxMixin } from "@cyllo_studio/js/custom_report/studio_report_box";
 import { SignMixin } from "@cyllo_studio/js/custom_report/studio_report_sign";
+import { RemoveSessions } from "@cyllo_studio/js/root/studio_wrapper";
 
 const Sortable = window.Sortable;
 const SS_TEMPLATE = 'cyllo_report_template';
@@ -53,6 +54,13 @@ export class EditReport extends Component {
             showSourceEditor: false,
             sourceCode: "",
             showResetDialog: false,
+            showActionsMenu: false,
+            showTemplateDialog: false,
+            templateForm: {
+                name: "",
+                description: "",
+                category: "",
+            },
             includeHeaderFooter: true,
             // ── Table Config Modal state ──
             showTableModal: false,
@@ -321,40 +329,22 @@ export class EditReport extends Component {
             }
 
             // ── Box drop zone click logic ──
-            // If the click target is INSIDE a box dropzone, select the child element
-            // (not the box wrapper) unless the click is directly on the dropzone itself.
             const boxWrapper = el.closest('.box-section-wrapper');
             const boxDropzone = el.closest('.box-dropzone');
             if (boxWrapper) {
                 if (el === boxWrapper || el === boxDropzone) {
-                    // Clicked the box itself (not a child) – select box
                     e.stopPropagation();
-                    $('.selected').removeClass('selected');
-                    boxWrapper.classList.add('selected');
-                    self.openBoxProps(boxWrapper);
-                    self.closeSignProps();
-                    return;
+                    el = boxWrapper;
                 } else {
-                    // Clicked a child inside the box – close box props, let normal selection flow
                     e.stopPropagation();
-                    self.closeBoxProps();
-                    // Fall through to normal selection logic below with el unchanged
                 }
-            } else {
-                // Clicked outside any box – close box props panel
-                self.closeBoxProps();
             }
 
             // ── Sign click logic ──
             const signWrapper = el.closest('.sign-wrapper');
             if (signWrapper) {
                 e.stopPropagation();
-                $('.selected').removeClass('selected');
-                signWrapper.classList.add('selected');
-                self.openSignProps(signWrapper);
-                return;
-            } else {
-                self.closeSignProps();
+                el = signWrapper;
             }
 
             // If we clicked something inside a table, we might want to select the cell OR the whole table.
@@ -419,11 +409,16 @@ export class EditReport extends Component {
             // "Select then Edit" strategy:
             // text-node: ALWAYS open editor on any click (no wasSelected gate)
             // other elements: open editor only if already selected (or just dropped)
-            // Never open MediumEditor for table wrapper or box wrapper
-            const shouldSkipEditor = el.classList.contains('table-wrapper')
-                || el.classList.contains('box-section-wrapper');
+            // Allow MediumEditor for all elements
+            const shouldSkipEditor = false;
 
-            if (shouldSkipEditor || (!isTextNode && !wasSelected && !isNewDrop)) {
+            const isAlwaysOpenElement = isTextNode ||
+                el.classList.contains('box-section-wrapper') ||
+                el.classList.contains('table-wrapper') ||
+                el.classList.contains('sign-wrapper') ||
+                el.classList.contains('s_qr_block');
+
+            if (shouldSkipEditor || (!isAlwaysOpenElement && !wasSelected && !isNewDrop)) {
                 if (self.editor) {
                     const prevEl = self.editor.elements[0];
                     self.editor.destroy();
@@ -459,7 +454,7 @@ export class EditReport extends Component {
             self.editor = new MediumEditor(el, {
                 toolbar: {
                     buttons: [
-                        'bold', 'italic', 'underline', 'strikethrough',
+                        'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
                         'h1', 'h3', 'quote', 'anchor', 'deleteElement',
                     ],
                     // No relativeContainer — let MediumEditor float near the selected text
@@ -468,6 +463,7 @@ export class EditReport extends Component {
                     'deleteElement': new window.DeleteButton(),
                     'undoButton': new window.UndoButton(),
                     'redoButton': new window.RedoButton(),
+                    'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
                 },
                 owner: self,
                 placeholder: false,
@@ -590,7 +586,7 @@ export class EditReport extends Component {
             // save before fetching the source so that the 'combined' arch
             // returned by the backend includes current DnD changes.
             const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
-            if (hasChanges) {
+            if (hasChanges && this.reportFrameRef.el) {
                 console.log("[EditSources] Pending changes detected, saving first...");
                 await this.save_changes(this);
             }
@@ -665,6 +661,89 @@ export class EditReport extends Component {
         }
     }
 
+    async _savePendingDesignIfMounted() {
+        const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
+        if (hasChanges && this.reportFrameRef.el) {
+            await this.save_changes(this);
+        }
+    }
+
+    async saveReportFromActions() {
+        this.state.showActionsMenu = false;
+        if (!this.reportFrameRef.el) {
+            this.notification.add("Switch off Preview before saving report layout changes.", { type: "warning" });
+            return;
+        }
+        await this.save_changes(this);
+    }
+
+    openSaveTemplateDialog() {
+        this.state.showActionsMenu = false;
+        this.state.templateForm = {
+            name: this.state.reportInfo.name ? `${this.state.reportInfo.name} Template` : "",
+            description: "",
+            category: "",
+        };
+        this.state.showTemplateDialog = true;
+    }
+
+    closeSaveTemplateDialog() {
+        this.state.showTemplateDialog = false;
+    }
+
+    async saveAsTemplate() {
+        const form = this.state.templateForm;
+        if (!form.name || !form.name.trim()) {
+            this.notification.add("Template Name is required.", { type: "warning" });
+            return;
+        }
+
+        try {
+            await this._savePendingDesignIfMounted();
+            this.state.isSaving = true;
+            const res = await this.rpc('/cyllo_studio/save_report_template', {
+                template: this._template,
+                name: form.name,
+                description: form.description,
+                category: form.category,
+            });
+            if (res.success) {
+                this.state.showTemplateDialog = false;
+                this.notification.add("Template saved successfully.", { type: "success" });
+            } else {
+                this.notification.add(res.error || "Template save failed.", { type: "danger" });
+            }
+        } finally {
+            this.state.isSaving = false;
+        }
+    }
+
+    async exportTemplate() {
+        this.state.showActionsMenu = false;
+        try {
+            await this._savePendingDesignIfMounted();
+            this.state.isSaving = true;
+            const res = await this.rpc('/cyllo_studio/export_report_template', {
+                template: this._template,
+            });
+            if (!res.success) {
+                this.notification.add(res.error || "Template export failed.", { type: "danger" });
+                return;
+            }
+            const blob = new Blob([JSON.stringify(res.payload, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = res.filename || "report_template.json";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } finally {
+            this.state.isSaving = false;
+        }
+    }
+
     onResetReport() {
         // Show the confirmation dialog
         this.state.showResetDialog = true;
@@ -702,7 +781,6 @@ export class EditReport extends Component {
     }
 
     onPrintReport() {
-        console.log('this.state.reportInfo', this.state.reportInfo)
         const report = this.state.reportInfo;
         const activeId = this.state.records[this.state.currentIndex];
         if (!report.id || !activeId) return;
@@ -714,7 +792,10 @@ export class EditReport extends Component {
             res_model: report.model,
             context: {
                 active_ids: [activeId],
+                active_id: activeId,
                 active_model: report.model,
+                report_pdf_no_attachment: true,
+                cyllo_studio_pdf: true,
             }
         });
     }
@@ -729,15 +810,26 @@ export class EditReport extends Component {
             // First save to ensure the node is persisted
             await this.save_changes(this);
 
-            // Call the universal backend action
-            const action = await this.orm.call(
-                'ir.actions.report',
-                'action_send_for_signature',
-                [[report.id], [activeId]]
-            );
+            try {
+                // Call the universal backend action
+                const action = await this.orm.call(
+                    'ir.actions.report',
+                    'action_send_for_signature',
+                    [[report.id], [activeId]]
+                );
 
-            if (action) {
-                this.action.doAction(action);
+                if (action) {
+                    this.action.doAction(action);
+                }
+            } catch (err) {
+                if (err && err.message && (err.message.includes('AttributeError') || err.message.includes('action_send_for_signature'))) {
+                    this.notification.add(
+                        "The 'Sign' module is required to use this feature. Please install the 'cyllo_sign' module.",
+                        { type: "warning", sticky: true }
+                    );
+                } else {
+                    throw err;
+                }
             }
         } finally {
             this.state.isSaving = false;
@@ -1006,11 +1098,12 @@ export class EditReport extends Component {
                         self.editor = new MediumEditor(item, {
                             toolbar: {
                                 buttons: [
-                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
                                     'h1', 'h3', 'quote', 'anchor', 'deleteElement',
                                 ],
                             },
                             extensions: {
+                                'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
                                 'deleteElement': new window.DeleteButton(),
                                 'undoButton': new window.UndoButton(),
                                 'redoButton': new window.RedoButton(),
@@ -1226,11 +1319,12 @@ export class EditReport extends Component {
                         self.editor = new MediumEditor(item, {
                             toolbar: {
                                 buttons: [
-                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
                                     'h1', 'h3', 'quote', 'anchor', 'deleteElement',
                                 ],
                             },
                             extensions: {
+                                'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
                                 'deleteElement': new window.DeleteButton(),
                                 'undoButton': new window.UndoButton(),
                                 'redoButton': new window.RedoButton(),
@@ -2124,14 +2218,14 @@ export class EditReport extends Component {
 
     async save_changes(component) {
         if (component.state.hasOverflow) {
-                    component.notification.add(
-                        "Cannot save: content exceeds the page boundary. " +
-                        "Remove or resize elements above the red line first.",
-                        { type: "danger", sticky: true }
-                    );
-                    // this.action.doAction("studio_reload");
-                    return;
-            }
+            component.notification.add(
+                "Cannot save: content exceeds the page boundary. " +
+                "Remove or resize elements above the red line first.",
+                { type: "danger", sticky: true }
+            );
+            // this.action.doAction("studio_reload");
+            return;
+        }
         if (component.state.isSaving) return;
         component.state.isSaving = true;
         try {

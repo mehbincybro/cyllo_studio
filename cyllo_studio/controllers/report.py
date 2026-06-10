@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import re
 from lxml import etree
 import base64
@@ -381,7 +382,10 @@ class StudioReportController(Controller):
             token_record.sudo().scan_count += 1
 
         try:
-            pdf_content, _ = report._render_qweb_pdf(report_id, [record_id])
+            pdf_content, _ = report.with_context(
+                report_pdf_no_attachment=True,
+                cyllo_studio_pdf=True,
+            )._render_qweb_pdf(report_id, [record_id])
 
             # Fetch record to build filename
             record = request.env[report.model].sudo().browse(record_id)
@@ -500,6 +504,97 @@ class StudioReportController(Controller):
             combined_arch = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
             arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
             return {'success': True, 'arch': arch_xml, 'doc_template': doc_template}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    def _build_template_payload(self, template):
+        report = request.env['ir.actions.report'].sudo().search([('report_name', '=', template)], limit=1)
+        if not report:
+            raise ValueError(f'Report {template!r} not found')
+
+        doc_view, doc_template = self._resolve_doc_template(template)
+        if not doc_view or not doc_view.exists():
+            raise ValueError(f'Document template for {template!r} not found')
+
+        wrapper_view = request.env.ref(template, raise_if_not_found=False)
+        wrapper_arch = ''
+        if wrapper_view and wrapper_view.exists():
+            wrapper_arch = etree.tostring(wrapper_view._get_combined_arch(), encoding='unicode', pretty_print=True)
+
+        combined_doc = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
+        document_arch = etree.tostring(combined_doc, encoding='unicode', pretty_print=True)
+
+        paperformat = report.paperformat_id
+        payload = {
+            'version': 1,
+            'source': {
+                'report_name': report.report_name,
+                'report_model': report.model,
+                'document_template': doc_template,
+            },
+            'architecture': {
+                'wrapper_arch': wrapper_arch,
+                'document_arch': document_arch,
+            },
+            'page_settings': {
+                'paperformat_id': paperformat.id if paperformat else False,
+                'paperformat_name': paperformat.name if paperformat else '',
+                'format': paperformat.format if paperformat else '',
+                'page_width': paperformat.page_width if paperformat else 0,
+                'page_height': paperformat.page_height if paperformat else 0,
+                'orientation': paperformat.orientation if paperformat else '',
+                'margin_top': paperformat.margin_top if paperformat else 0,
+                'margin_bottom': paperformat.margin_bottom if paperformat else 0,
+                'margin_left': paperformat.margin_left if paperformat else 0,
+                'margin_right': paperformat.margin_right if paperformat else 0,
+                'dpi': paperformat.dpi if paperformat else 0,
+            },
+            'visibility_settings': {
+                'attachment_use': bool(report.attachment_use),
+                'binding_type': report.binding_type or '',
+                'print_report_name': report.print_report_name or '',
+            },
+            'configuration': {
+                'has_qr': 'report-qr' in document_arch or '/report/barcode/' in document_arch,
+                'has_tables': '<table' in document_arch,
+                'has_signatures': 'o_sign_placeholder' in document_arch or '[[SIGN:' in document_arch,
+                'has_sections': 'report-section' in document_arch,
+            },
+        }
+        return report, doc_template, payload
+
+    @route('/cyllo_studio/save_report_template', auth='user', csrf=False, type='json')
+    def save_report_template(self, template, name, description='', category=''):
+        try:
+            name = (name or '').strip()
+            if not name:
+                return {'success': False, 'error': 'Template Name is required.'}
+
+            report, doc_template, payload = self._build_template_payload(template)
+            template_record = request.env['cyllo.report.template'].sudo().create({
+                'name': name,
+                'description': description or '',
+                'category': category or '',
+                'source_report_id': report.id,
+                'source_model': report.model,
+                'source_template': report.report_name,
+                'doc_template': doc_template,
+                'payload_json': json.dumps(payload, ensure_ascii=False, indent=2),
+            })
+            return {'success': True, 'template_id': template_record.id}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/export_report_template', auth='user', csrf=False, type='json')
+    def export_report_template(self, template):
+        try:
+            report, doc_template, payload = self._build_template_payload(template)
+            filename = f"{(report.name or 'report_template').replace('/', '_')}_template.json"
+            return {
+                'success': True,
+                'filename': filename,
+                'payload': payload,
+            }
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
