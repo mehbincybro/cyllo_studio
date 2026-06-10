@@ -6,7 +6,6 @@ from odoo.exceptions import UserError
 class FrontdeskVisitor(models.Model):
     _inherit = 'frontdesk.visitor'
 
-    expected_arrival = fields.Datetime(string='Expected Arrival', tracking=True)
     appointment_id = fields.Many2one('appointment.appointment', string='Linked Appointment', readonly=True)
     partner_id = fields.Many2one('res.partner', string='Customer/Partner', tracking=True)
 

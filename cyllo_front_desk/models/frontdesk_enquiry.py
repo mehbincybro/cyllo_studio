@@ -1,4 +1,24 @@
 # -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cyllo Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Author: Cyllo(<https://www.cyllo.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError
 
@@ -56,7 +76,6 @@ class FrontdeskEnquiry(models.Model):
     state = fields.Selection([
         ('new', 'New'),
         ('in_progress', 'In Progress'),
-        ('converted', 'Converted'),
         ('closed', 'Closed'),
         ('lost', 'Lost'),
     ], string='Status', default='new', required=True, tracking=True)
@@ -73,10 +92,13 @@ class FrontdeskEnquiry(models.Model):
     # Conversion links
     visitor_id = fields.Many2one(
         'frontdesk.visitor',
-        string='Converted To Visitor',
+        string='Linked Visitor',
         readonly=True,
-        help='Visitor record created when this enquiry was converted.'
+        copy=False,
+        tracking=True,
+        help='Visitor record automatically created when this enquiry was saved.'
     )
+
     partner_id = fields.Many2one(
         'res.partner',
         string='Linked Contact',
@@ -84,28 +106,41 @@ class FrontdeskEnquiry(models.Model):
         help='Customer / partner matched or created from this enquiry.'
     )
 
-    # Computed
-    is_converted = fields.Boolean(
-        string='Is Converted',
-        compute='_compute_is_converted',
-        store=True
-    )
-
-    @api.depends('visitor_id')
-    def _compute_is_converted(self):
-        for rec in self:
-            rec.is_converted = bool(rec.visitor_id)
 
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
             if vals.get('name', _('New')) == _('New'):
-                vals['name'] = self.env['ir.sequence'].next_by_code('frontdesk.enquiry') or _('New')
-        return super().create(vals_list)
-
-    # -------------------------------------------------------------------------
-    # Actions / State Transitions
-    # -------------------------------------------------------------------------
+                vals['name'] = self.env['ir.sequence'].next_by_code(
+                    'frontdesk.enquiry') or _('New')
+        records = super().create(vals_list)
+        for rec in records:
+            # Skip if a visitor is already linked (e.g. created programmatically)
+            if rec.visitor_id:
+                continue
+            visitor = self.env['frontdesk.visitor'].create({
+                'visitor_name': rec.visitor_name,
+                'visitor_type': 'enquiry',
+                'phone': rec.phone,
+                'email': rec.email,
+                'company': rec.company,
+                'station_id': rec.station_id.id,
+                'host_id': rec.handled_by.id if rec.handled_by else False,
+                'state': 'planned',
+            })
+            rec.visitor_id = visitor.id
+            visitor.enquiry_id = rec.id
+            rec.message_post(
+                body=_(
+                    "Visitor record auto-created: <a href='#' data-oe-model='frontdesk.visitor' data-oe-id='%d'>%s</a>") % (
+                         visitor.id, visitor.name)
+            )
+            visitor.message_post(
+                body=_(
+                    "Linked to enquiry: <a href='#' data-oe-model='frontdesk.enquiry' data-oe-id='%d'>%s</a>") % (
+                         rec.id, rec.name)
+            )
+        return records
 
     def action_in_progress(self):
         for rec in self:
@@ -116,22 +151,18 @@ class FrontdeskEnquiry(models.Model):
 
     def action_close(self):
         for rec in self:
-            if rec.state in ('converted', 'lost'):
-                raise UserError(_('Cannot close a converted or lost enquiry.'))
+            if rec.state in ('lost',):
+                raise UserError(_('Cannot close a  lost enquiry.'))
             rec.write({'state': 'closed'})
             rec.message_post(body=_("Enquiry closed."))
 
     def action_mark_lost(self):
         for rec in self:
-            if rec.state == 'converted':
-                raise UserError(_('Cannot mark a converted enquiry as lost.'))
             rec.write({'state': 'lost'})
             rec.message_post(body=_("Enquiry marked as lost."))
 
     def action_reset_new(self):
         for rec in self:
-            if rec.state in ('converted',):
-                raise UserError(_('Cannot reset a converted enquiry.'))
             rec.write({'state': 'new'})
             rec.message_post(body=_("Enquiry reset to New."))
 

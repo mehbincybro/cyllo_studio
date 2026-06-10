@@ -11,21 +11,17 @@
                     <button name="action_in_progress" string="Start" type="object"
                             class="btn-primary"
                             invisible="state != 'new'"/>
-                    <button name="action_convert_to_visitor" string="Convert to Visitor" type="object"
-                            class="btn-primary"
-                            invisible="state not in ('new','in_progress')"
-                            confirm="This will create a Visitor record and mark the enquiry as Converted. Continue?"/>
                     <button name="action_view_visitor" string="View Visitor" type="object"
                             class="btn-secondary"
                             invisible="not visitor_id"/>
                     <button name="action_close" string="Close" type="object"
-                            invisible="state in ('converted','closed','lost')"/>
+                            invisible="state in ('closed','lost')"/>
                     <button name="action_mark_lost" string="Mark as Lost" type="object"
-                            invisible="state in ('converted','lost','closed')"/>
+                            invisible="state in ('lost','closed')"/>
                     <button name="action_reset_new" string="Reset to New" type="object"
-                            invisible="state in ('converted','new')"/>
+                            invisible="state == 'new'"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="new,in_progress,converted,closed"/>
+                           statusbar_visible="new,in_progress,closed"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -51,6 +47,7 @@
                             <field name="priority" widget="priority"/>
                             <field name="enquiry_date"/>
                             <field name="follow_up_date"/>
+                            <field name="visitor_id" readonly="1" invisible="not visitor_id"/>
                         </group>
                     </group>
                     <notebook>
@@ -63,12 +60,7 @@
                                 <field name="follow_up_notes" placeholder="Notes for follow-up action..."/>
                             </group>
                         </page>
-                        <page string="Conversion" invisible="not visitor_id">
-                            <group>
-                                <field name="visitor_id"/>
-                                <field name="is_converted"/>
-                            </group>
-                        </page>
+                       
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
@@ -85,7 +77,7 @@
         <field name="name">frontdesk.enquiry.list</field>
         <field name="model">frontdesk.enquiry</field>
         <field name="arch" type="xml">
-            <tree string="Enquiries" decoration-success="state == 'converted'"
+            <tree string="Enquiries"
                   decoration-muted="state in ('closed','lost')"
                   decoration-warning="state == 'in_progress'">
                 <field name="name"/>
@@ -99,7 +91,6 @@
                 <field name="priority" widget="priority"/>
                 <field name="follow_up_date" optional="show"/>
                 <field name="state" widget="badge"
-                       decoration-success="state == 'converted'"
                        decoration-warning="state == 'in_progress'"
                        decoration-danger="state == 'lost'"
                        decoration-muted="state == 'closed'"
@@ -179,15 +170,12 @@
                 <field name="handled_by"/>
                 <filter name="filter_new" string="New" domain="[('state','=','new')]"/>
                 <filter name="filter_in_progress" string="In Progress" domain="[('state','=','in_progress')]"/>
-                <filter name="filter_converted" string="Converted" domain="[('state','=','converted')]"/>
                 <filter name="filter_closed" string="Closed" domain="[('state','=','closed')]"/>
                 <filter name="filter_lost" string="Lost" domain="[('state','=','lost')]"/>
                 <separator/>
                 <filter name="filter_today" string="Today"
                         domain="[('enquiry_date','&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)).strftime('%Y-%m-%d %H:%M:%S')),
                                  ('enquiry_date','&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
-                <filter name="filter_follow_up_due" string="Follow-Up Due"
-                        domain="[('follow_up_date','&lt;=', context_today().strftime('%Y-%m-%d')), ('state','not in',('converted','closed','lost'))]"/>
                 <filter name="filter_high_priority" string="High Priority"
                         domain="[('priority','in',('1','2'))]"/>
                 <group expand="0" string="Group By">

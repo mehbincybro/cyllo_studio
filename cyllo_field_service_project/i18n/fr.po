@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 07:23+0000\n"
-"PO-Revision-Date: 2026-01-13 07:23+0000\n"
+"POT-Creation-Date: 2026-06-09 11:56+0000\n"
+"PO-Revision-Date: 2026-06-09 11:56+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -29,6 +29,11 @@ msgstr "<span>Feuille de temps</span>"
 #: model:ir.model,name:cyllo_field_service_project.model_account_analytic_line
 msgid "Analytic Line"
 msgstr "Ligne analytique"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Available Task"
+msgstr "Tâche disponible"
 
 #. module: cyllo_field_service_project
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.view_field_service_invoice_form
@@ -176,6 +181,12 @@ msgid "Last Updated on"
 msgstr "Dernière mise à jour le"
 
 #. module: cyllo_field_service_project
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.project_project_view_form_fsm
+msgid "Manage tasks in the Field Service module"
+msgstr "Gérer les tâches dans le module Service de terrain"
+
+#. module: cyllo_field_service_project
+#: model:ir.model,name:cyllo_field_service_project.model_project_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__project_id
 msgid "Project"
 msgstr "Projet"
@@ -203,6 +214,17 @@ msgid "Task"
 msgstr "Tâche"
 
 #. module: cyllo_field_service_project
+#. odoo-python
+#: code:addons/cyllo_field_service_project/models/field_service_request.py:0
+#, python-format
+msgid ""
+"Task '%s' is already linked to Field Service Request '%s'. A task can only "
+"be assigned to one active request at a time."
+msgstr ""
+"La tâche '%s' est déjà liée à la demande de service de terrain '%s'. Une tâche "
+"ne peut être assignée qu'à une seule demande active à la fois."
+
+#. module: cyllo_field_service_project
 #: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__task_id
 msgid "Task which related to this request"
 msgstr "Tâche liée à cette demande"
@@ -211,6 +233,11 @@ msgstr "Tâche liée à cette demande"
 #: model:project.project,label_tasks:cyllo_field_service_project.project_project_field_service
 msgid "Tasks"
 msgstr "Tâches"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Tasks not already linked to another active field service request"
+msgstr "Tâches non encore liées à une autre demande de service de terrain active"
 
 #. module: cyllo_field_service_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_invoice__timesheet_ids
