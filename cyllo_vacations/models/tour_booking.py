@@ -124,6 +124,14 @@ class TourBooking(models.Model):
     transportation_ids = fields.Many2many('tour.transportation', string='Transportation')
     meal_ids = fields.Many2many('tour.meal', string='Meals')
     attraction_ids = fields.Many2many('tour.attraction', string='Attractions')
+    # Customizations
+    customization_ids = fields.One2many('tour.booking.customization', 'booking_id', string='Customizations')
+    customization_amount = fields.Monetary(
+        string='Customization Amount',
+        currency_field='currency_id',
+        compute='_compute_customization_amount',
+        store=True,
+    )
     # Expenses
     expense_ids = fields.One2many('tour.expense', 'booking_id', string='Expenses')
     total_expenses = fields.Monetary(compute='_compute_total_expenses', string='Total Expenses',
@@ -176,7 +184,8 @@ class TourBooking(models.Model):
             record.passenger_count = len(record.passenger_ids)
     
     @api.depends('num_adults', 'num_children', 'num_infants', 'adult_price', 'child_price',
-                 'infant_price', 'discount_amount', 'discount_percentage', 'extra_charges')
+                 'infant_price', 'discount_amount', 'discount_percentage', 'customization_amount',
+                 'extra_charges')
     def _compute_amounts(self):
         for record in self:
             subtotal = 0
@@ -191,7 +200,7 @@ class TourBooking(models.Model):
                 subtotal -= subtotal * (record.discount_percentage / 100)
             else:
                 subtotal -= record.discount_amount
-            # Add extra charges
+            subtotal += record.customization_amount
             subtotal += record.extra_charges
             record.price_subtotal = subtotal
             # Simplified tax calculation - can be enhanced
@@ -328,7 +337,12 @@ class TourBooking(models.Model):
     def _compute_total_expenses(self):
         for record in self:
             record.total_expenses = sum(record.expense_ids.mapped('amount'))
-    
+
+    @api.depends('customization_ids.amount')
+    def _compute_customization_amount(self):
+        for record in self:
+            record.customization_amount = sum(record.customization_ids.mapped('amount'))
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -351,6 +365,10 @@ class TourBooking(models.Model):
                     vals['attraction_ids'] = [(6, 0, package.attraction_ids.ids)]
         bookings = super().create(vals_list)
         for booking in bookings:
+            if booking.inquiry_id and not booking.customization_ids:
+                booking.inquiry_id.customization_ids.filtered(
+                    lambda customization: not customization.booking_id
+                ).write({'booking_id': booking.id})
             # Generate access token for portal
             booking._portal_ensure_token()
             # Send confirmation email
@@ -661,8 +679,12 @@ class TourBooking(models.Model):
                         'product_id': product.id,
                         'name': f"{self.package_name}\n{base_description}",
                         'product_uom_qty': 1,
-                        'price_unit': self.price_subtotal,
+                        'price_unit': self.adult_price or self.package_id.base_price,
                     }))
+                for customization in self.customization_ids:
+                    line_vals = customization._get_sale_line_values()
+                    if line_vals:
+                        order_lines.append((0, 0, line_vals))
                 # Add hotel services as note lines (details only)
                 if self.hotel_ids:
                     hotel_details = []
@@ -746,6 +768,13 @@ class TourBooking(models.Model):
                 note_parts.append(f"\nSPECIAL REQUIREMENTS:\n{self.special_requirements}")
             if self.customer_notes:
                 note_parts.append(f"\nCUSTOMER NOTES:\n{self.customer_notes}")
+            if self.customization_ids:
+                note_parts.append(f"\nCUSTOMIZATIONS:")
+                for customization in self.customization_ids:
+                    note_parts.append(
+                        f"  - {customization.name}: {self.currency_id.symbol or ''} "
+                        f"{customization.amount:,.2f}"
+                    )
             order_vals = {
                 'partner_id': self.partner_id.id,
                 'partner_invoice_id': self.partner_id.id,
@@ -915,9 +944,13 @@ class TourBooking(models.Model):
                 'product_id': product.id,
                 'name': f"{self.package_name}\n{base_description}",
                 'quantity': 1,
-                'price_unit': self.price_subtotal,
+                'price_unit': self.adult_price or self.package_id.base_price,
             }))
-        
+        for customization in self.customization_ids:
+            line_vals = customization._get_invoice_line_values()
+            if line_vals:
+                invoice_lines.append((0, 0, line_vals))
+
         # Add hotel information as note
         if self.hotel_ids:
             hotel_names = ', '.join(self.hotel_ids.mapped('name'))
@@ -982,6 +1015,13 @@ class TourBooking(models.Model):
                 narration_parts.append(f"  {idx}. {passenger.name} ({passenger.passenger_type})")
         if self.special_requirements:
             narration_parts.append(f"\nSPECIAL REQUIREMENTS:\n{self.special_requirements}")
+        if self.customization_ids:
+            narration_parts.append(f"\nCUSTOMIZATIONS:")
+            for customization in self.customization_ids:
+                narration_parts.append(
+                    f"  - {customization.name}: {self.currency_id.symbol or ''} "
+                    f"{customization.amount:,.2f}"
+                )
         # Create invoice
         invoice_vals = {
             'move_type': 'out_invoice',

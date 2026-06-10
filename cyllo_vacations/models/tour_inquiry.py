@@ -83,6 +83,13 @@ class TourInquiry(models.Model):
     booking_id = fields.Many2one('tour.booking', string='Converted Booking', readonly=True)
     sale_order_id = fields.Many2one('sale.order', string='Quotation', readonly=True, copy=False)
     sale_order_count = fields.Integer(compute='_compute_sale_order_count', string='Quotation Count')
+    customization_ids = fields.One2many('tour.booking.customization', 'inquiry_id', string='Customizations')
+    customization_amount = fields.Monetary(
+        string='Customization Amount',
+        currency_field='currency_id',
+        compute='_compute_customization_amount',
+        store=True,
+    )
 
     def _compute_sale_order_count(self):
         for inquiry in self:
@@ -114,7 +121,12 @@ class TourInquiry(models.Model):
     def _compute_total_persons(self):
         for record in self:
             record.total_persons = record.num_adults + record.num_children + record.num_infants
-    
+
+    @api.depends('customization_ids.amount')
+    def _compute_customization_amount(self):
+        for record in self:
+            record.customization_amount = sum(record.customization_ids.mapped('amount'))
+
     @api.model_create_multi
     def create(self, vals_list):
         for vals in vals_list:
@@ -134,7 +146,7 @@ class TourInquiry(models.Model):
                     })
                 vals['partner_id'] = partner.id
             # Explicitly calculate estimated price if creating from website
-            if 'estimated_price' not in vals and vals.get('package_id'):
+            if 'estimated_price' not in vals and vals.get('package_id') and not vals.get('customization_ids'):
                 package = self.env['tour.package'].browse(vals['package_id'])
                 if package.exists():
                     adults = vals.get('num_adults', 1)
@@ -252,6 +264,10 @@ class TourInquiry(models.Model):
                             'product_uom_qty': 1,
                             'price_unit': inquiry.package_id.base_price,
                         }))
+                    for customization in inquiry.customization_ids:
+                        line_vals = customization._get_sale_line_values()
+                        if line_vals:
+                            order_lines.append((0, 0, line_vals))
                     order_vals = {
                         'partner_id': inquiry.partner_id.id,
                         'partner_invoice_id': inquiry.partner_id.id,
@@ -336,6 +352,7 @@ class TourInquiry(models.Model):
             'sale_order_id': self.sale_order_id.id if self.sale_order_id else False,
         }
         booking = self.env['tour.booking'].create(booking_vals)
+        self.customization_ids.write({'booking_id': booking.id})
         self.write({
             'state': 'converted',
             'booking_id': booking.id,
@@ -402,7 +419,13 @@ class TourInquiry(models.Model):
             self.customer_phone = self.partner_id.phone
             self.customer_mobile = self.partner_id.mobile
     
-    @api.depends('package_id', 'num_adults', 'num_children', 'num_infants')
+    @api.depends(
+        'package_id',
+        'num_adults',
+        'num_children',
+        'num_infants',
+        'customization_amount',
+    )
     def _compute_estimated_price(self):
         for record in self:
             if not record.package_id:
@@ -415,5 +438,4 @@ class TourInquiry(models.Model):
                 total += record.num_infants * (record.package_id.infant_price or 0)
             else:
                 total = record.package_id.base_price
-            record.estimated_price = total
-
+            record.estimated_price = total + record.customization_amount

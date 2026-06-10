@@ -25,6 +25,37 @@ from odoo.addons.website.controllers.main import QueryURL
 
 
 class WebsiteTourAgency(http.Controller):
+
+    def _get_customization_quantity(self, price_application, adults, children, infants):
+        if price_application == 'per_person':
+            return adults + children + infants
+        if price_application == 'per_adult':
+            return adults
+        if price_application == 'per_child':
+            return children
+        if price_application == 'per_infant':
+            return infants
+        return 1
+
+    def _get_customization_commands(self, package, post):
+        commands = []
+        for option in package.option_ids.filtered('active'):
+            raw_value = post.get(f'custom_option_{option.id}')
+            option_line = request.env['tour.package.option.line']
+            if raw_value:
+                option_line = option_line.sudo().browse(self._safe_int(raw_value))
+            elif option.is_required and option.default_line_id:
+                option_line = option.default_line_id
+            if option.is_required and not option_line:
+                raise ValueError(_('Please select a choice for %s.', option.name))
+            if option_line:
+                if not option_line.exists() or option_line.option_id != option:
+                    raise ValueError(_('Invalid customization choice for %s.', option.name))
+                commands.append((0, 0, {
+                    'option_id': option.id,
+                    'option_line_id': option_line.id,
+                }))
+        return commands
     
     @http.route(['/tours', '/tours/page/<int:page>'], type='http', auth='public', website=True, sitemap=True)
     def tour_packages(self, page=1, category=None, tag=None, search='', **kwargs):
@@ -151,6 +182,9 @@ class WebsiteTourAgency(http.Controller):
                 'special_requirements': post.get('special_requirements', ''),
                 'source': 'website',
             }
+            customization_commands = self._get_customization_commands(package, post)
+            if customization_commands:
+                inquiry_vals['customization_ids'] = customization_commands
             # Link to logged-in user's partner if available
             if not request.env.user._is_public():
                 inquiry_vals['partner_id'] = request.env.user.partner_id.id
@@ -184,12 +218,6 @@ class WebsiteTourAgency(http.Controller):
     def tour_booking_submit(self, **post):
         """Submit booking form"""
 
-        def safe_int(val, default=0):
-            try:
-                return int(val) if val and str(val).strip() else default
-            except (ValueError, TypeError):
-                return default
-
         package = None
         try:
             package_id = safe_int(post.get('package_id'))
@@ -218,6 +246,9 @@ class WebsiteTourAgency(http.Controller):
                 'source': 'website',
                 'state': 'draft',
             }
+            customization_commands = self._get_customization_commands(package, post)
+            if customization_commands:
+                booking_vals['customization_ids'] = customization_commands
             booking = request.env['tour.booking'].sudo().create(booking_vals)
             # Redirect to booking detail (with access token for portal access)
             return request.redirect(f'/my/bookings/{booking.id}?access_token={booking._portal_ensure_token()}')
@@ -327,7 +358,7 @@ class WebsiteTourAgency(http.Controller):
         return request.render('cyllo_vacations.tour_packages_by_destination', values)
     
     @http.route(['/tour/calculate-price'], type='json', auth='public', website=True)
-    def calculate_tour_price(self, package_id, num_adults=1, num_children=0, num_infants=0, **kwargs):
+    def calculate_tour_price(self, package_id, num_adults=1, num_children=0, num_infants=0, option_line_ids=None, **kwargs):
         """Calculate tour price based on passengers"""
         
         package = request.env['tour.package'].browse(int(package_id))
@@ -340,9 +371,24 @@ class WebsiteTourAgency(http.Controller):
             total += num_infants * (package.infant_price or 0)
         else:
             total = package.base_price
+        customization_total = 0
+        option_line_ids = option_line_ids or []
+        option_lines = request.env['tour.package.option.line'].sudo().browse([
+            self._safe_int(line_id) for line_id in option_line_ids if self._safe_int(line_id)
+        ]).exists()
+        for option_line in option_lines.filtered(lambda line: line.option_id.package_id == package):
+            quantity = self._get_customization_quantity(
+                option_line.price_application,
+                num_adults,
+                num_children,
+                num_infants,
+            )
+            customization_total += option_line.price_extra * quantity
+        total += customization_total
         return {
             'success': True,
             'total': total,
+            'customization_total': customization_total,
             'currency': package.currency_id.symbol,
             'formatted_total': f"{package.currency_id.symbol} {total:,.2f}",
         }

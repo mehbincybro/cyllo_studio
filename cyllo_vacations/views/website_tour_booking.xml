@@ -91,6 +91,76 @@
                                 </div>
                             </div>
                             
+                            <t t-if="package.option_ids">
+                                <div class="card mb-4 tour-customization-options">
+                                    <div class="card-header">
+                                        <h5 class="mb-0">Customize Package</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <t t-foreach="package.option_ids" t-as="option">
+                                            <t t-if="option.active and option.line_ids">
+                                                <div class="mb-4">
+                                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                                        <div>
+                                                            <h6 class="mb-1">
+                                                                <t t-esc="option.name"/>
+                                                                <t t-if="option.is_required">
+                                                                    <span class="text-danger">*</span>
+                                                                </t>
+                                                            </h6>
+                                                            <t t-if="option.description">
+                                                                <p class="text-muted small mb-0" t-esc="option.description"/>
+                                                            </t>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <t t-if="not option.is_required">
+                                                            <div class="col-md-6 mb-2">
+                                                                <label class="border rounded p-3 d-block h-100 mb-0">
+                                                                    <input type="radio"
+                                                                           class="me-2 js_customization_option"
+                                                                           t-att-name="'custom_option_%s' % option.id"
+                                                                           value=""
+                                                                           data-price-extra="0"
+                                                                           data-price-application="per_booking"
+                                                                           checked="checked"/>
+                                                                    <span class="fw-bold">No change</span>
+                                                                    <div class="text-muted small mt-2">Keep the standard package inclusion.</div>
+                                                                </label>
+                                                            </div>
+                                                        </t>
+                                                        <t t-foreach="option.line_ids" t-as="line">
+                                                            <div class="col-md-6 mb-2">
+                                                                <label class="border rounded p-3 d-block h-100 mb-0">
+                                                                    <input type="radio"
+                                                                           class="me-2 js_customization_option"
+                                                                           t-att-name="'custom_option_%s' % option.id"
+                                                                           t-att-value="line.id"
+                                                                           t-att-data-price-extra="line.price_extra"
+                                                                           t-att-data-price-application="line.price_application"
+                                                                           t-att-required="'required' if option.is_required else None"
+                                                                           t-att-checked="'checked' if option.is_required and line.id == option.default_line_id.id else None"/>
+                                                                    <span class="fw-bold" t-esc="line.name"/>
+                                                                    <t t-if="line.price_extra">
+                                                                        <span class="badge bg-light text-dark float-end">
+                                                                            <t t-esc="package.currency_id.symbol"/>
+                                                                            <t t-esc="'{:,.2f}'.format(line.price_extra)"/>
+                                                                        </span>
+                                                                    </t>
+                                                                    <t t-if="line.description">
+                                                                        <div class="text-muted small mt-2" t-esc="line.description"/>
+                                                                    </t>
+                                                                </label>
+                                                            </div>
+                                                        </t>
+                                                    </div>
+                                                </div>
+                                            </t>
+                                        </t>
+                                    </div>
+                                </div>
+                            </t>
+
                             <div class="card mb-4">
                                 <div class="card-header">
                                     <h5 class="mb-0">Additional Information</h5>

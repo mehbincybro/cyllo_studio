@@ -70,6 +70,8 @@ class TourPackage(models.Model):
     # Inclusions and Exclusions
     inclusion_ids = fields.One2many('tour.package.inclusion', 'package_id', string='Inclusions')
     exclusion_ids = fields.One2many('tour.package.exclusion', 'package_id', string='Exclusions')
+    # Customization Options
+    option_ids = fields.One2many('tour.package.option', 'package_id', string='Customization Options')
     # Itinerary
     itinerary_ids = fields.One2many('tour.itinerary', 'package_id', string='Itinerary')
     itinerary_count = fields.Integer(compute='_compute_itinerary_count', string='Itinerary Days')

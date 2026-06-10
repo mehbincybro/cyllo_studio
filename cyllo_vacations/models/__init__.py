@@ -45,3 +45,6 @@ from . import tour_package_exclusion
 from . import tour_package_inclusion
 from . import tour_hotel_amenity
 from . import tour_hotel_room_type
+from . import tour_package_option
+from . import tour_package_option_line
+from . import tour_booking_customization

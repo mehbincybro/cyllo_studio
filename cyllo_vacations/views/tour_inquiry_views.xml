@@ -84,6 +84,7 @@
                         </group>
                         <group string="Pricing">
                             <field name="currency_id" invisible="1"/>
+                            <field name="customization_amount" widget="monetary"/>
                             <field name="estimated_price" widget="monetary"/>
                         </group>
                     </group>
@@ -100,6 +101,33 @@
                             <field name="message" placeholder="Customer's inquiry message..."/>
                             <separator string="Special Requirements"/>
                             <field name="special_requirements" placeholder="Any special requirements..."/>
+                        </page>
+                        <page string="Customizations" name="customizations">
+                            <field name="customization_ids" context="{'default_inquiry_id': id}">
+                                <tree editable="bottom">
+                                    <field name="option_id"/>
+                                    <field name="option_line_id"/>
+                                    <field name="price_extra" widget="monetary"/>
+                                    <field name="price_application"/>
+                                    <field name="quantity"/>
+                                    <field name="amount" widget="monetary"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </tree>
+                                <form string="Inquiry Customization">
+                                    <group>
+                                        <field name="inquiry_id"/>
+                                        <field name="booking_id"/>
+                                        <field name="option_id"/>
+                                        <field name="option_line_id"/>
+                                        <field name="price_extra" widget="monetary"/>
+                                        <field name="price_application"/>
+                                        <field name="quantity"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="product_id"/>
+                                    </group>
+                                </form>
+                            </field>
                         </page>
                         <page string="Internal Notes" name="notes">
                             <field name="notes" placeholder="Internal notes (not visible to customer)..."/>
