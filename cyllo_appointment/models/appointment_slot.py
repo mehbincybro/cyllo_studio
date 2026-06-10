@@ -144,27 +144,37 @@ class AppointmentSlot(models.Model):
                 calendar = rec.resource_id.working_hours_id
             elif rec.appointment_type_id.working_hours_id:
                 calendar = rec.appointment_type_id.working_hours_id
-
-            if calendar:
-                user_tz = pytz.timezone(
-                    self.env.user.tz or self._context.get('tz') or 'UTC')
-                start_dt = pytz.utc.localize(rec.start_datetime).astimezone(
-                    user_tz)
-                end_dt = pytz.utc.localize(rec.end_datetime).astimezone(user_tz)
-                weekday = str(start_dt.weekday())
-                attendances = calendar.attendance_ids.filtered(
-                    lambda a: a.dayofweek == weekday)
-                if not attendances:
-                    raise ValidationError(
-                        _("You cannot create slots on days where the assigned staff/resource has no working hours (e.g., weekends)."))
-                # Further check if the time is within working hours
-                start_float = start_dt.hour + start_dt.minute / 60.0
-                end_float = end_dt.hour + end_dt.minute / 60.0
-                valid_time = False
-                for att in attendances:
-                    if start_float >= att.hour_from and end_float <= att.hour_to:
-                        valid_time = True
-                        break
-                if not valid_time:
-                    raise ValidationError(
-                        _("The selected time slot falls outside the working hours defined in the calendar."))
+            if not calendar:
+                continue
+            user_tz = pytz.timezone(
+                self.env.user.tz or self._context.get('tz') or 'UTC')
+            start_dt = pytz.utc.localize(rec.start_datetime).astimezone(
+                user_tz)
+            end_dt = pytz.utc.localize(rec.end_datetime).astimezone(user_tz)
+            weekday = str(start_dt.weekday())
+            attendances = calendar.attendance_ids.filtered(
+                lambda a: a.dayofweek == weekday)
+            if not attendances:
+                raise ValidationError(
+                    _(
+                        "You cannot create slots on days where the assigned "
+                        "staff/resource has no working hours (e.g., weekends)."
+                    )
+                )
+            start_float = start_dt.hour + start_dt.minute / 60.0
+            end_float = end_dt.hour + end_dt.minute / 60.0
+            if end_float == 0.0 and end_dt.date() > start_dt.date():
+                end_float = 24.0
+            tolerance = 0.01
+            valid_time = any(
+                start_float < (att.hour_to + tolerance)
+                and end_float > (att.hour_from - tolerance)
+                for att in attendances
+            )
+            if not valid_time:
+                raise ValidationError(
+                    _(
+                        "The selected time slot falls outside the working "
+                        "hours defined in the calendar."
+                    )
+                )

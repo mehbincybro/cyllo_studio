@@ -73,9 +73,9 @@
                                                 <div class="col-md-6 mb-4">
                                                     <label class="form-label fw-bold">Select Staff</label>
                                                     <select name="staff_id" id="staff_select" class="form-select form-select-lg" required="1" style="border-radius: 8px;">
-                                                        <option value="">-- Choose a Provider --</option>
+                                                        <option value="" t-if="len(staffs) > 1">-- Choose a Provider --</option>
                                                         <t t-foreach="staffs" t-as="staff">
-                                                            <option t-att-value="staff.id"><t t-esc="staff.name"/></option>
+                                                            <option t-att-value="staff.id" t-att-selected="len(staffs) == 1"><t t-esc="staff.name"/></option>
                                                         </t>
                                                     </select>
                                                 </div>
