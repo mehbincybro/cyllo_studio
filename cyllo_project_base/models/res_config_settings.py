@@ -25,4 +25,7 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     module_cyllo_project_product = fields.Boolean("Task Products")
+    module_cyllo_budget_project = fields.Boolean("Add Projects from budget")
+    module_cyllo_project_planning = fields.Boolean("Allocate employees to tasks directly from Project")
     module_cyllo_field_service_project = fields.Boolean("Field Service")
+    module_hr_expense= fields.Boolean("Add expenses from Projects")

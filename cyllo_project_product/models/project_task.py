@@ -48,11 +48,13 @@ class ProjectTask(models.Model):
 
     @api.depends('extra_quotation_ids')
     def _compute_extra_quotation_count(self):
+        """Compute the number of extra quotations linked to each task."""
         for task in self:
             task.extra_quotation_count = len(task._get_task_extra_quotations())
 
 
     def action_view_task_products(self):
+        """Open the product catalog for the selected sales order or quotation."""
         self.ensure_one()
         if not self.related_sale_order_id:
             raise ValidationError("Choose a Sale order or Quotation to consume the Products.")
@@ -66,6 +68,7 @@ class ProjectTask(models.Model):
 
 
     def _get_task_extra_quotations(self):
+        """Retrieve all extra quotations linked to the current task."""
         self.ensure_one()
         return self.env['sale.order'].search([
             ('task_id', '=', self.id),
@@ -73,6 +76,7 @@ class ProjectTask(models.Model):
         ])
 
     def _get_product_catalog_sale_order_values(self, partner):
+        """Prepare values for creating a quotation from the task product catalog."""
         self.ensure_one()
         return {
             'partner_id': partner.id,
@@ -82,6 +86,7 @@ class ProjectTask(models.Model):
 
 
     def action_task_new_quotation(self):
+        """Create a new extra quotation for the current task."""
         self.ensure_one()
         partner = self.partner_id or self.project_id.partner_id
         if not partner:
@@ -102,6 +107,7 @@ class ProjectTask(models.Model):
         }
 
     def action_view_extra_quotations(self):
+        """ Open the extra quotations associated with the current task."""
         self.ensure_one()
         quotations = self._get_task_extra_quotations()
         action = {
