@@ -28,7 +28,7 @@
     'website': "https://www.cyllo.com",
     'summary': "Automate workflows and streamline processes with Cyllo Workflow Automation.",
     'description': """The Cyllo Workflow Automation module empowers users to create, manage, and automate complex workflows across different modules within the Cyllo ecosystem. Designed to enhance productivity, this module allowing users to define custom triggers, automate actions such as record creation, updates, deletions, and handle on-change events effortlessly. """,
-    'depends': ['base', 'cyllo_base', 'web', 'website', 'mail'],
+    'depends': ['base', 'cyllo_base', 'web', 'mail'],
     'icon': '/cyllo_workflow_automation/static/description/workflow-icon.svg',
     'data': [
         'security/workflow_group.xml',
@@ -41,7 +41,6 @@
         'data/loop.xml',
         'views/views.xml',
         'views/cyllo_base_automation_views.xml',
-        'views/approval_portal_template.xml',
     ],
     'assets': {
         'web.assets_backend': [

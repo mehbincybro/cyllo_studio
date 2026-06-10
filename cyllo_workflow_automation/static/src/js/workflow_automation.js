@@ -64,10 +64,18 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     Webhook: ['label', 'webhook_url', 'webhook_method', 'webhook_headers', 'webhook_payload', 'webhook_actions'],
     'Try Catch': ['label', 'try_catch_error_variable', 'try_catch_error_types'],
     'Approval': [
-        'label', 'approval_approver_type', 'approval_approver_id', 'approval_approver_group_id',
-        'approval_approver_field', 'approval_subject', 'approval_message', 'approval_notify_email',
-        'approval_notify_inbox', 'approval_expire_after', 'approval_auto_rule', 'approval_result_variable',
-        'approval_rule_id', 'approval_timeout_hours'
+        'label',
+        // Rule tab
+        'approval_rule_type', 'approval_rule_id',
+        // Approver tab
+        'approval_approver_type', 'approval_approver_id', 'approval_approver_group_id',
+        'approval_approver_field',
+        // Notifications tab
+        'approval_allow_comment', 'approval_notify_email',
+        'approval_notify_on_request', 'approval_notify_on_approve', 'approval_notify_on_reject',
+        // Advanced tab
+        'approval_expire_after', 'approval_timeout_hours',
+        'approval_auto_rule', 'approval_result_variable',
     ],
 };
 
@@ -945,12 +953,14 @@ export class WorkFlowAuto extends Component {
             return false;
         }
         const isReuseAutomation = inPutNode.name === "Reuse Automation" || inPutNode.data?.name === "Reuse Automation";
+        const isApproval = inPutNode.name === "Approval" || inPutNode.data?.name === "Approval";
         const modelToAction = outPutNode.data.type === "model" && inPutNode.data.type === "action";
         const modelToReuse = outPutNode.data.type === "model" && isReuseAutomation;
+        const modelToApproval = outPutNode.data.type === "model" && isApproval;
         const actionToModel = inPutNode.data.type === "action" && outPutNode.data.type !== "model";
-        // Allow: model -> trigger(action), model -> Reuse Automation(action_to_do)
+        // Allow: model -> trigger(action), model -> Reuse Automation(action_to_do), model -> Approval(action_to_do)
         // Block: action -> non-model, any other model -> non-action
-        if ((!modelToAction && !modelToReuse && outPutNode.data.type === "model") || actionToModel) {
+        if ((!modelToAction && !modelToReuse && !modelToApproval && outPutNode.data.type === "model") || actionToModel) {
             return false;
         }
         const branchId = this.getNodeBranchId(outPutNode);

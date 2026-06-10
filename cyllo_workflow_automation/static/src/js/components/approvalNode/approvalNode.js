@@ -4,206 +4,378 @@ const { onWillStart } = owl;
 import { ConfigurationBase } from "../configurationBase/configurationBase";
 
 /**
- * ApprovalNode — modal configuration for the Human Approval node.
+ * ApprovalNode — configuration modal for the Approval workflow node.
  *
- * The Approval node pauses workflow execution and waits for a human to
- * approve or reject via a secure portal URL. Three output ports are exposed:
+ * The node is only rendered when cyllo_approval is installed
+ * (controlled by state.hasApprovalModule in workflow_automation.js).
  *
- *   Output 1 (Approved)  — nodes executed when the approver approves.
- *   Output 2 (Rejected)  — nodes executed when the approver rejects.
- *   Output 3 (Timeout)   — nodes executed if the request expires before
- *                          a decision is made.
+ * Three output ports (mirrors Try Catch):
+ *   Output 1  →  Approved branch
+ *   Output 2  →  Rejected branch
+ *   Output 3  →  Timeout branch
  *
- * Configuration options:
- *   - label                   — display label for the node.
- *   - approverType            — 'user' | 'group' | 'dynamic'.
- *   - approverId              — specific user ID (when type = 'user').
- *   - approverGroupId         — group ID (when type = 'group').
- *   - approverField           — Python expression (when type = 'dynamic').
- *   - subject                 — email/inbox notification subject.
- *   - message                 — notification body.
- *   - notifyEmail             — send email notification.
- *   - notifyInbox             — send Odoo inbox notification.
- *   - expireAfter             — hours until auto-expiry (0 = never).
- *   - autoRule                — Python expression for auto-approval.
- *   - resultVariable          — variable name to store approval status.
+ * Tabs:
+ *   1. Approval Rule   — select rule type + existing rule OR auto-create
+ *   2. Approver        — who approves (user / group / dynamic expression)
+ *   3. Notifications   — mirrors approval.rule notification tab
+ *   4. Advanced        — auto-approve condition, timeout, result variable
  */
 export class ApprovalNode extends ConfigurationBase {
     static props = ['*'];
+
     setup() {
         super.setup();
         this.labelInput = useRef("labelInput");
 
-        this.approvalState = useState({
-            approverType: "user",
+        this.state2 = useState({
+            // Tabs
+            activeTab: 'general',
+
+            // General tab
+            ruleType: 'server',           // button | state | server
+
+            // Trigger configuration
+            buttonId: null,
+            stateFieldId: null,
+            stateSelectionId: null,
+            stateM2oId: null,
+            serverActionId: null,
+
+            // Selectable options
+            buttons: [],
+            serverActions: [],
+            stateFields: [],
+            stateSelections: [],
+            stateM2oValues: [],
+            
+            // Current model ID
+            modelId: null,
+
+            // Approver tab
+            approverType: 'user',
             approverId: null,
+            approverName: '',
             approverGroupId: null,
-            approverField: "",
-            subject: "Your Approval is Required",
-            message: "",
-            notifyEmail: true,
-            notifyInbox: true,
-            expireAfter: 0,
-            autoRule: "",
-            resultVariable: "",
-            labelError: false,
-            approverError: false,
+            approverGroupName: '',
+            approverField: '',
             users: [],
             groups: [],
+
+            // Notifications tab
+            allowComment: false,
+            notifyEmail: true,
+            notifyOnRequest: true,
+            notifyOnApprove: true,
+            notifyOnReject: true,
+
+            // Advanced tab
+            autoRule: '',
+            expireAfter: 0,
+            resultVariable: '',
+
+            // Validation
+            labelError: false,
+            approverError: false,
         });
 
         onWillStart(async () => {
-            try {
-                this.approvalState.users = await this.orm.searchRead(
-                    "res.users",
-                    [["active", "=", true], ["share", "=", false]],
-                    ["id", "name"],
-                    { limit: 200, order: "name asc" }
-                );
-                this.approvalState.users = this.approvalState.users.map(u => [u.id, u.name]);
-            } catch (e) {
-                console.warn("ApprovalNode: could not load users", e);
-                this.approvalState.users = [];
-            }
-
-            try {
-                this.approvalState.groups = await this.orm.searchRead(
-                    "res.groups",
-                    [],
-                    ["id", "name"],
-                    { limit: 200, order: "name asc" }
-                );
-                this.approvalState.groups = this.approvalState.groups.map(g => [g.id, g.name]);
-            } catch (e) {
-                console.warn("ApprovalNode: could not load groups", e);
-                this.approvalState.groups = [];
-            }
+            await this._loadUsers();
+            await this._loadGroups();
+            await this._loadModelData();
         });
 
         onMounted(() => {
             if (this.labelInput.el) this.labelInput.el.focus();
-            // Restore saved values
-            const fs = this.fieldState;
-            this.approvalState.approverType = fs.approval_approver_type || "user";
-            this.approvalState.approverId = fs.approval_approver_id || null;
-            this.approvalState.approverGroupId = fs.approval_approver_group_id || null;
-            this.approvalState.approverField = fs.approval_approver_field || "";
-            this.approvalState.subject = fs.approval_subject || "Your Approval is Required";
-            this.approvalState.message = fs.approval_message || "";
-            this.approvalState.notifyEmail = fs.approval_notify_email !== false;
-            this.approvalState.notifyInbox = fs.approval_notify_inbox !== false;
-            this.approvalState.expireAfter = fs.approval_expire_after || 0;
-            this.approvalState.autoRule = fs.approval_auto_rule || "";
-            this.approvalState.resultVariable = fs.approval_result_variable || "";
+            this._restoreFromFieldState();
         });
     }
 
-    // Handlers
+    // ── Data loaders ────────────────────────────────────────────────────────
+
+    async _loadUsers() {
+        try {
+            const rows = await this.orm.searchRead(
+                'res.users',
+                [['active', '=', true], ['share', '=', false]],
+                ['id', 'name'],
+                { limit: 300, order: 'name asc' }
+            );
+            this.state2.users = rows.map(r => ({ id: r.id, name: r.name }));
+        } catch (e) {
+            this.state2.users = [];
+        }
+    }
+
+    async _loadGroups() {
+        try {
+            const rows = await this.orm.searchRead(
+                'res.groups',
+                [],
+                ['id', 'full_name'],
+                { limit: 300, order: 'full_name asc' }
+            );
+            this.state2.groups = rows.map(r => ({ id: r.id, name: r.full_name || r.name }));
+        } catch (e) {
+            this.state2.groups = [];
+        }
+    }
+
+    async _loadModelData() {
+        const modelName = this.env.globalContext ? this.env.globalContext().modelName : null;
+        if (!modelName) return;
+        try {
+            const models = await this.orm.searchRead('ir.model', [['model', '=', modelName]], ['id']);
+            if (models.length > 0) {
+                this.state2.modelId = models[0].id;
+                await Promise.all([
+                    this._loadButtons(),
+                    this._loadServerActions(),
+                    this._loadStateFields()
+                ]);
+                if (this.state2.stateFieldId) {
+                    await this._loadStateValues(this.state2.stateFieldId);
+                }
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    async _loadButtons() {
+        if (!this.state2.modelId) return;
+        try {
+            this.state2.buttons = await this.orm.searchRead('ir.buttons', [['model_id', '=', this.state2.modelId]], ['id', 'name']);
+        } catch(e) {}
+    }
+
+    async _loadServerActions() {
+        if (!this.state2.modelId) return;
+        try {
+            this.state2.serverActions = await this.orm.searchRead('ir.actions.server', [['model_id', '=', this.state2.modelId]], ['id', 'name']);
+        } catch(e) {}
+    }
+
+    async _loadStateFields() {
+        if (!this.state2.modelId) return;
+        try {
+            this.state2.stateFields = await this.orm.searchRead('ir.model.fields', [
+                ['model_id', '=', this.state2.modelId],
+                ['name', 'in', ['state', 'stage_id']]
+            ], ['id', 'name', 'field_description', 'ttype', 'relation']);
+        } catch(e) {}
+    }
+
+    async _loadStateValues(fieldId) {
+        if (!fieldId) {
+            this.state2.stateSelections = [];
+            this.state2.stateM2oValues = [];
+            return;
+        }
+        const field = this.state2.stateFields.find(f => f.id === fieldId);
+        if (!field) return;
+        
+        try {
+            if (field.ttype === 'selection') {
+                this.state2.stateSelections = await this.orm.searchRead('ir.model.fields.selection', [['field_id', '=', fieldId]], ['id', 'name']);
+                this.state2.stateM2oValues = [];
+            } else if (field.ttype === 'many2one' && field.relation) {
+                this.state2.stateSelections = [];
+                // Auto-sync approval.state.value if needed by calling server method or just read
+                this.state2.stateM2oValues = await this.orm.searchRead('approval.state.value', [['res_model', '=', field.relation]], ['id', 'name']);
+            }
+        } catch(e) {}
+    }
+
+
+
+    _restoreFromFieldState() {
+        const fs = this.fieldState;
+
+        // General tab
+        this.state2.ruleType = fs.approval_rule_type || 'server';
+        this.state2.buttonId = fs.approval_button_id || null;
+        this.state2.stateFieldId = fs.approval_state_field_id || null;
+        this.state2.stateSelectionId = fs.approval_state_to_selection_id || null;
+        this.state2.stateM2oId = fs.approval_state_to_m2o_value_id || null;
+        this.state2.serverActionId = fs.approval_server_action_id || null;
+
+        // Approver tab
+        this.state2.approverType = fs.approval_approver_type || 'user';
+        this.state2.approverId = fs.approval_approver_id || null;
+        this.state2.approverGroupId = fs.approval_approver_group_id || null;
+        this.state2.approverField = fs.approval_approver_field || '';
+
+        // Notifications tab
+        this.state2.allowComment = !!fs.approval_allow_comment;
+        this.state2.notifyEmail = fs.approval_notify_email !== undefined ? !!fs.approval_notify_email : true;
+        this.state2.notifyOnRequest = fs.approval_notify_on_request !== undefined ? !!fs.approval_notify_on_request : true;
+        this.state2.notifyOnApprove = fs.approval_notify_on_approve !== undefined ? !!fs.approval_notify_on_approve : true;
+        this.state2.notifyOnReject = fs.approval_notify_on_reject !== undefined ? !!fs.approval_notify_on_reject : true;
+
+        // Advanced tab
+        this.state2.autoRule = fs.approval_auto_rule || '';
+        this.state2.expireAfter = fs.approval_expire_after || 0;
+        this.state2.resultVariable = fs.approval_result_variable || '';
+    }
+
+    // ── Tab handlers ─────────────────────────────────────────────────────────
+
+    setTab(tab) { this.state2.activeTab = tab; }
+
+    // ── General tab handlers ─────────────────────────────────────────────────────
+
+    setRuleType(value) {
+        this.state2.ruleType = value;
+    }
+
+    setButtonId(value) {
+        this.state2.buttonId = parseInt(value) || null;
+    }
+
+    setServerActionId(value) {
+        this.state2.serverActionId = parseInt(value) || null;
+    }
+
+    async setStateFieldId(value) {
+        const id = parseInt(value) || null;
+        this.state2.stateFieldId = id;
+        this.state2.stateSelectionId = null;
+        this.state2.stateM2oId = null;
+        await this._loadStateValues(id);
+    }
+
+    setStateSelectionId(value) {
+        this.state2.stateSelectionId = parseInt(value) || null;
+    }
+
+    setStateM2oId(value) {
+        this.state2.stateM2oId = parseInt(value) || null;
+    }
+
+    // ── Approver tab handlers ────────────────────────────────────────────────
 
     setLabel(value) {
         this.fieldState.label = value;
-        this.approvalState.labelError = false;
-        this.env.bus.trigger("CHANGE-LABEL", {
-            label: value,
-            nodeId: this.props.id,
-        });
+        this.state2.labelError = false;
+        this.env.bus.trigger('CHANGE-LABEL', { label: value, nodeId: this.props.id });
     }
 
     setApproverType(value) {
-        this.approvalState.approverType = value;
-        this.approvalState.approverId = null;
-        this.approvalState.approverGroupId = null;
-        this.approvalState.approverField = "";
-        this.approvalState.approverError = false;
+        this.state2.approverType = value;
+        this.state2.approverId = null;
+        this.state2.approverGroupId = null;
+        this.state2.approverField = '';
+        this.state2.approverError = false;
     }
 
-    onUserSelected(rawValue) {
-        this.approvalState.approverId = parseInt(rawValue) || null;
-        this.approvalState.approverError = false;
+    setApprover(rawValue) {
+        this.state2.approverId = parseInt(rawValue) || null;
+        this.state2.approverError = false;
     }
 
-    onGroupSelected(rawValue) {
-        this.approvalState.approverGroupId = parseInt(rawValue) || null;
-        this.approvalState.approverError = false;
+    setApproverGroup(rawValue) {
+        this.state2.approverGroupId = parseInt(rawValue) || null;
+        this.state2.approverError = false;
     }
 
     setApproverField(value) {
-        this.approvalState.approverField = value;
-        this.approvalState.approverError = false;
+        this.state2.approverField = value;
+        this.state2.approverError = false;
     }
 
-    setSubject(value) { this.approvalState.subject = value; }
-    setMessage(value) { this.approvalState.message = value; }
-    setNotifyEmail(checked) { this.approvalState.notifyEmail = checked; }
-    setNotifyInbox(checked) { this.approvalState.notifyInbox = checked; }
-    setExpireAfter(value) { this.approvalState.expireAfter = parseFloat(value) || 0; }
-    setAutoRule(value) { this.approvalState.autoRule = value; }
-    setResultVariable(value) { this.approvalState.resultVariable = value.trim(); }
+    // ── Notification tab handlers ────────────────────────────────────────────
 
-    // Validation
+    toggleAllowComment(ev) { this.state2.allowComment = ev.target.checked; }
+    toggleNotifyEmail(ev) {
+        this.state2.notifyEmail = ev.target.checked;
+        if (!this.state2.notifyEmail) {
+            this.state2.notifyOnRequest = false;
+            this.state2.notifyOnApprove = false;
+            this.state2.notifyOnReject = false;
+        }
+    }
+    toggleNotifyOnRequest(ev) { this.state2.notifyOnRequest = ev.target.checked; }
+    toggleNotifyOnApprove(ev) { this.state2.notifyOnApprove = ev.target.checked; }
+    toggleNotifyOnReject(ev) { this.state2.notifyOnReject = ev.target.checked; }
+
+    // ── Advanced tab handlers ────────────────────────────────────────────────
+
+    setAutoRule(value) { this.state2.autoRule = value; }
+    setExpireAfter(value) { this.state2.expireAfter = parseFloat(value) || 0; }
+    setResultVariable(value) { this.state2.resultVariable = (value || '').trim(); }
+
+    // ── Validation ───────────────────────────────────────────────────────────
 
     validateForm() {
         const errors = {};
-
         if (!this.fieldState.label || !this.fieldState.label.trim()) {
-            this.approvalState.labelError = true;
-            errors.label = "Label is required.";
+            this.state2.labelError = true;
+            errors.label = 'Node label is required.';
         }
-
-        const aType = this.approvalState.approverType;
-        if (aType === "user" && !this.approvalState.approverId) {
-            this.approvalState.approverError = true;
-            errors.approver = "Select a specific user as approver.";
-        } else if (aType === "group" && !this.approvalState.approverGroupId) {
-            this.approvalState.approverError = true;
-            errors.approver = "Select a user group as approver.";
-        } else if (aType === "dynamic" && !(this.approvalState.approverField || "").trim()) {
-            this.approvalState.approverError = true;
-            errors.approver = "Enter a Python expression for the approver field.";
+        const atype = this.state2.approverType;
+        if (atype === 'user' && !this.state2.approverId) {
+            this.state2.approverError = true;
+            errors.approver = 'Select a specific user as approver.';
+        } else if (atype === 'group' && !this.state2.approverGroupId) {
+            this.state2.approverError = true;
+            errors.approver = 'Select a user group as approver.';
+        } else if (atype === 'dynamic' && !(this.state2.approverField || '').trim()) {
+            this.state2.approverError = true;
+            errors.approver = 'Enter a Python expression for the approver.';
         }
-
         return { isValid: Object.keys(errors).length === 0, errors };
     }
 
-    // Code generation
+    // ── Code generation ──────────────────────────────────────────────────────
 
-    /**
-     * Generate the Python code injected into the workflow execution context.
-     */
     generateCode() {
-        const resultVar = (this.approvalState.resultVariable || "").trim();
-        const resultVarLine = resultVar ? `\n${resultVar} = approval_branch` : "";
-        return "__approval_node_pause__" + resultVarLine;
+        const resultVar = (this.state2.resultVariable || '').trim();
+        const resultVarLine = resultVar ? `\n${resultVar} = approval_branch` : '';
+        return '__approval_node_pause__' + resultVarLine;
     }
 
-    // Confirm
+    // ── Confirm ──────────────────────────────────────────────────────────────
 
     async onConfirm() {
         const { isValid, errors } = this.validateForm();
         if (!isValid) {
             this.env.services.effect.add({
-                title: "Validation Error",
-                message: "Unable to save Approval node.",
-                description: Object.values(errors).join("\n"),
-                type: "notification_panel",
-                notificationType: "warning",
+                title: 'Validation Error',
+                message: 'Cannot save Approval node.',
+                description: Object.values(errors).join('\n'),
+                type: 'notification_panel',
+                notificationType: 'warning',
             });
             return;
         }
 
-        // Persist config into fieldState
-        this.fieldState.approval_approver_type = this.approvalState.approverType;
-        this.fieldState.approval_approver_id = this.approvalState.approverId;
-        this.fieldState.approval_approver_group_id = this.approvalState.approverGroupId;
-        this.fieldState.approval_approver_field = this.approvalState.approverField;
-        this.fieldState.approval_subject = this.approvalState.subject;
-        this.fieldState.approval_message = this.approvalState.message;
-        this.fieldState.approval_notify_email = this.approvalState.notifyEmail;
-        this.fieldState.approval_notify_inbox = this.approvalState.notifyInbox;
-        this.fieldState.approval_expire_after = this.approvalState.expireAfter;
-        this.fieldState.approval_timeout_hours = this.approvalState.expireAfter;
-        this.fieldState.approval_auto_rule = this.approvalState.autoRule;
-        this.fieldState.approval_result_variable = this.approvalState.resultVariable;
+        // General tab
+        this.fieldState.approval_rule_type = this.state2.ruleType;
+        this.fieldState.approval_rule_id = false;
+        this.fieldState.approval_button_id = this.state2.buttonId;
+        this.fieldState.approval_server_action_id = this.state2.serverActionId;
+        this.fieldState.approval_state_field_id = this.state2.stateFieldId;
+        this.fieldState.approval_state_to_selection_id = this.state2.stateSelectionId;
+        this.fieldState.approval_state_to_m2o_value_id = this.state2.stateM2oId;
+
+        // Approver tab
+        this.fieldState.approval_approver_type = this.state2.approverType;
+        this.fieldState.approval_approver_id = this.state2.approverId;
+        this.fieldState.approval_approver_group_id = this.state2.approverGroupId;
+        this.fieldState.approval_approver_field = this.state2.approverField;
+
+        // Notifications tab
+        this.fieldState.approval_allow_comment = this.state2.allowComment;
+        this.fieldState.approval_notify_email = this.state2.notifyEmail;
+        this.fieldState.approval_notify_on_request = this.state2.notifyOnRequest;
+        this.fieldState.approval_notify_on_approve = this.state2.notifyOnApprove;
+        this.fieldState.approval_notify_on_reject = this.state2.notifyOnReject;
+
+        // Advanced tab
+        this.fieldState.approval_auto_rule = this.state2.autoRule;
+        this.fieldState.approval_expire_after = this.state2.expireAfter;
+        this.fieldState.approval_timeout_hours = this.state2.expireAfter;
+        this.fieldState.approval_result_variable = this.state2.resultVariable;
 
         const code = this.generateCode();
         this.state.used_variables = {};
@@ -212,4 +384,4 @@ export class ApprovalNode extends ConfigurationBase {
     }
 }
 
-ApprovalNode.template = "ApprovalNode";
+ApprovalNode.template = 'ApprovalNode';

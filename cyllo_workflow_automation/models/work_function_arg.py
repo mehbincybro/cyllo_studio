@@ -36,9 +36,6 @@ from odoo import _, api, exceptions, fields, models, tools
 from odoo.exceptions import AccessError
 from odoo.tools import file_open
 from odoo.tools.safe_eval import _BUILTINS, safe_eval
-
-# Lazy import to avoid circular dependency — resolved at runtime
-
 _logger = logging.getLogger(__name__)
 
 
