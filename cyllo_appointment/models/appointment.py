@@ -511,15 +511,17 @@ class Appointment(models.Model):
 
     def _create_calendar_event(self):
         """Create a calendar event linked to this appointment."""
-        print('_create_calendar_event')
         self.ensure_one()
         if self.calendar_event_id:
             return
+        partner_ids = [(4, self.partner_id.id)]
+        if self.staff_id and self.staff_id.user_id and self.staff_id.user_id.partner_id:
+            partner_ids.append((4, self.staff_id.user_id.partner_id.id))
         event = self.env['calendar.event'].create({
             'name': self.display_name or self.name,
             'start': self.start_datetime,
             'stop': self.end_datetime,
-            'partner_ids': [(4, self.partner_id.id)],
+            'partner_ids': partner_ids,
             'description': self.customer_notes or '',
             'user_id': self.staff_id.user_id.id if self.staff_id and self.staff_id.user_id else self.env.user.id,
         })

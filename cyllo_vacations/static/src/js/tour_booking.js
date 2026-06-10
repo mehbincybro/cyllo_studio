@@ -8,6 +8,7 @@ publicWidget.registry.TourBookingForm = publicWidget.Widget.extend({
     events: {
         'change .js_num_passengers': '_onPassengerChange',
         'input .js_num_passengers': '_onPassengerChange',
+        'change .js_customization_option': '_onCustomizationChange',
     },
 
     start: function () {
@@ -24,6 +25,10 @@ publicWidget.registry.TourBookingForm = publicWidget.Widget.extend({
     },
 
     _onPassengerChange: function () {
+        this._updatePrice();
+    },
+
+    _onCustomizationChange: function () {
         this._updatePrice();
     },
 
@@ -53,8 +58,32 @@ publicWidget.registry.TourBookingForm = publicWidget.Widget.extend({
         } else {
             total = this.adultPrice; // For per_package, use the base price
         }
-        
+
+        this.$('.js_customization_option:checked').each((index, input) => {
+            const priceExtra = parseFloat(input.dataset.priceExtra) || 0;
+            const priceApplication = input.dataset.priceApplication || 'per_booking';
+            let quantity = 1;
+            if (priceApplication === 'per_person') {
+                quantity = counts.adults + counts.children + counts.infants;
+            } else if (priceApplication === 'per_adult') {
+                quantity = counts.adults;
+            } else if (priceApplication === 'per_child') {
+                quantity = counts.children;
+            } else if (priceApplication === 'per_infant') {
+                quantity = counts.infants;
+            }
+            total += priceExtra * quantity;
+        });
+
         return total;
+    },
+
+    _getSelectedOptionLineIds: function () {
+        const selectedOptionLineIds = [];
+        this.$('.js_customization_option:checked').each((index, input) => {
+            selectedOptionLineIds.push(parseInt(input.value));
+        });
+        return selectedOptionLineIds.filter(Boolean);
     },
 
     async _updatePrice() {
@@ -71,6 +100,7 @@ publicWidget.registry.TourBookingForm = publicWidget.Widget.extend({
                 num_adults: counts.adults,
                 num_children: counts.children,
                 num_infants: counts.infants,
+                option_line_ids: this._getSelectedOptionLineIds(),
             });
             
             if (result.success) {

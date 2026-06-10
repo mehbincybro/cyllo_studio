@@ -211,6 +211,33 @@
                         </div>
                     </t>
                     
+                    <t t-if="booking.customization_ids">
+                        <hr/>
+                        <h5>Package Customizations</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Option</th>
+                                        <th>Choice</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="booking.customization_ids" t-as="customization">
+                                        <tr>
+                                            <td><t t-esc="customization.option_id.name"/></td>
+                                            <td><t t-esc="customization.option_line_id.name"/></td>
+                                            <td class="text-end">
+                                                <span t-field="customization.amount" t-options='{"widget": "monetary", "display_currency": booking.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
                     <t t-if="booking.customer_notes or booking.special_requirements">
                         <hr/>
                         <h5>Notes</h5>
@@ -383,6 +410,33 @@
                         </div>
                     </div>
                     
+                    <t t-if="inquiry.customization_ids">
+                        <hr/>
+                        <h5>Package Customizations</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Option</th>
+                                        <th>Choice</th>
+                                        <th class="text-end">Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <t t-foreach="inquiry.customization_ids" t-as="customization">
+                                        <tr>
+                                            <td><t t-esc="customization.option_id.name"/></td>
+                                            <td><t t-esc="customization.option_line_id.name"/></td>
+                                            <td class="text-end">
+                                                <span t-field="customization.amount" t-options='{"widget": "monetary", "display_currency": inquiry.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </tbody>
+                            </table>
+                        </div>
+                    </t>
+
                     <hr/>
                     <div class="text-center">
                         <a t-attf-href="/tour/package/{{inquiry.package_id.id}}" class="btn btn-primary">

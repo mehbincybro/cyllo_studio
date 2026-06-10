@@ -195,6 +195,9 @@ class AppointmentType(models.Model):
         'whatsapp.template', string='WhatsApp Cancellation Template',
         domain=[('model_id.model', '=', 'appointment.appointment')]
     )
+    appointment_ids = fields.One2many(
+        'appointment.appointment', 'appointment_type_id', string='Appointments'
+    )
     appointment_count = fields.Integer(
         string='Appointments', compute='_compute_appointment_count'
     )
@@ -228,16 +231,13 @@ class AppointmentType(models.Model):
             if rec.id:
                 rec.website_url = '/appointment/%s' % rec.id
 
-    @api.depends('name')
+    @api.depends('appointment_ids')
     def _compute_appointment_count(self):
         today = fields.Datetime.now()
         for rec in self:
-            appointments = self.env['appointment.appointment'].search([
-                ('appointment_type_id', '=', rec.id)
-            ])
-            rec.appointment_count = len(appointments)
-            rec.upcoming_appointment_count = len(appointments.filtered(
-                lambda a: a.start_datetime >= today and a.state not in (
+            rec.appointment_count = len(rec.appointment_ids)
+            rec.upcoming_appointment_count = len(rec.appointment_ids.filtered(
+                lambda a: a.start_datetime and a.start_datetime >= today and a.state not in (
                     'cancelled', 'rejected')
             ))
 

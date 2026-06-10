@@ -159,6 +159,76 @@
                                 </group>
                             </group>
                         </page>
+                        <page string="Customizations" name="customizations">
+                            <field name="option_ids" context="{'default_package_id': id}">
+                                <tree>
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="option_type"/>
+                                    <field name="is_required"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                </tree>
+                                <form string="Package Customization Option">
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="name"/>
+                                                <field name="package_id"/>
+                                                <field name="option_type"/>
+                                                <field name="sequence"/>
+                                            </group>
+                                            <group>
+                                                <field name="is_required"/>
+                                                <field name="active"/>
+                                            </group>
+                                        </group>
+                                        <group>
+                                            <field name="description" placeholder="Explain what the customer is choosing..."/>
+                                        </group>
+                                        <field name="line_ids" context="{'default_option_id': id}">
+                                            <tree editable="bottom">
+                                                <field name="sequence" widget="handle"/>
+                                                <field name="name"/>
+                                                <field name="is_default"/>
+                                                <field name="price_extra" widget="monetary"/>
+                                                <field name="price_application"/>
+                                                <field name="currency_id" column_invisible="1"/>
+                                            </tree>
+                                            <form string="Customization Choice">
+                                                <sheet>
+                                                    <group>
+                                                        <group>
+                                                            <field name="name"/>
+                                                            <field name="option_id"/>
+                                                            <field name="sequence"/>
+                                                            <field name="is_default"/>
+                                                        </group>
+                                                        <group>
+                                                            <field name="price_extra" widget="monetary"/>
+                                                            <field name="price_application"/>
+                                                            <field name="currency_id" invisible="1"/>
+                                                            <field name="product_id"/>
+                                                        </group>
+                                                    </group>
+                                                    <group string="Linked Service">
+                                                        <group>
+                                                            <field name="hotel_id"/>
+                                                            <field name="room_type_id"/>
+                                                            <field name="transportation_id"/>
+                                                        </group>
+                                                        <group>
+                                                            <field name="meal_id"/>
+                                                            <field name="attraction_id"/>
+                                                        </group>
+                                                    </group>
+                                                    <field name="description" placeholder="Customer-facing details for this choice..."/>
+                                                </sheet>
+                                            </form>
+                                        </field>
+                                    </sheet>
+                                </form>
+                            </field>
+                        </page>
                         <page string="Availability" name="availability">
                             <group>
                                 <group>

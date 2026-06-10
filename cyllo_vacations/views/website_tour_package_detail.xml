@@ -426,10 +426,14 @@
                                 
                                 <div class="d-grid gap-2">
                                     <a t-if="request.env.user._is_public()" href="/web/login" class="btn btn-primary btn-lg btn-block">
-                                        <i class="fa fa-calendar-check-o"/> Book Now
+                                        <i class="fa fa-calendar-check-o"/>
+                                        <t t-if="package.option_ids"> Customize &amp; Book</t>
+                                        <t t-else=""> Book Now</t>
                                     </a>
                                     <a t-else="" t-attf-href="/tour/booking/{{package.id}}" class="btn btn-primary btn-lg btn-block">
-                                        <i class="fa fa-calendar-check-o"/> Book Now
+                                        <i class="fa fa-calendar-check-o"/>
+                                        <t t-if="package.option_ids"> Customize &amp; Book</t>
+                                        <t t-else=""> Book Now</t>
                                     </a>
                                     <a t-attf-href="/tour/inquiry?package_id={{package.id}}" class="btn btn-outline-primary btn-block">
                                         <i class="fa fa-envelope"/> Send Inquiry
@@ -437,7 +441,37 @@
                                 </div>
                             </div>
                         </div>
-                        
+
+                        <t t-if="package.option_ids">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5 class="mb-0"><i class="fa fa-sliders"/> Customizable Choices</h5>
+                                </div>
+                                <div class="card-body">
+                                    <t t-foreach="package.option_ids" t-as="option">
+                                        <t t-if="option.active and option.line_ids">
+                                            <div class="mb-3">
+                                                <strong t-esc="option.name"/>
+                                                <ul class="list-unstyled small mb-0 mt-1">
+                                                    <t t-foreach="option.line_ids[:3]" t-as="line">
+                                                        <li class="d-flex justify-content-between">
+                                                            <span t-esc="line.name"/>
+                                                            <t t-if="line.price_extra">
+                                                                <span>
+                                                                    <t t-esc="package.currency_id.symbol"/>
+                                                                    <t t-esc="'{:,.2f}'.format(line.price_extra)"/>
+                                                                </span>
+                                                            </t>
+                                                        </li>
+                                                    </t>
+                                                </ul>
+                                            </div>
+                                        </t>
+                                    </t>
+                                </div>
+                            </div>
+                        </t>
+
                         <!-- Contact Card -->
                         <div class="card mb-4">
                             <div class="card-header bg-info text-white">

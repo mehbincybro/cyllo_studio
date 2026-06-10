@@ -226,8 +226,9 @@ class AppointmentWebsiteController(http.Controller):
             val['end_datetime'] = slot.end_datetime
 
         try:
-            appointment = request.env['appointment.appointment'].sudo().create(
-                val)
+            with request.env.cr.savepoint():
+                appointment = request.env['appointment.appointment'].sudo().create(val)
+                request.env.flush_all()
         except ValidationError as e:
             staffs = False
             if appointment_type.require_staff:

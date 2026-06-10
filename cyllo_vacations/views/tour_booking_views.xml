@@ -124,6 +124,7 @@
                                     <field name="discount_percentage"/>
                                     <field name="discount_amount" widget="monetary"/>
                                     <field name="applied_rules_desc" readonly="1" invisible="not applied_rules_desc"/>
+                                    <field name="customization_amount" widget="monetary"/>
                                     <field name="extra_charges" widget="monetary"/>
                                     <field name="extra_charges_note"/>
                                 </group>
@@ -181,6 +182,33 @@
                                     <field name="attraction_ids" widget="many2many_tags" nolabel="1" colspan="2"/>
                                 </group>
                             </group>
+                        </page>
+                        <page string="Customizations" name="customizations">
+                            <field name="customization_ids" context="{'default_booking_id': id}">
+                                <tree editable="bottom">
+                                    <field name="option_id"/>
+                                    <field name="option_line_id"/>
+                                    <field name="price_extra" widget="monetary"/>
+                                    <field name="price_application"/>
+                                    <field name="quantity"/>
+                                    <field name="amount" widget="monetary"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </tree>
+                                <form string="Booking Customization">
+                                    <group>
+                                        <field name="booking_id"/>
+                                        <field name="inquiry_id"/>
+                                        <field name="option_id"/>
+                                        <field name="option_line_id"/>
+                                        <field name="price_extra" widget="monetary"/>
+                                        <field name="price_application"/>
+                                        <field name="quantity"/>
+                                        <field name="amount" widget="monetary"/>
+                                        <field name="currency_id" invisible="1"/>
+                                        <field name="product_id"/>
+                                    </group>
+                                </form>
+                            </field>
                         </page>
                         <page string="Expenses" name="expenses">
                             <div class="mb-2">

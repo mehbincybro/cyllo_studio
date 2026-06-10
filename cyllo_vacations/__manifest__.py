@@ -97,8 +97,7 @@
         'views/website_tour_package_detail.xml',
         'views/website_tour_booking.xml',
         'views/website_tour_inquiry.xml',
-        # 'views/website_tour_snippets.xml',
-        
+
         # Views - Portal
         'views/portal_tour_templates.xml',
         # Wizards
@@ -118,7 +117,7 @@
         ],
     },
     'demo': [
-        'data/tour_demo_data.xml',
+        'demo/tour_demo_data.xml',
     ],
     'installable': True,
     'application': True,
