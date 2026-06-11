@@ -323,8 +323,22 @@ export class EditReport extends Component {
                 return;
             }
 
+            // ── Settings Button Click Handler ──
+            if (el.closest('.box-settings-btn, .table-settings, .field-settings, .sign-settings-btn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                let targetEl = el.closest('.box-section-wrapper, .table-wrapper, .field-block, .sign-wrapper');
+                const btnEl = el.closest('.box-settings-btn, .table-settings, .field-settings, .sign-settings-btn');
+                if (targetEl && window.SettingsButton) {
+                    const sb = new window.SettingsButton();
+                    sb.base = { options: { owner: self } };
+                    sb.showPopup(targetEl, btnEl);
+                }
+                return;
+            }
+
             // ── Box toolbar / resize handle – ignore for selection ──
-            if (el.closest('.box-toolbar') || el.closest('.box-resize-handles')) {
+            if (el.closest('.box-toolbar') || el.closest('.box-resize-handles') || el.closest('.table-handle-container') || el.closest('.field-handle-container') || el.closest('.sign-toolbar')) {
                 return;
             }
 
@@ -416,14 +430,26 @@ export class EditReport extends Component {
                 el.classList.contains('box-section-wrapper') ||
                 el.classList.contains('table-wrapper') ||
                 el.classList.contains('sign-wrapper') ||
-                el.classList.contains('s_qr_block');
+                el.classList.contains('s_qr_block') ||
+                el.classList.contains('field-block');
+
+            const isMediumEditorElement = (element) => {
+                return element && (
+                    element.classList.contains('text-node') ||
+                    element.classList.contains('box-section-wrapper') ||
+                    element.classList.contains('table-wrapper') ||
+                    element.classList.contains('sign-wrapper') ||
+                    element.classList.contains('s_qr_block') ||
+                    element.classList.contains('field-block')
+                );
+            };
 
             if (shouldSkipEditor || (!isAlwaysOpenElement && !wasSelected && !isNewDrop)) {
                 if (self.editor) {
                     const prevEl = self.editor.elements[0];
                     self.editor.destroy();
                     self.editor = null;
-                    if (prevEl && prevEl.classList.contains('text-node')) {
+                    if (isMediumEditorElement(prevEl)) {
                         prevEl.setAttribute('contenteditable', 'false');
                     }
                 }
@@ -433,7 +459,7 @@ export class EditReport extends Component {
             if (self.editor) {
                 const prevEl = self.editor.elements[0];
                 self.editor.destroy();
-                if (prevEl && prevEl.classList.contains('text-node')) {
+                if (isMediumEditorElement(prevEl)) {
                     prevEl.setAttribute('contenteditable', 'false');
                 }
             }
@@ -446,8 +472,8 @@ export class EditReport extends Component {
                 }
             }
 
-            // Bug fix: for text-nodes, enable contenteditable before MediumEditor init
-            if (el.classList.contains('text-node')) {
+            // Bug fix: enable contenteditable before MediumEditor init for structural blocks
+            if (isMediumEditorElement(el)) {
                 el.setAttribute('contenteditable', 'true');
             }
 
@@ -1035,6 +1061,7 @@ export class EditReport extends Component {
         return `
             <div class="box-toolbar" contenteditable="false">
                 <span class="box-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                <span class="box-settings-btn ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                 <span class="box-label-text">${label}</span>
                 <span class="box-layout-badge">${layoutMode}</span>
                 <span class="box-delete-btn ri-delete-bin-line" title="Delete Section"></span>
@@ -1128,6 +1155,7 @@ export class EditReport extends Component {
                     item.innerHTML = `
                         <div class="field-handle-container" contenteditable="false">
                             <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="field-settings ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                             <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                         </div>
                         <div class="field-container">
@@ -1176,6 +1204,7 @@ export class EditReport extends Component {
                     item.innerHTML = `
                         <div class="table-handle-container" contenteditable="false">
                             <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
+                            <div class="table-settings ri-settings-3-line" title="Settings" ></div>
                             <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                         </div>
                         ${tableHtml}`;
@@ -1220,6 +1249,7 @@ export class EditReport extends Component {
                     item.innerHTML = `
                         <div class="sign-toolbar" contenteditable="false">
                             <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                            <span class="sign-settings-btn ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                             <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
                         </div>
                         <div class="sign-content-wrapper" style="pointer-events: none; border: 2px dashed #ccc; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; position: relative;">
@@ -2464,6 +2494,41 @@ export class EditReport extends Component {
                 }
                 allChanges.push({ el, xpath, template, structChanged });
             }
+
+            // ── Detect attribute-only changes on cy-xpath children ──
+            // When d-print-none / t-if is toggled via the editor wrappers,
+            // _cleanStudioAttrs pushes those attributes down to the underlying cy-xpath children.
+            // The inner/text comparison misses them because those nodes are excluded from diffs.
+            // We generate separate change entries directly targeting the child xpath.
+            Array.from(el.children)
+                .filter(c => c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
+                .forEach(editedChild => {
+                    const childXpath = editedChild.getAttribute('cy-xpath');
+                    const childTemplate = editedChild.getAttribute('cy-template') || template;
+                    const originalChild = originalDoc.querySelector(
+                        `[cy-template="${childTemplate}"][cy-xpath="${childXpath}"]`
+                    ) || originalDoc.querySelector(`[cy-xpath="${childXpath}"]`);
+                    if (!originalChild) return;
+
+                    const editedHasHidden = editedChild.classList.contains('d-print-none');
+                    const originalHasHidden = originalChild.classList.contains('d-print-none');
+                    const editedTif = editedChild.getAttribute('t-if');
+                    const originalTif = originalChild.getAttribute('t-if');
+
+                    const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
+                    if (attrChanged) {
+                        console.log(`[Cyllo Studio] Attribute change on child ${childXpath}: hidden=${originalHasHidden}->${editedHasHidden}, t-if=${originalTif}->${editedTif}`);
+                        allChanges.push({
+                            el: editedChild,
+                            xpath: childXpath,
+                            template: childTemplate,
+                            structChanged: false,
+                            attrOnly: true,
+                            isHidden: editedHasHidden,
+                            tif: editedTif,
+                        });
+                    }
+                });
         });
 
 
@@ -2547,9 +2612,23 @@ export class EditReport extends Component {
                 if (el.parentNode) {
                     const children = Array.from(el.childNodes);
                     const promotedChildren = [];
+
+                    const isHidden = el.classList.contains('cy-block-hidden');
+                    const isInactive = el.getAttribute('t-if') === 'False';
+                    const isPbBefore = el.classList.contains('page-break-before');
+                    const isPbAfter = el.classList.contains('page-break-after');
+
                     children.forEach(child => {
                         // Skip whitespace nodes introduced by the wrapper's HTML template
                         if (child.nodeType === 3 && !child.textContent.trim()) return;
+
+                        if (child.tagName === 'TABLE' || (child.classList && child.classList.contains('table'))) {
+                            if (isHidden) child.classList.add('d-print-none');
+                            if (isInactive) child.setAttribute('t-if', 'False');
+                            if (isPbBefore) child.classList.add('page-break-before');
+                            if (isPbAfter) child.classList.add('page-break-after');
+                        }
+
                         promotedChildren.push(child);
                         el.parentNode.insertBefore(child, el);
                     });
@@ -2568,6 +2647,17 @@ export class EditReport extends Component {
                 // Build the output <div class="report-section">
                 const section = document.createElement('div');
                 section.className = 'report-section';
+
+                const isHidden = el.classList.contains('cy-block-hidden');
+                const isInactive = el.getAttribute('t-if') === 'False';
+                const isPbBefore = el.classList.contains('page-break-before');
+                const isPbAfter = el.classList.contains('page-break-after');
+
+                if (isHidden) section.classList.add('d-print-none');
+                if (isInactive) section.setAttribute('t-if', 'False');
+                if (isPbBefore) section.classList.add('page-break-before');
+                if (isPbAfter) section.classList.add('page-break-after');
+
                 if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
                 if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
                 section.setAttribute('data-box-id', cfg.id || '');
@@ -2613,6 +2703,16 @@ export class EditReport extends Component {
 
                 const section = document.createElement('div');
                 section.className = 'o_sign_placeholder';
+
+                const isHidden = el.classList.contains('cy-block-hidden');
+                const isInactive = el.getAttribute('t-if') === 'False';
+                const isPbBefore = el.classList.contains('page-break-before');
+                const isPbAfter = el.classList.contains('page-break-after');
+
+                if (isHidden) section.classList.add('d-print-none');
+                if (isInactive) section.setAttribute('t-if', 'False');
+                if (isPbBefore) section.classList.add('page-break-before');
+                if (isPbAfter) section.classList.add('page-break-after');
                 if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
                 if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
                 section.setAttribute('data-role', role);
@@ -2673,6 +2773,12 @@ export class EditReport extends Component {
                 if (el.parentNode) {
                     const children = Array.from(el.childNodes);
                     const promotedChildren = [];
+
+                    const isHidden = el.classList.contains('cy-block-hidden');
+                    const isInactive = el.getAttribute('t-if') === 'False';
+                    const isPbBefore = el.classList.contains('page-break-before');
+                    const isPbAfter = el.classList.contains('page-break-after');
+
                     children.forEach(child => {
                         // Skip whitespace nodes introduced by the wrapper's HTML template
                         if (child.nodeType === 3 && !child.textContent.trim()) return;
@@ -2680,6 +2786,14 @@ export class EditReport extends Component {
                         if (child.classList && child.classList.contains('field-container')) {
                             child.classList.remove('d-inline-flex', 'gap-1');
                         }
+
+                        if (child.nodeType === 1 && !child.classList.contains('field-handle-container')) {
+                            if (isHidden) child.classList.add('d-print-none');
+                            if (isInactive) child.setAttribute('t-if', 'False');
+                            if (isPbBefore) child.classList.add('page-break-before');
+                            if (isPbAfter) child.classList.add('page-break-after');
+                        }
+
                         promotedChildren.push(child);
                         el.parentNode.insertBefore(child, el);
                     });
@@ -2689,8 +2803,13 @@ export class EditReport extends Component {
                 }
             }
 
-            // Cleanup residual classes
+            // Cleanup residual classes; convert editor-side hidden marker to real d-print-none
             if (!keepStudioAttrs && el.classList) {
+                // cy-block-hidden is the editor-side marker; save as d-print-none in XML
+                if (el.classList.contains('cy-block-hidden')) {
+                    el.classList.add('d-print-none');
+                    el.classList.remove('cy-block-hidden');
+                }
                 el.classList.remove('c_new', 'selected', 'bg-white');
                 if (el.classList.length === 0) el.removeAttribute('class');
             }
@@ -2830,6 +2949,7 @@ export class EditReport extends Component {
             wrapper.innerHTML = `
                 <div class="sign-toolbar" contenteditable="false">
                     <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="sign-settings-btn ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                     <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
                 </div>
                 <div class="sign-content-wrapper" style="pointer-events: none; border: 2px dashed #ccc; width: 100%; height: 100%; padding: 10px; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; position: relative;">
@@ -2874,9 +2994,21 @@ export class EditReport extends Component {
             }
             const wrapper = document.createElement('div');
             wrapper.className = 'table-wrapper';
+
+            // Re-hydrate visibility state from the saved table onto the wrapper
+            const tblHidden = targetNode.classList.contains('d-print-none');
+            const tblInactive = targetNode.getAttribute('t-if') === 'False';
+            const tblPbBefore = targetNode.classList.contains('page-break-before');
+            const tblPbAfter = targetNode.classList.contains('page-break-after');
+            if (tblHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+            if (tblInactive) { wrapper.setAttribute('t-if', 'False'); }
+            if (tblPbBefore) { wrapper.classList.add('page-break-before'); targetNode.classList.remove('page-break-before'); }
+            if (tblPbAfter) { wrapper.classList.add('page-break-after'); targetNode.classList.remove('page-break-after'); }
+
             wrapper.innerHTML = `
                 <div class="table-handle-container" contenteditable="false">
                     <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
+                    <div class="table-settings ri-settings-3-line" title="Settings"></div>
                     <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                 </div>`;
             targetNode.parentNode.insertBefore(wrapper, targetNode);
@@ -2906,9 +3038,17 @@ export class EditReport extends Component {
             }
             const wrapper = document.createElement('div');
             wrapper.className = 'field-block dynamic-field-wrapper';
+
+            // Re-hydrate visibility from saved element
+            const fldHidden = targetNode.classList.contains('d-print-none');
+            const fldInactive = targetNode.getAttribute('t-if') === 'False';
+            if (fldHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+            if (fldInactive) { wrapper.setAttribute('t-if', 'False'); }
+
             wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
                     <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="field-settings ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                     <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
                 <div class="field-container"></div>
@@ -2937,9 +3077,17 @@ export class EditReport extends Component {
             }
             const wrapper = document.createElement('div');
             wrapper.className = 'field-block dynamic-field-wrapper';
+
+            // Re-hydrate visibility from saved fieldContainer
+            const fcHidden = targetNode.classList.contains('d-print-none');
+            const fcInactive = targetNode.getAttribute('t-if') === 'False';
+            if (fcHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+            if (fcInactive) { wrapper.setAttribute('t-if', 'False'); }
+
             wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
                     <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
+                    <span class="field-settings ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                     <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
             `;
@@ -3086,6 +3234,24 @@ export class EditReport extends Component {
                     return;
                 }
 
+                // ── Attribute-only change (visibility/t-if on existing cy-xpath element) ──
+                if (change.attrOnly) {
+                    // change.isHidden = cy-block-hidden was on wrapper (maps to d-print-none in saved XML)
+                    // change.tif = t-if value on the wrapper
+                    if (change.isHidden) {
+                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" add="d-print-none" separator=" "/></xpath>`;
+                    } else {
+                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" remove="d-print-none" separator=" "/></xpath>`;
+                    }
+                    if (change.tif === 'False') {
+                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if">False</attribute></xpath>`;
+                    } else {
+                        // Clear t-if if previously set to False
+                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if"/></xpath>`;
+                    }
+                    return;
+                }
+
                 if (this._isStructuralNode(change.el)) return;
                 const cloned = change.el.cloneNode(true);
                 const cleaned = this._cleanStudioAttrs(cloned);
@@ -3183,7 +3349,7 @@ export class EditReport extends Component {
 
         // ── 4. Show / hide the sticky warning banner ──────────────────────────
         const mainArea = container.closest('.flex-grow-1.overflow-auto') ||
-                         container.parentElement;
+            container.parentElement;
         if (!mainArea) return;
 
         let warning = mainArea.querySelector('.cy-overflow-warning');
