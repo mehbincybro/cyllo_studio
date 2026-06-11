@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Tour Agent Form View -->
+    <record id="view_tour_agent_form" model="ir.ui.view">
+        <field name="name">tour.agent.form</field>
+        <field name="model">tour.agent</field>
+        <field name="arch" type="xml">
+            <form string="Tour Agent">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_tour_booking)d" type="action" class="oe_stat_button" icon="fa-book" context="{'search_default_agent_id': id}">
+                            <div class="o_stat_info">
+                                <field name="booking_count" class="o_stat_value"/>
+                                <span class="o_stat_text">Bookings</span>
+                            </div>
+                        </button>
+                        <button name="%(action_tour_booking_commission)d" type="action" class="oe_stat_button" icon="fa-money" context="{'search_default_agent_id': id}">
+                            <div class="o_stat_info">
+                                <field name="commission_count" class="o_stat_value"/>
+                                <span class="o_stat_text">Commissions</span>
+                            </div>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Archived" bg_color="bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" default_focus="1" placeholder="Agent Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code" readonly="1" force_save="1" invisible="not code"/>
+                            <field name="partner_id" widget="res_partner_many2one" context="{'res_partner_search_mode': 'supplier', 'show_vat': True}"/>
+                            <field name="total_commission"/>
+                        </group>
+                        <group>
+                            <field name="active" widget="boolean_toggle"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Commission Rules" name="commission_rules">
+                            <field name="commission_rule_ids">
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="package_id" placeholder="All Packages"/>
+                                    <field name="commission_type"/>
+                                    <field name="percentage" invisible="commission_type != 'percentage'" required="commission_type == 'percentage'"/>
+                                    <field name="fixed_amount" invisible="commission_type != 'fixed'" required="commission_type == 'fixed'"/>
+                                    <field name="min_booking_amount"/>
+                                    <field name="max_booking_amount"/>
+                                    <field name="active" widget="boolean_toggle"/>
+                                    <field name="currency_id" column_invisible="True"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Tour Agent Tree View -->
+    <record id="view_tour_agent_tree" model="ir.ui.view">
+        <field name="name">tour.agent.tree</field>
+        <field name="model">tour.agent</field>
+        <field name="arch" type="xml">
+            <tree string="Tour Agents">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="booking_count"/>
+                <field name="total_commission"/>
+                <field name="company_id" groups="base.group_multi_company"/>
+                <field name="currency_id" column_invisible="True"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Tour Agent Search View -->
+    <record id="view_tour_agent_search" model="ir.ui.view">
+        <field name="name">tour.agent.search</field>
+        <field name="model">tour.agent</field>
+        <field name="arch" type="xml">
+            <search string="Search Tour Agents">
+                <field name="name"/>
+                <field name="code"/>
+                <field name="partner_id"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Company" name="company" context="{'group_by':'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Tour Agent Action -->
+    <record id="action_tour_agent" model="ir.actions.act_window">
+        <field name="name">Tour Agents</field>
+        <field name="res_model">tour.agent</field>
+        <field name="view_mode">tree,form</field>
+        <field name="search_view_id" ref="view_tour_agent_search"/>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first tour agent!
+            </p>
+            <p>
+                Manage agents and define their commission rules based on packages and booking amounts.
+            </p>
+        </field>
+    </record>
+
+</odoo>

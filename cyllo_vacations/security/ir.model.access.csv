@@ -61,3 +61,9 @@ access_tour_package_option_line_manager,tour.package.option.line.manager,model_t
 access_tour_booking_customization_portal,tour.booking.customization.portal,model_tour_booking_customization,base.group_portal,1,0,1,0
 access_tour_booking_customization_user,tour.booking.customization.user,model_tour_booking_customization,group_cyllo_vacations_user,1,1,1,1
 access_tour_booking_customization_manager,tour.booking.customization.manager,model_tour_booking_customization,group_cyllo_vacations_manager,1,1,1,1
+access_tour_agent_user,tour.agent.user,model_tour_agent,group_cyllo_vacations_user,1,1,1,0
+access_tour_agent_manager,tour.agent.manager,model_tour_agent,group_cyllo_vacations_manager,1,1,1,1
+access_tour_agent_commission_rule_user,tour.agent.commission.rule.user,model_tour_agent_commission_rule,group_cyllo_vacations_user,1,1,1,0
+access_tour_agent_commission_rule_manager,tour.agent.commission.rule.manager,model_tour_agent_commission_rule,group_cyllo_vacations_manager,1,1,1,1
+access_tour_booking_commission_user,tour.booking.commission.user,model_tour_booking_commission,group_cyllo_vacations_user,1,1,1,0
+access_tour_booking_commission_manager,tour.booking.commission.manager,model_tour_booking_commission,group_cyllo_vacations_manager,1,1,1,1

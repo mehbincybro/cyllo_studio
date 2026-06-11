@@ -96,6 +96,7 @@
                             <field name="travel_start_date"/>
                             <field name="travel_end_date"/>
                             <field name="source"/>
+                            <field name="agent_id" invisible="source != 'agent'"/>
                         </group>
                     </group>
                     <group>
@@ -238,6 +239,23 @@
                                 <field name="special_requirements" placeholder="Special requirements..."/>
                                 <field name="internal_notes" placeholder="Internal notes (not visible to customer)..."/>
                             </group>
+                        </page>
+                        <page string="Agent &amp; Commission" name="commission" invisible="not agent_id">
+                            <group>
+                                <group>
+                                    <field name="commission_amount" widget="monetary" readonly="1"/>
+                                </group>
+                            </group>
+                            <field name="commission_ids" context="{'default_booking_id': id, 'default_agent_id': agent_id}">
+                                <tree>
+                                    <field name="rule_id"/>
+                                    <field name="commission_type"/>
+                                    <field name="commission_rate"/>
+                                    <field name="booking_amount" widget="monetary"/>
+                                    <field name="commission_amount" widget="monetary" sum="Total"/>
+                                    <field name="state" widget="badge" decoration-info="state == 'draft'" decoration-success="state == 'paid'" decoration-warning="state == 'confirmed'" decoration-danger="state == 'cancelled'"/>
+                                </tree>
+                            </field>
                         </page>
                         <page string="Integration" name="integration">
                             <group>

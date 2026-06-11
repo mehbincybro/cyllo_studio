@@ -43,6 +43,14 @@
             <field name="number_increment">1</field>
         </record>
         
+        <record id="seq_tour_agent" model="ir.sequence">
+            <field name="name">Tour Agent</field>
+            <field name="code">tour.agent</field>
+            <field name="prefix">AGT</field>
+            <field name="padding">4</field>
+            <field name="number_increment">1</field>
+        </record>
+
         <!-- Product Category for Tour Services -->
         <record id="product_category_tour" model="product.category">
             <field name="name">Tour Services</field>

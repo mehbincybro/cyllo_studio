@@ -48,3 +48,6 @@ from . import tour_hotel_room_type
 from . import tour_package_option
 from . import tour_package_option_line
 from . import tour_booking_customization
+from . import tour_agent
+from . import tour_agent_commission_rule
+from . import tour_booking_commission
