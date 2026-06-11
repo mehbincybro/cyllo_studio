@@ -2208,7 +2208,7 @@ class StudioMode(Controller):
             'ttype': kwargs['selected_value'],
             'is_studio': True,
             'model_id': request.env['ir.model'].search(
-                [('model', '=', kwargs['resModel'])]).id
+                [('model', '=', kwargs['model'])]).id
         }
         if values['ttype'] == 'many2many':
             values.update({
@@ -4868,7 +4868,6 @@ class StudioMode(Controller):
         """
         Returns all many2one fields of the given model.
         """
-        print("helloomy")
         fields = request.env[model].fields_get()
         result = []
         for name, attrs in fields.items():

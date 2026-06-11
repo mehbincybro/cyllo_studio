@@ -11,17 +11,29 @@ export class ReportCreationDialog extends owl.Component {
     static components = { Dialog, AutoComplete };
     static props = {
         close: { type: Function },
+        context: { type: Object, optional: true },
     };
 
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
         this.notification = useService("notification");
+        const currentController = this.action.currentController;
+        const activeModel =
+            this.props.context?.active_model ||
+            this.props.context?.default_model ||
+            currentController?.action?.context?.default_model ||
+            null;
+        console.log(activeModel,currentController?.action?.context?.default_model, this.props.context?.default_model )
         this.state = useState({
             name: "",
             modelId: "",
             modelLabel: "",
             models: [],
+            templates: [],
+            startPoint: "blank",
+            templateId: "",
+            activeModel
         });
 
         onWillStart(async () => {
@@ -33,6 +45,24 @@ export class ReportCreationDialog extends owl.Component {
             );
             // Sort models by name
             this.state.models.sort((a, b) => a.name.localeCompare(b.name));
+            this.state.templates = await this.orm.searchRead(
+                "cyllo.report.template",
+                [["active", "=", true]],
+                ["id", "name", "description", "category", "source_model"]
+            );
+            if (activeModel) {
+                const match = this.state.models.find(m => m.model === activeModel);
+                console.log('match',match)
+                if (match) {
+                    this.state.modelId = match.id;
+                    this.state.modelLabel = `${match.name} (${match.model})`;
+                }
+            }
+            this.state.templates.sort((a, b) => {
+                const catA = a.category || "";
+                const catB = b.category || "";
+                return catA.localeCompare(catB) || a.name.localeCompare(b.name);
+            });
         });
     }
 
@@ -59,9 +89,25 @@ export class ReportCreationDialog extends owl.Component {
         this.state.modelLabel = label;
     }
 
+    get groupedTemplates() {
+        const groups = {};
+        for (const template of this.state.templates) {
+            const category = template.category || "Uncategorized";
+            if (!groups[category]) {
+                groups[category] = [];
+            }
+            groups[category].push(template);
+        }
+        return Object.entries(groups).map(([category, templates]) => ({ category, templates }));
+    }
+
     async _onCreate() {
         if (!this.state.name || !this.state.modelId) {
             this.notification.add("Please fill in all fields", { type: "danger" });
+            return;
+        }
+        if (this.state.startPoint === "template" && !this.state.templateId) {
+            this.notification.add("Please select a template", { type: "danger" });
             return;
         }
 
@@ -69,7 +115,7 @@ export class ReportCreationDialog extends owl.Component {
             const action = await this.orm.call(
                 "ir.actions.report",
                 "action_create_blank_report",
-                [this.state.name, this.state.modelId]
+                [this.state.name, this.state.modelId, this.state.startPoint === "template" ? this.state.templateId : false]
             );
 
             if (action && action.type === "ir.actions.client") {

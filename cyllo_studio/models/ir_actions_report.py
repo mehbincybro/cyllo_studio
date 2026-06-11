@@ -21,15 +21,19 @@
 #############################################################################
 import base64
 import io
+import json
 import logging
+import re
 import werkzeug
 
+from lxml import etree
 from PIL import Image
 
 from collections import OrderedDict
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.http import request
 from odoo.tools import is_html_empty
 from odoo.tools.pdf import PdfFileWriter, PdfFileReader
 from odoo.tools.safe_eval import time
@@ -147,7 +151,7 @@ class IrActionsReport(models.Model):
             context_timestamp=lambda t: fields.Datetime.context_timestamp(self.with_context(tz=user.tz), t),
             user=user,
             res_company=self.env.company,
-            web_base_url=self.env['ir.config_parameter'].sudo().get_param('web.base.url', default=''),
+            web_base_url=self._get_report_url(),
             url_quote=werkzeug.urls.url_quote,
         )
         try:
@@ -176,6 +180,18 @@ class IrActionsReport(models.Model):
 
         data = self._get_rendering_context(report, docids, data)
         return self._render_template(report.report_name, data), 'html'
+
+    def _get_report_url(self, layout=None):
+        """Use the active request host for Studio PDFs.
+
+        Studio preview loads reports from the browser's current host. If
+        wkhtmltopdf uses a stale ``report.url``/``web.base.url`` instead, it can
+        fetch missing CSS/images and produce an unstyled PDF or
+        ``ContentNotFoundError``.
+        """
+        if self.env.context.get('cyllo_studio_pdf') and request and request.httprequest:
+            return request.httprequest.host_url.rstrip('/')
+        return super()._get_report_url(layout=layout)
 
     def _render_qweb_pdf_prepare_streams(self, report_ref, data, res_ids=None):
         """Prepare and split PDF streams for the given report."""
@@ -241,7 +257,7 @@ class IrActionsReport(models.Model):
             # Without this, the header/footer of the reports randomly disappear
             # because the resources files are not loaded in time.
             # https://github.com/wkhtmltopdf/wkhtmltopdf/issues/2083
-            additional_context = {'debug': False}
+            additional_context = {'debug': False, 'report_type': 'pdf'}
 
             html = \
             self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[0]
@@ -461,7 +477,7 @@ class IrActionsReport(models.Model):
         }
 
     @api.model
-    def action_create_blank_report(self, name, model_id):
+    def action_create_blank_report(self, name, model_id, template_id=False):
         """Create a new blank report and its corresponding QWeb view."""
         self = self.sudo()
         model_rec = self.env['ir.model'].browse(int(model_id))
@@ -492,7 +508,15 @@ class IrActionsReport(models.Model):
         report_key = f"studio_report_{identifier}"
         xml_id = f"cyllo_studio_custom.{report_key}"
 
-        # Create the QWeb view with a basic blank structure
+        template_record = self.env['cyllo.report.template'].browse(int(template_id)) if template_id else False
+        template_payload = {}
+        if template_record and template_record.exists():
+            try:
+                template_payload = json.loads(template_record.payload_json or '{}')
+            except Exception:
+                template_payload = {}
+
+        # Create the QWeb view with a basic blank structure, or reuse a saved template structure.
         view_arch = f"""
             <t t-name="{xml_id}">
                 <t t-call="web.html_container">
@@ -515,6 +539,16 @@ class IrActionsReport(models.Model):
                 </t>
             </t>
         """
+        template_arch = template_payload.get('architecture', {}).get('document_arch') if template_payload else ''
+        if template_arch:
+            try:
+                root = etree.fromstring(template_arch.encode('utf-8'))
+                root.set('t-name', xml_id)
+                view_arch = etree.tostring(root, encoding='unicode', pretty_print=True)
+            except Exception:
+                view_arch = template_arch
+                view_arch = re.sub(r't-name="[^"]+"', f't-name="{xml_id}"', view_arch, count=1)
+                view_arch = re.sub(r"t-name='[^']+'", f"t-name='{xml_id}'", view_arch, count=1)
 
         view = self.env['ir.ui.view'].create({
             'name': name,
@@ -533,8 +567,7 @@ class IrActionsReport(models.Model):
             'noupdate': True,
         })
 
-        # Create the report action
-        report_action = self.create({
+        report_values = {
             'name': name,
             'model': model_rec.model,
             'report_type': 'qweb-pdf',
@@ -542,7 +575,19 @@ class IrActionsReport(models.Model):
             'report_file': xml_id,
             'binding_model_id': model_rec.id,
             'binding_type': 'report',
-        })
+        }
+        if template_payload:
+            page_settings = template_payload.get('page_settings', {})
+            visibility_settings = template_payload.get('visibility_settings', {})
+            paperformat_id = page_settings.get('paperformat_id')
+            if paperformat_id and self.env['report.paperformat'].browse(int(paperformat_id)).exists():
+                report_values['paperformat_id'] = int(paperformat_id)
+            report_values['attachment_use'] = bool(visibility_settings.get('attachment_use'))
+            if visibility_settings.get('print_report_name'):
+                report_values['print_report_name'] = visibility_settings.get('print_report_name')
+
+        # Create the report action
+        report_action = self.create(report_values)
 
         # Return the studio editor action for the new report
         return report_action.get_custom_report_page()
