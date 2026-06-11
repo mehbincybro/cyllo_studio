@@ -6,7 +6,7 @@
               sequence="85"/>
 
     <!-- Top level menus -->
-    <menuitem id="menu_frontdesk_dashboard"
+     <menuitem id="menu_frontdesk_dashboard"
               name="Stations"
               parent="menu_frontdesk_root"
               action="action_frontdesk_frontdesk"
@@ -24,11 +24,25 @@
               action="action_frontdesk_enquiry"
               sequence="25"/>
 
+<!--     <menuitem id="menu_frontdesk_config_emergency_alerts"-->
+<!--              name="Emergency Alerts"-->
+<!--              parent="menu_frontdesk_configuration"-->
+<!--              action="action_frontdesk_emergency_alert"-->
+<!--              sequence="30"/>-->
+
     <menuitem id="menu_frontdesk_reporting"
               name="Reporting"
               parent="menu_frontdesk_root"
               action="action_frontdesk_visitor_reporting"
               sequence="30"/>
+
+    <menuitem id="menu_frontdesk_reporting_emergency_logs"
+              name="Emergency Logs"
+              parent="menu_frontdesk_reporting"
+              action="action_frontdesk_emergency_log"
+              sequence="20"/>
+
+
 
     <!-- Configuration Menu -->
     <menuitem id="menu_frontdesk_configuration"
@@ -36,21 +50,27 @@
               parent="menu_frontdesk_root"
               sequence="100"/>
 
+    <menuitem id="menu_frontdesk_config_settings"
+              name="Settings"
+              parent="menu_frontdesk_configuration"
+              action="frontdesk_config_settings_action"
+              sequence="10"/>
+
     <menuitem id="menu_frontdesk_config_stations"
               name="Stations"
               parent="menu_frontdesk_configuration"
               action="action_frontdesk_frontdesk"
-              sequence="10"/>
+              sequence="20"/>
 
     <menuitem id="menu_frontdesk_config_drinks"
               name="Drinks"
               parent="menu_frontdesk_configuration"
               action="action_frontdesk_drink"
-              sequence="20"/>
+              sequence="30"/>
 
-    <menuitem id="menu_frontdesk_config_settings"
-              name="Settings"
+    <menuitem id="menu_frontdesk_config_emergency_alerts"
+              name="Emergency Alerts"
               parent="menu_frontdesk_configuration"
-              action="frontdesk_config_settings_action"
-              sequence="100"/>
+              action="action_frontdesk_emergency_alert"
+              sequence="40"/>
 </odoo>

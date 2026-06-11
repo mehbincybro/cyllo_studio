@@ -6,6 +6,7 @@
         <field name="model">frontdesk.visitor</field>
         <field name="arch" type="xml">
             <tree string="Visitors" decoration-info="state == 'planned'"
+                  decoration-warning="state == 'draft'"
                   decoration-success="state == 'checked_in'"
                   decoration-muted="state in ('checked_out', 'cancelled')">
                 <field name="name"/>
@@ -15,10 +16,13 @@
                 <field name="phone"/>
                 <field name="enquiry_id" optional="hide"/>
                 <field name="host_id"/>
+                <field name="expected_arrival" optional="show"/>
+                <field name="purpose" optional="hide"/>
                 <field name="check_in"/>
                 <field name="duration" widget="float_time"/>
                 <field name="station_id"/>
                 <field name="state" widget="badge"
+                       decoration-warning="state == 'draft'"
                        decoration-info="state == 'planned'"
                        decoration-success="state == 'checked_in'"
                        decoration-danger="state == 'cancelled'"
@@ -49,11 +53,15 @@
                             invisible="state != 'checked_in'"/>
                     <button name="action_cancel" string="Cancel" type="object"
                             invisible="state in ('checked_out', 'cancelled')"/>
+                    <button name="action_send_request" string="Send Request"
+                            type="object" class="oe_highlight"
+                            invisible="visitor_type != 'meeting' or state != 'draft' or is_approval_email_sent"/>
                     <button name="action_create_enquiry" string="Create Enquiry"
                             type="object" class="btn-primary"
                             invisible="visitor_type != 'enquiry' or enquiry_id"/>
+                    <field name="is_approval_email_sent" invisible="1"/>
                     <field name="state" widget="statusbar"
-                           statusbar_visible="planned,checked_in,checked_out,cancelled"/>
+                           statusbar_visible="draft,planned,checked_in,checked_out,cancelled"/>
                 </header>
                 <sheet>
                     <div class="oe_title">
@@ -67,6 +75,8 @@
                             <field name="is_drink" invisible="1"/>
                             <field name="drink_selection_ids"
                                    widget="many2many_tags" invisible="1"/>
+                            <field name="host_domain_ids" invisible="1"/>
+
                             <field name="partner_id" options="{'no_create': False}"/>
                             <field name="visitor_name"/>
                             <field name="visitor_type"/>
@@ -86,11 +96,23 @@
                             <field name="station_id"
                                    options="{'no_create': True}"/>
                             <field name="host_id" options="{'no_create': True}"
-                                   invisible="not is_host"/>
+                                   invisible="not is_host" domain="[('id', 'in', host_domain_ids)]" />
+                            <field name="expected_arrival" invisible="visitor_type != 'meeting'" required="visitor_type == 'meeting'"/>
+                            <field name="purpose" invisible="visitor_type != 'meeting'" required="visitor_type == 'meeting'"/>
                             <field name="check_in"/>
                             <field name="check_out"/>
                             <field name="duration" widget="float_time"
                                    readonly="1" invisible="check_in == False"/>
+                        </group>
+                    </group>
+                    <group string="Approval Information" invisible="visitor_type != 'meeting' or state == 'draft'">
+                        <group>
+                            <field name="approved_by_id" invisible="not approved_by_id"/>
+                            <field name="approved_datetime" invisible="not approved_datetime"/>
+                        </group>
+                        <group>
+                            <field name="rejected_by_id" invisible="not rejected_by_id"/>
+                            <field name="rejected_datetime" invisible="not rejected_datetime"/>
                         </group>
                     </group>
                 </sheet>

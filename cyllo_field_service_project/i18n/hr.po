@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 07:23+0000\n"
-"PO-Revision-Date: 2026-01-13 07:23+0000\n"
+"POT-Creation-Date: 2026-06-09 11:29+0000\n"
+"PO-Revision-Date: 2026-06-09 11:29+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -29,6 +29,11 @@ msgstr "<span>Evidencija rada</span>"
 #: model:ir.model,name:cyllo_field_service_project.model_account_analytic_line
 msgid "Analytic Line"
 msgstr "Analitička stavka"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Available Task"
+msgstr "Dostupni zadatak"
 
 #. module: cyllo_field_service_project
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.view_field_service_invoice_form
@@ -176,6 +181,12 @@ msgid "Last Updated on"
 msgstr "Zadnje ažurirano"
 
 #. module: cyllo_field_service_project
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.project_project_view_form_fsm
+msgid "Manage tasks in the Field Service module"
+msgstr "Upravljajte zadacima u modulu Terenska usluga"
+
+#. module: cyllo_field_service_project
+#: model:ir.model,name:cyllo_field_service_project.model_project_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__project_id
 msgid "Project"
 msgstr "Projekt"
@@ -203,6 +214,17 @@ msgid "Task"
 msgstr "Zadatak"
 
 #. module: cyllo_field_service_project
+#. odoo-python
+#: code:addons/cyllo_field_service_project/models/field_service_request.py:0
+#, python-format
+msgid ""
+"Task '%s' is already linked to Field Service Request '%s'. A task can only "
+"be assigned to one active request at a time."
+msgstr ""
+"Zadatak '%s' već je povezan sa Zahtjevom za terensku uslugu '%s'. Zadatak "
+"može biti dodijeljen samo jednom aktivnom zahtjevu u isto vrijeme."
+
+#. module: cyllo_field_service_project
 #: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__task_id
 msgid "Task which related to this request"
 msgstr "Zadatak povezan s ovim zahtjevom"
@@ -211,6 +233,11 @@ msgstr "Zadatak povezan s ovim zahtjevom"
 #: model:project.project,label_tasks:cyllo_field_service_project.project_project_field_service
 msgid "Tasks"
 msgstr "Zadaci"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Tasks not already linked to another active field service request"
+msgstr "Zadaci koji još nisu povezani s drugim aktivnim zahtjevom za terensku uslugu"
 
 #. module: cyllo_field_service_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_invoice__timesheet_ids

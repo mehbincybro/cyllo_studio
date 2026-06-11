@@ -17,5 +17,5 @@ linking them to sale order lines.""",
     'license': 'LGPL-3',
     'installable': True,
     'application': False,
-    'auto_install': False,
+    'auto_install': True,
 }

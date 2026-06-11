@@ -27,8 +27,8 @@
             <xpath expr="//setting[@id='stock_packaging_purchase']" position="after">
                 <setting id="enable_product_warranty_purchase"
                          help="Enable product warranty management in Purchase.">
-                    <field name="module_cyllo_product_warranty"/>
-                    <div class="content-group" invisible="not module_cyllo_product_warranty">
+                    <field name="module_cyllo_warranty_purchase"/>
+                    <div class="content-group" invisible="not module_cyllo_warranty_purchase">
                         <div class="mt16">
                             <label for="is_extend_warranty_purchase" string="Extend Warranty"/>
                             <field name="is_extend_warranty_purchase" class="oe_inline"/>

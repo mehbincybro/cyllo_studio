@@ -172,15 +172,5 @@
     </record>
 
     <!-- Menus -->
-    <menuitem id="menu_frontdesk_config_emergency_alerts"
-              name="Emergency Alerts"
-              parent="menu_frontdesk_configuration"
-              action="action_frontdesk_emergency_alert"
-              sequence="30"/>
 
-    <menuitem id="menu_frontdesk_reporting_emergency_logs"
-              name="Emergency Logs"
-              parent="menu_frontdesk_reporting"
-              action="action_frontdesk_emergency_log"
-              sequence="20"/>
 </odoo>

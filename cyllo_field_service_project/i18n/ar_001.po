@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 17.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-13 07:23+0000\n"
-"PO-Revision-Date: 2026-01-13 07:23+0000\n"
+"POT-Creation-Date: 2026-06-09 11:24+0000\n"
+"PO-Revision-Date: 2026-06-09 11:24+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -28,7 +28,12 @@ msgstr "<span>سجل الأنشطة</span>"
 #. module: cyllo_field_service_project
 #: model:ir.model,name:cyllo_field_service_project.model_account_analytic_line
 msgid "Analytic Line"
-msgstr "بند تحليلي"
+msgstr "البند التحليلي"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Available Task"
+msgstr "المهمة المتاحة"
 
 #. module: cyllo_field_service_project
 #: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.view_field_service_invoice_form
@@ -161,7 +166,7 @@ msgstr "فاتورة لـ"
 #. module: cyllo_field_service_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__is_invoiced
 msgid "Is Invoiced"
-msgstr "تمت فوترته"
+msgstr "تم فوترة"
 
 #. module: cyllo_field_service_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_invoice__write_uid
@@ -176,6 +181,12 @@ msgid "Last Updated on"
 msgstr "آخر تحديث في"
 
 #. module: cyllo_field_service_project
+#: model_terms:ir.ui.view,arch_db:cyllo_field_service_project.project_project_view_form_fsm
+msgid "Manage tasks in the Field Service module"
+msgstr "إدارة المهام في وحدة الخدمة الميدانية"
+
+#. module: cyllo_field_service_project
+#: model:ir.model,name:cyllo_field_service_project.model_project_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_request__project_id
 msgid "Project"
 msgstr "المشروع"
@@ -203,6 +214,17 @@ msgid "Task"
 msgstr "المهمة"
 
 #. module: cyllo_field_service_project
+#. odoo-python
+#: code:addons/cyllo_field_service_project/models/field_service_request.py:0
+#, python-format
+msgid ""
+"Task '%s' is already linked to Field Service Request '%s'. A task can only "
+"be assigned to one active request at a time."
+msgstr ""
+"المهمة '%s' مرتبطة بالفعل بطلب الخدمة الميدانية '%s'. لا يمكن تعيين المهمة "
+"إلا لطلب نشط واحد في كل مرة."
+
+#. module: cyllo_field_service_project
 #: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__task_id
 msgid "Task which related to this request"
 msgstr "المهمة المتعلقة بهذا الطلب"
@@ -211,6 +233,11 @@ msgstr "المهمة المتعلقة بهذا الطلب"
 #: model:project.project,label_tasks:cyllo_field_service_project.project_project_field_service
 msgid "Tasks"
 msgstr "المهام"
+
+#. module: cyllo_field_service_project
+#: model:ir.model.fields,help:cyllo_field_service_project.field_field_service_request__available_task_ids
+msgid "Tasks not already linked to another active field service request"
+msgstr "المهام غير المرتبطة بطلب خدمة ميدانية نشط آخر"
 
 #. module: cyllo_field_service_project
 #: model:ir.model.fields,field_description:cyllo_field_service_project.field_field_service_invoice__timesheet_ids
