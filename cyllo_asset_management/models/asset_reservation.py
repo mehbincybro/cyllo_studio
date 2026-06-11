@@ -65,34 +65,83 @@ class AssetReservation(models.Model):
                 rec.asset_id.is_reserve = False
             return super().unlink()
 
+
     def action_reserve(self):
         """Button action for reserving the assets"""
-        if self.asset_id.is_reserve:
-            raise UserError(_('You cannot complete this operation, The related asset is already Reserved.'))
-        open_requests = self.env['maintenance.request'].sudo().search([('asset_id', '=', self.asset_id.id),
-                                                                       ('stage_done', '=', False), ])
+        self.ensure_one()
+
+        open_requests = self.env['maintenance.request'].sudo().search([
+            ('asset_id', '=', self.asset_id.id),
+            ('stage_done', '=', False),
+        ])
+
         if open_requests:
-            raise UserError(
-                _('You cannot complete this operation, The related asset is already taken for a another '
-                  'operation'))
-        else:
-            context = {
-                'asset': self.asset_id.name,
-                'start_date': self.start_date,
-                'end_date': self.end_date,
-                'employee': self.employee_id.name
-            }
-            template = self.env.ref(
-                'cyllo_asset_management.mail_template_asset_reservation',
-                raise_if_not_found=False)
-            email_values = {
-                'email_to': self.email
-            }
-            template.with_context(**context).send_mail(res_id=self.id, email_values=email_values, force_send=True)
-            self.asset_id.is_reserve = True
-            self.asset_id.status = 'reserved'
-            self.status = 'reserve'
-            return {'type': 'ir.actions.act_window_close'}
+            raise UserError(_(
+                'You cannot complete this operation, The related asset is already '
+                'taken for another operation.'
+            ))
+
+        reservation = self.env['asset.reservation'].search([
+            ('asset_id', '=', self.asset_id.id),
+            ('id', '!=', self.id),
+            ('status', 'in', ['reserve', 'assign']),
+            ('start_date', '<=', self.end_date),
+            ('end_date', '>=', self.start_date),
+        ], limit=1)
+
+        if reservation:
+            raise UserError(_(
+                'The asset is already reserved from %s to %s.'
+            ) % (reservation.start_date, reservation.end_date))
+
+        lease = self.env['asset.lease'].search([
+            ('asset_id', '=', self.asset_id.id),
+            ('status', '!=', 'cancel'),
+            ('start_date', '<=', self.end_date),
+            ('end_date', '>=', self.start_date),
+        ], limit=1)
+
+        if lease:
+            raise UserError(_(
+                'The asset is already leased during the selected period.'
+            ))
+
+        rental = self.env['asset.rental'].search([
+            ('asset_id', '=', self.asset_id.id),
+            ('status', '!=', 'cancel'),
+            ('start_date', '<=', self.end_date),
+            ('end_date', '>=', self.start_date),
+        ], limit=1)
+
+        if rental:
+            raise UserError(_(
+                'The asset is already rented during the selected period.'
+            ))
+
+        context = {
+            'asset': self.asset_id.name,
+            'start_date': self.start_date,
+            'end_date': self.end_date,
+            'employee': self.employee_id.name,
+        }
+
+        template = self.env.ref(
+            'cyllo_asset_management.mail_template_asset_reservation',
+            raise_if_not_found=False
+        )
+
+        if template:
+            template.with_context(**context).send_mail(
+                res_id=self.id,
+                email_values={'email_to': self.email},
+                force_send=True
+            )
+
+        self.asset_id.is_reserve = True
+        self.asset_id.status = 'reserved'
+        self.status = 'reserve'
+
+        return {'type': 'ir.actions.act_window_close'}
 
     def action_assign_asset(self):
         """Button action for assigning the assets"""

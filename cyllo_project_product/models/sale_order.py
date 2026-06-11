@@ -37,6 +37,7 @@ class SaleOrder(models.Model):
     )
 
     def _get_product_catalog_record_lines(self, product_ids, **kwargs):
+        """Retrieve sale order lines grouped by product for a specific task."""
         task_id = kwargs.get('project_task_id') or self.env.context.get('default_project_task_product_id')
         if task_id:
             grouped_lines = defaultdict(lambda: self.env['sale.order.line'])
@@ -49,6 +50,7 @@ class SaleOrder(models.Model):
         return super()._get_product_catalog_record_lines(product_ids, **kwargs)
 
     def _update_order_line_info(self, product_id, quantity, **kwargs):
+        """Create, update, or remove task-specific sale order lines."""
         task_id = kwargs.pop('project_task_id', None) or self.env.context.get('default_project_task_product_id')
         if task_id:
             sol = self.order_line.filtered(lambda line: line.product_id.id == product_id and line.project_task_product_id.id == task_id)

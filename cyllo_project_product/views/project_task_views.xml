@@ -38,12 +38,13 @@
                 <label for="related_sale_order_id"/>
                     <div class="o_row">
                     <field name="related_sale_order_id"
-                       domain="[('id', 'in', [project_sale_order_id] + extra_quotation_ids)]"/>
+                       domain="[('id', 'in', [project_sale_order_id] + extra_quotation_ids),
+                       ('invoice_status', '!=', 'invoiced')]"/>
                     <button name="action_view_task_products"
                             type="object"
                             icon="fa-shopping-cart"
                             class="oe_highlight"
-                            invisible="not allow_task_products"
+                            invisible="not allow_task_products or not related_sale_order_id"
                     />
                     </div>
             </xpath>

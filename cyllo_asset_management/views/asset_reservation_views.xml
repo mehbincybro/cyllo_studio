@@ -9,8 +9,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="asset_id"
-                                   domain="[('is_lease','=', False), ('is_assign','=', False), ('is_reserve','=', False), ('status', 'not in', ('sell', 'disposed', 'cancel', 'lost'))]"/>
+                            <field name="asset_id"/>
                             <field name="employee_id"/>
                             <field name="email"/>
                         </group>
@@ -124,8 +123,7 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="asset_id"
-                                   domain="[('is_lease','=', False), ('is_assign','=', False), ('is_reserve','=', False), ('status', 'not in', ('sell', 'disposed', 'cancel', 'lost'))]"/>
+                            <field name="asset_id"/>
                             <field name="start_date" widget="daterange" options="{'end_date_field': 'end_date'}"/>
                             <field name="end_date" invisible="1"/>
                             <field name="company_id" readonly="status != 'draft'"/>
