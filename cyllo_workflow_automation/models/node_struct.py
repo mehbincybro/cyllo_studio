@@ -270,48 +270,23 @@ class NodeStruct(models.Model):
         help="Comma-separated exception class names to catch, e.g. 'UserError, ValidationError'.",
     )
 
-    # ── Approval block fields ──────────────────────────────────────────────
-    # These fields configure the Approval node in the workflow canvas.
-    # The Approval node is only shown when cyllo_approval is installed.
-    # All approval requests are stored as real approval.request records
-    # in the cyllo_approval module — no duplicate model is created here.
+    # Approval block fields
+    approval_rule_type = fields.Selection([
+        ('button', 'Button Click'),
+        ('server', 'Server Action'),
+        ('state', 'State Change'),
+    ], string="Trigger Rule Type", default='button')
+    approval_button_method = fields.Char(string="Button Method")
+    approval_server_action_id = fields.Many2one('ir.actions.server', string="Server Action")
+    approval_state_field_id = fields.Many2one('ir.model.fields', string="State Field")
+    approval_state_to_selection_id = fields.Many2one('ir.model.fields.selection', string="Target State Selection")
+    approval_state_to_m2o_value_id = fields.Integer(string="Target State M2O ID")
 
-    # Approval Rule (from cyllo_approval) — stored as integer to avoid
-    # hard dependency on cyllo_approval. Resolved at execution time.
-    approval_rule_id = fields.Integer(
-        string="Approval Rule ID",
-        copy=False,
-        help="ID of an approval.rule (server type) from cyllo_approval. "
-             "If not set, one is auto-created at workflow execution time.",
-    )
-
-    # Rule type mirrors approval.rule.rule_type selections.
-    # Stored here for UI display only — the actual rule behaviour
-    # is controlled by the approval.rule record.
-    approval_rule_type = fields.Selection(
-        selection=[
-            ('button', 'Button Click'),
-            ('state', 'State Change'),
-            ('server', 'Server Action'),
-        ],
-        string="Rule Type",
-        default='server',
-        help="Mirrors approval.rule.rule_type. Determines what triggers the "
-             "approval request popup on the target document.",
-    )
-
-    approval_button_id = fields.Integer(string="Button ID", copy=False)
-    approval_state_field_id = fields.Integer(string="State Field ID", copy=False)
-    approval_state_to_selection_id = fields.Integer(string="State Selection ID", copy=False)
-    approval_state_to_m2o_value_id = fields.Integer(string="State M2o ID", copy=False)
-    approval_server_action_id = fields.Integer(string="Server Action ID", copy=False)
-
-    # ── Approver configuration ────────────────────────────────────────────
     approval_approver_type = fields.Selection(
         selection=[
             ('user', 'Specific User'),
             ('group', 'User Group'),
-            ('dynamic', 'Dynamic Field (e.g. record.user_id)'),
+            ('dynamic', 'Dynamic Field (e.g. record.manager_id)'),
         ],
         string="Approver Type",
         default='user',
@@ -327,94 +302,34 @@ class NodeStruct(models.Model):
         ondelete='set null',
     )
     approval_approver_field = fields.Char(
-        string="Approver Field Expression",
-        help="Python expression resolving to a res.users record at runtime, "
-             "e.g. record.user_id or record.department_id.manager_id",
+        string="Approver Field",
+        help="Python expression resolving to a res.users record, e.g. record.user_id",
     )
-
-    # ── Notification settings (mirrors approval.rule notification tab) ────
-    approval_allow_comment = fields.Boolean(
-        string="Allow Comment",
-        default=False,
-        help="Allow the approver to leave a comment on the request.",
+    approval_subject = fields.Char(
+        string="Approval Subject",
+        default="Your Approval is Required",
     )
-    approval_notify_email = fields.Boolean(
-        string="Notify by Email",
-        default=True,
-        help="Enable email notifications for this approval rule.",
+    approval_message = fields.Text(
+        string="Approval Message",
+        help="Message body sent to the approver. Supports Jinja2 placeholders.",
     )
-    approval_notify_on_request = fields.Boolean(
-        string="Notify on Request",
-        default=True,
-        help="Send email when the approval request is created.",
-    )
-    approval_notify_on_approve = fields.Boolean(
-        string="Notify on Approval",
-        default=True,
-        help="Send email when the request is approved.",
-    )
-    approval_notify_on_reject = fields.Boolean(
-        string="Notify on Rejection",
-        default=True,
-        help="Send email when the request is rejected.",
-    )
-
-    # ── Timeout & auto-approve ────────────────────────────────────────────
+    approval_notify_email = fields.Boolean(string="Notify by Email", default=True)
+    approval_notify_inbox = fields.Boolean(string="Notify in Odoo Inbox", default=True)
     approval_expire_after = fields.Float(
         string="Expire After (hours)",
         default=0.0,
-        help="Set > 0 to auto-reject after this many hours (Timeout branch). "
-             "0 = never expire.",
-    )
-    approval_timeout_hours = fields.Float(
-        string="Timeout (hours)",
-        default=0.0,
-        help="Alias for approval_expire_after. Used internally.",
+        help="Set > 0 to automatically expire the approval request after this many hours. "
+             "0 means no expiry.",
     )
     approval_auto_rule = fields.Char(
-        string="Auto-Approve Condition",
-        help="Python expression evaluated at runtime. If True the Approved "
-             "branch is taken immediately without human input. "
-             "Example: record.amount_total < 1000",
+        string="Auto-Approve Rule",
+        help="Python expression. If it evaluates to True the approval is auto-approved, "
+             "skipping the human step. Example: record.amount_total < 1000",
     )
-
-    # ── Result variable ───────────────────────────────────────────────────
     approval_result_variable = fields.Char(
         string="Result Variable Name",
-        help="Optional variable name that will hold the approval decision "
-             "('approved', 'rejected', 'timeout') for downstream nodes.",
-    )
-
-    # ── Runtime state (populated at execution, cleared on resume) ─────────
-    approval_request_id = fields.Integer(
-        string="Approval Request ID",
-        copy=False,
-        help="ID of the approval.request created when this node executes.",
-    )
-    approval_resume_work_auto_id = fields.Many2one(
-        'work.auto',
-        string="Resuming Workflow",
-        ondelete='set null',
-        copy=False,
-    )
-    approval_resume_record_model = fields.Char(
-        string="Resume Record Model",
-        copy=False,
-    )
-    approval_resume_record_id = fields.Integer(
-        string="Resume Record ID",
-        copy=False,
-    )
-    approval_draw_node_id = fields.Char(
-        string="Draw Node ID",
-        copy=False,
-        help="Drawflow node key stored for resume routing.",
-    )
-    approval_timeout_cron_id = fields.Many2one(
-        'ir.cron',
-        string="Timeout Cron",
-        ondelete='set null',
-        copy=False,
+        help="Optional variable name to store the approval status string "
+             "('approved', 'rejected', 'timeout') for use in downstream nodes.",
     )
 
     # Activity block fields
@@ -504,21 +419,6 @@ class NodeStruct(models.Model):
 
         if 'wa_auto_report_id' in data and isinstance(data['wa_auto_report_id'], dict):
             data['wa_auto_report_id'] = data['wa_auto_report_id'].get('id') or False
-
-        if 'approval_approver_id' in data and isinstance(data['approval_approver_id'], dict):
-            data['approval_approver_id'] = data['approval_approver_id'].get('id') or False
-
-        if 'approval_approver_group_id' in data and isinstance(data['approval_approver_group_id'], dict):
-            data['approval_approver_group_id'] = data['approval_approver_group_id'].get('id') or False
-
-        if 'approval_rule_id' in data and isinstance(data['approval_rule_id'], dict):
-            data['approval_rule_id'] = data['approval_rule_id'].get('id') or False
-
-        # Sync expire_after <-> timeout_hours aliases
-        if 'approval_expire_after' in data and 'approval_timeout_hours' not in data:
-            data['approval_timeout_hours'] = data['approval_expire_after']
-        elif 'approval_timeout_hours' in data and 'approval_expire_after' not in data:
-            data['approval_expire_after'] = data['approval_timeout_hours']
 
         if not self:
             struct_node_id = self.create(data)

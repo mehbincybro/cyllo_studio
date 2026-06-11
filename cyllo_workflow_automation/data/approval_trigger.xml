@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="work_function_approval" model="work.function">
+        <field name="name">On Approval</field>
+        <field name="func_name">approval</field>
+        <field name="trigger_type">approval</field>
+        <field name="make_function"><![CDATA[
+def make_approval():
+    pass
+        ]]></field>
+    </record>
+</odoo>

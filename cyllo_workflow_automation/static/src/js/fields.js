@@ -98,23 +98,21 @@ export const webhookFields = [
 
 export const approvalFields = [
     { name: 'label', type: 'char' },
-    // Rule tab
     { name: 'approval_rule_type', type: 'selection' },
-    { name: 'approval_rule_id', type: 'integer' },
-    // Approver tab
+    { name: 'approval_button_method', type: 'char' },
+    { name: 'approval_server_action_id', type: 'many2One' },
+    { name: 'approval_state_field_id', type: 'many2One' },
+    { name: 'approval_state_to_selection_id', type: 'many2One' },
+    { name: 'approval_state_to_m2o_value_id', type: 'many2One' },
     { name: 'approval_approver_type', type: 'selection' },
     { name: 'approval_approver_id', type: 'many2One' },
     { name: 'approval_approver_group_id', type: 'many2One' },
     { name: 'approval_approver_field', type: 'char' },
-    // Notifications tab
-    { name: 'approval_allow_comment', type: 'boolean' },
+    { name: 'approval_subject', type: 'char' },
+    { name: 'approval_message', type: 'text' },
     { name: 'approval_notify_email', type: 'boolean' },
-    { name: 'approval_notify_on_request', type: 'boolean' },
-    { name: 'approval_notify_on_approve', type: 'boolean' },
-    { name: 'approval_notify_on_reject', type: 'boolean' },
-    // Advanced tab
+    { name: 'approval_notify_inbox', type: 'boolean' },
     { name: 'approval_expire_after', type: 'float' },
-    { name: 'approval_timeout_hours', type: 'float' },
     { name: 'approval_auto_rule', type: 'char' },
     { name: 'approval_result_variable', type: 'char' },
 ];
