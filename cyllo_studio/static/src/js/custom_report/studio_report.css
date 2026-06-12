@@ -2622,22 +2622,41 @@ span.badge.rounded-pill.bg-primary {
     font-size: 13px;
 }
 
+/* cy-block-hidden styles moved to bottom of file (enhanced version) */
+/* .cy-block-hidden and ::before are now defined with !important overrides below */
+
+/* ── Enhanced cy-block-hidden for all block types ─── */
 .cy-block-hidden {
     opacity: 0.5 !important;
-    position: relative;
-    border: 1px dashed rgba(0,0,0,0.2) !important;
+    position: relative !important;
+    border: 2px dashed #d8d7d7 !important;
+    overflow: visible !important;
 }
 
-.cy-block-hidden::before {
+.cy-block-hidden::after {
     content: 'Hidden';
     position: absolute;
-    top: 2px;
-    right: 2px;
-    background: #e2e8f0;
-    color: #475569;
+    top: -13px;
+    left: 0;
+    background: #8a8888;
+    color: #fff;
     font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    z-index: 10;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 4px 4px 0 0;
+    z-index: 1000;
     pointer-events: none;
+    white-space: nowrap;
+    line-height: 1.6;
+    box-shadow: 0 -2px 4px rgba(239,68,68,0.25);
+}
+
+.table-wrapper.cy-block-hidden,
+.field-block.cy-block-hidden,
+.box-section-wrapper.cy-block-hidden,
+.sign-wrapper.cy-block-hidden,
+.text-node.cy-block-hidden {
+    position: relative !important;
+    overflow: visible !important;
+    margin-top: 14px !important;
 }

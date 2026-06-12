@@ -355,8 +355,8 @@ if (typeof MediumEditor !== 'undefined') {
 
       const el = this.base.getSelectedParentElement();
       if (el && !el.classList.contains('page')) {
-          el.remove();
-          this.base.checkContentChanged();
+        el.remove();
+        this.base.checkContentChanged();
       }
     }
   });
@@ -397,11 +397,187 @@ if (typeof MediumEditor !== 'undefined') {
     }
   });
 
+  const SettingsButton = MediumEditor.Extension.extend({
+    name: 'settingsButton',
+    init: function () {
+      this.button = this.document.createElement('button');
+      this.button.classList.add('medium-editor-action');
+      this.button.innerHTML = '⚙';
+      this.button.title = 'Settings';
+      this.on(this.button, 'click', this.handleClick.bind(this));
+    },
+    getButton: function () { return this.button; },
+    handleClick: function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+      const el = this.base.getSelectedParentElement();
+      if (!el) return;
+
+      let targetEl = el.closest('.box-section-wrapper, .table-wrapper, .field-block, .qr_block, .sign-wrapper') || el;
+      this.showPopup(targetEl);
+    },
+    showPopup: function (targetEl, anchorEl = null) {
+      const existing = document.getElementById('cy-medium-settings-popup');
+      if (existing) existing.remove();
+
+      const popup = document.createElement('div');
+      popup.id = 'cy-medium-settings-popup';
+      popup.className = 'cy-medium-settings-popup cy-studio';
+
+      let cfg = {};
+      try { cfg = JSON.parse(targetEl.dataset.boxConfig || '{}'); } catch (e) { }
+      const s = cfg.style || {};
+
+      const visible = targetEl.classList.contains('cy-block-hidden') ? false : true;
+      const active = targetEl.getAttribute('t-if') === 'False' ? false : true;
+      const pbBefore = targetEl.classList.contains('page-break-before');
+      const pbAfter = targetEl.classList.contains('page-break-after');
+
+      popup.innerHTML = `
+        <div class="settings-header">
+            <h4>Block Settings</h4>
+            <button class="close-btn">&times;</button>
+        </div>
+        <div class="settings-body">
+            <div class="settings-section">
+                <h5>General</h5>
+                <label><input type="checkbox" id="cy-set-visible" ${visible ? 'checked' : ''}> Visible</label>
+                <label><input type="checkbox" id="cy-set-active" ${active ? 'checked' : ''}> Active</label>
+                <label><input type="checkbox" id="cy-set-lock" ${cfg.locked ? 'checked' : ''}> Lock Block</label>
+            </div>
+            <div class="settings-section">
+                <h5>Layout</h5>
+                <div><label>Width:</label><input type="text" id="cy-set-w" value="${s.width || ''}"></div>
+                <div><label>Height:</label><input type="text" id="cy-set-h" value="${s.height || ''}"></div>
+                <div><label>Padding:</label><input type="text" id="cy-set-p" value="${s.padding || ''}"></div>
+                <div><label>Margin:</label><input type="text" id="cy-set-m" value="${s.margin || ''}"></div>
+            </div>
+            <div class="settings-section">
+                <h5>Appearance</h5>
+                <div><label>Bg Color:</label><input type="text" id="cy-set-bg" value="${s.backgroundColor || ''}"></div>
+                <div><label>Border:</label><input type="text" id="cy-set-b" value="${s.border || ''}"></div>
+                <div><label>Radius:</label><input type="text" id="cy-set-br" value="${s.borderRadius || ''}"></div>
+            </div>
+            <div class="settings-section">
+                <h5>Report Settings</h5>
+                <label><input type="checkbox" id="cy-set-pbb" ${pbBefore ? 'checked' : ''}> Page Break Before</label>
+                <label><input type="checkbox" id="cy-set-pba" ${pbAfter ? 'checked' : ''}> Page Break After</label>
+            </div>
+            <div class="settings-section">
+                <h5>Advanced</h5>
+                <div><label>Class:</label><input type="text" id="cy-set-cls" value="${targetEl.className.replace(/cy-block-hidden|d-print-none/g, '').trim()}"></div>
+            </div>
+        </div>
+      `;
+
+      let toolbarEl = null;
+      try {
+        toolbarEl = this.base.getExtensionByName('toolbar').getToolbarElement();
+      } catch(e) {}
+
+      if (anchorEl) {
+        const rect = anchorEl.getBoundingClientRect();
+        popup.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+        popup.style.left = (rect.left + window.scrollX) + 'px';
+      } else if (toolbarEl && toolbarEl.classList.contains('medium-editor-toolbar-active')) {
+        const rect = toolbarEl.getBoundingClientRect();
+        popup.style.top = (rect.bottom + window.scrollY + 10) + 'px';
+        popup.style.left = (rect.left + window.scrollX) + 'px';
+      } else {
+        const rect = targetEl.getBoundingClientRect();
+        popup.style.top = (rect.top + window.scrollY - 10) + 'px';
+        popup.style.left = (rect.left + window.scrollX + 10) + 'px';
+      }
+
+      document.body.appendChild(popup);
+
+      popup.querySelector('.close-btn').addEventListener('click', () => popup.remove());
+
+      const updateConfig = () => {
+        targetEl.dataset.boxConfig = JSON.stringify(cfg);
+        if (this.base.options.owner && this.base.options.owner.undoManager) {
+          this.base.options.owner.undoManager.debouncedSave();
+        }
+      };
+
+      popup.querySelector('#cy-set-visible').addEventListener('change', (e) => {
+        if (!e.target.checked) {
+          targetEl.classList.add('cy-block-hidden');
+        } else {
+          targetEl.classList.remove('cy-block-hidden');
+        }
+        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      });
+
+      popup.querySelector('#cy-set-active').addEventListener('change', (e) => {
+        if (!e.target.checked) {
+          targetEl.setAttribute('t-if', 'False');
+        } else {
+          targetEl.removeAttribute('t-if');
+        }
+        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      });
+
+      popup.querySelector('#cy-set-lock').addEventListener('change', (e) => {
+        cfg.locked = e.target.checked;
+        updateConfig();
+      });
+
+      const applyStyle = (id, prop, field) => {
+        popup.querySelector(id).addEventListener('input', (e) => {
+          let val = e.target.value;
+          if (val && !isNaN(val) && field !== 'backgroundColor' && field !== 'border') val += 'px';
+          targetEl.style[prop] = val;
+          cfg.style[field] = val;
+          updateConfig();
+        });
+      };
+
+      applyStyle('#cy-set-w', 'width', 'width');
+      applyStyle('#cy-set-h', 'height', 'height');
+      applyStyle('#cy-set-p', 'padding', 'padding');
+      applyStyle('#cy-set-m', 'margin', 'margin');
+      applyStyle('#cy-set-bg', 'backgroundColor', 'backgroundColor');
+      applyStyle('#cy-set-b', 'border', 'border');
+      applyStyle('#cy-set-br', 'borderRadius', 'borderRadius');
+
+      popup.querySelector('#cy-set-pbb').addEventListener('change', (e) => {
+        if (e.target.checked) targetEl.classList.add('page-break-before');
+        else targetEl.classList.remove('page-break-before');
+        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      });
+      popup.querySelector('#cy-set-pba').addEventListener('change', (e) => {
+        if (e.target.checked) targetEl.classList.add('page-break-after');
+        else targetEl.classList.remove('page-break-after');
+        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      });
+      popup.querySelector('#cy-set-cls').addEventListener('change', (e) => {
+        const baseCls = ['cy-block-hidden'].filter(c => targetEl.classList.contains(c));
+        targetEl.className = e.target.value + ' ' + baseCls.join(' ');
+        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      });
+
+      // Close when clicking outside
+      setTimeout(() => {
+        const clickOutside = (e) => {
+          if (!popup.contains(e.target) && !e.target.closest('.medium-editor-action')) {
+            popup.remove();
+            document.removeEventListener('click', clickOutside);
+          }
+        };
+        document.addEventListener('click', clickOutside);
+      }, 0);
+    }
+  });
+
   // Global exposure for explicit instantiation
+  window.SettingsButton = SettingsButton;
   window.DeleteButton = DeleteButton;
   window.UndoButton = UndoButton;
   window.RedoButton = RedoButton;
 
+  MediumEditor.extensions.settingsButton = SettingsButton;
   MediumEditor.extensions.deleteElement = DeleteButton;
   MediumEditor.extensions.undoButton = UndoButton;
   MediumEditor.extensions.redoButton = RedoButton;
