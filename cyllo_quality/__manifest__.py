@@ -38,7 +38,6 @@
         'data/inspection_type_data.xml',
         'security/security.xml',
         'security/ir.model.access.csv',
-        'views/menu_item_views.xml',
         'views/inspection_action_views.xml',
         'views/quality_alert_views.xml',
         'views/quality_alert_stage_views.xml',
@@ -49,6 +48,7 @@
         'views/product_template_views.xml',
         'views/stock_lot_views.xml',
         'views/stock_picking_views.xml',
+        'views/menu_item_views.xml',
         'wizards/alert_warning_views.xml',
         'wizards/quality_check_instruction_views.xml',
 
@@ -59,6 +59,9 @@
             'cyllo_quality/static/src/js/components/**/*',
         ],
     },
+    'demo': [
+        'demo/cyllo_quality_demo.xml',
+    ],
     'license': 'LGPL-3',
     'installable': True,
     'application': True,

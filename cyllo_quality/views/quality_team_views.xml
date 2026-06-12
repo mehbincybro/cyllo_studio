@@ -23,17 +23,7 @@
 
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Team Members" name="members">
-                            <field name="member_ids">
-                                <tree>
-                                    <field name="name"/>
-                                    <field name="job_title"/>
-                                    <field name="department_id"/>
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
+
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" groups="base.group_user"/>
@@ -55,12 +45,4 @@
             </p>
         </field>
     </record>
-
-    <!-- Menu Item -->
-    <menuitem id="menu_quality_teams"
-              name="Quality Teams"
-              action="action_view_quality_teams"
-              parent="cyllo_quality.menu_configuration_categ"
-              sequence="10"
-    />
 </odoo>

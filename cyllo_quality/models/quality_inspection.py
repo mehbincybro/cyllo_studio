@@ -21,8 +21,9 @@
 #############################################################################
 from email.policy import default
 
-from odoo import api,fields, models
+from odoo import api, fields, models
 import json
+
 
 class QualityInspection(models.Model):
     _name = 'quality.inspection'
@@ -31,12 +32,14 @@ class QualityInspection(models.Model):
 
     priority = fields.Integer(default=1)
 
-
-    quality_control_id = fields.Many2one('quality.control.point', string='Quality Control Point')
-    inspection_action_id = fields.Many2one('inspection.action', string='Actions', required=True)
+    quality_control_id = fields.Many2one('quality.control.point',
+                                         string='Quality Control Point')
+    inspection_action_id = fields.Many2one('inspection.action',
+                                           string='Actions', required=True)
     name = fields.Char(compute='_compute_name', string='Actions')
     inspection_type_id = fields.Many2one('inspection.type', string='Type')
-    blocked_by_id = fields.Many2one('quality.inspection', string='Blocked By', domain="[('quality_control_id', '=', quality_control_id), ('quality_control_id', '!=', False), ('id', '!=', id)]")
+    blocked_by_id = fields.Many2one('quality.inspection', string='Blocked By',
+                                    domain="[('quality_control_id', '=', quality_control_id), ('quality_control_id', '!=', False), ('id', '!=', id)]")
     value = fields.Json(default=lambda self: {
         "unit": {
             "id": False,
@@ -68,12 +71,12 @@ class QualityInspection(models.Model):
 
     @api.depends('inspection_type_id')
     def _compute_is_measure(self):
-        measure_inspection_type_id = self.env.ref('cyllo_quality.inspection_type_measure').id
+        measure_inspection_type_id = self.env.ref(
+            'cyllo_quality.inspection_type_measure').id
         for record in self:
             record.is_measure = False
             if record.inspection_type_id.id == measure_inspection_type_id:
                 record.is_measure = True
-
 
     @api.onchange('inspection_type_id')
     def _onchange_inspection_type_id(self):

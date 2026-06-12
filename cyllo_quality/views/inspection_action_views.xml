@@ -16,11 +16,4 @@
         <field name="res_model">inspection.action</field>
         <field name="view_mode">tree</field>
     </record>
-    <!-- Menu Item -->
-    <menuitem id="menu_inspection_actions"
-              name="Inspection Actions"
-              action="action_view_inspection_actions"
-              parent="cyllo_quality.menu_configuration_categ"
-              sequence="11"
-    />
 </odoo>

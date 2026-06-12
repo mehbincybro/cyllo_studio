@@ -5,10 +5,4 @@
         <field name="res_model">stock.lot</field>
         <field name="view_mode">tree,form</field>
     </record>
-    <menuitem id="menu_lots/serial_numbers"
-              name="Lots/Serial Numbers"
-              parent="cyllo_quality.menu_products_categ"
-              action="action_view_lots/serial_numbers"
-              sequence="30"
-    />
 </odoo>

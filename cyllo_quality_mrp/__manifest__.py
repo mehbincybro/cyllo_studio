@@ -35,6 +35,9 @@
         'views/mrp_production_views.xml',
         'views/quality_check_views.xml',
     ],
+    'demo': [
+        'demo/cyllo_quality_mrp_demo.xml',
+    ],
     'installable': True,
     'auto_install': True,
     'application': False,

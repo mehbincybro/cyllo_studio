@@ -3,7 +3,7 @@
 #
 #    Cyllo Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cyllo(<https://www.cyllo.com>)
+#    Copyright (C) 2025-TODAY Cyllo(<https://www.cyllo.com>)
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
@@ -19,26 +19,5 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
-{
-    'name': 'Cyllo Quality Repair',
-    'version': '1.0',
-    'summary': 'Bridge module for Quality Checks in Repair',
-    'description': "Integrates Quality management with Repair to enable quality checks during repair operations.",
-    'category': 'Manufacturing/Repair',
-    'author': 'Cyllo',
-    'company': 'Cyllo',
-    'maintainer': 'Cyllo',
-    'website': 'https://www.cyllo.com',
-    'depends': ['cyllo_quality', 'repair'],
-    'data': [
-        'views/repair_order_views.xml',
-        'views/quality_check_views.xml',
-    ],
-    'demo': [
-        'demo/cyllo_quality_repair_demo.xml',
-    ],
-    'installable': True,
-    'auto_install': True,
-    'application': False,
-    'license': 'LGPL-3',
-}
+# quality.team tests are included in test_quality_alert.py (TestQualityTeam).
+# This file is kept as an importable stub so the __init__.py reference resolves.

@@ -148,10 +148,5 @@
         <field name="res_model">quality.alert</field>
         <field name="view_mode">kanban,tree,form</field>
     </record>
-    <!--    MenuItem of the Quality Alert-->
-    <menuitem id="menu_quality_alerts"
-              name="Quality Alerts"
-              action="action_view_quality_alerts"
-              parent="cyllo_quality.menu_quality_inspections_categ"
-              sequence="30"/>
+
 </odoo>
