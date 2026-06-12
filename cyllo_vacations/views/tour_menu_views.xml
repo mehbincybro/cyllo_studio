@@ -91,5 +91,22 @@
         action="action_tour_attraction"
         sequence="40"/>
 
-</odoo>
+    <!-- Agents & Commissions Menu -->
+    <menuitem id="menu_tour_agents_root"
+        name="Agents &amp; Commissions"
+        parent="menu_tour_root"
+        sequence="40"/>
 
+    <menuitem id="menu_tour_agent"
+        name="Tour Agents"
+        parent="menu_tour_agents_root"
+        action="action_tour_agent"
+        sequence="10"/>
+
+    <menuitem id="menu_tour_booking_commission"
+        name="Commissions"
+        parent="menu_tour_agents_root"
+        action="action_tour_booking_commission"
+        sequence="20"/>
+
+</odoo>

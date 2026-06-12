@@ -163,6 +163,14 @@ class TourBooking(models.Model):
     calendar_event_id = fields.Many2one('calendar.event', string='Calendar Event')
     # Portal Access
     access_token = fields.Char(string='Access Token', copy=False)
+    agent_id = fields.Many2one('tour.agent', string='Travel Agent',
+                               tracking=True, index=True)
+    commission_ids = fields.One2many('tour.booking.commission', 'booking_id',
+                                     string='Commission')
+    commission_amount = fields.Monetary(string='Commission',
+                                        compute='_compute_commission_amount',
+                                        store=True,
+                                        currency_field='currency_id')
     
     @api.depends('package_id', 'travel_start_date')
     def _compute_travel_end_date(self):
@@ -233,7 +241,16 @@ class TourBooking(models.Model):
                     invoice_paid += invoice.amount_total - invoice.amount_residual
             record.amount_paid = direct_paid + invoice_paid
             record.amount_due = max(0, record.price_total - record.amount_paid)
-    
+
+    @api.depends('commission_ids.commission_amount', 'commission_ids.state')
+    def _compute_commission_amount(self):
+        for booking in self:
+            booking.commission_amount = sum(
+                booking.commission_ids
+                .filtered(lambda c: c.state != 'cancelled')
+                .mapped('commission_amount')
+            )
+
     def _update_payment_status_from_payments(self):
         """Force update payment amounts and status - called after payment changes"""
         for record in self:

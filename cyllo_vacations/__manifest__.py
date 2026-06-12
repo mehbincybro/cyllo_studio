@@ -88,6 +88,8 @@
         'views/tour_meal_views.xml',
         'views/tour_attraction_views.xml',
         'views/tour_expense_views.xml',
+        'views/tour_agent_views.xml',
+        'views/tour_booking_commission_views.xml',
         'views/tour_menu_views.xml',
         'views/inherited_views.xml',
         # Views - Website
@@ -122,6 +124,7 @@
     'installable': True,
     'application': True,
     'auto_install': False,
+    'module_type': 'industries',
     'images': [
         'static/description/cyllo_vacations_icon.svg',
     ],

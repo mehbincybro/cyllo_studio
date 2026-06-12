@@ -98,6 +98,17 @@ class AccountMove(models.Model):
                 booking.invalidate_recordset(
                     ['amount_paid', 'amount_due', 'payment_status'])
                 booking._update_payment_status_from_payments()
+        if 'payment_state' in vals and vals['payment_state'] == 'paid':
+            # Find all commissions linked to vendor bills in this recordset
+            commissions = self.env['tour.booking.commission'].search([
+                ('vendor_bill_id', 'in', self.ids),
+                ('state', '!=', 'paid'),
+            ])
+            if commissions:
+                commissions.write({'state': 'paid'})
+                commissions.message_post(
+                    body='Commission automatically marked as paid when vendor bill was settled.'
+                )
         return res
 
     def _post(self, soft=True):
