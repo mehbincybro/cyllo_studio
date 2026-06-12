@@ -24,12 +24,11 @@
     width:100%;
     max-width:inherit;
 }
-.o_action_manager.menuListFixed > :nth-child(2) {
-        margin-left: 16% !important;
-        flex-flow: column nowrap;
-        overflow: hidden;
-    }
-}
+/*.o_action_manager.menuListFixed > :nth-child(2) {*/
+/*        margin-left: 16% !important;*/
+/*        flex-flow: column nowrap;*/
+/*        overflow: hidden;*/
+/*    }*/
 .o-mail-ChatterContainer{
     position:relative !important;
 }
@@ -475,7 +474,7 @@ body.cy-show-invisible .cy-studio-striped {
 .border-class {
     border:unset !important;
 }
-*/
+
 .cy-thead-list th.border-class {
     background-color: #f8f9e5 !important;/* Changed border into background */
     border: unset !important;
@@ -620,4 +619,11 @@ div[data-drag="1"]:empty {
 
 
 
+
+
+/* SortableJS Drag Placeholder */
+.sortable-ghost {
+    width: 100% !important;
+    min-width: 100% !important;
+}
 

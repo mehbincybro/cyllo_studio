@@ -526,9 +526,7 @@ class IrActionsReport(models.Model):
                                 <div class="oe_structure"/>
                                 <div class="row">
                                     <div class="col-12">
-                                        <h2 class="text-center mt-4">
-                                            <span t-esc="doc.name or doc.display_name or ''"/>
-                                        </h2>
+                                        <h2 class="text-center mt-4">{name}</h2>
                                         <p class="text-muted text-center">New Report for {model_rec.name}</p>
                                     </div>
                                 </div>

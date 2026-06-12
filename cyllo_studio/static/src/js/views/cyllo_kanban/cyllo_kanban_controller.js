@@ -18,7 +18,7 @@ import {
     KANBAN_TOOLTIP_ATTRIBUTE,
 } from "@web/views/kanban/kanban_arch_parser";
 import { Layout } from "@web/search/layout";
-import {onWillStart, onMounted, useRef} from "@odoo/owl";
+import {onWillStart, onMounted, onWillDestroy, useRef} from "@odoo/owl";
 import {useService} from "@web/core/utils/hooks";
 import { serializeXML } from "@web/core/utils/xml";
 import { session } from "@web/session";
@@ -41,6 +41,9 @@ export class CylloKanbanController extends KanbanController {
             }
         })
         onMounted(async () => {
+            if (this.props.resModel === 'ir.actions.report') {
+                document.body.classList.add('cy-report-kanban-view-active');
+            }
             const ribbonElement = document.querySelectorAll('[data-ribbon="1"]')
             const colorPickerEL = this.props.arch.querySelector("templates .oe_kanban_colorpicker[data-field]")
             const hasColorPicker = !!colorPickerEL
@@ -74,6 +77,12 @@ export class CylloKanbanController extends KanbanController {
             }
 
         })
+
+        onWillDestroy(() => {
+            if (this.props.resModel === 'ir.actions.report') {
+                document.body.classList.remove('cy-report-kanban-view-active');
+            }
+        });
     }
 
      /**
