@@ -5,10 +5,4 @@
         <field name="res_model">product.product</field>
         <field name="view_mode">tree,form</field>
     </record>
-    <menuitem id="menu_product_variants"
-              name=" Product Variants"
-              parent="cyllo_quality.menu_products_categ"
-              action="action_view_product_variants"
-              sequence="20"
-    />
 </odoo>

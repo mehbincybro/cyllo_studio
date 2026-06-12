@@ -126,10 +126,5 @@
         <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_quality_control_point_search"/>
     </record>
-    <!--    MenuItem of the Quality Control Points-->
-    <menuitem id="menu_quality_control_points"
-              name="Quality Control Points"
-              action="action_view_quality_control_points"
-              parent="cyllo_quality.menu_quality_inspections_categ"
-              sequence="10"/>
+
 </odoo>

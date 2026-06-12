@@ -51,7 +51,7 @@
     <record id="rule_quality_check_user_public" model="ir.rule">
         <field name="name">Quality Control Point User Access</field>
         <field name="model_id" ref="model_quality_control_point"/>
-        <field name="domain_force">['|', ('user_id', '=', user.id), ('quality_team_id.member_ids', 'in', user.id)]</field>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
         <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_user'))]"/>
     </record>
         <!--Record Rule for Quality Control Point Admin-->
@@ -80,8 +80,7 @@
     <record id="rule_quality_alert_user_alert" model="ir.rule">
         <field name="name">Quality Alert User Access</field>
         <field name="model_id" ref="model_quality_alert"/>
-        <field name="domain_force">['|', ('user_id', '=', user.id), ('quality_team_id.member_ids', 'in', user.id)]
-        </field>
+        <field name="domain_force">[('user_id', '=', user.id)]</field>
         <field name="groups" eval="[Command.link(ref('cyllo_quality.group_cyllo_quality_user'))]"/>
     </record>
 </odoo>

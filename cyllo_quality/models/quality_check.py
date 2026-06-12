@@ -31,9 +31,15 @@ class QualityCheck(models.Model):
 
     reference = fields.Char(default='', readonly=True, tracking=True)
     name = fields.Char(tracking=True)
-    quality_control_id = fields.Many2one('quality.control.point', string='Quality Control Point', tracking=True)
-    user_id = fields.Many2one('res.users', string='Responsible', related='quality_control_id.user_id', tracking=True, store=True, readonly=False, default=lambda self: self.env.user)
-    quality_team_id = fields.Many2one('quality.team', string='Team', tracking=True)
+    quality_control_id = fields.Many2one('quality.control.point',
+                                         string='Quality Control Point',
+                                         tracking=True)
+    user_id = fields.Many2one('res.users', string='Responsible',
+                              related='quality_control_id.user_id',
+                              tracking=True, store=True, readonly=False,
+                              default=lambda self: self.env.user)
+    quality_team_id = fields.Many2one('quality.team', string='Team',
+                                      tracking=True)
     qc_alert_count = fields.Integer(compute='_compute_qc_alert')
     picking_id = fields.Many2one('stock.picking', string='Picking')
     control_type = fields.Selection([
@@ -43,9 +49,12 @@ class QualityCheck(models.Model):
     ], default='product', required=True, tracking=True)
     quantity = fields.Integer(string='Quantity')
     uom_id = fields.Many2one('uom.uom', readonly=True)
-    product_ids = fields.Many2many('product.product', compute='_compute_products', store=True)
-    product_id = fields.Many2one('product.product', domain="[('id', 'in', product_ids)]")
-    quality_check_line_ids = fields.One2many('quality.check.line', 'quality_check_id', store=True,
+    product_ids = fields.Many2many('product.product',
+                                   compute='_compute_products', store=True)
+    product_id = fields.Many2one('product.product',
+                                 domain="[('id', 'in', product_ids)]")
+    quality_check_line_ids = fields.One2many('quality.check.line',
+                                             'quality_check_id', store=True,
                                              compute='_compute_quality_check_line_ids')
     company_id = fields.Many2one(
         'res.company', required=True,
@@ -98,32 +107,35 @@ class QualityCheck(models.Model):
     @api.depends('quality_control_id')
     def _compute_quality_check_line_ids(self):
         for record in self:
-            record.quality_check_line_ids = [fields.Command.clear()] + [fields.Command.create({
-                'quality_check_id': record.id,
-                'quality_inspection_id': qc.id,
-                'quality_control_id': qc.quality_control_id.id,
-                'inspection_action_id': qc.inspection_action_id.id,
-                'inspection_type_id': qc.inspection_type_id.id,
-                'instruction': qc.instruction,
-                'blocked_by_id': qc.blocked_by_id.id,
-                'measure_start': qc.measure_start,
-                'measure_end': qc.measure_end,
-                'unit_id': qc.unit_id.id,
-                'unit_value': {
-                    "unit": {
-                        "id": qc.value['unit'].get('id'),
-                        "name": qc.value['unit'].get('name') or ""
+            record.quality_check_line_ids = [fields.Command.clear()] + [
+                fields.Command.create({
+                    'quality_check_id': record.id,
+                    'quality_inspection_id': qc.id,
+                    'quality_control_id': qc.quality_control_id.id,
+                    'inspection_action_id': qc.inspection_action_id.id,
+                    'inspection_type_id': qc.inspection_type_id.id,
+                    'instruction': qc.instruction,
+                    'blocked_by_id': qc.blocked_by_id.id,
+                    'measure_start': qc.measure_start,
+                    'measure_end': qc.measure_end,
+                    'unit_id': qc.unit_id.id,
+                    'unit_value': {
+                        "unit": {
+                            "id": qc.value['unit'].get('id'),
+                            "name": qc.value['unit'].get('name') or ""
+                        },
+                        "value": qc.value.get('value')
                     },
-                    "value": qc.value.get('value')
-                },
-            }) for qc in record.quality_control_id.quality_inspection_ids]
+                }) for qc in record.quality_control_id.quality_inspection_ids]
 
     def _compute_qc_alert(self):
         for qc in self:
-            qc.qc_alert_count = self.env['quality.alert'].search_count([('quality_check_id', '=', qc.id)])
+            qc.qc_alert_count = self.env['quality.alert'].search_count(
+                [('quality_check_id', '=', qc.id)])
 
     def action_view_quality_alert(self):
-        quality_alert = self.env['quality.alert'].search([('quality_check_id', '=', self.id)])
+        quality_alert = self.env['quality.alert'].search(
+            [('quality_check_id', '=', self.id)])
         return {
             'name': 'Quality Checks',
             'view_mode': 'tree,form,kanban',
@@ -134,10 +146,15 @@ class QualityCheck(models.Model):
         }
 
     def get_quality_check_actions(self):
-        quality_control = self.read(['quality_check_line_ids', 'quality_control_id', 'control_type', 'product_id', 'user_id', 'quality_team_id', 'quantity'])
+        quality_control = self.read(
+            ['quality_check_line_ids', 'quality_control_id', 'control_type',
+             'product_id', 'user_id', 'quality_team_id', 'quantity'])
         for qc_rec in self:
-            qc = next((rec for rec in quality_control if rec["id"] == qc_rec.id), None)
+            qc = next(
+                (rec for rec in quality_control if rec["id"] == qc_rec.id),
+                None)
             if not qc:
                 quality_control.append(qc)
-            qc['quality_check_line_ids'] = qc_rec['quality_check_line_ids'].read()
+            qc['quality_check_line_ids'] = qc_rec[
+                'quality_check_line_ids'].read()
         return quality_control
