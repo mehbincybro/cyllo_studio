@@ -33,14 +33,18 @@
     'data': [
         'security/workflow_group.xml',
         'security/ir.model.access.csv',
+        'security/approval_security.xml',
         'data/create.xml',
         'data/write.xml',
         'data/unlink.xml',
         'data/schedule.xml',
         'data/onchange.xml',
+        'data/approval_trigger.xml',
         'data/loop.xml',
+        'data/approval_cron.xml',
         'views/views.xml',
         'views/cyllo_base_automation_views.xml',
+        'views/workflow_approval_views.xml',
         'views/approval_portal_template.xml',
     ],
     'assets': {

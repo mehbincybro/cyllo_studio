@@ -997,7 +997,7 @@ export class ModelComponent extends Component {
                     <t t-out="state.model.display_name"/>
                 </t>
                 <span
-                    t-if="props.type === 'action_to_do'"
+                    t-if="props.type === 'action_to_do' or state.model.display_name === 'Approval'"
                     class="settings-icon"
                     t-on-click="openConfigModal"
                 >

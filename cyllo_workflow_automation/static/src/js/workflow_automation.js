@@ -66,8 +66,7 @@ const AUTO_OPEN_CONFIG_FIELDS = {
     'Approval': [
         'label', 'approval_approver_type', 'approval_approver_id', 'approval_approver_group_id',
         'approval_approver_field', 'approval_subject', 'approval_message', 'approval_notify_email',
-        'approval_notify_inbox', 'approval_expire_after', 'approval_auto_rule', 'approval_result_variable',
-        'approval_rule_id', 'approval_timeout_hours'
+        'approval_notify_inbox', 'approval_expire_after', 'approval_auto_rule', 'approval_result_variable'
     ],
 };
 
@@ -233,8 +232,6 @@ export class WorkFlowAuto extends Component {
         this.isRestoring = false;
         this.refreshWhatsappModuleVisibility = async () => {
             this.state.hasWhatsappModule = await this.checkModuleInstalled('cyllo_whatsapp');
-        };
-        this.refreshApprovalModuleVisibility = async () => {
             this.state.hasApprovalModule = await this.checkModuleInstalled('cyllo_approval');
         };
 
@@ -296,7 +293,6 @@ export class WorkFlowAuto extends Component {
 
         onWillStart(async () => {
             await this.refreshWhatsappModuleVisibility();
-            await this.refreshApprovalModuleVisibility();
             this.state.recordList = await this.orm.search("work.auto", [])
             this.state.actions = await this.orm.searchRead('work.function', [], ['name', 'id', 'icon', 'model_id', 'func_name', 'trigger_type'])
             const recordId = this.id;
@@ -375,7 +371,6 @@ export class WorkFlowAuto extends Component {
         onWillUnmount(() => {
             window.removeEventListener('keydown', this.onKeyDown.bind(this));
             window.removeEventListener('focus', this.refreshWhatsappModuleVisibility);
-            window.removeEventListener('focus', this.refreshApprovalModuleVisibility);
             window.removeEventListener('click', this.handleWindowClickForTestReset);
             if (this.drawBoard?.el) {
                 this.drawBoard.el.removeEventListener('wheel', this.handleCanvasWheel);
@@ -393,8 +388,6 @@ export class WorkFlowAuto extends Component {
 
         onMounted(async () => {
             window.addEventListener('focus', this.refreshWhatsappModuleVisibility);
-            window.addEventListener('focus', this.refreshApprovalModuleVisibility);
-            window.addEventListener('click', this.handleWindowClickForTestReset);
             const globalVariables = await this.getGlobalVariables()
             this.env.globalVariables.setContext({variables: [...this.env.globalVariables.context.variables, ...globalVariables]});
             this.inputNameRef.el.focus();
@@ -816,7 +809,9 @@ export class WorkFlowAuto extends Component {
     get triggerActions() {
         return (this.state.actions || []).filter(action => {
             const funcName = (action?.func_name || "").toLowerCase();
-            return funcName !== 'loop';
+            if (funcName === 'loop') return false;
+            if (funcName === 'approval') return false;
+            return true;
         });
     }
 
@@ -971,7 +966,7 @@ export class WorkFlowAuto extends Component {
         const createdNode = flowNodes.find(node => node.id === id);
         if (!createdNode) return;
         const nodeId = createdNode.data.nodeId;
-        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "Try Catch" || createdNode.name === "Approval";
+        const isParent = createdNode.name === "Condition" || createdNode.name === "Loop" || createdNode.name === "Try Catch";
         //TODO: Handle Context
         const currentContext = this.env.context.context
         const nodes = currentContext?.nodes || []
@@ -992,7 +987,7 @@ export class WorkFlowAuto extends Component {
                 isParent,
                 isLoop,
                 isTryCatch,
-                isApproval: createdNode.name === "Approval",
+                isApproval: false,
                 code: "",
                 type: createdNode.data.type,
                 trigger_type: createdNode.data.trigger_type,
@@ -2521,49 +2516,7 @@ export class WorkFlowAuto extends Component {
                 const children2 = Array.isArray(node.child2) ? node.child2 : (node.child2 ? [node.child2] : []);
                 const nextNodes = Array.isArray(node.right) ? node.right : (node.right ? [node.right] : []);
 
-                if (node.isApproval) {
-                    // Approval Node code generation
-                    // Remove the sentinel line (__approval_node_pause__) that
-                    // node.code emitted — it was only a placeholder.
-                    const sentinelIdx = lines.findLastIndex(
-                        l => l.trimStart().startsWith('__approval_node_pause__')
-                    );
-                    if (sentinelIdx >= 0) lines.splice(sentinelIdx, 1);
-
-                    const ind = indentationLevel;
-                    const nodeId = node.nodeId || 0;
-
-                    // Emit: mixin call → pause guard → branch dispatch
-                    lines.push(`${ind}__approval_result__ = env['wa.approval.node.mixin'].execute(${nodeId}, _workflow_auto_id, record)`);
-                    lines.push(`${ind}approval_branch = __approval_result__`);
-                    lines.push(`${ind}if __approval_result__ == 'paused':`);
-                    lines.push(`${ind}    pass  # workflow paused — resumed by approval controller`);
-                    lines.push(`${ind}elif __approval_result__ == 'approved':`);
-
-                    // Port 1 — Approved branch
-                    if (children1.length > 0) {
-                        children1.forEach(child => traverse(child, ind + '    ', [...parentArray, node]));
-                    } else {
-                        lines.push(`${ind}    pass`);
-                    }
-
-                    // Port 2 — Rejected branch
-                    lines.push(`${ind}elif __approval_result__ == 'rejected':`);
-                    if (children2.length > 0) {
-                        children2.forEach(child => traverse(child, ind + '    ', [...parentArray, node]));
-                    } else {
-                        lines.push(`${ind}    pass`);
-                    }
-
-                    // Port 3 — Timeout branch
-                    lines.push(`${ind}elif __approval_result__ == 'timeout':`);
-                    if (nextNodes.length > 0) {
-                        nextNodes.forEach(child => traverse(child, ind + '    ', [...parentArray, node]));
-                    } else {
-                        lines.push(`${ind}    pass`);
-                    }
-
-                } else if (node.isTryCatch) {
+                if (node.isTryCatch) {
                     if (children1.length > 0) {
                         const lenBefore = lines.length;
                         children1.forEach(child => traverse(child, indentationLevel + "    ", [...parentArray, node]));
@@ -2983,9 +2936,15 @@ export class WorkFlowAuto extends Component {
             case 'Condition':
             case 'Loop':
             case 'Try Catch':
-            case 'Approval':
                 specificProps.type = "action_to_do";
                 right = 3;
+                break;
+            case 'Approval':
+                specificProps.type = "action";
+                specificProps.ttype = "Approval";
+                specificProps.trigger_type = "approval";
+                left = 1;
+                right = 1;
                 break;
             case 'Reuse Automation':
                 specificProps.type = "action_to_do";

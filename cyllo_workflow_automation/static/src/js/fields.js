@@ -99,6 +99,12 @@ export const webhookFields = [
 
 export const approvalFields = [
     { name: 'label', type: 'char' },
+    { name: 'approval_rule_type', type: 'selection' },
+    { name: 'approval_button_method', type: 'char' },
+    { name: 'approval_server_action_id', type: 'many2One' },
+    { name: 'approval_state_field_id', type: 'many2One' },
+    { name: 'approval_state_to_selection_id', type: 'many2One' },
+    { name: 'approval_state_to_m2o_value_id', type: 'many2One' },
     { name: 'approval_approver_type', type: 'selection' },
     { name: 'approval_approver_id', type: 'many2One' },
     { name: 'approval_approver_group_id', type: 'many2One' },

@@ -37,8 +37,6 @@ from odoo.exceptions import AccessError
 from odoo.tools import file_open
 from odoo.tools.safe_eval import _BUILTINS, safe_eval
 
-# Lazy import to avoid circular dependency — resolved at runtime
-
 _logger = logging.getLogger(__name__)
 
 
@@ -191,6 +189,7 @@ class WorkFunction(models.Model):
             ('field_change', 'On change'),
             ('other', 'Other functions'),
             ('button_click', 'Button Click (Studio)'),
+            ('approval', 'On Approval'),
         ],
         default='other'
     )
@@ -398,103 +397,6 @@ class WorkAuto(models.Model):
     )
     is_record_saved = fields.Boolean(default=False)
 
-    pending_approval_node_ids = fields.Many2many(
-        'node.struct',
-        string="Pending Approval Nodes",
-        help="Nodes that are currently waiting for human approval.",
-    )
-
-    def _run_from_node(self, node_id, record_model, record_id, approval_branch, approval_comment=''):
-        """
-        Resume workflow execution from a specific node's output port.
-        Used by the Human Approval node after an Approve/Reject/Timeout decision.
-        """
-        self.ensure_one()
-        try:
-            record = self.env[record_model].browse(record_id)
-        except Exception as e:
-            _logger.error("Could not find resume record %s,%s: %s", record_model, record_id, e)
-            return False
-
-        if not self.flow_data:
-            return False
-
-        nodes = self.flow_data.get('drawflow', {}).get('Home', {}).get('data', {})
-        # DrawFlow stores node IDs as string keys — try both str and the raw value.
-        start_node = nodes.get(str(node_id)) or nodes.get(node_id)
-        if not start_node:
-            _logger.warning(
-                "Workflow '%s': node_id=%s not found in flow_data on resume "
-                "(continuing with full-code re-run).",
-                self.name, node_id,
-            )
-            # Do not abort — full code re-run with __approval_resume__=True still works.
-
-        _logger.info("Resuming workflow %s from node %s with branch %s", self.id, node_id, approval_branch)
-
-        exec_code = self.code
-        if not exec_code:
-            return False
-
-        # Build the FULL execution context (same as _process) so branch code
-        # has access to all helpers: _logger, UserError, current_record, etc.
-        from odoo.tools.safe_eval import _BUILTINS
-
-        # Build the env that execute() will read via self.env.context
-        resume_env = self.env(context=dict(
-            self.env.context,
-            __approval_resume__=True,
-            approval_branch=approval_branch,
-            approval_comment=approval_comment or '',
-        ))
-
-        context = self.with_env(resume_env).get_context(records=record)
-        context.update(_BUILTINS)
-        context['_workflow_auto_id'] = self.id
-
-        # Restore trigger_type so the trigger guard in the compiled code passes.
-        # Prefer the value passed in via with_context() by _approval_resume;
-        # fall back to the related field on work.auto.
-        context['trigger_type'] = (
-            self.env.context.get('trigger_type')
-            or self.trigger_type
-            or ''
-        )
-
-        context['record'] = record
-        context['current_record'] = record
-        context['records'] = record
-        context['approval_branch'] = approval_branch
-        context['approval_status'] = approval_branch
-        context['approval_comment'] = approval_comment or ''
-        context['__approval_resume__'] = True
-
-        # Override 'env' in the eval globals so any ORM call inside the branch
-        # code (e.g. current_record.button_confirm()) also runs in the resume env.
-        context['env'] = resume_env
-
-        def _safe_schedule_activity(rec, **kwargs):
-            if not rec:
-                return False
-            valid = rec.filtered(lambda r: isinstance(r.id, int) and r.id > 0)
-            return valid.activity_schedule(**kwargs) if valid else False
-        context['_safe_schedule_activity'] = _safe_schedule_activity
-
-        # Run it
-        try:
-            code_obj = compile(exec_code.strip(), '<approval_resume>', 'exec')
-            local_dict = {}
-            eval(code_obj, context, local_dict)
-        except Exception as e:
-            import traceback as _tb
-            _logger.error(
-                "Workflow '%s' approval resume error (branch=%s):\n%s",
-                self.name, approval_branch, _tb.format_exc()
-            )
-            return False
-            
-        return True
-
     def _archive_workflows_with_whatsapp_nodes(self):
         """
             Archive active workflows containing WhatsApp nodes.
@@ -604,6 +506,68 @@ class WorkAuto(models.Model):
                 'trigger_function_ids': [(5, 0, 0)],
                 'function_id': False,
             })
+
+        # Sync approval rule if approval node exists and module is installed
+        if automation.env['ir.module.module'].search([('name', '=', 'cyllo_approval'), ('state', '=', 'installed')]):
+            approval_nodes = automation.node_struct_ids.filtered(lambda n: n.name == 'Approval' and n.trigger_type == 'approval')
+            for node in approval_nodes:
+                rule_domain = [('work_auto_id', '=', automation.id), ('model_id', '=', automation.model_id.id)]
+                existing_rule = automation.env['approval.rule'].search(rule_domain, limit=1)
+                
+                rule_vals = {
+                    'name': node.label or f'Approval Rule for {automation.name}',
+                    'model_id': automation.model_id.id,
+                    'work_auto_id': automation.id,
+                    'rule_type': node.approval_rule_type or 'button',
+                    'user_id': node.approval_approver_id.id if node.approval_approver_type == 'user' and node.approval_approver_id else False,
+                    'group_id': node.approval_approver_group_id.id if node.approval_approver_type == 'group' and node.approval_approver_group_id else False,
+                    'is_email': node.approval_notify_email,
+                    'is_email_request': node.approval_notify_email,
+                    'is_email_approve': node.approval_notify_email,
+                    'is_email_reject': node.approval_notify_email,
+                }
+
+                if node.approval_rule_type == 'button' and node.approval_button_method:
+                    button = automation.env['ir.buttons'].search([
+                        ('name', '=', node.approval_button_method),
+                        ('model_id', '=', automation.model_id.id)
+                    ], limit=1)
+                    if not button:
+                        automation.env['ir.buttons'].action_sync_buttons(automation.model_id.id)
+                        button = automation.env['ir.buttons'].search([
+                            ('name', '=', node.approval_button_method),
+                            ('model_id', '=', automation.model_id.id)
+                        ], limit=1)
+                    rule_vals['button_id'] = button.id if button else False
+
+                elif node.approval_rule_type == 'server':
+                    rule_vals['server_action_id'] = node.approval_server_action_id.id if node.approval_server_action_id else False
+
+                elif node.approval_rule_type == 'state':
+                    rule_vals['state_field_id'] = node.approval_state_field_id.id if node.approval_state_field_id else False
+                    rule_vals['state_to_selection_id'] = node.approval_state_to_selection_id.id if node.approval_state_to_selection_id else False
+                    
+                    if node.approval_state_to_m2o_value_id and node.approval_state_field_id:
+                        comodel = node.approval_state_field_id.relation
+                        if comodel:
+                            record = automation.env[comodel].sudo().browse(node.approval_state_to_m2o_value_id)
+                            if record.exists():
+                                display_name = record.display_name or record.name
+                                val = automation.env['approval.state.value'].search([('res_model', '=', comodel), ('res_id', '=', record.id)], limit=1)
+                                if not val:
+                                    val = automation.env['approval.state.value'].create({'res_model': comodel, 'res_id': record.id, 'name': display_name})
+                                rule_vals['state_to_m2o_value_id'] = val.id
+                            else:
+                                rule_vals['state_to_m2o_value_id'] = False
+                        else:
+                            rule_vals['state_to_m2o_value_id'] = False
+                    else:
+                        rule_vals['state_to_m2o_value_id'] = False
+
+                if existing_rule:
+                    existing_rule.write(rule_vals)
+                else:
+                    automation.env['approval.rule'].create(rule_vals)
 
         return automation.id
 
@@ -1518,9 +1482,7 @@ class WorkAuto(models.Model):
         # Skip execution of triggers if the recordset is empty (no records).
         # This prevents Expected singleton or access errors in downstream nodes
         # when background actions write to empty recordsets.
-        # EXCEPTION: approval resume calls must always proceed even if the
-        # original record was deleted — the workflow code handles missing records.
-        if hasattr(records, '_name') and not records and not args.get('__approval_resume__'):
+        if hasattr(records, '_name') and not records:
             _logger.info(
                 "Skipping workflow automation '%s' (ID %d) because the target recordset is empty.",
                 self.name, self.id
@@ -1535,12 +1497,8 @@ class WorkAuto(models.Model):
         # Only dedup top-level automations (direct ORM triggers).
         # Reusable automations called from another automation have a non-empty
         # __workflow_stack__ — skip dedup for them so they always execute.
-        # Approval resume calls (__approval_resume__=True) MUST always bypass
-        # dedup — they run in a separate HTTP request from the original trigger,
-        # so the dedup set has been reset, but to be safe we skip explicitly.
         is_reuse_call = len(stack) > 1  # stack has at least [parent_id, self.id]
-        is_approval_resume = bool(args.get('__approval_resume__'))
-        if records and incoming_trigger and incoming_trigger != 'field_change' and not is_reuse_call and not is_approval_resume:
+        if records and incoming_trigger and incoming_trigger != 'field_change' and not is_reuse_call:
             cr = self.env.cr
             if not hasattr(cr, '_workflow_done'):
                 cr._workflow_done = set()
@@ -1618,17 +1576,6 @@ class WorkAuto(models.Model):
             return valid.activity_schedule(**kwargs)
 
         context['_safe_schedule_activity'] = _safe_schedule_activity
-        context['_workflow_auto_id'] = self.id
-        _resolved_records = args.get('records', False)
-        context['_approval_res_model'] = (
-            self.model_id.sudo().model if self.model_id else
-            (getattr(_resolved_records, '_name', None) if _resolved_records else False)
-        )
-        context['_approval_res_id'] = (
-            _resolved_records.id
-            if _resolved_records and hasattr(_resolved_records, 'id') and len(_resolved_records) == 1
-            else False
-        )
 
         if self.code:
             code_obj = compile(self.code.strip(), "", 'exec')
@@ -1712,9 +1659,6 @@ class WorkAuto(models.Model):
             '_logger': _logger,
             'requests': _requests_lib,
             'json': _json_lib,
-            'approval_branch': '',
-            'approval_status': '',
-            'approval_comment': '',
         }
 
     @api.model

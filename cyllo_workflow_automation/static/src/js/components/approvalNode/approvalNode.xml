@@ -1,63 +1,139 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 
-    <!--
-        ApprovalNode modal template.
-        Inherits ConfigurationBase (same pattern as TryCatchNode, WebhookNode, etc.)
-        and injects all form fields into the .modal-body via xpath.
-
-        Three output ports:
-          1 — Approved  (green)
-          2 — Rejected  (red)
-          3 — Timeout   (orange)
-    -->
     <t t-name="ApprovalNode" t-inherit="ConfigurationBase" t-inherit-mode="primary">
         <xpath expr="//div[hasclass('modal-body')]" position="inside">
-            <div class="py-2 px-1">
+            <div class="approval-node">
 
-                <!-- ══════════════════════════════════════════════════════
-                     INFO BANNER
-                ══════════════════════════════════════════════════════ -->
-                <div class="alert alert-info small py-2 mb-3 d-flex align-items-start gap-2">
-                    <i class="fa fa-user-check mt-1"/>
-                    <span>
-                        The <strong>Approval</strong> node pauses the workflow and sends a
-                        secure link to the approver. Route downstream nodes to the
-                        <em>Approved</em>, <em>Rejected</em>, or <em>Timeout</em> ports.
-                    </span>
-                </div>
+                <!-- ── Trigger Configuration ────────────────────────────── -->
+                <div class="cy-config-section-header mt-1 mb-2 fw-semibold">Trigger Configuration</div>
 
-                <!-- ══════════════════════════════════════════════════════
-                     NODE LABEL
-                ══════════════════════════════════════════════════════ -->
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Node Label</label>
+                <div class="cy-config-section mb-3">
+                    <label class="form-label mb-1 fw-semibold">Label *</label>
                     <input type="text"
+                           t-att-class="'o_input ' + (approvalState.labelError ? 'border-danger' : '')"
                            style="border-radius:0px !important;"
-                           t-ref="labelInput"
-                           class="o_input"
-                           autocomplete="off"
-                           placeholder="e.g. Manager Approval"
-                           t-att-value="fieldState.label or ''"
-                           t-on-input="(ev) => this.setLabel(ev.target.value)"/>
-                    <div t-if="approvalState.labelError" class="text-danger small mt-1">
-                        Label is required.
-                    </div>
+                           t-att-value="getLabel"
+                           t-on-change="(e) => this.setLabel(e.target.value)"
+                           placeholder="e.g. Purchase Manager Approval"/>
                 </div>
 
-                <!-- ══════════════════════════════════════════════════════
-                     APPROVER CONFIGURATION
-                ══════════════════════════════════════════════════════ -->
-                <div class="fw-semibold mb-2 mt-3 border-bottom pb-1" style="color:#875a7b;">
-                    Approver Configuration
-                </div>
-
-                <!-- Approver Type -->
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Approver Type <span class="text-danger">*</span></label>
-                    <select class="o_input w-100"
+                <div class="cy-config-section mb-3">
+                    <label class="form-label mb-1 fw-semibold">Trigger Rule Type *</label>
+                    <select class="o_input"
                             style="border-radius:0px !important;"
-                            t-on-change="(ev) => this.setApproverType(ev.target.value)">
+                            t-on-change="(e) => this.setRuleType(e.target.value)">
+                        <option value="button"
+                                t-att-selected="approvalState.ruleType === 'button'">
+                            Button Click
+                        </option>
+                        <option value="server"
+                                t-att-selected="approvalState.ruleType === 'server'">
+                            Server Action
+                        </option>
+                        <option value="state"
+                                t-att-selected="approvalState.ruleType === 'state'">
+                            State Change
+                        </option>
+                    </select>
+                </div>
+
+                <t t-if="approvalState.ruleType === 'button'">
+                    <div class="cy-config-section mb-3">
+                        <label class="form-label mb-1 fw-semibold">Button Method *</label>
+                        <select class="o_input"
+                                style="border-radius:0px !important;"
+                                t-on-change="this.setButtonMethod.bind(this)">
+                            <option value="">-- Select Button --</option>
+                            <t t-foreach="approvalState.buttons" t-as="btn" t-key="btn.id">
+                                <option t-att-value="btn.name"
+                                        t-att-selected="approvalState.buttonMethod === btn.name">
+                                    <t t-esc="btn.display_name"/>
+                                </option>
+                            </t>
+                        </select>
+                        <p class="form-text text-muted small">
+                            The button to intercept.
+                        </p>
+                    </div>
+                </t>
+
+                <t t-if="approvalState.ruleType === 'server'">
+                    <div class="cy-config-section mb-3">
+                        <label class="form-label mb-1 fw-semibold">Server Action *</label>
+                        <select class="o_input"
+                                style="border-radius:0px !important;"
+                                t-on-change="this.setServerActionId.bind(this)">
+                            <option value="">-- Select Server Action --</option>
+                            <t t-foreach="approvalState.serverActions" t-as="act" t-key="act.id">
+                                <option t-att-value="act.id"
+                                        t-att-selected="approvalState.serverActionId === act.id">
+                                    <t t-esc="act.name"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                </t>
+
+                <t t-if="approvalState.ruleType === 'state'">
+                    <div class="cy-config-section mb-3">
+                        <label class="form-label mb-1 fw-semibold">State Field *</label>
+                        <select class="o_input"
+                                style="border-radius:0px !important;"
+                                t-on-change="(e) => this.onStateFieldChange(e.target.value)">
+                            <option value="">-- Select State Field --</option>
+                            <t t-foreach="approvalState.stateFields" t-as="fld" t-key="fld.id">
+                                <option t-att-value="fld.id"
+                                        t-att-selected="approvalState.stateFieldId === fld.id">
+                                    <t t-esc="fld.field_description + ' (' + fld.name + ')'"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+                    
+                    <t t-if="approvalState.activeStateField and approvalState.activeStateField.ttype === 'selection'">
+                        <div class="cy-config-section mb-3">
+                            <label class="form-label mb-1 fw-semibold">Target State Selection *</label>
+                            <select class="o_input"
+                                    style="border-radius:0px !important;"
+                                    t-on-change="this.setStateSelectionId.bind(this)">
+                                <option value="">-- Select Target State --</option>
+                                <t t-foreach="approvalState.stateSelections" t-as="sel" t-key="sel.id">
+                                    <option t-att-value="sel.id"
+                                            t-att-selected="approvalState.stateSelectionId === sel.id">
+                                        <t t-esc="sel.name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </t>
+                    
+                    <t t-if="approvalState.activeStateField and approvalState.activeStateField.ttype === 'many2one'">
+                        <div class="cy-config-section mb-3">
+                            <label class="form-label mb-1 fw-semibold">Target Stage *</label>
+                            <select class="o_input"
+                                    style="border-radius:0px !important;"
+                                    t-on-change="this.setStateM2oId.bind(this)">
+                                <option value="">-- Select Target Stage --</option>
+                                <t t-foreach="approvalState.stateM2os" t-as="m2o" t-key="m2o.id">
+                                    <option t-att-value="m2o.id"
+                                            t-att-selected="approvalState.stateM2oId === m2o.id">
+                                        <t t-esc="m2o.display_name"/>
+                                    </option>
+                                </t>
+                            </select>
+                        </div>
+                    </t>
+                </t>
+
+                <!-- ── Approver Configuration ────────────────────────────── -->
+                <div class="cy-config-section-header mt-3 mb-2 fw-semibold">Approver Configuration</div>
+
+                <div class="cy-config-section mb-3">
+                    <label class="form-label mb-1 fw-semibold">Approver Type *</label>
+                    <select class="o_input"
+                            style="border-radius:0px !important;"
+                            t-on-change="(e) => this.setApproverType(e.target.value)">
                         <option value="user"
                                 t-att-selected="approvalState.approverType === 'user'">
                             Specific User
@@ -66,209 +142,61 @@
                                 t-att-selected="approvalState.approverType === 'group'">
                             User Group
                         </option>
-                        <option value="dynamic"
-                                t-att-selected="approvalState.approverType === 'dynamic'">
-                            Dynamic Field (Python expression)
-                        </option>
                     </select>
                 </div>
 
-                <!-- Specific User selector -->
                 <t t-if="approvalState.approverType === 'user'">
-                    <div class="mb-3">
-                        <label class="form-label mb-1 fw-semibold">Approver User <span class="text-danger">*</span></label>
-                        <select class="o_input w-100"
+                    <div class="cy-config-section mb-3">
+                        <label class="form-label mb-1 fw-semibold">Approver User *</label>
+                        <select class="o_input"
                                 style="border-radius:0px !important;"
-                                t-att-class="{'border-danger': approvalState.approverError}"
-                                t-on-change="(ev) => this.onUserSelected(ev.target.value)">
-                            <option value="">— Select a User —</option>
-                            <t t-foreach="approvalState.users" t-as="u" t-key="u[0]">
-                                <option t-att-value="u[0]"
-                                        t-att-selected="approvalState.approverId == u[0]">
-                                    <t t-esc="u[1]"/>
+                                t-att-class="{'cy-input-error': approvalState.approverError}"
+                                t-on-change="this.setApproverUserId.bind(this)">
+                            <option value="">-- Select User --</option>
+                            <t t-foreach="approvalState.users" t-as="usr" t-key="usr.id">
+                                <option t-att-value="usr.id"
+                                        t-att-selected="approvalState.approverId === usr.id">
+                                    <t t-esc="usr.name"/>
                                 </option>
                             </t>
                         </select>
-                        <div class="form-text text-muted small">
-                            The selected user will receive the approval request email/notification.
-                        </div>
-                        <div t-if="approvalState.approverError" class="text-danger small mt-1">
-                            Select an approver user.
-                        </div>
+                        <span t-if="approvalState.approverError" class="text-danger small mt-1">
+                            Select a valid user.
+                        </span>
                     </div>
                 </t>
 
-                <!-- Group selector -->
                 <t t-if="approvalState.approverType === 'group'">
-                    <div class="mb-3">
-                        <label class="form-label mb-1 fw-semibold">Approver Group <span class="text-danger">*</span></label>
-                        <select class="o_input w-100"
+                    <div class="cy-config-section mb-3">
+                        <label class="form-label mb-1 fw-semibold">Approver Group *</label>
+                        <select class="o_input"
                                 style="border-radius:0px !important;"
-                                t-att-class="{'border-danger': approvalState.approverError}"
-                                t-on-change="(ev) => this.onGroupSelected(ev.target.value)">
-                            <option value="">— Select a Group —</option>
-                            <t t-foreach="approvalState.groups" t-as="g" t-key="g[0]">
-                                <option t-att-value="g[0]"
-                                        t-att-selected="approvalState.approverGroupId == g[0]">
-                                    <t t-esc="g[1]"/>
+                                t-att-class="{'cy-input-error': approvalState.approverError}"
+                                t-on-change="this.setApproverGroupId.bind(this)">
+                            <option value="">-- Select Group --</option>
+                            <t t-foreach="approvalState.groups" t-as="grp" t-key="grp.id">
+                                <option t-att-value="grp.id"
+                                        t-att-selected="approvalState.approverGroupId === grp.id">
+                                    <t t-esc="grp.display_name"/>
                                 </option>
                             </t>
                         </select>
-                        <div class="form-text text-muted small">
-                            The first user in this group will receive the approval request.
-                        </div>
-                        <div t-if="approvalState.approverError" class="text-danger small mt-1">
-                            Select an approver group.
-                        </div>
+                        <span t-if="approvalState.approverError" class="text-danger small mt-1">
+                            Select a valid group.
+                        </span>
                     </div>
                 </t>
 
-                <!-- Dynamic expression -->
-                <t t-if="approvalState.approverType === 'dynamic'">
-                    <div class="mb-3">
-                        <label class="form-label mb-1 fw-semibold">Approver Field Expression <span class="text-danger">*</span></label>
-                        <input type="text"
-                               style="border-radius:0px !important; font-family: monospace;"
-                               class="o_input"
-                               t-att-class="{'border-danger': approvalState.approverError}"
-                               placeholder="e.g. record.user_id  or  record.department_id.manager_id"
-                               t-att-value="approvalState.approverField"
-                               t-on-input="(ev) => this.setApproverField(ev.target.value)"/>
-                        <div class="form-text text-muted small">
-                            Python expression that resolves to a <code>res.users</code> record at runtime.
-                        </div>
-                        <div t-if="approvalState.approverError" class="text-danger small mt-1">
-                            Enter an approver field expression.
-                        </div>
-                    </div>
-                </t>
+                <!-- ── Notification ──────────────────────────────────────── -->
+                <div class="cy-config-section-header mt-3 mb-2 fw-semibold">Notification</div>
 
-                <!-- ══════════════════════════════════════════════════════
-                     NOTIFICATION
-                ══════════════════════════════════════════════════════ -->
-                <div class="fw-semibold mb-2 mt-3 border-bottom pb-1" style="color:#875a7b;">
-                    Notification
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Subject</label>
-                    <input type="text"
-                           style="border-radius:0px !important;"
-                           class="o_input"
-                           placeholder="Your Approval is Required"
-                           t-att-value="approvalState.subject"
-                           t-on-input="(ev) => this.setSubject(ev.target.value)"/>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Message <span class="text-muted fw-normal">(optional)</span></label>
-                    <textarea style="border-radius:0px !important;"
-                              class="o_input w-100"
-                              rows="3"
-                              placeholder="Additional details or instructions for the approver…"
-                              t-on-input="(ev) => this.setMessage(ev.target.value)">
-                        <t t-esc="approvalState.message"/>
-                    </textarea>
-                </div>
-
-                <div class="mb-3 d-flex gap-4">
-                    <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
+                <div class="cy-config-section d-flex gap-4 mb-3">
+                    <label class="d-flex align-items-center gap-2 cursor-pointer">
                         <input type="checkbox"
                                t-att-checked="approvalState.notifyEmail"
-                               t-on-change="(ev) => this.setNotifyEmail(ev.target.checked)"/>
-                        <span>Send Email</span>
+                               t-on-change="(e) => { approvalState.notifyEmail = e.target.checked; }"/>
+                        Enable Email Notifications
                     </label>
-                    <label class="d-flex align-items-center gap-2" style="cursor:pointer;">
-                        <input type="checkbox"
-                               t-att-checked="approvalState.notifyInbox"
-                               t-on-change="(ev) => this.setNotifyInbox(ev.target.checked)"/>
-                        <span>Odoo Inbox</span>
-                    </label>
-                </div>
-
-                <!-- ══════════════════════════════════════════════════════
-                     TIMEOUT SETTINGS
-                ══════════════════════════════════════════════════════ -->
-                <div class="fw-semibold mb-2 mt-3 border-bottom pb-1" style="color:#875a7b;">
-                    Timeout
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Expire After (hours)</label>
-                    <input type="number"
-                           style="border-radius:0px !important;"
-                           class="o_input"
-                           min="0"
-                           step="0.5"
-                           placeholder="0 = never expire"
-                           t-att-value="approvalState.expireAfter"
-                           t-on-input="(ev) => this.setExpireAfter(ev.target.value)"/>
-                    <div class="form-text text-muted small">
-                        Set &gt; 0 to automatically route to the <strong>Timeout</strong> port after this many hours.
-                    </div>
-                </div>
-
-                <!-- ══════════════════════════════════════════════════════
-                     AUTO-APPROVAL RULE
-                ══════════════════════════════════════════════════════ -->
-                <div class="fw-semibold mb-2 mt-3 border-bottom pb-1" style="color:#875a7b;">
-                    Auto-Approval Rule <span class="text-muted fw-normal small">(optional)</span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Auto-Approve Expression (Python)</label>
-                    <input type="text"
-                           style="border-radius:0px !important; font-family: monospace;"
-                           class="o_input"
-                           placeholder="e.g. record.amount_total &lt; 1000"
-                           t-att-value="approvalState.autoRule"
-                           t-on-input="(ev) => this.setAutoRule(ev.target.value)"/>
-                    <div class="form-text text-muted small">
-                        If this expression evaluates to <code>True</code>, the <strong>Approved</strong>
-                        branch is taken immediately — no human input needed.
-                    </div>
-                </div>
-
-                <!-- ══════════════════════════════════════════════════════
-                     RESULT VARIABLE
-                ══════════════════════════════════════════════════════ -->
-                <div class="fw-semibold mb-2 mt-3 border-bottom pb-1" style="color:#875a7b;">
-                    Result Variable <span class="text-muted fw-normal small">(optional)</span>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label mb-1 fw-semibold">Variable Name</label>
-                    <input type="text"
-                           style="border-radius:0px !important;"
-                           class="o_input"
-                           placeholder="e.g. approval_status"
-                           t-att-value="approvalState.resultVariable"
-                           t-on-input="(ev) => this.setResultVariable(ev.target.value)"/>
-                    <div class="form-text text-muted small">
-                        Stores <code>'approved'</code>, <code>'rejected'</code>, or
-                        <code>'timeout'</code> for use in downstream nodes.
-                    </div>
-                </div>
-
-                <!-- ══════════════════════════════════════════════════════
-                     OUTPUT PORT SUMMARY
-                ══════════════════════════════════════════════════════ -->
-                <div class="border rounded p-2 bg-light small mt-3">
-                    <div class="fw-semibold mb-1">Output Ports</div>
-                    <div class="d-flex flex-column gap-1">
-                        <div>
-                            <span class="badge bg-success me-1">1 — Approved</span>
-                            Taken when the approver clicks Approve.
-                        </div>
-                        <div>
-                            <span class="badge bg-danger me-1">2 — Rejected</span>
-                            Taken when the approver clicks Reject.
-                        </div>
-                        <div>
-                            <span class="badge me-1" style="background:#fd7e14;">3 — Timeout</span>
-                            Taken when the request expires before a decision is made.
-                        </div>
-                    </div>
                 </div>
 
             </div>

@@ -201,6 +201,7 @@
                                                 <i class="ri-add-circle-fill"></i>
                                                 <p>Create Trigger</p>
                                             </div>
+
 										</div>
 									</div>
 								</div>
@@ -383,6 +384,16 @@
                                                 <p>WhatsApp</p>
                                             </div>
                                             </t>
+                                            <t t-if="state.hasApprovalModule and !isFieldChangeTrigger">
+                                            <div class="collapse_btn"
+                                                 t-on-dragstart="(ev) => this.dragStart(ev,'approval')"
+                                                 draggable="true" data-node="Approval">
+                                                <img draggable="false"
+                                                     src="cyllo_workflow_automation/static/src/img/node-icons/approval.svg"
+                                                     alt=""/>
+                                                <p>Approval</p>
+                                            </div>
+                                            </t>
                                             <t t-if="!isFieldChangeTrigger">
                                             <div class="collapse_btn"
                                                  t-on-dragstart="(ev) => this.dragStart(ev,'SMS')"
@@ -434,17 +445,6 @@
                                                      alt=""/>
                                                 <p>Try Catch</p>
                                             </div>
-                                            <t t-if="state.hasApprovalModule">
-                                                <div class="collapse_btn" draggable="true"
-                                                     t-on-dragstart="(ev) => this.dragStart(ev,'approval')"
-                                                     data-node="Approval"
-                                                     data-type="action_to_do">
-                                                    <img draggable="false"
-                                                         src="cyllo_workflow_automation/static/src/img/node-icons/approval.svg"
-                                                         alt=""/>
-                                                    <p>Approval</p>
-                                                </div>
-                                            </t>
                                         </div>
                                     </div>
                                 </div>

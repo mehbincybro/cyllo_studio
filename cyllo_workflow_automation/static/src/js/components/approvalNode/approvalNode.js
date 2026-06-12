@@ -1,6 +1,5 @@
 /** @odoo-module */
 const { useState, useRef, onMounted } = owl;
-const { onWillStart } = owl;
 import { ConfigurationBase } from "../configurationBase/configurationBase";
 
 /**
@@ -29,73 +28,165 @@ import { ConfigurationBase } from "../configurationBase/configurationBase";
  *   - resultVariable          — variable name to store approval status.
  */
 export class ApprovalNode extends ConfigurationBase {
-    static props = ['*'];
     setup() {
         super.setup();
         this.labelInput = useRef("labelInput");
 
         this.approvalState = useState({
+            ruleType: "button",
+            buttonMethod: "",
+            serverActionId: null,
+            stateFieldId: null,
+            stateSelectionId: null,
+            stateM2oId: null,
             approverType: "user",
             approverId: null,
             approverGroupId: null,
-            approverField: "",
             subject: "Your Approval is Required",
-            message: "",
             notifyEmail: true,
-            notifyInbox: true,
-            expireAfter: 0,
-            autoRule: "",
-            resultVariable: "",
-            labelError: false,
-            approverError: false,
+            buttons: [],
             users: [],
             groups: [],
-        });
-
-        onWillStart(async () => {
-            try {
-                this.approvalState.users = await this.orm.searchRead(
-                    "res.users",
-                    [["active", "=", true], ["share", "=", false]],
-                    ["id", "name"],
-                    { limit: 200, order: "name asc" }
-                );
-                this.approvalState.users = this.approvalState.users.map(u => [u.id, u.name]);
-            } catch (e) {
-                console.warn("ApprovalNode: could not load users", e);
-                this.approvalState.users = [];
-            }
-
-            try {
-                this.approvalState.groups = await this.orm.searchRead(
-                    "res.groups",
-                    [],
-                    ["id", "name"],
-                    { limit: 200, order: "name asc" }
-                );
-                this.approvalState.groups = this.approvalState.groups.map(g => [g.id, g.name]);
-            } catch (e) {
-                console.warn("ApprovalNode: could not load groups", e);
-                this.approvalState.groups = [];
-            }
+            labelError: false,
+            approverError: false,
         });
 
         onMounted(() => {
             if (this.labelInput.el) this.labelInput.el.focus();
             // Restore saved values
             const fs = this.fieldState;
-            this.approvalState.approverType = fs.approval_approver_type || "user";
-            this.approvalState.approverId = fs.approval_approver_id || null;
-            this.approvalState.approverGroupId = fs.approval_approver_group_id || null;
-            this.approvalState.approverField = fs.approval_approver_field || "";
-            this.approvalState.subject = fs.approval_subject || "Your Approval is Required";
-            this.approvalState.message = fs.approval_message || "";
-            this.approvalState.notifyEmail = fs.approval_notify_email !== false;
-            this.approvalState.notifyInbox = fs.approval_notify_inbox !== false;
-            this.approvalState.expireAfter = fs.approval_expire_after || 0;
-            this.approvalState.autoRule = fs.approval_auto_rule || "";
-            this.approvalState.resultVariable = fs.approval_result_variable || "";
+            this.approvalState.ruleType         = fs.approval_rule_type        || "button";
+            this.approvalState.buttonMethod     = fs.approval_button_method    || "";
+            this.approvalState.serverActionId   = fs.approval_server_action_id || null;
+            this.approvalState.stateFieldId     = fs.approval_state_field_id   || null;
+            this.approvalState.stateSelectionId = fs.approval_state_to_selection_id || null;
+            this.approvalState.stateM2oId       = fs.approval_state_to_m2o_value_id || null;
+            this.approvalState.approverType     = fs.approval_approver_type    || "user";
+            this.approvalState.approverId       = fs.approval_approver_id      || null;
+            this.approvalState.approverGroupId  = fs.approval_approver_group_id || null;
+            this.approvalState.subject          = fs.approval_subject          || "Your Approval is Required";
+            this.approvalState.notifyEmail      = fs.approval_notify_email !== false;
+
+            this.approvalState.serverActions    = [];
+            this.approvalState.stateFields      = [];
+            this.approvalState.stateSelections  = [];
+            this.approvalState.stateM2os        = [];
+            this.approvalState.activeStateField = null; // To store full field metadata
+
+            this.fetchApprovalData();
         });
+    }
+
+    async fetchApprovalData() {
+        let modelId = this.props.primaryModelId || this.fieldState.model_id;
+        
+        if (!modelId && this.variables) {
+            const currentRec = this.variables.find(v => v.variable_name === 'current_record');
+            if (currentRec && currentRec.modelId) {
+                modelId = currentRec.modelId;
+            }
+        }
+        
+        try {
+            if (modelId) {
+                await this.orm.call('ir.buttons', 'action_sync_buttons', [modelId]);
+                this.approvalState.buttons = await this.orm.searchRead('ir.buttons', [['model_id', '=', modelId]], ['id', 'name', 'display_name']);
+            }
+        } catch (e) {
+            console.warn("Could not fetch ir.buttons", e);
+        }
+
+        try {
+            if (modelId) {
+                this.approvalState.serverActions = await this.orm.searchRead('ir.actions.server', [['model_id', '=', modelId]], ['id', 'name']);
+            }
+        } catch (e) {}
+
+        try {
+            if (modelId) {
+                this.approvalState.stateFields = await this.orm.searchRead(
+                    'ir.model.fields', 
+                    [['model_id', '=', modelId], ['name', 'in', ['state', 'stage_id']]], 
+                    ['id', 'name', 'field_description', 'ttype', 'relation']
+                );
+                
+                // If a state field was already selected, load its options
+                if (this.approvalState.stateFieldId) {
+                    this.onStateFieldChange(this.approvalState.stateFieldId);
+                }
+            }
+        } catch (e) {}
+
+        try {
+            this.approvalState.users = await this.orm.searchRead('res.users', [], ['id', 'name']);
+        } catch (e) {}
+
+        try {
+            this.approvalState.groups = await this.orm.searchRead('res.groups', [], ['id', 'display_name']);
+        } catch (e) {}
+    }
+
+    async onStateFieldChange(fieldId) {
+        this.approvalState.stateFieldId = parseInt(fieldId) || null;
+        if (!this.approvalState.stateFieldId) {
+            this.approvalState.activeStateField = null;
+            this.approvalState.stateSelections = [];
+            this.approvalState.stateM2os = [];
+            return;
+        }
+
+        const field = this.approvalState.stateFields.find(f => f.id === this.approvalState.stateFieldId);
+        this.approvalState.activeStateField = field || null;
+
+        if (field && field.ttype === 'selection') {
+            this.approvalState.stateSelections = await this.orm.searchRead(
+                'ir.model.fields.selection',
+                [['field_id', '=', field.id]],
+                ['id', 'name', 'value']
+            );
+            this.approvalState.stateM2os = [];
+            // Reset M2O
+            if (this.fieldState.approval_state_field_id !== field.id) {
+                this.approvalState.stateM2oId = null;
+            }
+        } else if (field && field.ttype === 'many2one' && field.relation) {
+            this.approvalState.stateM2os = await this.orm.searchRead(
+                field.relation,
+                [],
+                ['id', 'display_name']
+            );
+            this.approvalState.stateSelections = [];
+            // Reset Selection
+            if (this.fieldState.approval_state_field_id !== field.id) {
+                this.approvalState.stateSelectionId = null;
+            }
+        }
+    }
+
+    setButtonMethod(e) {
+        this.approvalState.buttonMethod = e.target.value;
+    }
+
+    setServerActionId(e) {
+        this.approvalState.serverActionId = parseInt(e.target.value) || null;
+    }
+
+    setStateSelectionId(e) {
+        this.approvalState.stateSelectionId = parseInt(e.target.value) || null;
+    }
+
+    setStateM2oId(e) {
+        this.approvalState.stateM2oId = parseInt(e.target.value) || null;
+    }
+
+    setApproverUserId(e) {
+        this.approvalState.approverId = parseInt(e.target.value) || null;
+        this.approvalState.approverError = false;
+    }
+
+    setApproverGroupId(e) {
+        this.approvalState.approverGroupId = parseInt(e.target.value) || null;
+        this.approvalState.approverError = false;
     }
 
     // Handlers
@@ -109,36 +200,25 @@ export class ApprovalNode extends ConfigurationBase {
         });
     }
 
+    setRuleType(value) {
+        this.approvalState.ruleType = value;
+    }
+
+    get getLabel() {
+        return this.fieldState.label || "";
+    }
+
+    setLabel(label) {
+        this.fieldState.label = label;
+        this.approvalState.labelError = false;
+        const nodeId = this.props.id;
+        this.env.bus.trigger("CHANGE-LABEL", { label, nodeId });
+    }
+
     setApproverType(value) {
         this.approvalState.approverType = value;
-        this.approvalState.approverId = null;
-        this.approvalState.approverGroupId = null;
-        this.approvalState.approverField = "";
         this.approvalState.approverError = false;
     }
-
-    onUserSelected(rawValue) {
-        this.approvalState.approverId = parseInt(rawValue) || null;
-        this.approvalState.approverError = false;
-    }
-
-    onGroupSelected(rawValue) {
-        this.approvalState.approverGroupId = parseInt(rawValue) || null;
-        this.approvalState.approverError = false;
-    }
-
-    setApproverField(value) {
-        this.approvalState.approverField = value;
-        this.approvalState.approverError = false;
-    }
-
-    setSubject(value) { this.approvalState.subject = value; }
-    setMessage(value) { this.approvalState.message = value; }
-    setNotifyEmail(checked) { this.approvalState.notifyEmail = checked; }
-    setNotifyInbox(checked) { this.approvalState.notifyInbox = checked; }
-    setExpireAfter(value) { this.approvalState.expireAfter = parseFloat(value) || 0; }
-    setAutoRule(value) { this.approvalState.autoRule = value; }
-    setResultVariable(value) { this.approvalState.resultVariable = value.trim(); }
 
     // Validation
 
@@ -157,23 +237,22 @@ export class ApprovalNode extends ConfigurationBase {
         } else if (aType === "group" && !this.approvalState.approverGroupId) {
             this.approvalState.approverError = true;
             errors.approver = "Select a user group as approver.";
-        } else if (aType === "dynamic" && !(this.approvalState.approverField || "").trim()) {
-            this.approvalState.approverError = true;
-            errors.approver = "Enter a Python expression for the approver field.";
+        }
+
+        const rType = this.approvalState.ruleType;
+        if (rType === "button" && !this.approvalState.buttonMethod) {
+            errors.rule = "Enter the button method.";
+        } else if (rType === "server" && !this.approvalState.serverActionId) {
+            errors.rule = "Enter the server action ID.";
+        } else if (rType === "state" && !this.approvalState.stateFieldId) {
+            errors.rule = "Enter the state field ID.";
         }
 
         return { isValid: Object.keys(errors).length === 0, errors };
     }
 
-    // Code generation
-
-    /**
-     * Generate the Python code injected into the workflow execution context.
-     */
     generateCode() {
-        const resultVar = (this.approvalState.resultVariable || "").trim();
-        const resultVarLine = resultVar ? `\n${resultVar} = approval_branch` : "";
-        return "__approval_node_pause__" + resultVarLine;
+        return "";
     }
 
     // Confirm
@@ -192,18 +271,18 @@ export class ApprovalNode extends ConfigurationBase {
         }
 
         // Persist config into fieldState
-        this.fieldState.approval_approver_type = this.approvalState.approverType;
-        this.fieldState.approval_approver_id = this.approvalState.approverId;
-        this.fieldState.approval_approver_group_id = this.approvalState.approverGroupId;
-        this.fieldState.approval_approver_field = this.approvalState.approverField;
-        this.fieldState.approval_subject = this.approvalState.subject;
-        this.fieldState.approval_message = this.approvalState.message;
-        this.fieldState.approval_notify_email = this.approvalState.notifyEmail;
-        this.fieldState.approval_notify_inbox = this.approvalState.notifyInbox;
-        this.fieldState.approval_expire_after = this.approvalState.expireAfter;
-        this.fieldState.approval_timeout_hours = this.approvalState.expireAfter;
-        this.fieldState.approval_auto_rule = this.approvalState.autoRule;
-        this.fieldState.approval_result_variable = this.approvalState.resultVariable;
+        this.fieldState.trigger_type                   = "approval";
+        this.fieldState.approval_rule_type             = this.approvalState.ruleType;
+        this.fieldState.approval_button_method         = this.approvalState.buttonMethod;
+        this.fieldState.approval_server_action_id      = this.approvalState.serverActionId;
+        this.fieldState.approval_state_field_id        = this.approvalState.stateFieldId;
+        this.fieldState.approval_state_to_selection_id = this.approvalState.stateSelectionId;
+        this.fieldState.approval_state_to_m2o_value_id = this.approvalState.stateM2oId;
+        this.fieldState.approval_approver_type         = this.approvalState.approverType;
+        this.fieldState.approval_approver_id           = this.approvalState.approverId;
+        this.fieldState.approval_approver_group_id     = this.approvalState.approverGroupId;
+        this.fieldState.approval_subject               = this.approvalState.subject;
+        this.fieldState.approval_notify_email          = this.approvalState.notifyEmail;
 
         const code = this.generateCode();
         this.state.used_variables = {};
