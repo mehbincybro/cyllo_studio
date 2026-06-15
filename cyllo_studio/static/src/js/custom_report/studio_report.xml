@@ -3,172 +3,198 @@
     <t t-name="custom_report.edit_report">
         <div class="d-flex flex-column w-100 bg-200" style="height: 100vh;">
             <!-- Header -->
-            <div class="cy-report-hdr w-100 bg-white border-bottom px-4 py-3 d-flex align-items-center shadow-sm">
-                <div class="d-flex align-items-center gap-2 flex-shrink-0">
-                    <button class="cy-back-icon-btn btn btn-light border-0"
-                            title="Back to Reports"
-                            t-on-click="() => this.close_edit(this)">
-                        <i class="ri-arrow-left-line"/>
+            <div class="cy-report-hdr">
+                <button class="cy-back-icon-btn" title="Back to Reports" t-on-click="() => this.close_edit(this)">
+                    <i class="ri-arrow-left-line"/>
+                </button>
+                <span class="cy-report-title">Quotation / Order</span>
+
+                <div class="cy-hdr-divider"></div>
+
+                <div class="cy-preview-toggle d-flex align-items-center gap-2">
+                    <span>Preview</span>
+                    <label class="cy-switch-wrap m-0">
+                        <input type="checkbox" id="previewSwitch" t-on-change="togglePreview" t-att-checked="state.previewMode"/>
+                        <span class="cy-slider"></span>
+                    </label>
+                </div>
+
+                <div class="cy-hdr-divider"></div>
+
+                <div class="position-relative">
+                    <button class="cy-hdr-actions-btn" t-att-disabled="state.isSaving" t-on-click="() => state.showActionsMenu = !state.showActionsMenu">
+                        <i class="fa fa-sliders me-1"/> Actions <i class="fa fa-chevron-down ms-1"/>
                     </button>
-                    <button class="cy-hdr-save btn"
-                            t-att-disabled="state.isSaving"
-                            t-on-click="() => this.save_changes(this)">
-                        <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
-                        Save
-                    </button>
-                    <button class="cy-hdr-discard btn"
-                            t-on-click="() => this.close_edit(this)">Discard</button>
-                    <div class="position-relative">
-                        <button class="btn btn-light border btn-sm px-2 py-1"
-                                t-att-disabled="state.isSaving"
-                                t-on-click="() => state.showActionsMenu = !state.showActionsMenu">
-                            <i class="fa fa-bars me-1"/>
-                            Actions
-                        </button>
-                        <div t-if="state.showActionsMenu"
-                             class="position-absolute bg-white border rounded shadow-sm py-1"
-                             style="top: 38px; left: 0; min-width: 180px; z-index: 1050;">
-<!--                            <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white"-->
-<!--                                    t-on-click="saveReportFromActions">-->
-<!--                                Save Report-->
-<!--                            </button>-->
-                            <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white"
-                                    t-on-click="openSaveTemplateDialog">
-                                Save as Template
-                            </button>
-                            <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white"
-                                    t-on-click="exportTemplate">
-                                Export Template
-                            </button>
-                        </div>
+                    <div t-if="state.showActionsMenu" class="position-absolute bg-white border rounded shadow-sm py-1" style="top: 38px; left: 0; min-width: 180px; z-index: 1050;">
+                        <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white" t-on-click="openSaveTemplateDialog">Save as Template</button>
+                        <button class="dropdown-item text-start w-100 px-3 py-2 border-0 bg-white" t-on-click="exportTemplate">Export Template</button>
                     </div>
                 </div>
-                <div class="ms-4 form-check form-switch pt-1">
-                    <input class="form-check-input" type="checkbox" id="previewSwitch" t-on-change="togglePreview"
-                           t-att-checked="state.previewMode"/>
-                    <label class="form-check-label fw-bold" for="previewSwitch">Preview</label>
-                </div>
-                <!-- Preview-mode controls: Print + Record navigation -->
+
                 <div class="flex-grow-1"/>
+
                 <t t-if="!state.previewMode">
-                    <button t-ref="undoBtn" t-on-click="undo" class="btn btn-light border mx-1" disabled="1"
-                            title="Undo">
+                    <div class="cy-hdr-divider"></div>
+                    <button t-ref="undoBtn" t-on-click="undo" class="cy-hdr-icon-btn" disabled="1" title="Undo">
                         <i class="fa fa-undo"/>
                     </button>
-                    <button t-ref="redoBtn" t-on-click="redo" class="btn btn-light border mx-1" disabled="1"
-                            title="Redo">
+                    <button t-ref="redoBtn" t-on-click="redo" class="cy-hdr-icon-btn" disabled="1" title="Redo">
                         <i class="fa fa-repeat"/>
                     </button>
                 </t>
                 <t t-if="state.previewMode">
-                <button class="btn btn-light border px-3 position-absolute translate-middle-x"
-                        style="left: calc(50% + 170px);"
-                        t-on-click="onPrintReport">
-                <i class="fa fa-print me-1"/>Print
-                </button>
-                <button t-if="state.hasSign"
-                        class="btn btn-primary border px-3 position-absolute translate-middle-x"
-                        style="left: calc(50% + 280px); background-color: #9ea700; border-color: #9ea700;"
-                        t-on-click="onSignReport">
-                <i class="fa fa-pencil me-1"/>Sign
-                </button>
-
+                    <button class="btn btn-light border px-3 position-absolute translate-middle-x" style="left: calc(50% + 170px);" t-on-click="onPrintReport">
+                        <i class="fa fa-print me-1"/>Print
+                    </button>
+                    <button t-if="state.hasSign" class="btn btn-primary border px-3 position-absolute translate-middle-x" style="left: calc(50% + 280px); background-color: #9ea700; border-color: #9ea700;" t-on-click="onSignReport">
+                        <i class="fa fa-pencil me-1"/>Sign
+                    </button>
                     <div class="ms-auto d-flex align-items-center gap-1">
-                    <button class="btn btn-sm btn-outline-secondary px-2"
-                            t-on-click="onPrevRecord"
-                            style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
-                        <i class="fa fa-chevron-left small"/>
-                    </button>
+                        <button class="btn btn-sm btn-outline-secondary px-2" t-on-click="onPrevRecord" style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
+                            <i class="fa fa-chevron-left small"/>
+                        </button>
                         <span class="small text-muted px-1" style="min-width:48px;text-align:center;">
-                        <t t-esc="state.currentIndex + 1"/>
-                            /
-                            <t t-esc="state.records.length"/>
-                    </span>
-                        <button class="btn btn-sm btn-outline-secondary px-2"
-                                t-on-click="onNextRecord"
-                                style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
-                        <i class="fa fa-chevron-right small"/>
-                    </button>
-                </div>
-            </t>
+                            <t t-esc="state.currentIndex + 1"/> / <t t-esc="state.records.length"/>
+                        </span>
+                        <button class="btn btn-sm btn-outline-secondary px-2" t-on-click="onNextRecord" style="width:28px;height:28px;padding:0;display:flex;align-items:center;justify-content:center;">
+                            <i class="fa fa-chevron-right small"/>
+                        </button>
+                    </div>
+                </t>
+
+                <div class="cy-hdr-divider"></div>
+
+                <button class="cy-hdr-discard" t-on-click="() => this.close_edit(this)">Discard</button>
+                <button class="cy-hdr-save" t-att-disabled="state.isSaving" t-on-click="() => this.save_changes(this)">
+                    <i t-if="state.isSaving" class="fa fa-spinner fa-spin me-1"/>
+                    <i t-else="" class="fa fa-floppy-o me-1"/> Save
+                </button>
             </div>
             <!-- Body -->
             <div class="d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
                 <!-- Sidebar (Editable) -->
-                <div id="snippet-panel" class="snippet-panel bg-white border-end p-3 shadow-sm d-flex flex-column"
-                     t-att-class="{'d-none': state.previewMode}" style="width: 260px; overflow-y: auto; z-index: 10;">
-                    <h6 class="text-uppercase text-muted mb-4 mt-2 fw-bold"
-                        style="font-size: 12px; letter-spacing: 1px;">Report Elements</h6>
+                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column"
+                     t-att-class="{'d-none': state.previewMode}" style="width: 300px; overflow-y: auto; z-index: 10;">
 
 
-                    <h6 class="text-uppercase text-muted mb-3 fw-bold" style="font-size: 11px; letter-spacing: 1px;">Basic Elements</h6>
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="box" title="Box"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-square-o fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">Box</span>
+
+                    <div class="cy-section-label">
+                        <span>Report Elements</span>
                     </div>
 
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="field" title="Dynamic Field"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-database fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">Dynamic Field</span>
+                    <div class="cy-section-label">
+                        <span>Basic Elements</span>
                     </div>
 
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="table" title="Table"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-table fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">Table</span>
+                    <div class="cy-node-card snippet" data-type="box" title="Box">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-layout-2-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Box</div>
+                            <div class="cy-node-desc">Layout container</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
                     </div>
 
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-3 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="text" title="Text"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-font fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">Text</span>
+                    <div class="cy-node-card snippet" data-type="field" title="Dynamic Field">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-file-list-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Dynamic Field</div>
+                            <div class="cy-node-desc">Field from a record</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
                     </div>
 
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-4 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="qr" title="QR Code"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-qrcode fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">QR Code</span>
+                    <div class="cy-node-card snippet" data-type="table" title="Table">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-table-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Table</div>
+                            <div class="cy-node-desc">Rows &amp; columns</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
                     </div>
 
-                    <div class="snippet bg-light border border-secondary border-opacity-25 rounded p-3 mb-4 d-flex align-items-center shadow-sm"
-                         style="cursor: grab; transition: all 0.2s;"
-                         data-type="sign" title="Signature"
-                         onmouseover="this.classList.add('bg-white')" onmouseout="this.classList.remove('bg-white')">
-                        <i class="fa fa-pencil fa-lg me-3" style="color: #9ea700;"/>
-                        <span class="fw-semibold text-dark">Signature</span>
+                    <div class="cy-node-card snippet" data-type="text" title="Text">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-text"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Text</div>
+                            <div class="cy-node-desc">Static text block</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
                     </div>
 
+                    <div class="cy-node-card snippet" data-type="qr" title="QR Code">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-qr-code-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">QR Code</div>
+                            <div class="cy-node-desc">Scannable link</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="cy-node-card snippet" data-type="sign" title="Signature">
+                        <div class="cy-node-accent"></div>
+                        <div class="cy-node-icon-wrap">
+                            <i class="ri-pen-nib-line"></i>
+                        </div>
+                        <div class="cy-node-text">
+                            <div class="cy-node-label">Signature</div>
+                            <div class="cy-node-desc">Sign-off field</div>
+                        </div>
+                        <div class="cy-node-drag-grip">
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                            <div class="cy-dot"></div><div class="cy-dot"></div>
+                        </div>
+                    </div>
 
                     <!-- Technical Actions -->
-                    <div class="border-top pt-3 mb-4">
-                        <h6 class="text-uppercase text-muted mb-3 fw-bold"
-                            style="font-size: 11px; letter-spacing: 1px;">Technical Tools</h6>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
-                                    style="font-size: 10px; background-color: #9ea700; border: none; border-radius: 4px;"
-                                    t-on-click="onEditSources">
-                                <i class="fa fa-code me-1"/>
-                                Edit Sources
-                            </button>
-                            <button class="btn btn-sm text-white text-uppercase fw-bold py-2 flex-grow-1"
-                                    style="font-size: 10px; background-color: #e85e6a; border: none; border-radius: 4px;"
-                                    t-on-click="onResetReport">
-                                <i class="fa fa-refresh me-1"/>
-                                Reset Report
-                            </button>
-                        </div>
+                    <div class="cy-section-label">
+                        <span>Technical Tools</span>
+                    </div>
+                    <div class="cy-tech-tools">
+                        <button class="cy-tech-btn btn-edit-sources" t-on-click="onEditSources">
+                            <i class="ri-code-s-slash-line"></i>
+                            <span>Edit Sources</span>
+                        </button>
+                        <button class="cy-tech-btn btn-reset-report" t-on-click="onResetReport">
+                            <i class="ri-refresh-line"></i>
+                            <span>Reset Report</span>
+                        </button>
                     </div>
                 </div>
 
@@ -192,23 +218,55 @@
                 </div>
 
                 <!-- Main Area -->
-                <div class="flex-grow-1 overflow-auto d-flex flex-column align-items-center pt-5 pb-5 bg-200"
+                <div class="cy-canvas-area flex-grow-1 overflow-auto d-flex flex-column align-items-center pt-5 pb-5"
                      style="position: relative; min-height: 100%;">
 
                     <!-- A4 / Custom Paper Container -->
-                    <div class="cyllo-studio-report-container bg-white shadow-lg"
-                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; box-sizing: border-box; position: relative; transition: all 0.3s ease; border-bottom: 4px solid #c8cdd5;'">
+                    <div class="cyllo-studio-report-container d-flex flex-column"
+                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm;'">
+
+                        <!-- ── Report Header: Company + Partner (only in edit mode) ── -->
+                        <div t-if="!state.previewMode" class="cy-report-header">
+                            <!-- Left: Logo + Company Info -->
+                            <div class="cy-company-block">
+                                <!-- Logo Block -->
+                                <div class="cy-logo-block" t-on-click="onLogoClick">
+                                    <t t-if="state.companyLogo">
+                                        <img t-att-src="'data:image/png;base64,' + state.companyLogo"
+                                             class="cy-company-logo" alt="Company Logo"/>
+                                    </t>
+                                    <t t-else="">
+                                        <div class="cy-logo-placeholder">
+                                            <i class="ri-camera-line"/>
+                                            <span>Your logo</span>
+                                        </div>
+                                    </t>
+                                    <input type="file" class="cy-logo-input" accept="image/*"
+                                           style="display:none" t-ref="logoInput"
+                                           t-on-change="onLogoFileChange"/>
+                                </div>
+                                <!-- Company Name + Info -->
+                                <div class="cy-company-info">
+                                    <strong class="cy-company-name" t-esc="state.companyName"/>
+                                    <t t-foreach="(state.companyInfo || '').split('\n')" t-as="line" t-key="line_index">
+                                        <span t-if="line" t-esc="line"/>
+                                    </t>
+                                </div>
+                            </div>
+
+                        </div>
+
                         <iframe t-if="state.previewMode and state.previewUrl"
-                                class="live-report-content w-100 border-0"
-                                style="min-height: 297mm;"
+                                class="live-report-content w-100 flex-grow-1 border-0"
                                 t-att-src="state.previewUrl"/>
                         <div t-else="" id="studio_report" t-ref="report_frame"
-                             class="editable-area w-100 h-100 text-dark" style="padding: 10mm;"/>
+                             class="editable-area w-100 flex-grow-1 text-dark" style="padding: 10mm;"/>
                     </div>
-                    <!-- End of Page marker -->
+                    <!-- End of Page marker (temporarily disabled)
                     <div class="cyllo-end-of-page-marker mb-5">
                         <span>&#8212; End of Page &#8212;</span>
                     </div>
+                    -->
                 </div>
 
                 <!-- ── Box Properties Panel (right sidebar) ────────────────── -->

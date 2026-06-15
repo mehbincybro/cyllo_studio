@@ -35,6 +35,7 @@ export class EditReport extends Component {
         this.undoBtn = useRef("undoBtn");
         this.redoBtn = useRef("redoBtn");
         this.aceEditorRef = useRef("aceEditor");
+        this.logoInputRef = useRef("logoInput");
         this.action = useService("action");
         this.popover = useService("popover");
         this.loadFieldInfo = useLoadFieldInfo();
@@ -100,7 +101,11 @@ export class EditReport extends Component {
             },
             hasQr: false,
             hasSign: false,
-            hasOverflow: false
+            hasOverflow: false,
+            // ── Company & Report Settings ──
+            companyLogo: null,
+            companyName: '',
+            companyInfo: '',
         });
 
         // Promise resolver for the table config modal
@@ -112,6 +117,46 @@ export class EditReport extends Component {
 
         onWillStart(async () => {
             await loadJS("/web/static/lib/ace/ace.js");
+            // Fetch company logo and info
+            // try {
+            //     const companies = await this.orm.searchRead(
+            //         'res.company',
+            //         [['id', '=', this.env.company.id]],
+            //         ['name', 'logo', 'street', 'city', 'phone', 'email', 'website']
+            //     );
+            //     console.log('omomomom',companies)
+            //     if (companies && companies.length > 0) {
+            //         const co = companies[0];
+            //         this._companyId = co.id; // store for logo upload
+            //         this.state.companyLogo = co.logo || null;
+            //         this.state.companyName = co.name || '';
+            //         this.state.companyInfo = [
+            //             co.street,
+            //             co.city,
+            //             co.phone ? '\u260e ' + co.phone : '',
+            //             co.email ? '\u2709 ' + co.email : '',
+            //             co.website ? '\uD83C\uDF10 ' + co.website : ''
+            //         ].filter(Boolean).join('\n');
+            //     }
+            // } catch (e) {
+            //     console.warn('[Cyllo Studio] Could not fetch company info:', e);
+            // }
+            let companyId = null;
+            if (!companyId) {
+            const companies = await this.orm.searchRead(
+                'res.company', [], ['id'], { limit: 1, order: 'id asc' }
+            );
+            if (companies && companies.length > 0) {
+                companyId = companies[0].id;
+            }
+        }
+
+        if (!companyId) {
+            console.warn('[Cyllo Studio] Could not determine company ID by any method.');
+            return;
+        }
+
+        this._companyId = companyId;
         });
 
         onMounted(async () => {
@@ -273,7 +318,8 @@ export class EditReport extends Component {
         // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
         this._updateHasSign();
 
-        this._startOverflowGuardObserver();
+        // Overflow guard observer (temporarily disabled)
+        // this._startOverflowGuardObserver();
 
         this.editor = null;
         $('[t-elif], [t-else]').hide();
@@ -2226,6 +2272,33 @@ export class EditReport extends Component {
         });
     }
 
+    onLogoClick() {
+        if (this.logoInputRef.el) this.logoInputRef.el.click();
+    }
+
+    async onLogoFileChange(ev) {
+        const file = ev.target.files[0];
+        if (!file) return;
+        // Use stored company ID (this.env.company may not be available in Community)
+        const companyId = this._companyId;
+        if (!companyId) {
+            this.notification.add('Could not determine company. Please reload and try again.', { type: 'warning' });
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const base64 = e.target.result.split(',')[1];
+            try {
+                await this.orm.write('res.company', [companyId], { logo: base64 });
+                this.state.companyLogo = base64;
+                this.notification.add('Company logo updated', { type: 'success' });
+            } catch (err) {
+                this.notification.add('Failed to save logo: ' + err.message, { type: 'danger' });
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
     async close_edit(component) {
         const action = {
             name: 'Reports',
@@ -2328,42 +2401,25 @@ export class EditReport extends Component {
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
 
-                // ── CAPTURE THUMBNAIL (Non-blocking, Only if missing) ────
+                // ── CAPTURE THUMBNAIL (Server-Side PDF to Image) ────
                 if (!component.state.hasThumbnail) {
-                    setTimeout(async () => {
-                        try {
-                            const reportEl = component.reportFrameRef.el;
-                            const containerEl = reportEl ? reportEl.closest('.cyllo-studio-report-container') : null;
-
-                            if (containerEl && window.html2canvas) {
-                                // Brief delay to ensure any final paint after RPC
-                                await new Promise(r => setTimeout(r, 400));
-                                containerEl.scrollTop = 0;
-
-                                const canvas = await window.html2canvas(containerEl, {
-                                    scale: 0.5, // Reduced scale for faster processing and smaller size
-                                    useCORS: true,
-                                    logging: false,
-                                    allowTaint: true,
-                                    backgroundColor: '#ffffff',
-                                    width: containerEl.clientWidth,
-                                    height: Math.min(containerEl.scrollHeight, 1200) // Limit height to capture only the relevant top part
-                                });
-
-                                const imgData = canvas.toDataURL('image/jpeg', 0.6); // Slightly lower quality for even faster save
-
-                                await component.rpc('/cyllo_studio/save_report_thumbnail', {
-                                    report_id: component._reportId,
-                                    report_name: component._template,
-                                    image_base64: imgData
-                                });
-                                console.log("[Cyllo Studio] Lazy thumbnail saved.");
+                    const sampleRecordId = component.state.records && component.state.records.length > 0 ? component.state.records[0] : null;
+                    if (sampleRecordId) {
+                        // Fire and forget - let the server generate the thumbnail quietly in the background
+                        component.rpc('/cyllo_studio/generate_report_thumbnail', {
+                            report_id: component._reportId,
+                            record_id: sampleRecordId
+                        }).then((res) => {
+                            if (res && res.success) {
+                                console.log("[Cyllo Studio] Server-side thumbnail generated.");
                                 component.state.hasThumbnail = true;
+                            } else {
+                                console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
                             }
-                        } catch (e) {
-                            console.error("[Cyllo Studio] Background thumbnail capture failure:", e);
-                        }
-                    }, 100);
+                        }).catch((e) => {
+                            console.error("[Cyllo Studio] Failed to generate thumbnail server-side:", e);
+                        });
+                    }
                 }
 
                 // ── PERSISTENT SAVE: Refresh local state instead of closing ────
