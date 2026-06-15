@@ -1,0 +1,86 @@
+.cy-content_box {
+    padding: 0.5rem;
+    border: 1px solid #828176;
+    border-radius: 4px;
+    margin-bottom: 8px;
+}
+
+.cy-radio_label{
+    color: #BCBBA7;
+    margin-bottom: 0.5rem !important;
+}
+
+.cy-btn_save {
+    background-color: #9ea700;
+    color: #fff;
+    border: 1px solid #9ea700;
+    padding: 8px 20px;
+    border-radius: 3px;
+    box-shadow: none;
+}
+.cy-btn_save:focus{
+    background-color: #9ea700;
+}
+.cy-cancel_btn {
+    padding: 8px 20px;
+    border-radius: 3px;
+    border: 1px solid #BCBBA7;
+    color: #BCBBA7;
+    font-weight: 500;
+    background-color: transparent;
+}
+
+.cy-cancel_btn:focus{
+    background-color: transparent;
+}
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .d-flex input{
+    color:#BCBBA7 !important;
+}
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .d-flex input:disabled {
+color: #85857d !important;
+}
+.cy-studio-custom-dropdown .custom-dropdown ul{
+   max-height:16rem !important;
+   overflow-y: auto !important;
+}
+.btn_div{
+padding-bottom:15px;
+}
+
+/* === Code Editor Styling === */
+.cy-compute-editor {
+    position: relative;
+    height: 220px; /* container height */
+    background-color: var(--studio-bg-color, #1e1e1e);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cy-compute-editor .o_code_editor {
+    height: 100% !important;
+    width: 100% !important;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* Fix for Ace content hidden issue */
+.cy-compute-editor .ace_editor {
+    height: 100% !important;
+    width: 100% !important;
+    font-size: 13px !important;
+    line-height: 1.4;
+}
+
+/* Optional: match Cyllo dark theme */
+.cy-compute-editor .ace_tm {
+    background-color: #1e1e1e !important;
+    color: #dcdcdc !important;
+}
+
+/* Scrollbar visibility */
+.cy-compute-editor .ace_scrollbar {
+    background-color: #2a2a2a;
+}
+
+

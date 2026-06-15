@@ -1,0 +1,261 @@
+:root {
+    --body-bg: #363827;
+    --navbar-bg: #25281a;
+    --new-app-color: #9ea700;
+    --view-edits-bg: #9ea700;
+    --view-edits-border: #9ea700;
+    --view-edits-color: #ffffff;
+    --arrow-btn-bg: #9ea700;
+    --arrow-btn-color: #ffffff;
+    --navbar-title-color: #a3be1e;
+    --view-selection-bg: #fff;
+    --view-border: #b8b8b828;
+    --close-btn-bg:red;
+    --navbar-margin: 13px 15px 2px 16px;
+    --navbar-padding: 10px 0px 7px 8px;
+    --font-weight: 600;
+    --font-size: 16px;
+    --menu-gap: 10px;
+    --view-edits-radius: 4px;
+}
+
+.light-studio-mode {
+    --body-bg: #fff;
+    --navbar-bg: #e6e6e6;
+    --navbar-title-color: #61720d;
+    --new-app-color: #9ea700;
+    --view-edits-bg: #9ea700;
+    --view-edits-border: #9ea700;
+    --view-edits-color: #2a2828;
+    --arrow-btn-bg: #9ea700;
+    --arrow-btn-color: #2a2828;
+    --view-selection-bg: #f1f1f1;
+    --view-border: #b8b8b8;
+    --view-border: #d3d3d3;
+    --close-btn-bg:red;
+}
+
+body{
+    background: var(--body-bg)!important;
+}
+.cy-navbar {
+    background: var(--navbar-bg);
+    margin: var(--navbar-margin);
+    padding: var(--navbar-padding);
+    justify-content: space-between;
+}
+.cy-navbar-title {
+    min-width: 64.33%;
+}
+.shadow{
+    box-shadow: -3px -2px 5px 1px #25281a82 !important;
+}
+.cy-nav-NewApp {
+    color: var(--new-app-color);
+}
+.cy-new-app plus{
+    color: var(--new-app-color) !important;
+}
+.cy-status_bar-icon {
+    border-radius: 2px;
+    padding: 0.4rem 0.6rem;
+    background-color: var(--view-selection-bg);
+}
+.cy-nav-menu {
+    gap: var(--menu-gap);
+}
+
+.cy-viewEdits {
+    width: 62px;
+    background: var(--view-edits-bg) !important;
+    border: 1px solid var(--view-edits-border) !important;
+    border-radius: var(--view-edits-radius);
+    color: var(--view-edits-color);
+}
+
+.cy-arrow-btn {
+    background: var(--arrow-btn-bg);
+    color: var(--arrow-btn-color);
+    height: 100%;
+
+}
+
+.cy-arrow-btn:hover,
+.cy-viewEdits:hover {
+    background: #7b8300 !important;
+    border: 1px solid #7b8300 !important;
+    color: var(--view-edits-color);
+}
+
+.cy-close-btn {
+    background: var(--close-btn-bg);
+    color: var(--arrow-btn-color);
+    height: 100%;
+}
+
+.cy-close-btn:hover {
+    background: #cc0000 !important;
+    color: var(--arrow-btn-color) !important;
+}
+
+.cy-window-view{
+        background: var(--navbar-bg);
+
+}
+
+.border-view{
+    height: 90.67%;
+}
+
+.hnk-selected span.cy-status_bar-icon{
+    animation:gradientShift 3s ease-in-out infinite;
+    border: 1.5px solid transparent;
+    border-image:linear-gradient(45deg, #6b8941, #6b8941) 1;
+    color: #fff;
+    background-color: #111827;
+    transition: transform 0.2s, box-shadow 0.2s, border-image 0.3s;
+    position: relative;
+    overflow: hidden;
+    padding: 5px 9px;
+}
+
+.hnk-selected span.cy-status_bar-icon:hover{
+    transform: translateY(-1px) scale(1.01);
+    box-shadow: 0 4px 12px rgba(163, 190, 30, 0.4);
+    border-image: linear-gradient(45deg, #3f5d1b, #4e8511) 1;
+    cursor: pointer;
+}
+
+/*-----------------------------------------------------------------------------------------------------------------*/
+.cy-miscellaneous_card{
+    display: none;
+    padding-top:1rem;
+    margin-top:1rem;
+    position:absolute;
+    top: 4%;
+    transition: left 0.3s ease, right 0.3s ease;
+}
+
+.cy-miscellaneous_card .menubar {
+    padding: 2rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    justify-items: center;
+    width: 680px;
+    display: grid;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 -4px 28px -2px rgba(25, 25, 25, 0.1);
+    position: relative;
+    min-width: auto;
+    transition: left 0.3s ease, right 0.3s ease;
+}
+
+.cy-miscellaneous_card .menubar::before {
+    content: "";
+    position: absolute;
+    top: -10px;
+    left: 66%;
+    border-width: 0 10px 10px 10px;
+    border-style: solid;
+    border-color: transparent transparent #fff transparent;
+
+}
+
+.cy-miscellaneous_card .menu-item {
+    background-color: #f2ffe5;
+    padding: 1.2rem;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    transition: background-color 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.cy-miscellaneous_card .menu-item:hover {
+    background-color: #e5f6ef;
+}
+
+
+.cy-miscellaneous_card .icon {
+    font-size: 1rem;
+    background-color: #f2f2f2;
+    border-radius: 10px;
+    padding: 10px;
+    margin-right: 1rem;
+}
+
+.cy-miscellaneous_card .text {
+    flex: 1;
+}
+
+.cy-miscellaneous_card .text h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+}
+
+.cy-miscellaneous_card .text p {
+    font-size: 12px;
+    color: #777;
+}
+
+.cy-miscellaneous_card .new {
+    background-color: #e1d8ff;
+    color: #7d4cc7;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 12px;
+    margin-left: 0.5rem;
+}
+
+.cy-miscellaneous_card .cy-arrow {
+    font-size: 1.2rem;
+    color: #00b894;
+    transition: transform 0.3s ease;
+}
+
+.cy-miscellaneous_card .menu-item:hover .cy-arrow {
+    transform: translateX(5px);
+}
+.cy-nav-menu .cy-nav-Menu-button:hover .cy-miscellaneous_card {
+    display:block;
+}
+.cy-nav-menu .cy-nav-Menu-button .cy-viewEdits{
+    height: 100%;
+    }
+
+.menu-item {
+    position: relative;
+    overflow: hidden; /* keeps ribbon inside the card */
+}
+
+/* Green ribbon across left corner */
+.cy-studio-beta .cy-studio-ribbon {
+    position: absolute;
+    top: 12px;
+    left: -40px;
+    width: 120px;
+    text-align: center;
+    background: #9ea700;   /* the green from your image */
+    color: #fff;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 4px 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    display: none; /* only on hover */
+}
+
+/* Show ribbon on hover */
+.menu-item:hover .cy-studio-ribbon {
+    display: block;
+}
+
+
+
+
+

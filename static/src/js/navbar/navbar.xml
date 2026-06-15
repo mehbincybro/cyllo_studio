@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates id="template" xml:space="preserve">
+	<t t-name="cyllo_studio.CylloNavBar">
+		<header class="cy-NavHeader" t-ref="cy_nav_bar">
+			<div class="rounded cy-navbar d-flex shadow">
+				<div class="d-flex align-items-center gap-3" style="min-width: 412px;">
+					<div class="cy-nav-NewApp">
+						<a class="cy-new-app plus" t-on-click="createApp" href="#">
+                            <i class="ri-add-line fs-3"/>
+                            <span>NEW APP</span>
+						</a>
+					</div>
+                    <!--					<div class="cy-nav-AIApp mt-1">-->
+                    <!--						<i class="ri-robot-line"/>-->
+                    <!--						<span>AI Builder</span>-->
+                    <!--					</div>-->
+                    <div class="cy-studio-views">
+						<ViewSelectionDropDown t-props="viewSelectionProps"/>
+					</div>
+				</div>
+                <div class="d-flex cy-nav-menu pe-2">
+					<t t-if="!state.studioEditableList">
+
+						           <div t-if="state.isPreviewMode" style="
+
+        border: 1px solid #9ea700;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 90px;
+        padding: 4px 10px;
+
+    ">
+      <i class="ri-tv-2-line" style="color: #9ea700;"/>
+        <span style="
+            color: white;
+            font-size: 14px;
+            font: sans-serif;
+        ">Preview
+                            </span>
+                        </div>
+						<button t-if="props.editButton" class="cy-viewEdits" t-on-click="()=>this.handleEdit()">
+							<i class="ri-pencil-line"/>
+                            Edit
+						</button>
+                        <div class="cy-nav-Menu-button">
+							<button class="cy-viewEdits" t-on-mouseover="ShowMiscellaneousDrop">
+								Menu
+							</button>
+                            <div class="cy-miscellaneous_card">
+								<div class="menubar">
+									<div class="menu-item" t-on-click="AccessRightsClick">
+										<div class="icon">
+											<img src="/cyllo_studio/static/src/img/cyber-security.svg"
+                                                 style="width:20px;"/>
+										</div>
+                                        <div class="text">
+											<h3>
+												<a href="#">Access Right</a>
+											</h3>
+                                            <p>Manage user permissions: view, create, edit, delete.</p>
+										</div>
+                                        <span class="cy-arrow">→</span>
+									</div>
+                                    <div class="menu-item" t-on-click="ReportClick">
+										<div class="icon">
+											<img src="/cyllo_studio/static/src/img/report.svg" style="width:20px;"/>
+										</div>
+                                        <div class="text">
+											<h3>
+												<a href="#">Report</a>
+											</h3>
+                                            <p>Customizable documents for export/printing.</p>
+										</div>
+                                        <span class="cy-arrow">→</span>
+									</div>
+                                    <div class="menu-item" t-on-click="RecordRuleClick">
+										<div class="icon">
+											<img src="/cyllo_studio/static/src/img/document.svg" style="width:20px;"/>
+										</div>
+                                        <div class="text">
+											<h3>
+												<a href="#">Record Rules</a>
+											</h3>
+                                            <p>Rules define access for CRUD operations.</p>
+										</div>
+                                        <span class="cy-arrow">→</span>
+									</div>
+                                    <div class="menu-item cy-studio-beta" t-on-click="EmailTemplateClick">
+										<div class="icon">
+											<img src="/cyllo_studio/static/src/img/mail.svg" style="width:20px;"/>
+										</div>
+                                        <div class="text">
+											<h3>
+												<a href="#">Email Template</a>
+											</h3>
+                                            <p>Customize Email Template Layouts.</p>
+										</div>
+                                        <span class="cy-arrow">→</span>
+                                        <div class="cy-studio-ribbon">
+                                            <div class="inner-text">Beta</div>
+                                        </div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</t>
+                    <div>
+						<button t-att-disabled="!state.canUndo" class="btn cy-arrow-btn" t-on-click="undoChange">
+							<i class="ri-arrow-go-back-line"/>
+						</button>
+					</div>
+                    <div>
+						<button t-att-disabled="!state.canRedo" class="btn cy-arrow-btn" t-on-click="redoChange">
+							<i class="ri-arrow-go-forward-line"/>
+						</button>
+					</div>
+                    <div>
+						<button class="btn cy-close-btn" t-on-click="handleClose">
+							<i class="ri-close-line"/>
+                            Exit
+						</button>
+					</div>
+				</div>
+			</div>
+		</header>
+	</t>
+</templates>

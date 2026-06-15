@@ -1,0 +1,5 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_default_widgets,access default_widgets,cyllo_studio.model_default_widgets,base.group_user,1,1,1,1
+access_qr_download_token,access qr_download_token,cyllo_studio.model_qr_download_token,base.group_user,1,1,1,1
+access_qr_scan_event,access qr_scan_event,cyllo_studio.model_qr_scan_event,base.group_user,1,1,1,1
+access_cyllo_report_template,access cyllo_report_template,cyllo_studio.model_cyllo_report_template,base.group_user,1,1,1,1

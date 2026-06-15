@@ -1,0 +1,5 @@
+.disabled-studio {
+    opacity: 0.4;       /* blur / faded look */
+    pointer-events: none; /* non-clickable */
+    cursor: not-allowed;
+}

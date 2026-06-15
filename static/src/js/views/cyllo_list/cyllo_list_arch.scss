@@ -1,0 +1,44 @@
+.o-mail-ActivityButton {
+          pointer-events: none;  // icon not clickable
+          cursor: default;
+ }
+.o_todo_done_button{
+    pointer-events: none ;  // icon not clickable
+    cursor: default ;
+    }
+.o_priority_star{
+    pointer-events: none ;  // icon not clickable
+    cursor: default ;
+    }
+.o_avatar{
+    pointer-events: none ;  // icon not clickable
+    cursor: default ;
+    }
+td[name="last_update_status"] .dropdown-toggle,
+ td[name="state"] .dropdown-toggle {
+    pointer-events: none !important;
+    cursor: default !important;
+    opacity: 0.6; /* optional, to look disabled */
+}
+
+.o_list_renderer .o_list_table tbody > tr > td.o_list_record_remove {
+    pointer-events: auto !important;
+}
+.o_field_task_with_hours {
+    pointer-events: none;
+ }
+.o_phone_content{
+    pointer-events: none;
+}
+div[name="move_name"] a {
+    pointer-events: none !important;
+}
+div[name="product_id"] a.o_form_uri {
+    pointer-events: none !important;
+}
+a[type="action"][name="254"] {
+    pointer-events: none !important;
+}
+.o_widget_qty_at_date_widget a.fa-area-chart {
+    pointer-events: none !important;
+}

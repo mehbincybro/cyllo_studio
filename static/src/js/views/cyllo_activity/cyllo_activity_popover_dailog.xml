@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+	<t t-name="cyllo_studio.CylloActivityPopover">
+		<Dialog title="'Edit Activity Record'" footer="false">
+            <div class="d-flex studio_activity">
+				<div class="cy-field__box">
+					<div class="d-flex align-items-center gap-2">
+						<i class="ri-code-box-fill cy-content-header-icon"/>
+                        <h3 class="cy-content_header">Field Customizer</h3>
+					</div>
+                    <t t-if="state.editable">
+						<div t-if="state.widget" class="functionInfo">
+							<div style="display: flex; align-items: center;gap:8px;">
+								<div class="d-flex">
+									<svg fill="#c6b8b8" width="20px" height="20px" class="alert-icon"
+                                         xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+										<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+									</svg>
+								</div>
+                                <span style="text-align: left;font-size: 12px;">
+								  	The attribute won't work because it has a widget.
+								</span>
+							</div>
+						</div>
+                        <div class="my-3 cy-addable__list overflow-auto cy-activity-dropdown activity-edit-custom-dropdown"
+                             t-att-style="state.widget ? 'pointer-events: none; opacity: 0.7;max-height: 60vh !important;' : 'max-height: 60vh !important'">
+							<label>Display</label>
+                            <CylloStudioDropdown
+                                    options="fieldsDisplay"
+                                    defaultValue="displayValue"
+                                    onChange="(value) => this.updatedFieldDisplay(value)"
+                                    placeholder="'Select an attribute...'"
+                                    searchable="true"
+                                    width="''"
+                                    maxHeight="'70px'"
+                            />
+                            <div class="form-check form-switch mt-2">
+								<input class="form-check-input" type="checkbox" role="switch" name="customRadio"
+                                       id="radio1" t-att-checked="state.attribute.bold"
+                                       t-on-change="(ev)=>this.handleFieldBold(ev)"/>
+                                <label class="form-check-label" for="radio1">Bold</label>
+							</div>
+                            <div class="form-check form-switch mt-2">
+								<input class="form-check-input" type="checkbox" role="switch" name="customRadio"
+                                       id="radio2" t-att-checked="state.attribute.muted"
+                                       t-on-change="(ev)=>this.handleFieldMuted(ev)"/>
+                                <label class="form-check-label" for="radio2">Muted</label>
+							</div>
+						</div>
+                        <div class="d-flex w-100 my-3 gap-2">
+							<button class="cy-drag_edit-btn cy-activity_discard" data-tooltip="Discard"
+                                    t-on-click="onDiscard">
+								<i class="ri-arrow-go-back-line cy-activity-icon"/>
+							</button>
+                            <button class="cy-drag_edit-btn cy-activity_save" data-tooltip="Save" t-on-click="onSave">
+								<i class="ri-save-fill cy-activity-icon"/>
+							</button>
+                            <button class="cy-drag_edit-btn cy-activity_delete" data-tooltip="Delete"
+                                    t-on-click="onDelete">
+								<i class="ri-delete-bin-5-fill cy-activity-icon"/>
+							</button>
+						</div>
+					</t>
+                    <t t-elif="!this.state.editable">
+						<div style="display: flex;gap: 50px;">
+							<div>
+								<div class="form-group mb-3 col-10 cy-activity-dropdown activity-add-custom-dropdown"
+                                     style="color: #111827;">
+									<label>Field</label>
+                                    <CylloStudioDropdown
+                                            options="allFields"
+                                            defaultValue=""
+                                            onChange="(value) => this.updatedField(value)"
+                                            placeholder="'Select a field...'"
+                                            searchable="true"
+                                            width="''"
+                                            maxHeight="'50px'"
+                                    />
+								</div>
+							</div>
+                            <div>
+								<button class="btn btn-primary" style="margin-top: 10px; width: 93px;
+    								height: 41px;" t-on-click="()=> this.addActivityField()">
+									Add Field
+								</button>
+							</div>
+						</div>
+					</t>
+				</div>
+				<div class="vr"/>
+                <div class="cy-field__box o_cw_popover border-0">
+					<div class="d-flex align-items-center gap-2">
+						<i class="ri-gallery-fill cy-content-header-icon"/>
+                        <h3 class="cy-content_header">Interactive Preview</h3>
+					</div>
+                    <div class="my-3 cy-addable__list o_activity_view">
+						<t t-set="recordValue" t-value="props.records.length - 1"/>
+                        <ul class="o_activity_record list-group list-group-flush o_cw_popover_fields_secondary cy-activity"
+                            style="max-height: 60vh !important; width: 425px">
+							<CylloActivityRecord archInfo="props.archInfo" record="props.records[recordValue]"
+                                                 openRecord="props.openRecord"/>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</Dialog>
+	</t>
+</templates>

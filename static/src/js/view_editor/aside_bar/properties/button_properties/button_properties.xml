@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    <t t-name="cyllo_studio.ButtonProperties">
+        <div class="button_properties m-2">
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label">Label Name</label>
+                <input class="cy-input cy-input-field-align cy-studio-input-placeholder"
+                       reqired="true" type="text" id="label" name="label"
+                       placeholder="Enter the label name" autocomplete="off"
+                       t-model="buttonProperties.string"
+                       t-on-input="handleLabelChange"/>
+            </div>
+            <div class="mb-2">
+                <label for="" class="cy-navbar_label ">Class</label>
+                <div class="cy-input-background-color cy-button-custom">
+                    <CustomSelection class="cy-selection-custom"
+                        onChange.bind="(class)=>buttonProperties.class = class"
+                        defaultClass="buttonProperties.class"/>
+                </div>
+                <t t-if="props.viewDetails.viewType !== 'form'">
+                    <input type="text" class="cy-input form-control "
+                           t-model="buttonProperties.class"/>
+                </t>
+            </div>
+            <t t-if="props.viewDetails.viewType !== 'form'">
+                <div class="dropdown-checkbox-container mb-2">
+                    <label class="cy-navbar_label customCheckbox-label"
+                           for="onStyle">Style
+                    </label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown options="onStyleChange"
+                                             defaultValue="state.style"
+                                             onChange="(value) => this.handleOnStyleChange(value)"
+                                             searchable="true"/>
+                    </div>
+                </div>
+            </t>
+            <t t-if="props.viewDetails.viewType !== 'form'">
+                <div class="mb-2 custom_icon">
+                    <label for="" class="cy-navbar_label">Icon</label>
+                    <div class="cy-input text-start cy-input-icon d-flex cursor-pointer">
+                        <i class="cy-studio-button-properties-icon flex-grow-1 fa fa-2x d-flex align-items-center"
+                           t-att-class="buttonProperties.icon ? buttonProperties.icon + ' fa ' : 'p-2'"
+                           t-on-click="()=>state.iconToggle = !state.iconToggle"/>
+                        <i t-if="buttonProperties.icon"
+                           class="align-self-center ri-close-fill ri-lg"
+                           t-on-click="()=>buttonProperties.icon=''"/>
+                    </div>
+                    <div class="modal-content cy-sheet_icon-selectBox cy-select-option"
+                         t-att-class="state.iconToggle ? '':'d-none'"
+                         t-ref="IconRef">
+                        <div class="modal-body pt-0 cy-icon-button"
+                             style="background: #2e2e2e;">
+                            <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2 list-unstyled">
+                                <li t-foreach="IconClass" t-as="icons"
+                                    t-key="icons_index">
+                                    <div class="cy-icon_box-item cursor-pointer opacity-75-hover p-1"
+                                         t-att-class="buttonProperties.icon == icons ? 'bg-primary rounded':''"
+                                         t-on-click="()=> this.setIcon(icons)">
+                                        <i class="cy-icons fa fa-fw text-white"
+                                           t-att-class="icons"/>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <div class="dropdown-checkbox-container" style="margin-bottom:8px;">
+                <label class="cy-navbar_label customCheckbox-label"
+                       for="defaultGroupBy">Type
+                </label>
+                <div t-if="this.buttonProperties.newButton" class="cy-studio-custom-dropdown">
+                    <CylloStudioDropdown
+                            onChange="(value) => this.handleOnTypeChange(value)"
+                            options="onTypeChange"
+                            defaultValue="buttonProperties.type"/>
+                </div>
+                    <input t-else="" type="text" class="cy-input" id="Type" style="text-transform: capitalize;" t-att-value="buttonProperties.type" autocomplete="off"
+                       maxlength="1" readonly="1"/>
+            </div>
+            <t t-if="buttonProperties.type === 'object'">
+                <div class="dropdown-checkbox-container">
+                    <label class="cy-navbar_label customCheckbox-label">
+                        Function
+                    </label>
+                    <div t-if="this.buttonProperties.newButton" class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown
+                                onChange="(value) => this.handleButtonFunctionChange(value)"
+                                options="ButtonFunctionChange(functions)"
+                                defaultValue="buttonProperties.name"
+                                searchable="true"/>
+                    </div>
+                    <input t-else="" type="text" class="cy-input" id="Function" t-att-value="buttonProperties.name"
+                       autocomplete="off"
+                       maxlength="1" readonly="1"/>
+                </div>
+                <div class="functionInfo d-none">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="d-flex">
+                            <svg fill="#c6b8b8" width="20px" height="20px"
+                                 class="alert-icon"
+                                 xmlns="http://www.w3.org/2000/svg"
+                                 viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 15c-.55 0-1-.45-1-1v-4c0-.55.45-1 1-1s1 .45 1 1v4c0 .55-.45 1-1 1zm1-8h-2V7h2v2z"/>
+                            </svg>
+                        </div>
+                        <span class="text-start fs-6">
+                            Please verify function stability before applying
+                            changes.
+                        </span>
+                    </div>
+                </div>
+            </t>
+            <t t-if="buttonProperties.type === 'action'">
+                <label for="" class="cy-navbar_label">Action</label>
+                <div t-if="this.buttonProperties.newButton" class="cy-studio-custom-dropdown-action">
+
+                    <RecordSelector resId="buttonProperties.name" resModel="'ir.actions.actions'" update="(resId)=> buttonProperties.name = resId" domain="[['binding_model_id', '=', this.action.currentController.props.resModel]]"/>
+                </div>
+                <input t-else="" type="text" class="cy-input" id="Function" t-att-value="this.actionName.value"
+                       autocomplete="off"
+                       maxlength="1" readonly="1"/>
+            </t>
+            <div class="dropdown-checkbox-container button_visible" style=" margin-top: 8px;">
+                <label for="" class="cy-navbar_label">Button Visible To</label>
+                <div class="cy-input cy-studio-visible-to-drop-align">
+                    <MultiRecordSelector resIds="buttonProperties.groupIds "
+                                         resModel="'res.groups'"
+                                         update="(groupIds)=> buttonProperties.groupIds = groupIds"/>
+                </div>
+            </div>
+            <div class="overall_container_list d-flex justify-content-between">
+                <div class="round">
+                    <input type="checkbox" name="invisible" id="invisible"
+                           t-on-click="onDomainRadioClick"
+                           t-att-checked="['false', 'undefined', undefined].includes(buttonProperties.invisible) ? null : 'checked'"/>
+                    <label for="invisible">
+                        <span style="margin-left: 25px;color: var(--checkbox-text-color);">
+                            Invisible
+                        </span>
+                    </label>
+                </div>
+                <button class="cy-basedOn" data-attribute="invisible"
+                        t-on-click="onDomainClick">
+                    <span>Based on</span>
+                    <span class="cy-setting-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             viewBox="0 0 24 24" fill="currentColor">
+                            <path fill="none" d="M0 0h24v24H0z"/>
+                            <path d="M2.13127 13.6308C1.9492 12.5349 1.95521 11.434 2.13216 10.3695C3.23337 10.3963 4.22374 9.86798 4.60865 8.93871C4.99357 8.00944 4.66685 6.93557 3.86926 6.17581C4.49685 5.29798 5.27105 4.51528 6.17471 3.86911C6.9345 4.66716 8.0087 4.99416 8.93822 4.60914C9.86774 4.22412 10.3961 3.23332 10.369 2.13176C11.4649 1.94969 12.5658 1.9557 13.6303 2.13265C13.6036 3.23385 14.1319 4.22422 15.0612 4.60914C15.9904 4.99406 17.0643 4.66733 17.8241 3.86975C18.7019 4.49734 19.4846 5.27153 20.1308 6.1752C19.3327 6.93499 19.0057 8.00919 19.3907 8.93871C19.7757 9.86823 20.7665 10.3966 21.8681 10.3695C22.0502 11.4654 22.0442 12.5663 21.8672 13.6308C20.766 13.6041 19.7756 14.1324 19.3907 15.0616C19.0058 15.9909 19.3325 17.0648 20.1301 17.8245C19.5025 18.7024 18.7283 19.4851 17.8247 20.1312C17.0649 19.3332 15.9907 19.0062 15.0612 19.3912C14.1316 19.7762 13.6033 20.767 13.6303 21.8686C12.5344 22.0507 11.4335 22.0447 10.3691 21.8677C10.3958 20.7665 9.86749 19.7761 8.93822 19.3912C8.00895 19.0063 6.93508 19.333 6.17532 20.1306C5.29749 19.503 4.51479 18.7288 3.86862 17.8252C4.66667 17.0654 4.99367 15.9912 4.60865 15.0616C4.22363 14.1321 3.23284 13.6038 2.13127 13.6308ZM11.9997 15.0002C13.6565 15.0002 14.9997 13.657 14.9997 12.0002C14.9997 10.3433 13.6565 9.00018 11.9997 9.00018C10.3428 9.00018 8.99969 10.3433 8.99969 12.0002C8.99969 13.657 10.3428 15.0002 11.9997 15.0002Z">
+                            </path>
+                        </svg>
+                    </span>
+                </button>
+            </div>
+            <div class="d-flex btn_div w-100 my-3 gap-2">
+                <button class="cy-btn_save w-100"
+                        t-on-click="addButton">
+                    Save
+                </button>
+                    <button class="px-3 cy-cancel_btn w-100"
+                            t-on-click.stop="RemoveButton"><t t-esc="this.state.newButton ? 'Cancel' : 'Remove'"/>
+                    </button>
+            </div>
+        </div>
+    </t>
+</templates>

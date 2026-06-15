@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="cyllo_studio.ReportCreationDialog">
+        <Dialog title="'Create New Report'" size="'md'">
+            <div class="o_form_view">
+                <div class="o_form_sheet border-0 p-0">
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Report Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" class="form-control" t-model="state.name" placeholder="e.g. Custom Invoice" autofocus="autofocus"/>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Model</label>
+                        <div class="col-sm-8">
+                            <AutoComplete
+                                sources="autoCompleteSources"
+                                value="state.modelLabel"
+                                onSelect="(res) => this.onModelSelected(res)"
+                                placeholder="'Search a model...'"
+                            />
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Starting Point</label>
+                        <div class="col-sm-8">
+                            <div class="d-flex gap-2">
+                                <label class="border rounded px-3 py-2 flex-fill"
+                                       t-att-class="state.startPoint === 'blank' ? 'border-primary bg-light' : ''"
+                                       style="cursor: pointer;">
+                                    <input type="radio" name="report_start_point" value="blank"
+                                           t-att-checked="state.startPoint === 'blank'"
+                                           t-on-change="() => state.startPoint = 'blank'"/>
+                                    <span class="ms-1 fw-semibold">Blank Report</span>
+                                </label>
+                                <label class="border rounded px-3 py-2 flex-fill"
+                                       t-att-class="state.startPoint === 'template' ? 'border-primary bg-light' : ''"
+                                       style="cursor: pointer;">
+                                    <input type="radio" name="report_start_point" value="template"
+                                           t-att-checked="state.startPoint === 'template'"
+                                           t-on-change="() => state.startPoint = 'template'"/>
+                                    <span class="ms-1 fw-semibold">Use Template</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div t-if="state.startPoint === 'template'" class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-bold">Template</label>
+                        <div class="col-sm-8">
+                            <div t-if="!state.templates.length" class="text-muted small border rounded p-3">
+                                No saved templates found. Save a report as a template first.
+                            </div>
+                            <div t-else="" class="border rounded p-2" style="max-height: 260px; overflow-y: auto;">
+                                <div t-foreach="groupedTemplates" t-as="group" t-key="group.category" class="mb-2">
+                                    <div class="text-uppercase text-muted fw-bold small px-1 mb-1" style="font-size: 11px;">
+                                        <t t-esc="group.category"/>
+                                    </div>
+                                    <label t-foreach="group.templates" t-as="template" t-key="template.id"
+                                           class="d-block border rounded px-3 py-2 mb-2"
+                                           t-att-class="state.templateId === template.id ? 'border-primary bg-light' : ''"
+                                           style="cursor: pointer;">
+                                        <input type="radio" name="report_template"
+                                               t-att-checked="state.templateId === template.id"
+                                               t-on-change="() => state.templateId = template.id"/>
+                                        <span class="ms-1 fw-semibold"><t t-esc="template.name"/></span>
+                                        <div t-if="template.description" class="small text-muted ms-4">
+                                            <t t-esc="template.description"/>
+                                        </div>
+                                        <div t-if="template.source_model" class="small text-muted ms-4">
+                                            Source model: <t t-esc="template.source_model"/>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <t t-set-slot="footer">
+                <button class="btn btn-primary px-4" t-on-click="_onCreate">Create</button>
+                <button class="btn btn-light border px-4" t-on-click="props.close">Cancel</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>
