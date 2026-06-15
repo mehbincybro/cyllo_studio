@@ -30,6 +30,7 @@ class NodeStruct(models.Model):
     _name = 'node.struct'
 
     name = fields.Char()
+    drawflow_node_id = fields.Char(string="Drawflow Node ID")
     work_auto_id = fields.Many2one('work.auto', ondelete='cascade')
     reused_work_auto_id = fields.Many2one('work.auto', string="Reusable Automation", ondelete='set null')
     reused_variable = fields.Json("Reusable Record Variable")
@@ -308,6 +309,7 @@ class NodeStruct(models.Model):
     )
 
     # Approval block fields
+    approval_rule_id = fields.Integer(string="Approval Rule ID")
     approval_rule_type = fields.Selection([
         ('button', 'Button Click'),
         ('server', 'Server Action'),

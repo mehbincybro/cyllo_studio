@@ -397,6 +397,32 @@ class WorkAuto(models.Model):
     )
     is_record_saved = fields.Boolean(default=False)
 
+    def _register_hook(self):
+        super()._register_hook()
+        if 'approval.request' in self.env:
+            ApprovalRequest = self.env.registry['approval.request']
+            if not hasattr(ApprovalRequest, '_workflow_injected'):
+                origin_action_approve = ApprovalRequest.action_approve
+                origin_action_reject = ApprovalRequest.action_reject
+                
+                def new_action_approve(self):
+                    pending_records = self.filtered(lambda r: r.state == 'pending')
+                    res = origin_action_approve(self)
+                    if hasattr(self, '_run_approval_workflow'):
+                        pending_records._run_approval_workflow('approved')
+                    return res
+                    
+                def new_action_reject(self):
+                    pending_records = self.filtered(lambda r: r.state == 'pending')
+                    res = origin_action_reject(self)
+                    if hasattr(self, '_run_approval_workflow'):
+                        pending_records._run_approval_workflow('rejected')
+                    return res
+                    
+                ApprovalRequest.action_approve = new_action_approve
+                ApprovalRequest.action_reject = new_action_reject
+                ApprovalRequest._workflow_injected = True
+
     def _archive_workflows_with_whatsapp_nodes(self):
         """
             Archive active workflows containing WhatsApp nodes.
@@ -445,10 +471,11 @@ class WorkAuto(models.Model):
             drawflow = data.get('drawflow', {}) or {}
             home = drawflow.get('Home', {}) or {}
             nodes = home.get('data', {}) or {}
-            for node in nodes.values():
+            for drawflow_id, node in nodes.items():
                 nid = node.get('data', {}).get('nodeId')
                 if nid:
                     node_ids.append(nid)
+                    self.env['node.struct'].sudo().browse(nid).write({'drawflow_node_id': str(drawflow_id)})
 
         if not self:
             values = {
@@ -511,13 +538,13 @@ class WorkAuto(models.Model):
         if automation.env['ir.module.module'].search([('name', '=', 'cyllo_approval'), ('state', '=', 'installed')]):
             approval_nodes = automation.node_struct_ids.filtered(lambda n: n.name == 'Approval' and n.trigger_type == 'approval')
             for node in approval_nodes:
-                rule_domain = [('work_auto_id', '=', automation.id), ('model_id', '=', automation.model_id.id)]
-                existing_rule = automation.env['approval.rule'].search(rule_domain, limit=1)
+                existing_rule = automation.env['approval.rule'].browse(node.approval_rule_id) if node.approval_rule_id else False
+                if existing_rule and not existing_rule.exists():
+                    existing_rule = False
                 
                 rule_vals = {
                     'name': node.label or f'Approval Rule for {automation.name}',
                     'model_id': automation.model_id.id,
-                    'work_auto_id': automation.id,
                     'rule_type': node.approval_rule_type or 'button',
                     'user_id': node.approval_approver_id.id if node.approval_approver_type == 'user' and node.approval_approver_id else False,
                     'group_id': node.approval_approver_group_id.id if node.approval_approver_type == 'group' and node.approval_approver_group_id else False,
@@ -567,7 +594,8 @@ class WorkAuto(models.Model):
                 if existing_rule:
                     existing_rule.write(rule_vals)
                 else:
-                    automation.env['approval.rule'].create(rule_vals)
+                    new_rule = automation.env['approval.rule'].create(rule_vals)
+                    node.write({'approval_rule_id': new_rule.id})
 
         return automation.id
 
@@ -1247,6 +1275,13 @@ class WorkAuto(models.Model):
 
         def patch(model, name, method):
             """Patch method `name` on `model` unless already patched."""
+            if not method:
+                _logger.warning(
+                    "Skipping workflow patch for %s.%s because no method was generated.",
+                    getattr(model, '_name', model),
+                    name,
+                )
+                return
             if model not in patched_models[name]:
                 patched_models[name].add(model)
                 ModelClass = type(model)
@@ -1363,7 +1398,7 @@ class WorkAuto(models.Model):
                     code_obj = compile(function.c_make_function, '<string>', 'exec')
                     func = types.FunctionType(
                         code_obj.co_consts[0], globals(), function.func_name
-                    )()
+                    )
                 patch(Model, function.func_name, func)
                 patched_function_ids.add(function.id)
 
@@ -1565,6 +1600,27 @@ class WorkAuto(models.Model):
         context.update(args)
         context['trigger_type'] = args.get('trigger_type')
         context.update(_BUILTINS)
+        context['__approval_resume__'] = bool(args.get('__approval_resume__'))
+
+        if context['__approval_resume__']:
+            # The generated Approval node checks env.context to decide whether
+            # it should create a new request. Make the resume flag visible in
+            # the Odoo environment itself, not only in the exec globals.
+            context['env'] = self.env.with_context(__approval_resume__=True)
+
+        # Inject a unified approval outcome variable so generated Approval node
+        # Python code can branch on it with a simple variable reference.
+        # Supports both 'approved'/'rejected'/'expired' (from workflow.approval.request)
+        # and 'timeout' (legacy alias for 'expired').
+        _raw_status  = args.get('approval_status', '') or ''
+        _raw_branch  = args.get('approval_branch', '') or ''
+        _approval_outcome = _raw_status or _raw_branch
+        if _approval_outcome == 'expired':
+            _approval_outcome = 'timeout'
+        context['_approval_outcome'] = _approval_outcome
+        context['approval_status']   = _raw_status
+        context['approval_branch']   = _raw_branch
+        context['_approval_node_id'] = args.get('approval_node_id', '')
 
         def _safe_schedule_activity(rec, **kwargs):
             """Schedule an activity only for real DB records (id > 0)."""
@@ -1576,6 +1632,9 @@ class WorkAuto(models.Model):
             return valid.activity_schedule(**kwargs)
 
         context['_safe_schedule_activity'] = _safe_schedule_activity
+        # Inject a reference to the current workflow record so generated Approval
+        # node code can pass `automation.id` when creating workflow.approval.request.
+        context['automation'] = self
 
         if self.code:
             code_obj = compile(self.code.strip(), "", 'exec')

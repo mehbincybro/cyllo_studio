@@ -21,3 +21,4 @@
 #############################################################################
 
 from . import test_chat_bot
+from . import test_approval_trigger

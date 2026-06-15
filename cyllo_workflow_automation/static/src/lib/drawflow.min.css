@@ -136,6 +136,19 @@
     background: #b47706 !important; /* Continue branch (Orange) */
 }
 
+/* Approval node output ports */
+.drawflow .drawflow-node.Approval .output_1 {
+    background: #28a745 !important; /* Approved branch (Green) */
+}
+
+.drawflow .drawflow-node.Approval .output_2 {
+    background: #ff4d4d !important; /* Rejected branch (Red) */
+}
+
+.drawflow .drawflow-node.Approval .output_3 {
+    background: #b47706 !important; /* Timeout branch (Orange) */
+}
+
 
 
 .drawflow svg {

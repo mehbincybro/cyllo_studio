@@ -44,6 +44,7 @@ export class ApprovalNode extends ConfigurationBase {
             approverGroupId: null,
             subject: "Your Approval is Required",
             notifyEmail: true,
+            expireAfter: 0,
             buttons: [],
             users: [],
             groups: [],
@@ -66,6 +67,7 @@ export class ApprovalNode extends ConfigurationBase {
             this.approvalState.approverGroupId  = fs.approval_approver_group_id || null;
             this.approvalState.subject          = fs.approval_subject          || "Your Approval is Required";
             this.approvalState.notifyEmail      = fs.approval_notify_email !== false;
+            this.approvalState.expireAfter      = parseFloat(fs.approval_expire_after) || 0;
 
             this.approvalState.serverActions    = [];
             this.approvalState.stateFields      = [];
@@ -189,6 +191,15 @@ export class ApprovalNode extends ConfigurationBase {
         this.approvalState.approverError = false;
     }
 
+    setExpireAfter(e) {
+        const val = parseFloat(e.target.value);
+        this.approvalState.expireAfter = isNaN(val) || val < 0 ? 0 : val;
+    }
+
+    setNotifyEmail(e) {
+        this.approvalState.notifyEmail = e.target.checked;
+    }
+
     // Handlers
 
     setLabel(value) {
@@ -252,6 +263,16 @@ export class ApprovalNode extends ConfigurationBase {
     }
 
     generateCode() {
+        // Only generate creation code when NOT resuming (i.e. on first trigger).
+        // The expireAfter value is serialised so the backend can set the datetime.
+        const expireHours = this.approvalState.expireAfter || 0;
+        const approverType = this.approvalState.approverType || 'user';
+        const approverId   = this.approvalState.approverId   || 'False';
+        const groupId      = this.approvalState.approverGroupId || 'False';
+        const subject      = (this.fieldState.approval_subject || 'Your Approval is Required')
+                                .replace(/'/g, "\\'");
+        const notifyEmail  = this.approvalState.notifyEmail ? 'True' : 'False';
+
         return "";
     }
 
@@ -283,6 +304,7 @@ export class ApprovalNode extends ConfigurationBase {
         this.fieldState.approval_approver_group_id     = this.approvalState.approverGroupId;
         this.fieldState.approval_subject               = this.approvalState.subject;
         this.fieldState.approval_notify_email          = this.approvalState.notifyEmail;
+        this.fieldState.approval_expire_after          = this.approvalState.expireAfter || 0;
 
         const code = this.generateCode();
         this.state.used_variables = {};
