@@ -84,6 +84,12 @@ patch(ButtonBox.prototype, {
     const self = this;
     const smart_button = this.ref.el;
 
+    // Ref element may be absent (button box not rendered for this form).
+    // Sortable.get(null) reads an expando off null and throws, so bail out.
+    if (!smart_button) {
+        return;
+    }
+
     // Destroy existing sortable if any
     const existingSortable = Sortable.get(smart_button);
     if (existingSortable) existingSortable.destroy();

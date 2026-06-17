@@ -2156,16 +2156,16 @@ select>option {
 }
 
 /* ── A4 page bottom boundary ───────────────────────────────────────────────── */
-.cy-studio.rounded.m-2.overflow-hidden.border-view.shadow {
+/* .cy-studio.rounded.m-2.overflow-hidden.border-view.shadow {
     height: auto !important;
     min-height: 100% !important;
     overflow: visible !important;
-}
+} */
 
-.border-view {
+/* .border-view {
     height: auto !important;
     min-height: 0 !important;
-}
+} */
 
 /* Strong downward shadow on the paper container to visually "ground" the page */
 .cyllo-studio-report-container {

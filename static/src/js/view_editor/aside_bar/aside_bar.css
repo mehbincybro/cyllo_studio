@@ -1,9 +1,9 @@
 :root {
 
     --background-color-bg: #363827;
-    --text-color: #cccccc;
+    --text-color: #e2e2e2;
     --active-text-color: #7c8a00;
-    --border-color: #cccccc;
+    --border-color: #DFDFDF;
     --active-border-color: #7c8a00;
     --accordion-background-color: #333333;
     --accordion-expanded-color: #b3b3b3;
@@ -27,37 +27,25 @@
 }
 
 .cy-side-menu {
-    position: sticky;
-    right: 16px;
-    top: 2%;
-    bottom: 0;
-    padding-bottom: 8px;
-    height: calc(100vh - 78px); /* ensures it ends at the bottom */
-    max-height: 90.9%;
     background: #25281a;
     z-index: auto;
     transition:
         transform 0.8s cubic-bezier(0.33, 1, 0.68, 1),
         opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1);
-    transform: translateX(0);
     opacity: 1;
-    /*border: 1px solid var(--view-border) !important;
-    border-radius: 4px;*/
-    margin-top:8px;
     overflow-y: auto;
-     scrollbar-width: none;
-    scrollbar-color: #555 #2a2a2a;
-    border-radius:5px;
+    scrollbar-width: none;
 }
 
 .cy-side-menu::-webkit-scrollbar {
- width: 0px;
+    width: 0px;
 }
 
 .cy-side-menu.animate-out {
     transform: translateX(100%);
     opacity: 0;
 }
+
 .cy-nav__link {
     color: #535353;
     width: 100%;
@@ -72,8 +60,8 @@
 
 .cy-nav__link.active {
     color: var(--checkbox-text-color);
-   /* border-bottom: 1px solid #696969;*/
-    box-shadow:-4px -1px 17px rgba(0, 0, 0, 0.3);
+    /* border-bottom: 1px solid #696969;*/
+    box-shadow: -4px -1px 17px rgba(0, 0, 0, 0.3);
     transition: 0.3s;
 }
 
@@ -91,7 +79,7 @@
     background-color: var(--accordion-background-color);
     margin-bottom: 1rem;
     padding: 0.5rem 0;
-    font-size:16px !important;
+    font-size: 16px !important;
     border-radius: 0 !important;
 }
 
@@ -135,7 +123,7 @@
     font-size: 14px;
     margin-bottom: 0.5rem;
     color: var(--text-color);
-    font-family:inter, sans-serif;
+    font-family: inter, sans-serif;
 }
 
 .cy-input {
@@ -146,17 +134,18 @@
     margin-bottom: 0.5rem;
     padding: 0.38rem;
     color: #BCBBA7 !important;
-    font-size:13px;
-    font-family:inter,sans-serif;
+    font-size: 13px;
+    font-family: inter, sans-serif;
     font-weight: normal;
-     &[readonly] {
-      color: #85857d !important;
+
+    &[readonly] {
+        color: #85857d !important;
     }
 
 }
 
 .cy-basedOn {
-    gap : 3px;
+    gap: 3px;
     display: flex;
     font-size: 14px;
     background-color: transparent;
@@ -207,29 +196,33 @@
     visibility: hidden;
 }
 
-.round input[type="checkbox"]:checked + label {
+.round input[type="checkbox"]:checked+label {
     background-color: var(--checkbox-background-color);
     border-color: var(--checkbox-background-color);
     transition: all 0.6s linear;
 }
 
-.round input[type="checkbox"]:checked + label:after {
+.round input[type="checkbox"]:checked+label:after {
     opacity: 1;
-    width:10px;
+    width: 10px;
 }
-.cy-studio-custom-dropdown-action ul{
+
+.cy-studio-custom-dropdown-action ul {
     background: #2a2a2a;
     width: 14%;
     margin-left: -3px;
     margin-top: 6px;
 }
-.cy-studio-custom-dropdown-action a{
+
+.cy-studio-custom-dropdown-action a {
     color: #BCBBA7 !important;
 }
-.cy-studio-custom-dropdown-action input{
+
+.cy-studio-custom-dropdown-action input {
     color: #BCBBA7 !important;
 }
-.cy-studio-button-icon{
+
+.cy-studio-button-icon {
     background-color: var(--input-background-color);
 }
 
@@ -239,7 +232,7 @@
     left: 7px;
     width: 30px;
     height: 30px;
-    background: #9ea700 ;
+    background: #9ea700;
     border: none;
     border-radius: 50%;
     display: flex;
@@ -248,65 +241,202 @@
     color: white;
     font-size: 1.2rem;
     cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.cy-close-arrow .ri-arrow-left-fill{
-        font-size:20px;
-    }
+.cy-close-arrow .ri-arrow-left-fill {
+    font-size: 20px;
+}
 
-.o_form_view .o_control_panel_main{
-    display:flex !important;
-    justify-content:center !important;
+.o_form_view .o_control_panel_main {
+    display: flex !important;
+    justify-content: center !important;
 
 }
 
 /* Tablets (768px) */
 @media (max-width: 767px) {
-  .cy-side-menu {
-    width: 200px !important;
-  }
+    .cy-side-menu {
+        width: 200px !important;
+    }
 }
 
 /* Mobiles (599px) */
 @media (max-width: 599px) {
-  .cy-side-menu {
-    width: 150px !important;
-  }
+    .cy-side-menu {
+        width: 150px !important;
+    }
 }
 
 /* Extra small devices (320px) */
 @media (max-width: 319px) {
-  .cy-side-menu {
-    width: 120px !important;
-  }
+    .cy-side-menu {
+        width: 120px !important;
+    }
 }
 
 /* Aspect Ratio: Widescreen 16:9 */
 @media (min-width: 1024px) and (aspect-ratio: 16/9) {
-  .cy-side-menu {
-    width: 340px !important;
-  }
+    .cy-side-menu {
+        width: 340px !important;
+    }
 }
 
 /* Aspect Ratio: Standard 4:3 */
 @media (aspect-ratio: 4/3) {
-  .cy-side-menu {
-    width: 280px !important;
-  }
+    .cy-side-menu {
+        width: 280px !important;
+    }
 }
 
 /* Portrait Tablets */
 @media (max-width: 1023px) and (orientation: portrait) {
-  .cy-side-menu {
-    width: 220px !important;
-  }
+    .cy-side-menu {
+        width: 220px !important;
+    }
 }
 
 /* Mobile Landscape */
 @media (max-width: 767px) and (orientation: landscape) {
-  .cy-side-menu {
-    width: 180px !important;
-  }
+    .cy-side-menu {
+        width: 180px !important;
+    }
 }
 
+/* Studio editor row: give the right panel a stable full width and let the
+   action area take the remaining (balance) space. The col-2 / aspect-ratio
+   media rules left it too narrow, clipping "Show Invisible Elements" etc. */
+.cy-studio .o_action_manager .flex-column > .d-flex > .cy-side-menu {
+    flex: 0 0 320px !important;
+    width: 320px !important;
+    max-width: 320px !important;
+    min-width: 320px !important;
+}
+
+.cy-studio .o_action_manager .flex-column > .d-flex > .position-relative,
+.cy-studio .o_action_manager .flex-column > .d-flex > .o_action {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+}
+
+/* Flex items default to min-width:auto and refuse to shrink below their
+   content's intrinsic width. The wide list table then pushes the whole row
+   past the overflow-hidden .cy-studio container, clipping the rightmost
+   element (the aside) — worst when devtools shrink the viewport. Allow the
+   chain to shrink so the action area scrolls internally instead. */
+.cy-studio .o_action_manager > .flex-column,
+.cy-studio .o_action_manager .flex-column > .d-flex {
+    min-width: 0 !important;
+}
+
+/* =========================================================
+   Light theme for the View / Properties aside panel.
+   Flips the CSS vars + hardcoded dark colors to white.
+   ========================================================= */
+.cy-side-menu.view_overall_light {
+    --background-color-bg: #ffffff;
+    --text-color: #374151;
+    --active-text-color: #9EA700;
+    --border-color: #d6d9de;
+    --active-border-color: #9EA700;
+    --accordion-background-color: #f4f5f3;
+    --accordion-expanded-color: #1f2430;
+    --input-background-color: #ffffff;
+    --input-border-color: #d6d9de;
+    --checkbox-background-color: #9EA700;
+    --checkbox-text-color: #1f2430;
+    background: #ffffff !important;
+    color: #374151;
+    border-left: 1px solid var(--border-color);
+}
+
+/* Tab header (View / Properties) */
+.cy-side-menu.view_overall_light .cy-tab-header {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    background: #ffffff;
+    position: relative;
+}
+
+.cy-side-menu.view_overall_light .cy-tab-pill {
+    display: flex;
+    flex: 1;
+    background: #efefef;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+}
+
+.cy-side-menu.view_overall_light .cy-tab-pill > div {
+    flex: 1;
+}
+
+.cy-side-menu.view_overall_light .cy-window-view {
+    background: transparent !important;
+}
+
+.cy-side-menu.view_overall_light .cy-nav__link {
+    width: 100%;
+    color: #6b7280;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    box-shadow: none;
+    white-space: nowrap;
+}
+
+.cy-side-menu.view_overall_light .cy-nav__link.active {
+    color: #1f2430;
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    border-bottom: none;
+}
+
+/* Section containers / boxes */
+.cy-side-menu.view_overall_light .overall_container_list {
+    background-color: #ffffff !important;
+}
+
+/* Text inputs */
+.cy-side-menu.view_overall_light .cy-input {
+    background-color: #ffffff !important;
+    border-color: #d6d9de;
+    color: #374151 !important;
+}
+
+.cy-side-menu.view_overall_light .cy-input[readonly] {
+    color: #9aa0a8 !important;
+}
+
+/* Custom dropdown menus */
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action ul {
+    background: #ffffff !important;
+    border: 1px solid #d6d9de;
+}
+
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action a,
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action input {
+    color: #374151 !important;
+}
+
+/* CylloStudioDropdown (Group By / Sort By / Select Position) */
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown .d-flex {
+    background-color: #ffffff !important;
+    border-color: #d6d9de !important;
+}
+
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown span,
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown i {
+    color: #374151 !important;
+}
+
+.cy-side-menu.view_overall_light .cy-studio-custom-dropdown .o-autocomplete--dropdown-menu {
+    --custom-dropdown-bg: #ffffff;
+    --custom-dropdown-border: #d6d9de;
+}

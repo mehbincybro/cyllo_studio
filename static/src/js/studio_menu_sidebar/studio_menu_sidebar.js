@@ -14,6 +14,7 @@ import {
 } from "@cyllo_studio/js/studio_menu_sidebar/dialog/dialog";
 
 import { MenuSideBar } from "@cyllo_base/js/menu_sidebar";
+import { FirstPage } from '@cyllo_studio/js/new_app/new_app_templates';
 
 /**
  * Custom Studio Menu Sidebar Component
@@ -48,6 +49,15 @@ export class StudioMenuSideBar extends MenuSideBar {
             }
         }, () => [this.state.MenuDraggable, this.state.CustomMenuDraggable])
     }
+    /**
+     * Open the Cyllo Studio app creation dialog (stays in studio mode).
+     */
+    createApp() {
+        this.dialogService.add(FirstPage, {
+            title: 'Cyllo Studio',
+        });
+    }
+
     /**
      * Creates a SortableJS instance for drag-and-drop menus
      * @param {HTMLElement} el - The container element for draggable menus
@@ -138,14 +148,14 @@ export class StudioMenuSideBar extends MenuSideBar {
         event.preventDefault();
         var activeContextMenu = this.cyLeftSidebar.el.querySelectorAll('.studio-context-menu[style="display: flex;"]')
         activeContextMenu.forEach((menu) => {
-            menu.style.display = 'none'
+            menu.style.display = 'flex'
         })
         const element = event.target.closest('.draggableDiv') || event.target.parentNode;
         var cyLeftSidebarContextMenu = element?.querySelector('.studio-context-menu')
         if (cyLeftSidebarContextMenu) {
             cyLeftSidebarContextMenu.style.display = 'flex';
             const hideContextMenu = () => {
-                cyLeftSidebarContextMenu.style.display = 'none';
+                cyLeftSidebarContextMenu.style.display = 'flex';
                 document.removeEventListener('click', hideContextMenu);
             };
             document.addEventListener('click', hideContextMenu);

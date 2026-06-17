@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-name="cyllo_studio.AsideBar">
-        <div class="rounded cy-side-menu col-2 view_overall_light shadow"
+        <div class="cy-side-menu col-2 view_overall_light"
              t-att-class="props?.isAnimatingSidebar ? 'animate-out' : ''">
-            <div class="d-flex" style="border-bottom:1px solid #8b8989 !important;">
-                <div class="rounded cy-window-view w-100 d-flex justify-content-center align-items-center"
-                     t-on-click="(ev)=> this.props.handleView(ev)">
-                    <button class="w-100 cy-nav__link" t-att-class="state.type === 'View' ? 'active' : ''">View</button>
-                </div>
-                <div t-if="propsType" class=" w-100 d-flex justify-content-center align-items-center">
-                    <button class="w-100 cy-nav__link" t-att-class="propsType ? 'active' : ''">Properties</button>
+            <div class="cy-tab-header">
+                <div class="cy-tab-pill">
+                    <div class="cy-window-view" t-on-click="(ev)=> this.props.handleView(ev)">
+                        <button class="cy-nav__link" t-att-class="state.type === 'View' ? 'active' : ''">View</button>
+                    </div>
+                    <div t-if="propsType">
+                        <button class="cy-nav__link" t-att-class="propsType ? 'active' : ''">Properties</button>
+                    </div>
                 </div>
                 <button class="cy-close-arrow" t-on-click="() => this.closeSidebar()">
                     <i class="ri-arrow-left-fill"/>

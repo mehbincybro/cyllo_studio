@@ -3,70 +3,109 @@
     background-color: #e0e1dd !important;
 }*/
 
-.o_content{
+.o_content {
     overflow: auto;
     height: 90vh;
 }
-.o_action{
+
+.o_action {
     display: flex;
 }
 
 .o_action_manager .o_action {
     flex-direction: column;
 }
+
 /* List View */
-/*@media (min-width: 1570px) {
-    .o_list_table{
-        width:
-    }
-}*/
+
 .o_list_renderer .o_list_table {
-    width:100%;
-    max-width:inherit;
+    width: 100%;
+    max-width: inherit;
 }
-/*.o_action_manager.menuListFixed > :nth-child(2) {*/
-/*        margin-left: 16% !important;*/
-/*        flex-flow: column nowrap;*/
-/*        overflow: hidden;*/
-/*    }*/
-.o-mail-ChatterContainer{
-    position:relative !important;
+
+.cy-studio {
+    .table> :not(caption)>*>* {
+        padding: 0.75rem 0.75rem !important;
+    }
 }
-.cy-mail-chatter{
-    z-index:9 !important;
+
+.o-mail-ChatterContainer {
+    position: relative !important;
+}
+
+.cy-mail-chatter {
+    z-index: 9 !important;
 
 }
 
-.rounded .o_searchview .o_searchview_autocomplete .o_menu_item a {
+.cy-studio {
+    height: 100%;
+    border-radius: 8px;
+    flex: 1;
+
+    /* .menuListFixed .cy_active_main_menu .cy-image,
+    .menuListFixed .cy_active_main_menu a>i,
+    .menuListFixed .cy_active_main_menu .cy-svg-container {
+        box-shadow: none !important;
+    } */
+}
+
+.cy-studio .cy-left-sidebar {
+    height: calc(100dvh - 32px);
+
+    .cy_dashboard_back-btn {
+        padding: 1rem 1.5rem !important;
+    }
+}
+
+@media (min-width: 1099px) and (max-width: 1430px) {
+    .cy-left-sidebar:not(.cy-left-sidebar-absolute) {
+        width: 100% !important;
+        -webkit-transition: width 0.3s ease;
+        transition: width 0.3s ease;
+    }
+}
+
+.cy-studio .o_action_manager {
+    height: 100%;
+    width: 100%;
+}
+
+.cy-studio .o_searchview .o_searchview_autocomplete .o_menu_item a {
     color: #495052;
 }
 
-.rounded .o_cp_searchview .dropdown-item {
+.cy-studio .o_cp_searchview .dropdown-item {
     color: #495052;
 }
 
-.cy-chatter-trash:hover{
-    color:red;
-    transform:scale(1.3,1.3);
+.cy-chatter-trash:hover {
+    color: red;
+    transform: scale(1.3, 1.3);
     transition: all 0.5s ease;
 }
+
 .border-class-list {
-    border:3px solid #9EA700 !important;
+    border: 3px solid #9EA700 !important;
 }
 
 .cy-thead-list th.border-class-list {
-    background-color: #f8f9e5 !important;/* Changed border into background */
+    background-color: #f8f9e5 !important;
+    /* Changed border into background */
     border: unset !important;
 }
-.primary-svg{
+
+.primary-svg {
     fill: #9EA700 !important;
 
 }
 
 td.border-class-list {
-    background-color: #f8f9e5;/* Changed border into background */
-    border:unset !important;
+    background-color: #f8f9e5;
+    /* Changed border into background */
+    border: unset !important;
 }
+
 /* striped for invisible */
 .cy-studio-striped {
     display: none !important;
@@ -85,24 +124,28 @@ body.cy-show-invisible .cy-studio-striped {
     color: #9EA700;
     font-size: 1.2rem;
 }
-.cy-content-wrapper{
+
+.cy-content-wrapper {
     display: flex;
     overflow-x: auto;
     flex-grow: 1;
     scroll-behavior: smooth;
     scrollbar-width: none;
 }
-.cy-field__box{
+
+.cy-field__box {
     width: 100%;
     padding: 0 1rem 1rem;
     height: 100%;
 }
-.cy-addable__list{
+
+.cy-addable__list {
     padding: 0.5rem;
     border: 2px dashed #BCBBA7;
     border-radius: 4px;
 }
-.cy-drag-input_container{
+
+.cy-drag-input_container {
     margin-top: 0.3rem;
     display: flex;
     border: 1px solid #dfdfdf;
@@ -110,6 +153,7 @@ body.cy-show-invisible .cy-studio-striped {
     overflow: hidden;
     padding: 0.3rem;
 }
+
 .cy-draginput--box {
     min-width: 58px;
     overflow: auto;
@@ -118,25 +162,30 @@ body.cy-show-invisible .cy-studio-striped {
     border-radius: 3px;
     border: 1px solid #dfdfdf;
 }
-.cy-chatter-exist{
+
+.cy-chatter-exist {
     opacity: 0.5;
     cursor: not-allowed !important;
 }
+
 .cy-drag_edit-btn {
     border: 0px solid #dfdfdf;
     padding: -1.25rem 0.5rem;
     border-radius: 2px;
     font-size: 13px;
 }
+
 .cy-drag_save {
     background-color: #fff !important;
     color: #9EA700 !important;
 }
+
 .cy-drag_delete {
     background-color: #fff !important;
     color: red !important;
     margin-left: 0.2rem;
 }
+
 .cy-field__box .cy-btn-primary {
     margin-bottom: 26px;
 }
@@ -151,7 +200,8 @@ body.cy-show-invisible .cy-studio-striped {
     width: 100%;
     padding: 0.7rem 0.1rem;
 }
-.cy-studio-overlay{
+
+.cy-studio-overlay {
     position: absolute;
     top: 16px;
     left: 0;
@@ -168,13 +218,9 @@ body.cy-show-invisible .cy-studio-striped {
     transition: opacity 0.3s ease;
     margin-top: -16px;
 }
+
 .overlay-active {
     overflow: hidden !important;
-}
-
-.rounded.cy-navbar {
-    padding: 8px !important;
-    height: 54px !important;
 }
 
 /* Form View */
@@ -184,29 +230,29 @@ body.cy-show-invisible .cy-studio-striped {
 }
 
 /* Activity dropdown */
-.activity-add-custom-dropdown .d-flex{
+.activity-add-custom-dropdown .d-flex {
     width: 87%;
 }
 
-.activity-add-custom-dropdown ul{
-    width:13%;
-    min-width:100px  !important;
+.activity-add-custom-dropdown ul {
+    width: 13%;
+    min-width: 100px !important;
 }
 
-.activity-edit-custom-dropdown .d-flex{
-    width:50%
+.activity-edit-custom-dropdown .d-flex {
+    width: 50%
 }
 
-.activity-edit-custom-dropdown ul{
+.activity-edit-custom-dropdown ul {
     min-width: 13% !important;
 }
 
-.custom-dropdown .custom-dropdown-text{
+.custom-dropdown .custom-dropdown-text {
     border: 1px solid #828176;
 }
 
 /* Activity Add Button */
-.cy-btn-add-activity{
+.cy-btn-add-activity {
     width: 53px;
     margin-top: 5%;
 }
@@ -224,29 +270,35 @@ body.cy-show-invisible .cy-studio-striped {
 }
 
 /* Activity Field border */
-.cy-activity  .d-flex:hover{
+.cy-activity .d-flex:hover {
     border-radius: 3px;
     border: 1px solid #9EA700;
     cursor: move !important;
 }
+
 .drop-here-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 300px;             /* Set height to 300px */
+    height: 300px;
+    /* Set height to 300px */
     width: 100%;
-    font-size: 24px;           /* Adjust size as needed */
-    color: #333;               /* Adjust color as needed */
-    border: 2px dashed #ccc;   /* Optional: Add a border */
+    font-size: 24px;
+    /* Adjust size as needed */
+    color: #333;
+    /* Adjust color as needed */
+    border: 2px dashed #ccc;
+    /* Optional: Add a border */
     text-align: center;
 }
 
-.cy-activity .d-inline-block:hover{
+.cy-activity .d-inline-block:hover {
     border-radius: 3px;
     border: 1px solid #9EA700;
     cursor: move !important;
 }
-.cy-activity .d-block .d-block:hover{
+
+.cy-activity .d-block .d-block:hover {
     border-radius: 3px;
     border: 1px solid #9EA700;
     cursor: move !important;
@@ -257,7 +309,7 @@ body.cy-show-invisible .cy-studio-striped {
 /*}*/
 
 /* Activity Template */
-.cy-activity-template  {
+.cy-activity-template {
     position: absolute;
     top: 0;
     left: 0;
@@ -269,12 +321,12 @@ body.cy-show-invisible .cy-studio-striped {
 }
 
 /* Activity Icon */
-.cy-activity-icon{
-    font-size:17px;
+.cy-activity-icon {
+    font-size: 17px;
 }
 
-.cy-activity-viewbody{
-    position:relative;
+.cy-activity-viewbody {
+    position: relative;
 }
 
 /* Custom Dropdown Activity View */
@@ -282,7 +334,7 @@ body.cy-show-invisible .cy-studio-striped {
     width: 247px !important;
 }
 
-.custom-dropdown.o-autocomplete . o-autocomplete--dropdown-menu {
+.custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     border-top: none;
@@ -290,10 +342,10 @@ body.cy-show-invisible .cy-studio-striped {
 }
 
 .activity-edit-custom-dropdown .d-flex {
-    width: 209px  !important;
+    width: 209px !important;
 }
 
-.cy-activity-edit-message{
+.cy-activity-edit-message {
     font-size: 12px;
     padding: 0.5rem;
     position: absolute;
@@ -307,10 +359,11 @@ body.cy-show-invisible .cy-studio-striped {
     z-index: 1;
 }
 
-.cy-activity-edit-message span{
+.cy-activity-edit-message span {
     margin-left: 11px;
 }
-.cy-activity-edit-message:before{
+
+.cy-activity-edit-message:before {
     content: "";
     position: absolute;
     top: -10px;
@@ -324,17 +377,16 @@ body.cy-show-invisible .cy-studio-striped {
     margin-left: 0 !important;
 }
 
-.cy-add-button:hover button{
+.cy-add-button:hover button {
     display: block !important;
 }
 
-.cy-add-button:hover div{
+.cy-add-button:hover div {
     display: none !important;
 }
-/* ribbon-dialog checkbox */
-*Overall Component*/
 
-.checkbox-can-create .can_create_label {
+/* ribbon-dialog checkbox */
+*Overall Component*/ .checkbox-can-create .can_create_label {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -415,82 +467,92 @@ body.cy-show-invisible .cy-studio-striped {
     border-color: #9EA700 !important;
 }
 
-.checkbox-can-create .inp-can_create_label:checked + .can_create_label span:first-child {
+.checkbox-can-create .inp-can_create_label:checked+.can_create_label span:first-child {
     border-color: #9EA700;
     background: #9EA700;
     animation: check-15 0.6s ease;
 }
 
-.checkbox-can-create .inp-can_create_label:checked + .can_create_label span:first-child svg {
+.checkbox-can-create .inp-can_create_label:checked+.can_create_label span:first-child svg {
     stroke-dashoffset: 0;
     width: auto;
 }
 
-.checkbox-can-create .inp-can_create_label:checked + .can_create_label span:first-child:before {
+.checkbox-can-create .inp-can_create_label:checked+.can_create_label span:first-child:before {
     transform: scale(1.6);
     opacity: 0;
     transition: all 0.6s ease;
 }
 
-.checkbox-can-create .inp-can_create_label:checked + .can_create_label span:last-child {
+.checkbox-can-create .inp-can_create_label:checked+.can_create_label span:last-child {
     color: #B9B8C3;
     transition: all 0.3s ease;
 }
 
-                                         /* kanban div  */
+/* kanban div  */
 
-.cy-component-container{
+.cy-component-container {
     color: #222;
     background: #f5f6e6;
 }
 
-.kanban-component{
+.kanban-component {
     align-items: center;
     padding: 6px 0 6px 12px;
     justify-content: space-between;
 }
-.kanban-component-text{
+
+.kanban-component-text {
     width: 50%;
     display: flex;
     font-style: normal;
 }
-.cy-studio-kanban-component{
-        font-style: normal;
+
+.cy-studio-kanban-component {
+    font-style: normal;
     font-weight: 500;
 }
-.kanban-component-icon{
+
+.kanban-component-icon {
     display: flex;
 }
+
 .cy-studio-grab {
-  cursor: grab !important;
-  cursor: -moz-grab !important;
-  cursor: -webkit-grab !important;
+    cursor: grab !important;
+    cursor: -moz-grab !important;
+    cursor: -webkit-grab !important;
 }
 
 
-.o_kanban_renderer .border-class{
+.o_kanban_renderer .border-class {
     border: 1px solid #9EA700 !important;
 }
+
 .border-class {
-    border:unset !important;
+    border: unset !important;
 }
 
 .cy-thead-list th.border-class {
-    background-color: #f8f9e5 !important;/* Changed border into background */
+    background-color: #f8f9e5 !important;
+    /* Changed border into background */
     border: unset !important;
 }
 
 td.border-class {
-    background-color: #f8f9e5;/* Changed border into background */
-    border:unset !important;
+    background-color: #f8f9e5;
+    /* Changed border into background */
+    border: unset !important;
 }
+
 .cy-thead-list th.border-class-list {
-    background-color: #f8f9e5 !important;/* Changed border into background */
+    background-color: #f8f9e5 !important;
+    /* Changed border into background */
     border: unset !important;
 }
 
 td.border-class-list {
-    background-color: #f8f9e5;/* Changed border into background */
+    background-color: #f8f9e5;
+    /* Changed border into background */
 }
 
 .o-scrollbar {
@@ -503,25 +565,26 @@ td.border-class-list {
     cursor: move;
 }
 
-div.cy-studio-kanban-border[data-drag="1"]{
+div.cy-studio-kanban-border[data-drag="1"] {
     border-color: #9EA700;
 }
-.cy-studio-kanban-container{
+
+.cy-studio-kanban-container {
     border: 1px dashed #c3c686 !important;
 }
 
-div.cy-studio-kanban-border[data-drag="1"]{
+div.cy-studio-kanban-border[data-drag="1"] {
     border-color: #9EA700;
 }
 
 div[data-drag="1"]:empty {
-    background-color: #d8d9db!important;
+    background-color: #d8d9db !important;
     padding: 3px;
 }
 
 .modal div[data-drag="1"]:empty {
-    background-color: transparent!important;
-    padding: 0!important;
+    background-color: transparent !important;
+    padding: 0 !important;
 }
 
 .border-primary {
@@ -610,15 +673,13 @@ div[data-drag="1"]:empty {
 .cy-hide-invisible .cy-studio-invisible-element {
     display: none !important;
 }
+
 .cy-shadow-kanban {
     opacity: .70;
     pointer-events: none;
     transform: scale(.98);
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.15));
+    filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.15));
 }
-
-
-
 
 
 /* SortableJS Drag Placeholder */
@@ -626,4 +687,3 @@ div[data-drag="1"]:empty {
     width: 100% !important;
     min-width: 100% !important;
 }
-
