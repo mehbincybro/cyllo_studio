@@ -63,7 +63,7 @@ import { LabelSelectionField } from '@web/views/fields/label_selection/label_sel
 import { ListActivity } from '@mail/views/web/fields/list_activity/list_activity';
 import { BadgeField } from "@web/views/fields/badge/badge_field";
 import { HandleField } from "@web/views/fields/handle/handle_field";
-import { ListSectionAndNoteText } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
+// import { ListSectionAndNoteText } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 import { KanbanActivity } from "@mail/views/web/fields/kanban_activity/kanban_activity";
 
 OuterGroup.props = [
@@ -317,15 +317,9 @@ patch(HandleField,{
         placeholder: { type: String, optional: true}
     }
 });
-patch(ListSectionAndNoteText,{
-    props: {
-        ...ListSectionAndNoteText.props,
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(KanbanActivity,{
-    props: {
-        ...KanbanActivity.props,
-        placeholder: { type: String, optional: true}
-    }
-});
+// patch(ListSectionAndNoteText,{
+//     props: {
+//         ...ListSectionAndNoteText.props,
+//         placeholder: { type: String, optional: true}
+//     }
+// });

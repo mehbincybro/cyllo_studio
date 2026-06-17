@@ -230,15 +230,29 @@
                             <!-- Left: Logo + Company Info -->
                             <div class="cy-company-block">
                                 <!-- Logo Block -->
-                                <div class="cy-logo-block" t-on-click="onLogoClick">
-                                    <t t-if="state.companyLogo">
-                                        <img t-att-src="'data:image/png;base64,' + state.companyLogo"
-                                             class="cy-company-logo" alt="Company Logo"/>
+                                <div class="cy-logo-block">
+                                    <t t-if="state.companyLogo and !state.hideLogo">
+                                        <!-- Logo is visible: show image + remove button on hover -->
+                                        <div class="cy-logo-wrapper"
+                                             t-on-mouseenter="() => { this.state.logoHovered = true; }"
+                                             t-on-mouseleave="() => { this.state.logoHovered = false; }">
+                                            <img t-att-src="'data:image/png;base64,' + state.companyLogo"
+                                                 class="cy-company-logo" alt="Company Logo"
+                                                 t-on-click="onLogoClick"/>
+                                            <button t-if="state.logoHovered"
+                                                    class="cy-remove-logo-btn"
+                                                    t-on-click.stop="onRemoveLogoClick"
+                                                    title="Remove logo from this report only">
+                                                <i class="ri-close-line"/>
+                                            </button>
+                                        </div>
                                     </t>
                                     <t t-else="">
-                                        <div class="cy-logo-placeholder">
+                                        <!-- No logo or hidden: show placeholder -->
+                                        <div class="cy-logo-placeholder" t-on-click="onLogoClick">
                                             <i class="ri-camera-line"/>
-                                            <span>Your logo</span>
+                                            <span t-if="state.hideLogo and state.companyLogo">Logo hidden — click to restore</span>
+                                            <span t-else="">Your logo</span>
                                         </div>
                                     </t>
                                     <input type="file" class="cy-logo-input" accept="image/*"
@@ -260,7 +274,7 @@
                                 class="live-report-content w-100 flex-grow-1 border-0"
                                 t-att-src="state.previewUrl"/>
                         <div t-else="" id="studio_report" t-ref="report_frame"
-                             class="editable-area w-100 flex-grow-1 text-dark" style="padding: 10mm;"/>
+                             class="editable-area w-100 flex-grow-1 text-dark" style="padding: 10mm; overflow-x: hidden; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word;"/>
                     </div>
                     <!-- End of Page marker (temporarily disabled)
                     <div class="cyllo-end-of-page-marker mb-5">

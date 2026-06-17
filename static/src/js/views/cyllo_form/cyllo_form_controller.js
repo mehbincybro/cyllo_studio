@@ -67,7 +67,7 @@ export class CylloFormController extends FormController {
         onWillStart(async () => {
             this.env.bus.trigger("Studio:NotebookChanged")
             if (!this.env.config.viewId) {
-                await this.rpc('cyllo_studio/form/add/form_view', {
+                await this.rpc('/cyllo_studio/form/add/form_view', {
                     arch: serializeXML(this.props.arch),
                     model: this.props.resModel,
                 })

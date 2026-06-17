@@ -106,6 +106,8 @@ export class EditReport extends Component {
             companyLogo: null,
             companyName: '',
             companyInfo: '',
+            hideLogo: false,
+            logoHovered: false,
         });
 
         // Promise resolver for the table config modal
@@ -118,45 +120,52 @@ export class EditReport extends Component {
         onWillStart(async () => {
             await loadJS("/web/static/lib/ace/ace.js");
             // Fetch company logo and info
-            // try {
-            //     const companies = await this.orm.searchRead(
-            //         'res.company',
-            //         [['id', '=', this.env.company.id]],
-            //         ['name', 'logo', 'street', 'city', 'phone', 'email', 'website']
-            //     );
-            //     console.log('omomomom',companies)
-            //     if (companies && companies.length > 0) {
-            //         const co = companies[0];
-            //         this._companyId = co.id; // store for logo upload
-            //         this.state.companyLogo = co.logo || null;
-            //         this.state.companyName = co.name || '';
-            //         this.state.companyInfo = [
-            //             co.street,
-            //             co.city,
-            //             co.phone ? '\u260e ' + co.phone : '',
-            //             co.email ? '\u2709 ' + co.email : '',
-            //             co.website ? '\uD83C\uDF10 ' + co.website : ''
-            //         ].filter(Boolean).join('\n');
-            //     }
-            // } catch (e) {
-            //     console.warn('[Cyllo Studio] Could not fetch company info:', e);
-            // }
+            try {
+                let companyId = null;
+                if (this.env && this.env.company && this.env.company.id) {
+                    companyId = this.env.company.id;
+                }
+                const domain = companyId ? [['id', '=', companyId]] : [];
+
+                const companies = await this.orm.searchRead(
+                    'res.company',
+                    domain,
+                    ['name', 'logo', 'street', 'city', 'phone', 'email', 'website'],
+                    { limit: 1, order: 'id asc' }
+                );
+                // console.log('logoooooo',companies)
+                if (companies && companies.length > 0) {
+                    const co = companies[0];
+                    this._companyId = co.id; // store for logo upload
+                    this.state.companyLogo = co.logo || null;
+                    this.state.companyName = co.name || '';
+                    this.state.companyInfo = [
+                        co.street,
+                        co.city,
+                        co.phone ? '\u260e ' + co.phone : '',
+                        co.email ? '\u2709 ' + co.email : '',
+                        co.website ? '\uD83C\uDF10 ' + co.website : ''
+                    ].filter(Boolean).join('\n');
+                }
+            } catch (e) {
+                console.warn('[Cyllo Studio] Could not fetch company info:', e);
+            }
             let companyId = null;
             if (!companyId) {
-            const companies = await this.orm.searchRead(
-                'res.company', [], ['id'], { limit: 1, order: 'id asc' }
-            );
-            if (companies && companies.length > 0) {
-                companyId = companies[0].id;
+                const companies = await this.orm.searchRead(
+                    'res.company', [], ['id'], { limit: 1, order: 'id asc' }
+                );
+                if (companies && companies.length > 0) {
+                    companyId = companies[0].id;
+                }
             }
-        }
 
-        if (!companyId) {
-            console.warn('[Cyllo Studio] Could not determine company ID by any method.');
-            return;
-        }
+            if (!companyId) {
+                console.warn('[Cyllo Studio] Could not determine company ID by any method.');
+                return;
+            }
 
-        this._companyId = companyId;
+            this._companyId = companyId;
         });
 
         onMounted(async () => {
@@ -277,6 +286,18 @@ export class EditReport extends Component {
                         console.warn('[Cyllo Studio] get_arch failed:', result?.error);
                     }
                 }
+            }
+
+            // Check if the saved arch contains a logo-hide override and restore state
+            if (arch && typeof arch === 'string' && arch.includes('cy-logo-override')) {
+                this.state.hideLogo = true;
+                // Strip it out of the editable canvas so it doesn't appear as a DOM node
+                const parser = new DOMParser();
+                const archDoc = parser.parseFromString(arch, 'text/html');
+                archDoc.querySelectorAll('.cy-logo-override').forEach(el => el.remove());
+                arch = archDoc.body.innerHTML;
+            } else {
+                this.state.hideLogo = false;
             }
 
             this._setupReportFrame(arch || '');
@@ -2276,8 +2297,104 @@ export class EditReport extends Component {
     }
 
     // \u2500\u2500 Company Logo Upload \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
-    onLogoClick() {
+    onLogoClick(ev) {
+        console.log('klloo',this.state.hideLogo,this.state.companyLogo)
+        if (this.state.hideLogo && this.state.companyLogo) {
+            // Restore hidden logo for this report (no file picker needed)
+            this.state.hideLogo = false;
+            if (this.undoManager) this.undoManager.debouncedSave();
+            return;
+        }
+                    console.log('testttttttt,logoo',this.state.companyLogo)
+
+        if (this.state.companyLogo) {
+            // Remove existing dropdown if any
+            const existing = document.getElementById('cy-logo-actions-menu');
+            if (existing) existing.remove();
+
+            const rect = ev.currentTarget.getBoundingClientRect();
+            const menu = document.createElement('div');
+            menu.id = 'cy-logo-actions-menu';
+            menu.className = 'bg-white border rounded shadow-sm py-1 position-fixed';
+            menu.style.top = `${rect.bottom + 5}px`;
+            menu.style.left = `${rect.left}px`;
+            menu.style.zIndex = '9999';
+            menu.style.minWidth = '150px';
+
+            const uploadBtn = document.createElement('button');
+            uploadBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white';
+            uploadBtn.innerText = 'Upload New Logo';
+            uploadBtn.onclick = () => {
+                menu.remove();
+                if (this.logoInputRef.el) this.logoInputRef.el.click();
+            };
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white text-danger';
+            deleteBtn.innerText = 'Delete Logo';
+            deleteBtn.onclick = async () => {
+                menu.remove();
+                await this.orm.write('res.company', [this._companyId], { logo: false });
+                this.state.companyLogo = false;
+                this.notification.add('Company logo removed', { type: 'success' });
+            };
+
+            menu.appendChild(uploadBtn);
+            menu.appendChild(deleteBtn);
+            document.body.appendChild(menu);
+
+            // Close on outside click
+            setTimeout(() => {
+                const closeMenu = (e) => {
+                    if (!menu.contains(e.target)) {
+                        menu.remove();
+                        document.removeEventListener('click', closeMenu);
+                    }
+                };
+                document.addEventListener('click', closeMenu);
+            }, 0);
+            return;
+        }
+
+        // No logo yet — open file picker to upload one
         if (this.logoInputRef.el) this.logoInputRef.el.click();
+    }
+
+    onRemoveLogoClick(ev) {
+        // Hides the logo for THIS report only. Does NOT touch res.company.logo.
+        this.state.hideLogo = true;
+        this.state.logoHovered = false;
+
+        // Hide visually from canvas
+        if (this.reportFrameRef && this.reportFrameRef.el) {
+            const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
+            logoImgs.forEach(logoImg => {
+                logoImg.classList.add('cy-logo-hidden');
+                logoImg.style.setProperty('display', 'none', 'important');
+            });
+        }
+        if (this.undoManager) this.undoManager.debouncedSave();
+    }
+
+    onLogoVisibilityChange(ev) {
+        const checked = ev.target.checked;
+        this.state.hideLogo = checked;
+
+        // Visual update in the canvas
+        if (this.reportFrameRef && this.reportFrameRef.el) {
+            const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
+            logoImgs.forEach(logoImg => {
+                if (checked) {
+                    logoImg.classList.add('cy-logo-hidden');
+                    logoImg.style.setProperty('display', 'none', 'important');
+                } else {
+                    logoImg.classList.remove('cy-logo-hidden');
+                    logoImg.style.removeProperty('display');
+                }
+            });
+        }
+
+        if (this.undoManager) this.undoManager.debouncedSave();
     }
 
     async onLogoFileChange(ev) {
@@ -2393,12 +2510,52 @@ export class EditReport extends Component {
             const changes = component.getChangedElements(originalDoc, editedDoc);
             console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
 
-            if (changes.length === 0) {
+            // ── Logo hide/show persistence ──────────────────────────────────
+            // We track whether hideLogo changed relative to what was originally loaded.
+            const originallyHiddenLogo = !!(component._loadedArch || '').includes('cy-logo-override');
+            const nowHidingLogo = component.state.hideLogo;
+
+            // Build a standalone mini-template that injects or removes the CSS override
+            // inside the report page div. We anchor it to the first cy-xpath node in
+            // the edited document so the XPath is always valid.
+            let logoOverrideTemplates = [];
+            if (nowHidingLogo !== originallyHiddenLogo) {
+                // Find any anchored node to get a valid cy-template
+                const anchorEl = component.reportFrameRef.el.querySelector('[cy-xpath][cy-template]');
+                const cyTemplate = anchorEl ? anchorEl.getAttribute('cy-template') : null;
+
+                if (cyTemplate && nowHidingLogo) {
+                    // Inject the override: find the page div xpath to append inside it
+                    const pageEl = component.reportFrameRef.el.querySelector('.page[cy-xpath]');
+                    const pageXpath = pageEl ? pageEl.getAttribute('cy-xpath') : null;
+                    if (pageXpath) {
+                        logoOverrideTemplates.push(
+                            `<template id="cy_logo_override_${Date.now()}" inherit_id="${cyTemplate}">` +
+                            `<xpath expr="${pageXpath}" position="inside">` +
+                            `<style class="cy-logo-override">` +
+                            `img[alt="Logo"]{display:none!important;}` +
+                            `.company_logo{display:none!important;}` +
+                            `</style>` +
+                            `</xpath>` +
+                            `</template>`
+                        );
+                    }
+                } else if (cyTemplate && !nowHidingLogo) {
+                    // The override was previously saved. We'll rely on the full content
+                    // replace (position="replace" with cleaned content) to drop it.
+                    // No separate template needed — the DOM save already excludes it.
+                }
+            }
+
+            if (changes.length === 0 && logoOverrideTemplates.length === 0) {
                 component.state.isSaving = false;
                 return;
             }
 
-            const newTemplates = component.buildInheritanceXML(changes);
+            let newTemplates = component.buildInheritanceXML(changes);
+            if (logoOverrideTemplates.length) {
+                newTemplates = newTemplates.concat(logoOverrideTemplates);
+            }
             console.log('[Cyllo Studio] Sending templates:', newTemplates);
 
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
@@ -2672,6 +2829,30 @@ export class EditReport extends Component {
             handles.forEach(h => h.remove());
 
             // Unwrap wrappers
+
+            // \u2500\u2500 Logo enrich wrapper: unwrap and persist hidden state as d-print-none \u2500\u2500
+            if (el.classList && el.classList.contains('cy-logo-enrich-wrapper')) {
+                if (el.parentNode) {
+                    // Find the logo img inside the wrapper
+                    const img = el.querySelector('img[alt="Logo"], .company_logo');
+                    if (img) {
+                        // Convert editor-side hidden marker to d-print-none for PDF output
+                        if (img.classList.contains('cy-logo-hidden')) {
+                            img.classList.remove('cy-logo-hidden');
+                            img.classList.add('d-print-none');
+                        }
+                        // Remove UI-only elements before saving
+                        el.querySelectorAll('.cy-canvas-remove-logo-btn, .cy-canvas-logo-restore-hint').forEach(n => n.remove());
+                        // Unwrap: move img (and any siblings) back to parent
+                        const children = Array.from(el.childNodes);
+                        children.forEach(child => el.parentNode.insertBefore(child, el));
+                        el.remove();
+                        children.forEach(child => clean(child));
+                        return;
+                    }
+                }
+            }
+
             if (el.classList && el.classList.contains('table-wrapper')) {
                 if (el.parentNode) {
                     const children = Array.from(el.childNodes);
@@ -3169,6 +3350,19 @@ export class EditReport extends Component {
         });
 
         container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
+
+        // \u2500\u2500 Enrich the report canvas logo (img[alt="Logo"] from external_layout) \u2500\u2500
+        // (Removed wrapper injection per user request, as it was breaking the address block layout)
+        const reportLogoImgs = container.querySelectorAll('img[alt="Logo"], .company_logo');
+        reportLogoImgs.forEach(logoImg => {
+            if (this.state.hideLogo || logoImg.getAttribute('cy-logo-removed') === '1') {
+                logoImg.classList.add('cy-logo-hidden');
+                logoImg.style.setProperty('display', 'none', 'important');
+            } else {
+                logoImg.classList.remove('cy-logo-hidden');
+                logoImg.style.removeProperty('display');
+            }
+        });
     }
 
     // ──────────────────────────────────────────────────────────────────────────
