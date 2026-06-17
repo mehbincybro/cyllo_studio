@@ -63,7 +63,8 @@ export class CylloActivityRenderer extends ActivityRenderer {
      * Show a temporary highlight message for the edit button
      */
 	showEditButton(ev) {
-		const editButton = document.querySelector('.cy-viewEdits').parentElement
+		const editButton = document.querySelector('.cy-viewEdits')?.parentElement
+		if (!editButton) return;
 		const editHighlight = editButton.querySelector('div')
 
 		if (editButton && !editHighlight) {

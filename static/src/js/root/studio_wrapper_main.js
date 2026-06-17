@@ -1,6 +1,6 @@
 /** @odoo-module **/
 import { Component, useState } from "@odoo/owl";
-import { CylloNavBar } from "@cyllo_studio/js/navbar/navbar";
+// import { CylloNavBar } from "@cyllo_studio/js/navbar/navbar";
 import { ActionContainer } from "@web/webclient/actions/action_container";
 import { MainComponentsContainer } from "@web/core/main_components_container";
 
@@ -43,7 +43,7 @@ export class StudioWrapperMain extends Component {
   }
 }
 StudioWrapperMain.components = {
-  CylloNavBar,
+  // CylloNavBar,
   MainComponentsContainer,
   ActionContainer,
 };

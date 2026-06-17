@@ -1,249 +1,230 @@
-/*.....................................*/
-
-
-.view-icons{
-padding: 0.3rem 0.6rem;
-color: #BCBBA7;
-cursor: pointer;
-transition: 0.3s;
-font-size:16px;
-filter: drop-shadow(1px 1px 1px #000) drop-shadow(-1px -1px 1px #333);
+/* ── Nav view icons ──────────────────────────────────────────── */
+.view-icons {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 8px;
+    color: #4b5563;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    font-size: 18px;
+    line-height: 1;
 }
 
-.view-icons:hover{
-    color:#fff;
-    transform: translateY(-1px) scale(1.01);
+.view-icons .cy-view-label {
+    display: none;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.view-icons:hover {
+    color: #111827;
+    background-color: #f1f2f4;
 }
 
 .view-icons.active {
-    color:#9ea700;
+    color: #111827;
+    background-color: #eeeeee;
 }
 
+.view-icons.active .cy-view-label {
+    display: inline;
+}
+
+.cy-view-caret {
+    font-size: 18px;
+    padding: 6px;
+}
+
+/* ── Dropdown container ──────────────────────────────────────── */
 .hnk-dropdown__container {
     max-height: 0;
     visibility: hidden;
     pointer-events: none;
-    background-color: #2e2e2e ;
-    box-shadow: 0 6px 40px 0 rgba(28, 28, 28, 0.1019607843);
-    border-radius: 3px;
-    padding: 0 5px;
+    background-color: #ffffff;
+    box-shadow: 0 6px 40px 0 rgba(28, 28, 28, 0.1);
+    border-radius: 6px;
+    padding: 4px;
     position: absolute;
     z-index: 999;
-    border: 1px solid #2e2e2e;
-    color:#BCBBA7 !important;
+    border: 1px solid var(--border-color);
+    color: #374151;
 }
 
-.hnk-dropdown__container:after {
-    content: "";
-    position: absolute;
-    display: block;
-    width: 100%;
-    height: 25px;
-    left: 0;
-    bottom: 0;
-    border-bottom-left-radius: 3px;
-    border-bottom-right-radius: 3px;
-    pointer-events: none;
-}
-
-.hnk-dropdown__container:before{
+.hnk-dropdown__container::before {
     content: "";
     position: absolute;
     top: -10px;
-    right:  47%;
+    right: 47%;
     border-width: 0 10px 10px 10px;
     border-style: solid;
-    border-color: transparent transparent #2e2e2e transparent;
+    border-color: transparent transparent var(--border-color) transparent;
 }
 
-.hnk-dropdown--open .hnk-dropdown__container,
-.hnk-dropdown--open .hnk-dropdown__options {
-    max-height: 200px !important; /* Reduced Max height 220px to 200px */
+.hnk-dropdown--open .hnk-dropdown__container {
+    display: flex;
+    max-height: 100% !important;
     visibility: visible !important;
     pointer-events: unset !important;
-    min-width: 170px;
+    min-width: 180px;
+    margin-top: 0.7%;
+    margin-left: -4%;
 }
-/*.....................................*/
 
-/*.....................................*/
+/* ── Options list ────────────────────────────────────────────── */
 .hnk-dropdown__options {
     max-height: 0;
     visibility: hidden;
     pointer-events: none;
-    padding-left: 0;
-    padding-top: 10px;
+    padding: 0;
     margin: 0;
     list-style: none;
     overflow-y: auto;
-    /* width */
-    /* Track */
-    /* Handle */
-    /* Handle on hover */
-}
-
-.hnk-dropdown__options::-webkit-scrollbar {
-    width: 4px;
-}
-
-.hnk-dropdown__options::-webkit-scrollbar-track {
-    background: #f2f2f2;
-    border-radius: 15px;
-}
-
-.hnk-dropdown__options::-webkit-scrollbar-thumb {
-    background: #dadada;
-    border-radius: 15px;
-}
-
-.hnk-dropdown__options::-webkit-scrollbar-thumb:hover {
-    background: #cbcbcb;
-}
-/*.....................................*/
-
-/*.....................................*/
-.hnk-dropdown__option {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    position: relative;
-}
-
-.hnk-dropdown__option .hnk-dropdown__label {
-    display: flex;
-    grid-template-columns: 20px auto;
     width: 100%;
-    padding: 8px 8px 8px 1.85rem;
-    gap: 12px;
+}
+
+.hnk-dropdown--open .hnk-dropdown__options {
+    max-height: 100% !important;
+    visibility: visible !important;
+    pointer-events: unset !important;
+}
+
+.hnk-dropdown__options::-webkit-scrollbar { width: 4px; }
+.hnk-dropdown__options::-webkit-scrollbar-track { background: #f2f2f2; border-radius: 15px; }
+.hnk-dropdown__options::-webkit-scrollbar-thumb { background: #dadada; border-radius: 15px; }
+.hnk-dropdown__options::-webkit-scrollbar-thumb:hover { background: #cbcbcb; }
+
+/* ── Individual view item ────────────────────────────────────── */
+.cy-view-item {
+    display: flex;
     align-items: center;
-    cursor: default;
+    border-radius: 4px;
 }
 
-/* Style the label when the checkbox is disabled */
-.hnk-dropdown__option .hnk-dropdown__label.disabled {
-    background: repeating-linear-gradient(
-        -45deg,
-        rgba(128, 128, 128, 0.2),
-        rgba(128, 128, 128, 0.2) 10px,
-        rgba(128, 128, 128, 0) 10px,
-        rgba(128, 128, 128, 0) 20px
-    ); /* Striped background */
-    color: gray; /* Gray text */
-    opacity: 0.6; /* Dim the appearance */
-    border-radius: 5px; /* Add rounded corners */
-    padding: 5px; /* Add some spacing for better visuals */
-    cursor: not-allowed; /* Indicate it's non-interactive */
-}
-/*.....................................*/
-
-/*.....................................*/
-.hnk-dropdown__radio-container {
-    position: absolute;
-    bottom: 13px;
+.cy-view-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    padding: 7px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    user-select: none;
+    transition: background-color 0.15s ease;
 }
 
-.hnk-dropdown__radio-container.disabled {
-    bottom: 8px;
+.cy-view-item:not(.cy-view-item--disabled):hover {
+    background-color: #f3f4f6;
 }
-/*.....................................*/
 
-/*.....................................*/
-.hnk-dropdown__radio {
-    display: none;
-}
-/*.....................................*/
-
-/*.....................................*/
-.hnk-dropdown__radio-label {
+/* ── Checkbox ────────────────────────────────────────────────── */
+.cy-checkbox-wrap {
     width: 20px;
     height: 20px;
-    display: inline-block;
-    border-radius: 2px;
-    position: absolute;
-    left: 0;
-    top: -18px;
-    background-color: #dadada;
-    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.hnk-dropdown__radio-label::after {
+.cy-checkbox {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: 20px;
+    height: 20px;
+    background-color: #dadada;
+    border-radius: 3px;
+    cursor: pointer;
+    margin: 0;
+    position: relative;
+    transition: background-color 0.15s ease;
+}
+
+.cy-checkbox:checked {
+    background-color: #9EA700;
+}
+
+.cy-checkbox:checked::after {
     content: "";
     position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 16px;
-    height: 16px;
+    top: 5px;
+    left: 5px;
+    width: 10px;
+    height: 10px;
     background-image: url('/cyllo_studio/static/src/img/check (1).svg');
     background-size: contain;
+    opacity: 1;
+}
+
+.cy-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+/* ── View icon + text ────────────────────────────────────────── */
+.cy-view-icon {
+    font-size: 16px !important;
+    flex-shrink: 0;
+    color: #4b5563;
+}
+
+.cy-item-text {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+}
+
+/* ── Disabled row (Search) ───────────────────────────────────── */
+.cy-view-item--disabled {
+    pointer-events: none;
+}
+
+.cy-view-row--disabled {
+    background: repeating-linear-gradient(
+        -45deg,
+        rgba(128, 128, 128, 0.15),
+        rgba(128, 128, 128, 0.15) 10px,
+        transparent 10px,
+        transparent 20px
+    );
+    opacity: 0.6;
+    border-radius: 4px;
+    cursor: not-allowed;
+}
+
+/* ── Pushpin ─────────────────────────────────────────────────── */
+.cy-studio-view-pin {
+    padding: 0 0.8rem;
     opacity: 0;
-}
-/*.....................................*/
-
-/*.....................................*/
-.scroll-container::-webkit-scrollbar {
-    display: none;
+    transition: opacity 0.15s ease;
 }
 
+.cy-view-item:hover .cy-studio-view-pin {
+    color: #4b5563;
+    opacity: 1;
+}
+
+.cy-pushpin-fill {
+    padding: 0 0.8rem;
+    color: #9EA700;
+}
+
+/* ── Checked radio highlight ─────────────────────────────────── */
+.hnk-dropdown .cy-checkbox:checked {
+    background: #9EA700;
+}
+
+/* ── Scroll container ────────────────────────────────────────── */
+.scroll-container::-webkit-scrollbar { display: none; }
 .scroll-container {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
-/*.....................................*/
 
-/*.....................................*/
-.cy-studio-view-pin {
-    padding: 0 0.8rem;
-    opacity: 0
-}
-
-.cy-studio-view:hover .cy-studio-view-pin{
-    color: #9EA700;
-    opacity: 100
-}
-/*.....................................*/
-
-/*.....................................*/
-/* Active View pushpin */
-.cy-pushpin-fill{
-    padding: 0 0.8rem;
-}
-
-.cy-pushpin-fill{
-    color: #9EA700;
-}
-/*.....................................*/
-
-/*.....................................*/
-.hnk-dropdown .hnk-dropdown__radio:checked+.hnk-dropdown__radio-label {
-    background: #9EA700;
-}
-.Cylloview{
-    height: 34px;
-    display: flex;
-    padding-top: 10px !important;
-}
-
-.hnk-dropdown--open .hnk-dropdown__container{
- display: flex;
- margin-top: 0.7%;
- margin-left: -4%;
-}
-
-.hnk-dropdown .hnk-dropdown__radio:checked+.hnk-dropdown__radio-label::after {
-    opacity: 1;
-    width: 10px;
-    height: 10px;
-    top: 5px;
-    left: 5px;
-}
-/*.....................................*/
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 1666px) {
-  .hnk-dropdown--open .hnk-dropdown__container {
-    margin-left: -4.5%;
-  }
+    .hnk-dropdown--open .hnk-dropdown__container { margin-left: -4.5%; }
 }
-
 @media (max-width: 1500px) {
-  .hnk-dropdown--open .hnk-dropdown__container {
-    margin-left: -5%;
-  }
+    .hnk-dropdown--open .hnk-dropdown__container { margin-left: -5%; }
 }

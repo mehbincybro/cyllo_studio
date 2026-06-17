@@ -12,12 +12,12 @@ import {
 import {
     useState,
     useRef,
-    onMounted,onPatched
+    onMounted,onPatched,onWillUnmount
 } from "@odoo/owl";
 import {
     FirstPage
 } from '@cyllo_studio/js/new_app/new_app_templates';
-import { RemoveSessions } from '@cyllo_studio/js/root/studio_wrapper';
+import { RemoveSessions } from '@cyllo_studio/js/root/studio_utils';
 
 /**
  * CylloNavBar extends the standard Odoo NavBar to integrate
@@ -34,16 +34,46 @@ export class CylloNavBar extends NavBar {
         this.rpc = useService("rpc");
         this.dialogService = useService("dialog");
         this.menuService = useService("menu")
+        this.notification = useService("notification")
+        const prevForm = this._readPrevForm();
         this.state = useState({
             studioEditableList: false,
             lightMode: false,
             isStudioEdit: false,
             canUndo: JSON.parse(sessionStorage.getItem('UndoRedo') || '[]').length > 0, //starlin
             canRedo: JSON.parse(sessionStorage.getItem('ReDO') || '[]').length > 0, //starlin
+            configOpen: false,
+            // x2many drill-down breadcrumb (e.g. "Quotations > Order Lines").
+            // Mirrors the studio wrapper's own state, driven by the same bus
+            // event — reliable, unlike sessionStorage which RemoveSessions clears.
+            bcActive: sessionStorage.getItem('CyX2ManyTriggered') === 'true',
+            bcPrev: prevForm?.ModelName || "",
+            bcField: prevForm?.FieldName || "",
         });
         useBus(this.env.bus, 'studio_editable_list', (res) => {
             this.state.studioEditableList = res.detail;
             this.props.updateState("edit", false);
+        });
+        useBus(this.env.bus, 'X2Many-Breadcrumbs', ({ detail }) => {
+            this.state.bcPrev = detail.ModelName || "";
+            this.state.bcField = detail.FieldName || "";
+            this.state.bcActive = true;
+        });
+        // The navbar isn't reactive to controller swaps, so the model-name label
+        // and breadcrumb go stale on menu navigation. UI-UPDATED fires after every
+        // action UI change: re-render to refresh currentModelName, and clear the
+        // x2many breadcrumb whenever the action itself changes (menu nav). An x2many
+        // drill re-sets the breadcrumb via X2Many-Breadcrumbs, which fires after the
+        // drill's doAction resolves, so the trail survives.
+        useBus(this.env.bus, 'ACTION_MANAGER:UI-UPDATED', () => {
+            const actionId = this.action.currentController?.action?.jsId;
+            if (actionId && this._lastActionId !== null && this._lastActionId !== actionId) {
+                this._clearBreadcrumb();
+            }
+            if (actionId) {
+                this._lastActionId = actionId;
+            }
+            this.render();
         });
                 useBus(this.env.bus, 'PREVIEW_MODE_CHANGED', ({detail}) => {
     this.state.isPreviewMode = detail.isPreviewMode;
@@ -53,14 +83,38 @@ export class CylloNavBar extends NavBar {
         });
 
         this.viewChange = this.viewChange.bind(this);
+        // The x2many drill-down is an in-app view swap with no history entry,
+        // so any browser back/forward (popstate) leaves the drill. Reset the
+        // breadcrumb then — it re-appears via the bus event on a fresh drill.
+        this._lastActionId = null;
+        this._onPopState = () => this._clearBreadcrumb();
+        // Close the (click-opened) Configuration dropdown on any outside click.
+        this._onDocClick = (ev) => {
+            if (!this.state.configOpen) {
+                return;
+            }
+            const btn = this.root.el?.querySelector('.cy-nav-Menu-button');
+            if (btn && !btn.contains(ev.target)) {
+                this.state.configOpen = false;
+            }
+        };
         onMounted(() => {
             this.updateUndoRedoState();
             setInterval(() => this.updateUndoRedoState(), 500);
+            window.addEventListener('popstate', this._onPopState);
+            document.addEventListener('click', this._onDocClick);
+        });
+        onWillUnmount(() => {
+            window.removeEventListener('popstate', this._onPopState);
+            document.removeEventListener('click', this._onDocClick);
         });
         onPatched(() => {
             let studioViews = this.root?.el.querySelector('.cy-studio-views');
             if (studioViews) {
                 studioViews.style.display = this.state.studioEditableList ? 'none' : 'block';
+            }
+            if (this.state.configOpen) {
+                this.ShowMiscellaneousDrop();
             }
             });
     }
@@ -89,6 +143,7 @@ export class CylloNavBar extends NavBar {
 
         /** Open the Access Rights view for the current model. */
     async AccessRightsClick(){
+        this.state.configOpen = false;
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.model.access']);
         this.action.doAction({
             name: 'Access Rights',
@@ -106,6 +161,7 @@ export class CylloNavBar extends NavBar {
 
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
+        this.state.configOpen = false;
         const model_id = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.rule']);
         this.action.doAction({
             name: 'Record Rules',
@@ -119,11 +175,20 @@ export class CylloNavBar extends NavBar {
         });
     }
 
+    /** Toggle the Configuration dropdown (click-driven, not hover). */
+    toggleConfig(ev) {
+        ev.stopPropagation();
+        this.state.configOpen = !this.state.configOpen;
+    }
+    /** Close the Configuration dropdown. */
+    closeConfig() {
+        this.state.configOpen = false;
+    }
     /** Show the miscellaneous menu dropdown aligned properly. */
     ShowMiscellaneousDrop() {
-        const menuContainer = this.root.el.querySelector('.cy-nav-Menu-button');
-        const menuCard = this.root.el.querySelector('.cy-miscellaneous_card');
-        //        menuCard.style.display = 'block';
+        const menuContainer = this.root.el?.querySelector('.cy-nav-Menu-button');
+        const menuCard = this.root.el?.querySelector('.cy-miscellaneous_card');
+        if (!menuContainer || !menuCard) return;
         const containerRect = menuContainer.getBoundingClientRect();
         const cardRect = menuCard.getBoundingClientRect();
         const spaceToRight = window.innerWidth - containerRect.right;
@@ -140,6 +205,7 @@ export class CylloNavBar extends NavBar {
     }
     /** Open report view for the current model. */
     async ReportClick() {
+        this.state.configOpen = false;
         const currentController = this.action.currentController;
         console.log('hiiii',currentController)
         const resModel = currentController.action.res_model;
@@ -198,7 +264,35 @@ export class CylloNavBar extends NavBar {
             viewChange: this.viewChange,
         };
     }
+    /** Human-readable name of the model/action currently being edited. */
+    get currentModelName() {
+        const ctrl = this.action.currentController;
+        return ctrl?.action?.name || this.props.viewDetails?.model || "";
+    }
+    /** Safely parse the persisted x2many parent-form descriptor. */
+    _readPrevForm() {
+        try {
+            return JSON.parse(sessionStorage.getItem('PrevForm') || 'null');
+        } catch (_) {
+            return null;
+        }
+    }
+    /** Reset the x2many drill-down breadcrumb state. */
+    _clearBreadcrumb() {
+        this.state.bcActive = false;
+        this.state.bcPrev = "";
+        this.state.bcField = "";
+    }
+    /** Navigate back from the x2many breadcrumb (handled by the wrapper). */
+    breadcrumbBack(e) {
+        e.preventDefault();
+        this._clearBreadcrumb();
+        this.env.bus.trigger("STUDIO_BREADCRUMB_BACK");
+    }
     viewChange(attr, value) {
+        // Switching the top-level view (via the view icons) leaves any x2many
+        // drill, so the "Parent > Field" breadcrumb must reset.
+        this._clearBreadcrumb();
         this.props.updateState("editButton", false);
         this.props.updateState(attr, value);
     }
@@ -237,73 +331,103 @@ export class CylloNavBar extends NavBar {
         setTimeout(() => window.location.reload(), 500);
     }
     async undoChange() {
-        try {
-            const storage = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-            const undoElement = storage.pop();
-            let view_type = this.props.viewDetails.viewType
-            let view_id = this.props.viewDetails.viewId
-            sessionStorage.setItem('UndoRedo', JSON.stringify(storage));
-            const searchViewId = sessionStorage.getItem("searchViewId");
-            const element = document.querySelector('.o_content');
-            if (searchViewId) {
-                view_type = 'search'
-                view_id = searchViewId
-            }
-            if (undoElement) {
-                let redoStack = JSON.parse(sessionStorage.getItem('ReDO')) || [];
-                redoStack.push(undoElement);
-                sessionStorage.setItem('ReDO', JSON.stringify(redoStack));
-                let xPaths = false
-                const count = (undoElement.match(/<xpath /g) || []).length;
-                if (count >= 2) {
-                    xPaths = true
-                }
-
-                await this.rpc('cyllo_studio/undo_action', {
-                    model: this.props.viewDetails.model,
-                    view_type: view_type,
-                    view_id: view_id,
-                    xPaths: xPaths,
-                });
-            }
-        } finally {
-            this.action.doAction("studio_reload");
-            this.env.bus.trigger('resetProperties')
-            window.location.reload()
+        const storage = JSON.parse(sessionStorage.getItem('UndoRedo') || '[]');
+        if (!storage.length) {
+            return; // nothing to undo
         }
+        let view_type = this.props.viewDetails?.viewType;
+        let view_id = this.props.viewDetails?.viewId;
+        const model = this.props.viewDetails?.model;
+        const searchViewId = sessionStorage.getItem("searchViewId");
+        if (searchViewId) {
+            view_type = 'search';
+            view_id = searchViewId;
+        }
+        // Guard: a valid editable view must be open, else the server would try
+        // to build a Studio view from an empty model / view id and crash.
+        if (!view_id || !view_type || (!model && !searchViewId)) {
+            this.notification.add("Open the view you want to undo changes on first.", {
+                title: "Nothing to undo here",
+                type: "warning",
+            });
+            return;
+        }
+        const undoElement = storage[storage.length - 1];
+        let xPaths = false;
+        const count = (undoElement.match(/<xpath /g) || []).length;
+        if (count >= 2) {
+            xPaths = true;
+        }
+        try {
+            await this.rpc('cyllo_studio/undo_action', {
+                model: model,
+                view_type: view_type,
+                view_id: view_id,
+                xPaths: xPaths,
+            });
+        } catch (e) {
+            this.notification.add("Could not undo the last change.", {
+                title: "Undo failed",
+                type: "danger",
+            });
+            return; // keep stacks intact so the action isn't lost
+        }
+        // Success: move the element from the undo stack onto the redo stack.
+        storage.pop();
+        sessionStorage.setItem('UndoRedo', JSON.stringify(storage));
+        const redoStack = JSON.parse(sessionStorage.getItem('ReDO') || '[]');
+        redoStack.push(undoElement);
+        sessionStorage.setItem('ReDO', JSON.stringify(redoStack));
+        this.action.doAction("studio_reload");
+        this.env.bus.trigger('resetProperties');
+        window.location.reload();
     }
 
     async redoChange() {
-        try {
-            const storage = JSON.parse(sessionStorage.getItem('ReDO')) || [];
-            const storage_undo = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-            const redoElement = storage.pop();
-            let view_type = this.props.viewDetails.viewType
-            let view_id = this.props.viewDetails.viewId
-            sessionStorage.setItem('ReDO', JSON.stringify(storage));
-            const searchViewId = sessionStorage.getItem("searchViewId");
-            const element = document.querySelector('.o_content');
-            if (searchViewId) {
-                view_type = 'search'
-                view_id = searchViewId
-            }
-            if (redoElement) {
-                let undoStack = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                undoStack.push(redoElement);
-                sessionStorage.setItem('UndoRedo', JSON.stringify(undoStack));
-
-                await this.rpc('cyllo_studio/redo_action', {
-                    model: this.props.viewDetails.model,
-                    view_type: view_type,
-                    view_id: view_id,
-                    arch: redoElement,
-                });
-            }
-        } finally {
-            this.action.doAction("studio_reload");
-            this.env.bus.trigger('resetProperties')
-            window.location.reload()
+        const storage = JSON.parse(sessionStorage.getItem('ReDO') || '[]');
+        if (!storage.length) {
+            return; // nothing to redo
         }
+        let view_type = this.props.viewDetails?.viewType;
+        let view_id = this.props.viewDetails?.viewId;
+        const model = this.props.viewDetails?.model;
+        const searchViewId = sessionStorage.getItem("searchViewId");
+        if (searchViewId) {
+            view_type = 'search';
+            view_id = searchViewId;
+        }
+        // Guard: a valid editable view must be open (see undoChange).
+        if (!view_id || !view_type || (!model && !searchViewId)) {
+            this.notification.add("Open the view you want to redo changes on first.", {
+                title: "Nothing to redo here",
+                type: "warning",
+            });
+            return;
+        }
+        const redoElement = storage[storage.length - 1];
+        try {
+            await this.rpc('cyllo_studio/redo_action', {
+                model: model,
+                view_type: view_type,
+                view_id: view_id,
+                arch: redoElement,
+            });
+        } catch (e) {
+            this.notification.add("Could not redo the change.", {
+                title: "Redo failed",
+                type: "danger",
+            });
+            return; // keep stacks intact
+        }
+        // Success: move the element from the redo stack back onto the undo stack.
+        storage.pop();
+        sessionStorage.setItem('ReDO', JSON.stringify(storage));
+        const undoStack = JSON.parse(sessionStorage.getItem('UndoRedo') || '[]');
+        undoStack.push(redoElement);
+        sessionStorage.setItem('UndoRedo', JSON.stringify(undoStack));
+        this.action.doAction("studio_reload");
+        this.env.bus.trigger('resetProperties');
+        window.location.reload();
     }
 
 

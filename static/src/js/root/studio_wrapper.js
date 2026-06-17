@@ -49,45 +49,11 @@ import {
 import {
     ActivityDialog
 } from "@cyllo_studio/js/views/cyllo_activity/cyllo_activity_dailog";
+import { CylloNavBar } from "@cyllo_studio/js/navbar/navbar";
+import { RemoveSessions, validateEdit } from "@cyllo_studio/js/root/studio_utils";
 
-/**
- * Clears X2Many-related session and local storage entries.
- */
-
-export function RemoveSessions() {
-    localStorage.removeItem('X2ManysStudioPage');
-    sessionStorage.removeItem('X2manyList');
-    sessionStorage.removeItem('CyX2Many');
-    sessionStorage.removeItem('CyX2ManyPath');
-    sessionStorage.removeItem('x2ManyDetails');
-    sessionStorage.removeItem('CyX2ManyTriggered');
-    sessionStorage.removeItem('PrevForm');
-    sessionStorage.removeItem("RelationalModel");
-}
-
-/**
- * Validates whether a field is currently being edited.
- * Displays a notification if editing is in progress.
- *
- * @param {Object} state - The state object containing field flags.
- * @param {Object} notification - Notification service to display warnings.
- * @param {String} field - The field key to check in the state.
- * @param {String} type - Optional. Type of editing (default: "Editing").
- * @returns {Boolean} True if field is not being edited, false otherwise.
- */
-
-export function validateEdit(state, notification, field, type = "Editing") {
-    if (!state?.[field]) return true;
-
-    notification.add({
-        title: "Validation Error",
-        message: `${type} is in progress.`,
-        description: "Please save or cancel the current process.",
-        type: "notification_panel",
-        notificationType: "warning",
-    });
-    return false;
-}
+// Re-export so existing importers of these helpers from studio_wrapper keep working.
+export { RemoveSessions, validateEdit };
 
 export class StudioWrapper extends Component {
     static template = "cyllo_studio.StudioWrapper";
@@ -282,6 +248,11 @@ export class StudioWrapper extends Component {
         useBus(this.env.bus, "FIELDS_DETAILS", this.handleFieldDetails);
         useBus(this.env.bus, "BUTTON_DETAILS", this.handleButtonDetails);
         useBus(this.env.bus, "LIST_EXISTING_FIELDS", this.handleExistingField);
+
+        // Back navigation for the x2many breadcrumb now rendered in the navbar.
+        useBus(this.env.bus, "STUDIO_BREADCRUMB_BACK", () =>
+            this.handleForm({ preventDefault: () => {} })
+        );
 
         this.env.bus.addEventListener('X2ManyDetails', ({ detail }) => {
             this.state.isX2Many = !!sessionStorage.getItem('CyX2ManyPath');
@@ -866,7 +837,11 @@ export class StudioWrapper extends Component {
         this.state.FieldName = '';
         this.env.bus.trigger('resetProperties');
         if (this.state.isX2Many) {
-            window.location.reload();
+            // Soft (in-SPA) reload instead of window.location.reload() so the
+            // breadcrumb back-nav doesn't trigger a full browser page load.
+            // State + sessions are already cleared above, so the current
+            // action (the parent form) re-renders without the x2many drill.
+            this.action.doAction("studio_reload");
         } else {
             const PrevViewData = JSON.parse(sessionStorage.getItem('PrevForm'));
             if (PrevViewData) {
@@ -898,4 +873,5 @@ StudioWrapper.components = {
     MainComponentsContainer,
     ActivityDialog,
     StudioMenuSideBar,
+    CylloNavBar,
 };

@@ -1,6 +1,6 @@
 <templates id="template" xml:space="preserve">
     <t t-name="cyllo_studio.StudioWrapperMain">
-        <CylloNavBar t-props="viewProps"/>
+        <!-- <CylloNavBar t-props="viewProps"/> -->
         <ActionContainer t-props="viewProps"/>
         <MainComponentsContainer/>
     </t>

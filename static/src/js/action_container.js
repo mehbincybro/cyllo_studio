@@ -38,13 +38,12 @@ patch(ActionContainer.prototype, {
           this.props.updateState("edit", false);
           this.props.updateState("view", false);
         } else {
-           if(this.props.edit)
-           {
-           this.props.updateState("editButton", false);
-           }
-           else{
-          this.props.updateState("editButton", true);
-          this.props.updateState("view", true);
+          if (this.props.edit) {
+            this.props.updateState("editButton", false);
+          }
+          else {
+            this.props.updateState("editButton", true);
+            this.props.updateState("view", true);
           }
         }
       },
@@ -57,6 +56,7 @@ patch(ActionContainer.prototype, {
       edit: this.props.edit,
       viewChanged: this.props.viewChanged,
       updateState: this.props.updateState,
+      viewProps: this.props,
     };
   },
 });
@@ -69,7 +69,7 @@ ActionContainer.props = {
   updateState: { type: Function, optional: true },
   isAnimatingSidebar: { type: Boolean, optional: true },
   activity_view: { type: Boolean, optional: true },
-   viewDetails: { type: Object, optional: true },
+  viewDetails: { type: Object, optional: true },
 
 
 };

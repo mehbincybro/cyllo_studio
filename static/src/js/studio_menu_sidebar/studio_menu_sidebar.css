@@ -1,3 +1,43 @@
+/* New App (+) sidebar button */
+
+
+
+.cy-new-app-li {
+    display: flex;
+    justify-content: center;
+}
+
+.cy-new-app-btn {
+    justify-content: center;
+    color: #BCBBA7;
+    background: transparent !important;
+    border: none;
+    transition: color 0.2s ease;
+    padding: 0 !important;
+}
+
+.cy-new-app-btn:hover {
+    color: #fff;
+}
+
+.cy-new-app-icon {
+    font-size: 28px;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none !important;
+    background: #363827;
+    border-radius: 5px;
+}
+
+.cy-new-app-icon:hover {
+    background: #373627;
+
+}
+
 /* parent dialog */
 .btn_group_menu {
     display: flex;
@@ -42,15 +82,21 @@
 }
 
 .cy-studio .o_action_manager> :nth-child(2) {
-    margin-left: 16% !important;
+    margin-left: 320px !important;
 }
 
 .cy-studio .o_action_manager.menuListFixed> :nth-child(2) {
-    margin-left: 16% !important;
+    margin-left: 320px !important;
 }
 
-.cy-studio .o_action_manager nav {
-    width: 16% !important;
+.cy-studio .o_action_manager.menuListFixed nav.cy-left-sidebar-nav {
+    width: 320px !important;
+    background-color: #373627;
+}
+
+.cy-studio .o_action_manager nav.cy-left-sidebar-nav {
+    width: 320px !important;
+    height: 100%;
 
 
     .cy-sidebar-heading {
@@ -74,6 +120,11 @@
 
 .studio-context-menu .cy-menu_cust {
     opacity: 1;
+}
+
+.menus-sidebar-arrows {
+    scale: 1.2;
+
 }
 
 @media (max-width: 1470px) {
@@ -107,16 +158,11 @@
 .studio-context-menu {
     background: #373627;
     z-index: 1000;
-    display: none;
+    display: flex;
     border-radius: 8px;
-    /* Rounded corners */
     color: #bcbba7;
-    font-family: Arial, sans-serif;
-    /* Simple, clean font */
     font-size: 16px;
-    /* Font size similar to the image */
     right: 8px;
-    padding: 0 4px;
 }
 
 .studio-context-menu .cy-studio-context-menu-a {
@@ -176,6 +222,14 @@
     justify-content: space-between;
 }
 
+.cy-studio .cy-submenu-box li:not(.cy_active_menu):hover,
+.cy-submenu-box .cy-accordian:hover {
+    a {
+        color: var(--text-color) !important;
+    }
+}
+
+
 .rounded .cy-submenu-box>ul>li>ul>li {
     padding-left: 7% !important;
 }
@@ -193,6 +247,46 @@
 
     a {
         background-color: transparent !important;
+    }
+}
+
+.cy-submenu-box .nav-link {
+    span {
+        width: 145px;
+    }
+}
+
+/* Indent the menu TEXT, not the whole row — so the hover/active background
+   still spans the full panel width. Container padding is zeroed and the
+   indent is moved onto the inner nav-link (bg fills padding, text shifts). */
+.cy-studio .cy-submenu-box>ul>li>ul>li,
+.cy-studio .cy-submenu-box>ul>li>ul>div.menu-draggable,
+.cy-studio .cy-submenu-box>ul>li>ul>ul>li,
+.cy-studio .cy-submenu-box>ul>li>ul>ul>div.menu-draggable {
+    padding-left: 0 !important;
+}
+
+/* Level 1 children → 7% */
+.cy-studio .cy-submenu-box>ul>li>ul>li>a.nav-link,
+.cy-studio .cy-submenu-box>ul>li>ul>div.menu-draggable>.sidebar_container_list>a.nav-link {
+    padding-left: calc(16px + 7%) !important;
+    width: 100% !important;
+
+    span {
+        width: 145px;
+        flex: 1;
+    }
+}
+
+/* Level 2 children → 14% */
+.cy-studio .cy-submenu-box>ul>li>ul>ul>li>a.nav-link,
+.cy-studio .cy-submenu-box>ul>li>ul>ul>div.menu-draggable>.sidebar_container_list>a.nav-link {
+    padding-left: calc(16px + 14%) !important;
+    width: 100% !important;
+
+    span {
+        width: 145px;
+        flex: 1;
     }
 }
 
@@ -271,17 +365,17 @@
 }
 
 .cy-submenu-box .nav-link {
-    padding: 0.5rem 0.9rem 0.5rem 0.3rem;
+    padding: 0.5rem 16px !important;
 }
 
 .cy-submenu-box .nav-link.cy-sidebar-heading {
-    padding: 0.5rem 0.6rem !important;
+    padding: 0.5rem 16px !important;
     margin-top: 5px !important;
     cursor: default;
 }
 
 .cy-submenu-box .cy-submenu-logo {
-    padding-top: 26px;
+    padding-top: 0;
     padding-bottom: 0;
     position: sticky;
     top: 0;
@@ -316,7 +410,9 @@
     }
 }
 
-.rounded .menuListFixed .cy-left-sidebar li.nav-item.mb-2:hover {
+.rounded .menuListFixed .cy-left-sidebar li.nav-item.mb-2:hover,
+.cy-studio .menuListFixed .cy-left-sidebar li.nav-item.mb-2:has(a:focus-visible),
+.cy-studio .menuListFixed .cy-left-sidebar li.nav-item.mb-2:hover {
     background-color: transparent !important;
 }
 
@@ -399,7 +495,7 @@
 .draggableDiv {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 4px;
 
     span {
         max-width: 7vw;
@@ -411,7 +507,7 @@
 }
 
 .nav-link span {
-    max-width: 7vw;
+    /* max-width: 7vw; */
     text-overflow: ellipsis;
     overflow: hidden;
     text-wrap: nowrap;
@@ -604,4 +700,205 @@
 
 .cy-submenu-box .deactivated .cy-accordian:hover {
     background-color: transparent !important;
+}
+
+/* =========================================================
+   Studio submenu panel – light theme (studio only)
+   Scoped to .cy-studio so it never affects outside-studio.
+   ========================================================= */
+
+/* Panel background */
+.cy-studio .cy-submenu-box,
+.cy-studio .cy-studio-section .cy-submenu-box,
+.cy-studio .menuListFixed .cy-submenu-box {
+    background-color: #373627 !important;
+}
+
+.cy-studio .menuListFixed .cy-submenu-box {
+    min-width: 250px !important;
+    max-width: 250px !important;
+    height: calc(100dvh - 32px) !important;
+
+}
+
+/* Scroll: keep the panel fixed at 300px and scroll the long /
+   deeply-indented menu list instead of letting it push to the right. */
+.cy-studio .menuListFixed .cy-submenu-box,
+.cy-studio .cy-studio-section .cy-submenu-box {
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+.cy-studio .cy-submenu-box .cy-submenu-lists {
+    overflow: visible !important;
+    padding-bottom: 24px;
+    /* .nav defaults to flex-wrap:wrap; with flex-column + bounded box
+       height the list wrapped into a 2nd column instead of scrolling. */
+    flex-wrap: nowrap !important;
+    height: auto !important;
+}
+
+.cy-studio .cy-left-sidebar .nav {
+    padding-bottom: 24px;
+}
+
+/* Logo header */
+.cy-studio .cy-submenu-box .cy-submenu-logo {
+    background: #373627 !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-left: 14px;
+
+    img {
+        position: static !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        height: 30px !important;
+    }
+}
+
+.cy-studio .cy-submenu-logo-studio {
+    font-family: "Inter", sans-serif;
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1;
+    padding-top: 2px;
+}
+
+/* App name heading */
+.cy-studio .cy-submenu-box .cy-sidebar-heading {
+    background-color: #2c2b1e !important;
+    letter-spacing: 0.4px;
+    margin-top: 0 !important;
+}
+
+/* Menu text + icons */
+.cy-studio .cy-submenu-box .cy-sidebar-nav,
+.cy-studio .cy-submenu-box .nav-link,
+.cy-studio .cy-submenu-box .cy-menu_name,
+.cy-studio .cy-submenu-box .draggableDiv span,
+.cy-studio .cy-submenu-box .cy-icons {
+    color: var(--text-color) !important;
+}
+
+/* Row separators */
+/* .cy-studio .cy-submenu-box .sidebar_container_list a {
+    border-bottom: 1px solid var(--border-color);
+} */
+
+.cy-studio .draggableDiv {
+    span {
+        max-width: unset;
+    }
+}
+
+/* Hover */
+/* .cy-studio .cy-submenu-box li:not(.cy_active_menu):hover,
+.cy-studio .cy-submenu-box .cy-accordian:hover,
+.cy-studio .cy-submenu-box .sidebar_container_list:hover,
+.cy-studio .rounded .cy-submenu-box>ul>li>ul>div.menu-draggable:hover {
+    background-color: #f4f5f3 !important;
+} */
+
+/* .cy-studio .cy-submenu-box li:not(.cy_active_menu):hover a,
+.cy-studio .cy-submenu-box .cy-accordian:hover a {
+    color: #111827 !important;
+} */
+
+/* Active menu */
+/* .cy-studio .cy-submenu-box .cy_active_menu,*/
+/* .cy-studio .cy-submenu-box .cy-accordian:has(+ .show),
+.cy-studio .cy-submenu-box .show {
+    background-color: #ffffff !important;
+} */
+
+/* .cy-studio .cy-submenu-box .cy_active_menu {
+    background-color: #eaeaea !important;
+} */
+
+/* .cy-studio .cy-submenu-box .cy_active_menu,
+.cy-studio .cy-submenu-box .cy_active_menu a {
+    color: #1f2711 !important;
+} */
+
+/* Drag-dot handles + accordion arrows (inline svg fill override) */
+.cy-studio .cy-submenu-box .draggableDiv svg path,
+.cy-studio .cy-submenu-box .ri-drag-move-line path {
+    fill: var(--text-color) !important;
+}
+
+.cy-studio .cy-submenu-box .menus-sidebar-arrows path {
+    fill: var(--text-color) !important;
+}
+
+/* Edit pencil */
+.cy-studio .cy-submenu-box .cy-menu_cust {
+    color: var(--text-color) !important;
+}
+
+/* Edit-menu popup affordance */
+.cy-studio .studio-context-menu {
+    background: transparent !important;
+}
+
+.cy-studio .cy-submenu-box .cy-sidebar-nav:hover {
+
+    .studio-context-menu i,
+    .studio-context-menu .cy-menu_cust {
+        visibility: visible;
+    }
+}
+
+.cy-studio .studio-context-menu i,
+.cy-studio .studio-context-menu .cy-menu_cust {
+    visibility: hidden;
+    color: var(--text-color) !important;
+    font-size: 14px;
+    padding-left: 8px;
+}
+
+.cy-studio .cy-submenu-box .accordion-bg li:not(.cy_active_menu) .studio-context-menu,
+.cy-studio .cy-submenu-box .accordion-bg li:not(.cy_active_menu):hover .studio-context-menu,
+.cy-studio .cy-submenu-box .cy-accordian:hover .studio-context-menu {
+    background-color: transparent !important;
+}
+
+/* Add Menu link */
+.cy-studio .addMenu,
+.cy-studio .addMenu i.ri-add-line {
+    color: var(--text-color) !important;
+}
+
+.cy-studio .addMenu i.ri-add-line {
+    font-size: 20px;
+    margin: 0 8px 0 0 !important;
+}
+
+.cy-studio .addMenu:hover {
+    background: #46442d !important;
+    color: #fff;
+}
+
+/* Keep "Add Menu" as the last item; stick it to the panel bottom when
+   the menu list overflows (sticky only engages on overflow). */
+.cy-studio .addMenu {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    width: 100%;
+    padding: 8px 13px !important;
+    background: #373627 !important;
+}
+
+/* No bottom padding under the list so the sticky bar hugs the edge. */
+.cy-studio .cy-submenu-box .cy-submenu-lists {
+    padding-bottom: 0 !important;
+}
+
+/* Edit-menu tooltip text */
+.cy-studio .cy-submenu-box .cy-edit-menu-tooltip {
+    color: #6b7280;
 }

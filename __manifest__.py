@@ -96,7 +96,7 @@
             'cyllo_studio/static/src/js/actions/utils.js',
             'cyllo_studio/static/src/js/actions/view_reload.js',
 
-
+            'cyllo_studio/static/src/js/root/studio_utils.js',
             'cyllo_studio/static/src/js/root/studio_wrapper.js',
             'cyllo_studio/static/src/js/root/studio_wrapper.xml',
 

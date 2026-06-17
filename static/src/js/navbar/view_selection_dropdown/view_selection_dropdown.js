@@ -40,13 +40,13 @@ const ICONCLASS = {
     list: "ri-align-justify",
     form: "ri-profile-line",
     activity: "ri-time-line",
-    search: "ri-search-eye-line",
+    search: "ri-search-line",
     kanban: "ri-bar-chart-2-line",
     calendar: "ri-calendar-2-line",
     pivot: "ri-table-2",
-    gantt: "fa fa-tasks",
+    gantt: "ri-bar-chart-horizontal-line",
     graph: "ri-line-chart-line",
-    map_view: "fa fa-map-marker",
+    map_view: "ri-map-pin-line",
 };
 
 // Supported view types
@@ -211,9 +211,11 @@ export class ViewSelectionDropDown extends Component {
                 })
                 window.location.reload()
             } else if (activeView) {
-                const allFields = this.__owl__.parent.parent.children.__2.children.__1.component.overall.allFields || this.__owl__.parent.parent.children.__2.children.__1.component.overall.activeFields
+                // CalendarDialog.loadFields() fetches fields via fields_get on
+                // details[0].resModel when fields is empty — no need to reach
+                // into owl internals (brittle, crashed with undefined 'overall').
                 this.dialogService.add(CalendarDialog, {
-                    fields: allFields,
+                    fields: {},
                     details: [{
                         activeView,
                         actionId: this.action.currentController.config.actionId,
