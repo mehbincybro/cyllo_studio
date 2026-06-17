@@ -427,7 +427,8 @@ if (typeof MediumEditor !== 'undefined') {
 
       let cfg = {};
       try { cfg = JSON.parse(targetEl.dataset.boxConfig || '{}'); } catch (e) { }
-      const s = cfg.style || {};
+      if (!cfg.style) cfg.style = {};
+      const s = cfg.style;
 
       const visible = targetEl.classList.contains('cy-block-hidden') ? false : true;
       const active = targetEl.getAttribute('t-if') === 'False' ? false : true;
@@ -455,7 +456,8 @@ if (typeof MediumEditor !== 'undefined') {
             </div>
             <div class="settings-section">
                 <h5>Appearance</h5>
-                <div><label>Bg Color:</label><input type="text" id="cy-set-bg" value="${s.backgroundColor || ''}"></div>
+                <div><label>Bg Color:</label><input type="color" id="cy-set-bg" value="${s.backgroundColor || '#ffffff'}"></div>
+                <div><label>Color:</label><input type="color" id="cy-set-color" value="${s.color || '#000000'}"></div>
                 <div><label>Border:</label><input type="text" id="cy-set-b" value="${s.border || ''}"></div>
                 <div><label>Radius:</label><input type="text" id="cy-set-br" value="${s.borderRadius || ''}"></div>
             </div>
@@ -525,9 +527,11 @@ if (typeof MediumEditor !== 'undefined') {
       });
 
       const applyStyle = (id, prop, field) => {
-        popup.querySelector(id).addEventListener('input', (e) => {
+        const el = popup.querySelector(id);
+        if (!el) return;
+        el.addEventListener('input', (e) => {
           let val = e.target.value;
-          if (val && !isNaN(val) && field !== 'backgroundColor' && field !== 'border') val += 'px';
+          if (val && !isNaN(val) && field !== 'backgroundColor' && field !== 'color' && field !== 'border') val += 'px';
           targetEl.style[prop] = val;
           cfg.style[field] = val;
           updateConfig();
@@ -539,6 +543,7 @@ if (typeof MediumEditor !== 'undefined') {
       applyStyle('#cy-set-p', 'padding', 'padding');
       applyStyle('#cy-set-m', 'margin', 'margin');
       applyStyle('#cy-set-bg', 'backgroundColor', 'backgroundColor');
+      applyStyle('#cy-set-color', 'color', 'color');
       applyStyle('#cy-set-b', 'border', 'border');
       applyStyle('#cy-set-br', 'borderRadius', 'borderRadius');
 
