@@ -4911,7 +4911,7 @@ class StudioMode(Controller):
             return {"compute": "", "depends": "", "is_computed": False}
 
     @route('/cyllo_studio/get_default', type='json', auth='user')
-    def get_default(self, model, field_name):
+    def get_default(self, model=None, field_name=None):
         """
          Retrieve the stored default value for a specific field.
 
@@ -4924,6 +4924,10 @@ class StudioMode(Controller):
                   - Parsed JSON value if available.
                   - None if no default is defined.
         """
+        # New columns / buttons have no field name yet — JSON-RPC drops the
+        # undefined key, so guard against missing args instead of crashing.
+        if not model or not field_name:
+            return None
         field = request.env['ir.model.fields']._get(model, field_name)
 
         default = request.env['ir.default'].search([

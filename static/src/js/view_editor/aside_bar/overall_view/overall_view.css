@@ -58,7 +58,7 @@
     position: relative;
     width: 16px;
     height: 16px;
-    border-radius: 50%;
+    border-radius: 5px;
     border: 1px solid var(--checkbox-border-color);
     transition: all 0.2s ease;
     vertical-align: middle;

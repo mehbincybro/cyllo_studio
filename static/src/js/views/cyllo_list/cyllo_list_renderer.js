@@ -102,120 +102,148 @@ export class CylloListRenderer extends listView.Renderer {
        const self = this
        const treeEl = self.list_trRef.el
        if (self.props.activeActions.type === "view" && !isGrouped && treeEl) {
-       let originalOrder = Array.from(treeEl.children);
-    const sortableInstance = Sortable.create(treeEl, {
-      animation: 150,
-      ghostClass: 'sortable-ghost',
-      chosenClass: 'sortable-chosen',
-      dragClass: 'sortable-drag',
+       // Odoo-style column drag: a floating clone follows the cursor and a
+       // drop indicator marks the target column. The real headers do NOT
+       // reshuffle while dragging — the move is committed on drop via RPC +
+       // studio_reload (which re-renders in the new order).
+       const isDraggableTh = (th) =>
+         th && th.tagName === 'TH' &&
+         treeEl.contains(th) &&
+         !th.classList.contains('add-fields') &&
+         !th.classList.contains('o_list_open_form_view') &&
+         !th.classList.contains('o_list_controller') &&
+         !th.classList.contains('o_list_record_selector');
 
-      filter: function(evt, item) {
-        const el = evt.target;
-        return (
-          el.classList.contains("add-fields") ||
-          item.classList.contains('add-fields') ||
-          item.classList.contains('o_list_open_form_view') ||
-          el.classList.contains('o_list_open_form_view') ||
-          item.classList.contains('o_list_controller')
-        );
-      },
+       const thFieldPath = (th) =>
+         th.getAttribute('cy-xpath') ||
+         th.querySelector('.cy-listBtn')?.getAttribute('cyxpath') || null;
 
-      onStart: function(evt) {
-        // Snapshot the current order when drag starts
-        originalOrder = Array.from(treeEl.children);
-      },
+       const table = treeEl.closest('table');
 
-      onEnd: async function(evt) {
-        const el = evt.item;
+       const clearIndicator = () => {
+         const root = table || treeEl;
+         root.querySelectorAll('.cy-col-drop-before, .cy-col-drop-after').forEach((el) =>
+           el.classList.remove('cy-col-drop-before', 'cy-col-drop-after'));
+       };
 
-        // No movement — nothing to do
-        if (evt.oldIndex === evt.newIndex) return;
+       // Mark th + all tbody tds in that column so the line spans full table height.
+       const addColumnIndicator = (th, cls) => {
+         th.classList.add(cls);
+         if (!table) return;
+         const allThs = [...treeEl.querySelectorAll('th')];
+         const colIdx = allThs.indexOf(th);
+         if (colIdx < 0) return;
+         table.querySelectorAll('tbody tr').forEach(tr => {
+           const td = tr.cells[colIdx];
+           if (td) td.classList.add(cls);
+         });
+       };
 
-        // --- KEY FIX: Read the sibling AFTER Sortable has moved the element ---
-        // At this point, Sortable has already rearranged the DOM.
-        // The next o_column_* or th sibling after el is our "before" target.
-        const allThs = Array.from(treeEl.children);
-        const droppedIdx = allThs.indexOf(el);
+       const onColumnPointerDown = (ev) => {
+         if (ev.button !== 0) return;
+         if (ev.target.closest('.o_resize')) return;   // column resize, not drag
+         const source = ev.target.closest('th');
+         if (!isDraggableTh(source)) return;
 
-        // Find the next real column th after the dropped position
-        let siblingEl = null;
-        for (let i = droppedIdx + 1; i < allThs.length; i++) {
-          const th = allThs[i];
-          // Skip non-column headers (optional button, open form view, etc.)
-          if (
-            th.classList.contains('add-fields') ||
-            th.classList.contains('o_list_open_form_view') ||
-            th.classList.contains('o_list_controller') ||
-            th.classList.contains('o_list_record_selector')
-          ) continue;
-          siblingEl = th;
-          break;
-        }
+         const startX = ev.clientX;
+         let started = false;
+         let ghost = null;
+         let dropTarget = null;
+         let dropAfterLast = false;  // true when dropping into the "+" zone
 
-        // --- IMMEDIATELY revert DOM to original order ---
-        // This prevents visual glitch since studio_reload will re-render correctly
-        originalOrder.forEach(child => treeEl.appendChild(child));
+         const onMove = (e) => {
+           if (!started) {
+             if (Math.abs(e.clientX - startX) < 4) return;  // movement threshold
+             started = true;
+             ghost = source.cloneNode(true);
+             ghost.classList.add('cy-col-drag-ghost');
+             const r = source.getBoundingClientRect();
+             ghost.style.width = `${r.width}px`;
+             document.body.appendChild(ghost);
+             source.classList.add('cy-col-dragging');
+           }
+           e.preventDefault();
+           ghost.style.setProperty('left', `${e.clientX}px`, 'important');
+           ghost.style.setProperty('top', `${e.clientY}px`, 'important');
 
-        // Resolve paths
-        const fieldPath =
-          el.getAttribute('cy-xpath') ||
-          el.querySelector('.cy-listBtn')?.getAttribute('cyxpath');
+           const under = document.elementFromPoint(e.clientX, e.clientY);
+           const targetTh = under && under.closest('th');
+           clearIndicator();
+           dropAfterLast = false;
 
-        const siblingField = siblingEl
-          ? (siblingEl.getAttribute('cy-xpath') ||
-             siblingEl.querySelector('.cy-listBtn')?.getAttribute('cyxpath'))
-          : null;
+           if (targetTh && targetTh.classList.contains('add-fields')) {
+             // Cursor on "+" column → drop after last real column
+             const allDraggable = [...treeEl.querySelectorAll('th')].filter(isDraggableTh);
+             const lastTh = allDraggable[allDraggable.length - 1];
+             if (lastTh && lastTh !== source) {
+               dropTarget = lastTh;
+               dropAfterLast = true;
+               addColumnIndicator(lastTh, 'cy-col-drop-after');
+             } else {
+               dropTarget = null;
+             }
+           } else if (isDraggableTh(targetTh) && targetTh !== source) {
+             dropTarget = targetTh;
+             addColumnIndicator(targetTh, 'cy-col-drop-before');
+           } else {
+             dropTarget = null;
+           }
+         };
 
-        // If no sibling found, we're dropping at the end → position 'inside' parent
-        // If sibling found → position 'before' that sibling
-        const sourceField = evt.from?.getAttribute('cy-xpath');
-        const path = siblingField || sourceField;
-        const position = siblingField ? 'before' : 'inside';
+         const onUp = async () => {
+           document.removeEventListener('pointermove', onMove);
+           document.removeEventListener('pointerup', onUp);
+           if (ghost) ghost.remove();
+           source.classList.remove('cy-col-dragging');
+           clearIndicator();
+           // No drag movement → let the normal click (open Properties) proceed.
+           if (!started || !dropTarget) return;
 
-        if (!fieldPath) {
-          console.error('Could not resolve fieldPath for dragged column', el);
-          return;
-        }
+           const fieldPath = thFieldPath(source);
+           const siblingField = thFieldPath(dropTarget);
+           if (!fieldPath || !siblingField || fieldPath === siblingField) return;
 
-        if (self.state.drop === true) {
-          self.env.bus.trigger("CLEAR-MENU");
-        }
+           const position = dropAfterLast ? 'after' : 'before';
 
-        const view_id = self.env.config.viewId;
+           if (self.state.drop === true) {
+             self.env.bus.trigger("CLEAR-MENU");
+           }
+           const view_id = self.env.config.viewId;
+           try {
+             const response = await self.rpc("/cyllo_studio/move/tree", {
+               method: 'move_tree',
+               model: self.props.list.model.config.resModel,
+               view_id: self.env.config.viewId,
+               view_type: self.env.config.viewType === 'list'
+                 ? 'tree'
+                 : self.env.config.viewType,
+               args: [],
+               kwargs: {
+                 path: siblingField,
+                 position,
+                 fieldPath,
+                 viewType: self.env.config.viewType,
+                 view_id: view_id ?? null,
+                 model: self.props.list.model.config.resModel
+               }
+             });
+             if (response) {
+               let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+               storedArray.push(response.replace(/\s+/g, ' ').trim());
+               sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+               sessionStorage.setItem('ReDO', JSON.stringify([]));
+             }
+           } finally {
+             self.env.services.ui.unblock();
+           }
+           self.action.doAction('studio_reload');
+         };
 
-        try {
-          const response = await self.rpc("/cyllo_studio/move/tree", {
-            method: 'move_tree',
-            model: self.props.list.model.config.resModel,
-            view_id: self.env.config.viewId,
-            view_type: self.env.config.viewType === 'list'
-              ? 'tree'
-              : self.env.config.viewType,
-            args: [],
-            kwargs: {
-              path,
-              position,
-              fieldPath,
-              viewType: self.env.config.viewType,
-              view_id: view_id ?? null,
-              model: self.props.list.model.config.resModel
-            }
-          });
+         document.addEventListener('pointermove', onMove);
+         document.addEventListener('pointerup', onUp);
+       };
 
-          if (response) {
-            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-            let cleanedStr = response.replace(/\s+/g, ' ').trim();
-            storedArray.push(cleanedStr);
-            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-            sessionStorage.setItem('ReDO', JSON.stringify([]));
-          }
-        } finally {
-          self.env.services.ui.unblock();
-        }
-
-        self.action.doAction('studio_reload');
-      }
-    });
+       treeEl.addEventListener('pointerdown', onColumnPointerDown);
   }
 
     });
@@ -335,6 +363,27 @@ export class CylloListRenderer extends listView.Renderer {
             notificationType: "warning",
             animation: false,
         });
+    }
+
+    // Persistent highlight on the selected column so the active column
+    // stays identifiable even when not hovering it.
+    const current = ev.target.closest("th") || ev.target.closest("td");
+    if (current) {
+      document.querySelectorAll(".cy-active-col").forEach((e) =>
+        e.classList.remove("cy-active-col")
+      );
+      const headers = current.closest("tr").querySelectorAll(current.tagName);
+      const colIndex = Array.from(headers).indexOf(current);
+      document.querySelectorAll(".o_list_table tr").forEach((row) => {
+        let cells = row.querySelectorAll("td");
+        cells = cells.length ? cells : row.querySelectorAll("th");
+        if (
+          cells[colIndex] &&
+          parseInt(cells[colIndex].getAttribute("colspan") || 0) <= 1
+        ) {
+          cells[colIndex].classList.add("cy-active-col");
+        }
+      });
     }
 
     const fieldType = this.props.list._config.fields[column.name]?.type || "";

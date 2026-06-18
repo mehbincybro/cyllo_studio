@@ -3,7 +3,8 @@ import {
     Component,
     useState,
     onWillUpdateProps,
-    onRendered
+    onRendered,
+    onMounted,
 } from "@odoo/owl";
 import {
     useService
@@ -148,6 +149,16 @@ export class AsideBar extends Component {
             viewProperty: this.props.type,
             type: this.props.type,
             is_edit: false,
+            entering: true,
+        });
+        // Double rAF: first ensures the 0-width collapsed state is painted,
+        // second removes cy-entering so the CSS width transition fires.
+        onMounted(() => {
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    this.state.entering = false;
+                });
+            });
         });
         onWillUpdateProps((props) => {
             if (props.type) {
@@ -313,9 +324,10 @@ export class AsideBar extends Component {
             fromClose: true
         });
         this.props.updateState("editButton", true);
-        this.props.updateState("isAnimatingSidebar", true);
+        this.props.updateState("isAnimatingSidebar", true);  // triggers collapse animation
         this.props.updateState("edit", false);
-        this.action.doAction('studio_reload')
+        // Delay reload until collapse animation finishes (350ms transition + 50ms buffer)
+        setTimeout(() => this.action.doAction('studio_reload'), 400);
     }
     get noteBookPropertiesProps() {
         return {
