@@ -239,12 +239,6 @@
                                             <img t-att-src="'data:image/png;base64,' + state.companyLogo"
                                                  class="cy-company-logo" alt="Company Logo"
                                                  t-on-click="onLogoClick"/>
-                                            <button t-if="state.logoHovered"
-                                                    class="cy-remove-logo-btn"
-                                                    t-on-click.stop="onRemoveLogoClick"
-                                                    title="Remove logo from this report only">
-                                                <i class="ri-close-line"/>
-                                            </button>
                                         </div>
                                     </t>
                                     <t t-else="">
@@ -258,13 +252,6 @@
                                     <input type="file" class="cy-logo-input" accept="image/*"
                                            style="display:none" t-ref="logoInput"
                                            t-on-change="onLogoFileChange"/>
-                                </div>
-                                <!-- Company Name + Info -->
-                                <div class="cy-company-info">
-                                    <strong class="cy-company-name" t-esc="state.companyName"/>
-                                    <t t-foreach="(state.companyInfo || '').split('\n')" t-as="line" t-key="line_index">
-                                        <span t-if="line" t-esc="line"/>
-                                    </t>
                                 </div>
                             </div>
 

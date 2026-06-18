@@ -106,6 +106,23 @@ export class FormOverall extends Component {
         onWillStart(async () => {
             await this.loadButtonLimitAttribute();
             this.state.invisible = sessionStorage.getItem('invisible');
+            const storedUndo = JSON.parse(sessionStorage.getItem('UndoRedo') || "[]");
+    if (storedUndo.length > 0) {
+        this.state.hasStudioChanges = true;
+    }
+
+    const view_id = this.props.viewDetails?.viewId || this.props.viewId;
+    if (view_id) {
+        try {
+            const result = await this.rpc("/cyllo_studio/check_view_customized", {
+                view_id: view_id,
+            });
+            console.log("check_view_customized result:", result, typeof result);
+            this.state.hasStudioChanges = !!result || storedUndo.length > 0;
+        } catch (error) {
+            console.error("check_view_customized failed:", error);
+        }
+    }
 
             if (this.props.model) {
                 const result = await this.rpc("/cyllo_studio/check/chatter", {
@@ -826,6 +843,9 @@ export class FormOverall extends Component {
                     sessionStorage.removeItem("ReDO");
 
                 } finally {
+                    sessionStorage.removeItem("UndoRedo");
+                    sessionStorage.removeItem("ReDO");
+                    this.state.hasStudioChanges = false;
                     this.action.doAction("studio_reload");
                     window.location.reload();
                 }

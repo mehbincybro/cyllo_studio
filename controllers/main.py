@@ -1750,60 +1750,65 @@ class StudioMode(Controller):
             if args[0].get("value", {}).get("sql_constraints") is not None:
                 sql_constraints = args[0]["value"]["sql_constraints"]
                 field_name = args[0].get("field_name")
-                if len(sql_constraints) > 0:
-                    print(f"Saving {len(sql_constraints)} constraints for field: {field_name}")
-                    print(f"Constraint data: {sql_constraints}")
-
-                    # ⭐ This calls _save_sql_constraints which adds to registry
-                    self._save_sql_constraints(model_rec, sql_constraints)
-
-                    attributes += '<attribute name="constrains">true</attribute>'
+                # Only allow constraint changes on custom (manual) fields
+                _field_rec_check = request.env['ir.model.fields'].search([
+                    ('model_id', '=', model_rec.id),
+                    ('name', '=', field_name),
+                ], limit=1)
+                _is_manual_field = _field_rec_check and _field_rec_check.state == 'manual'
+                if _is_manual_field:
+                    if len(sql_constraints) > 0:
+                        _logger.info(f"Saving {len(sql_constraints)} SQL constraints for field: {field_name}")
+                        self._save_sql_constraints(model_rec, sql_constraints)
+                        attributes += '<attribute name="constrains">true</attribute>'
+                    else:
+                        if field_name:
+                            self._remove_sql_constraints(model_rec, field_name)
+                        attributes += '<attribute name="constrains">false</attribute>'
                 else:
-                    if field_name:
-                        self._remove_sql_constraints(model_rec, field_name)
-                    attributes += '<attribute name="constrains">false</attribute>'
+                    _logger.info(f"Skipping SQL constraint change for base field: {field_name}")
 
+            field_name = args[0].get("field_name")
             if args[0].get("value", {}).get("python_constraint") is not None:
                 python_constraint = args[0]["value"]["python_constraint"]
-                print("heelooaa")
-                field_name = args[0].get("field_name")
                 if python_constraint:
                     deps = python_constraint.get("deps", "").strip()
                     code = python_constraint.get("code", "").strip()
                     if deps and code:
-                        model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
-                        if model_rec:
+                        _py_model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+                        if _py_model_rec:
                             field_rec = request.env['ir.model.fields'].search([
-                                ('model_id', '=', model_rec.id),
+                                ('model_id', '=', _py_model_rec.id),
                                 ('name', '=', field_name),
                             ], limit=1)
-
-                            if field_rec:
+                            # Only write Python constraints to custom (manual) fields
+                            if field_rec and field_rec.state == 'manual':
                                 field_rec.write({
                                     'constraint_code': code,
                                     'constraint_fields': deps,
                                 })
-
                                 _logger.info(
                                     f"✓ Saved Python constraint for field {field_name}: "
                                     f"deps={deps}, code_length={len(code)}"
                                 )
+                            elif field_rec:
+                                _logger.info(f"Skipping Python constraint write for base field: {field_name}")
             if args[0].get("value", {}).get("python_constraint") is None:
-                    print("get inside")
-                    model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
-                    if model_rec and field_name:
+                    _clear_model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+                    if _clear_model_rec and field_name:
                         field_rec = request.env['ir.model.fields'].search([
-                            ('model_id', '=', model_rec.id),
+                            ('model_id', '=', _clear_model_rec.id),
                             ('name', '=', field_name),
                         ], limit=1)
-                        print("tt22")
-                        if field_rec:
+                        # Only clear Python constraints from custom (manual) fields
+                        if field_rec and field_rec.state == 'manual':
                             field_rec.write({
                                 'constraint_code': False,
                                 'constraint_fields': False,
                             })
-                            print("field_rec",field_rec)
                             _logger.info(f"✓ Removed Python constraint from field {field_name}")
+                        elif field_rec:
+                            _logger.info(f"Skipping Python constraint clear for base field: {field_name}")
 
             dynamic_placeholder_field = args[0].get("value", {}).get("dynamic_placeholder")
             print("testt",dynamic_placeholder_field)
