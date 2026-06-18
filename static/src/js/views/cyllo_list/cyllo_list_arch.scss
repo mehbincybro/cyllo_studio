@@ -1,44 +1,123 @@
 .o-mail-ActivityButton {
-          pointer-events: none;  // icon not clickable
-          cursor: default;
- }
-.o_todo_done_button{
-    pointer-events: none ;  // icon not clickable
-    cursor: default ;
-    }
-.o_priority_star{
-    pointer-events: none ;  // icon not clickable
-    cursor: default ;
-    }
-.o_avatar{
-    pointer-events: none ;  // icon not clickable
-    cursor: default ;
-    }
-td[name="last_update_status"] .dropdown-toggle,
- td[name="state"] .dropdown-toggle {
-    pointer-events: none !important;
-    cursor: default !important;
-    opacity: 0.6; /* optional, to look disabled */
+    pointer-events: none; // icon not clickable
+    cursor: default;
 }
 
-.o_list_renderer .o_list_table tbody > tr > td.o_list_record_remove {
+.o_todo_done_button {
+    pointer-events: none; // icon not clickable
+    cursor: default;
+}
+
+.o_priority_star {
+    pointer-events: none; // icon not clickable
+    cursor: default;
+}
+
+.o_avatar {
+    pointer-events: none; // icon not clickable
+    cursor: default;
+}
+
+td[name="last_update_status"] .dropdown-toggle,
+td[name="state"] .dropdown-toggle {
+    pointer-events: none !important;
+    cursor: default !important;
+    opacity: 0.6;
+    /* optional, to look disabled */
+}
+
+.o_list_renderer .o_list_table tbody>tr>td.o_list_record_remove {
     pointer-events: auto !important;
 }
+
 .o_field_task_with_hours {
     pointer-events: none;
- }
-.o_phone_content{
+}
+
+.o_phone_content {
     pointer-events: none;
 }
+
 div[name="move_name"] a {
     pointer-events: none !important;
 }
+
 div[name="product_id"] a.o_form_uri {
     pointer-events: none !important;
 }
+
 a[type="action"][name="254"] {
     pointer-events: none !important;
 }
+
 .o_widget_qty_at_date_widget a.fa-area-chart {
     pointer-events: none !important;
+}
+
+/* Column drag (Odoo-style): floating ghost + drop indicator, no live reshuffle. */
+.cy-col-drag-ghost {
+    /* cloned <th> may be position:sticky — force fixed so it tracks the cursor */
+    position: fixed !important;
+    right: auto !important;
+    bottom: auto !important;
+    margin: 0 !important;
+    display: block !important;
+    z-index: 2000;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    opacity: 0.9;
+    background: #FAFAFA;
+    color: #222222;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+    padding: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.cy-thead-list th.cy-col-drop-before,
+tbody td.cy-col-drop-before {
+    box-shadow: inset 3px 0 0 0 #9EA700;
+}
+
+/* Right-side indicator when dropping after the last column (into the "+" zone) */
+.cy-thead-list th.cy-col-drop-after,
+tbody td.cy-col-drop-after {
+    box-shadow: inset -3px 0 0 0 #9EA700;
+}
+
+.cy-thead-list th.cy-col-dragging {
+    opacity: 0.1;
+}
+
+/* Studio editor: gap between columns (boxed cells like Odoo Studio). */
+/* Scoped to .o_list_view so x2many embedded lists in form views are NOT affected. */
+
+.cy-studio .o_list_renderer .o_list_table.o_list_table_ungrouped {
+        table-layout: auto !important;
+}
+
+.o_form_view .o_field_widget.o_field_one2many {
+    .o_list_renderer .o_list_table.o_list_table_ungrouped {
+        border-collapse: collapse !important;
+
+        >thead>tr>th,
+        >tbody>tr>td {
+            border: none !important;
+            border-bottom: 1px solid var(--border-color) !important;
+        }
+    }
+}
+
+.cy-studio .o_list_renderer .o_list_table.o_list_table_ungrouped {
+    border-collapse: separate !important;
+    border-spacing: 6px 0 !important;
+
+    // Vertical separators only → columns look gapped, rows stay seamless.
+    >thead>tr>th,
+    >tbody>tr>td {
+        border-left: 1px solid var(--border-color) !important;
+        border-right: 1px solid var(--border-color) !important;
+        border-bottom: 1px solid var(--border-color) !important;
+        border-top: 0 !important;
+    }
 }

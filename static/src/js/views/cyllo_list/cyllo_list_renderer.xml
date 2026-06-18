@@ -55,7 +55,7 @@
 
                         </t>
                         <th class="add-fields">
-                            <button id="newButtonLabel" class="btn prevent-drag add-fields cy-studio-icon fa fa-plus"
+                            <button id="newButtonLabel" class="prevent-drag add-fields cy-studio-icon fa fa-plus"
                                     t-on-click="itemOnClick"/>
                         </th>
 

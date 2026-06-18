@@ -8,8 +8,9 @@
     height: 90vh;
 }
 
-.o_action {
+.cy-studio .o_action {
     display: flex;
+
 }
 
 .o_action_manager .o_action {
@@ -104,6 +105,24 @@ td.border-class-list {
     background-color: #f8f9e5;
     /* Changed border into background */
     border: unset !important;
+}
+
+/* Persistent highlight on the clicked / active column */
+.cy-thead-list th.cy-active-col,
+td.cy-active-col {
+    background-color: #eef1c9 !important;
+    border: unset !important;
+}
+
+.add-fields.cy-studio-icon {
+    font-size: 24px;
+    border: none;
+    width: 100%;
+    background: transparent;
+
+    &:hover {
+        color: #7c8a00 !important;
+    }
 }
 
 /* striped for invisible */
@@ -525,7 +544,7 @@ body.cy-show-invisible .cy-studio-striped {
 
 
 .o_kanban_renderer .border-class {
-    border: 1px solid #9EA700 !important;
+    border: 2px solid #9EA700 !important;
 }
 
 .border-class {
@@ -598,6 +617,10 @@ div[data-drag="1"]:empty {
 
 .cy-studio .o_kanban_renderer.o_kanban_ungrouped .o_kanban_record:has(.o_survey_kanban_card) {
     width: unset;
+}
+
+.o_kanban_renderer.o_kanban_ungrouped .o_kanban_record {
+    width: unset !important;
 }
 
 .cy-studio div#require_payment {

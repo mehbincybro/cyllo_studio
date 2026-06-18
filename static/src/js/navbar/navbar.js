@@ -10,9 +10,10 @@ import {
     ViewSelectionDropDown
 } from "@cyllo_studio/js/navbar/view_selection_dropdown/view_selection_dropdown";
 import {
+    useEffect,
     useState,
     useRef,
-    onMounted,onPatched,onWillUnmount
+    onMounted, onPatched, onWillUnmount
 } from "@odoo/owl";
 import {
     FirstPage
@@ -75,9 +76,9 @@ export class CylloNavBar extends NavBar {
             }
             this.render();
         });
-                useBus(this.env.bus, 'PREVIEW_MODE_CHANGED', ({detail}) => {
-    this.state.isPreviewMode = detail.isPreviewMode;
-    });
+        useBus(this.env.bus, 'PREVIEW_MODE_CHANGED', ({ detail }) => {
+            this.state.isPreviewMode = detail.isPreviewMode;
+        });
         useBus(this.env.bus, "STUDIO_EDIT_BUTTON_HIDE", () => {
             this.props.updateState("editButton", false);
         });
@@ -116,7 +117,7 @@ export class CylloNavBar extends NavBar {
             if (this.state.configOpen) {
                 this.ShowMiscellaneousDrop();
             }
-            });
+        });
     }
 
     /**
@@ -141,8 +142,8 @@ export class CylloNavBar extends NavBar {
         })
     }
 
-        /** Open the Access Rights view for the current model. */
-    async AccessRightsClick(){
+    /** Open the Access Rights view for the current model. */
+    async AccessRightsClick() {
         this.state.configOpen = false;
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.model.access']);
         this.action.doAction({
@@ -157,7 +158,7 @@ export class CylloNavBar extends NavBar {
             },
         });
     }
-    async EmailTemplateClick(){}
+    async EmailTemplateClick() { }
 
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
@@ -207,7 +208,7 @@ export class CylloNavBar extends NavBar {
     async ReportClick() {
         this.state.configOpen = false;
         const currentController = this.action.currentController;
-        console.log('hiiii',currentController)
+        console.log('hiiii', currentController)
         const resModel = currentController.action.res_model;
         if (resModel && resModel !== 'ir.actions.report') {
             sessionStorage.setItem('cy_report_editor_origin', JSON.stringify({
@@ -216,7 +217,7 @@ export class CylloNavBar extends NavBar {
             }));
         }
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.actions.report']);
-        
+
         const action = {
             name: 'Reports',
             type: 'ir.actions.act_window',
@@ -252,12 +253,13 @@ export class CylloNavBar extends NavBar {
     /** Activate studio edit mode. */
     async handleEdit() {
         this.state.isStudioEdit = true;
-        this.env.bus.trigger('STUDIO_EDIT_STARTED',{
-             isStudioEdit : this.state.isStudioEdit
+        this.env.bus.trigger('STUDIO_EDIT_STARTED', {
+            isStudioEdit: this.state.isStudioEdit
         });
         this.props.updateState("edit", true);
         this.props.updateState("editButton", false);
     }
+
     get viewSelectionProps() {
         return {
             view: this.props.view,

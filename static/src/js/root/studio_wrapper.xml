@@ -28,7 +28,7 @@
                         <StudioMenuSideBar/>
                         <div class="d-flex flex-column" style="height: 100%; width: stretch !important">
                             <CylloNavBar t-props="props.viewProps"/>
-                            <div class="d-flex h-100">
+                            <div class="d-flex justify-content-end h-100">
                                 <div t-if="props.info and props.info?.componentProps?.action ||
                                 props.info and props.info?.componentProps?.type == 'hierarchy' ||
                                 props.info and props.info?.componentProps?.type == 'grid' ||

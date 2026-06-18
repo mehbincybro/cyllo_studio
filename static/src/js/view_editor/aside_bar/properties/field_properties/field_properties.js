@@ -582,10 +582,12 @@ export class FieldProperties extends Component {
                     if (this.props.edit) {
 
                     this.state.field = "new";
-                        const result = await this.rpc("/cyllo_studio/get_default", {
-                            model: this.props.model,
-                            field_name: this.props.name,
-                        });
+                        const result = this.props.name
+                            ? await this.rpc("/cyllo_studio/get_default", {
+                                model: this.props.model,
+                                field_name: this.props.name,
+                            })
+                            : null;
                         this.state.default_value = result || "";
 
                // Load SQL constraints

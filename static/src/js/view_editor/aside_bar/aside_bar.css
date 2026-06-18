@@ -26,22 +26,51 @@
 
 }
 
+/* Outer shell: drives layout reflow (table expands/contracts in sync).
+   Animates flex-basis + width so the flex row actually changes size.
+   overflow:hidden clips the inner content while it slides. */
 .cy-side-menu {
-    background: #25281a;
+    background: transparent;
     z-index: auto;
+    overflow: hidden;
+    /* Animate the LAYOUT dimension so the table reflows in sync */
     transition:
-        transform 0.8s cubic-bezier(0.33, 1, 0.68, 1),
-        opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1);
-    opacity: 1;
-    overflow-y: auto;
-    scrollbar-width: none;
+        flex-basis 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+        width 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+        min-width 0.35s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-.cy-side-menu::-webkit-scrollbar {
+/* Collapsed state (entering before rAF fires, or animate-out).
+   Use same specificity as the fixed-width rule so !important wins. */
+.cy-side-menu.cy-entering,
+.cy-side-menu.animate-out {
+    flex-basis: 0px !important;
+    width: 0px !important;
+    min-width: 0px !important;
+}
+
+/* Inner wrapper: fixed 320px, scrollable, slides + fades independently. */
+.cy-side-menu-inner {
+    width: 320px;
+    min-width: 320px;
+    height: calc(100dvh - 92px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    background: #25281a;
+    transition:
+        transform 0.35s cubic-bezier(0.33, 1, 0.68, 1),
+        opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1);
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.cy-side-menu-inner::-webkit-scrollbar {
     width: 0px;
 }
 
-.cy-side-menu.animate-out {
+/* When outer is collapsed → slide inner off to the right */
+.cy-side-menu.cy-entering .cy-side-menu-inner,
+.cy-side-menu.animate-out .cy-side-menu-inner {
     transform: translateX(100%);
     opacity: 0;
 }
@@ -166,7 +195,7 @@
 
 .round label {
     border: 1px solid var(--border-color);
-    border-radius: 50%;
+    border-radius: 5px;
     cursor: pointer;
     height: 18px;
     left: 0;
@@ -183,7 +212,7 @@
     border-right: none;
     content: "";
     height: 6px;
-    left: 2px;
+    left: 3px;
     opacity: 0;
     position: absolute;
     top: 4px;
@@ -303,18 +332,25 @@
     }
 }
 
-/* Studio editor row: give the right panel a stable full width and let the
-   action area take the remaining (balance) space. The col-2 / aspect-ratio
-   media rules left it too narrow, clipping "Show Invisible Elements" etc. */
-.cy-studio .o_action_manager .flex-column > .d-flex > .cy-side-menu {
+/* Studio editor row: stable 320px panel; action area gets remaining space.
+   Transitions are on the .cy-side-menu base rule — this sets the target values. */
+.cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu {
     flex: 0 0 320px !important;
     width: 320px !important;
     max-width: 320px !important;
     min-width: 320px !important;
 }
 
-.cy-studio .o_action_manager .flex-column > .d-flex > .position-relative,
-.cy-studio .o_action_manager .flex-column > .d-flex > .o_action {
+/* Keep the fixed-width rule from conflicting during collapse animation */
+.cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu.cy-entering,
+.cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu.animate-out {
+    flex: 0 0 0px !important;
+    width: 0px !important;
+    min-width: 0px !important;
+}
+
+.cy-studio .o_action_manager .flex-column>.d-flex>.position-relative,
+.cy-studio .o_action_manager .flex-column>.d-flex>.o_action {
     flex: 1 1 auto !important;
     min-width: 0 !important;
 }
@@ -324,9 +360,23 @@
    past the overflow-hidden .cy-studio container, clipping the rightmost
    element (the aside) — worst when devtools shrink the viewport. Allow the
    chain to shrink so the action area scrolls internally instead. */
-.cy-studio .o_action_manager > .flex-column,
-.cy-studio .o_action_manager .flex-column > .d-flex {
+.cy-studio .o_action_manager>.flex-column,
+.cy-studio .o_action_manager .flex-column>.d-flex {
     min-width: 0 !important;
+}
+
+/* Single horizontal scroller. Both .o_content and the inner
+   .o_list_renderer.table-responsive could scroll on X → either two stacked
+   scrollbars, or (with the aside open) the inner one not reaching the last
+   columns. Make .o_content the only X scroller and let the table overflow
+   into it, so the full table width is always reachable. */
+.cy-studio .o_content {
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+.cy-studio .o_content .o_list_renderer.o_renderer.table-responsive {
+    overflow-x: visible !important;
 }
 
 /* =========================================================
@@ -345,8 +395,13 @@
     --input-border-color: #d6d9de;
     --checkbox-background-color: #9EA700;
     --checkbox-text-color: #1f2430;
-    background: #ffffff !important;
+    /* background/border on inner wrapper so they don't show during collapse */
+    background: transparent !important;
     color: #374151;
+}
+
+.cy-side-menu.view_overall_light .cy-side-menu-inner {
+    background: #ffffff !important;
     border-left: 1px solid var(--border-color);
 }
 
@@ -354,9 +409,12 @@
 .cy-side-menu.view_overall_light .cy-tab-header {
     display: flex;
     align-items: center;
-    padding: 10px 12px;
+    padding: 12px;
     background: #ffffff;
-    position: relative;
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
 .cy-side-menu.view_overall_light .cy-tab-pill {
@@ -366,11 +424,34 @@
     border-radius: 8px;
     padding: 3px;
     gap: 2px;
+    height: 35px;
 }
 
-.cy-side-menu.view_overall_light .cy-tab-pill > div {
+.cy-side-menu.view_overall_light .cy-tab-pill>div {
     flex: 1;
 }
+
+.cy-side-menu.view_overall_light .cy-close-pill {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0;
+    background: #efefef;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    height: 35px;
+    min-width: 35px;
+
+    &:hover {
+        background-color: #eaeaea;
+    }
+
+    i {
+        font-size: 22px;
+    }
+}
+
 
 .cy-side-menu.view_overall_light .cy-window-view {
     background: transparent !important;
@@ -382,13 +463,14 @@
     background: transparent;
     border: none;
     border-radius: 6px;
-    padding: 6px 12px;
+    padding: 3px 12px;
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.15s ease;
     box-shadow: none;
     white-space: nowrap;
+    height: 100%;
 }
 
 .cy-side-menu.view_overall_light .cy-nav__link.active {

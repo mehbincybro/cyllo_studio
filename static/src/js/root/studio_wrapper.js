@@ -773,7 +773,12 @@ export class StudioWrapper extends Component {
         this.viewDetails.type = 'View'
     }
     handleClearMenu(params) {
-        this.props.updateState("editButton", true);
+        // Only editable views get the "Edit View" button back. Client actions
+        // (dashboards, report viewer, etc.) carry a `componentProps.action` and
+        // are not editable — re-showing Edit View there is wrong, and caused it
+        // to reappear on dashboards whenever CLEAR-MENU fired.
+        const isClientAction = !!this.props.info?.componentProps?.action;
+        this.props.updateState("editButton", !isClientAction);
         this.props.edit = false;
         this.viewDetails.type = '';
         sessionStorage.removeItem('KanbanEdit');
