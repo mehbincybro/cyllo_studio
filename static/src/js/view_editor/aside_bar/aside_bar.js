@@ -5,6 +5,7 @@ import {
     onWillUpdateProps,
     onRendered,
     onMounted,
+    useRef,
 } from "@odoo/owl";
 import {
     useService
@@ -145,6 +146,7 @@ export class AsideBar extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.dialogService = useService("dialog");
+        this.sideMenuRef = useRef('sideMenu');
         this.state = useState({
             viewProperty: this.props.type,
             type: this.props.type,
@@ -324,10 +326,15 @@ export class AsideBar extends Component {
             fromClose: true
         });
         this.props.updateState("editButton", true);
-        this.props.updateState("isAnimatingSidebar", true);  // triggers collapse animation
-        this.props.updateState("edit", false);
-        // Delay reload until collapse animation finishes (350ms transition + 50ms buffer)
-        setTimeout(() => this.action.doAction('studio_reload'), 400);
+        // Add class directly to DOM — bypasses OWL re-render so the browser
+        // sees the property change on the already-painted element and runs the CSS transition.
+        if (this.sideMenuRef.el) {
+            this.sideMenuRef.el.classList.add('animate-out');
+        }
+        setTimeout(() => {
+            this.props.updateState("edit", false);
+            this.action.doAction('studio_reload');
+        }, 400);
     }
     get noteBookPropertiesProps() {
         return {

@@ -1,7 +1,9 @@
 <templates id="template" xml:space="preserve">
     <t t-name="cyllo_studio.StudioWrapperMain">
-        <!-- <CylloNavBar t-props="viewProps"/> -->
-        <ActionContainer t-props="viewProps"/>
-        <MainComponentsContainer/>
+        <div class="d-flex flex-column p-2">
+            <CylloNavBar t-props="viewProps"/>
+            <ActionContainer t-props="viewProps"/>
+            <MainComponentsContainer/>
+        </div>
     </t>
 </templates>

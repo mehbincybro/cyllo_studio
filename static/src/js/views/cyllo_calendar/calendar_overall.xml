@@ -11,7 +11,7 @@
                  id="accordionExample">
                 <div class="overall_container_list cy-from-type-field">
                     <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button cy-studio_accordion"
+                        <button class="accordion-button cy-heading cy-studio_accordion"
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#collapseOne"
@@ -100,7 +100,7 @@
             <div class="accordion" id="accordionExample">
                 <div class="overall_container_list">
                     <h2 class="accordion-header" id="headingTwo">
-                        <button class="accordion-button cy-studio_accordion collapsed"
+                        <button class="accordion-button cy-heading cy-studio_accordion collapsed"
                                 type="button"
                                 data-bs-toggle="collapse"
                                 data-bs-target="#collapseTwo"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-name="cyllo_studio.AsideBar">
-        <div class="cy-side-menu col-2 view_overall_light" t-att-class="(props?.isAnimatingSidebar ? 'animate-out' : '') + (state.entering ? ' cy-entering' : '')">
+        <div class="cy-side-menu view_overall_light" t-ref="sideMenu" t-att-class="(state.entering ? 'cy-entering' : '')">
             <!-- Inner wrapper: fixed 320px, slides/fades. Outer drives layout reflow. -->
             <div class="cy-side-menu-inner">
                 <div class="cy-tab-header">

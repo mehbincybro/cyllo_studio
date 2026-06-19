@@ -18,9 +18,7 @@
                     />
                 </t>
                 <t t-else="" t-on-click.stop="toggleDropdown">
-                    <span class="selected-text">
-                        <t t-esc="displayValue"/>
-                    </span>
+                    <input type="text" style="color: #000000;" class="o-autocomplete--input o_input input_drop" required="true" t-att-placeholder="displayValue" readonly=""/>
                 </t>
                 <i t-att-class="state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'" class="cy-dropdown-icon"/>
             </div>

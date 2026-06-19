@@ -1,6 +1,6 @@
 <templates id="template" xml:space="preserve">
     <t t-name="cyllo_studio.StudioWrapper">
-        <div t-att-class="asideProps.type  and asideProps.type != 'dialog_box' ? 'pe-3' : ''" class="d-flex p-3" style="height: 100dvh;">
+        <div class="d-flex" style="height: calc(100dvh - 84px);">
             <div class="d-flex gap-2 w-100">
                 <div class="cy-studio overflow-hidden">
                     <div t-if="props.info?.componentProps?.action?.tag == 'report_view'" class="cy-window-view d-flex gap-2 py-2 ps-3">
@@ -27,7 +27,6 @@
                     <div class="o_action_manager d-flex position-relative">
                         <StudioMenuSideBar/>
                         <div class="d-flex flex-column" style="height: 100%; width: stretch !important">
-                            <CylloNavBar t-props="props.viewProps"/>
                             <div class="d-flex justify-content-end h-100">
                                 <div t-if="props.info and props.info?.componentProps?.action ||
                                 props.info and props.info?.componentProps?.type == 'hierarchy' ||
@@ -72,26 +71,18 @@
                                     <!--</div>-->
                                 </div>
                                 <t t-elif="props.info.Component" t-component="props.info.Component" className="'o_action'" t-props="props.info.componentProps" t-key="props.info.id"/>
-                                <t t-if="asideBarAvailable || state?.isAnimatingSidebar">
-                                    <t t-if="!state.activity_view">
-                                        <AsideBar t-props="asideProps"/>
-                                    </t>
-                                    <t t-if="state.activity_view and props.edit">
-                                        <ActivityDialog t-props="activityProps"/>
-                                    </t>
-                                </t>
                             </div>
                         </div>
                     </div>
                 </div>
-                <!-- <t t-if="asideBarAvailable || state?.isAnimatingSidebar">
+                <t t-if="asideBarAvailable || state?.isAnimatingSidebar">
                     <t t-if="!state.activity_view">
                         <AsideBar t-props="asideProps"/>
                     </t>
                     <t t-if="state.activity_view and props.edit">
                         <ActivityDialog t-props="activityProps"/>
                     </t>
-                </t> -->
+                </t>
             </div>
         </div>
     </t>

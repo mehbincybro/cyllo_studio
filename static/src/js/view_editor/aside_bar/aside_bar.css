@@ -1,47 +1,45 @@
+/* ============================================================
+   ASIDE BAR — CSS
+   Structure follows the DOM in aside_bar.xml:
+     .cy-side-menu (outer shell)
+       .cy-side-menu-inner (inner wrapper)
+         .cy-tab-header
+           .cy-tab-pill  →  .cy-nav__link
+           .cy-close-pill
+         [panel content]
+   ============================================================ */
+
+/* === 1. CSS Variables ======================================= */
 :root {
-
-    --background-color-bg: #363827;
+    --background-color-bg: #25281a;
     --text-color: #e2e2e2;
-    --active-text-color: #7c8a00;
-    --border-color: #DFDFDF;
-    --active-border-color: #7c8a00;
-    --accordion-background-color: #333333;
-    --accordion-expanded-color: #b3b3b3;
-    --input-background-color: #3a3a3a;
-    --input-border-color: #666666;
-    --checkbox-background-color: #7c8a00;
-}
-
-.light-studio-mode {
-    --background-color-bg: #e6e6e6;
-    --text-color: #828176;
     --active-text-color: #9EA700;
-    --border-color: #828176;
+    --border-color: #d6d9de;
     --active-border-color: #9EA700;
-    --accordion-background-color: transparent;
-    --accordion-expanded-color: #BCBBA7;
-    --input-background-color: white;
-    --input-border-color: #dfdfdf;
+    /* --accordion-background-color: #f4f5f3;
+    --accordion-expanded-color: #1f2430; */
+    --input-background-color: #373627;
+    --input-border-color: #4b4934;
     --checkbox-background-color: #9EA700;
-
+    --checkbox-text-color: #e2e2e2;
 }
 
-/* Outer shell: drives layout reflow (table expands/contracts in sync).
-   Animates flex-basis + width so the flex row actually changes size.
-   overflow:hidden clips the inner content while it slides. */
+/* === 2. Outer Shell (.cy-side-menu) ========================= */
+
+/* Drives layout reflow — animates flex-basis + width so the
+   flex row changes size and the table resizes in sync.
+   overflow:hidden clips the inner content while sliding. */
 .cy-side-menu {
     background: transparent;
     z-index: auto;
     overflow: hidden;
-    /* Animate the LAYOUT dimension so the table reflows in sync */
     transition:
         flex-basis 0.35s cubic-bezier(0.33, 1, 0.68, 1),
         width 0.35s cubic-bezier(0.33, 1, 0.68, 1),
         min-width 0.35s cubic-bezier(0.33, 1, 0.68, 1);
 }
 
-/* Collapsed state (entering before rAF fires, or animate-out).
-   Use same specificity as the fixed-width rule so !important wins. */
+/* Collapsed state — before open rAF fires (cy-entering) or during close (animate-out) */
 .cy-side-menu.cy-entering,
 .cy-side-menu.animate-out {
     flex-basis: 0px !important;
@@ -49,14 +47,18 @@
     min-width: 0px !important;
 }
 
-/* Inner wrapper: fixed 320px, scrollable, slides + fades independently. */
+/* === 3. Inner Wrapper (.cy-side-menu-inner) ================= */
+
+/* Fixed 320px, scrollable, slides + fades independently of the outer shell */
 .cy-side-menu-inner {
     width: 320px;
     min-width: 320px;
-    height: calc(100dvh - 92px);
+    height: calc(100dvh - 84px);
     overflow-y: auto;
     scrollbar-width: none;
-    background: #25281a;
+    background: var(--background-color-bg);
+    color: var(--text-color);
+    border-radius: 8px;
     transition:
         transform 0.35s cubic-bezier(0.33, 1, 0.68, 1),
         opacity 0.35s cubic-bezier(0.33, 1, 0.68, 1);
@@ -68,30 +70,159 @@
     width: 0px;
 }
 
-/* When outer is collapsed → slide inner off to the right */
+.cy-side-menu .cy-container {
+    padding: 0 16px;
+}
+
+/* When outer collapses → slide inner off to the right + fade out */
 .cy-side-menu.cy-entering .cy-side-menu-inner,
 .cy-side-menu.animate-out .cy-side-menu-inner {
     transform: translateX(100%);
     opacity: 0;
 }
 
-.cy-nav__link {
-    color: #535353;
-    width: 100%;
-    font-weight: 500;
-    background-color: transparent;
-    box-shadow: none;
-    border: none;
-    /*border-bottom: 1px solid #535353;*/
-    padding: 1rem;
-    width: 100%;
+/* === 4. Tab Header (.cy-tab-header) ========================= */
+
+.cy-side-menu .cy-tab-header {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    background: var(--navbar-bg);
+    gap: 4px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
 
-.cy-nav__link.active {
-    color: var(--checkbox-text-color);
-    /* border-bottom: 1px solid #696969;*/
-    box-shadow: -4px -1px 17px rgba(0, 0, 0, 0.3);
-    transition: 0.3s;
+/* === 5. Tab Pill (.cy-tab-pill) ============================= */
+
+.cy-side-menu .cy-tab-pill {
+    display: flex;
+    flex: 1;
+    background: #373627;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    height: 35px;
+}
+
+.cy-side-menu .cy-tab-pill>div {
+    flex: 1;
+}
+
+/* === 6. Nav Links (.cy-nav__link) =========================== */
+
+.cy-side-menu .cy-window-view {
+    background: transparent !important;
+}
+
+.cy-side-menu .cy-nav__link {
+    width: 100%;
+    color: #b9b9b9;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    padding: 3px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: none;
+    white-space: nowrap;
+    height: 100%;
+    transition: all 0.15s ease;
+}
+
+.cy-side-menu .cy-nav__link.active {
+    color: #e2e2e2;
+    background: #46442d;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    border-bottom: none;
+}
+
+/* === 7. Close Button (.cy-close-pill) ======================= */
+
+.cy-side-menu .cy-close-pill {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0;
+    background: #373627;
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+    height: 35px;
+    min-width: 35px;
+    cursor: pointer;
+
+    &:hover {
+        background-color: #46442d;
+
+        i {
+            color: #e2e2e2;
+        }
+    }
+
+    i {
+        font-size: 22px;
+        color: #b9b9b9;
+    }
+}
+
+/* Legacy close arrow (older UI, kept for backwards compat) */
+.cy-close-arrow {
+    position: absolute;
+    top: 11px;
+    left: 7px;
+    width: 30px;
+    height: 30px;
+    background: #9ea700;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.cy-close-arrow .ri-arrow-left-fill {
+    font-size: 20px;
+}
+
+/* === 8. Panel Content — Labels & Inputs ===================== */
+
+.cy-side-menu .cy-heading {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cy-navbar_label {
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-family: inter, sans-serif;
+    font-weight: normal;
+}
+
+/* Base: dark theme (used outside .cy-side-menu context) */
+.cy-side-menu .cy-input {
+    width: 100%;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-background-color);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.44rem 10px;
+    color: var(--text-color) !important;
+    font-size: 13px;
+    font-family: inter, sans-serif;
+    font-weight: normal;
+
+    &[readonly] {
+        color: #85857d !important;
+    }
 }
 
 .overall_container_list {
@@ -103,6 +234,26 @@
     font-size: 14px !important;
 }
 
+.cy-basedOn {
+    gap: 3px;
+    display: flex;
+    font-size: 14px;
+    background-color: transparent;
+    color: var(--navbar-title-color);
+    border: none;
+}
+
+.cy-setting-icon {
+    color: var(--text-color);
+    width: 1rem;
+}
+
+.cy-studio-button-icon {
+    background-color: var(--input-background-color);
+}
+
+/* === 9. Accordion (.cy-studio_accordion) ==================== */
+
 .cy-studio_accordion {
     border-color: var(--active-border-color);
     background-color: var(--accordion-background-color);
@@ -112,10 +263,24 @@
     border-radius: 0 !important;
 }
 
-.cy-studio_accordion:not(.collapsed) {
+.cy-studio_accordion[aria-expanded="true"] {
+    border-color: var(--active-border-color) !important;
+    border-bottom: 1px solid;
+    color: var(--text-color);
+    background-color: unset;
+}
+
+.cy-studio_accordion[aria-expanded="false"] {
+    border-color: var(--border-color) !important;
+    border-bottom: 1px solid;
+    color: var(--text-color);
+    background-color: unset;
+}
+
+/* .cy-studio_accordion:not(.collapsed) {
     background-color: var(--accordion-background-color);
     color: var(--accordion-expanded-color);
-}
+} */
 
 .cy-studio_accordion::after {
     content: "";
@@ -134,58 +299,7 @@
     filter: brightness(1);
 }
 
-.cy-studio_accordion[aria-expanded="true"] {
-    border-color: var(--active-border-color) !important;
-    border-bottom: 1px solid;
-    color: var(--text-color);
-    background-color: unset;
-}
-
-.cy-studio_accordion[aria-expanded="false"] {
-    border-color: var(--border-color) !important;
-    border-bottom: 1px solid;
-    color: var(--text-color);
-    background-color: unset;
-}
-
-.cy-navbar_label {
-    font-size: 14px;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-    font-family: inter, sans-serif;
-}
-
-.cy-input {
-    width: 100%;
-    border: 1px solid #474a3a;
-    background-color: #32352a;
-    border-radius: 3px;
-    margin-bottom: 0.5rem;
-    padding: 0.38rem;
-    color: #BCBBA7 !important;
-    font-size: 13px;
-    font-family: inter, sans-serif;
-    font-weight: normal;
-
-    &[readonly] {
-        color: #85857d !important;
-    }
-
-}
-
-.cy-basedOn {
-    gap: 3px;
-    display: flex;
-    font-size: 14px;
-    background-color: transparent;
-    color: var(--navbar-title-color);
-    border: none;
-}
-
-.cy-setting-icon {
-    color: var(--text-color);
-    width: 1rem;
-}
+/* === 10. Checkboxes (.round) ================================ */
 
 .round {
     position: relative;
@@ -236,104 +350,9 @@
     width: 10px;
 }
 
-.cy-studio-custom-dropdown-action ul {
-    background: #2a2a2a;
-    width: 14%;
-    margin-left: -3px;
-    margin-top: 6px;
-}
+/* === 12. Studio Editor Layout Context ======================= */
 
-.cy-studio-custom-dropdown-action a {
-    color: #BCBBA7 !important;
-}
-
-.cy-studio-custom-dropdown-action input {
-    color: #BCBBA7 !important;
-}
-
-.cy-studio-button-icon {
-    background-color: var(--input-background-color);
-}
-
-.cy-close-arrow {
-    position: absolute;
-    top: 11px;
-    left: 7px;
-    width: 30px;
-    height: 30px;
-    background: #9ea700;
-    border: none;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 1.2rem;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.cy-close-arrow .ri-arrow-left-fill {
-    font-size: 20px;
-}
-
-.o_form_view .o_control_panel_main {
-    display: flex !important;
-    justify-content: center !important;
-
-}
-
-/* Tablets (768px) */
-@media (max-width: 767px) {
-    .cy-side-menu {
-        width: 200px !important;
-    }
-}
-
-/* Mobiles (599px) */
-@media (max-width: 599px) {
-    .cy-side-menu {
-        width: 150px !important;
-    }
-}
-
-/* Extra small devices (320px) */
-@media (max-width: 319px) {
-    .cy-side-menu {
-        width: 120px !important;
-    }
-}
-
-/* Aspect Ratio: Widescreen 16:9 */
-@media (min-width: 1024px) and (aspect-ratio: 16/9) {
-    .cy-side-menu {
-        width: 340px !important;
-    }
-}
-
-/* Aspect Ratio: Standard 4:3 */
-@media (aspect-ratio: 4/3) {
-    .cy-side-menu {
-        width: 280px !important;
-    }
-}
-
-/* Portrait Tablets */
-@media (max-width: 1023px) and (orientation: portrait) {
-    .cy-side-menu {
-        width: 220px !important;
-    }
-}
-
-/* Mobile Landscape */
-@media (max-width: 767px) and (orientation: landscape) {
-    .cy-side-menu {
-        width: 180px !important;
-    }
-}
-
-/* Studio editor row: stable 320px panel; action area gets remaining space.
-   Transitions are on the .cy-side-menu base rule — this sets the target values. */
+/* Panel: stable 320px; action area gets remaining space */
 .cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu {
     flex: 0 0 320px !important;
     width: 320px !important;
@@ -341,7 +360,7 @@
     min-width: 320px !important;
 }
 
-/* Keep the fixed-width rule from conflicting during collapse animation */
+/* Override fixed-width during collapse animation */
 .cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu.cy-entering,
 .cy-studio .o_action_manager .flex-column>.d-flex>.cy-side-menu.animate-out {
     flex: 0 0 0px !important;
@@ -349,27 +368,21 @@
     min-width: 0px !important;
 }
 
+/* Action area: take remaining space after panel */
 .cy-studio .o_action_manager .flex-column>.d-flex>.position-relative,
 .cy-studio .o_action_manager .flex-column>.d-flex>.o_action {
     flex: 1 1 auto !important;
     min-width: 0 !important;
 }
 
-/* Flex items default to min-width:auto and refuse to shrink below their
-   content's intrinsic width. The wide list table then pushes the whole row
-   past the overflow-hidden .cy-studio container, clipping the rightmost
-   element (the aside) — worst when devtools shrink the viewport. Allow the
-   chain to shrink so the action area scrolls internally instead. */
+/* Prevent wide list table from pushing the panel off-screen */
 .cy-studio .o_action_manager>.flex-column,
 .cy-studio .o_action_manager .flex-column>.d-flex {
     min-width: 0 !important;
 }
 
-/* Single horizontal scroller. Both .o_content and the inner
-   .o_list_renderer.table-responsive could scroll on X → either two stacked
-   scrollbars, or (with the aside open) the inner one not reaching the last
-   columns. Make .o_content the only X scroller and let the table overflow
-   into it, so the full table width is always reachable. */
+/* Single horizontal scroller: let .o_content scroll on X,
+   inner table-responsive scrolls into it */
 .cy-studio .o_content {
     overflow-x: auto !important;
     overflow-y: auto !important;
@@ -379,146 +392,53 @@
     overflow-x: visible !important;
 }
 
-/* =========================================================
-   Light theme for the View / Properties aside panel.
-   Flips the CSS vars + hardcoded dark colors to white.
-   ========================================================= */
-.cy-side-menu.view_overall_light {
-    --background-color-bg: #ffffff;
-    --text-color: #374151;
-    --active-text-color: #9EA700;
-    --border-color: #d6d9de;
-    --active-border-color: #9EA700;
-    --accordion-background-color: #f4f5f3;
-    --accordion-expanded-color: #1f2430;
-    --input-background-color: #ffffff;
-    --input-border-color: #d6d9de;
-    --checkbox-background-color: #9EA700;
-    --checkbox-text-color: #1f2430;
-    /* background/border on inner wrapper so they don't show during collapse */
-    background: transparent !important;
-    color: #374151;
+/* === 13. Misc =============================================== */
+
+.o_form_view .o_control_panel_main {
+    display: flex !important;
+    justify-content: center !important;
 }
 
-.cy-side-menu.view_overall_light .cy-side-menu-inner {
-    background: #ffffff !important;
-    border-left: 1px solid var(--border-color);
-}
+/* === 14. Media Queries ====================================== */
 
-/* Tab header (View / Properties) */
-.cy-side-menu.view_overall_light .cy-tab-header {
-    display: flex;
-    align-items: center;
-    padding: 12px;
-    background: #ffffff;
-    gap: 4px;
-    position: sticky;
-    top: 0;
-    z-index: 1;
-}
-
-.cy-side-menu.view_overall_light .cy-tab-pill {
-    display: flex;
-    flex: 1;
-    background: #efefef;
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-    height: 35px;
-}
-
-.cy-side-menu.view_overall_light .cy-tab-pill>div {
-    flex: 1;
-}
-
-.cy-side-menu.view_overall_light .cy-close-pill {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex: 0;
-    background: #efefef;
-    border-radius: 8px;
-    padding: 3px;
-    gap: 2px;
-    height: 35px;
-    min-width: 35px;
-
-    &:hover {
-        background-color: #eaeaea;
-    }
-
-    i {
-        font-size: 22px;
+@media (max-width: 767px) {
+    .cy-side-menu {
+        width: 200px !important;
     }
 }
 
-
-.cy-side-menu.view_overall_light .cy-window-view {
-    background: transparent !important;
+@media (max-width: 599px) {
+    .cy-side-menu {
+        width: 150px !important;
+    }
 }
 
-.cy-side-menu.view_overall_light .cy-nav__link {
-    width: 100%;
-    color: #6b7280;
-    background: transparent;
-    border: none;
-    border-radius: 6px;
-    padding: 3px 12px;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.15s ease;
-    box-shadow: none;
-    white-space: nowrap;
-    height: 100%;
+@media (max-width: 319px) {
+    .cy-side-menu {
+        width: 120px !important;
+    }
 }
 
-.cy-side-menu.view_overall_light .cy-nav__link.active {
-    color: #1f2430;
-    background: #ffffff;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-    border-bottom: none;
+@media (min-width: 1024px) and (aspect-ratio: 16/9) {
+    .cy-side-menu {
+        width: 340px !important;
+    }
 }
 
-/* Section containers / boxes */
-.cy-side-menu.view_overall_light .overall_container_list {
-    background-color: #ffffff !important;
+@media (aspect-ratio: 4/3) {
+    .cy-side-menu {
+        width: 280px !important;
+    }
 }
 
-/* Text inputs */
-.cy-side-menu.view_overall_light .cy-input {
-    background-color: #ffffff !important;
-    border-color: #d6d9de;
-    color: #374151 !important;
+@media (max-width: 1023px) and (orientation: portrait) {
+    .cy-side-menu {
+        width: 220px !important;
+    }
 }
 
-.cy-side-menu.view_overall_light .cy-input[readonly] {
-    color: #9aa0a8 !important;
-}
-
-/* Custom dropdown menus */
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action ul {
-    background: #ffffff !important;
-    border: 1px solid #d6d9de;
-}
-
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action a,
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown-action input {
-    color: #374151 !important;
-}
-
-/* CylloStudioDropdown (Group By / Sort By / Select Position) */
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown .d-flex {
-    background-color: #ffffff !important;
-    border-color: #d6d9de !important;
-}
-
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown span,
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown i {
-    color: #374151 !important;
-}
-
-.cy-side-menu.view_overall_light .cy-studio-custom-dropdown .o-autocomplete--dropdown-menu {
-    --custom-dropdown-bg: #ffffff;
-    --custom-dropdown-border: #d6d9de;
+@media (max-width: 767px) and (orientation: landscape) {
+    .cy-side-menu {
+        width: 180px !important;
+    }
 }

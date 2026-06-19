@@ -32,342 +32,342 @@ import {
     getWidgetTypes,
     getWidgetSupport
 } from "@cyllo_studio/js/view_editor/widget";
-import {MultiSelectDropDown} from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
+import { MultiSelectDropDown } from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
 import {
     DomainSelectorDialog
 } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 
 import {
-SelectionFieldValue
+    SelectionFieldValue
 } from "@cyllo_studio/js/view_editor/components/selection_field_widget_values/selection_field_value_widget";
 import {
- usePopover
- } from "@web/core/popover/popover_hook";
+    usePopover
+} from "@web/core/popover/popover_hook";
 import {
- ModelFieldSelectorPopover
- } from "@web/core/model_field_selector/model_field_selector_popover";
+    ModelFieldSelectorPopover
+} from "@web/core/model_field_selector/model_field_selector_popover";
 import {
- useLoadFieldInfo
- } from "@web/core/model_field_selector/utils";
-
- import {
-  CodeEditor
-   } from "@web/core/code_editor/code_editor";
-
-   import {
-  ComputeDialog
-   } from "@cyllo_studio/js/view_editor/aside_bar/dialog/compute_dialog"
+    useLoadFieldInfo
+} from "@web/core/model_field_selector/utils";
 
 import {
- DateTimePicker
- } from "@web/core/datetime/datetime_picker";
+    CodeEditor
+} from "@web/core/code_editor/code_editor";
 
- import { ConstraintDialog } from "@cyllo_studio/js/view_editor/aside_bar/dialog/constraint_dialog";
+import {
+    ComputeDialog
+} from "@cyllo_studio/js/view_editor/aside_bar/dialog/compute_dialog"
+
+import {
+    DateTimePicker
+} from "@web/core/datetime/datetime_picker";
+
+import { ConstraintDialog } from "@cyllo_studio/js/view_editor/aside_bar/dialog/constraint_dialog";
 
 
 
 export class FieldProperties extends Component {
-            static template = "cyllo_studio.FieldProperties";
-            static props = {
-                attr: {
-                    type: Object,
-                    optional: true
-                },
-                allFields: {
-                    type: Object,
-                    optional: true
-                },
-                type: {
-                    type: String,
-                    optional: true
-                },
-                name: {
-                    type: String,
-                    optional: true
-                },
-                string: {
-                    type: String,
-                    optional: true
-                },
-                label: {
-                    type: String,
-                    optional: true
-                },
-                widget: {
-                    type: String,
-                    optional: true
-                },
-                fieldType: {
-                    type: String,
-                    optional: true
-                },
-                context: {
-                    type: String,
-                    optional: true
-                },
-                viewType: {
-                    type: String,
-                    optional: true
-                },
-                model: {
-                    type: String,
-                    optional: true
-                },
-                viewId: {
-                    type: Number,
-                    optional: true
-                },
-                type: {
-                    type: String,
-                    optional: true
-                },
-                create: {
-                    type: Boolean,
-                    optional: true
-                },
-                placeholder: {
-                    type: String,
-                    optional: true
-                },
-                help: {
-                    type: String,
-                    optional: true
-                },
-                edit: {
-                    type: Boolean,
-                    optional: true
-                },
-                readonly: {
-                    type: String,
-                    optional: true
-                },
-                  recordData: {
-                    type: Object,
-                    optional: true
-                },
-            dynamic_placeholder: {
+    static template = "cyllo_studio.FieldProperties";
+    static props = {
+        attr: {
+            type: Object,
+            optional: true
+        },
+        allFields: {
+            type: Object,
+            optional: true
+        },
+        type: {
             type: String,
             optional: true
         },
-                column_invisible: {
-                    type: String,
-                    optional: true
-                },
-                invisible: {
-                    type: String,
-                    optional: true
-                },
-                required: {
-                    type: String,
-                    optional: true
-                },
-                related_model: {
-                    type: String,
-                    optional: true
-                },
-                relational_model: {
-                    type: [Object, String],
-                    optional: true
-                },
-                domain: {
-                    type: String,
-                    optional: true
-                },
-                field_path: {
-                    type: String,
-                    optional: true
-                },
-                label_path: {
-                    type: String,
-                    optional: true
-                },
-                path: {
-                    type: String,
-                    optional: true
-                },
-                widget_types: {
-                    type: Object,
-                    optional: true
-                },
-                options: {
-                    type: Object,
-                    optional: true
-                },
-                label_path: {
-                    type: String,
-                    optional: true
-                },
-                position: {
-                    type: String,
-                    optional: true
-                },
-                item_type: {
-                    type: String,
-                    optional: true
-                },
-                field_info: {
-                    type: Object,
-                    optional: true
-                },
-                sibling: {
-                    type: Boolean,
-                    optional: true
-                },
-                sibling_edit: {
-                    type: Boolean,
-                    optional: true
-                },
-                 mode: {
-                type: [String, Object, Number],
-                optional: true
-            },
-            activeFields: {
-                type: Object,
-                optional: true
-            },
-            measure: {
-                type: [String, Object, Array],
-                optional: true
-            },
-            isMenu: {
-                type: Boolean,
-                optional: true
-            },
-            hasColorPicker: {
-                type: Boolean,
-                optional: true
-            },
-            progressAttributes: {
-                type: Object,
-                optional: true
-            },
-            envModel: {
-                type: [String, Object],
-                optional: true
-            },
-            ribbonElement: {
-                type: Object,
-                optional: true
-            },
-            MetaData: {
-                type: Object,
-                optional: true
-            },
-            calendar_info: {
-                type: Object,
-                optional: true
-            },
-            isFieldTag: {
-                type: Boolean,
-                optional: true
-            },
-            colorPickerPath: {
-                type: String,
-                optional: true
-            },
-            optional: {
-                type: String,
-                optional: true
-            },
-            fieldNodes: {
-                type: Object,
-                optional: true
-              },
-            };
-            setup() {
+        name: {
+            type: String,
+            optional: true
+        },
+        string: {
+            type: String,
+            optional: true
+        },
+        label: {
+            type: String,
+            optional: true
+        },
+        widget: {
+            type: String,
+            optional: true
+        },
+        fieldType: {
+            type: String,
+            optional: true
+        },
+        context: {
+            type: String,
+            optional: true
+        },
+        viewType: {
+            type: String,
+            optional: true
+        },
+        model: {
+            type: String,
+            optional: true
+        },
+        viewId: {
+            type: Number,
+            optional: true
+        },
+        type: {
+            type: String,
+            optional: true
+        },
+        create: {
+            type: Boolean,
+            optional: true
+        },
+        placeholder: {
+            type: String,
+            optional: true
+        },
+        help: {
+            type: String,
+            optional: true
+        },
+        edit: {
+            type: Boolean,
+            optional: true
+        },
+        readonly: {
+            type: String,
+            optional: true
+        },
+        recordData: {
+            type: Object,
+            optional: true
+        },
+        dynamic_placeholder: {
+            type: String,
+            optional: true
+        },
+        column_invisible: {
+            type: String,
+            optional: true
+        },
+        invisible: {
+            type: String,
+            optional: true
+        },
+        required: {
+            type: String,
+            optional: true
+        },
+        related_model: {
+            type: String,
+            optional: true
+        },
+        relational_model: {
+            type: [Object, String],
+            optional: true
+        },
+        domain: {
+            type: String,
+            optional: true
+        },
+        field_path: {
+            type: String,
+            optional: true
+        },
+        label_path: {
+            type: String,
+            optional: true
+        },
+        path: {
+            type: String,
+            optional: true
+        },
+        widget_types: {
+            type: Object,
+            optional: true
+        },
+        options: {
+            type: Object,
+            optional: true
+        },
+        label_path: {
+            type: String,
+            optional: true
+        },
+        position: {
+            type: String,
+            optional: true
+        },
+        item_type: {
+            type: String,
+            optional: true
+        },
+        field_info: {
+            type: Object,
+            optional: true
+        },
+        sibling: {
+            type: Boolean,
+            optional: true
+        },
+        sibling_edit: {
+            type: Boolean,
+            optional: true
+        },
+        mode: {
+            type: [String, Object, Number],
+            optional: true
+        },
+        activeFields: {
+            type: Object,
+            optional: true
+        },
+        measure: {
+            type: [String, Object, Array],
+            optional: true
+        },
+        isMenu: {
+            type: Boolean,
+            optional: true
+        },
+        hasColorPicker: {
+            type: Boolean,
+            optional: true
+        },
+        progressAttributes: {
+            type: Object,
+            optional: true
+        },
+        envModel: {
+            type: [String, Object],
+            optional: true
+        },
+        ribbonElement: {
+            type: Object,
+            optional: true
+        },
+        MetaData: {
+            type: Object,
+            optional: true
+        },
+        calendar_info: {
+            type: Object,
+            optional: true
+        },
+        isFieldTag: {
+            type: Boolean,
+            optional: true
+        },
+        colorPickerPath: {
+            type: String,
+            optional: true
+        },
+        optional: {
+            type: String,
+            optional: true
+        },
+        fieldNodes: {
+            type: Object,
+            optional: true
+        },
+    };
+    setup() {
 
-                this.sqlConstraints = useState([]);
+        this.sqlConstraints = useState([]);
 
-                this.actionService = useService("action");
-                this.action = useService("action");
-                this.dialogService = useService("dialog");
-                this.orm = useService("orm");
-                this.rpc = useService("rpc");
-                 this.fieldService = useService("field");
-                 this.popover = usePopover(ModelFieldSelectorPopover, {
-                 popoverClass: "o_model_field_selector_popover",
+        this.actionService = useService("action");
+        this.action = useService("action");
+        this.dialogService = useService("dialog");
+        this.orm = useService("orm");
+        this.rpc = useService("rpc");
+        this.fieldService = useService("field");
+        this.popover = usePopover(ModelFieldSelectorPopover, {
+            popoverClass: "o_model_field_selector_popover",
         });
         this.loadFieldInfo = useLoadFieldInfo();
-                  this.fieldsInfo = this.props.allFields || {};
-                this.notification = useService("effect");
-                this.addDialog = useOwnedDialogs();
-                this.ref = useRef('cy-Properties')
-                this.prevState = useState({
-                    ...this.props
-                })
-                this.StatusBarValues = useState({
-                    clickable: false,
-                    foldField: '',
-                    statusbarVisible: '',
-                    group_ids: [],
-                    invisible: 'False',
-                    defaultValue: 'True',
-                })
-                this.state = useState({
-                    xStudio: 0,
-                    create: this.props.create || false,
-                    field_names: [],
-                    item_name: null,
-                    name: this.props.name,
-                    string: this.props.string,
-                    related_model: this.props.related_model || this.getRelatedModelFromField(),
-                    widget: this.props.widget,
-                    help: this.props.help,
-                    placeholder: this.props.placeholder,
-                    dynamic_placeholder: this.props.dynamic_placeholder || '',
-                    dynamic_placeholder_field: null, // Store the actual field object
-                    optional: this.props?.attr?.optional || '',
-                    column_invisible: this.props.column_invisible || 'false',
-                    invisible: this.props.invisible || 'false',
-                    readonly: this.props.readonly || 'false',
-                    required: this.props.required || 'false',
-                    relatedModel: this.props.related_model || '',
-                    relatedModelField: "",
-                    field_path: this.props.field_path,
-                    label_path: this.props.label_path,
-                    edited: false,
-                    recordData: this.props.recordData || {},
-                    isPlaceholderFocused: false,
-                    existedField: false,
-                    fieldType: [
-                        "Char",
-                        "Text",
-                        "Html",
-                        "Integer",
-                        "Float",
-                        "Date",
-                        "Datetime",
-                        "Binary",
-                        "Selection",
-                        "Boolean",
-                        "Many2one",
-                        "One2many",
-                        "Many2many",
-                    ],
-                     field: 'existing',
-                    values: [],
-                    selectionValues: [],
-                    SelectedOptions: [],
-                    models: [],
-                    domain: this.props.domain || '',
-                    inverseFields: [],
-                    selectedFieldType: this.props.fieldType || 'char',
-                    widget_types: [],
-                    context: '{}',
-                    sibling : this.props.sibling,
-                    isStatusBar: false,
-                    related_model_field: [],
-                    is_computed: false,
-                    compute_dependencies: "",
-                    compute_code: "",
-                    default_value: "",
-                    constraintEnabled:false,
-                    pythonConstraint: null,
-                });
-                if (!this.props.edit) {
-                this.state.field = "new";
-                }
-                        // Initialize dynamic_placeholder_field and resolve value if dynamic_placeholder is set
+        this.fieldsInfo = this.props.allFields || {};
+        this.notification = useService("effect");
+        this.addDialog = useOwnedDialogs();
+        this.ref = useRef('cy-Properties')
+        this.prevState = useState({
+            ...this.props
+        })
+        this.StatusBarValues = useState({
+            clickable: false,
+            foldField: '',
+            statusbarVisible: '',
+            group_ids: [],
+            invisible: 'False',
+            defaultValue: 'True',
+        })
+        this.state = useState({
+            xStudio: 0,
+            create: this.props.create || false,
+            field_names: [],
+            item_name: null,
+            name: this.props.name,
+            string: this.props.string,
+            related_model: this.props.related_model || this.getRelatedModelFromField(),
+            widget: this.props.widget,
+            help: this.props.help,
+            placeholder: this.props.placeholder,
+            dynamic_placeholder: this.props.dynamic_placeholder || '',
+            dynamic_placeholder_field: null, // Store the actual field object
+            optional: this.props?.attr?.optional || '',
+            column_invisible: this.props.column_invisible || 'false',
+            invisible: this.props.invisible || 'false',
+            readonly: this.props.readonly || 'false',
+            required: this.props.required || 'false',
+            relatedModel: this.props.related_model || '',
+            relatedModelField: "",
+            field_path: this.props.field_path,
+            label_path: this.props.label_path,
+            edited: false,
+            recordData: this.props.recordData || {},
+            isPlaceholderFocused: false,
+            existedField: false,
+            fieldType: [
+                "Char",
+                "Text",
+                "Html",
+                "Integer",
+                "Float",
+                "Date",
+                "Datetime",
+                "Binary",
+                "Selection",
+                "Boolean",
+                "Many2one",
+                "One2many",
+                "Many2many",
+            ],
+            field: 'existing',
+            values: [],
+            selectionValues: [],
+            SelectedOptions: [],
+            models: [],
+            domain: this.props.domain || '',
+            inverseFields: [],
+            selectedFieldType: this.props.fieldType || 'char',
+            widget_types: [],
+            context: '{}',
+            sibling: this.props.sibling,
+            isStatusBar: false,
+            related_model_field: [],
+            is_computed: false,
+            compute_dependencies: "",
+            compute_code: "",
+            default_value: "",
+            constraintEnabled: false,
+            pythonConstraint: null,
+        });
+        if (!this.props.edit) {
+            this.state.field = "new";
+        }
+        // Initialize dynamic_placeholder_field and resolve value if dynamic_placeholder is set
         if (this.state.dynamic_placeholder && this.props.allFields) {
             const fieldInfo = this.props.allFields[this.state.dynamic_placeholder];
 
@@ -386,61 +386,61 @@ export class FieldProperties extends Component {
                 };
             }
         }
-                this.state.show_compute_section =
+        this.state.show_compute_section =
+            this.props.edit === true &&
+            (this.props.name || "").startsWith("x_studio_");
+        if (this.props.attr) {
+            this.state.is_computed = this.props.attr.is_computed || false;
+            this.state.compute_dependencies = this.props.attr.depends || "";
+            this.state.compute_code = this.props.attr.compute || "";
+        }
+        this.selectedWidget = this.props.widget === 'False' ? '' : this.props.widget || ''
+        onWillUpdateProps((nextProps) => {
+            if (nextProps.name !== this.lastFieldName) {
+                // Reset dynamic state when switching fields
+                this.state.default_value = "";
+                this.state.values = [];
+                this.state.selectionValues = [];
+                this.state.SelectedOptions = [];
+                this.state.field = nextProps.field_info && nextProps.field_info.selection ? "existing" : "new";
+                this.state.dynamic_placeholder = '';
+
+                this.lastFieldName = nextProps.name;
+            }
+            this.state.show_compute_section =
                 this.props.edit === true &&
                 (this.props.name || "").startsWith("x_studio_");
-                if (this.props.attr) {
-                    this.state.is_computed = this.props.attr.is_computed || false;
-                    this.state.compute_dependencies = this.props.attr.depends || "";
-                    this.state.compute_code = this.props.attr.compute || "";
+            this.state.name = nextProps.name
+            this.state.string = nextProps.string
+
+            let relatedModel = nextProps.related_model;
+            if (!relatedModel && nextProps.name && nextProps.allFields) {
+                const fieldInfo = nextProps.allFields[nextProps.name];
+                if (fieldInfo?.relation) {
+                    relatedModel = fieldInfo.relation;
                 }
-                this.selectedWidget = this.props.widget === 'False' ? '' : this.props.widget || ''
-                onWillUpdateProps((nextProps) => {
-                    if (nextProps.name !== this.lastFieldName) {
-                        // Reset dynamic state when switching fields
-                        this.state.default_value = "";
-                        this.state.values = [];
-                        this.state.selectionValues = [];
-                        this.state.SelectedOptions = [];
-                        this.state.field = nextProps.field_info && nextProps.field_info.selection ? "existing" : "new";
-                        this.state.dynamic_placeholder = '';
+            }
+            if (nextProps.field_info && nextProps.field_info.selection) {
+                this.state.values = nextProps.field_info.selection;
+                this.state.field = 'existing';
+            } else if (!nextProps.field_info) {
+                if (this.props.create || !nextProps.name) {
+                    this.state.field = 'new';
+                }
+            }
 
-                        this.lastFieldName = nextProps.name;
-                    }
-                     this.state.show_compute_section =
-                     this.props.edit === true &&
-                    (this.props.name || "").startsWith("x_studio_");
-                    this.state.name = nextProps.name
-                    this.state.string = nextProps.string
+            //                      if (nextProps.dynamic_placeholder && nextProps.allFields) {
+            //            const fieldInfo = nextProps.allFields[nextProps.dynamic_placeholder];
+            //            if (fieldInfo) {
+            //                this.state.dynamic_placeholder_field = {
+            //                    name: nextProps.dynamic_placeholder,
+            //                    string: fieldInfo.string || nextProps.dynamic_placeholder,
+            //                    type: fieldInfo.type
+            //                };
+            //            }
+            //        }
 
-                    let relatedModel = nextProps.related_model;
-                    if (!relatedModel && nextProps.name && nextProps.allFields) {
-                        const fieldInfo = nextProps.allFields[nextProps.name];
-                        if (fieldInfo?.relation) {
-                            relatedModel = fieldInfo.relation;
-                        }
-                    }
-                    if (nextProps.field_info && nextProps.field_info.selection) {
-                        this.state.values = nextProps.field_info.selection;
-                        this.state.field = 'existing';
-                    } else if (!nextProps.field_info) {
-                        if (this.props.create || !nextProps.name) {
-                            this.state.field = 'new';
-                        }
-                    }
-
-//                      if (nextProps.dynamic_placeholder && nextProps.allFields) {
-//            const fieldInfo = nextProps.allFields[nextProps.dynamic_placeholder];
-//            if (fieldInfo) {
-//                this.state.dynamic_placeholder_field = {
-//                    name: nextProps.dynamic_placeholder,
-//                    string: fieldInfo.string || nextProps.dynamic_placeholder,
-//                    type: fieldInfo.type
-//                };
-//            }
-//        }
-
-   if (nextProps.dynamic_placeholder) {
+            if (nextProps.dynamic_placeholder) {
                 this.state.dynamic_placeholder = nextProps.dynamic_placeholder;
 
                 const fieldInfo = nextProps.allFields?.[nextProps.dynamic_placeholder];
@@ -457,44 +457,44 @@ export class FieldProperties extends Component {
             }
 
 
-                    this.state.related_model = relatedModel;
-                    this.state.recordData = nextProps.recordData || {};
-                    this.state.widget = nextProps.widget
-                    if (nextProps.widget && nextProps.widget !== this.props.widget) {
-                    this.widgetOptionalFields(nextProps.widget, nextProps.options);
-    }
-                    this.state.selectedFieldType = nextProps.fieldType
-                    this.state.help = nextProps.help
-                    this.state.placeholder = nextProps.placeholder
-                     this.state.dynamic_placeholder = nextProps.dynamic_placeholder;
-                    this.state.optional = nextProps.optional
-                    this.state.column_invisible = nextProps.column_invisible || 'false'
-                    this.state.invisible = nextProps.invisible || 'false'
-                    this.state.readonly = nextProps.readonly || 'false'
-                    this.state.required = nextProps.required || 'false'
-                    this.state.sibling = nextProps.sibling
-                    this.state.widget_types = getWidgetTypes(nextProps.fieldType);
-                    this.state.domain = nextProps.domain || '';
-                    if (nextProps.name !== this.props.name) {
-                        this.rpc("/cyllo_studio/get_default", {
-                            model: nextProps.model,
-                            field_name: nextProps.name,
-                        }).then((value) => {
-                            this.state.default_value = value || "";
-                        });
-
-                    }else {
-                        this.state.default_value =
-                            "default_value" in nextProps ? (nextProps.default_value ?? "") : "";
-                    }
-
+            this.state.related_model = relatedModel;
+            this.state.recordData = nextProps.recordData || {};
+            this.state.widget = nextProps.widget
+            if (nextProps.widget && nextProps.widget !== this.props.widget) {
+                this.widgetOptionalFields(nextProps.widget, nextProps.options);
+            }
+            this.state.selectedFieldType = nextProps.fieldType
+            this.state.help = nextProps.help
+            this.state.placeholder = nextProps.placeholder
+            this.state.dynamic_placeholder = nextProps.dynamic_placeholder;
+            this.state.optional = nextProps.optional
+            this.state.column_invisible = nextProps.column_invisible || 'false'
+            this.state.invisible = nextProps.invisible || 'false'
+            this.state.readonly = nextProps.readonly || 'false'
+            this.state.required = nextProps.required || 'false'
+            this.state.sibling = nextProps.sibling
+            this.state.widget_types = getWidgetTypes(nextProps.fieldType);
+            this.state.domain = nextProps.domain || '';
+            if (nextProps.name !== this.props.name) {
+                this.rpc("/cyllo_studio/get_default", {
+                    model: nextProps.model,
+                    field_name: nextProps.name,
+                }).then((value) => {
+                    this.state.default_value = value || "";
                 });
 
-                useEffect(() => {
-                    if (this.props.edit === true && this.state.widget === 'statusbar') {
-                        this.loadStatusbarValues();
-                    }
-                }, () => [this.props.edit, this.state.widget])
+            } else {
+                this.state.default_value =
+                    "default_value" in nextProps ? (nextProps.default_value ?? "") : "";
+            }
+
+        });
+
+        useEffect(() => {
+            if (this.props.edit === true && this.state.widget === 'statusbar') {
+                this.loadStatusbarValues();
+            }
+        }, () => [this.props.edit, this.state.widget])
         //        useEffect(() => {
         //            if (this.props.edit != true) {
         //                return
@@ -504,290 +504,291 @@ export class FieldProperties extends Component {
         //            }
         //        }, () => [this.props.edit])
 
-    // Add this useEffect in setup() after your existing useEffect blocks
-    useEffect(() => {
-        const loadConstraintsForField = async () => {
-            if (this.props.edit && this.props.name && this.props.model) {
-                try {
-                    // Load SQL constraints
-                    const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
-                        model: this.props.model,
-                        field_name: this.props.name,
-                    });
-
-                    // Clear existing constraints
-                    this.sqlConstraints.splice(0, this.sqlConstraints.length);
-
-                    // Load new SQL constraints
-                    let hasSqlConstraints = false;
-                    if (constraints && constraints.length > 0) {
-                        this.sqlConstraints.push(...constraints);
-                        hasSqlConstraints = true;
-                        console.log(`✓ Loaded ${constraints.length} SQL constraints for ${this.props.name}`);
-                    }
-
-                    // Load Python constraints
-                    let hasPythonConstraint = false;
+        // Add this useEffect in setup() after your existing useEffect blocks
+        useEffect(() => {
+            const loadConstraintsForField = async () => {
+                if (this.props.edit && this.props.name && this.props.model) {
                     try {
-                        const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                        // Load SQL constraints
+                        const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
                             model: this.props.model,
                             field_name: this.props.name,
                         });
-                        
-                        if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
-                            this.state.pythonConstraint = {
-                                deps: pythonConstraintInfo.deps,
-                                code: pythonConstraintInfo.code
-                            };
-                            hasPythonConstraint = true;
-                            console.log(`✓ Loaded Python constraint for ${this.props.name}`);
-                        } else {
+
+                        // Clear existing constraints
+                        this.sqlConstraints.splice(0, this.sqlConstraints.length);
+
+                        // Load new SQL constraints
+                        let hasSqlConstraints = false;
+                        if (constraints && constraints.length > 0) {
+                            this.sqlConstraints.push(...constraints);
+                            hasSqlConstraints = true;
+                            console.log(`✓ Loaded ${constraints.length} SQL constraints for ${this.props.name}`);
+                        }
+
+                        // Load Python constraints
+                        let hasPythonConstraint = false;
+                        try {
+                            const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                                model: this.props.model,
+                                field_name: this.props.name,
+                            });
+
+                            if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
+                                this.state.pythonConstraint = {
+                                    deps: pythonConstraintInfo.deps,
+                                    code: pythonConstraintInfo.code
+                                };
+                                hasPythonConstraint = true;
+                                console.log(`✓ Loaded Python constraint for ${this.props.name}`);
+                            } else {
+                                this.state.pythonConstraint = null;
+                            }
+                        } catch (error) {
+                            console.log("No Python constraint found or error loading:", error);
                             this.state.pythonConstraint = null;
                         }
-                    } catch (error) {
-                        console.log("No Python constraint found or error loading:", error);
-                        this.state.pythonConstraint = null;
-                    }
 
-                    // Enable checkbox if either SQL or Python constraints exist
-                    this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
-                    
-                    const constraintTypes = [];
-                    if (hasSqlConstraints) constraintTypes.push("SQL");
-                    if (hasPythonConstraint) constraintTypes.push("Python");
-                    
-                    if (constraintTypes.length > 0) {
-                        console.log(`✓ Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
-                    } else {
-                        console.log(`No constraints found for ${this.props.name}`);
+                        // Enable checkbox if either SQL or Python constraints exist
+                        this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
+
+                        const constraintTypes = [];
+                        if (hasSqlConstraints) constraintTypes.push("SQL");
+                        if (hasPythonConstraint) constraintTypes.push("Python");
+
+                        if (constraintTypes.length > 0) {
+                            console.log(`✓ Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
+                        } else {
+                            console.log(`No constraints found for ${this.props.name}`);
+                        }
+                    } catch (error) {
+                        console.error('Error loading constraints:', error);
+                        this.sqlConstraints.splice(0, this.sqlConstraints.length);
+                        this.state.pythonConstraint = null;
+                        this.state.constraintEnabled = false;
                     }
-                } catch (error) {
-                    console.error('Error loading constraints:', error);
+                } else {
+                    // Not in edit mode - clear constraints
                     this.sqlConstraints.splice(0, this.sqlConstraints.length);
                     this.state.pythonConstraint = null;
                     this.state.constraintEnabled = false;
                 }
-            } else {
-                // Not in edit mode - clear constraints
-                this.sqlConstraints.splice(0, this.sqlConstraints.length);
-                this.state.pythonConstraint = null;
-                this.state.constraintEnabled = false;
-            }
-        };
+            };
 
-        loadConstraintsForField();
-    }, () => [this.props.edit, this.props.name, this.props.model]);
+            loadConstraintsForField();
+        }, () => [this.props.edit, this.props.name, this.props.model]);
 
-                onWillStart(async () => {
-                    if (this.props.edit) {
+        onWillStart(async () => {
+            if (this.props.edit) {
 
-                    this.state.field = "new";
-                        const result = this.props.name
-                            ? await this.rpc("/cyllo_studio/get_default", {
-                                model: this.props.model,
-                                field_name: this.props.name,
-                            })
-                            : null;
-                        this.state.default_value = result || "";
+                this.state.field = "new";
+                const result = this.props.name
+                    ? await this.rpc("/cyllo_studio/get_default", {
+                        model: this.props.model,
+                        field_name: this.props.name,
+                    })
+                    : null;
+                this.state.default_value = result || "";
 
-               // Load SQL constraints
-               const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
-                model: this.props.model,
-                field_name: this.props.name,
-            });
-
-            // Clear existing constraints
-            this.sqlConstraints.splice(0, this.sqlConstraints.length);
-
-            // Load SQL constraints and check for Python constraints
-            let hasSqlConstraints = false;
-            if (constraints && constraints.length > 0) {
-                this.sqlConstraints.push(...constraints);
-                hasSqlConstraints = true;
-            }
-
-            // Load Python constraints
-            let hasPythonConstraint = false;
-            try {
-                const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                // Load SQL constraints
+                const constraints = await this.rpc("/cyllo_studio/get_sql_constraints", {
                     model: this.props.model,
                     field_name: this.props.name,
                 });
-                
-                if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
-                    this.state.pythonConstraint = {
-                        deps: pythonConstraintInfo.deps,
-                        code: pythonConstraintInfo.code
-                    };
-                    hasPythonConstraint = true;
-                } else {
+
+                // Clear existing constraints
+                this.sqlConstraints.splice(0, this.sqlConstraints.length);
+
+                // Load SQL constraints and check for Python constraints
+                let hasSqlConstraints = false;
+                if (constraints && constraints.length > 0) {
+                    this.sqlConstraints.push(...constraints);
+                    hasSqlConstraints = true;
+                }
+
+                // Load Python constraints
+                let hasPythonConstraint = false;
+                try {
+                    const pythonConstraintInfo = await this.rpc("/cyllo_studio/get_python_constraint", {
+                        model: this.props.model,
+                        field_name: this.props.name,
+                    });
+
+                    if (pythonConstraintInfo && pythonConstraintInfo.code && pythonConstraintInfo.deps) {
+                        this.state.pythonConstraint = {
+                            deps: pythonConstraintInfo.deps,
+                            code: pythonConstraintInfo.code
+                        };
+                        hasPythonConstraint = true;
+                    } else {
+                        this.state.pythonConstraint = null;
+                    }
+                } catch (error) {
+                    console.log("No Python constraint found or error loading:", error);
                     this.state.pythonConstraint = null;
                 }
-            } catch (error) {
-                console.log("No Python constraint found or error loading:", error);
-                this.state.pythonConstraint = null;
-            }
 
-            // Set constraint state based on loaded data
-            this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
-            
-            const constraintTypes = [];
-            if (hasSqlConstraints) constraintTypes.push(`${constraints.length} SQL`);
-            if (hasPythonConstraint) constraintTypes.push("Python");
-            
-            if (constraintTypes.length > 0) {
-                console.log(`✓ Initial load: Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
-            }
-                    }
-                });
-                useEffect(() => {
-                        const loadComputeInfo = async () => {
-                        if (this.props.edit && this.props.name && this.props.model) {
-                        try {
-                            const computeInfo = await this.rpc('/cyllo_studio/get_field_compute_info', {
-                                model: this.props.model,
-                                field_name: this.props.name
-                            });
+                // Set constraint state based on loaded data
+                this.state.constraintEnabled = hasSqlConstraints || hasPythonConstraint;
 
-                            if (computeInfo && computeInfo.is_computed) {
-                                this.state.is_computed = true;
-                                this.state.compute_code = computeInfo.compute || "";
-                                this.state.compute_dependencies = computeInfo.depends || "";
-                            } else {
-                                this.state.is_computed = false;
-                                this.state.compute_code = "";
-                                this.state.compute_dependencies = "";
-                            }
-                        } catch (error) {
-                            console.error("Error loading compute info:", error);
+                const constraintTypes = [];
+                if (hasSqlConstraints) constraintTypes.push(`${constraints.length} SQL`);
+                if (hasPythonConstraint) constraintTypes.push("Python");
+
+                if (constraintTypes.length > 0) {
+                    console.log(`✓ Initial load: Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
+                }
+            }
+        });
+        useEffect(() => {
+            const loadComputeInfo = async () => {
+                if (this.props.edit && this.props.name && this.props.model) {
+                    try {
+                        const computeInfo = await this.rpc('/cyllo_studio/get_field_compute_info', {
+                            model: this.props.model,
+                            field_name: this.props.name
+                        });
+
+                        if (computeInfo && computeInfo.is_computed) {
+                            this.state.is_computed = true;
+                            this.state.compute_code = computeInfo.compute || "";
+                            this.state.compute_dependencies = computeInfo.depends || "";
+                        } else {
                             this.state.is_computed = false;
                             this.state.compute_code = "";
                             this.state.compute_dependencies = "";
                         }
-                    } else {
+                    } catch (error) {
+                        console.error("Error loading compute info:", error);
                         this.state.is_computed = false;
                         this.state.compute_code = "";
                         this.state.compute_dependencies = "";
                     }
-                };
-
-                loadComputeInfo();
-            }, () => [this.props.edit, this.props.name, this.props.model]);
-
-                onMounted(async () => {
-                    this.state.widget_types = getWidgetTypes(this.props.fieldType)
-                    this.action_area = document.querySelector(".o_action_manager")
-                    const fieldsData = await this.orm.searchRead(
-                        "ir.model.fields",
-                        [
-                            ["model_id", "=", this.props.model]
-                        ],
-                        ["name"]
-                    );
-                    const studioFields = fieldsData.filter((field) =>
-                        field.name?.startsWith("x_studio")
-                    );
-                    this.state.xStudio = studioFields.length;
-                    this.state.models = await this.rpc('/cyllo_studio/get_non_abstract_non_transient_models');
-
-
-                        if (this.props.edit && this.props.name && this.props.model) {
-            try {
-                const defaultResult = await this.rpc('/cyllo_studio/get_default', {
-                    model: this.props.model,
-                    field_name: this.props.name
-                });
-
-                if (defaultResult.success && defaultResult.default_value !== null) {
-                    this.state.default_value = String(defaultResult.default_value);
-                }
-            } catch (error) {
-                console.log('Error loading default value:', error);
-            }
-        }
-
-           if (this.props.field_info && this.props.field_info.selection) {
-            this.state.values = this.props.field_info.selection;
-            this.state.field = 'existing';
-        } else if (this.props.edit && this.props.name && this.props.allFields) {
-            const fieldInfo = this.props.allFields[this.props.name];
-            if (fieldInfo && fieldInfo.selection) {
-                this.state.values = fieldInfo.selection;
-                this.state.field = 'existing';
-            }
-        }
-        if (this.props.widget === "date" || this.props.fieldType === "date") {
-        this.widgetOptionalFields("date", this.props.options);
-    }
-                });
-
-                var arrExistingFields = []
-                Object.entries(this.props.allFields).forEach(([key, value]) => {
-                    arrExistingFields.push({
-                        name: key,
-                        string: value.string,
-                        type: value.type
-                    })
-                });
-                this.existedField = arrExistingFields
-
-            }
-            //start
-            onOptionalClick({target}){
-            this.state.optional = target.checked ? 'hide' : 'show'
-            }
-          get statusbarVisibleOptions() {
-            // Use props.options if exists
-            let visible = '';
-            if (this.props.options && this.props.options.statusbar_visible) {
-                visible = this.props.options.statusbar_visible;
-            } else if (this.StatusBarValues.statusbarVisible) {
-                visible = this.StatusBarValues.statusbarVisible;
-            }
-
-            const visibleArray = visible
-                ? visible.split(',').map(v => v.trim()).filter(Boolean)
-                : [];
-
-            return visibleArray;
-        }
-
-        async loadStatusbarValues() {
-            try {
-                // Load selection values for the field
-                if (this.props.field_info && this.props.field_info.selection) {
-                    this.state.values = this.props.field_info.selection;
-                } else if (this.props.allFields && this.props.name) {
-                    const fieldInfo = this.props.allFields[this.props.name];
-                    if (fieldInfo && fieldInfo.selection) {
-                        this.state.values = fieldInfo.selection;
-                    }
-                }
-
-                // Load currently visible options from widget options
-                if (this.props.options && this.props.options.statusbar_visible) {
-                    const visibleStr = this.props.options.statusbar_visible;
-                    // statusbar_visible contains keys (technical names), not labels
-                    this.state.SelectedOptions = visibleStr
-                        .split(',')
-                        .map(v => v.trim())
-                        .filter(Boolean);
-                    this.StatusBarValues.statusbarVisible = visibleStr;
                 } else {
-                    // If no statusbar_visible is set, show all values
-                    this.state.SelectedOptions = this.state.values.map(v => v[0]);
+                    this.state.is_computed = false;
+                    this.state.compute_code = "";
+                    this.state.compute_dependencies = "";
                 }
-            } catch (error) {
-                console.error('Error loading statusbar values:', error);
+            };
+
+            loadComputeInfo();
+        }, () => [this.props.edit, this.props.name, this.props.model]);
+
+        onMounted(async () => {
+            this.state.widget_types = getWidgetTypes(this.props.fieldType)
+            this.action_area = document.querySelector(".o_action_manager")
+            const fieldsData = await this.orm.searchRead(
+                "ir.model.fields",
+                [
+                    ["model_id", "=", this.props.model]
+                ],
+                ["name"]
+            );
+            const studioFields = fieldsData.filter((field) =>
+                field.name?.startsWith("x_studio")
+            );
+            this.state.xStudio = studioFields.length;
+            this.state.models = await this.rpc('/cyllo_studio/get_non_abstract_non_transient_models');
+
+
+            if (this.props.edit && this.props.name && this.props.model) {
+                try {
+                    const defaultResult = await this.rpc('/cyllo_studio/get_default', {
+                        model: this.props.model,
+                        field_name: this.props.name
+                    });
+
+                    if (defaultResult.success && defaultResult.default_value !== null) {
+                        this.state.default_value = String(defaultResult.default_value);
+                    }
+                } catch (error) {
+                    console.log('Error loading default value:', error);
+                }
             }
+
+            if (this.props.field_info && this.props.field_info.selection) {
+                this.state.values = this.props.field_info.selection;
+                this.state.field = 'existing';
+            } else if (this.props.edit && this.props.name && this.props.allFields) {
+                const fieldInfo = this.props.allFields[this.props.name];
+                if (fieldInfo && fieldInfo.selection) {
+                    this.state.values = fieldInfo.selection;
+                    this.state.field = 'existing';
+                }
+            }
+            if (this.props.widget === "date" || this.props.fieldType === "date") {
+                this.widgetOptionalFields("date", this.props.options);
+            }
+        });
+
+        var arrExistingFields = []
+        Object.entries(this.props.allFields).forEach(([key, value]) => {
+            arrExistingFields.push({
+                name: key,
+                string: value.string,
+                type: value.type,
+                relation: value.relation,
+            })
+        });
+        this.existedField = arrExistingFields
+
+    }
+    //start
+    onOptionalClick({ target }) {
+        this.state.optional = target.checked ? 'hide' : 'show'
+    }
+    get statusbarVisibleOptions() {
+        // Use props.options if exists
+        let visible = '';
+        if (this.props.options && this.props.options.statusbar_visible) {
+            visible = this.props.options.statusbar_visible;
+        } else if (this.StatusBarValues.statusbarVisible) {
+            visible = this.StatusBarValues.statusbarVisible;
         }
 
-        // Add method to get compatible fields for dynamic placeholder
+        const visibleArray = visible
+            ? visible.split(',').map(v => v.trim()).filter(Boolean)
+            : [];
+
+        return visibleArray;
+    }
+
+    async loadStatusbarValues() {
+        try {
+            // Load selection values for the field
+            if (this.props.field_info && this.props.field_info.selection) {
+                this.state.values = this.props.field_info.selection;
+            } else if (this.props.allFields && this.props.name) {
+                const fieldInfo = this.props.allFields[this.props.name];
+                if (fieldInfo && fieldInfo.selection) {
+                    this.state.values = fieldInfo.selection;
+                }
+            }
+
+            // Load currently visible options from widget options
+            if (this.props.options && this.props.options.statusbar_visible) {
+                const visibleStr = this.props.options.statusbar_visible;
+                // statusbar_visible contains keys (technical names), not labels
+                this.state.SelectedOptions = visibleStr
+                    .split(',')
+                    .map(v => v.trim())
+                    .filter(Boolean);
+                this.StatusBarValues.statusbarVisible = visibleStr;
+            } else {
+                // If no statusbar_visible is set, show all values
+                this.state.SelectedOptions = this.state.values.map(v => v[0]);
+            }
+        } catch (error) {
+            console.error('Error loading statusbar values:', error);
+        }
+    }
+
+    // Add method to get compatible fields for dynamic placeholder
     getDynamicPlaceholderOptions() {
         const currentFieldType = this.state.selectedFieldType || this.props.fieldType;
 
         // Don't show dynamic placeholder for relational fields
-        if (['many2one', 'one2many', 'many2many', 'binary','html'].includes(currentFieldType)) {
+        if (['many2one', 'one2many', 'many2many', 'binary', 'html'].includes(currentFieldType)) {
             return [{ value: '', label: '' }];
         }
 
@@ -844,8 +845,8 @@ export class FieldProperties extends Component {
                 type: fieldInfo?.type,
                 value: fieldValue // Store the value as well
             };
-                        this.state.placeholder = `${fieldValue}`;
-//            this.state.placeholder = `{{${value}}}`;
+            this.state.placeholder = `${fieldValue}`;
+            //            this.state.placeholder = `{{${value}}}`;
         } else {
             this.state.dynamic_placeholder_field = "";
             this.state.dynamic_placeholder = '';
@@ -886,133 +887,133 @@ export class FieldProperties extends Component {
     }
 
 
-            generateRandomFieldName() {
-                const timestamp = Date.now();
-                const randomNum = Math.floor(Math.random() * 1000);
-                return `x_studio_${timestamp}_${randomNum}`;
-            }
+    generateRandomFieldName() {
+        const timestamp = Date.now();
+        const randomNum = Math.floor(Math.random() * 1000);
+        return `x_studio_${timestamp}_${randomNum}`;
+    }
 
-            onCellKeydown(value) {
-                this.state.edited = true
-                const labelValue = this.ref.el.querySelector("#label").value.trim();
-                this.state.name = 'x_studio_' + labelValue.toLowerCase().split(' ').join('_');
-            }
-            get fieldType() {
-                const result = this.state.fieldType.map((item) => ({
-                    value: item,
-                    label: item
-                }));
-                return result;
-            }
-            RelatedModel(array) {
-                const result = array.map((item) => ({
-                    value: item.model,
-                    label: item.name,
-                }));
-                return result;
-            }
-           async handleFieldTypeChange(value) {
-            this.state.edited = true
-            this.selectedWidget = ''
-            const container = document.getElementById('dynamic-container');
-            while (container && container.firstChild) {
-                container.removeChild(container.firstChild);
-            }
-            this.state.selectedFieldType = value.toLowerCase()
-            this.state.widget_types = getWidgetTypes(this.state.selectedFieldType)
-            if (['many2one', 'many2many'].includes(this.state.selectedFieldType)) {
-                this.state.models = await this.rpc('/cyllo_studio/get_non_abstract_non_transient_models');
-            }else if (this.state.selectedFieldType === 'one2many') {
-                const relatedFields = await this.orm.searchRead('ir.model.fields',[
-                    ['ttype', '=', 'many2one'],
-                    ['relation', '=', this.action.currentController.action.res_model]
-                    ], ['name', 'field_description', 'model_id'])
-                this.state.related_model_field = relatedFields;
-            } else {
-                this.state.related_model_field = [];
+    onCellKeydown(value) {
+        this.state.edited = true
+        const labelValue = this.ref.el.querySelector("#label").value.trim();
+        this.state.name = 'x_studio_' + labelValue.toLowerCase().split(' ').join('_');
+    }
+    get fieldType() {
+        const result = this.state.fieldType.map((item) => ({
+            value: item,
+            label: item
+        }));
+        return result;
+    }
+    RelatedModel(array) {
+        const result = array.map((item) => ({
+            value: item.model,
+            label: item.name,
+        }));
+        return result;
+    }
+    async handleFieldTypeChange(value) {
+        this.state.edited = true
+        this.selectedWidget = ''
+        const container = document.getElementById('dynamic-container');
+        while (container && container.firstChild) {
+            container.removeChild(container.firstChild);
+        }
+        this.state.selectedFieldType = value.toLowerCase()
+        this.state.widget_types = getWidgetTypes(this.state.selectedFieldType)
+        if (['many2one', 'many2many'].includes(this.state.selectedFieldType)) {
+            this.state.models = await this.rpc('/cyllo_studio/get_non_abstract_non_transient_models');
+        } else if (this.state.selectedFieldType === 'one2many') {
+            const relatedFields = await this.orm.searchRead('ir.model.fields', [
+                ['ttype', '=', 'many2one'],
+                ['relation', '=', this.action.currentController.action.res_model]
+            ], ['name', 'field_description', 'model_id'])
+            this.state.related_model_field = relatedFields;
+        } else {
+            this.state.related_model_field = [];
+        }
+    }
+    getRelatedModelFromField() {
+        if (this.props.name && this.props.allFields) {
+            const fieldInfo = this.props.allFields[this.props.name];
+            if (fieldInfo?.relation) {
+                return fieldInfo.relation;
             }
         }
-        getRelatedModelFromField() {
-            if (this.props.name && this.props.allFields) {
-                const fieldInfo = this.props.allFields[this.props.name];
-                if (fieldInfo?.relation) {
-                    return fieldInfo.relation;
-                }
-            }
-            return '';
+        return '';
+    }
+
+    fieldsDomain() {
+        const ModelName = this.state.related_model || this.props.model || this.props.related_model
+        this.dialogService.add(DomainSelectorDialog, {
+            resModel: ModelName,
+            domain: this.state.domain,
+            onConfirm: (domain) => this.domainConfirm(domain),
+            title: ("Domain"),
+        });
+    }
+    domainConfirm(domain) {
+        this.state.domain = domain
+    }
+    cancelField() {
+        if (this.props.create) {
+            this.action.doAction('studio_reload')
+            this.env.bus.trigger('CLEAR-MENU');
         }
+    }
 
-            fieldsDomain() {
-                const ModelName = this.state.related_model || this.props.model || this.props.related_model
-                this.dialogService.add(DomainSelectorDialog, {
-                    resModel: ModelName,
-                    domain: this.state.domain,
-                    onConfirm: (domain) => this.domainConfirm(domain),
-                    title: ("Domain"),
-                });
-            }
-            domainConfirm(domain) {
-                this.state.domain = domain
-            }
-            cancelField() {
-                if (this.props.create) {
-                    this.action.doAction('studio_reload')
-                    this.env.bus.trigger('CLEAR-MENU');
-                }
-            }
+    async deleteField(el) {
+        const view_id = this.props.viewId
+        const view_type = this.props.viewType
+        const response = await this.rpc("cyllo_studio/delete/existing_fields", {
+            method: 'delete_existing_fields',
+            model: this.props.model,
+            view_id: this.props.viewId,
+            view_type: this.props.viewType,
+            args: [{
+                fieldName: this.props.string,
+                model: this.props.model,
+                path: this.props.path,
+                label_path: this.props.label_path
+            }],
 
-            async deleteField(el) {
-                const view_id = this.props.viewId
-                const view_type = this.props.viewType
-                const response = await this.rpc("cyllo_studio/delete/existing_fields", {
-                    method: 'delete_existing_fields',
-                    model: this.props.model,
-                    view_id: this.props.viewId,
-                    view_type: this.props.viewType,
-                    args: [{
-                        fieldName: this.props.string,
-                        model: this.props.model,
-                        path: this.props.path,
-                        label_path: this.props.label_path
-                    }],
-
-                    kwargs: {
-                        view_id: view_id ? view_id : null,
-                        view_type: view_type,
-                    }
-                })
-                if (response) {
-                    let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                    let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                    storedArray.push(cleanedStr);
-                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                    sessionStorage.setItem('ReDO', JSON.stringify([]));
-                }
-                window.location.reload()
-                this.action.doAction('studio_reload')
+            kwargs: {
+                view_id: view_id ? view_id : null,
+                view_type: view_type,
             }
-            async createField() {
-            // Validate field name
-            if (!this.state.name) {
+        })
+        if (response) {
+            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+            let cleanedStr = response.replace(/\s+/g, ' ').trim();
+            storedArray.push(cleanedStr);
+            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+            sessionStorage.setItem('ReDO', JSON.stringify([]));
+        }
+        window.location.reload()
+        this.action.doAction('studio_reload')
+    }
+    async createField() {
+        // Validate field name
+        if (!this.state.name) {
+            this.notification.add({
+                title: _t("Validation Error"),
+                message: "Unable to save the field.",
+                description: "Please provide a field name to save",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return;
+        }
+        if (this.state.relatedField && this.state.relatedField.trim()) {
+            const parts = this.state.relatedField.split(".");
+            if (parts.length < 2) {
                 this.notification.add({
-                    title: _t("Validation Error"),
-                    message: "Unable to save the field.",
-                    description: "Please provide a field name to save",
+                    title: _t("Related Field Error"),
+                    message: "Invalid related field path.",
+                    description: "Please select a valid relational field path.",
                     type: "notification_panel",
                     notificationType: "warning",
                 });
-                return;
-            }
-            if (this.state.relatedField && this.state.relatedField.trim()) {
-                const parts = this.state.relatedField.split(".");
-                if (parts.length < 2) {
-                    this.notification.add({
-                        title: _t("Related Field Error"),
-                        message: "Invalid related field path.",
-                        description: "Please select a valid relational field path.",
-                        type: "notification_panel",
-                        notificationType: "warning",
-                    });
                 return;
             }
         }
@@ -1021,54 +1022,54 @@ export class FieldProperties extends Component {
             const deps = (this.state.compute_dependencies || "").trim();
             const code = (this.state.compute_code || "").trim();
             if (!deps || !code) {
-              this.notification.add({
-                title: _t("Compute Field Incomplete"),
-                message: "Please configure the compute field properly.",
-                description: "Click the 'Based on' button next to Compute and add both Dependencies and Compute Code.",
-                type: "notification_panel",
-                notificationType: "warning",
-            })
+                this.notification.add({
+                    title: _t("Compute Field Incomplete"),
+                    message: "Please configure the compute field properly.",
+                    description: "Click the 'Based on' button next to Compute and add both Dependencies and Compute Code.",
+                    type: "notification_panel",
+                    notificationType: "warning",
+                })
                 return;
             }
-                }
-                if (this.state.default_value && !this.validateDefaultValueForType()) {
-                return;
-            }
-              if (this.props.edit && !this.state.constraintEnabled) {
-        try {
-            // Remove Python constraint if it exists
-            if (this.state.pythonConstraint) {
-                await this.rpc("/cyllo_studio/get_python_constraint", {
-                    model: this.props.model,
-                    field_name: this.props.name,
-                });
-                // Mark for removal by setting to null
-                this.state.pythonConstraint = null;
-            }
-        } catch (error) {
-            console.error('Error preparing constraint removal:', error);
         }
-    }
-            if (this.props.edit) {
-                const defaultResult = await this.rpc("/cyllo_studio/set_default", {
-                    model: this.props.model,
-                    field_name: this.props.name,
-                    value: this.state.default_value || "",
-                });
+        if (this.state.default_value && !this.validateDefaultValueForType()) {
+            return;
+        }
+        if (this.props.edit && !this.state.constraintEnabled) {
+            try {
+                // Remove Python constraint if it exists
+                if (this.state.pythonConstraint) {
+                    await this.rpc("/cyllo_studio/get_python_constraint", {
+                        model: this.props.model,
+                        field_name: this.props.name,
+                    });
+                    // Mark for removal by setting to null
+                    this.state.pythonConstraint = null;
+                }
+            } catch (error) {
+                console.error('Error preparing constraint removal:', error);
             }
-            let optionalFields = {};
+        }
+        if (this.props.edit) {
+            const defaultResult = await this.rpc("/cyllo_studio/set_default", {
+                model: this.props.model,
+                field_name: this.props.name,
+                value: this.state.default_value || "",
+            });
+        }
+        let optionalFields = {};
 
-            // Collect widget options from DOM
-            const container = document.getElementById('dynamic-container');
-            if (container) {
-                container.querySelectorAll('input, select').forEach(field => {
-                    const fieldName = field.id;
-                    let fieldValue = field.type === "checkbox" ? field.checked : field.value;
+        // Collect widget options from DOM
+        const container = document.getElementById('dynamic-container');
+        if (container) {
+            container.querySelectorAll('input, select').forEach(field => {
+                const fieldName = field.id;
+                let fieldValue = field.type === "checkbox" ? field.checked : field.value;
 
-                    if (field.name === "fold_field") {
-                        this.orm.searchRead("ir.model.fields", [
-                            ['model', '=', this.state.relatedModel]
-                        ])
+                if (field.name === "fold_field") {
+                    this.orm.searchRead("ir.model.fields", [
+                        ['model', '=', this.state.relatedModel]
+                    ])
                         .then((fields) => {
                             const foldFieldExists = fields.some(f => f.name === 'fold');
                             if (!foldFieldExists) {
@@ -1083,79 +1084,79 @@ export class FieldProperties extends Component {
                                 });
                             }
                         });
-                    }
+                }
 
-                    if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
+                if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
+                    optionalFields[fieldName] = fieldValue;
+                }
+
+                if (typeof fieldValue === 'string' && fieldValue.startsWith('[') && fieldValue.endsWith(']')) {
+                    try {
+                        fieldValue = fieldValue.replace(/'/g, '"');
+                        fieldValue = JSON.parse(fieldValue);
                         optionalFields[fieldName] = fieldValue;
+                    } catch (e) {
+                        console.error('Error parsing field value:', e);
                     }
-
-                    if (typeof fieldValue === 'string' && fieldValue.startsWith('[') && fieldValue.endsWith(']')) {
-                        try {
-                            fieldValue = fieldValue.replace(/'/g, '"');
-                            fieldValue = JSON.parse(fieldValue);
-                            optionalFields[fieldName] = fieldValue;
-                        } catch (e) {
-                            console.error('Error parsing field value:', e);
-                        }
-                    }
-                });
-            }
-            // Build the arguments object
-            const attrs = {
-                widget: this.state.widget || '',
-                help: this.state.help || '',
-                placeholder: this.state.placeholder || '',
-                dynamic_placeholder: this.state.dynamic_placeholder || '', // Add this
-                invisible: this.state.invisible || '',
-                readonly: this.state.readonly || '',
-                required: this.state.required || '',
-                domain: this.state.domain || '',
-                context: this.state.context || '',
-                default_value: this.state.default_value || '',
-                is_computed: this.state.is_computed || false,
-                depends: this.state.compute_dependencies || "",
-                compute: this.state.compute_code || "",
-            };
-
-            if (this.state.relatedField) {
-                attrs.related = this.state.relatedField;
-                attrs.store = true;
-            }
-            let args = {};
-
-            if (this.props.edit) {
-                // EDIT MODE: Send changed values with field_info containing selection
-                const changedValues = this.getCurrentChanges(this.prevState, this.state);
-                changedValues.default_value = this.state.default_value;
-
-//                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
-
-                // Ensure field_info is included for selection fields
-                if (this.state.selectedFieldType === 'selection') {
-                    changedValues.field_info = {
-                        selection: this.state.SelectedOptions
-                            .filter(val => val && val.trim() !== '')
-                            .map(val => [val.toLowerCase().replace(/\s+/g, '_'), val])
-                    };
                 }
+            });
+        }
+        // Build the arguments object
+        const attrs = {
+            widget: this.state.widget || '',
+            help: this.state.help || '',
+            placeholder: this.state.placeholder || '',
+            dynamic_placeholder: this.state.dynamic_placeholder || '', // Add this
+            invisible: this.state.invisible || '',
+            readonly: this.state.readonly || '',
+            required: this.state.required || '',
+            domain: this.state.domain || '',
+            context: this.state.context || '',
+            default_value: this.state.default_value || '',
+            is_computed: this.state.is_computed || false,
+            depends: this.state.compute_dependencies || "",
+            compute: this.state.compute_code || "",
+        };
 
-                // IMPORTANT: Add statusbar_visible to optional_fields if this is a statusbar widget
-                if (this.state.widget === 'statusbar' && this.state.SelectedOptions.length > 0) {
-                    optionalFields['statusbar_visible'] = this.state.SelectedOptions.join(', ');
-                }
-                changedValues.dynamic_placeholder = this.state.dynamic_placeholder || '';
-                changedValues.is_computed = this.state.is_computed;
-                if (this.state.is_computed) {
+        if (this.state.relatedField) {
+            attrs.related = this.state.relatedField;
+            attrs.store = true;
+        }
+        let args = {};
+
+        if (this.props.edit) {
+            // EDIT MODE: Send changed values with field_info containing selection
+            const changedValues = this.getCurrentChanges(this.prevState, this.state);
+            changedValues.default_value = this.state.default_value;
+
+            //                changedValues.dynamic_placeholder = this.state.dynamic_placeholder;
+
+            // Ensure field_info is included for selection fields
+            if (this.state.selectedFieldType === 'selection') {
+                changedValues.field_info = {
+                    selection: this.state.SelectedOptions
+                        .filter(val => val && val.trim() !== '')
+                        .map(val => [val.toLowerCase().replace(/\s+/g, '_'), val])
+                };
+            }
+
+            // IMPORTANT: Add statusbar_visible to optional_fields if this is a statusbar widget
+            if (this.state.widget === 'statusbar' && this.state.SelectedOptions.length > 0) {
+                optionalFields['statusbar_visible'] = this.state.SelectedOptions.join(', ');
+            }
+            changedValues.dynamic_placeholder = this.state.dynamic_placeholder || '';
+            changedValues.is_computed = this.state.is_computed;
+            if (this.state.is_computed) {
                 changedValues.compute = this.state.compute_code || "";
                 changedValues.depends = this.state.compute_dependencies || "";
-                }else {
+            } else {
                 changedValues.compute = "";
                 changedValues.depends = "";
-                }
+            }
 
-         if (this.state.constraintEnabled) {
+            if (this.state.constraintEnabled) {
                 console.log("=== EDIT MODE: Adding constraints to changedValues ===");
-                
+
                 // Add SQL constraints if any exist
                 if (this.sqlConstraints && this.sqlConstraints.length > 0) {
                     changedValues.sql_constraints = this.sqlConstraints.map(c => [
@@ -1181,112 +1182,112 @@ export class FieldProperties extends Component {
                 changedValues.python_constraint = null;
             }
 
-                args = {
-                    edit: true,
-                    value: changedValues,
-                    optional_fields: optionalFields || {},
-                    field_path: this.props.field_path || this.props.path,
-                    label_path: this.props.label_path || '',
-                    field_name: this.props.name || '',
-                    active_fields:this.props.activeFields,
-                    model:this.state.related_model || this.props.model,
-                };
-            } else {
-                var related_model_field = null;
-                if (this.state.selectedFieldType === 'one2many') {
-                    const related_field_id = this.state.relatedModelField ? this.state.relatedModelField : '';
-                    if (related_field_id) {
-                        related_model_field = this.state.related_model_field.find(field => field.id == related_field_id);
-                    }
+            args = {
+                edit: true,
+                value: changedValues,
+                optional_fields: optionalFields || {},
+                field_path: this.props.field_path || this.props.path,
+                label_path: this.props.label_path || '',
+                field_name: this.props.name || '',
+                active_fields: this.props.activeFields,
+                model: this.state.related_model || this.props.model,
+            };
+        } else {
+            var related_model_field = null;
+            if (this.state.selectedFieldType === 'one2many') {
+                const related_field_id = this.state.relatedModelField ? this.state.relatedModelField : '';
+                if (related_field_id) {
+                    related_model_field = this.state.related_model_field.find(field => field.id == related_field_id);
                 }
-
-                // For statusbar widget in new field mode
-                if (this.state.widget === 'statusbar' && this.state.selectionValues.length > 0) {
-                    optionalFields['statusbar_visible'] = this.state.selectionValues.join(', ');
-                }
-                args = {
-                    edit: false,
-                    field_type: this.state.selectedFieldType || 'char',
-                    optional_fields: optionalFields || {},
-                    technical_name: this.state.name,
-                    label: this.state.string || '',
-                    position: this.props.position || 'inside',
-                    cy_path: this.props.path || '',
-                    sibling: this.state.sibling || false,
-                    item_type: this.props.item_type || "",
-                    field_info: this.props.field_info || {},
-                    field_path: this.props.path,
-                    label_path: this.props.label_path,
-                    elementType: "",
-                    related_model: this.state.related_model,
-                    attrs,
-                    model: this.props.model,
-                    view_id: this.props.viewId,
-                    view_type: this.props.viewType,
-                    selectionValues: this.state.selectionValues,
-                    related_model_field: related_model_field,
-                    active_fields:this.props.activeFields,
-                    optional_fields: optionalFields || {},
-                };
             }
-            this.env.services.ui.block();
-                let hasError = false;
-            try {
-                const modelName = sessionStorage.getItem("RelationalModel")
-                    ? (Flatted.parse(sessionStorage.getItem("RelationalModel"))?.[0]?.relation || this.props.model)
-                    : this.props.model;
-                if ((this.state.selectedFieldType=='one2many' && !this.state.relatedModelField) ||
-                    (['many2one', 'many2many'].includes(this.state.selectedFieldType) && !this.props.related_model)) {
-                    this.notification.add({
-                        title: _t("Validation Error"),
-                        message: "Unable to save the field.",
-                        description: "Please select a related model field for One2many or Many2many.",
-                        type: "notification_panel",
-                        notificationType: "warning",
-                    });
-                    hasError=true;
-                    return;
-                }
-                const response = await this.rpc("/cyllo_studio/create/new_fields", {
-                    method: 'create_new_fields',
-                    model: modelName || this.props.model,
-                    view_id: this.props.viewId,
-                    view_type: this.props.viewType,
-                    args: [args],
-                });
 
-                  if (this.state.default_value && this.state.default_value.trim()) {
+            // For statusbar widget in new field mode
+            if (this.state.widget === 'statusbar' && this.state.selectionValues.length > 0) {
+                optionalFields['statusbar_visible'] = this.state.selectionValues.join(', ');
+            }
+            args = {
+                edit: false,
+                field_type: this.state.selectedFieldType || 'char',
+                optional_fields: optionalFields || {},
+                technical_name: this.state.name,
+                label: this.state.string || '',
+                position: this.props.position || 'inside',
+                cy_path: this.props.path || '',
+                sibling: this.state.sibling || false,
+                item_type: this.props.item_type || "",
+                field_info: this.props.field_info || {},
+                field_path: this.props.path,
+                label_path: this.props.label_path,
+                elementType: "",
+                related_model: this.state.related_model,
+                attrs,
+                model: this.props.model,
+                view_id: this.props.viewId,
+                view_type: this.props.viewType,
+                selectionValues: this.state.selectionValues,
+                related_model_field: related_model_field,
+                active_fields: this.props.activeFields,
+                optional_fields: optionalFields || {},
+            };
+        }
+        this.env.services.ui.block();
+        let hasError = false;
+        try {
+            const modelName = sessionStorage.getItem("RelationalModel")
+                ? (Flatted.parse(sessionStorage.getItem("RelationalModel"))?.[0]?.relation || this.props.model)
+                : this.props.model;
+            if ((this.state.selectedFieldType == 'one2many' && !this.state.relatedModelField) ||
+                (['many2one', 'many2many'].includes(this.state.selectedFieldType) && !this.props.related_model)) {
+                this.notification.add({
+                    title: _t("Validation Error"),
+                    message: "Unable to save the field.",
+                    description: "Please select a related model field for One2many or Many2many.",
+                    type: "notification_panel",
+                    notificationType: "warning",
+                });
+                hasError = true;
+                return;
+            }
+            const response = await this.rpc("/cyllo_studio/create/new_fields", {
+                method: 'create_new_fields',
+                model: modelName || this.props.model,
+                view_id: this.props.viewId,
+                view_type: this.props.viewType,
+                args: [args],
+            });
+
+            if (this.state.default_value && this.state.default_value.trim()) {
                 const defaultResult = await this.rpc("/cyllo_studio/set_default", {
                     model: this.props.model,
                     field_name: this.props.edit ? this.props.name : this.state.name,
                     value: this.state.default_value,
                 });
-                }
-                if (response) {
-                    console.log('Backend response:', response);
-                    let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                    let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                    storedArray.push(cleanedStr);
-                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                    sessionStorage.setItem('ReDO', JSON.stringify([]));
-                }
-            } catch (error) {
-                hasError = true;
-                console.error('Error creating field:', error);
-                this.notification.add({
-                    title: _t("Error"),
-                    message: "Failed to save the field",
-                    description: error.message || "An unexpected error occurred",
-                    type: "notification_panel",
-                    notificationType: "danger",
-                });
-            } finally {
-                this.env.services.ui.unblock();
-                if(!hasError){
+            }
+            if (response) {
+                console.log('Backend response:', response);
+                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                let cleanedStr = response.replace(/\s+/g, ' ').trim();
+                storedArray.push(cleanedStr);
+                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                sessionStorage.setItem('ReDO', JSON.stringify([]));
+            }
+        } catch (error) {
+            hasError = true;
+            console.error('Error creating field:', error);
+            this.notification.add({
+                title: _t("Error"),
+                message: "Failed to save the field",
+                description: error.message || "An unexpected error occurred",
+                type: "notification_panel",
+                notificationType: "danger",
+            });
+        } finally {
+            this.env.services.ui.unblock();
+            if (!hasError) {
                 window.location.reload();
-                }
             }
         }
+    }
     //        getCurrentChanges(prev, current) {
     //            const changed = {};
     //            const excludedKeys = ['fieldType', 'widget_types'];
@@ -1298,547 +1299,547 @@ export class FieldProperties extends Component {
     //            return changed;
     //        }
 
-            openCalendarPopover() {
-                const fieldType = this.state.selectedFieldType;
-                const input = document.getElementById('default_value');
-                if (!input) {
-                    console.error('Input element not found');
+    openCalendarPopover() {
+        const fieldType = this.state.selectedFieldType;
+        const input = document.getElementById('default_value');
+        if (!input) {
+            console.error('Input element not found');
+            return;
+        }
+        let currentValue = null;
+        if (this.state.default_value) {
+            try {
+                const { DateTime } = luxon || window.luxon;
+
+                if (fieldType === 'date') {
+                    currentValue = DateTime.fromISO(this.state.default_value);
+                } else if (fieldType === 'datetime') {
+                    const isoValue = this.state.default_value.includes('T')
+                        ? this.state.default_value
+                        : this.state.default_value.replace(' ', 'T');
+                    currentValue = DateTime.fromISO(isoValue);
+                }
+            } catch (e) {
+                console.warn('Could not parse current date:', e);
+                currentValue = null;
+            }
+        }
+        const picker = this.env.services.datetime_picker.create({
+            pickerProps: {
+                type: fieldType,
+                value: currentValue,
+                onSelect: (value) => {
+                    if (value) {
+                        this.updateInputFromDate(value, fieldType, input);
+                    }
+                },
+            },
+            onApply: (value) => {
+                if (value) {
+                    this.updateInputFromDate(value, fieldType, input);
+                }
+            },
+            target: input,
+        });
+        picker.enable();
+        picker.computeBasePickerProps();
+        picker.open(0);
+    }
+    updateInputFromDate(dateValue, fieldType, input) {
+        if (fieldType === 'date') {
+            this.state.default_value = dateValue.toISODate();
+        } else if (fieldType === 'datetime') {
+            const iso = dateValue.toISO().split('.')[0];
+            this.state.default_value = iso.replace('T', ' ');
+        }
+        if (input) {
+            input.value = this.state.default_value;
+        }
+        this.state.edited = true;
+    }
+
+    getCurrentChanges(prev, current) {
+        const changed = {};
+        const excludedKeys = ['fieldType', 'widget_types'];
+        const forceKeys = ["is_computed", "compute_code", "compute_dependencies", "compute", "depends", "default_value", "min_precision",
+            "max_precision", "sql_constraints", "python_constraint", "dynamic_placeholder"];
+
+        for (const key in current) {
+            if (forceKeys.includes(key)) {
+                changed[key] = current[key];
+                continue;
+            }
+            if (
+                prev[key] !== undefined &&
+                !excludedKeys.includes(key) &&
+                prev[key] !== current[key]
+            ) {
+                changed[key] = current[key];
+            }
+        }
+        return changed;
+    }
+
+
+    handleColumnInvisibleChange(event) {
+        this.state.edited = true
+        this.state.column_invisible = ["false", "undefined"].includes(this.state.column_invisible) ? "true" : "false";
+    }
+    handleInvisibleChange(event) {
+        this.state.edited = true
+        this.state.invisible = ["false", "undefined"].includes(this.state.invisible) ? "true" : "false";
+    }
+    handleReadonlyChange(event) {
+        this.state.edited = true
+        this.state.readonly = ["false", "undefined"].includes(this.state.readonly) ? "true" : "false";
+    }
+    handleRequiredChange(event) {
+        this.state.required = ["false", "undefined"].includes(this.state.required) ? "true" : "false";
+    }
+    handleRelatedModelChange(value) {
+        this.state.edited = true
+        this.props.related_model = value;
+        this.state.related_model = value;
+    }
+
+    openComputeDialog() {
+        this.dialogService.add(ComputeDialog, {
+            title: "Computed Field Configuration",
+            resModel: this.props.model,
+            dependencies: this.state.compute_dependencies || "",
+            code: this.state.compute_code || "",
+            onConfirm: ({ deps, code, disableCompute }) => {
+
+                if (disableCompute) {
+                    this.state.is_computed = false;
+                    this.state.compute_dependencies = "";
+                    this.state.compute_code = "";
+                    this.state.edited = true;
                     return;
                 }
-                let currentValue = null;
-                if (this.state.default_value) {
-                    try {
-                        const { DateTime } = luxon || window.luxon;
+                this.state.is_computed = true;
+                this.state.compute_dependencies = deps;
+                this.state.compute_code = code;
+                this.state.edited = true;
+            },
+        });
+    }
 
-                        if (fieldType === 'date') {
-                            currentValue = DateTime.fromISO(this.state.default_value);
-                        } else if (fieldType === 'datetime') {
-                            const isoValue = this.state.default_value.includes('T')
-                                ? this.state.default_value
-                                : this.state.default_value.replace(' ', 'T');
-                            currentValue = DateTime.fromISO(isoValue);
-                        }
-                    } catch (e) {
-                        console.warn('Could not parse current date:', e);
-                        currentValue = null;
-                    }
-                }
-                const picker = this.env.services.datetime_picker.create({
-                    pickerProps: {
-                        type: fieldType,
-                        value: currentValue,
-                        onSelect: (value) => {
-                            if (value) {
-                                this.updateInputFromDate(value, fieldType, input);
-                            }
-                        },
-                    },
-                    onApply: (value) => {
-                        if (value) {
-                            this.updateInputFromDate(value, fieldType, input);
-                        }
-                    },
-                    target: input,
-                });
-                picker.enable();
-                picker.computeBasePickerProps();
-                picker.open(0);
+    toggleIsComputed(ev) {
+        this.state.is_computed = ev.target.checked;
+        if (!ev.target.checked) {
+            this.state.compute_code = "";
+            this.state.compute_dependencies = "";
+            this.state.edited = true;
+        }
+    }
+    validateDefaultValueForType() {
+        const ttype = (this.state.selectedFieldType || "").toLowerCase();
+        let raw = this.state.default_value;
+        let val = (raw === null || raw === undefined) ? "" : String(raw).trim();
+        const errors = [];
+        if (ttype === "selection") {
+            const values = this.state.field === 'existing'
+                ? (this.state.values || [])
+                : (this.state.selectionValues || []);
+
+            let options = [];
+
+            if (values.length && Array.isArray(values[0])) {
+                options = values.map(v => String(v[0]));
+            } else {
+                options = values.map(v => String(v).toLowerCase().replace(/\s+/g, '_'));
             }
-            updateInputFromDate(dateValue, fieldType, input) {
-                if (fieldType === 'date') {
-                    this.state.default_value = dateValue.toISODate();
-                } else if (fieldType === 'datetime') {
-                    const iso = dateValue.toISO().split('.')[0];
-                    this.state.default_value = iso.replace('T', ' ');
+
+            if (val !== "" && !options.includes(val)) {
+                errors.push(`Selection default must be one of: ${options.join(", ")}`);
+            }
+        }
+        if (ttype === "boolean") {
+            const allowed = ["true", "false", "1", "0"];
+            if (val !== "" && !allowed.includes(val.toLowerCase())) {
+                errors.push("Boolean default accepts only: true, false, 1, 0");
+            }
+        }
+        if (ttype === "integer") {
+            if (val !== "" && !/^-?\d+$/.test(val)) {
+                errors.push("Integer default accepts only whole numbers (e.g., 10, -3).");
+            }
+        }
+        if (ttype === "float") {
+            if (val !== "" && !/^-?\d+(\.\d+)?$/.test(val)) {
+                errors.push("Float default accepts only numeric values (e.g., 10, 10.25).");
+            }
+        }
+        if (ttype === "date") {
+            // Odoo format: YYYY-MM-DD
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+
+            if (val !== "" && !dateRegex.test(val)) {
+                errors.push("Date default must follow format: YYYY-MM-DD (e.g., 2025-11-19)");
+            }
+        }
+        if (ttype === "datetime") {
+            const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
+
+            if (val !== "" && !datetimeRegex.test(val)) {
+                errors.push("Datetime default must follow format: YYYY-MM-DD HH:MM:SS (e.g., 2025-11-19 14:30:00)");
+            }
+        }
+        if (errors.length) {
+            this.notification.add({
+                title: _t("Default Value Error"),
+                message: errors.join(" — "),
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return false;
+        }
+        return true;
+    }
+    RelatedModelField(array) {
+        const result = array.map(item => ({
+            value: item.id,
+            label: item.field_description + '(' + item.model_id[1] + ')'
+        }));
+        return [{ value: false, label: '' }, ...result]
+    }
+
+    async handleRelatedModelFieldChange(value) {
+        this.state.relatedModelField = value;
+        const One2ManyRelated = this.state.related_model_field.find(field => field.id == this.state.relatedModelField)
+        const One2ManyRelatedModel = await this.orm.read("ir.model", [One2ManyRelated.model_id[0]], [])
+        this.state.relatedModel = One2ManyRelatedModel[0].model
+    }
+
+    get defaultRelatedModelField() {
+        return this.state.relatedModelField
+    }
+
+    async attrDomain(ev) {
+        this.state.edited = true
+        const parent = event.target.closest('.cy-basedOn')
+        var attribute = parent.getAttribute('data-attribute')
+        var domain = '';
+        if (attribute === 'readonly' && this.props.readonly) {
+            domain = this.state.readonly ? this.state.readonly : this.props.readonly
+        } else if (attribute === 'invisible' && this.props.invisible) {
+            domain = this.state.invisible ? this.state.invisible : this.props.invisible
+        } else if (attribute === 'required' && this.props.required) {
+            domain = this.state.required ? this.state.required : this.props.required
+        } else {
+            domain = false
+        }
+        var resModel = this.action.currentController.props.resModel
+        var fields_detail = await this.orm.call(resModel, 'fields_get', [], {
+            attributes: ['string', 'help', 'type', 'relation', 'selection', 'domain']
+        });
+        var resModel = this.action.currentController.props.resModel
+        domain = domain ? domain : "False";
+
+        // Use the fields that are already available from props
+        const fields_info = this.props.allFields || {};
+        this.addDialog(ExpressionEditorDialog, {
+            resModel,
+            fields: fields_info,
+            expression: domain,
+            onConfirm: (expression) => this.modifier(expression, attribute),
+        });
+    }
+    modifier(expression, attribute) {
+        this.attribute = attribute
+        if (attribute == 'invisible') {
+            this.state.invisible = expression
+        }
+        if (attribute == 'readonly') {
+            this.state.readonly = expression
+        }
+        if (attribute == 'required') {
+            this.state.required = expression
+        }
+    }
+    get newFieldWidgets() {
+        return this.state.widget_types.length ? [{
+            value: false,
+            label: ''
+        }, ...this.state.widget_types] : this.state.widget_types
+    }
+
+    FieldTypeChange(value) {
+        if (value === 'button') {
+            this.createButton();
+        } else if (value === 'new') {
+            this.createNewField();
+        } else if (value === 'existing') {
+            this.env.bus.trigger("LIST_EXISTING_FIELDS", {
+                name: "ExistingName",
+                type: "ExistingProperties",
+            });
+            this.env.bus.trigger('CLEAR-MENU');
+        }
+    }
+
+    openFieldSelector(ev) {
+        const targetEl = ev.currentTarget;
+        const resModel = this.props.model;
+
+        this.popover.open(targetEl, {
+            resModel,
+            path: this.state.finalRelated || "",
+            showSearchInput: true,
+            followRelations: true,
+            isDebugMode: this.env.debug || odoo.debug,
+            filter: (fieldDef, path) => {
+                const isRootLevel = !path || path.trim() === "";
+                if (isRootLevel) {
+                    return fieldDef.type === "many2one";
+                } else {
+                    return true;
                 }
-                if (input) {
-                    input.value = this.state.default_value;
-                }
+            },
+            update: async (path) => {
+                this.state.finalRelated = path;
+                this.state.relatedModelField = path;
+                this.state.relatedField = path;
+                const fieldInfo = await this.loadFieldInfo(resModel, path);
+                this.state.relatedFieldType = fieldInfo.fieldDef.type;
                 this.state.edited = true;
             }
 
-            getCurrentChanges(prev, current) {
-            const changed = {};
-            const excludedKeys = ['fieldType', 'widget_types'];
-            const forceKeys = ["is_computed", "compute_code", "compute_dependencies","compute", "depends","default_value","min_precision",
-            "max_precision","sql_constraints","python_constraint","dynamic_placeholder"];
+        });
+    }
 
-            for (const key in current) {
-                if (forceKeys.includes(key)) {
-                    changed[key] = current[key];
-                    continue;
-                }
-                if (
-                    prev[key] !== undefined &&
-                    !excludedKeys.includes(key) &&
-                    prev[key] !== current[key]
-                ) {
-                    changed[key] = current[key];
-                }
-            }
-            return changed;
-            }
+    async createButton() {
+        this.env.bus.trigger("BUTTON_DETAILS", {
+            type: "ButtonProperties",
+            path: "/tree",
+            position: "inside",
+        });
+    }
 
+    handleFieldWidgetChange(value) {
+        this.state.widget = value;
+        this.widgetOptionalFields(this.state.widget)
+    }
 
-            handleColumnInvisibleChange(event){
-            this.state.edited = true
-            this.state.column_invisible = ["false", "undefined"].includes(this.state.column_invisible) ? "true" : "false";
-            }
-            handleInvisibleChange(event) {
-                this.state.edited = true
-                this.state.invisible = ["false", "undefined"].includes(this.state.invisible) ? "true" : "false";
-            }
-            handleReadonlyChange(event) {
-                this.state.edited = true
-                this.state.readonly = ["false", "undefined"].includes(this.state.readonly) ? "true" : "false";
-            }
-            handleRequiredChange(event) {
-                this.state.required = ["false", "undefined"].includes(this.state.required) ? "true" : "false";
-            }
-            handleRelatedModelChange(value) {
-                this.state.edited = true
-                this.props.related_model = value;
-                this.state.related_model = value;
-            }
+    //    Widget Options Start
+    widgetOptionalFields(widget_name, widget_options = null) {
+        if (document.getElementById('dynamic-container')) {
+            document.getElementById('dynamic-container').innerHTML = '';
+        }
+        if (widget_name) {
 
-            openComputeDialog() {
-                this.dialogService.add(ComputeDialog, {
-                    title: "Computed Field Configuration",
-                    resModel: this.props.model,
-                    dependencies: this.state.compute_dependencies || "",
-                    code: this.state.compute_code || "",
-                    onConfirm: ({ deps, code, disableCompute }) => {
+            if (widget_name == "statusbar") {
+                this.state.isStatusBar = true
+                this.loadStatusbarValues();
+            } else {
+                this.state.isStatusBar = false
+            }
+            const supportedOptions = getWidgetSupport(widget_name);
+            const widgetOption = getWidgetTypes(widget_name)
+            console.log("wid", widgetOption)
+            console.log("wid", supportedOptions)
+            if (supportedOptions) {
+                const container = document.getElementById('dynamic-container');
+                console.log("cont", container)
+                if (container) {
+                    container.innerHTML = '';
+                    supportedOptions.forEach(async field => {
+                        const fieldName = field.options.name;
+                        const widgetOptionsType = widgetOption?.component?.props[fieldName]?.type
+                        let widgetOptionsType_value = "";
 
-                        if (disableCompute) {
-                            this.state.is_computed = false;
-                            this.state.compute_dependencies = "";
-                            this.state.compute_code = "";
-                            this.state.edited = true;
-                            return;
+                        if (widgetOptionsType && widgetOptionsType.name) {
+                            widgetOptionsType_value = widgetOptionsType.name.toString();
                         }
-                        this.state.is_computed = true;
-                        this.state.compute_dependencies = deps;
-                        this.state.compute_code = code;
-                        this.state.edited = true;
-                    },
-                });
-            }
+                        var fieldValue = this.props.options?.[fieldName] || ''
+                        if (field.options.availableTypes && field.options.availableTypes.length > 0) {
+                            const optionFields = this.state.field_type === 'many2many' ? this.state.related_model : this.existedField
+                            if (optionFields) {
+                                this.state.charFields = Object.keys(optionFields)
+                                    .filter(key => optionFields[key].type === field.options.availableTypes[0])
+                                    .reduce((obj, key) => {
+                                        obj[key] = optionFields[key];
+                                        return obj;
+                                    }, {});
+                            }
+                            if (widget_name === 'monetary' && this.state.charFields) {
+                                const options = Object.keys(this.state.charFields)
+                                    .filter(item => this.state.charFields[item].relation === 'res.currency')
+                                    .reduce((acc, key) => {
+                                        acc[key] = this.state.charFields[key];
+                                        return acc;
+                                    }, {});
 
-            toggleIsComputed(ev) {
-            this.state.is_computed = ev.target.checked;
-                if (!ev.target.checked) {
-                    this.state.compute_code = "";
-                    this.state.compute_dependencies = "";
-                    this.state.edited = true;
-                }
-            }
-            validateDefaultValueForType() {
-                const ttype = (this.state.selectedFieldType || "").toLowerCase();
-                let raw = this.state.default_value;
-                let val = (raw === null || raw === undefined) ? "" : String(raw).trim();
-                const errors = [];
-                if (ttype === "selection") {
-                    const values = this.state.field === 'existing'
-                        ? (this.state.values || [])
-                        : (this.state.selectionValues || []);
-
-                    let options = [];
-
-                    if (values.length && Array.isArray(values[0])) {
-                        options = values.map(v => String(v[0]));
-                    } else {
-                        options = values.map(v => String(v).toLowerCase().replace(/\s+/g, '_'));
-                    }
-
-                    if (val !== "" && !options.includes(val)) {
-                        errors.push(`Selection default must be one of: ${options.join(", ")}`);
-                    }
-                }
-                if (ttype === "boolean") {
-                    const allowed = ["true", "false", "1", "0"];
-                    if (val !== "" && !allowed.includes(val.toLowerCase())) {
-                        errors.push("Boolean default accepts only: true, false, 1, 0");
-                    }
-                }
-                if (ttype === "integer") {
-                    if (val !== "" && !/^-?\d+$/.test(val)) {
-                        errors.push("Integer default accepts only whole numbers (e.g., 10, -3).");
-                    }
-                }
-                if (ttype === "float") {
-                    if (val !== "" && !/^-?\d+(\.\d+)?$/.test(val)) {
-                        errors.push("Float default accepts only numeric values (e.g., 10, 10.25).");
-                    }
-                }
-                if (ttype === "date") {
-                    // Odoo format: YYYY-MM-DD
-                    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-
-                    if (val !== "" && !dateRegex.test(val)) {
-                        errors.push("Date default must follow format: YYYY-MM-DD (e.g., 2025-11-19)");
-                    }
-                }
-                if (ttype === "datetime") {
-                    const datetimeRegex = /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/;
-
-                    if (val !== "" && !datetimeRegex.test(val)) {
-                        errors.push("Datetime default must follow format: YYYY-MM-DD HH:MM:SS (e.g., 2025-11-19 14:30:00)");
-                    }
-                }
-                if (errors.length) {
-                    this.notification.add({
-                        title: _t("Default Value Error"),
-                        message: errors.join(" — "),
-                        type: "notification_panel",
-                        notificationType: "warning",
-                    });
-                    return false;
-                }
-                return true;
-            }
-            RelatedModelField(array) {
-                const result = array.map(item => ({
-                value: item.id,
-                label: item.field_description + '(' + item.model_id[1] + ')'
-                }));
-                return [{value: false, label: ''},...result]
-            }
-
-            async handleRelatedModelFieldChange(value) {
-                this.state.relatedModelField = value;
-                const One2ManyRelated = this.state.related_model_field.find(field => field.id == this.state.relatedModelField)
-                const One2ManyRelatedModel = await this.orm.read("ir.model", [One2ManyRelated.model_id[0]], [])
-                this.state.relatedModel = One2ManyRelatedModel[0].model
-            }
-
-            get defaultRelatedModelField() {
-                return this.state.relatedModelField
-            }
-
-            async attrDomain(ev) {
-                this.state.edited = true
-                const parent = event.target.closest('.cy-basedOn')
-                var attribute = parent.getAttribute('data-attribute')
-                var domain = '';
-                if (attribute === 'readonly' && this.props.readonly) {
-                    domain = this.state.readonly ? this.state.readonly : this.props.readonly
-                } else if (attribute === 'invisible' && this.props.invisible) {
-                    domain = this.state.invisible ? this.state.invisible : this.props.invisible
-                } else if (attribute === 'required' && this.props.required) {
-                    domain = this.state.required ? this.state.required : this.props.required
-                } else {
-                    domain = false
-                }
-                var resModel = this.action.currentController.props.resModel
-                 var fields_detail = await this.orm.call(resModel, 'fields_get', [], {
-                attributes: ['string', 'help', 'type', 'relation', 'selection', 'domain']
-            });
-            var resModel = this.action.currentController.props.resModel
-            domain = domain ? domain : "False";
-
-            // Use the fields that are already available from props
-            const fields_info = this.props.allFields || {};
-                this.addDialog(ExpressionEditorDialog, {
-                    resModel,
-                    fields: fields_info,
-                    expression: domain,
-                    onConfirm: (expression) => this.modifier(expression, attribute),
-                });
-            }
-            modifier(expression, attribute) {
-                this.attribute = attribute
-                if (attribute == 'invisible') {
-                    this.state.invisible = expression
-                }
-                if (attribute == 'readonly') {
-                    this.state.readonly = expression
-                }
-                if (attribute == 'required') {
-                    this.state.required = expression
-                }
-            }
-            get newFieldWidgets() {
-                return this.state.widget_types.length ? [{
-                    value: false,
-                    label: ''
-                }, ...this.state.widget_types] : this.state.widget_types
-            }
-
-            FieldTypeChange(value) {
-                if (value === 'button') {
-                    this.createButton();
-                } else if (value === 'new') {
-                    this.createNewField();
-                } else if (value === 'existing') {
-                    this.env.bus.trigger("LIST_EXISTING_FIELDS", {
-                        name: "ExistingName",
-                        type: "ExistingProperties",
-                    });
-                    this.env.bus.trigger('CLEAR-MENU');
-                }
-            }
-
-        openFieldSelector(ev) {
-            const targetEl = ev.currentTarget;
-            const resModel = this.props.model;
-
-            this.popover.open(targetEl, {
-                resModel,
-                path: this.state.finalRelated || "",
-                showSearchInput: true,
-                followRelations: true,
-                isDebugMode: this.env.debug || odoo.debug,
-                filter: (fieldDef, path) => {
-                    const isRootLevel = !path || path.trim() === "";
-                    if (isRootLevel) {
-                        return fieldDef.type === "many2one";
-                    } else {
-                        return true;
-                    }
-                },
-            update: async (path) => {
-            this.state.finalRelated = path;
-            this.state.relatedModelField = path;
-            this.state.relatedField = path;
-            const fieldInfo = await this.loadFieldInfo(resModel, path);
-            this.state.relatedFieldType = fieldInfo.fieldDef.type;
-            this.state.edited = true;
-        }
-
-            });
-        }
-
-            async createButton() {
-                this.env.bus.trigger("BUTTON_DETAILS", {
-                    type: "ButtonProperties",
-                    path: "/tree",
-                    position: "inside",
-                });
-            }
-
-            handleFieldWidgetChange(value) {
-                this.state.widget = value;
-                this.widgetOptionalFields(this.state.widget)
-            }
-
-            //    Widget Options Start
-            widgetOptionalFields(widget_name, widget_options = null) {
-                if (document.getElementById('dynamic-container')) {
-                    document.getElementById('dynamic-container').innerHTML = '';
-                }
-                if (widget_name) {
-
-                    if (widget_name == "statusbar") {
-                        this.state.isStatusBar = true
-                        this.loadStatusbarValues();
-                    } else {
-                        this.state.isStatusBar = false
-                    }
-                    const supportedOptions = getWidgetSupport(widget_name);
-                    const widgetOption = getWidgetTypes(widget_name)
-                    console.log("wid",widgetOption)
-                    console.log("wid",supportedOptions)
-                    if (supportedOptions) {
-                        const container = document.getElementById('dynamic-container');
-                        console.log("cont",container)
-                        if (container) {
-                            container.innerHTML = '';
-                            supportedOptions.forEach(async field => {
-                                const fieldName = field.options.name;
-                                const widgetOptionsType = widgetOption?.component?.props[fieldName]?.type
-                                let widgetOptionsType_value = "";
-
-                                if (widgetOptionsType && widgetOptionsType.name) {
-                                    widgetOptionsType_value = widgetOptionsType.name.toString();
-                                }
-                                var fieldValue = this.props.options?.[fieldName] || ''
-                                if (field.options.availableTypes && field.options.availableTypes.length > 0) {
-                                    const optionFields = this.state.field_type === 'many2many' ? this.state.related_model : this.existedField
-                                    if (optionFields) {
-                                        this.state.charFields = Object.keys(optionFields)
-                                            .filter(key => optionFields[key].type === field.options.availableTypes[0])
-                                            .reduce((obj, key) => {
-                                                obj[key] = optionFields[key];
-                                                return obj;
-                                            }, {});
-                                    }
-                                    if (widget_name === 'monetary' && this.state.charFields) {
-                                        const options = Object.keys(this.state.charFields)
-                                            .filter(item => this.state.charFields[item].relation === 'res.currency')
-                                            .reduce((acc, key) => {
-                                                acc[key] = this.state.charFields[key];
-                                                return acc;
-                                            }, {});
-
-                                        // Update charFields with the filtered options (for 'monetary' widget)
-                                        this.state.charFields = options;
-                                    }
-                                }
-                                var obj = field.options.label
-                                let string = "";
-                                for (const key in obj) {
-                                    if (obj.hasOwnProperty(key)) {
-                                        string += obj[key];
-                                    }
-                                }
-                                if (field.options.type === 'field') {
-                                    if (fieldName === "fold_field") {
-                                        const div = document.createElement('div');
-                                        div.id = fieldName + '_div'; // Use field name as ID
-                                        div.innerHTML = `
+                                // Update charFields with the filtered options (for 'monetary' widget)
+                                this.state.charFields = options;
+                            }
+                        }
+                        var obj = field.options.label
+                        let string = "";
+                        for (const key in obj) {
+                            if (obj.hasOwnProperty(key)) {
+                                string += obj[key];
+                            }
+                        }
+                        if (field.options.type === 'field') {
+                            if (fieldName === "fold_field") {
+                                const div = document.createElement('div');
+                                div.id = fieldName + '_div'; // Use field name as ID
+                                div.innerHTML = `
                                             <label class="cy-radio_label" for="${fieldName}">
                                                 <input class="form-check-input " type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''} >
                                                 ${obj}
                                             </label>`;
-                                        container.appendChild(div);
-                                    } else {
-                                        const div = document.createElement('div');
-                                        div.id = fieldName + '_div'; // Use field name as ID
-                                        div.innerHTML = `
+                                container.appendChild(div);
+                            } else {
+                                const div = document.createElement('div');
+                                div.id = fieldName + '_div'; // Use field name as ID
+                                div.innerHTML = `
                                         <label class="cy-navbar_label" for="${fieldName}">${obj}:</label>`;
-                                        container.appendChild(div);
-                                        const div2 = document.createElement('div');
-                                        div2.setAttribute('id', fieldName);
-                                        div2.classList.add('cy-studio-custom-dropdown-image-widget', 'cy-studio-custom-dropdown');
-                                        container.appendChild(div2);;
-                                        await owl.mount(CylloStudioDropdown, div2, {
-                                            props: {
-                                                options: this.ImageWidget,
-                                                defaultValue: fieldValue,
-                                                onChange: (value) => this.AddModelWidget({
-                                                    [fieldName]: value
-                                                })
-
-                                            },
+                                container.appendChild(div);
+                                const div2 = document.createElement('div');
+                                div2.setAttribute('id', fieldName);
+                                div2.classList.add('cy-studio-custom-dropdown-image-widget', 'cy-studio-custom-dropdown');
+                                container.appendChild(div2);;
+                                await owl.mount(CylloStudioDropdown, div2, {
+                                    props: {
+                                        options: this.ImageWidget,
+                                        defaultValue: fieldValue,
+                                        onChange: (value) => this.AddModelWidget({
+                                            [fieldName]: value
                                         })
-                                    }
-                                } else if (field.options.type === 'string') {
-                                    const div = document.createElement('div');
-                                    div.id = fieldName + '_div';
 
-                                    // Create label element
-                                    const label = document.createElement('label');
-                                    label.className = 'cy-navbar_label';
-                                    label.htmlFor = fieldName; // Links the label to the input by ID
-                                    label.textContent = `${obj}:`;
+                                    },
+                                })
+                            }
+                        } else if (field.options.type === 'string') {
+                            const div = document.createElement('div');
+                            div.id = fieldName + '_div';
 
-                                    // Create input element
-                                    const input = document.createElement('input');
-                                    input.className = 'cy-input';
-                                    input.type = 'text';
-                                    input.autocomplete = 'off';
-                                    input.id = fieldName;
-                                    input.name = fieldName;
-                                    input.value = fieldValue;
-                                    if (widgetOptionsType) {
-                                        input.placeholder = `Expected Input  As :- ${widgetOptionsType_value}`;
-                                    }
+                            // Create label element
+                            const label = document.createElement('label');
+                            label.className = 'cy-navbar_label';
+                            label.htmlFor = fieldName; // Links the label to the input by ID
+                            label.textContent = `${obj}:`;
 
-                                    // Bind events
-                                    input.addEventListener('change', (ev) => this.fieldValidation(ev, widgetOptionsType_value)); // Event for the input
-                                    // Append elements
-                                    div.appendChild(label);
-                                    div.appendChild(input);
+                            // Create input element
+                            const input = document.createElement('input');
+                            input.className = 'cy-input';
+                            input.type = 'text';
+                            input.autocomplete = 'off';
+                            input.id = fieldName;
+                            input.name = fieldName;
+                            input.value = fieldValue;
+                            if (widgetOptionsType) {
+                                input.placeholder = `Expected Input  As :- ${widgetOptionsType_value}`;
+                            }
 
-                                    // Append the div to the container
-                                    container.appendChild(div);
-                                } else if (field.options.type == 'boolean') {
-                                    const div = document.createElement('div');
-                                    div.id = fieldName + '_div';
-                                    div.innerHTML = `
+                            // Bind events
+                            input.addEventListener('change', (ev) => this.fieldValidation(ev, widgetOptionsType_value)); // Event for the input
+                            // Append elements
+                            div.appendChild(label);
+                            div.appendChild(input);
+
+                            // Append the div to the container
+                            container.appendChild(div);
+                        } else if (field.options.type == 'boolean') {
+                            const div = document.createElement('div');
+                            div.id = fieldName + '_div';
+                            div.innerHTML = `
                                         <label class="cy-radio_label" for="${fieldName}">
                                             <input class="form-check-input" type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''} onClick="(ev)=>onClickColorChangeLabel(ev)">
                                             ${obj}
                                         </label>
                                     `;
-                                    div.addEventListener('click', function(ev) {
-                                        const label = document.getElementsByClassName('cy-radio_label')
-                                        const checkbox = ev.target;
-                                        if (checkbox.checked) {
-                                            ev.srcElement.parentElement.style.color = '#d3d2ba';
-                                        } else {
-                                            ev.srcElement.parentElement.style.color = "#BCBBA7";
-                                        }
-                                    })
-                                    container.appendChild(div);
-                                } else if (field.options.type === "select") {
-        const div = document.createElement("div");
-        div.id = fieldName + "_div";
-
-        const label = document.createElement("label");
-        label.className = "cy-navbar_label";
-        label.textContent = field.options.name + ":";
-        div.appendChild(label);
-
-        const select = document.createElement("select");
-        select.id = fieldName;
-        select.className = "cy-input";
-
-        field.options.options.forEach(opt => {
-            const option = document.createElement("option");
-            option.value = opt;
-            option.textContent = opt;
-            if (opt === fieldValue) option.selected = true;
-            select.appendChild(option);
-        });
-
-        select.addEventListener("change", (ev) => {
-            if (fieldName === "minimalPrecision") {
-                this.handleMinPrecisionChange(ev.target.value);
-            } else if (fieldName === "maximalPrecision") {
-                this.handleMaxPrecisionChange(ev.target.value);
-            }
-            this.state.edited = true;
-        });
-
-        div.appendChild(select);
-        container.appendChild(div);
-    }
+                            div.addEventListener('click', function (ev) {
+                                const label = document.getElementsByClassName('cy-radio_label')
+                                const checkbox = ev.target;
+                                if (checkbox.checked) {
+                                    ev.srcElement.parentElement.style.color = '#d3d2ba';
+                                } else {
+                                    ev.srcElement.parentElement.style.color = "#BCBBA7";
+                                }
                             })
+                            container.appendChild(div);
+                        } else if (field.options.type === "select") {
+                            const div = document.createElement("div");
+                            div.id = fieldName + "_div";
+
+                            const label = document.createElement("label");
+                            label.className = "cy-navbar_label";
+                            label.textContent = field.options.name + ":";
+                            div.appendChild(label);
+
+                            const select = document.createElement("select");
+                            select.id = fieldName;
+                            select.className = "cy-input";
+
+                            field.options.options.forEach(opt => {
+                                const option = document.createElement("option");
+                                option.value = opt;
+                                option.textContent = opt;
+                                if (opt === fieldValue) option.selected = true;
+                                select.appendChild(option);
+                            });
+
+                            select.addEventListener("change", (ev) => {
+                                if (fieldName === "minimalPrecision") {
+                                    this.handleMinPrecisionChange(ev.target.value);
+                                } else if (fieldName === "maximalPrecision") {
+                                    this.handleMaxPrecisionChange(ev.target.value);
+                                }
+                                this.state.edited = true;
+                            });
+
+                            div.appendChild(select);
+                            container.appendChild(div);
                         }
-
-                    }
-                } else if (document.getElementById('dynamic-container')) {
-                    const container = document.getElementById('dynamic-container');
-                    container.innerHTML = '';
+                    })
                 }
-            }
 
-            get ImageWidget() {
-                const arr = [{
-                    value: false,
-                    label: ''
-                }]
-                for (let value in this.state.charFields) {
-                    const obj = {
-                        value: this.state.charFields[value].name,
-                        label: this.state.charFields[value].string || this.state.charFields[value].display_name
-                    }
-                    arr.push(obj)
-                }
-                return arr
             }
-            AddModelWidget(value) {
-                this.state.previewImage = {...this.state.previewImage, ...value}
-            }
+        } else if (document.getElementById('dynamic-container')) {
+            const container = document.getElementById('dynamic-container');
+            container.innerHTML = '';
+        }
+    }
 
-        //    get multiSelectDropDown() {
-        //        const fieldInfo = this.existingFields[this.state.field_name]?.selection
-        //        let allValues = {}
-        //        if (fieldInfo) {
-        //            allValues = fieldInfo.reduce((obj, [key, value]) => {
-        //            obj[key] = value;
-        //            return obj
-        //            }, {})
-        //        }
-        //        return {
-        //        selectedValues: this.state.optionVisible || [],
-        //        allValues: allValues,
-        //        onUpdate: (value) => {
-        //        this.state.optionVisible = value
-        //        }
-        //        }
-        //        }
+    get ImageWidget() {
+        const arr = [{
+            value: false,
+            label: ''
+        }]
+        for (let value in this.state.charFields) {
+            const obj = {
+                value: this.state.charFields[value].name,
+                label: this.state.charFields[value].string || this.state.charFields[value].display_name
+            }
+            arr.push(obj)
+        }
+        return arr
+    }
+    AddModelWidget(value) {
+        this.state.previewImage = { ...this.state.previewImage, ...value }
+    }
+
+    //    get multiSelectDropDown() {
+    //        const fieldInfo = this.existingFields[this.state.field_name]?.selection
+    //        let allValues = {}
+    //        if (fieldInfo) {
+    //            allValues = fieldInfo.reduce((obj, [key, value]) => {
+    //            obj[key] = value;
+    //            return obj
+    //            }, {})
+    //        }
+    //        return {
+    //        selectedValues: this.state.optionVisible || [],
+    //        allValues: allValues,
+    //        onUpdate: (value) => {
+    //        this.state.optionVisible = value
+    //        }
+    //        }
+    //        }
     //    get multiSelectDropDown() {
     //        const values = this.state.field === 'existing' ? this.state.values : this.state.selectionValues;
     //
@@ -1874,64 +1875,64 @@ export class FieldProperties extends Component {
     //            },
     //        };
     //    }
-        //    get multiSelectDropDown(){
-        //        const values = this.state.field == 'existing' ? this.state.values : this.state.selectionValues
-        //        let allValues = values.reduce((acc, item) => {
-        //            if (this.state.field == 'existing'){
-        //                acc[item[0]] = item[1];
-        //            }else{
-        //                acc[item] = item;
-        //            }
-        //          return acc;
-        //        }, {});
-        //
-        //        return {
-        //          selectedValues:  [...new Set(this.state.SelectedOptions)],
-        //          allValues,
-        //          onUpdate: (value)=> {
-        //            this.state.SelectedOptions = value
-        //            this.StatusBarValues.statusbarVisible = value.join(', ')
-        //
-        //          },
-        //        }
-        //    }
+    //    get multiSelectDropDown(){
+    //        const values = this.state.field == 'existing' ? this.state.values : this.state.selectionValues
+    //        let allValues = values.reduce((acc, item) => {
+    //            if (this.state.field == 'existing'){
+    //                acc[item[0]] = item[1];
+    //            }else{
+    //                acc[item] = item;
+    //            }
+    //          return acc;
+    //        }, {});
+    //
+    //        return {
+    //          selectedValues:  [...new Set(this.state.SelectedOptions)],
+    //          allValues,
+    //          onUpdate: (value)=> {
+    //            this.state.SelectedOptions = value
+    //            this.StatusBarValues.statusbarVisible = value.join(', ')
+    //
+    //          },
+    //        }
+    //    }
 
-                get multiSelectDropDown() {
-                const values = this.state.field === 'existing' ? (this.state.values || []) : (this.state.selectionValues || []);
+    get multiSelectDropDown() {
+        const values = this.state.field === 'existing' ? (this.state.values || []) : (this.state.selectionValues || []);
 
-                let allValues = {};
-                const isExistingFormat = values.length && Array.isArray(values[0]);
+        let allValues = {};
+        const isExistingFormat = values.length && Array.isArray(values[0]);
 
-                if (isExistingFormat) {
-                    // values are in form [[key, label], ...]
-                    values.forEach(item => {
-                        if (Array.isArray(item) && item.length >= 2) {
-                            const key = String(item[0]);
-                            const label = String(item[1]);
-                            allValues[key] = label;
-                        }
-                    });
-                } else {
-                    // new-field mode: values are simple strings; we expose them as key->label (use normalized key)
-                    values.forEach(item => {
-                        if (item) {
-                            const label = String(item);
-                            const key = String(label).toLowerCase().replace(/\s+/g, '_');
-                            allValues[key] = label;
-                        }
-                    });
+        if (isExistingFormat) {
+            // values are in form [[key, label], ...]
+            values.forEach(item => {
+                if (Array.isArray(item) && item.length >= 2) {
+                    const key = String(item[0]);
+                    const label = String(item[1]);
+                    allValues[key] = label;
                 }
+            });
+        } else {
+            // new-field mode: values are simple strings; we expose them as key->label (use normalized key)
+            values.forEach(item => {
+                if (item) {
+                    const label = String(item);
+                    const key = String(label).toLowerCase().replace(/\s+/g, '_');
+                    allValues[key] = label;
+                }
+            });
+        }
 
-                return {
-                    selectedValues: [...new Set(this.state.SelectedOptions || [])],
-                    allValues,
-                    onUpdate: (value) => {
-                        this.state.SelectedOptions = value;
-                        this.StatusBarValues.statusbarVisible = value.join(',');
-                        this.state.edited = true;
-                    },
-                };
-            }
+        return {
+            selectedValues: [...new Set(this.state.SelectedOptions || [])],
+            allValues,
+            onUpdate: (value) => {
+                this.state.SelectedOptions = value;
+                this.StatusBarValues.statusbarVisible = value.join(',');
+                this.state.edited = true;
+            },
+        };
+    }
 
     openConstraintDialog() {
         // Auto-enable the checkbox when opening dialog
@@ -1965,84 +1966,84 @@ export class FieldProperties extends Component {
         }
     }
 
-//    handleConstrainsChange(event) {
-//        const isChecked = event.target.checked;
-//
-//        if (!isChecked) {
-//            // If unchecking and constraints exist, warn user
-//            const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
-//            const hasPythonConstraint = !!this.state.pythonConstraint;
-//            const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
-//
-//            if (hasAnyConstraints) {
-//                const constraintTypes = [];
-//                if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
-//                if (hasPythonConstraint) constraintTypes.push("Python");
-//
-//                // Show confirmation dialog
-//                if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
-//                    // User cancelled, re-check the box
-//                    event.target.checked = true;
-//                    this.state.constraintEnabled = true;
-//                    return;
-//                }
-//
-//                // Clear all constraints using the new method
-//                this.clearAllConstraints();
-//
-//                this.notification.add({
-//                    title: _t("Constraints Cleared"),
-//                    message: "All constraints have been removed from this field.",
-//                    type: "notification_panel",
-//                    notificationType: "success",
-//                });
-//            } else {
-//                this.state.constraintEnabled = false;
-//            }
-//        } else {
-//            this.state.constraintEnabled = true;
-//        }
-//
-//        this.state.edited = true;
-//    }
+    //    handleConstrainsChange(event) {
+    //        const isChecked = event.target.checked;
+    //
+    //        if (!isChecked) {
+    //            // If unchecking and constraints exist, warn user
+    //            const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
+    //            const hasPythonConstraint = !!this.state.pythonConstraint;
+    //            const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
+    //
+    //            if (hasAnyConstraints) {
+    //                const constraintTypes = [];
+    //                if (hasSqlConstraints) constraintTypes.push(`${this.sqlConstraints.length} SQL`);
+    //                if (hasPythonConstraint) constraintTypes.push("Python");
+    //
+    //                // Show confirmation dialog
+    //                if (!confirm(`This will remove ${constraintTypes.join(" and ")} constraint(s) from this field. Continue?`)) {
+    //                    // User cancelled, re-check the box
+    //                    event.target.checked = true;
+    //                    this.state.constraintEnabled = true;
+    //                    return;
+    //                }
+    //
+    //                // Clear all constraints using the new method
+    //                this.clearAllConstraints();
+    //
+    //                this.notification.add({
+    //                    title: _t("Constraints Cleared"),
+    //                    message: "All constraints have been removed from this field.",
+    //                    type: "notification_panel",
+    //                    notificationType: "success",
+    //                });
+    //            } else {
+    //                this.state.constraintEnabled = false;
+    //            }
+    //        } else {
+    //            this.state.constraintEnabled = true;
+    //        }
+    //
+    //        this.state.edited = true;
+    //    }
 
     handleConstrainsChange(event) {
-    const isChecked = event.target.checked;
+        const isChecked = event.target.checked;
 
-    if (!isChecked) {
-        // If unchecking and constraints exist, warn user
-        const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
-        const hasPythonConstraint = !!this.state.pythonConstraint;
-        const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
+        if (!isChecked) {
+            // If unchecking and constraints exist, warn user
+            const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
+            const hasPythonConstraint = !!this.state.pythonConstraint;
+            const hasAnyConstraints = hasSqlConstraints || hasPythonConstraint;
 
-        if (hasAnyConstraints) {
-            this.clearAllConstraints();
-            this.state.edited = true;
+            if (hasAnyConstraints) {
+                this.clearAllConstraints();
+                this.state.edited = true;
 
-            this.notification.add({
-                title: _t("Constraints Cleared"),
-                message: "All constraints will be removed when you save the field.",
-                type: "notification_panel",
-                notificationType: "success",
-            });
+                this.notification.add({
+                    title: _t("Constraints Cleared"),
+                    message: "All constraints will be removed when you save the field.",
+                    type: "notification_panel",
+                    notificationType: "success",
+                });
+            } else {
+                this.state.constraintEnabled = false;
+            }
         } else {
-            this.state.constraintEnabled = false;
+            this.state.constraintEnabled = true;
         }
-    } else {
-        this.state.constraintEnabled = true;
-    }
 
-    this.state.edited = true;
-}
+        this.state.edited = true;
+    }
 
     addConstraint(constraint) {
         console.log("=== ADD CONSTRAINT CALLED ===");
         console.log("Constraint received:", constraint);
-        
+
         // Handle both SQL and Python constraints
         const hasSqlConstraint = constraint.sql_constraint;
         const hasPythonConstraint = constraint.python_constraint;
-        
+
         if (!hasSqlConstraint && !hasPythonConstraint) {
             this.notification.add({
                 title: _t("Invalid Constraint"),
@@ -2088,7 +2089,7 @@ export class FieldProperties extends Component {
         // Handle Python constraint
         if (hasPythonConstraint) {
             const pythonConstraint = constraint.python_constraint;
-            
+
             // Validate Python constraint data
             if (!pythonConstraint.deps || !pythonConstraint.code) {
                 this.notification.add({
@@ -2108,7 +2109,7 @@ export class FieldProperties extends Component {
         const messages = [];
         if (hasSqlConstraint) messages.push("SQL");
         if (hasPythonConstraint) messages.push("Python");
-        
+
         this.notification.add({
             title: _t("Success"),
             message: `${messages.join(" and ")} constraint(s) added successfully. Don't forget to save the field!`,
@@ -2117,75 +2118,75 @@ export class FieldProperties extends Component {
         });
     }
 
-//    removeConstraint(index) {
-//        if (this.sqlConstraints && this.sqlConstraints[index]) {
-//            const removed = this.sqlConstraints.splice(index, 1);
-//            this.state.edited = true;
-//
-//            // Check if we still have any constraints (SQL or Python)
-//            const hasSqlConstraints = this.sqlConstraints.length > 0;
-//            const hasPythonConstraint = !!this.state.pythonConstraint;
-//
-//            // Auto-disable checkbox if no constraints left
-//            if (!hasSqlConstraints && !hasPythonConstraint) {
-//                this.state.constraintEnabled = false;
-//                console.log("All constraints removed, checkbox disabled");
-//            }
-//        }
-//    }
+    //    removeConstraint(index) {
+    //        if (this.sqlConstraints && this.sqlConstraints[index]) {
+    //            const removed = this.sqlConstraints.splice(index, 1);
+    //            this.state.edited = true;
+    //
+    //            // Check if we still have any constraints (SQL or Python)
+    //            const hasSqlConstraints = this.sqlConstraints.length > 0;
+    //            const hasPythonConstraint = !!this.state.pythonConstraint;
+    //
+    //            // Auto-disable checkbox if no constraints left
+    //            if (!hasSqlConstraints && !hasPythonConstraint) {
+    //                this.state.constraintEnabled = false;
+    //                console.log("All constraints removed, checkbox disabled");
+    //            }
+    //        }
+    //    }
 
     async removeConstraint(index) {
-    if (this.sqlConstraints && this.sqlConstraints[index]) {
-        const constraintToRemove = this.sqlConstraints[index];
+        if (this.sqlConstraints && this.sqlConstraints[index]) {
+            const constraintToRemove = this.sqlConstraints[index];
 
-        // Remove from database immediately
-        try {
-            const result = await this.rpc('/cyllo_studio/remove_single_constraint', {
-                model: this.props.model,
-                field_name: this.props.name,
-                constraint_key: constraintToRemove.key
-            });
-
-            if (result.success) {
-                // Remove from frontend array
-                this.sqlConstraints.splice(index, 1);
-                this.state.edited = true;
-
-                // Check if we still have any constraints
-                const hasSqlConstraints = this.sqlConstraints.length > 0;
-                const hasPythonConstraint = !!this.state.pythonConstraint;
-
-                // Auto-disable checkbox if no constraints left
-                if (!hasSqlConstraints && !hasPythonConstraint) {
-                    this.state.constraintEnabled = false;
-                    console.log("All constraints removed, checkbox disabled");
-                }
-
-                this.notification.add({
-                    title: _t("Success"),
-                    message: "Constraint removed successfully",
-                    type: "notification_panel",
-                    notificationType: "success",
+            // Remove from database immediately
+            try {
+                const result = await this.rpc('/cyllo_studio/remove_single_constraint', {
+                    model: this.props.model,
+                    field_name: this.props.name,
+                    constraint_key: constraintToRemove.key
                 });
-            } else {
+
+                if (result.success) {
+                    // Remove from frontend array
+                    this.sqlConstraints.splice(index, 1);
+                    this.state.edited = true;
+
+                    // Check if we still have any constraints
+                    const hasSqlConstraints = this.sqlConstraints.length > 0;
+                    const hasPythonConstraint = !!this.state.pythonConstraint;
+
+                    // Auto-disable checkbox if no constraints left
+                    if (!hasSqlConstraints && !hasPythonConstraint) {
+                        this.state.constraintEnabled = false;
+                        console.log("All constraints removed, checkbox disabled");
+                    }
+
+                    this.notification.add({
+                        title: _t("Success"),
+                        message: "Constraint removed successfully",
+                        type: "notification_panel",
+                        notificationType: "success",
+                    });
+                } else {
+                    this.notification.add({
+                        title: _t("Error"),
+                        message: result.error || "Failed to remove constraint",
+                        type: "notification_panel",
+                        notificationType: "danger",
+                    });
+                }
+            } catch (error) {
+                console.error('Error removing constraint:', error);
                 this.notification.add({
                     title: _t("Error"),
-                    message: result.error || "Failed to remove constraint",
+                    message: "Failed to remove constraint",
                     type: "notification_panel",
                     notificationType: "danger",
                 });
             }
-        } catch (error) {
-            console.error('Error removing constraint:', error);
-            this.notification.add({
-                title: _t("Error"),
-                message: "Failed to remove constraint",
-                type: "notification_panel",
-                notificationType: "danger",
-            });
         }
     }
-}
 
     // New method to remove Python constraint
     removePythonConstraint() {
@@ -2195,7 +2196,7 @@ export class FieldProperties extends Component {
 
             // Check if we still have any SQL constraints
             const hasSqlConstraints = this.sqlConstraints && this.sqlConstraints.length > 0;
-            
+
             // Auto-disable checkbox if no constraints left
             if (!hasSqlConstraints) {
                 this.state.constraintEnabled = false;
@@ -2207,19 +2208,19 @@ export class FieldProperties extends Component {
     // New method to clear all constraints
     clearAllConstraints() {
         console.log("=== CLEARING ALL CONSTRAINTS ===");
-        
+
         // Clear SQL constraints
         if (this.sqlConstraints) {
             this.sqlConstraints.splice(0, this.sqlConstraints.length);
         }
-        
+
         // Clear Python constraint
         this.state.pythonConstraint = null;
-        
+
         // Disable checkbox
         this.state.constraintEnabled = false;
         this.state.edited = true;
-        
+
         console.log("✓ All constraints cleared, checkbox disabled");
     }
 
@@ -2229,45 +2230,45 @@ export class FieldProperties extends Component {
         }
         return this.sqlConstraints.map(c => [c.key, c.definition, c.message]);
     }
-           checkSelectionValues() {
-                const lowerCaseArray = this.state.selectionValues.map(element => element.toLowerCase());
-                let setValues = new Set(lowerCaseArray);
-                const isSameElement = setValues.size != lowerCaseArray.length
-                const isEmpty = lowerCaseArray.some(str => str === null || str.match(/^ *$/) !== null);
-                if (isSameElement || isEmpty) {
-                let message = isSameElement ? 'Containing same values!' : 'Containing empty values!'
-                this.env.services.action.doAction({
+    checkSelectionValues() {
+        const lowerCaseArray = this.state.selectionValues.map(element => element.toLowerCase());
+        let setValues = new Set(lowerCaseArray);
+        const isSameElement = setValues.size != lowerCaseArray.length
+        const isEmpty = lowerCaseArray.some(str => str === null || str.match(/^ *$/) !== null);
+        if (isSameElement || isEmpty) {
+            let message = isSameElement ? 'Containing same values!' : 'Containing empty values!'
+            this.env.services.action.doAction({
                 'type': 'ir.actions.client',
                 'tag': 'display_notification',
                 'params': {
-                'message': message,
-                'type': 'warning',
-                'sticky': false,
+                    'message': message,
+                    'type': 'warning',
+                    'sticky': false,
                 }
-                })
-                return false
-                }
-                return true
-                }
-        addSelectionValue() {
-            return this.checkSelectionValues() ? this.state.selectionValues.push('') : false
+            })
+            return false
         }
-        changeSelectionValue(index, value) {
-            this.state.selectionValues[index] = value
-        }
-        deleteSelectionValue(index) {
-            this.state.selectionValues.splice(index, 1)
-        }
+        return true
+    }
+    addSelectionValue() {
+        return this.checkSelectionValues() ? this.state.selectionValues.push('') : false
+    }
+    changeSelectionValue(index, value) {
+        this.state.selectionValues[index] = value
+    }
+    deleteSelectionValue(index) {
+        this.state.selectionValues.splice(index, 1)
+    }
 
-        }
+}
 
-        FieldProperties.components = {
-            CylloStudioDropdown,
-            MultiSelectDropDown,
-            SelectionFieldValue,
-            CodeEditor,
-            ComputeDialog,
+FieldProperties.components = {
+    CylloStudioDropdown,
+    MultiSelectDropDown,
+    SelectionFieldValue,
+    CodeEditor,
+    ComputeDialog,
     //        DatePicker,
-            DateTimePicker,
-            ConstraintDialog
-        };
+    DateTimePicker,
+    ConstraintDialog
+};

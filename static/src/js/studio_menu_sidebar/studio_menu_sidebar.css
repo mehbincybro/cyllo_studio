@@ -8,34 +8,45 @@
 }
 
 .cy-new-app-btn {
-    justify-content: center;
+    justify-content: start;
     color: #BCBBA7;
     background: transparent !important;
     border: none;
     transition: color 0.2s ease;
     padding: 0 !important;
+    padding-left: 14.8px !important;
 }
+
 
 .cy-new-app-btn:hover {
     color: #fff;
 }
 
-.cy-new-app-icon {
+.menuListFixed .cy-new-app-btn {
+    padding: 0 !important;
+    padding-left: 0 !important;
     font-size: 28px;
+
+    .cy-new-app-icon {
+        background: #363827;
+        width: 40px;
+    }
+
+    .cy-new-app-icon:hover {
+        background: #373627;
+    }
+}
+
+.cy-new-app-icon {
+    font-size: 34px;
     line-height: 1;
-    width: 40px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: none !important;
-    background: #363827;
+    background: transparent;
     border-radius: 5px;
-}
-
-.cy-new-app-icon:hover {
-    background: #373627;
-
 }
 
 /* parent dialog */
