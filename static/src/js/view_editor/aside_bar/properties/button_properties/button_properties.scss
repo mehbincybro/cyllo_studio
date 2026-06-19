@@ -1,17 +1,21 @@
 .button_properties {
-    background-color:unset; ;
+    background-color: unset;
+    ;
     border-radius: 10px;
     padding: 20px 11.5px 5px 17px;
     color: #ffffff;
     font-size: 14px;
     line-height: 1.4;
     margin: 0px !important;
-    .ui-widget.ui-autocomplete{
+
+    .ui-widget.ui-autocomplete {
         width: 245px;
     }
-    .dropdown-checkbox-container{
-        margin-top:6px;
+
+    .dropdown-checkbox-container {
+        margin-top: 6px;
     }
+
     .form-group {
         margin-bottom: 20px;
         display: flex;
@@ -34,15 +38,18 @@
             gap: 10px;
         }
     }
-     .cy-studio-custom-dropdown .custom-dropdown ul{
-         top:35px;
-        }
-     .cy-input-background-color .custom_selection_dropdown{
-         position:absolute;
-         z-index:1;
-         width:90%;
-         margin-top: 0%;
-         }
+
+    .cy-studio-custom-dropdown .custom-dropdown ul {
+        top: 35px;
+    }
+
+    .cy-input-background-color .custom_selection_dropdown {
+        position: absolute;
+        z-index: 1;
+        width: 90%;
+        margin-top: 0%;
+    }
+
     .cy-input {
         width: 100%;
         background-color: #32352a !important;
@@ -51,61 +58,71 @@
         color: #BCBBA7 !important;
         transition: all 0.2s ease;
         font-size: 13px;
-        &[readonly]{
+
+        &[readonly] {
             color: #85857d !important;
-            }
+        }
+
         &:focus {
             border-color: #555;
             outline: none;
             box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.1);
         }
     }
-.cy-input::placeholder{
-    color:#919074 !important;
+
+    .cy-input::placeholder {
+        color: #919074 !important;
     }
+
     .cy-input-icon {
         height: 34px;
     }
-    .o_multi_record_selector{
+
+    .o_multi_record_selector {
         border: unset;
     }
-    .cy-studio-custom-dropdown-action{
+
+    .cy-studio-custom-dropdown-action {
         background-color: #32352a !important;
         border: 1px solid #474a3a !important;
         border-radius: 3px;
         height: 35px;
 
-        .o_record_selector{
+        .o_record_selector {
             border: unset;
-            padding:4px !important;
+            padding: 4px !important;
         }
-       .o_record_selector .dropdown input{
-           padding:4px !important;
-           padding-left:1px !important;
-           font-size: 13px !important;
-           font-family: inter, sans-serif;
-           }
 
-       .o_record_selector .dropdown ul{
-           border: none !important;
-           font-family: inter, sans-serif !important;
-           font-size: 13px !important;
-           }
-       .o_record_selector .dropdown ul .o_m2o_dropdown_option a{
-           color: #7c8a00 !important;
-           }
+        .o_record_selector .dropdown input {
+            padding: 4px !important;
+            padding-left: 1px !important;
+            font-size: 13px !important;
+            font-family: inter, sans-serif;
+        }
+
+        .o_record_selector .dropdown ul {
+            border: none !important;
+            font-family: inter, sans-serif !important;
+            font-size: 13px !important;
+        }
+
+        .o_record_selector .dropdown ul .o_m2o_dropdown_option a {
+            color: #7c8a00 !important;
+        }
     }
 
-.cy-studio-visible-to-drop-align .o_multi_record_selector .dropdown{
-    input{
-       color:#BCBBA7 !important;
-       }
-    ul{
-        background-color: #2a2a2a !important;
-        border: none;
-        a{
-        color: #BCBBA7;
+    .cy-studio-visible-to-drop-align .o_multi_record_selector .dropdown {
+        input {
+            color: #BCBBA7 !important;
         }
+
+        ul {
+            background-color: #2a2a2a !important;
+            border: none;
+
+            a {
+                color: #BCBBA7;
+            }
         }
     }
 
@@ -130,12 +147,14 @@
             color: #BCBBA7;
             font-size: 14px;
         }
-        .d-flex{
-                border: unset !important;
-                margin-bottom: 0px;
-                background: #32352a !important;
 
-            }
+        .d-flex {
+            border: unset !important;
+            margin-bottom: 0px;
+            background: #32352a !important;
+
+        }
+
         svg {
             position: absolute;
             right: 15px;
@@ -147,14 +166,19 @@
         }
 
     }
-.custom-dropdown .o-autocomplete .d-flex input, .custom-dropdown.o-autocomplete .d-flex input::placeholder{
-    color:#919074 !important;
+
+    .custom-dropdown .o-autocomplete .d-flex input,
+    .custom-dropdown.o-autocomplete .d-flex input::placeholder {
+        color: #919074 !important;
     }
 
-.cy-button-custom {
-    .d-flex{
-        paddig-left: 1px;
-        span{color: #BCBBA7 !important;}
+    .cy-button-custom {
+        .d-flex {
+            paddig-left: 1px;
+
+            span {
+                color: #BCBBA7 !important;
+            }
         }
 
     }
@@ -183,38 +207,43 @@
             color: white !important;
         }
     }
-    .cy-btn_save{
+
+    .cy-btn_save {
         background-color: #9ea700;
-    color: #fff;
-    border: 1px solid #9ea700;
-    padding: 8px 20px;
-    border-radius: 3px;
-    box-shadow: none;
-    }
-.cy-btn_save:focus{
-    background-color: #9ea700;
-}
-    .cy-cancel_btn{
-          padding: 8px 20px;
-    border-radius: 3px;
-    border: 1px solid #BCBBA7;
-    color: #BCBBA7;
-    font-weight: 500;
-    background-color: transparent;
+        color: #fff;
+        border: 1px solid #9ea700;
+        padding: 8px 20px;
+        border-radius: 3px;
+        box-shadow: none;
     }
 
-   .cy-cancel_btn:focus{
-    background-color: transparent;
-}
-    .cy-studio-button-properties-icon{
+    .cy-btn_save:focus {
+        background-color: #9ea700;
+    }
+
+    .cy-cancel_btn {
+        padding: 8px 20px;
+        border-radius: 3px;
+        border: 1px solid #BCBBA7;
+        color: #BCBBA7;
+        font-weight: 500;
+        background-color: transparent;
+    }
+
+    .cy-cancel_btn:focus {
+        background-color: transparent;
+    }
+
+    .cy-studio-button-properties-icon {
         background-color: #32352a !important;
-        }
+    }
+
     .overall_container_list {
         display: flex;
         align-items: center;
         margin-top: 20px;
         gap: 15px;
-        padding:3px !important;
+        padding: 3px !important;
 
         .round {
             display: flex;
@@ -257,7 +286,7 @@
         border: 1px solid #444;
         border-radius: 6px;
         overflow: auto;
-        max-height:16rem;
+        max-height: 16rem;
         margin-top: 10px;
         z-index: 999;
         margin-top: 0%;

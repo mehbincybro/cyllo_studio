@@ -98,10 +98,9 @@ export class CylloListRenderer extends listView.Renderer {
         allFields: this.props.list.fields,
         activeFields: this.props.list.activeFields,
       });
-      const isGrouped = this.props.list.isGrouped;
-       const self = this
+      const self = this
        const treeEl = self.list_trRef.el
-       if (self.props.activeActions.type === "view" && !isGrouped && treeEl) {
+       if (self.props.activeActions.type === "view" && treeEl) {
        // Odoo-style column drag: a floating clone follows the cursor and a
        // drop indicator marks the target column. The real headers do NOT
        // reshuffle while dragging — the move is committed on drop via RPC +
@@ -480,6 +479,10 @@ export class CylloListRenderer extends listView.Renderer {
       }
     });
   }
+  get getEmptyRowIds() {
+    return [];
+  }
+
   getCellClass(column, record) {
     		let classes = super.getCellClass(...arguments)
     		    if (column.widget == "handle") {
@@ -492,6 +495,8 @@ CylloListRenderer.template = "cyllo_studio.CylloListRenderer";
 CylloListRenderer.rowsTemplate = "cyllo_studio.CylloListRenderer.Rows";
 CylloListRenderer.recordRowTemplate =
   "cyllo_studio.CylloListRenderer.RecordRow";
+CylloListRenderer.groupRowTemplate =
+  "cyllo_studio.CylloListRenderer.GroupRow";
 
 CylloListRenderer.components = {
   ...listView.Renderer.components,

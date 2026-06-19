@@ -4,20 +4,17 @@ $placeholder-color: #757575;
 
 
 :root {
-    --custom-dropdown-bg: #2e2e2e;
-    --custom-dropdown-border: #2e2e2e;
-    --custom-dropdown-color: #BCBBA7;
-
+  --custom-dropdown-bg: #2d2d20;
+  --custom-dropdown-border: #2e2e2e;
+  --custom-dropdown-color: #BCBBA7;
+  --input-background-color: #373627;
+  --input-border-color: #4b4934;
+  --text-color: #e2e2e2;
 }
 
-.light-studio-mode {
-
-    --custom-dropdown-bg: #fff;
-    --custom-dropdown-border: #c7c3c3;
-    --custom-dropdown-color: #000;
-}
-.custom-dropdown.o-autocomplete .d-flex input ,.custom-dropdown.o-autocomplete .d-flex input::placeholder {
-    color:#dedede !important;
+.custom-dropdown.o-autocomplete .d-flex input,
+.custom-dropdown.o-autocomplete .d-flex input::placeholder {
+  color: #dedede !important;
 }
 
 
@@ -25,6 +22,7 @@ $placeholder-color: #757575;
   width: 100%;
   font-family: 'inter', sans-serif;
   cursor: pointer;
+
   .d-flex {
     display: flex;
     align-items: start;
@@ -33,17 +31,20 @@ $placeholder-color: #757575;
     border-bottom: 1px solid $border-color;
     transition: border-color 0.3s ease;
 
-    &:hover, &:focus-within {
+    &:hover,
+    &:focus-within {
       border-bottom-color: $primary-color;
     }
 
-    input, .selected-text {
+    input,
+    .selected-text {
       flex-grow: 1;
       border: none;
       font-size: 13px;
       color: rgba(0, 0, 0, 0.87);
       outline: none;
       background: transparent;
+
       &::placeholder {
         color: $placeholder-color;
         opacity: 1;
@@ -64,6 +65,7 @@ $placeholder-color: #757575;
     border: 1px solid $border-color;
     border-top: none;
     min-width: 320px;
+
     .o-autocomplete--dropdown-item {
 
       a {
@@ -87,74 +89,107 @@ $placeholder-color: #757575;
   }
 }
 
-.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu{
-    margin-top: -9px;
-    margin-left: -5px;
-    width: 100%;
-    background: var(--custom-dropdown-bg) !important;
-    border: 1px solid var(--custom-dropdown-border);
-    border-top: none;
-    position: absolute !important;
-    min-width: 0px !important;
-    animation: dropdownFadeSlide 0.5s ease;
-    }
-.cy-studio-custom-dropdown span{
-    color: #BCBBA7 !important;
-    margin-top: 2px;
-    }
-.cy-studio-custom-dropdown i{
-    margin-top: 5px;
-    color: #BCBBA7 !important;
-    margin-right: 6px;
-    }
-/* Calendar View Over all View Field */
-@keyframes dropdownFadeSlide {
-    0% {
-        opacity: 0;
-        transform: translateY(-10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.cy-studio-custom-dropdown {
+  width: 100%;
+  border: 1px solid var(--input-border-color) !important;
+  background-color: var(--input-background-color) !important;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  padding: 0.315rem 10px;
+
+  div.d-flex {
+    background-color: transparent !important;
+    border: none !important;
+  }
 }
 
-
-.cy-studio-custom-dropdown .d-flex{
-    width: 100%;
-    border: 1px solid #474a3a !important;
-    background-color: #32352a !important;
-    border-radius: 3px;
-    margin-bottom: 0.5rem;
-    padding: 0.315rem;
-    }
-.cy-studio-custom-dropdown{
-    position: relative;
+.cy-studio-custom-dropdown-action ul {
+  background: #2a2a2a;
+  width: 14%;
+  margin-left: -3px;
+  margin-top: 6px;
 }
 
-.cy-drop-down{
-    border: 1px solid #dfdfdf !important;
-    border-radius: 3px;
-    margin-top: 5px;
-
+.cy-studio-custom-dropdown-action a,
+.cy-studio-custom-dropdown-action input {
+  color: var(--text-color) !important;
 }
-.cy-drop-down .o-dropdown{
-   width: 100%;
+
+.cy-drop-down {
+  border: 1px solid var(--input-border-color) !important;
+  background-color: var(--input-background-color) !important;
+  border-radius: 8px;
+}
+
+.cy-drop-down {
+  border: 1px solid #dfdfdf !important;
+  border-radius: 3px;
+}
+
+.cy-drop-down .o-dropdown {
+  width: 100%;
 }
 
 .cy-drop-down button {
-    background-color: #fff;
-    border: none;
-    width: 100%
+  background-color: #fff;
+  border: none;
+  width: 100%
+}
+
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
+  margin-top: 4px !important;
+  margin-left: 0;
+  left: 0 !important;
+  width: 100%;
+  background: var(--custom-dropdown-bg) !important;
+  border: 1px solid var(--input-border-color);
+  position: absolute !important;
+  min-width: 0px !important;
+  animation: dropdownFadeSlide 0.5s ease;
+  scrollbar-width: auto !important;
+  border-radius: 8px;
+}
+
+.cy-studio-custom-dropdown .o-autocomplete--input.o_input.input_drop[disabled] {
+  color: #85857d !important
+}
+
+.cy-studio-custom-dropdown span {
+  color: var(--text-color) !important;
+  margin-top: 2px;
+}
+
+.cy-studio-custom-dropdown i {
+  margin-top: 5px;
+  color: var(--text-color) !important;
+  margin-right: 6px;
+}
+
+/* Calendar View Over all View Field */
+@keyframes dropdownFadeSlide {
+  0% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.cy-studio-custom-dropdown {
+  position: relative;
 }
 
 .cy-activity-dropdown {
   .custom-dropdown.o-autocomplete {
     .o-autocomplete--dropdown-menu {
       background-color: #ffffff;
-      top:unset !important;
-      left:unset !important;
-       margin-top:unset !important;
+      top: unset !important;
+      left: unset !important;
+      margin-top: unset !important;
       border: 1px solid #e2e2e2;
       position: absolute !important;
       width: 237px;

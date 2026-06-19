@@ -23,6 +23,7 @@
 .cyst1 .modal-body {
     overflow: visible !important;
 }
+
 .cyst1 .modal-header {
     font-size: 28px;
     border: none;
@@ -30,7 +31,8 @@
 }
 
 .cyst1 .modal-header span {
-    color: #a0a800; /* Green color for the first span */
+    color: #a0a800;
+    /* Green color for the first span */
     font-weight: bold;
     font-size: 28px;
     font-family: var(--inter-sans);
@@ -40,7 +42,8 @@
     font-weight: bold;
     font-size: 28px;
     font-family: var(--inter-sans);
-    margin-left: 10px; /* Adjust the gap as needed */
+    margin-left: 10px;
+    /* Adjust the gap as needed */
 }
 
 
@@ -64,7 +67,7 @@
     font-weight: 700;
     color: hsl(244, 11%, 29%);
     padding-left: 0;
-    font-family:'Inter', sans-serif;
+    font-family: 'Inter', sans-serif;
 
 }
 
@@ -86,7 +89,8 @@
 }
 
 
-.cyst1 .nav-tabs .nav-link:hover, .nav-tabs2 .nav-link:hover {
+.cyst1 .nav-tabs .nav-link:hover,
+.nav-tabs2 .nav-link:hover {
     border-top-color: transparent;
     /* border-bottom-color: transparent; */
     border-left-color: transparent;
@@ -156,7 +160,8 @@ option {
 
     background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>') no-repeat right .75rem center / 8px 10px;
     background-size: 18px 18px;
-    padding-right: 30px; /* Adjust based on arrow size */
+    padding-right: 30px;
+    /* Adjust based on arrow size */
 }
 
 /* Custom Radio Button */
@@ -164,7 +169,7 @@ option {
     display: none;
 }
 
-.cyst1 .custom-radio + .custom-radio-label {
+.cyst1 .custom-radio+.custom-radio-label {
     position: relative;
     padding-left: 20px;
     cursor: pointer;
@@ -173,7 +178,7 @@ option {
     user-select: none;
 }
 
-.cyst1 .custom-radio + .custom-radio-label::before {
+.cyst1 .custom-radio+.custom-radio-label::before {
     content: "";
     position: absolute;
     left: 0;
@@ -185,11 +190,11 @@ option {
     background: white;
 }
 
-.cyst1 .custom-radio:checked + .custom-radio-label::before {
+.cyst1 .custom-radio:checked+.custom-radio-label::before {
     border: 1px solid #a0a800;
 }
 
-.cyst1 .custom-radio:checked + .custom-radio-label::after {
+.cyst1 .custom-radio:checked+.custom-radio-label::after {
     content: "";
     position: absolute;
     left: 3px;
@@ -237,22 +242,25 @@ option {
     border-bottom: 1px solid #353535 !important;
     transition: border-color 0.3s ease;
 }
+
 .cyst1 #myTabContent .o_multi_record_selector:hover {
-   outline: none !important;
-    border-color: #9EA700 !important;
-    box-shadow: none;
-}
-
-.cyst1 #myTabContent .o_record_selector .o_input{
-    border-bottom: 1px solid #353535 !important;
-        transition: border-color 0.3s ease;
-
-}
-.cyst1 #myTabContent .o_record_selector .o_input:hover{
     outline: none !important;
     border-color: #9EA700 !important;
     box-shadow: none;
 }
+
+.cyst1 #myTabContent .o_record_selector .o_input {
+    border-bottom: 1px solid #353535 !important;
+    transition: border-color 0.3s ease;
+
+}
+
+.cyst1 #myTabContent .o_record_selector .o_input:hover {
+    outline: none !important;
+    border-color: #9EA700 !important;
+    box-shadow: none;
+}
+
 /*.o_multi_record_selector{*/
 /*    border-bottom: 1px solid #ccc !important;*/
 /*}*/
@@ -262,7 +270,7 @@ option {
     width: 100%;
     padding: 2px;
     border-radius: 0 !important;
-    font-size:14px !important;
+    font-size: 14px !important;
     /* border: 2px solid #9EA700; */
     font-family: 'Inter', sans-serif;
     border: none;
@@ -297,7 +305,9 @@ option {
     top: 4px;
 }
 
-.cyst1 #myTabContent input:focus, #myTabContent input:hover, #myselect:hover {
+.cyst1 #myTabContent input:focus,
+#myTabContent input:hover,
+#myselect:hover {
     outline: none !important;
     border-color: #9EA700 !important;
     box-shadow: none;
@@ -307,7 +317,8 @@ option {
     font-family: 'Plus Jakarta Sans', sans-serif !important;
 }
 
-.cyst1 #profile input, #profile select {
+.cyst1 #profile input,
+#profile select {
     padding-left: 2px !important;
     padding-top: 0.6rem !important;
     border-radius: 0 !important;
@@ -318,7 +329,8 @@ option {
     padding: 2px !important;
 }
 
-.cyst1 #profile input[readonly], #profile select[readonly] {
+.cyst1 #profile input[readonly],
+#profile select[readonly] {
     opacity: 0.5;
     color: #636e79;
     border-bottom: 1px solid #636e79 !important;
@@ -334,7 +346,10 @@ option {
 /*    border-bottom: 1px solid #636e79 !important;*/
 /*}*/
 
-.cyst1 #profile input:focus, #profile select:hover, #profile input:hover, #profile select:focus {
+.cyst1 #profile input:focus,
+#profile select:hover,
+#profile input:hover,
+#profile select:focus {
     outline: none !important;
     border-color: #9EA700 !important;
     box-shadow: none;
@@ -396,7 +411,8 @@ option {
     box-shadow: none;
 }
 
-.cyst1 .btn-outline-primary:not(:disabled):not(.disabled):active, .icon-group .icon-group.btn-secondary:not(:disabled):not(.disabled):active {
+.cyst1 .btn-outline-primary:not(:disabled):not(.disabled):active,
+.icon-group .icon-group.btn-secondary:not(:disabled):not(.disabled):active {
     background-color: #a0a800 !important;
 }
 
@@ -493,21 +509,21 @@ option {
     display: none;
 }
 
-.customCheckbox + .customCheckbox-label {
+.customCheckbox+.customCheckbox-label {
     position: relative;
     display: inline-block;
     padding-left: 20px;
     cursor: pointer;
 }
 
-.nolabel + .cstnolabel {
+.nolabel+.cstnolabel {
     position: relative;
     display: inline !important;
     padding-left: 20px;
     cursor: pointer;
 }
 
-.customCheckbox + .customCheckbox-label::before {
+.customCheckbox+.customCheckbox-label::before {
     content: "";
     position: absolute;
     width: 15px;
@@ -518,13 +534,13 @@ option {
     border-width: 1px;
 }
 
-.customCheckbox:checked + .customCheckbox-label::before {
+.customCheckbox:checked+.customCheckbox-label::before {
     border: solid #a0a800;
     border-width: 1px;
     background-color: #a0a800;
 }
 
-.customCheckbox + .customCheckbox-label::after {
+.customCheckbox+.customCheckbox-label::after {
     content: "";
     position: absolute;
     display: none;
@@ -537,7 +553,7 @@ option {
     transform: rotate(45deg);
 }
 
-.customCheckbox:checked + .customCheckbox-label::after {
+.customCheckbox:checked+.customCheckbox-label::after {
     display: block;
 }
 
@@ -582,10 +598,14 @@ option {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 235px; /* Set a desired width */
-    height: 50px; /* Set a desired height */
-    padding: 10px; /* Adjust padding as needed */
-    font-size: 28px; /* Adjust font size as needed */
+    width: 235px;
+    /* Set a desired width */
+    height: 50px;
+    /* Set a desired height */
+    padding: 10px;
+    /* Adjust padding as needed */
+    font-size: 28px;
+    /* Adjust font size as needed */
 }
 
 .custom-button:hover {
@@ -594,7 +614,8 @@ option {
 }
 
 .custom-button i {
-    margin-right: 8px; /* Adjust the space between icon and text */
+    margin-right: 8px;
+    /* Adjust the space between icon and text */
 }
 
 
@@ -645,7 +666,8 @@ option {
     flex-wrap: wrap;
     overflow-y: auto;
     max-height: 750px;
-    padding: 10px; /* Add some padding to create space for the scrollbar */
+    padding: 10px;
+    /* Add some padding to create space for the scrollbar */
 
 }
 
@@ -714,7 +736,8 @@ option {
 }
 
 /* Custom button */
-.btn-outline-primary:not(:disabled):not(.disabled):active, .btn-st-custom:not(:disabled):not(.disabled):active {
+.btn-outline-primary:not(:disabled):not(.disabled):active,
+.btn-st-custom:not(:disabled):not(.disabled):active {
     background-color: #a0a800;
 }
 
@@ -761,6 +784,7 @@ option {
     justify-content: center;
     grid-column-gap: 15px;
 }
+
 @media (max-width: 100px) {
     .btn_group_custom {
         display: grid;
@@ -861,39 +885,37 @@ option {
     color: #769000;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx {
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx {
     background-color: #9ea700;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child {
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx span:first-child {
     /*border-color: #94b300;
     background: #94b300;*/
     animation: check-15 0.6s ease;
     color: #fbfbf8;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child svg {
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx span:first-child svg {
     stroke-dashoffset: 0;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx span:first-child:before {
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx span:first-child:before {
     transform: scale(2.2);
     opacity: 0;
     transition: all 0.6s ease;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx span:last-child {
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx span:last-child {
     color: #fbfbf8;
     transition: all 0.3s ease;
 }
 
-.checkbox-wrapper-15 .inp-cbx:checked + .cbx span:last-child:after {
-
-}
+.checkbox-wrapper-15 .inp-cbx:checked+.cbx span:last-child:after {}
 
 @keyframes check-15 {
     50% {
-    transform: scale(1.2);
+        transform: scale(1.2);
     }
 }
 
@@ -953,14 +975,17 @@ li.nav-item span svg {
 .nav-tabs .access_active {
     margin-bottom: -2px;
 }
+
 .cy-app-install-onboarding-card__input.record_rule_name {
     border: 1px solid #353535;
 }
-.cy-app-install-onboarding-card__input{
+
+.cy-app-install-onboarding-card__input {
     border-bottom: 1px solid #353535 !important;
 }
 
-.cy-app-install-onboarding-card__input.record_rule_name:focus, .cy-app-install-onboarding-card__input.record_rule_name:hover{
+.cy-app-install-onboarding-card__input.record_rule_name:focus,
+.cy-app-install-onboarding-card__input.record_rule_name:hover {
     border: 2px solid #9EA700 !important;
 }
 
@@ -982,7 +1007,7 @@ li.nav-item span svg {
     border-bottom: 1px solid #353535;
     position: relative;
     padding-left: 3px !important;
-    transition:border-color 0.3s ease;
+    transition: border-color 0.3s ease;
 }
 
 .position-dropdown-options {
@@ -1013,7 +1038,9 @@ li.nav-item span svg {
     background-color: #f1f1f1;
 }
 
-.position-dropdown-selected:hover, .position-dropdown-selected:focus, .position-dropdown-selected:focus-visible {
+.position-dropdown-selected:hover,
+.position-dropdown-selected:focus,
+.position-dropdown-selected:focus-visible {
     outline: none !important;
     border-color: #9EA700 !important;
     box-shadow: none;
@@ -1022,9 +1049,10 @@ li.nav-item span svg {
 
 
 
-.show{
-    display:block !important;
-    }
+.show {
+    display: block !important;
+}
+
 .down-arrow {
     position: relative;
 }
@@ -1038,6 +1066,7 @@ li.nav-item span svg {
     right: 0;
     top: 4px;
 }
+
 .model-dropdown {
     position: relative;
     width: auto;
@@ -1070,12 +1099,14 @@ li.nav-item span svg {
     display: none;
     z-index: 1000;
 }
-.default-view-field{
-    .custom-dropdown.o-autocomplete .d-flex .selected-text{
-    font-size:14px;
-    font-style:inter,sans-serif;
-       }
+
+.default-view-field {
+    .custom-dropdown.o-autocomplete .d-flex .selected-text {
+        font-size: 14px;
+        font-style: inter, sans-serif;
     }
+}
+
 .model-dropdown-option {
     cursor: pointer;
     padding-top: 5px;
@@ -1090,32 +1121,44 @@ li.nav-item span svg {
     background-color: #f1f1f1;
 }
 
-.model-dropdown-selected:hover, .model-dropdown-selected:focus, .model-dropdown-selected:focus-visible {
+.model-dropdown-selected:hover,
+.model-dropdown-selected:focus,
+.model-dropdown-selected:focus-visible {
     outline: none !important;
     border-color: #9EA700 !important;
     box-shadow: none;
 }
 
-.default-view-field{
+.default-view-field {
     font-family: inter, sans-serif !important;
     font-size: 14px;
-    }
+}
+
 .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
-    margin-top:0px !important;
+    margin-top: 0px !important;
     background-color: #ffffff;
     border: 1px solid #e2e2e2;
-    position: absolute !important; /* Ensure absolute positioning */
-    top: 100% !important; /* Place dropdown just below the input */
-    left: 2px !important; /* Align with the left of the parent */
-    width: 379px; /* Set the desired width */
+    position: absolute !important;
+    /* Ensure absolute positioning */
+    top: 100% !important;
+    /* Place dropdown just below the input */
+    left: 2px !important;
+    /* Align with the left of the parent */
+    width: 379px;
+    /* Set the desired width */
     max-height: 1000%;
-    margin-left: 0; /* No additional margin needed */
-    z-index: 99999 !important; /* Make sure dropdown is above the modal and footer */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow for better visibility */
-//     overflow: visible; /* Ensure content is fully visible */
+    margin-left: 0;
+    /* No additional margin needed */
+    z-index: 99999 !important;
+    /* Make sure dropdown is above the modal and footer */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Add shadow for better visibility */
+    //     overflow: visible; /* Ensure content is fully visible */
 }
-.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu{
-    margin-top: -9px; /*To check the dropbox alignment*/
+
+.cy-studio-custom-dropdown .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
+    margin-top: -9px;
+    /*To check the dropbox alignment*/
     margin-left: -5px;
     width: 100%;
     background: #2e2e2e !important;
@@ -1155,7 +1198,8 @@ li.nav-item span svg {
     flex-wrap: wrap;
     overflow-y: auto;
     max-height: 750px;
-    padding: 10px; /* Add some padding to create space for the scrollbar */
+    padding: 10px;
+    /* Add some padding to create space for the scrollbar */
 
 }
 
@@ -1222,23 +1266,28 @@ li.nav-item span svg {
 .cyst1 .custom-file-upload-parentmenu input[type="file"] {
     display: none;
 }
+
 .cy-new-app-install-onboarding-card__input {
     border: unset !important;
 }
-.cyst1 .access_records td{
-    border:none !important;
+
+.cyst1 .access_records td {
+    border: none !important;
 }
+
 .cyst1 .access_records td:first-child {
     width: 60%;
 }
+
 .cyst1 .access_records .table tbody {
     border-left: 1px solid #ccc;
     border-right: 1px solid #ccc;
 }
+
 // .cyst1 .o_input{
 //     border:none !important;
 //     border-bottom: 1px solid black !important;
 // }
 .cyst1 .o_record_selector:hover .o_dropdown_button:after {
-    content:unset;
+    content: unset;
 }

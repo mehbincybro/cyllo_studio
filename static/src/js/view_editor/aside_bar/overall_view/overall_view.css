@@ -2,7 +2,7 @@
     /* Dark mode variables */
     --checkbox-border-color: #c5c5c5;
     --checkbox-bg-color: #9EA700;
-    --checkbox-text-color: #c5c5c5;
+    --checkbox-text-color: #e2e2e2;
     --checkbox-checked-text-color: #fff;
     --checkbox-indicator-bg-color: hsl(93, 52%, 52%);
     --components-container-bg: #222222;
@@ -11,27 +11,6 @@
     --cy-components-column-color: 000000;
     --cy-components-span: #dfe0ce;
 
-}
-
-.light-studio-mode {
-    /* Light mode variables */
-    --checkbox-border-color: #B9B8C3;
-    --checkbox-bg-color: #9EA700;
-    --checkbox-text-color: #4b4a43;
-    --checkbox-checked-text-color: #000000;
-    --checkbox-indicator-bg-color: hsl(93, 52%, 52%);
-    --components-container-bg: #e6e6e6;
-    --components-container-color: #000;
-    --cy-components-column-bg: #ebebeb;
-    --cy-components-column-color: 000000;
-    --cy-components-span: #cfcfcf;
-
-}
-
-.list-container {
-    display: flex;
-    flex-direction: column;
-    margin: 14px;
 }
 
 .list-checkbox-group {
@@ -96,27 +75,29 @@
     margin-left: 8px;
     color: var(--checkbox-text-color);
 }
-.cy-overall-label{
-        color: var(--checkbox-text-color);
+
+.cy-overall-label {
+    color: var(--checkbox-text-color);
 
 }
-.checkbox-input:checked + .checkbox-label .checkbox-indicator {
+
+.checkbox-input:checked+.checkbox-label .checkbox-indicator {
     border-color: var(--checkbox-bg-color);
     background: var(--checkbox-bg-color);
     animation: check-15 0.6s ease;
 }
 
-.checkbox-input:checked + .checkbox-label .checkbox-indicator svg {
+.checkbox-input:checked+.checkbox-label .checkbox-indicator svg {
     stroke-dashoffset: 0;
-    width:10px;
+    width: 10px;
 }
 
-.checkbox-input:checked + .checkbox-label .checkbox-indicator:before {
+.checkbox-input:checked+.checkbox-label .checkbox-indicator:before {
     transform: scale(1.6);
     opacity: 0;
 }
 
-.checkbox-input:checked + .checkbox-label .checkbox-text {
+.checkbox-input:checked+.checkbox-label .checkbox-text {
     color: var(--checkbox-checked-text-color);
 }
 
@@ -126,57 +107,74 @@
     }
 }
 
-.components-container{
+.components-container {
     background-color: transparent;
     text-align: left;
     padding: 8px;
     color: var(--components-container-color);
 }
-.components-title{
-    color:var(--checkbox-text-color);
-    font-size:15px;
+
+.components-title {
+    color: var(--checkbox-text-color);
+    font-size: 15px;
 }
+
 .cy-studio-columns {
-   display: flex;
-    flex-direction: column; /* Stack elements vertically */
+    display: flex;
+    flex-direction: column;
+    /* Stack elements vertically */
     margin: 14px;
     gap: 10px;
 }
-.cy-components-row{
+
+.cy-components-row {
     display: flex;
-    align-items: center; /* Vertically align icons and text */
+    align-items: center;
+    /* Vertically align icons and text */
     border-radius: 6px;
     cursor: move;
     background: var(--cy-components-column-bg);
-    margin-bottom: 5px; /* Space between rows */
-    padding: 10px; /* Padding inside the row */
-    width: 90%; /* Full width */
-    box-sizing: border-box; /* Include padding in the width */
+    margin-bottom: 5px;
+    /* Space between rows */
+    padding: 10px;
+    /* Padding inside the row */
+    width: 90%;
+    /* Full width */
+    box-sizing: border-box;
+    /* Include padding in the width */
 }
 
 .cy-components-column {
     display: flex;
-    align-items: center; /* Vertically align icons and text */
-    justify-content: flex-start; /* Align items to the start of the container */
+    align-items: center;
+    /* Vertically align icons and text */
+    justify-content: flex-start;
+    /* Align items to the start of the container */
     color: var(--cy-components-column-color);
 }
 
 .cy-components-text {
-   text-align: left;
-    margin-left: 0; /* Remove extra margin */
+    text-align: left;
+    margin-left: 0;
+    /* Remove extra margin */
     font-size: 14px;
     color: var(--cy-components-column-color);
 }
-.cy-components-span{
+
+.cy-components-span {
     background-color: var(--cy-components-span);
-    height: 24px; /* Adjust icon size */
-    width: 24px; /* Adjust icon size */
+    height: 24px;
+    /* Adjust icon size */
+    width: 24px;
+    /* Adjust icon size */
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 6px 0 0 6px;
-    margin-right: 10px; /* Space between icon and text */
+    margin-right: 10px;
+    /* Space between icon and text */
 }
+
 .plus_input {
     background: #00000000;
     border: none;
@@ -184,13 +182,17 @@
     left: 97%;
     color: var(--checkbox-text-color);
 }
-.dropdown_pivot_overall{
+
+.dropdown_pivot_overall {
     position: relative;
 }
-.dropdown-overall{
+
+.dropdown-overall {
     position: absolute;
 }
-#columnGrouping .o-dropdown--menu, #columnGrouping .dropdown-item{
+
+#columnGrouping .o-dropdown--menu,
+#columnGrouping .dropdown-item {
     background-color: #2e2e2e !important;
     color: #d6d6d6 !important;
     width: 15.5%;
@@ -202,7 +204,8 @@
     max-height: 400px;
 }
 
-#rowGrouping .o-dropdown--menu, #columnGrouping .dropdown-item{
+#rowGrouping .o-dropdown--menu,
+#columnGrouping .dropdown-item {
     background-color: #2e2e2e !important;
     color: #d6d6d6 !important;
     width: 15.5%;
@@ -213,26 +216,29 @@
     max-height: 400px;
 }
 
-.kanban-input-container{
+.kanban-input-container {
     margin-top: 0.3rem;
     display: flex;
     overflow: hidden;
     padding: 0 1px;
 
-    .cy-drag_edit-btn{
+    .cy-drag_edit-btn {
         background-color: #32352a !important;
         border: 1px solid #474a3a;
-        i{
+
+        i {
             color: #BCBBA7 !important;
         }
     }
 }
-.kanban-input--box{
+
+.kanban-input--box {
     background-color: #32352a !important;
     border: 1px solid #474a3a !important;
     border-radius: 3px;
     color: #BCBBA7 !important;
 }
+
 .cy-drag_edit-btn {
     padding: 0.25rem 0.5rem;
     border-radius: 3px;
@@ -240,9 +246,7 @@
     color: #9EA700;
     margin-left: 0.2rem;
 
-    i{
-      color: #495057 !important;
+    i {
+        color: #495057 !important;
     }
 }
-
- 

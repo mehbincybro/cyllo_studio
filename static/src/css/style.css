@@ -1,13 +1,3 @@
-/*body*/
-/*.o_web_client {
-    background-color: #e0e1dd !important;
-}*/
-
-.o_content {
-    overflow: auto;
-    height: 90vh;
-}
-
 .cy-studio .o_action {
     display: flex;
 
@@ -15,6 +5,10 @@
 
 .o_action_manager .o_action {
     flex-direction: column;
+}
+
+.o_content>div {
+    box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
 }
 
 /* List View */
@@ -508,6 +502,7 @@ body.cy-show-invisible .cy-studio-striped {
     transition: all 0.3s ease;
 }
 
+.cy-new-app-btn
 /* kanban div  */
 
 .cy-component-container {
@@ -619,9 +614,10 @@ div[data-drag="1"]:empty {
     width: unset;
 }
 
-.o_kanban_renderer.o_kanban_ungrouped .o_kanban_record {
-    width: unset !important;
-}
+/* .o_kanban_renderer.o_kanban_ungrouped .o_kanban_record {
+    width: 500px !important;
+    max-width: 500px;
+} */
 
 .cy-studio div#require_payment {
     display: flex;
