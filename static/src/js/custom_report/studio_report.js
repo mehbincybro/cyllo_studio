@@ -1247,13 +1247,14 @@ export class EditReport extends Component {
 
                 if (type === 'box') {
                     const boxId = 'box_' + Math.random().toString(36).slice(2, 10);
-                    const cfg = { id: boxId, label: 'Section', style: { width: 280, height: 160, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8 }, layoutMode: 'free', children: [] };
+                    const cfg = { id: boxId, label: 'Section', style: { width: 280, height: 160, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8, marginTop: 16 }, layoutMode: 'free', children: [] };
                     item.className = 'box-section-wrapper c_new';
                     item.setAttribute('cy-type', 'box');
                     item.setAttribute('data-box-id', boxId);
                     item.setAttribute('data-box-config', JSON.stringify(cfg));
                     item.style.width = cfg.style.width + 'px';
                     item.style.height = cfg.style.height + 'px';
+                    item.style.marginTop = cfg.style.marginTop + 'px';
                     item.style.opacity = '1';
                     item.innerHTML = self._buildBoxInnerHTML(cfg);
                     item.querySelector('.box-delete-btn').onclick = (e) => {
@@ -1488,7 +1489,7 @@ export class EditReport extends Component {
                     const defaultCfg = {
                         id: boxId,
                         label: 'Section',
-                        style: { width: 300, height: 200, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8 },
+                        style: { width: 300, height: 200, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8, marginTop: 16 },
                         layoutMode: 'free',
                         children: [],
                     };
@@ -1498,6 +1499,7 @@ export class EditReport extends Component {
                     item.setAttribute('data-box-config', JSON.stringify(defaultCfg));
                     item.style.width = defaultCfg.style.width + 'px';
                     item.style.height = defaultCfg.style.height + 'px';
+                    item.style.marginTop = defaultCfg.style.marginTop + 'px';
                     item.style.opacity = '1';
                     item.style.cursor = 'default';
                     item.innerHTML = self._buildBoxInnerHTML(defaultCfg);
@@ -1939,8 +1941,14 @@ export class EditReport extends Component {
         // Determine if a field type is numeric
         const isNumeric = (type) => ['float', 'monetary', 'integer'].includes(type);
 
+        // Fix 1: build colgroup so each column gets an explicit width slot
+        const colgroupHtml = cols.length
+            ? `<colgroup>${cols.map(col => `<col style="width: ${col.width || 'auto'};">`).join('')}</colgroup>`
+            : '';
+
         let html = `
-            <table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse;">`;
+            <table class="table table-sm mt-3" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+            ${colgroupHtml}`;
 
         // ── Header Row ────────────────────────────────────────────────
         if (config.headerRow && cols.length > 0) {
@@ -2916,6 +2924,7 @@ export class EditReport extends Component {
                 if (s.border && s.border !== 'none') styleStr += `border:${s.border};`;
                 if (s.borderRadius) styleStr += `border-radius:${s.borderRadius}px;`;
                 if (s.padding) styleStr += `padding:${s.padding}px;`;
+                if (s.marginTop) styleStr += `margin-top:${s.marginTop}px;`;
                 if (layoutMode === 'flow') styleStr += 'display:flex;flex-direction:column;gap:8px;align-items:flex-start;';
                 section.setAttribute('style', styleStr);
 
@@ -3098,6 +3107,7 @@ export class EditReport extends Component {
                         border: section.style.border || '1px solid #ccc',
                         borderRadius: parseInt(section.style.borderRadius) || 4,
                         padding: parseInt(section.style.padding) || 8,
+                        marginTop: parseInt(section.style.marginTop) || 16,
                     },
                     layoutMode: section.dataset.layoutMode || 'free',
                     children: [],
@@ -3116,6 +3126,7 @@ export class EditReport extends Component {
             wrapper.setAttribute('data-box-config', JSON.stringify(cfg));
             wrapper.style.width = (cfg.style.width || 300) + 'px';
             wrapper.style.height = (cfg.style.height || 200) + 'px';
+            wrapper.style.marginTop = (cfg.style.marginTop !== undefined ? cfg.style.marginTop : 16) + 'px';
             wrapper.innerHTML = this._buildBoxInnerHTML(cfg);
 
             section.parentNode.insertBefore(wrapper, section);

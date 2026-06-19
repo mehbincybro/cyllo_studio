@@ -78,9 +78,9 @@
                     
 
 
-                    <div class="cy-section-label">
-                        <span>Report Elements</span>
-                    </div>
+<!--                    <div class="cy-section-label">-->
+<!--                        <span>Report Elements</span>-->
+<!--                    </div>-->
 
                     <div class="cy-section-label">
                         <span>Basic Elements</span>
@@ -261,7 +261,7 @@
                                 class="live-report-content w-100 flex-grow-1 border-0"
                                 t-att-src="state.previewUrl"/>
                         <div t-else="" id="studio_report" t-ref="report_frame"
-                             class="editable-area w-100 flex-grow-1 text-dark" style="padding: 10mm; overflow-x: hidden; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word;"/>
+                             class="editable-area w-100 flex-grow-1 text-dark" style="padding: 10mm; overflow: visible; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word;"/>
                     </div>
                     <!-- End of Page marker (temporarily disabled)
                     <div class="cyllo-end-of-page-marker mb-5">
@@ -364,6 +364,12 @@
                                 <input type="number" min="0"
                                        t-att-value="state.boxConfig.padding"
                                        t-on-change="(ev) => this.onBoxConfigChange('padding', ev.target.value)"/>
+                            </div>
+                            <div class="box-props-row">
+                                <label>Margin Top (px)</label>
+                                <input type="number" min="0"
+                                       t-att-value="state.boxConfig.marginTop"
+                                       t-on-change="(ev) => this.onBoxConfigChange('marginTop', ev.target.value)"/>
                             </div>
                         </div>
 

@@ -76,6 +76,7 @@ export const BoxMixin = {
             border: s.border || '1px solid #ccc',
             borderRadius: s.borderRadius !== undefined ? s.borderRadius : 4,
             padding: s.padding !== undefined ? s.padding : 8,
+            marginTop: s.marginTop !== undefined ? s.marginTop : 16,
             layoutMode: cfg.layoutMode || 'free',
         };
         this.state.showBoxProps = true;
@@ -125,6 +126,10 @@ export const BoxMixin = {
             cfg.style.padding = v;
             const dz = boxEl.querySelector('.box-dropzone');
             if (dz) dz.style.padding = v + 'px';
+        } else if (field === 'marginTop') {
+            const v = Math.max(0, parseInt(value) || 0);
+            cfg.style.marginTop = v;
+            boxEl.style.marginTop = v + 'px';
         }
 
         boxEl.dataset.boxConfig = JSON.stringify(cfg);

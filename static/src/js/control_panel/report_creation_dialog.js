@@ -26,6 +26,7 @@ export class ReportCreationDialog extends owl.Component {
             null;
         console.log(activeModel,currentController?.action?.context?.default_model, this.props.context?.default_model )
         this.state = useState({
+            step: 1,
             name: "",
             modelId: "",
             modelLabel: "",
@@ -33,6 +34,7 @@ export class ReportCreationDialog extends owl.Component {
             templates: [],
             startPoint: "blank",
             templateId: "",
+            activeCategory: "all",
             activeModel
         });
 
@@ -101,6 +103,41 @@ export class ReportCreationDialog extends owl.Component {
         return Object.entries(groups).map(([category, templates]) => ({ category, templates }));
     }
 
+    get selectedModel() {
+        return this.state.models.find(m => m.id === this.state.modelId);
+    }
+
+    get selectedTemplate() {
+        return this.state.templates.find(t => t.id === this.state.templateId);
+    }
+
+    get selectedTemplateName() {
+        const template = this.selectedTemplate;
+        return template ? template.name : "";
+    }
+
+    get step1Valid() {
+        return this.state.name && this.state.modelId;
+    }
+
+    nextStep() {
+        if (this.state.step === 1 && !this.step1Valid) {
+            this.notification.add("Please fill in Report Name and Model", { type: "danger" });
+            return;
+        }
+        if (this.state.step < 3) this.state.step++;
+    }
+
+    prevStep() {
+        if (this.state.step > 1) this.state.step--;
+    }
+
+    goToStep(step) {
+        if (step < this.state.step || (step === 2 && this.step1Valid) || (step === 3 && this.step1Valid)) {
+            this.state.step = step;
+        }
+    }
+
     async _onCreate() {
         if (!this.state.name || !this.state.modelId) {
             this.notification.add("Please fill in all fields", { type: "danger" });
@@ -128,4 +165,28 @@ export class ReportCreationDialog extends owl.Component {
             this.notification.add(error.message || "An error occurred", { type: "danger" });
         }
     }
+    get categoryList() {
+    const cats = new Set(this.state.templates.map(t => t.category || "Uncategorized"));
+    return Array.from(cats).sort((a, b) => a.localeCompare(b));
+}
+
+get visibleTemplates() {
+    if (this.state.activeCategory === "all") {
+        return this.state.templates;
+    }
+    return this.state.templates.filter(
+        (t) => (t.category || "Uncategorized") === this.state.activeCategory
+    );
+}
+
+selectCategory(cat) {
+    this.state.activeCategory = cat;
+}
+    onCancelClick() {
+    if (this.state.step > 1) {
+        this.prevStep();
+    } else {
+        this.props.close();
+    }
+}
 }
