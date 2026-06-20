@@ -15,16 +15,27 @@
     width: 100%;
     border-collapse: collapse;
     table-layout: auto;
-    /* NOT fixed – lets cells size naturally */
     margin-bottom: 8px;
 }
 
-.editable-area table th,
+
+/* Header cells: never split mid-word */
+.editable-area table th {
+    padding: 4px 8px;
+    vertical-align: top;
+    border: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Data cells: wrap only at word boundaries, never mid-word */
 .editable-area table td {
     padding: 4px 8px;
     vertical-align: top;
     border: none;
     white-space: normal;
+    word-break: normal;
     overflow-wrap: break-word;
 }
 
@@ -290,8 +301,20 @@
     transition: color 0.15s;
 }
 
+.table-settings {
+    color: #faf9f9;
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px;
+    transition: color 0.15s;
+}
+
 .table-delete:hover,
 .field-delete:hover {
+    color: white;
+}
+
+.table-settings:hover {
     color: white;
 }
 
@@ -1751,6 +1774,22 @@ select>option {
         background: #c62828 !important;
     }
 
+    .table-settings {
+        width: 22px;
+        height: 20px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .table-settings:hover {
+        background: #8aa334;
+    }
+
     .table-handle:hover {
         background: #8aa334;
     }
@@ -3156,6 +3195,7 @@ body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
     line-height: 1.6;
     color: #1f2937;
     min-height: calc(297mm - 80mm);
+    overflow: visible;
 }
 
 /* ── Section 5: Table Header ── */
@@ -3166,6 +3206,9 @@ body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
     font-size: 12px;
     color: #111827;
     padding: 6px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* ── Section 5: Table Body ── */

@@ -1863,13 +1863,14 @@ class StudioMode(Controller):
                 if not field_rec:
                     raise UserError("Unable to locate field to update.")
 
-                field_rec.write({
-                    "compute": compute_code,
-                    "depends": depends_csv,
-                    "store": True,
-                    "related": False,
-                    "readonly": False,
-                })
+                if field_rec.state == 'manual':
+                    field_rec.write({
+                        "compute": compute_code,
+                        "depends": depends_csv,
+                        "store": True,
+                        "related": False,
+                        "readonly": False,
+                    })
 
             if args[0].get("value", {}).get("is_computed") == False:
                 model_name = args[0].get("model")
@@ -1883,7 +1884,7 @@ class StudioMode(Controller):
                         ("name", "=", field_name),
                     ], limit=1)
 
-                    if field_rec:
+                    if field_rec and field_rec.state == 'manual':
                         # Clear compute fields
                         field_rec.write({
                             "compute": False,
