@@ -1,5 +1,4 @@
 :root {
-    /* Dark mode variables */
     --checkbox-border-color: #c5c5c5;
     --checkbox-bg-color: #9EA700;
     --checkbox-text-color: #e2e2e2;
@@ -122,41 +121,31 @@
 .cy-studio-columns {
     display: flex;
     flex-direction: column;
-    /* Stack elements vertically */
-    margin: 14px;
     gap: 10px;
 }
 
 .cy-components-row {
     display: flex;
     align-items: center;
-    /* Vertically align icons and text */
     border-radius: 6px;
     cursor: move;
     background: var(--cy-components-column-bg);
     margin-bottom: 5px;
-    /* Space between rows */
     padding: 10px;
-    /* Padding inside the row */
     width: 90%;
-    /* Full width */
     box-sizing: border-box;
-    /* Include padding in the width */
 }
 
 .cy-components-column {
     display: flex;
     align-items: center;
-    /* Vertically align icons and text */
     justify-content: flex-start;
-    /* Align items to the start of the container */
     color: var(--cy-components-column-color);
 }
 
 .cy-components-text {
     text-align: left;
     margin-left: 0;
-    /* Remove extra margin */
     font-size: 14px;
     color: var(--cy-components-column-color);
 }
@@ -164,15 +153,12 @@
 .cy-components-span {
     background-color: var(--cy-components-span);
     height: 24px;
-    /* Adjust icon size */
     width: 24px;
-    /* Adjust icon size */
     display: flex;
     justify-content: center;
     align-items: center;
     border-radius: 6px 0 0 6px;
     margin-right: 10px;
-    /* Space between icon and text */
 }
 
 .plus_input {
@@ -196,11 +182,7 @@
     background-color: #2e2e2e !important;
     color: #d6d6d6 !important;
     width: 15.5%;
-    /*left: 83.2% !important;
-    top: 32% !important;
-    */
     height: fit-content;
-
     max-height: 400px;
 }
 
@@ -209,10 +191,7 @@
     background-color: #2e2e2e !important;
     color: #d6d6d6 !important;
     width: 15.5%;
-
     height: fit-content;
-    /*top: 32% !important;
-    left: 83.2% !important;*/
     max-height: 400px;
 }
 
@@ -223,30 +202,31 @@
     padding: 0 1px;
 
     .cy-drag_edit-btn {
-        background-color: #32352a !important;
-        border: 1px solid #474a3a;
+        background-color: var(--input-background-color) !important;
+        border: 1px solid var(--input-border-color) !important;
 
         i {
-            color: #BCBBA7 !important;
+            color: #e2e2e2 !important;
         }
     }
 }
 
 .kanban-input--box {
-    background-color: #32352a !important;
-    border: 1px solid #474a3a !important;
-    border-radius: 3px;
-    color: #BCBBA7 !important;
+    background-color: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    border-radius: 8px;
+    padding: 4px 8px !important;
+    color: #e2e2e2 !important;
 }
 
 .cy-drag_edit-btn {
     padding: 0.25rem 0.5rem;
-    border-radius: 3px;
+    border-radius: 8px;
     font-size: 14px;
     color: #9EA700;
     margin-left: 0.2rem;
 
     i {
-        color: #495057 !important;
+        color: #e2e2e2 !important;
     }
 }

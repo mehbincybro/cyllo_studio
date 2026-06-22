@@ -416,6 +416,16 @@ export class CylloListRenderer extends listView.Renderer {
    * @param {Event} ev - Click event on add-field trigger.
    */
     itemOnClick(ev) {
+        if (sessionStorage.getItem("newListElement")) {
+            return this.notification.add({
+                title: "Validation Error",
+                message: "Edit is in progress.",
+                description: "Please save or cancel the current process.",
+                type: "notification_panel",
+                notificationType: "warning",
+                animation: false,
+            });
+        }
         sessionStorage.setItem("newListElement", true);
 
         const newth = document.createElement('th');

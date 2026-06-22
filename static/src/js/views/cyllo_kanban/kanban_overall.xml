@@ -56,7 +56,7 @@
                 </div>
             </div>
             <div class="dropdown-checkbox-container">
-                <label class="cy-navbar_label customCheckbox-label" for="defaultGroupBy">Group By:</label>
+                <label class="cy-navbar_label customCheckbox-label" for="defaultGroupBy">Group by</label>
                 <div class="cy-studio-custom-dropdown">
                     <CylloStudioDropdown
                             options="kanbanFields"
