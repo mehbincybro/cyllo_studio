@@ -53,13 +53,25 @@
                                     <label class="form-check-label mb-0" style="font-size: 0.85rem;">
                                         <div class="d-flex flex-column">
                                             <!-- Field name -->
-                                            <span>
-                                                <t t-esc="item.name"/>
-                                            </span>
-                                            <!-- Field type -->
-                                            <span class="text-muted">
-                                                <t t-esc="item.type"/>
-                                            </span>
+                                                        <span class="fw-semibold" style="font-size: 0.82rem; line-height: 1.2;">
+                <t t-esc="item.string"/>
+            </span>
+            <!-- Technical name -->
+            <span class="text-muted" style="font-size: 0.72rem; font-family: monospace;">
+                <t t-esc="item.name"/>
+            </span>
+            <!-- Field type -->
+            <span class="text-muted" style="font-size: 0.70rem;">
+                <t t-esc="item.type"/>
+            </span>
+<!--                                            <span>-->
+<!--                                                <t t-esc="item.string"/>-->
+<!--                                                <t t-esc="item.name"/>-->
+<!--                                            </span>-->
+<!--                                            &lt;!&ndash; Field type &ndash;&gt;-->
+<!--                                            <span class="text-muted">-->
+<!--                                                <t t-esc="item.type"/>-->
+<!--                                            </span>-->
                                         </div>
                                     </label>
                                 </div>
