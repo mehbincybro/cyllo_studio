@@ -423,6 +423,9 @@ export class FieldProperties extends Component {
             if (nextProps.field_info && nextProps.field_info.selection) {
                 this.state.values = nextProps.field_info.selection;
                 this.state.field = 'existing';
+            } else if (nextProps.allFields && nextProps.name && nextProps.allFields[nextProps.name]?.selection) {
+                this.state.values = nextProps.allFields[nextProps.name].selection;
+                this.state.field = 'existing';
             } else if (!nextProps.field_info) {
                 if (this.props.create || !nextProps.name) {
                     this.state.field = 'new';

@@ -11,8 +11,14 @@ import {
     useOwnedDialogs
 } from "@web/core/utils/hooks";
 import {
-    MultiRecordSelector
-} from "@web/core/record_selectors/multi_record_selector";
+    MultiSelectDropDown
+} from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
+import {
+    CylloStudioDropdown
+} from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
+import {
+    IconPicker
+} from "@cyllo_studio/js/view_editor/dropdown/icon_picker/icon_picker";
 import {
     ExpressionEditorDialog
 } from "@web/core/expression_editor_dialog/expression_editor_dialog";
@@ -47,7 +53,7 @@ export class SmartButtonProperties extends Component {
             stringPath: this.props.properties.stringPath || "",
             StatusLabelPath: this.props.properties.StatusLabelPath == 'false' ? false : this.props.properties.StatusLabelPath,
             iconToggle : false,
-
+            allGroups: {},
         })
        onWillStart(async () =>{
             if(this.props.properties.string === ''){
@@ -55,6 +61,7 @@ export class SmartButtonProperties extends Component {
                 const btnClass = smart_button_class.split(" ").find(className => className.includes("btn-"));
             }
             this.state.oldicon = this.state.icon
+            await this.loadAllGroups();
         });
 
         onWillUpdateProps( async(nextProps)=> {
@@ -78,6 +85,28 @@ export class SmartButtonProperties extends Component {
         })
 
     }
+    async loadAllGroups() {
+        const groups = await this.rpc("/web/dataset/call_kw/res.groups/search_read", {
+            model: "res.groups",
+            method: "search_read",
+            args: [[], ["id", "full_name"]],
+            kwargs: { limit: 0 },
+        });
+        this.state.allGroups = Object.fromEntries(groups.map(g => [String(g.id), g.full_name]));
+    }
+
+    get groupsAllValues() {
+        return this.state.allGroups || {};
+    }
+
+    get groupsSelectedValues() {
+        return (this.state.group_ids || []).map(id => String(id));
+    }
+
+    updateGroupIds(selectedStrings) {
+        this.state.group_ids = selectedStrings.map(s => parseInt(s, 10));
+    }
+
     async findGroupIds(groups) {
         if (groups) {
             this.state.group_ids = await this.rpc("cyllo_studio/find/groups", {
@@ -100,6 +129,16 @@ export class SmartButtonProperties extends Component {
     }
     get IconClass() {
         return ICONCLASS
+    }
+
+    get iconOptions() {
+        return [
+            { value: "", label: "None" },
+            ...ICONCLASS.map(cls => ({
+                value: cls,
+                label: cls.replace(/^fa-/, "").replace(/-/g, " "),
+            })),
+        ];
     }
 
     fieldDomain() {
@@ -277,7 +316,9 @@ export class SmartButtonProperties extends Component {
 }
 
 SmartButtonProperties.components = {
-    MultiRecordSelector,
+    MultiSelectDropDown,
+    CylloStudioDropdown,
+    IconPicker,
     ModelFieldSelector
 }
 

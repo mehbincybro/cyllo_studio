@@ -8,19 +8,8 @@
             </div>
             <div class="mb-2">
                 <label for="" class="cy-navbar_label">Icon</label>
-                <div t-on-click="() => state.iconToggle = !state.iconToggle" class="cy-input text-center d-flex cursor-pointer align-items-center justify-content-center" style="min-height:33.5px" data-tooltip="Icon">
-                    <i class="cy-icons fa" t-att-class="state.icon"/>
-                </div>
-            </div>
-            <div class="modal-content cy-sheet_icon-selectBox d-none" t-att-class="state.iconToggle ? '' : 'd-none'" t-ref="IconRef">
-                <div class="modal-body pt-0 cy-icon-drop">
-                    <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2 list-unstyled">
-                        <li t-foreach="IconClass" t-as="icons" t-key="icons_index" class="list-unstyled">
-                            <div class="cy-icon_box-item cursor-pointer opacity-75-hover p-1" t-att-class="state.icon == icons ? 'cy-icon-border':''" t-on-click="()=> this.selectIcon(icons)">
-                                <i class="cy-icons fa fa-fw" t-att-class="icons"/>
-                            </div>
-                        </li>
-                    </ul>
+                <div class="cy-studio-custom-dropdown">
+                    <IconPicker icons="IconClass" value="state.icon || ''" onChange="(v) => { state.icon = v; }"/>
                 </div>
             </div>
             <div class="mb-2" t-if="props.properties?.new_button">
@@ -34,9 +23,9 @@
                 <input type="text" class="cy-input" t-on-click="fieldDomain" readonly="1" t-att-value="state.domain"/>
             </div>
             <div class="mb-2 SmartButtonMultiRecord">
-                <label for="" class="cy-navbar_label">Smart Button Visible To</label>
-                <div class="cy-input cy-studio-visible-to-drop-align">
-                    <MultiRecordSelector resIds="state.group_ids" resModel="'res.groups'" update="(group_ids)=> state.group_ids = group_ids"/>
+                <label for="" class="cy-navbar_label">Smart Button Visibility</label>
+                <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                    <MultiSelectDropDown allValues="groupsAllValues" selectedValues="groupsSelectedValues" onUpdate="(v) => this.updateGroupIds(v)"/>
                 </div>
             </div>
 

@@ -1,9 +1,7 @@
-/* Form Overall Container */
 .form_overall_container {
-    border-radius: 10px; /* Rounded corners */
-    padding: 10px; /* Padding around the content */
-    /*box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);*/ /* Subtle shadow for depth */
-    font-family: 'Arial', sans-serif; /* Font for better readability */
+    border-radius: 10px;
+    margin: 16px;
+    font-family: 'Arial', sans-serif;
 }
 
 .light-studio-mode .form_overall_container .cy-components-column {
@@ -11,25 +9,25 @@
     border: 1px solid #d2d2d2;
 }
 
-/* Components Container */
 .form_overall_container .components-container {
-    margin-bottom: 20px; /* Space below the container */
-    display: flex; /* Use flexbox for alignment */
-    align-items: center; /* Vertically center the content */
-    justify-content: flex-start; /* Align content to the left */
-    padding: 10px; /* Padding around the content */
-    border-radius: 5px; /* Rounded corners */
-    background:unset;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 10px;
+    border-radius: 5px;
+    background: unset;
 }
 
 .light-studio-mode .form_overall_container .components-container label {
     border-bottom: 1.5px solid #fff4f4;
 }
+
 .form_overall_container .components-container label {
-    color: #9ea700; /* Text color for the label */
+    color: #9ea700;
     font-size: 16px;
     font-weight: bold;
-    margin: 0; /* Remove default margin */
+    margin: 0;
     border-bottom: 1.5px solid #535353;
     width: 100%;
 }
@@ -37,84 +35,34 @@
 .form_overall_container .components-title {
     font-size: 16px;
     font-weight: bold;
-    margin-bottom: 8px; /* Space below the title */
-    color:#BCBBA7 !important;
+    margin-bottom: 8px;
+    color: #BCBBA7 !important;
 }
 
-/* Columns and Elements */
 .form_overall_container .cy-studio-columns {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* Create 2 columns */
-    margin-left: 0px;
+    grid-template-columns: repeat(2, 1fr);
+    margin-left: 0;
 }
 
 .form_overall_container .cy-components-column {
-    display: flex; /* Use flexbox layout */
-    align-items: center; /* Vertically center the content */
-    background-color: var(--cy-components-column-bg); /* Light gray background */
-    border-radius: 4px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; /* Smooth transition for hover */
+    display: flex;
+    align-items: center;
+    background-color: var(--cy-components-column-bg);
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
     width: 100%;
     height: 40px;
 }
 
-@media (max-width: 1749px) {
-    .form_overall_container{
-        margin-left: -10px;
-    }
-}
-@media (max-width: 1620px) {
-    .form_overall_container{
-            margin-left: -15px;
-    }
-}
-@media (max-width: 1620px) {
-    .form_overall_container{
-            margin-left: -20px;
-    }
-}
-@media (max-width: 1540px) {
-    .form_overall_container .cy-components-column{
-        width: 109px;
-        margin-left: 2px;}
-    .form_overall_container .cy-components-span{
-        width: 33px;
-    }
-
-    .form_overall_container {
-        margin-left: -18px;
-    }
-
-    .form_overall_container .cy-components-text {
-        margin-left: -4px;
-    }
-
-}
-@media (max-width: 1530px) {
-    .form_overall_container .cy-components-column{
-
-        width: 103.5px;
-    }
-}
-
-@media (max-width: 1450px) {
-    .form_overall_container .cy-components-column {
-        width: 80%; /* Adjust width for smaller screens */
-        margin-left:15%; /* Reduce left margin */
-    }
-    .form_overall_container .cy-studio-columns{
-        display: flex
-    }
-}
-
 .form_overall_container .cy-components-column:hover {
-    transform: translateY(-4px); /* Lift effect on hover */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Increased shadow on hover */
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .form_overall_container .cy-components-span {
-    margin:unset;
+    margin: unset;
     height: 100%;
     width: 40px;
     margin-right: 4px;
@@ -124,7 +72,6 @@
     color: #555;
 }
 
-/* Attributes */
 .form_overall_container .attributes {
     margin-top: 24px;
 }
@@ -144,4 +91,3 @@
     font-size: 14px;
     color: #333;
 }
-

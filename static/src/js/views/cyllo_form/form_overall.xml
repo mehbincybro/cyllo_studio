@@ -24,7 +24,7 @@
                 <div class="components-container  m-2">
                     <label>Components</label>
                 </div>
-                <div style="margin-left: 18px;">
+                <div>
                     <label class="components-title" style="font-size: 15px;">Columns</label>
                     <div class="cy-studio-columns" id="cyComponents">
                         <div class="cy-components-column column-1"

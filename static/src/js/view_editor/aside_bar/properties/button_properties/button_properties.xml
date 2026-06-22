@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates>
     <t t-name="cyllo_studio.ButtonProperties">
-        <div class="button_properties m-2">
+        <div class="button_properties">
             <div class="mb-2">
                 <label for="" class="cy-navbar_label">Label Name</label>
                 <input class="cy-input cy-input-field-align cy-studio-input-placeholder" reqired="true" type="text" id="label" name="label" placeholder="Enter the label name" autocomplete="off" t-model="buttonProperties.string" t-on-input="handleLabelChange"/>
@@ -27,20 +27,8 @@
             <t t-if="props.viewDetails.viewType !== 'form'">
                 <div class="mb-2 custom_icon">
                     <label for="" class="cy-navbar_label">Icon</label>
-                    <div class="cy-input text-start cy-input-icon d-flex cursor-pointer">
-                        <i class="cy-studio-button-properties-icon flex-grow-1 fa fa-2x d-flex align-items-center" t-att-class="buttonProperties.icon ? buttonProperties.icon + ' fa ' : 'p-2'" t-on-click="()=>state.iconToggle = !state.iconToggle"/>
-                        <i t-if="buttonProperties.icon" class="align-self-center ri-close-fill ri-lg" t-on-click="()=>buttonProperties.icon=''"/>
-                    </div>
-                    <div class="modal-content cy-sheet_icon-selectBox cy-select-option" t-att-class="state.iconToggle ? '':'d-none'" t-ref="IconRef">
-                        <div class="modal-body pt-0 cy-icon-button" style="background: #2e2e2e;">
-                            <ul class="d-flex align-items-start gap-3 flex-wrap cy-selection_icon-list py-2 list-unstyled">
-                                <li t-foreach="IconClass" t-as="icons" t-key="icons_index">
-                                    <div class="cy-icon_box-item cursor-pointer opacity-75-hover p-1" t-att-class="buttonProperties.icon == icons ? 'bg-primary rounded':''" t-on-click="()=> this.setIcon(icons)">
-                                        <i class="cy-icons fa fa-fw text-white" t-att-class="icons"/>
-                                    </div>
-                                </li>
-                            </ul>
-                        </div>
+                    <div class="cy-studio-custom-dropdown">
+                        <IconPicker icons="IconClass" value="buttonProperties.icon || ''" onChange="(v) => { buttonProperties.icon = v; }"/>
                     </div>
                 </div>
             </t>
@@ -86,9 +74,9 @@
                 <input t-else="" type="text" class="cy-input" id="Function" t-att-value="this.actionName.value" autocomplete="off" maxlength="1" readonly="1"/>
             </t>
             <div class="dropdown-checkbox-container button_visible" style=" margin-top: 8px;">
-                <label for="" class="cy-navbar_label">Button Visible To</label>
-                <div class="cy-input cy-studio-visible-to-drop-align">
-                    <MultiRecordSelector resIds="buttonProperties.groupIds " resModel="'res.groups'" update="(groupIds)=> buttonProperties.groupIds = groupIds"/>
+                <label for="" class="cy-navbar_label">Button Visibility</label>
+                <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                    <MultiSelectDropDown allValues="groupsAllValues" selectedValues="groupsSelectedValues" onUpdate="(v) => this.updateGroupIds(v)"/>
                 </div>
             </div>
             <div class="overall_container_list d-flex justify-content-between">

@@ -13,6 +13,9 @@ import {
     CylloStudioDropdown
 } from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
 import {
+    IconPicker
+} from "@cyllo_studio/js/view_editor/dropdown/icon_picker/icon_picker";
+import {
     useService,
     useOwnedDialogs
 } from "@web/core/utils/hooks";
@@ -20,8 +23,8 @@ import {
     RecordSelector
 } from "@web/core/record_selectors/record_selector";
 import {
-    MultiRecordSelector
-} from "@web/core/record_selectors/multi_record_selector";
+    MultiSelectDropDown
+} from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
 import {
     _t
 } from "@web/core/l10n/translation";
@@ -390,6 +393,7 @@ export class ButtonProperties extends Component {
             validation: true,
             newButton: this.props.newButton || false,
             elementInfo: this.props.elementInfo || {},
+            allGroups: {},
         });
         this.buttonProperties = useState({
             string: this.props.string || "",
@@ -414,7 +418,7 @@ export class ButtonProperties extends Component {
             this.state.elementInfo = nextProps.elementInfo;
             this.state.newButton = this.props.newButton || false,
                 this.buttonProperties.string = nextProps.string
-            this.buttonProperties.type = nextProps.function_type
+            this.buttonProperties.type = nextProps.function_type || "object"
             this.buttonProperties.class = nextProps.class_name || "btn-secondary"
 
             this.buttonProperties.icon = nextProps.icon
@@ -464,7 +468,25 @@ export class ButtonProperties extends Component {
             this.functions = await this.rpc("cyllo_studio/find/functions", {
                 model_name: this.modelName,
             });
+            await this.loadAllGroups();
         });
+    }
+
+    async loadAllGroups() {
+        const groups = await this.orm.searchRead("res.groups", [], ["id", "full_name"], { limit: 0 });
+        this.state.allGroups = Object.fromEntries(groups.map(g => [String(g.id), g.full_name]));
+    }
+
+    get groupsAllValues() {
+        return this.state.allGroups || {};
+    }
+
+    get groupsSelectedValues() {
+        return (this.buttonProperties.groupIds || []).map(id => String(id));
+    }
+
+    updateGroupIds(selectedStrings) {
+        this.buttonProperties.groupIds = selectedStrings.map(s => parseInt(s, 10));
     }
 
     async getInputValue(id) {
@@ -491,6 +513,16 @@ export class ButtonProperties extends Component {
     setIcon(icons) {
         this.buttonProperties.icon = icons;
         this.state.iconToggle = false;
+    }
+
+    get iconOptions() {
+        return [
+            { value: "", label: "None" },
+            ...ICONCLASS.map(cls => ({
+                value: cls,
+                label: cls.replace(/^fa-/, "").replace(/-/g, " "),
+            })),
+        ];
     }
     handleOnStyleChange(value) {
         this.buttonProperties.class = this.buttonProperties.class.split(' ').map((className) => {
@@ -789,5 +821,6 @@ ButtonProperties.components = {
     CustomSelection,
     CylloStudioDropdown,
     RecordSelector,
-    MultiRecordSelector,
+    MultiSelectDropDown,
+    IconPicker,
 };
