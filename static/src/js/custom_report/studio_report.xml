@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="custom_report.edit_report">
-        <div class="d-flex flex-column w-100 bg-200" style="height: 100vh;">
+<!--        <div class="d-flex flex-column w-100 bg-200" style="height: 100%;">-->
+        <div class="d-flex flex-column w-100 bg-200" style="position: fixed; inset: 0; z-index: 1040;">
+
             <!-- Header -->
             <div class="cy-report-hdr">
                 <button class="cy-back-icon-btn" title="Back to Reports" t-on-click="() => this.close_edit(this)">
@@ -222,6 +224,7 @@
                      style="position: relative; min-height: 100%;">
 
                     <!-- A4 / Custom Paper Container -->
+
                     <div class="cyllo-studio-report-container d-flex flex-column"
                          t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm;'">
 

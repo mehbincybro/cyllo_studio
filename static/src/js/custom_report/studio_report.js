@@ -330,10 +330,9 @@ export class EditReport extends Component {
         this._loadedArch = arch;
         this._updateHasQr(arch);
         this._updateHasSign(arch);
+
         this.reportFrameRef.el.innerHTML = arch;
         const editableArea = this.reportFrameRef.el;
-
-        // Enrich existing DOM with Studio wrappers/handles
         this._enrichReportDOM(editableArea);
 
         // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
@@ -547,8 +546,8 @@ export class EditReport extends Component {
             self.editor = new MediumEditor(el, {
                 toolbar: {
                     buttons: [
-                        'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
-                        'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                        'bold', 'italic', 'underline', 'strikethrough',
+                        'h1', 'h3', 'quote', 'anchor', 'deleteElement', 'settingsButton',
                     ],
                     // No relativeContainer — let MediumEditor float near the selected text
                 },
@@ -1175,7 +1174,8 @@ export class EditReport extends Component {
 
                 const type = item.dataset.type;
                 delete item.dataset._fromPanel;
-                item.style.opacity = '0.4';
+                item.style.opacity = '0.7';
+                item.classList.add('awaiting-config-block');
 
                 if (type === 'text') {
                     // Transform dropped snippet into an immediately-editable text node
@@ -1195,8 +1195,8 @@ export class EditReport extends Component {
                         self.editor = new MediumEditor(item, {
                             toolbar: {
                                 buttons: [
-                                    'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
-                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement', 'settingsButton',
                                 ],
                             },
                             extensions: {
@@ -1396,8 +1396,9 @@ export class EditReport extends Component {
                 const type = item.dataset.type; // read BEFORE anything
                 delete item.dataset._fromPanel;
 
-                // hide while async runs
-                item.style.opacity = '0.4';
+                // hide or style while async runs
+                item.style.opacity = '0.7';
+                item.classList.add('awaiting-config-block');
 
                 if (type === 'text') {
                     // Transform dropped snippet into an immediately-editable text node
@@ -1420,8 +1421,8 @@ export class EditReport extends Component {
                         self.editor = new MediumEditor(item, {
                             toolbar: {
                                 buttons: [
-                                    'settingsButton', 'bold', 'italic', 'underline', 'strikethrough',
-                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement',
+                                    'bold', 'italic', 'underline', 'strikethrough',
+                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement', 'settingsButton',
                                 ],
                             },
                             extensions: {
@@ -2515,7 +2516,9 @@ export class EditReport extends Component {
             // Normalize editedDoc by unwrapping UI shells to match originalDoc structure
             component._cleanStudioAttrs(editedDoc.body, true);
 
-            const changes = component.getChangedElements(originalDoc, editedDoc);
+            let changes = component.getChangedElements(originalDoc, editedDoc);
+
+
             console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
 
             // ── Logo hide/show persistence ──────────────────────────────────

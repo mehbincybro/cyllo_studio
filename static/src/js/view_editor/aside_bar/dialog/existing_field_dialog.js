@@ -135,6 +135,7 @@ export class ExistingFieldDialog extends Component {
             name: key,
             type: this.props.fields[key].type,
             icon: this.props.fields[key].icon,
+            string: this.props.fields[key].string,
         }));
 
         if (!query) {
@@ -142,6 +143,7 @@ export class ExistingFieldDialog extends Component {
         }
 
         return fieldsArray.filter(field =>
+            field.string.toLowerCase().includes(query) ||
             field.name.toLowerCase().includes(query) ||
             field.type.toLowerCase().includes(query)
         );

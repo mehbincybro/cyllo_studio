@@ -445,7 +445,7 @@ if (typeof MediumEditor !== 'undefined') {
                 <h5>General</h5>
                 <label><input type="checkbox" id="cy-set-visible" ${visible ? 'checked' : ''}> Visible</label>
                 <label><input type="checkbox" id="cy-set-active" ${active ? 'checked' : ''}> Active</label>
-                <label><input type="checkbox" id="cy-set-lock" ${cfg.locked ? 'checked' : ''}> Lock Block</label>
+<!--                <label><input type="checkbox" id="cy-set-lock" ${cfg.locked ? 'checked' : ''}> Lock Block</label>-->
             </div>
             <div class="settings-section">
                 <h5>Layout</h5>
@@ -461,11 +461,11 @@ if (typeof MediumEditor !== 'undefined') {
                 <div><label>Border:</label><input type="text" id="cy-set-b" value="${s.border || ''}"></div>
                 <div><label>Radius:</label><input type="text" id="cy-set-br" value="${s.borderRadius || ''}"></div>
             </div>
-            <div class="settings-section">
-                <h5>Report Settings</h5>
-                <label><input type="checkbox" id="cy-set-pbb" ${pbBefore ? 'checked' : ''}> Page Break Before</label>
-                <label><input type="checkbox" id="cy-set-pba" ${pbAfter ? 'checked' : ''}> Page Break After</label>
-            </div>
+<!--            <div class="settings-section">-->
+<!--                <h5>Report Settings</h5>-->
+<!--                <label><input type="checkbox" id="cy-set-pbb" ${pbBefore ? 'checked' : ''}> Page Break Before</label>-->
+<!--                <label><input type="checkbox" id="cy-set-pba" ${pbAfter ? 'checked' : ''}> Page Break After</label>-->
+<!--            </div>-->
             <div class="settings-section">
                 <h5>Advanced</h5>
                 <div><label>Class:</label><input type="text" id="cy-set-cls" value="${targetEl.className.replace(/cy-block-hidden|d-print-none/g, '').trim()}"></div>
@@ -521,10 +521,10 @@ if (typeof MediumEditor !== 'undefined') {
         if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
       });
 
-      popup.querySelector('#cy-set-lock').addEventListener('change', (e) => {
-        cfg.locked = e.target.checked;
-        updateConfig();
-      });
+      // popup.querySelector('#cy-set-lock').addEventListener('change', (e) => {
+      //   cfg.locked = e.target.checked;
+      //   updateConfig();
+      // });
 
       const applyStyle = (id, prop, field) => {
         const el = popup.querySelector(id);
@@ -547,16 +547,16 @@ if (typeof MediumEditor !== 'undefined') {
       applyStyle('#cy-set-b', 'border', 'border');
       applyStyle('#cy-set-br', 'borderRadius', 'borderRadius');
 
-      popup.querySelector('#cy-set-pbb').addEventListener('change', (e) => {
-        if (e.target.checked) targetEl.classList.add('page-break-before');
-        else targetEl.classList.remove('page-break-before');
-        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
-      });
-      popup.querySelector('#cy-set-pba').addEventListener('change', (e) => {
-        if (e.target.checked) targetEl.classList.add('page-break-after');
-        else targetEl.classList.remove('page-break-after');
-        if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
-      });
+      // popup.querySelector('#cy-set-pbb').addEventListener('change', (e) => {
+      //   if (e.target.checked) targetEl.classList.add('page-break-before');
+      //   else targetEl.classList.remove('page-break-before');
+      //   if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      // });
+      // popup.querySelector('#cy-set-pba').addEventListener('change', (e) => {
+      //   if (e.target.checked) targetEl.classList.add('page-break-after');
+      //   else targetEl.classList.remove('page-break-after');
+      //   if (this.base.options.owner) this.base.options.owner.undoManager.debouncedSave();
+      // });
       popup.querySelector('#cy-set-cls').addEventListener('change', (e) => {
         const baseCls = ['cy-block-hidden'].filter(c => targetEl.classList.contains(c));
         targetEl.className = e.target.value + ' ' + baseCls.join(' ');
