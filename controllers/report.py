@@ -247,6 +247,120 @@ class StudioReportController(Controller):
 
         except Exception as e:
             return {'success': False, 'error': str(e)}
+    @route('/cyllo_studio/save_company_footer', type='json', auth='user')
+    def save_company_footer(self, company_id, footer_text):
+        """Save the company report footer with sudo to prevent access errors."""
+        try:
+            if not request.env.user.has_group('base.group_user'):
+                return {'success': False, 'error': 'Unauthorized'}
+            company = request.env['res.company'].browse(int(company_id))
+            if company.exists():
+                company.sudo().write({'report_footer': footer_text})
+                return {'success': True}
+            return {'success': False, 'error': 'Company not found'}
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/get_footer_preview', auth='user', csrf=False, type='json')
+    def get_footer_preview(self):
+        """
+        Return the rendered footer HTML from web.external_layout_standard for
+        display as a static (non-editable) preview strip at the bottom of the
+        Cyllo Studio report canvas.
+
+        Uses the raw arch so we can emit human-readable placeholder labels
+        (e.g. "Company > Report Footer") rather than trying to evaluate QWeb
+        expressions which require a real record context.
+        """
+        try:
+            layout = request.env.ref('web.external_layout_standard', raise_if_not_found=False)
+            if not layout:
+                return {'success': True, 'html': ''}
+
+            arch = layout._get_combined_arch()
+
+            # Strategy 1: div.footer (standard Odoo layout)
+            footers = arch.xpath('.//div[contains(@class,"footer")]')
+            # Strategy 2: div.o_standard_footer (some community layouts)
+            if not footers:
+                footers = arch.xpath('.//div[contains(@class,"o_standard_footer")]')
+            # Strategy 3: HTML5 <footer> tag
+            if not footers:
+                footers = arch.xpath('.//footer')
+            # Strategy 4: any div that contains a page-number span
+            if not footers:
+                footers = arch.xpath('.//div[.//span[contains(@class,"page")]]')
+
+            if not footers:
+                # Return a minimal hardcoded footer so the frontend always has a strip to show
+                fallback_html = (
+                    '<div class="o_footer_content">'
+                    '<div><span class="cy-footer-placeholder">Company \u203a Report Footer</span></div>'
+                    '<div>Page <span class="cy-footer-expr">1</span>'
+                    ' / <span class="cy-footer-expr">N</span></div>'
+                    '</div>'
+                )
+                return {'success': True, 'html': fallback_html}
+
+            footer_el = footers[0]
+
+            # Walk the footer tree and replace QWeb expressions with readable labels
+            import copy
+            footer_copy = copy.deepcopy(footer_el)
+
+            def _humanise(node):
+                """Replace t-field / t-out / t-esc with a readable placeholder span."""
+                FIELD_MAP = {
+                    'company.report_footer': 'Company › Report Footer',
+                    'o.name': 'Document Name',
+                }
+                PAGE_ATTRS = {'class': 'page'}
+                TOPAGE_ATTRS = {'class': 'topage'}
+
+                # t-field → replace with a placeholder chip
+                tf = node.get('t-field')
+                if tf:
+                    label = FIELD_MAP.get(tf.strip(), tf.strip())
+                    node.tag = 'span'
+                    node.text = label
+                    for a in list(node.attrib):
+                        del node.attrib[a]
+                    node.set('class', 'cy-footer-placeholder')
+                    return
+
+                # t-out / t-esc → inline expression placeholder
+                for attr in ('t-out', 't-esc'):
+                    val = node.get(attr)
+                    if val is not None:
+                        node.tag = 'span'
+                        node.text = val.strip()
+                        for a in list(node.attrib):
+                            del node.attrib[a]
+                        node.set('class', 'cy-footer-expr')
+                        return
+
+                # t-if / t-attf-class / t-attf-style → strip qweb attrs
+                for a in list(node.attrib):
+                    if a.startswith('t-'):
+                        del node.attrib[a]
+
+                # <span class="page"/> → "1"  and  <span class="topage"/> → "N"
+                cls = node.get('class', '')
+                if 'page' in cls.split() and node.tag == 'span':
+                    node.text = '1'
+                elif 'topage' in cls.split() and node.tag == 'span':
+                    node.text = 'N'
+
+                for child in list(node):
+                    _humanise(child)
+
+            _humanise(footer_copy)
+
+            html = etree.tostring(footer_copy, encoding='unicode', method='html')
+            return {'success': True, 'html': html}
+
+        except Exception as e:
+            return {'success': False, 'error': str(e)}
 
     @route('/cyllo_studio/get_report_preview_data', auth='user', csrf=False, type='json')
     def get_report_preview_data(self, template, res_model):

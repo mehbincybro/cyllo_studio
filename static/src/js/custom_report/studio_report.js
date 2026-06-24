@@ -108,6 +108,12 @@ export class EditReport extends Component {
             companyInfo: '',
             hideLogo: false,
             logoHovered: false,
+            // ── Footer Preview Controls ──
+            footerShowReportFooter: true,
+            footerShowPageNum: true,
+            footerShowDocName: false,
+            showFooterEditor: false,
+            companyReportFooterText: '',
         });
 
         // Promise resolver for the table config modal
@@ -130,7 +136,7 @@ export class EditReport extends Component {
                 const companies = await this.orm.searchRead(
                     'res.company',
                     domain,
-                    ['name', 'logo', 'street', 'city', 'phone', 'email', 'website'],
+                    ['name', 'logo', 'street', 'city', 'phone', 'email', 'website', 'report_footer'],
                     { limit: 1, order: 'id asc' }
                 );
                 // console.log('logoooooo',companies)
@@ -139,13 +145,8 @@ export class EditReport extends Component {
                     this._companyId = co.id; // store for logo upload
                     this.state.companyLogo = co.logo || null;
                     this.state.companyName = co.name || '';
-                    this.state.companyInfo = [
-                        co.street,
-                        co.city,
-                        co.phone ? '\u260e ' + co.phone : '',
-                        co.email ? '\u2709 ' + co.email : '',
-                        co.website ? '\uD83C\uDF10 ' + co.website : ''
-                    ].filter(Boolean).join('\n');
+                    this.state.companyReportFooterText = co.report_footer || '';
+                    this.state.companyInfo = this._formatCompanyInfo(co);
                 }
             } catch (e) {
                 console.warn('[Cyllo Studio] Could not fetch company info:', e);
@@ -303,6 +304,9 @@ export class EditReport extends Component {
             this._setupReportFrame(arch || '');
             this._setupSortable();
             await this._fetchPreviewData();
+
+            // Load footer preview (fire-and-forget, non-blocking)
+            this._loadFooterPreview();
         });
 
         onWillUnmount(() => {
@@ -323,7 +327,63 @@ export class EditReport extends Component {
             // Re-setup sortable if the component was patched (e.g. after modal close)
             // to ensure listeners are still attached to the live DOM elements.
             this._setupSortable();
+            // Re-inject footer preview strip in case OWL replaced the DOM node
+            this._renderFooterPreview();
         });
+    }
+
+    /**
+     * Fetch the footer preview HTML from the backend and inject it into
+     * #studio_footer_preview. Non-blocking – called once on mount.
+     */
+    async _loadFooterPreview() {
+        try {
+            const res = await this.rpc('/cyllo_studio/get_footer_preview', {});
+            if (res && res.success && res.html) {
+                this._footerPreviewHTML = res.html;
+                this._renderFooterPreview();
+            }
+        } catch (e) {
+            console.warn('[Cyllo Studio] Could not load footer preview:', e);
+        }
+    }
+
+    /**
+     * Render the footer preview strip.
+     * Always builds clean HTML from our own template — never uses raw backend HTML
+     * to avoid centering issues caused by Odoo's .text-center class.
+     * Respects state.footerShowReportFooter and state.footerShowPageNum toggles.
+     */
+    _renderFooterPreview() {
+        const el = document.getElementById('studio_footer_preview');
+        if (!el) return;
+
+        const showFooter = this.state.footerShowReportFooter;
+        const showPageNum = this.state.footerShowPageNum;
+        const showDocName = this.state.footerShowDocName;
+
+        if (!showFooter && !showPageNum) {
+            el.innerHTML = '<div class="cy-footer-empty-msg">All footer elements hidden</div>';
+        } else {
+            const leftHtml = [
+                showFooter ? `<span class="cy-footer-placeholder">${this.state.companyReportFooterText || 'Company \u203A Report Footer'}</span>` : '',
+                showDocName && showFooter ? '<span class="cy-footer-separator"> &nbsp;|&nbsp; </span>' : '',
+                showDocName ? '<span class="cy-footer-placeholder">o.name</span>' : '',
+            ].join('');
+
+            const rightHtml = showPageNum
+                ? 'Page <span class="cy-footer-expr">1</span> / <span class="cy-footer-expr">N</span>'
+                : '';
+
+            el.innerHTML = `
+                <div class="cy-footer-row">
+                    <div class="cy-footer-cell-left">${leftHtml}</div>
+                    <div class="cy-footer-cell-right">${rightHtml}</div>
+                </div>`;
+        }
+
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
     }
 
     _setupReportFrame(arch) {
@@ -333,10 +393,29 @@ export class EditReport extends Component {
 
         this.reportFrameRef.el.innerHTML = arch;
         const editableArea = this.reportFrameRef.el;
+
+        // Extract custom footer preferences from QWeb (take the last one if multiple)
+        const customFooters = editableArea.querySelectorAll('.cy-custom-footer');
+        if (customFooters.length > 0) {
+            const lastFooter = customFooters[customFooters.length - 1];
+            this.state.footerShowReportFooter = lastFooter.dataset.showFooter === 'true';
+            this.state.footerShowDocName = lastFooter.dataset.showDoc === 'true';
+            this.state.footerShowPageNum = lastFooter.dataset.showPage === 'true';
+            // Remove ALL injected footers from the editable canvas to prevent duplicates
+            customFooters.forEach(el => el.remove());
+        } else {
+            this.state.footerShowReportFooter = true;
+            this.state.footerShowPageNum = true;
+            this.state.footerShowDocName = false;
+        }
+
         this._enrichReportDOM(editableArea);
 
         // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
         this._updateHasSign();
+
+        // Re-render footer preview after each canvas refresh
+        this._renderFooterPreview();
 
         // Overflow guard observer (temporarily disabled)
         // this._startOverflowGuardObserver();
@@ -636,6 +715,28 @@ export class EditReport extends Component {
         }
     }
 
+    onIframeLoad(evt) {
+        try {
+            const iframe = evt.target;
+            const doc = iframe.contentDocument || iframe.contentWindow.document;
+            if (!doc || !doc.head) return;
+            const style = doc.createElement('style');
+            // Only fix footer text alignment — do NOT touch body/html/article layout
+            // since Odoo's report HTML has its own positioning system
+            style.textContent = `
+                /* Cyllo Studio: left-align footer text in preview */
+                .footer .text-center,
+                .o_standard_footer .text-center,
+                .o_footer_content .text-center {
+                    text-align: left !important;
+                }
+            `;
+            doc.head.appendChild(style);
+        } catch (e) {
+            console.warn('[Cyllo Studio] Could not inject iframe CSS:', e);
+        }
+    }
+
     onPrevRecord() {
         if (this.state.currentIndex > 0) {
             this.state.currentIndex--;
@@ -729,6 +830,15 @@ export class EditReport extends Component {
     }
 
     async onSaveSource() {
+        const confirmed = await new Promise((resolve) => {
+        this.dialog.add(ConfirmationDialog, {
+            title: "Save Source Changes",
+            body: "Saving source code will overwrite any unsaved visual canvas changes. Are you sure you want to continue?",
+            confirm: () => resolve(true),
+            cancel: () => resolve(false),
+        });
+    });
+    if (!confirmed) return;
         const res = await this.rpc('/cyllo_studio/save_report_source', {
             template: this._template,
             doc_template: this._docTemplate || this._template,
@@ -3350,7 +3460,7 @@ export class EditReport extends Component {
                     <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
             `;
-            targetNode.parentNode.insertBefore(wrapper, targetNode);
+            targetNode.parentNode.insertBefore(targetNode, wrapper);
             wrapper.appendChild(targetNode);
             wrapper.querySelector('.field-delete').onclick = (e) => {
                 e.stopPropagation();
@@ -3377,6 +3487,39 @@ export class EditReport extends Component {
                 logoImg.style.removeProperty('display');
             }
         });
+    }
+
+    _formatCompanyInfo(co) {
+        return [
+            co.street,
+            co.city,
+            co.phone ? '\u260e ' + co.phone : '',
+            co.email ? '\u2709 ' + co.email : '',
+            co.website ? '\uD83C\uDF10 ' + co.website : ''
+        ].filter(Boolean).join('\n');
+    }
+
+    async saveCompanyFooter() {
+        try {
+            const result = await this.rpc('/cyllo_studio/save_company_footer', {
+                company_id: this._companyId,
+                footer_text: this.state.companyReportFooterText
+            });
+            if (result.success) {
+                this.notification.add('Company footer updated successfully', { type: 'success' });
+                // Re-render preview strip
+                this._renderFooterPreview();
+                // Re-fetch iframe if previewing
+                if (this.state.previewMode) {
+                    this._fetchPreviewData();
+                }
+            } else {
+                throw new Error(result.error);
+            }
+        } catch (e) {
+            console.error('[Cyllo Studio] Save footer error:', e);
+            this.notification.add('Failed to update company footer', { type: 'danger' });
+        }
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -3534,6 +3677,84 @@ export class EditReport extends Component {
                 new_inherits.push({ key, xpathBlocks: `<data>\n${xpathBlock}\n</data>` });
             }
         }
+
+
+        // ── INJECT CUSTOM FOOTER XPATH ──
+        // Append the footer settings directly into the main template's data block
+        let mainInherit = new_inherits.find(h => h.key === this._template);
+        if (!mainInherit) {
+            mainInherit = { key: this._template, xpathBlocks: "<data>\n</data>" };
+            new_inherits.push(mainInherit);
+        }
+
+        // Clean out any existing custom footer xpaths from the payload to prevent duplicates
+        try {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
+            const oldFooters = doc.querySelectorAll('xpath div.cy-custom-footer');
+            oldFooters.forEach(f => {
+                if (f.parentNode && f.parentNode.tagName === 'xpath') {
+                    f.parentNode.remove();
+                }
+            });
+            mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
+        } catch (e) {
+            console.warn('[Cyllo Studio] Error cleaning old footer xpaths:', e);
+        }
+
+        const showF = this.state.footerShowReportFooter;
+        const showD = this.state.footerShowDocName;
+        const showP = this.state.footerShowPageNum;
+
+        let footerXml = '';
+        if (showF || showP || showD) {
+            footerXml = `
+                <xpath expr="(//div[hasclass('page')])[1]" position="inside">
+                    <style>
+                        .footer.o_standard_footer { display: none !important; }
+                        @media screen {
+                            body { padding-bottom: 80px; }
+                            .cy-custom-footer {
+                                position: fixed !important;
+                                bottom: 0;
+                                left: 0;
+                                right: 0;
+                                width: 100% !important;
+                                background: white;
+                                z-index: 1000;
+                                padding: 10px 15px 15px 15px !important;
+                                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+                                margin-top: 0 !important;
+                            }
+                        }
+                    </style>
+                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" style="width: 100%; font-size: 12px; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 8px;">
+                        <div class="row">
+                            <div class="col-8 text-start">
+                                <t t-if="${showF ? 'True' : 'False'}"><span t-field="res_company.report_footer"/></t>
+                                <t t-if="${showF && showD ? 'True' : 'False'}"><span> | </span></t>
+                                <t t-if="${showD ? 'True' : 'False'}"><span t-esc="o.name"/></t>
+                            </div>
+                            <div class="col-4 text-end">
+                                <t t-if="${showP ? 'True' : 'False'}"><div class="text-muted">Page: <span class="page"/> / <span class="topage"/></div></t>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            `;
+        } else {
+            footerXml = `
+                <xpath expr="(//div[hasclass('page')])[1]" position="inside">
+                    <style>
+                        .footer.o_standard_footer { display: none !important; }
+                    </style>
+                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" style="display: none;"/>
+                </xpath>
+            `;
+        }
+
+        mainInherit.xpathBlocks = mainInherit.xpathBlocks.replace('</data>', footerXml + '\n</data>');
+
         console.log('new_inherits', new_inherits);
         return new_inherits;
     }
