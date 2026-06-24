@@ -54,38 +54,83 @@ a[type="action"][name="254"] {
     pointer-events: none !important;
 }
 
-/* Column drag (Odoo-style): floating ghost + drop indicator, no live reshuffle. */
+/* Column drag ghost: mini-table (th + up to 6 tds) follows cursor */
 .cy-col-drag-ghost {
-    /* cloned <th> may be position:sticky — force fixed so it tracks the cursor */
     position: fixed !important;
     right: auto !important;
     bottom: auto !important;
     margin: 0 !important;
-    display: block !important;
+    display: table !important;
+    table-layout: fixed;
+    border-collapse: collapse;
     z-index: 2000;
     pointer-events: none;
-    transform: translate(-50%, -50%);
-    opacity: 0.9;
-    background: #FAFAFA;
-    color: #222222;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
-    padding: 12px;
-    font-weight: 600;
-    white-space: nowrap;
+    transform: translate(-50%, -20px);
+    opacity: 0.92;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.22);
+
+    thead th {
+        background: #f0f0e8 !important;
+        color: #222;
+        font-weight: 600;
+        padding: 12px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-bottom: 2px solid #d0d0c0 !important;
+    }
+
+    tbody tr td {
+        background: #fff !important;
+        padding: 12px;
+        border-top: 1px solid #e9ecef !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    tbody tr:nth-child(even) td {
+        background: #f8f8f4 !important;
+    }
 }
 
-.cy-thead-list th.cy-col-drop-before,
-tbody td.cy-col-drop-before {
-    box-shadow: inset 3px 0 0 0 #9EA700;
+/* DOM-injected drop indicator: single vertical bar centered on the column edge (= the gap) */
+.cy-drop-indicator {
+    position: fixed;
+    width: 4px;
+    background: #9EA700;
+    border-radius: 2px;
+    z-index: 999;
+    pointer-events: none;
+    transform: translateX(-50%);
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 12px;
+        background: #9EA700;
+        border-radius: 50%;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 12px;
+        height: 12px;
+        background: #9EA700;
+        border-radius: 50%;
+    }
 }
 
-/* Right-side indicator when dropping after the last column (into the "+" zone) */
-.cy-thead-list th.cy-col-drop-after,
-tbody td.cy-col-drop-after {
-    box-shadow: inset -3px 0 0 0 #9EA700;
-}
-
-.cy-thead-list th.cy-col-dragging {
+.cy-thead-list th.cy-col-dragging,
+tbody td.cy-col-dragging {
     opacity: 0.1;
 }
 
@@ -93,7 +138,7 @@ tbody td.cy-col-drop-after {
 /* Scoped to .o_list_view so x2many embedded lists in form views are NOT affected. */
 
 .cy-studio .o_list_renderer .o_list_table {
-        table-layout: auto !important;
+    table-layout: auto !important;
 }
 
 .o_form_view .o_field_widget.o_field_one2many {

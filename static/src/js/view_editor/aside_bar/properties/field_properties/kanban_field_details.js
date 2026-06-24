@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import {
-Component,onWillUpdateProps,useState,onWillStart
+    Component, onWillUpdateProps, useState, onWillStart
 } from "@odoo/owl";
 import {
     CylloStudioDropdown
@@ -10,42 +10,43 @@ import {
     registry
 } from "@web/core/registry";
 import {
-	useService,
-	useOwnedDialogs
+    useService,
+    useOwnedDialogs
 } from "@web/core/utils/hooks";
 import {
-	ExpressionEditorDialog
+    ExpressionEditorDialog
 } from "@web/core/expression_editor_dialog/expression_editor_dialog";
+
+
 export class KanbanFieldProperties extends Component {
-	static template = "cyllo_studio.KanbanFieldProperties";
+    static template = "cyllo_studio.KanbanFieldProperties";
 
-	setup() {
-		this.rpc = useService("rpc");
+    setup() {
+        this.rpc = useService("rpc");
+        this.actionService = useService("action");
+        this.action = useService("action");
+        this.orm = useService("orm");
+        this.addDialog = useOwnedDialogs();
+        this.state = useState({
+            widget: this.props.widget || '',
+            path: this.props.path,
+            fieldInvisible: this.props.invisible || false,
+            widget_value: this.props.widget ? this.props.widget : false,
+            defaultWidgets: []
 
-		this.actionService = useService("action");
-		this.action = useService("action");
-		this.orm = useService("orm");
-		this.addDialog = useOwnedDialogs();
-		this.state = useState({
-			widget: this.props.widget || '',
-			path: this.props.path,
-			fieldInvisible: this.props.invisible || false,
-			widget_value: this.props.widget ? this.props.widget : false,
-			defaultWidgets: []
-
-		});
-		onWillUpdateProps(async (nextProps) => {
-              if(this.state.path !== nextProps.path){
-                    this.state.widget = nextProps.widget
-                    this.state.path = nextProps.path
-               }
         });
-        onWillStart(async ()=>{
-                await this.defaultWidgets()
-          })
-	}
+        onWillUpdateProps(async (nextProps) => {
+            if (this.state.path !== nextProps.path) {
+                this.state.widget = nextProps.widget
+                this.state.path = nextProps.path
+            }
+        });
+        onWillStart(async () => {
+            await this.defaultWidgets()
+        })
+    }
 
-	undoOperation(response){
+    undoOperation(response) {
         let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
         let cleanedStr = response.replace(/\s+/g, ' ').trim();
         storedArray.push(cleanedStr);
@@ -53,39 +54,39 @@ export class KanbanFieldProperties extends Component {
         sessionStorage.setItem('ReDO', JSON.stringify([]));
     }
 
-	handleInvisibleChange(event) {
-		this.state.fieldInvisible = event.target.checked ? 'True' : 'False'
-	}
-	async attrDomain(ev) {
-		const parent = ev.target.closest('.cy-basedOn');
-		var attribute = parent.getAttribute('data-attribute');
-		var domain = '';
-		if (attribute === 'invisible' && (this.state.fieldInvisible || this.props.invisible)) {
-			domain = this.state.fieldInvisible || this.props.invisible;
-		} else {
-			domain = false;
-		}
-		var resModel = this.action.currentController.props.resModel;
-		domain = domain ? domain : "False";
+    handleInvisibleChange(event) {
+        this.state.fieldInvisible = event.target.checked ? 'True' : 'False'
+    }
+    async attrDomain(ev) {
+        const parent = ev.target.closest('.cy-basedOn');
+        var attribute = parent.getAttribute('data-attribute');
+        var domain = '';
+        if (attribute === 'invisible' && (this.state.fieldInvisible || this.props.invisible)) {
+            domain = this.state.fieldInvisible || this.props.invisible;
+        } else {
+            domain = false;
+        }
+        var resModel = this.action.currentController.props.resModel;
+        domain = domain ? domain : "False";
 
-		this.addDialog(ExpressionEditorDialog, {
-			resModel,
-			fields: this.props.allFields,
-			expression: domain,
-			onConfirm: (expression) => this.modifier(expression, attribute),
-		});
-	}
-	modifier(expression, attribute) {
-		this.attribute = attribute
-		if (attribute === 'invisible') {
-			this.state.fieldInvisible = expression
-		}
-	}
-	async defaultWidgets(){
-            this.state.defaultWidgets = await this.orm.searchRead("default.widgets", [])
-            }
+        this.addDialog(ExpressionEditorDialog, {
+            resModel,
+            fields: this.props.allFields,
+            expression: domain,
+            onConfirm: (expression) => this.modifier(expression, attribute),
+        });
+    }
+    modifier(expression, attribute) {
+        this.attribute = attribute
+        if (attribute === 'invisible') {
+            this.state.fieldInvisible = expression
+        }
+    }
+    async defaultWidgets() {
+        this.state.defaultWidgets = await this.orm.searchRead("default.widgets", [])
+    }
 
-	get defaultWidget(){
+    get defaultWidget() {
         const widget = this.props.widget ? this.props.widget : this.state.widget_value
         return widget
     }
@@ -94,7 +95,7 @@ export class KanbanFieldProperties extends Component {
         let widgets = [];
         let hasWidget = false;
         let type =
-                this.props.allFields[this.props.name].type === "image" ?
+            this.props.allFields[this.props.name].type === "image" ?
                 "binary" :
                 this.props.allFields[this.props.name].type;
         let widget_params = {
@@ -106,64 +107,64 @@ export class KanbanFieldProperties extends Component {
         }
         const val = registry.category("cyllo_studio_widget_list").get("widget_list")
         const values = val(widget_params)
-        if(values.defaultWidget){
-            this.orm.create('default.widgets',[values.defaultWidget])
+        if (values.defaultWidget) {
+            this.orm.create('default.widgets', [values.defaultWidget])
         }
         this.content = values.widgets
-            Object.entries(this.content).forEach(
-          ([key, value]) => {
-            if (key.includes(".") && key.split(".")[0] !== 'kanban') {
-              return;
-            }
+        Object.entries(this.content).forEach(
+            ([key, value]) => {
+                if (key.includes(".") && key.split(".")[0] !== 'kanban') {
+                    return;
+                }
 
-            if (
-              value[1].supportedTypes !== undefined &&
-              value[1].supportedTypes.includes(type)
-            ) {
+                if (
+                    value[1].supportedTypes !== undefined &&
+                    value[1].supportedTypes.includes(type)
+                ) {
 
-             if(key === this.state.widget){
-                hasWidget = true;
-             }
-              widgets.push({
-                value:key,
-                label: `${value[1].displayName || ""} (${key.split(".").pop()})`,
-              });
+                    if (key === this.state.widget) {
+                        hasWidget = true;
+                    }
+                    widgets.push({
+                        value: key,
+                        label: `${value[1].displayName || ""} (${key.split(".").pop()})`,
+                    });
+                }
             }
-          }
         );
-        if(!hasWidget && this.state.widget && this.state.widget !== 'False'){
-            widgets.push({value:this.state.widget, label: `(${this.state.widget})`})
+        if (!hasWidget && this.state.widget && this.state.widget !== 'False') {
+            widgets.push({ value: this.state.widget, label: `(${this.state.widget})` })
         }
-        return [{value: false, label: ''}, ...widgets];
+        return [{ value: false, label: '' }, ...widgets];
     }
-    handleWidget(value){
+    handleWidget(value) {
         this.state.widget_value = value;
     }
-	async updateKanban(){
-	    const args = {
-	        model: this.props.viewDetails.model,
+    async updateKanban() {
+        const args = {
+            model: this.props.viewDetails.model,
             view_id: this.props.viewDetails.viewId,
             view_type: this.props.viewDetails.viewType,
             path: this.props.path,
             widget: this.state.widget_value || this.state.widget,
-            invisible:this.state.fieldInvisible,
-            active_fields:this.props.activeFields,
+            invisible: this.state.fieldInvisible,
+            active_fields: this.props.activeFields,
             remove_widget: this.state.widget_value === false || this.state.widget_value === '',
-	    }
-         const response = await this.rpc("cyllo_studio/kanban/update/field",  { args });
-        if(response){
-                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                storedArray.push(cleanedStr);
-                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                sessionStorage.setItem('ReDO', JSON.stringify([]));
+        }
+        const response = await this.rpc("cyllo_studio/kanban/update/field", { args });
+        if (response) {
+            let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+            let cleanedStr = response.replace(/\s+/g, ' ').trim();
+            storedArray.push(cleanedStr);
+            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+            sessionStorage.setItem('ReDO', JSON.stringify([]));
         }
 
         this.env.bus.trigger('resetProperties');
         this.action.doAction('studio_reload');
 
-	}
-	async RemoveField(){
+    }
+    async RemoveField() {
         const path = this.props.path
         const regex = /field(\[\d+\])?$/;
         let isChildField = false;
@@ -182,20 +183,20 @@ export class KanbanFieldProperties extends Component {
         const fieldName = this.props.name
         const isField = regex.test(path);
         let field = ""
-        if(isField){
+        if (isField) {
             const fieldNodes = this.props.fieldNodes;
             const nameExists = Object.keys(fieldNodes).filter(element => element.startsWith(fieldName));
             let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
             field = isPathIncluded ? "" : fieldName
         }
         let childField = ""
-        if(isChildField){
+        if (isChildField) {
             const fieldNodes = this.props.fieldNodes;
             const nameExists = Object.keys(fieldNodes).filter(element => element.startsWith(childNames));
             let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
             childField = isPathIncluded ? "" : childNames
         }
-        const response =  await this.rpc("cyllo_studio/delete/kanban/field", {
+        const response = await this.rpc("cyllo_studio/delete/kanban/field", {
             model: this.props.viewDetails.model,
             view_id: this.props.viewDetails.viewId,
             view_type: this.props.viewDetails.viewType,
@@ -203,7 +204,7 @@ export class KanbanFieldProperties extends Component {
             field_name: field,
             child_field_name: childField,
         });
-        if(response){
+        if (response) {
             this.undoOperation(response)
         }
         this.env.bus.trigger("CLEAR-MENU");
@@ -211,6 +212,6 @@ export class KanbanFieldProperties extends Component {
     }
 
 }
-KanbanFieldProperties.components={
-CylloStudioDropdown
+KanbanFieldProperties.components = {
+    CylloStudioDropdown
 }

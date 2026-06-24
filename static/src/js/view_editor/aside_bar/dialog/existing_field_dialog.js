@@ -18,61 +18,61 @@ import {
 } from "@web/core/utils/hooks";
 
 const fieldIcons = [{
-        fieldType: "integer",
-        icon: "ri-numbers-line"
-    },
-    {
-        fieldType: "char",
-        icon: "ri-text"
-    },
-    {
-        fieldType: "many2one",
-        icon: "ri-link"
-    },
-    {
-        fieldType: "many2many",
-        icon: "ri-links-line"
-    },
-    {
-        fieldType: "one2many",
-        icon: "ri-share-box-line"
-    },
-    {
-        fieldType: "text",
-        icon: "ri-file-text-line"
-    },
-    {
-        fieldType: "selection",
-        icon: "ri-arrow-down-s-line"
-    },
-    {
-        fieldType: "boolean",
-        icon: "ri-checkbox-line"
-    },
-    {
-        fieldType: "binary",
-        icon: "ri-file-binary-line"
-    },
-    {
-        fieldType: "datetime",
-        icon: "ri-calendar-line"
-    },
-    {
-        fieldType: "date",
-        icon: "ri-calendar-event-line"
-    },
-    {
-        fieldType: "html",
-        icon: "ri-code-line"
-    },
-    {
-        fieldType: "float",
-        icon: "ri-compass-line"
-    },
-    {
-        fieldType: "monetary",
-        icon: "ri-money-dollar-circle-line"
-    },
+    fieldType: "integer",
+    icon: "ri-numbers-line"
+},
+{
+    fieldType: "char",
+    icon: "ri-text"
+},
+{
+    fieldType: "many2one",
+    icon: "ri-link"
+},
+{
+    fieldType: "many2many",
+    icon: "ri-links-line"
+},
+{
+    fieldType: "one2many",
+    icon: "ri-share-box-line"
+},
+{
+    fieldType: "text",
+    icon: "ri-file-text-line"
+},
+{
+    fieldType: "selection",
+    icon: "ri-arrow-down-s-line"
+},
+{
+    fieldType: "boolean",
+    icon: "ri-checkbox-line"
+},
+{
+    fieldType: "binary",
+    icon: "ri-file-binary-line"
+},
+{
+    fieldType: "datetime",
+    icon: "ri-calendar-line"
+},
+{
+    fieldType: "date",
+    icon: "ri-calendar-event-line"
+},
+{
+    fieldType: "html",
+    icon: "ri-code-line"
+},
+{
+    fieldType: "float",
+    icon: "ri-compass-line"
+},
+{
+    fieldType: "monetary",
+    icon: "ri-money-dollar-circle-line"
+},
 ];
 
 /**
@@ -100,7 +100,7 @@ export class ExistingFieldDialog extends Component {
         });
 
         if (this.env.dialogData) {
-        this.env.dialogData.dismiss = this.onDialogClose.bind(this);
+            this.env.dialogData.dismiss = this.onDialogClose.bind(this);
         }
 
         /**
@@ -261,11 +261,8 @@ export class ExistingFieldDialog extends Component {
                 animation: false,
             });
 
-            this.action.doAction("view_reload");
-
         } finally {
             if (this.props.close) {
-
                 this.props.close();
             }
             if (this.props.onClose) {
@@ -275,17 +272,17 @@ export class ExistingFieldDialog extends Component {
         this.action.doAction("studio_reload");
     }
     /**
- * Handle dialog close
- */
-onDialogClose() {
-    if (this.props.close) {
-        this.props.close();
+     * Handle dialog close
+     */
+    onDialogClose() {
+        if (this.props.close) {
+            this.props.close();
+        }
+        if (this.props.onClose) {
+            this.props.onClose();
+        }
+        this.action.doAction('studio_reload');
     }
-    if (this.props.onClose) {
-        this.props.onClose();
-    }
-    this.action.doAction('studio_reload');
-}
 }
 
 ExistingFieldDialog.components = {

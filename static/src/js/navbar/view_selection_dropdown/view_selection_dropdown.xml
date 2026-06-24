@@ -9,7 +9,7 @@
                             <div class="view-icons" t-att-class="state.currentViewType == view ? 'active' : ''"
                                  t-att-data-tooltip="view.replace(/^./, c => c.toUpperCase())"
                                  t-on-click="(e) => view == 'search' ? this.onSearchClick(e) : this.onViewClicked(view, e)">
-                                <i t-attf-class="{{viewIcons[view]}}"/>
+                                <i t-attf-class="{{getViewIcon(view)}}"/>
                             </div>
                         </t>
                     </t>

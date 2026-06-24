@@ -1724,7 +1724,7 @@ export class FieldProperties extends Component {
                             const label = document.createElement('label');
                             label.className = 'cy-navbar_label';
                             label.htmlFor = fieldName; // Links the label to the input by ID
-                            label.textContent = `${obj}:`;
+                            label.textContent = `${obj}`;
 
                             // Create input element
                             const input = document.createElement('input');

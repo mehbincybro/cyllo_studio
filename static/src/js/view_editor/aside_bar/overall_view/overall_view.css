@@ -6,9 +6,9 @@
     --checkbox-indicator-bg-color: hsl(93, 52%, 52%);
     --components-container-bg: #222222;
     --components-container-color: #9EA700;
-    --cy-components-column-bg: #f8f9e5;
+    --cy-components-column-bg: #373627;
     --cy-components-column-color: 000000;
-    --cy-components-span: #dfe0ce;
+    --cy-components-span: #46442d;
 
 }
 
@@ -110,18 +110,12 @@
     background-color: transparent;
     text-align: left;
     padding: 8px;
-    color: var(--components-container-color);
-}
-
-.components-title {
-    color: var(--checkbox-text-color);
-    font-size: 15px;
 }
 
 .cy-studio-columns {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .cy-components-row {

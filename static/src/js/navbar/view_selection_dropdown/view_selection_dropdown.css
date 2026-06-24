@@ -24,7 +24,7 @@
 
 .view-icons.active {
     color: #fff;
-    background-color: var(--primary);
+    background-color: #ffffff22;
 }
 
 .view-icons.active .cy-view-label {

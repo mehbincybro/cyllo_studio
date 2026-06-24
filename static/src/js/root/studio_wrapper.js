@@ -487,6 +487,7 @@ export class StudioWrapper extends Component {
         detail
     }) {
         if (detail) {
+            this.ButtonDetails.newButton = false;
             Object.assign(this.overall, {
                 mode: detail.mode,
                 allFields: detail.allFields,

@@ -37,13 +37,13 @@ import {
 
 // Mapping of view types to icon classes
 const ICONCLASS = {
-    list: "ri-align-justify",
+    list: "ri-table-line",
     form: "ri-profile-line",
     activity: "ri-time-line",
     search: "ri-search-line",
     kanban: "ri-bar-chart-2-line",
-    calendar: "ri-calendar-2-line",
-    pivot: "ri-table-2",
+    calendar: "ri-calendar-line",
+    pivot: "ri-layout-2-line",
     gantt: "ri-bar-chart-horizontal-line",
     graph: "ri-line-chart-line",
     map_view: "ri-map-pin-line",
@@ -66,7 +66,7 @@ export class ViewSelectionDropDown extends Component {
     setup() {
         this.state = useState({
             activatedViews: [],
-            currentViewType:null,
+            currentViewType: null,
         });
         this.ViewTypes = ViewTypes;
         this.viewIcons = ICONCLASS;
@@ -91,7 +91,7 @@ export class ViewSelectionDropDown extends Component {
                         this.env.bus.trigger("SEARCH_CLICKED");
                         this.props.viewChange("editButton", false);
                     }, 0);
-                  } else {
+                } else {
                     // Normal behavior
                     this.state.currentViewType = detail.viewType;
                 }
@@ -118,9 +118,15 @@ export class ViewSelectionDropDown extends Component {
             });
         });
     }
+    getViewIcon(view) {
+        const cls = ICONCLASS[view] || '';
+        return this.state.currentViewType === view ? cls.replace(/-line$/, '-fill') : cls;
+    }
+
     onViewClicked(view, e) {
         // Trigger studio state update
         this.env.bus.trigger("StudioWrapperUpdateState", {})
+        this.state.currentViewType = view;
         document.querySelectorAll('.view-icons').forEach(el => {
             el.classList.remove('active');
         });
@@ -150,6 +156,7 @@ export class ViewSelectionDropDown extends Component {
 
     }
     onSearchClick(e) {
+        this.state.currentViewType = 'search';
         document.querySelectorAll('.view-icons').forEach(el => {
             el.classList.remove('active');
         });

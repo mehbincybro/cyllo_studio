@@ -101,11 +101,32 @@ td.border-class-list {
     border: unset !important;
 }
 
-/* Persistent highlight on the clicked / active column */
-.cy-thead-list th.cy-active-col,
-td.cy-active-col {
-    background-color: #eef1c9 !important;
+/* Persistent highlight on the clicked / active column — outline only, no inter-cell lines */
+.cy-thead-list th.cy-active-col {
+    background-color: #f2f2f2 !important;
     border: unset !important;
+    /* top + left + right sides only */
+    box-shadow:
+        inset 0  4px 0 0 var(--active-text-color),
+        inset  4px 0 0 0 var(--active-text-color),
+        inset -4px 0 0 0 var(--active-text-color);
+}
+
+td.cy-active-col {
+    background-color: #f2f2f2 !important;
+    border: unset !important;
+    /* left + right sides only */
+    box-shadow:
+        inset  4px 0 0 0 var(--active-text-color),
+        inset -4px 0 0 0 var(--active-text-color);
+}
+
+/* Close the bottom edge on the last data row */
+tbody tr:last-child td.cy-active-col {
+    box-shadow:
+        inset  4px 0 0 0 var(--active-text-color),
+        inset -4px 0 0 0 var(--active-text-color),
+        inset 0 -4px 0 0 var(--active-text-color);
 }
 
 .add-fields.cy-studio-icon {

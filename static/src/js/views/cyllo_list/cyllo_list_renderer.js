@@ -119,71 +119,121 @@ export class CylloListRenderer extends listView.Renderer {
 
        const table = treeEl.closest('table');
 
+       let dropIndicator = null;
+
        const clearIndicator = () => {
-         const root = table || treeEl;
-         root.querySelectorAll('.cy-col-drop-before, .cy-col-drop-after').forEach((el) =>
-           el.classList.remove('cy-col-drop-before', 'cy-col-drop-after'));
+         if (dropIndicator) { dropIndicator.remove(); dropIndicator = null; }
        };
 
-       // Mark th + all tbody tds in that column so the line spans full table height.
-       const addColumnIndicator = (th, cls) => {
-         th.classList.add(cls);
-         if (!table) return;
-         const allThs = [...treeEl.querySelectorAll('th')];
-         const colIdx = allThs.indexOf(th);
-         if (colIdx < 0) return;
-         table.querySelectorAll('tbody tr').forEach(tr => {
-           const td = tr.cells[colIdx];
-           if (td) td.classList.add(cls);
+       const showDropIndicator = (th, side) => {
+         clearIndicator();
+         const tableEl   = table || treeEl.closest('table') || treeEl;
+         const tableRect = tableEl.getBoundingClientRect();
+         const thRect    = th.getBoundingClientRect();
+         const x         = side === 'after' ? thRect.right : thRect.left;
+         dropIndicator   = document.createElement('div');
+         dropIndicator.className = 'cy-drop-indicator';
+         Object.assign(dropIndicator.style, {
+           top:    `${tableRect.top}px`,
+           left:   `${x}px`,
+           height: `${tableRect.height}px`,
          });
+         document.body.appendChild(dropIndicator);
        };
 
        const onColumnPointerDown = (ev) => {
          if (ev.button !== 0) return;
-         if (ev.target.closest('.o_resize')) return;   // column resize, not drag
+         if (ev.target.closest('.o_resize')) return;
          const source = ev.target.closest('th');
          if (!isDraggableTh(source)) return;
 
          const startX = ev.clientX;
+         const startY = ev.clientY;          // FIX: store Y for 2-D threshold
          let started = false;
          let ghost = null;
          let dropTarget = null;
-         let dropAfterLast = false;  // true when dropping into the "+" zone
+         let dropPosition = 'before';        // FIX: replaces dropAfterLast bool
+
+         // Column index of the source th — computed once, reused in all helpers
+         const srcColIdx = [...treeEl.querySelectorAll('th')].indexOf(source);
+
+         // FIX: dim th + every td in the source column while dragging
+         const setSourceDimmed = (dim) => {
+           source.classList.toggle('cy-col-dragging', dim);
+           if (!table || srcColIdx < 0) return;
+           table.querySelectorAll('tbody tr').forEach(tr => {
+             const td = tr.cells[srcColIdx];
+             if (td) td.classList.toggle('cy-col-dragging', dim);
+           });
+         };
 
          const onMove = (e) => {
            if (!started) {
-             if (Math.abs(e.clientX - startX) < 4) return;  // movement threshold
+             // FIX: 2-D distance threshold — avoids accidental drags on vertical jitter
+             if (Math.hypot(e.clientX - startX, e.clientY - startY) < 5) return;
              started = true;
-             ghost = source.cloneNode(true);
-             ghost.classList.add('cy-col-drag-ghost');
              const r = source.getBoundingClientRect();
+             ghost = document.createElement('table');
+             ghost.classList.add('cy-col-drag-ghost');
              ghost.style.width = `${r.width}px`;
+
+             const thead = document.createElement('thead');
+             const theadRow = document.createElement('tr');
+             theadRow.appendChild(source.cloneNode(true));
+             thead.appendChild(theadRow);
+             ghost.appendChild(thead);
+
+             if (table && srcColIdx >= 0) {
+               const tbody = document.createElement('tbody');
+               [...table.querySelectorAll('tbody tr')].slice(0, 6).forEach(tr => {
+                 const td = tr.cells[srcColIdx];
+                 if (td) {
+                   const row = document.createElement('tr');
+                   row.appendChild(td.cloneNode(true));
+                   tbody.appendChild(row);
+                 }
+               });
+               if (tbody.children.length) ghost.appendChild(tbody);
+             }
+
              document.body.appendChild(ghost);
-             source.classList.add('cy-col-dragging');
+             setSourceDimmed(true);
            }
+
            e.preventDefault();
            ghost.style.setProperty('left', `${e.clientX}px`, 'important');
-           ghost.style.setProperty('top', `${e.clientY}px`, 'important');
+           ghost.style.setProperty('top',  `${e.clientY}px`, 'important');
 
+           // FIX: hide ghost before elementFromPoint so it never intercepts the hit-test
+           ghost.style.visibility = 'hidden';
            const under = document.elementFromPoint(e.clientX, e.clientY);
+           ghost.style.visibility = '';
+
            const targetTh = under && under.closest('th');
            clearIndicator();
-           dropAfterLast = false;
+           dropPosition = 'before';
 
            if (targetTh && targetTh.classList.contains('add-fields')) {
-             // Cursor on "+" column → drop after last real column
              const allDraggable = [...treeEl.querySelectorAll('th')].filter(isDraggableTh);
              const lastTh = allDraggable[allDraggable.length - 1];
              if (lastTh && lastTh !== source) {
-               dropTarget = lastTh;
-               dropAfterLast = true;
-               addColumnIndicator(lastTh, 'cy-col-drop-after');
+               dropTarget  = lastTh;
+               dropPosition = 'after';
+               showDropIndicator(lastTh, 'after');
              } else {
                dropTarget = null;
              }
            } else if (isDraggableTh(targetTh) && targetTh !== source) {
              dropTarget = targetTh;
-             addColumnIndicator(targetTh, 'cy-col-drop-before');
+             // FIX: left/right half detection — right half → insert after, left half → before
+             const rect = targetTh.getBoundingClientRect();
+             if (e.clientX > rect.left + rect.width / 2) {
+               dropPosition = 'after';
+               showDropIndicator(targetTh, 'after');
+             } else {
+               dropPosition = 'before';
+               showDropIndicator(targetTh, 'before');
+             }
            } else {
              dropTarget = null;
            }
@@ -193,21 +243,20 @@ export class CylloListRenderer extends listView.Renderer {
            document.removeEventListener('pointermove', onMove);
            document.removeEventListener('pointerup', onUp);
            if (ghost) ghost.remove();
-           source.classList.remove('cy-col-dragging');
+           setSourceDimmed(false);          // FIX: clears both th and td dimming
            clearIndicator();
-           // No drag movement → let the normal click (open Properties) proceed.
            if (!started || !dropTarget) return;
 
-           const fieldPath = thFieldPath(source);
+           const fieldPath    = thFieldPath(source);
            const siblingField = thFieldPath(dropTarget);
            if (!fieldPath || !siblingField || fieldPath === siblingField) return;
-
-           const position = dropAfterLast ? 'after' : 'before';
 
            if (self.state.drop === true) {
              self.env.bus.trigger("CLEAR-MENU");
            }
-           const view_id = self.env.config.viewId;
+
+           // FIX: block UI during RPC so user can't trigger a second move
+           self.env.services.ui.block();
            try {
              const response = await self.rpc("/cyllo_studio/move/tree", {
                method: 'move_tree',
@@ -218,12 +267,12 @@ export class CylloListRenderer extends listView.Renderer {
                  : self.env.config.viewType,
                args: [],
                kwargs: {
-                 path: siblingField,
-                 position,
+                 path:      siblingField,
+                 position:  dropPosition,   // FIX: no more redundant view_id variable
                  fieldPath,
-                 viewType: self.env.config.viewType,
-                 view_id: view_id ?? null,
-                 model: self.props.list.model.config.resModel
+                 viewType:  self.env.config.viewType,
+                 view_id:   self.env.config.viewId,
+                 model:     self.props.list.model.config.resModel,
                }
              });
              if (response) {
