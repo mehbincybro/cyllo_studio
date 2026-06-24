@@ -10,6 +10,160 @@
     color: #333;
 }
 
+/* ── Footer Preview Strip ──────────────────────────── */
+.cy-footer-preview-wrapper {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 0 10mm 8mm 10mm;
+}
+
+/* Controls bar above the preview area */
+.cy-footer-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0f2f5;
+    border: 1px solid #dde0e6;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    padding: 5px 10px;
+    gap: 8px;
+}
+
+.cy-footer-ctrl-title {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6c757d;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.cy-footer-ctrl-items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cy-footer-ctrl-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #444;
+    cursor: pointer;
+    user-select: none;
+    margin: 0;
+}
+
+.cy-footer-ctrl-item input[type="checkbox"] {
+    width: 13px;
+    height: 13px;
+    accent-color: #9ea700;
+    cursor: pointer;
+    margin: 0;
+}
+
+.cy-footer-edit-link {
+    display: inline-flex;
+    align-items: center;
+    font-size: 11px;
+    color: #1a56db;
+    text-decoration: none;
+    border: 1px solid #b8d0f7;
+    border-radius: 3px;
+    padding: 1px 7px;
+    background: #dce8fb;
+    white-space: nowrap;
+    pointer-events: all !important;
+}
+.cy-footer-edit-link:hover {
+    background: #c3d9f8;
+    color: #1340a8;
+}
+
+/* Preview content area */
+.cy-footer-preview-area {
+    pointer-events: none;
+    user-select: none;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #555;
+    background: #f8f9fa;
+    border: 1px solid #dde0e6;
+    border-radius: 0 0 4px 4px;
+    padding: 7px 10px;
+    min-height: 32px;
+}
+
+/* Left / right row layout for the preview content */
+.cy-footer-preview-area .cy-footer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border-top: 1px solid #ddd;
+    padding-top: 5px;
+}
+
+.cy-footer-preview-area .cy-footer-cell-left {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.cy-footer-preview-area .cy-footer-cell-right {
+    flex: 0 0 auto;
+    text-align: right;
+    white-space: nowrap;
+    color: #888;
+}
+
+.cy-footer-empty-msg {
+    color: #aaa;
+    font-size: 11px;
+    font-style: italic;
+    text-align: center;
+    padding: 4px 0;
+}
+
+/* Odoo-style placeholder chip */
+.cy-footer-preview-area .cy-footer-placeholder {
+    display: inline-block;
+    background: #dce8fb;
+    color: #1a56db;
+    border: 1px solid #b8d0f7;
+    border-radius: 3px;
+    padding: 1px 6px;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+/* Expression chip – Page 1 / N */
+.cy-footer-preview-area .cy-footer-expr {
+    display: inline-block;
+    background: #fef3cd;
+    color: #7a5c00;
+    border: 1px dashed #f0c040;
+    border-radius: 3px;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-family: monospace;
+}
+
+.cy-footer-separator {
+    color: #bbb;
+    font-size: 11px;
+}
+
+
 /* ── Tables – use auto layout so column widths adapt to content ── */
 .editable-area table {
     width: 100%;
