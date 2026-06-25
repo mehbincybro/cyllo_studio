@@ -19,5 +19,15 @@
         <t t-if="props.viewType == 'graph'">
             <GraphOverall t-props="overallGraphProps"/>
         </t>
+        <!-- Common Reset to Default for every view type. The form's own
+             restore/preview block (FormOverall) stays; only its duplicate
+             reset button was removed in favour of this one. -->
+        <div class="cy-reset-view-wrapper">
+            <button class="btn cy-reset-view-btn w-100" t-on-click="resetView">
+                <i class="ri-loop-left-line me-1"/>
+                Reset to Default
+            </button>
+            <p class="cy-reset-view-hint">Discard all Studio changes and restore the original view.</p>
+        </div>
     </t>
 </templates>

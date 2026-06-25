@@ -28,6 +28,11 @@ export class ChatterComponent extends Component {
         this.action = useService('action');
     }
 
+    get showPlaceholder() {
+        const h = this.props.hasChatter;
+        return h === false || h === 'false' || h === undefined || h === null;
+    }
+
     /**
      * Handles click to add or remove Chatter
      * Calls the server RPC and reloads the form view

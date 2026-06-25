@@ -19,12 +19,12 @@
 }
 
 .view-icons:hover {
-    background-color: #ffffff11;
+    background-color: #373627;
 }
 
 .view-icons.active {
     color: #fff;
-    background-color: #ffffff22;
+    background-color: #646141;
 }
 
 .view-icons.active .cy-view-label {

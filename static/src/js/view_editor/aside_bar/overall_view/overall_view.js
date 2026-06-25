@@ -8,6 +8,7 @@ import { _t } from "@web/core/l10n/translation";
 import { KanbanOverall } from "@cyllo_studio/js/views/cyllo_kanban/kanban_overall";
 import { CalendarOverall } from "@cyllo_studio/js/views/cyllo_calendar/calendar_overall";
 import { GraphOverall } from "@cyllo_studio/js/views/cyllo_graph/graph_overall";
+import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 
 /**
  * Component to handle editing and displaying all types of views in Studio.
@@ -46,8 +47,10 @@ export class OverallView extends Component {
     this.rpc = useService("rpc");
     this.notification = useService("effect");
     this.actionService = useService("action");
+    this.dialogService = useService("dialog");
     this.state = useState({
-     showInvisible: sessionStorage.getItem("invisible") === "1"
+     showInvisible: sessionStorage.getItem("invisible") === "1",
+     showOptional: sessionStorage.getItem("show_optional") === "1"
     });
 //    onWillStart(() => {
 //      const checked = sessionStorage.getItem("invisible") === "1";
@@ -62,6 +65,11 @@ export class OverallView extends Component {
         const checked = sessionStorage.getItem("invisible") === "1";
         this.state.showInvisible = checked;
         document.body.classList.toggle("cy-show-invisible", checked);
+        // Optional fields are revealed by a separate toggle so "Show Invisible
+        // Elements" no longer also exposes optional columns.
+        const optionalChecked = sessionStorage.getItem("show_optional") === "1";
+        this.state.showOptional = optionalChecked;
+        document.body.classList.toggle("cy-show-optional", optionalChecked);
     });
 //        onMounted(() => {
 //        const checked = sessionStorage.getItem("invisible") === "1";
@@ -108,6 +116,77 @@ showInvisibleFields(ev) {
 }
 
   /**
+   * Toggle display of optional (column-options) fields. Separate from
+   * "Show Invisible Elements" so each reveals only its own kind of hidden
+   * column. Pure CSS body-class toggle — no reload needed.
+   * @param {Event} ev - The checkbox change event.
+   */
+  showOptionalFields(ev) {
+    const checked = !!ev.target.checked;
+    this.state.showOptional = checked;
+    if (checked) {
+        sessionStorage.setItem("show_optional", "1");
+    } else {
+        sessionStorage.removeItem("show_optional");
+    }
+    document.body.classList.toggle("cy-show-optional", checked);
+}
+
+  /**
+   * Reset the current view to its code-defined default, discarding ALL
+   * Studio customizations on it. Works for every view type (form, list,
+   * kanban, ...). The Studio view is deactivated (not deleted), so it can
+   * later be restored from the deactivated-views list. Confirms first.
+   */
+  resetView() {
+    const model = this.props.model;
+    let view_id = this.props.viewId;
+    let view_type = this.props.viewType;
+    // Search views are tracked separately (see undo/redo in the navbar).
+    const searchViewId = sessionStorage.getItem("searchViewId");
+    if (searchViewId) {
+      view_type = "search";
+      view_id = searchViewId;
+    }
+    if (!model || !view_id || !view_type) {
+      this.notification.add({
+        title: _t("Cannot Reset"),
+        message: "Open the view you want to reset first.",
+        type: "notification_panel",
+        notificationType: "warning",
+        animation: false,
+      });
+      return;
+    }
+    this.dialogService.add(ConfirmationDialog, {
+      title: _t("Reset View to Default"),
+      body: _t(
+        "This removes ALL Studio changes on this view and restores the "
+        + "original layout defined in code. Custom fields you added stay on "
+        + "the model but will no longer appear here."
+      ),
+      confirmLabel: _t("Reset View"),
+      cancelLabel: _t("Cancel"),
+      confirm: async () => {
+        try {
+          await this.rpc("/cyllo_studio/reset_view", {
+            model: model,
+            view_type: view_type,
+            view_id: view_id,
+          });
+        } finally {
+          sessionStorage.removeItem("UndoRedo");
+          sessionStorage.removeItem("ReDO");
+          this.env?.bus?.trigger?.("resetProperties");
+          this.actionService.doAction("studio_reload");
+          window.location.reload();
+        }
+      },
+      cancel: () => {},
+    });
+  }
+
+  /**
    * Common properties passed to all overall view components.
    */
   get commonProps() {
@@ -120,6 +199,8 @@ showInvisibleFields(ev) {
       handleView: this.handleView.bind(this),
       showInvisibleFields: this.showInvisibleFields.bind(this),
       showInvisible: this.state.showInvisible,
+      showOptionalFields: this.showOptionalFields.bind(this),
+      showOptional: this.state.showOptional,
     };
   }
 

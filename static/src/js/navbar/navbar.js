@@ -432,7 +432,6 @@ export class CylloNavBar extends NavBar {
         window.location.reload();
     }
 
-
 }
 CylloNavBar.props = {
     edit: {

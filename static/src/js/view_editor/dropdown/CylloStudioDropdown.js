@@ -46,7 +46,7 @@ export class CylloStudioDropdown extends Component {
                         <t t-esc="displayValue"/>
                     </span>
                 </t>
-                <i t-att-class="state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'" class="cy-dropdown-icon"/>
+                <i t-att-class="(state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + (props.disabled ? ' cy-dropdown-icon--disabled' : '')" class="cy-dropdown-icon"/>
             </div>
             <t t-if="state.isOpen  and !props.disabled">
                 <ul class="o-autocomplete--dropdown-menu ui-widget show"
@@ -135,6 +135,7 @@ export class CylloStudioDropdown extends Component {
     }
 
     toggleDropdown() {
+        if (this.props.disabled) return;
         this.state.isOpen = !this.state.isOpen;
     }
     checkActive(option) {

@@ -20,7 +20,7 @@
                 <t t-else="" t-on-click.stop="toggleDropdown">
                     <input type="text" style="color: #000000;" class="o-autocomplete--input o_input input_drop" required="true" t-att-placeholder="displayValue" readonly=""/>
                 </t>
-                <i t-att-class="state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down'" class="cy-dropdown-icon"/>
+                <i t-att-class="(state.isOpen ? 'fa fa-chevron-up' : 'fa fa-chevron-down') + (props.disabled ? ' cy-dropdown-icon--disabled' : '')" class="cy-dropdown-icon"/>
             </div>
             <t t-if="state.isOpen  and !props.disabled">
                 <ul class="o-autocomplete--dropdown-menu ui-widget show"

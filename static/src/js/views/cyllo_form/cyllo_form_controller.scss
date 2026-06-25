@@ -1,41 +1,55 @@
 .o_form_view_container {
     .o_control_panel {
-            padding-top: 0px !important;
-            z-index:1 !important;
-            box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.12); /* outset by default */
+        padding-top: 0px !important;
+        z-index: 1 !important;
+        box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.12);
+        /* outset by default */
 
     }
-    .o_control_panel_main .o_control_panel_actions{
-          margin-top:0px !important;
 
-          .o-form-buttonbox .oe_stat_button{
-              height:50px !important;
-          }
+    .o_control_panel_main .o_control_panel_actions {
+        margin-top: 0px !important;
+
+        .o-form-buttonbox .oe_stat_button {
+            height: 50px !important;
+        }
     }
 }
- .o-checkbox{
-     pointer-events: none !important;
-     }
-     .filter_domain_selector_dialog .o-checkbox{
+
+.o-checkbox {
+    pointer-events: none !important;
+}
+
+.filter_domain_selector_dialog .o-checkbox {
     pointer-events: auto !important;
-    }
+}
+
 .o_list_view .o-checkbox,
 .o_form_view .o-checkbox {
     pointer-events: auto !important;
 }
 
+.o-mail-ChatterContainer.o-aside,
+.o-mail-Form-chatter.o-aside {
+    margin-bottom: 16px;
+}
+
+
 div[name="time_cycle_manual"] {
     display: inline-flex;
     align-items: center;
-    gap: 4px; /* space between number and text */
+    gap: 4px;
+    /* space between number and text */
 }
 
 div[name="time_cycle_manual"] span {
     vertical-align: middle;
 }
+
 .o_form_sheet .o_field_widget.o_field_integer.cy-studio-readonly.cy-studio-field-h {
     width: 5rem !important;
 }
+
 /* In your custom CSS file */
 .o_form_view .o_field_widget[name='delay_count'] {
     width: 80px !important;
@@ -46,9 +60,11 @@ div[name="time_cycle_manual"] span {
     width: 80px !important;
     min-width: 80px !important;
 }
-.o-checkbox.form-check.o_field_boolean.o_boolean_toggle.form-switch{
+
+.o-checkbox.form-check.o_field_boolean.o_boolean_toggle.form-switch {
     pointer-events: auto !important;
 }
+
 div[name="delay_count"],
 div[name="delay_unit"],
 div[name="delay_from"] {
@@ -56,6 +72,7 @@ div[name="delay_from"] {
     align-items: center;
     vertical-align: middle;
 }
+
 // .cyllo-fallback-ghost {
 //     opacity: 0.8 !important;
 //     background-color: #bbdefb !important;
@@ -92,15 +109,16 @@ div[name="delay_from"] {
     flex-direction: row !important;
     width: auto !important;
     height: auto !important;
-    min-width: 500px !important;                   // ← CHANGED
-    min-height: 25px !important;                  // ← CHANGED
+    min-width: 500px !important; // ← CHANGED
+    min-height: 25px !important; // ← CHANGED
     justify-content: center !important;
-        align-items: center !important;
-    gap: 8px !important;                      /* ← NEW */
+    align-items: center !important;
+    gap: 8px !important;
+    /* ← NEW */
     padding: 8px 12px !important;
     opacity: 0.95 !important;
-    background-color: transparent !important;    // ✅ CHANGED FROM: white
-//     border: none !important;                      // ✅ CHANGED FROM: 1px solid #ddd
+    background-color: transparent !important; // ✅ CHANGED FROM: white
+    //     border: none !important;                      // ✅ CHANGED FROM: 1px solid #ddd
     border-radius: 4px !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
 
@@ -110,12 +128,3 @@ div[name="delay_from"] {
     visibility: visible !important;
 
 }
-
-
-
-
-
-
-
-
-

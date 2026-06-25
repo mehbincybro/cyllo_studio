@@ -16,3 +16,66 @@
     .btn-link.text-dark {
     pointer-events: none !important;
     }
+
+/* Inline activity editor rendered in the Studio aside bar.
+   Mirrors .cy-side-menu-inner so it matches the other property panels. */
+.cy-activity-aside {
+    width: 320px;
+    min-width: 320px;
+    height: calc(100dvh - 84px);
+    overflow-y: auto;
+    scrollbar-width: none;
+    background: var(--background-color-bg);
+    color: var(--text-color);
+    border-radius: 8px;
+
+    &::-webkit-scrollbar { width: 0; }
+
+    .cy-tab-header {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: var(--navbar-bg);
+        gap: 4px;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .cy-tab-pill {
+        display: flex;
+        flex: 1;
+        background: #373627;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+        height: 35px;
+    }
+
+    .cy-nav__link {
+        width: 100%;
+        color: #e2e2e2;
+        background: #46442d;
+        border: none;
+        border-radius: 6px;
+        padding: 3px 12px;
+        font-size: 13px;
+        font-weight: 500;
+        height: 100%;
+    }
+
+    /* Stack Field Customizer above Interactive Preview, fit the narrow panel. */
+    .studio_activity {
+        flex-direction: column;
+        padding: 16px;
+        gap: 16px;
+    }
+
+    .cy-field__box {
+        width: 100%;
+    }
+
+    .o_activity_record {
+        width: 100% !important;
+    }
+}

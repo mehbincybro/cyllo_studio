@@ -226,7 +226,7 @@
 }
 
 .overall_container_list {
-    background-color: #25281a;
+    background-color: transparent;
     padding: 8px;
     border-radius: 8px;
     font-family: 'Arial', sans-serif !important;
@@ -271,8 +271,7 @@
 }
 
 .cy-studio_accordion[aria-expanded="false"] {
-    border-color: var(--border-color) !important;
-    border-bottom: 1px solid;
+    border-bottom: 1px solid #46442d;
     color: var(--text-color);
     background-color: unset;
 }

@@ -376,15 +376,6 @@
                     </t>
                 </div>
             </t>
-            <div t-if="state.hasStudioChanges">
-                <label class="components-title">
-                    Restore default layout
-                </label>
-                <button
-                    t-on-click="resetView"
-                    class="btn btn-danger w-100">
-                    <i class="fa fa-undo" style="font-size: 12px;" /> Reset to Default </button>
-            </div>
         </div>
     </t>
 </templates>

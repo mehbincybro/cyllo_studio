@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 	<t t-name="cyllo_studio.CylloActivityDialog">
-			<h1>Activity Dialog</h1>
+		<t t-if="props.records and props.records.length">
+			<ActivityPopover inline="true"
+				archInfo="props.archInfo"
+				fields="props.fields"
+				activityResIds="props.activityResIds"
+				records="props.records"
+				model="props.model"
+				viewId="props.viewId"
+				viewType="props.viewType"
+				updateState="props.updateState"/>
+		</t>
 	</t>
 </templates>

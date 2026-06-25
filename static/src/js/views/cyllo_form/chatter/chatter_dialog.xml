@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t t-name="cyllo_studio.ChatterDialog">
-        <Dialog size="'md   '" title="props.title" contentClass="'cy-kanban-preview-dialog'">
+        <Dialog size="'md'" title="props.title" contentClass="'cy-kanban-preview-dialog'">
                 <div class="title-card-kanban">
                     <p>Are you sure you want to Remove Chatter?</p>
                 </div>
