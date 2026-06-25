@@ -27,6 +27,8 @@ import {
   import {
  ModelFieldSelectorPopover
  } from "@web/core/model_field_selector/model_field_selector_popover";
+  import { patch } from '@web/core/utils/patch';
+
 
 export class ConstraintDialog extends Component {
     static template = "cyllo_studio.ConstraintDialog";
@@ -483,5 +485,12 @@ async loadExistingConstraints() {
         });
     }
 }
+patch(CodeEditor, {
+    props: {
+        ...CodeEditor.props,
+        lang: { type: String, optional: true },
+        height: { type: [String, Number], optional: true },
+    }
+});
 
 ConstraintDialog.components = {Dialog, CodeEditor};

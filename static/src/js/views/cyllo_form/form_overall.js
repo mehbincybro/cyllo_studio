@@ -698,7 +698,17 @@ export class FormOverall extends Component {
                                 sessionStorage.setItem('ReDO', JSON.stringify([]));
                             }
                             self.action.doAction("studio_reload");
-                        }
+                        },
+                        onDiscard: () => {
+                            if (el && el.parentNode) {
+                                el.remove();
+                            }
+                        },
+                        onClose: () => {
+                        if (el && el.parentNode) {
+                                el.remove();
+                            }
+                    },
                     });
                 }
             };

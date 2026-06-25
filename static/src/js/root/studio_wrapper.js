@@ -74,6 +74,10 @@ export class StudioWrapper extends Component {
             type: Boolean,
             optional: true
         },
+        viewProps: {
+            type: Object,
+            optional: true
+        }
     };
     setup() {
         this.state = useState({

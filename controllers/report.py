@@ -185,6 +185,14 @@ class StudioReportController(Controller):
                                     p = old_el.getparent()
                                     if p is not None:
                                         p.remove(old_el)
+
+                                # 3. Footer-specific: if the same expr is being re-saved with ANY
+                                # position (e.g. old "inside" → new "after"), remove the old entry
+                                # to avoid stacking duplicate footer blocks.
+                                elif old_expr == expr and 'page' in expr.lower():
+                                    p = old_el.getparent()
+                                    if p is not None:
+                                        p.remove(old_el)
                             
                             data_node.append(new_el)
                     except Exception as e:

@@ -335,8 +335,8 @@
 
                         <iframe t-if="state.previewMode and state.previewUrl"
                                 class="live-report-content w-100 flex-grow-1 border-0"
-                                t-att-src="state.previewUrl"/>
-<!--                                t-on-load="onIframeLoad"/>-->
+                                t-att-src="state.previewUrl"
+                                t-on-load="onIframeLoad"/>
                         <t t-else="">
                             <div id="studio_report" t-ref="report_frame"
                                  class="editable-area w-100 flex-grow-1 text-dark"

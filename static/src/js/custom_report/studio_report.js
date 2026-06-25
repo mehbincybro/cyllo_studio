@@ -114,6 +114,7 @@ export class EditReport extends Component {
             footerShowDocName: false,
             showFooterEditor: false,
             companyReportFooterText: '',
+            hasCustomFooter: false,
         });
 
         // Promise resolver for the table config modal
@@ -305,8 +306,8 @@ export class EditReport extends Component {
             this._setupSortable();
             await this._fetchPreviewData();
 
-            // Load footer preview (fire-and-forget, non-blocking)
-            this._loadFooterPreview();
+            // Render initial footer preview
+            this._renderFooterPreview();
         });
 
         onWillUnmount(() => {
@@ -332,21 +333,7 @@ export class EditReport extends Component {
         });
     }
 
-    /**
-     * Fetch the footer preview HTML from the backend and inject it into
-     * #studio_footer_preview. Non-blocking – called once on mount.
-     */
-    async _loadFooterPreview() {
-        try {
-            const res = await this.rpc('/cyllo_studio/get_footer_preview', {});
-            if (res && res.success && res.html) {
-                this._footerPreviewHTML = res.html;
-                this._renderFooterPreview();
-            }
-        } catch (e) {
-            console.warn('[Cyllo Studio] Could not load footer preview:', e);
-        }
-    }
+
 
     /**
      * Render the footer preview strip.
@@ -387,27 +374,59 @@ export class EditReport extends Component {
     }
 
     _setupReportFrame(arch) {
-        this._loadedArch = arch;
         this._updateHasQr(arch);
         this._updateHasSign(arch);
 
-        this.reportFrameRef.el.innerHTML = arch;
-        const editableArea = this.reportFrameRef.el;
+        // Pre-clean the arch in a detached DOM to prevent visual artifacts
+        const parser = new DOMParser();
+        const tempDoc = parser.parseFromString(arch, 'text/html');
 
-        // Extract custom footer preferences from QWeb (take the last one if multiple)
-        const customFooters = editableArea.querySelectorAll('.cy-custom-footer');
+        // ── Strip all cy-custom-footer elements AND related style injections ──
+        // 1. Remove .cy-custom-footer divs (handles both old position="inside" and new position="after" formats)
+        const customFooters = tempDoc.querySelectorAll('.cy-custom-footer');
         if (customFooters.length > 0) {
             const lastFooter = customFooters[customFooters.length - 1];
             this.state.footerShowReportFooter = lastFooter.dataset.showFooter === 'true';
             this.state.footerShowDocName = lastFooter.dataset.showDoc === 'true';
             this.state.footerShowPageNum = lastFooter.dataset.showPage === 'true';
-            // Remove ALL injected footers from the editable canvas to prevent duplicates
+
+            if (lastFooter.dataset.hasCustom === 'true') {
+                this.state.hasCustomFooter = true;
+                this.state.companyReportFooterText = decodeURIComponent(lastFooter.dataset.customText || '');
+            } else {
+                this.state.hasCustomFooter = false;
+            }
+
+            // Remove ALL injected footer divs from the detached doc
             customFooters.forEach(el => el.remove());
         } else {
             this.state.footerShowReportFooter = true;
             this.state.footerShowPageNum = true;
             this.state.footerShowDocName = false;
+            this.state.hasCustomFooter = false;
         }
+
+        // 2. Remove any injected <style> blocks that were part of the footer format
+        tempDoc.querySelectorAll('style').forEach(styleEl => {
+            const txt = styleEl.textContent || '';
+            const cls = styleEl.getAttribute('class') || '';
+            if (txt.includes('cy-custom-footer') || txt.includes('o_standard_footer') ||
+                cls.includes('cy-footer-hide-std')) {
+                styleEl.remove();
+            }
+        });
+
+        // 3. Remove any .footer div that is a direct sibling of .page (position="after" format)
+        tempDoc.querySelectorAll('.page ~ .footer, .page + .footer').forEach(el => {
+            el.remove();
+        });
+
+        // Now set the cleaned HTML to the live DOM
+        this.reportFrameRef.el.innerHTML = tempDoc.body.innerHTML;
+        const editableArea = this.reportFrameRef.el;
+
+        // ── Store _loadedArch AFTER cleanup so it matches the canvas DOM ──
+        this._loadedArch = editableArea.innerHTML;
 
         this._enrichReportDOM(editableArea);
 
@@ -721,8 +740,10 @@ export class EditReport extends Component {
             const doc = iframe.contentDocument || iframe.contentWindow.document;
             if (!doc || !doc.head) return;
             const style = doc.createElement('style');
-            // Only fix footer text alignment — do NOT touch body/html/article layout
-            // since Odoo's report HTML has its own positioning system
+
+            // Check if a cy-custom-footer is present in the rendered report
+            const hasCustomFooter = !!(doc.querySelector('.cy-custom-footer'));
+
             style.textContent = `
                 /* Cyllo Studio: left-align footer text in preview */
                 .footer .text-center,
@@ -730,8 +751,35 @@ export class EditReport extends Component {
                 .o_footer_content .text-center {
                     text-align: left !important;
                 }
+                ${ hasCustomFooter ? `
+                /* Hide Odoo standard footer when Cyllo custom footer is present */
+                .footer.o_standard_footer,
+                .o_standard_footer,
+                footer.footer {
+                    display: none !important;
+                }
+                /* Pin custom footer to the bottom of the HTML preview window */
+                .cy-custom-footer {
+                    position: fixed !important;
+                    bottom: 0;
+                    left: 0;
+                    right: 0;
+                    background: white;
+                    z-index: 1000;
+                    box-shadow: 0 -1px 3px rgba(0,0,0,0.1);
+                }
+                /* Add padding so content doesn't hide behind the fixed footer */
+                body {
+                    padding-bottom: 80px !important;
+                }
+                ` : '' }
             `;
             doc.head.appendChild(style);
+
+            doc.querySelectorAll('a[href]').forEach((a) => {
+                a.setAttribute('target', '_blank');
+                a.setAttribute('rel', 'noopener noreferrer');
+            });
         } catch (e) {
             console.warn('[Cyllo Studio] Could not inject iframe CSS:', e);
         }
@@ -2673,6 +2721,26 @@ export class EditReport extends Component {
                 return;
             }
 
+            // ── Ensure _docTemplate is resolved before building XPaths ──
+            // _docTemplate is only set when the source editor is opened.
+            // On a fresh save we must resolve it so the footer xpath targets
+            // the correct inner document view, not the outer wrapper template.
+            if (!component._docTemplate) {
+                try {
+                    const srcRes = await component.rpc('/cyllo_studio/get_report_source', {
+                        template: component._template,
+                    });
+                    if (srcRes && srcRes.success && srcRes.doc_template) {
+                        component._docTemplate = srcRes.doc_template;
+                    } else {
+                        component._docTemplate = component._template;
+                    }
+                } catch (e) {
+                    console.warn('[Cyllo Studio] Could not resolve _docTemplate, falling back to _template:', e);
+                    component._docTemplate = component._template;
+                }
+            }
+
             let newTemplates = component.buildInheritanceXML(changes);
             if (logoOverrideTemplates.length) {
                 newTemplates = newTemplates.concat(logoOverrideTemplates);
@@ -3501,24 +3569,19 @@ export class EditReport extends Component {
 
     async saveCompanyFooter() {
         try {
-            const result = await this.rpc('/cyllo_studio/save_company_footer', {
-                company_id: this._companyId,
-                footer_text: this.state.companyReportFooterText
-            });
-            if (result.success) {
-                this.notification.add('Company footer updated successfully', { type: 'success' });
-                // Re-render preview strip
-                this._renderFooterPreview();
-                // Re-fetch iframe if previewing
-                if (this.state.previewMode) {
-                    this._fetchPreviewData();
-                }
-            } else {
-                throw new Error(result.error);
+            this.state.hasCustomFooter = true;
+            await this.save_changes(this);
+            this.notification.add('Footer text updated successfully for this report', { type: 'success' });
+
+            // Re-render preview strip
+            this._renderFooterPreview();
+            // Re-fetch iframe if previewing
+            if (this.state.previewMode) {
+                this._fetchPreviewData();
             }
         } catch (e) {
             console.error('[Cyllo Studio] Save footer error:', e);
-            this.notification.add('Failed to update company footer', { type: 'danger' });
+            this.notification.add('Failed to update report footer', { type: 'danger' });
         }
     }
 
@@ -3680,10 +3743,14 @@ export class EditReport extends Component {
 
 
         // ── INJECT CUSTOM FOOTER XPATH ──
-        // Append the footer settings directly into the main template's data block
-        let mainInherit = new_inherits.find(h => h.key === this._template);
+        // The footer must be anchored to the *document* template (the inner
+        // template that contains the <div class="page">) — NOT the outer wrapper.
+        // Using _template (wrapper) causes "cannot be located in parent view"
+        // because the wrapper arch does not contain the .page div.
+        const footerTemplateKey = this._docTemplate || this._template;
+        let mainInherit = new_inherits.find(h => h.key === footerTemplateKey);
         if (!mainInherit) {
-            mainInherit = { key: this._template, xpathBlocks: "<data>\n</data>" };
+            mainInherit = { key: footerTemplateKey, xpathBlocks: "<data>\n</data>" };
             new_inherits.push(mainInherit);
         }
 
@@ -3691,10 +3758,12 @@ export class EditReport extends Component {
         try {
             const parser = new DOMParser();
             const doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
-            const oldFooters = doc.querySelectorAll('xpath div.cy-custom-footer');
-            oldFooters.forEach(f => {
-                if (f.parentNode && f.parentNode.tagName === 'xpath') {
-                    f.parentNode.remove();
+            // Remove any xpath elements that contain a cy-custom-footer descendant
+            doc.querySelectorAll('xpath').forEach(xpathEl => {
+                if (xpathEl.querySelector('.cy-custom-footer') ||
+                    xpathEl.querySelector('div[class*="cy-custom-footer"]') ||
+                    (xpathEl.getAttribute('expr') || '').includes('page')) {
+                    xpathEl.remove();
                 }
             });
             mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
@@ -3706,32 +3775,24 @@ export class EditReport extends Component {
         const showD = this.state.footerShowDocName;
         const showP = this.state.footerShowPageNum;
 
+        const encodedText = this.state.hasCustomFooter ? encodeURIComponent(this.state.companyReportFooterText || '') : '';
+
+        // IMPORTANT: Use position="after" on the .page div so the footer is rendered
+        // BELOW the page content, not appended inside it. Using position="inside"
+        // causes the footer to appear at the bottom of the content body and overlap
+        // existing content on reports that have long content.
         let footerXml = '';
         if (showF || showP || showD) {
             footerXml = `
-                <xpath expr="(//div[hasclass('page')])[1]" position="inside">
-                    <style>
-                        .footer.o_standard_footer { display: none !important; }
-                        @media screen {
-                            body { padding-bottom: 80px; }
-                            .cy-custom-footer {
-                                position: fixed !important;
-                                bottom: 0;
-                                left: 0;
-                                right: 0;
-                                width: 100% !important;
-                                background: white;
-                                z-index: 1000;
-                                padding: 10px 15px 15px 15px !important;
-                                box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-                                margin-top: 0 !important;
-                            }
-                        }
-                    </style>
-                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" style="width: 100%; font-size: 12px; margin-top: 30px; border-top: 1px solid #ccc; padding-top: 8px;">
+                <xpath expr="(//div[hasclass('page')])[1]" position="after">
+                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="width: 100%; font-size: 12px; padding: 8px 15px; border-top: 1px solid #e0e0e0; margin-top: 8px;">
                         <div class="row">
-                            <div class="col-8 text-start">
-                                <t t-if="${showF ? 'True' : 'False'}"><span t-field="res_company.report_footer"/></t>
+                            <div class="col-8 text-start cy-footer-text-content">
+                                <t t-if="${showF ? 'True' : 'False'}">
+                                    ${this.state.hasCustomFooter 
+                                        ? `<span>${this.state.companyReportFooterText}</span>` 
+                                        : '<span t-field="res_company.report_footer"/>'}
+                                </t>
                                 <t t-if="${showF && showD ? 'True' : 'False'}"><span> | </span></t>
                                 <t t-if="${showD ? 'True' : 'False'}"><span t-esc="o.name"/></t>
                             </div>
@@ -3740,15 +3801,14 @@ export class EditReport extends Component {
                             </div>
                         </div>
                     </div>
+                    <!-- Suppress the Odoo standard footer so only our custom footer shows -->
+                    <style class="cy-footer-hide-std">.footer.o_standard_footer, footer.o_standard_footer { display: none !important; }</style>
                 </xpath>
             `;
         } else {
             footerXml = `
-                <xpath expr="(//div[hasclass('page')])[1]" position="inside">
-                    <style>
-                        .footer.o_standard_footer { display: none !important; }
-                    </style>
-                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" style="display: none;"/>
+                <xpath expr="(//div[hasclass('page')])[1]" position="after">
+                    <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="display: none;"/>
                 </xpath>
             `;
         }

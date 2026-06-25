@@ -200,6 +200,7 @@ export class CylloField extends Field {
         delete props.attrs;
         delete props.type;
         delete props.readonly;
+        delete props.striped;
 
         return {
             readonly: !this.cyStudioReadonly,
