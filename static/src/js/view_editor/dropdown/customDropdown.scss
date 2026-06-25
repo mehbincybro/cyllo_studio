@@ -96,6 +96,7 @@ $placeholder-color: #757575;
   border-radius: 8px;
   margin-bottom: 1rem;
   padding: 0.315rem 10px;
+  min-height: 35.56px;
 
   div.d-flex {
     background-color: transparent !important;
@@ -276,6 +277,18 @@ $placeholder-color: #757575;
     color: var(--primary-color, #9ea700) !important;
     background: transparent !important;
   }
+}
+
+.cy-studio-custom-dropdown:has(.cy-dropdown-icon--disabled) {
+  .custom-dropdown.o-autocomplete .d-flex .selected-text {
+    color: #85857d !important;
+  }
+}
+
+.cy-dropdown-icon--disabled {
+  opacity: 0.3 !important;
+  cursor: default;
+  pointer-events: none;
 }
 
 .cy-activity-dropdown {

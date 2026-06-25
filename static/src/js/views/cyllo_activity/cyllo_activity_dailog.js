@@ -23,19 +23,9 @@ export class ActivityDialog extends Component {
         this.addDialog = useOwnedDialogs();
 
         onMounted(() => {
-            if (this.props.records?.length) {
-                this.dialogService.add(ActivityPopover, {
-                    archInfo: this.props.archInfo,
-                    fields: this.props.fields,
-                    activityResIds: this.props.activityResIds,
-                    records: this.props.records,
-                    model: this.props.model,
-                    viewId: this.props.viewId,
-                    viewType: this.props.viewType,
-                    updateState : this.props.updateState
-                });
-            }
-            else {
+            // Records render inline in the aside bar (see template). Only the
+            // empty case still needs a notification.
+            if (!this.props.records?.length) {
                 return DisplayNotification(this, {
                     message: 'No Activity Records !!',
                     type: 'warning',

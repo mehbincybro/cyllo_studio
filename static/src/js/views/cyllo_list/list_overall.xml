@@ -53,6 +53,19 @@
                             </span>
                         </label>
                     </div>
+                    <div class="checkbox-item">
+                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showOptionalFields" t-att-checked="props.showOptional" t-on-click="(ev)=> this.props.showOptionalFields(ev)" name="checkbox6"/>
+                        <label class="checkbox-label" for="showOptionalFields">
+                            <span class="checkbox-indicator">
+                                <svg width="12px" height="9px" viewbox="0 0 12 9">
+                                    <polyline points="1 5 4 8 11 1"></polyline>
+                                </svg>
+                            </span>
+                            <span class="label-text">Show Optional
+                                    Fields
+                            </span>
+                        </label>
+                    </div>
                     <t t-if="props.mode.activeActions.edit">
                         <div class="checkbox-item">
                             <input class="checkbox-input d-none ViewCheck" type="checkbox" id="massEdit" name="checkbox5" t-model="props.mode.multiEdit" t-on-click="(ev)=> this.props.handleView('multi_edit',!props.mode.multiEdit)"/>

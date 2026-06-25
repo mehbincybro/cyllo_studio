@@ -224,3 +224,48 @@
         color: #e2e2e2 !important;
     }
 }
+
+/* Reset to Default — destructive action in the View tab */
+.cy-reset-view-wrapper {
+    margin-top: 18px;
+    padding: 14px 10px 6px;
+    border-top: 1px solid #3a3a3a;
+}
+
+.cy-reset-view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid #e57373;
+    color: #e57373;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+
+    i {
+        color: #e57373 !important;
+        transition: color 0.2s ease;
+    }
+
+    &:hover {
+        background: #e53935;
+        border-color: #e53935;
+        color: #ffffff;
+
+        i {
+            color: #ffffff !important;
+        }
+    }
+}
+
+.cy-reset-view-hint {
+    margin: 8px 2px 0;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #9a9a9a;
+    text-align: center;
+}

@@ -1,8 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 	<t t-name="cyllo_studio.CylloActivityPopover">
-		<Dialog title="'Edit Activity Record'" footer="false">
-            <div class="d-flex studio_activity">
+		<!-- inline = render in the Studio aside bar; otherwise the legacy modal. -->
+		<t t-if="props.inline">
+			<div class="cy-activity-aside">
+				<div class="cy-tab-header">
+					<div class="cy-tab-pill">
+						<button class="cy-nav__link active">Activity</button>
+					</div>
+				</div>
+				<t t-call="cyllo_studio.CylloActivityEditorBody"/>
+			</div>
+		</t>
+		<t t-else="">
+			<Dialog title="'Edit Activity Record'" footer="false">
+				<t t-call="cyllo_studio.CylloActivityEditorBody"/>
+			</Dialog>
+		</t>
+	</t>
+
+	<t t-name="cyllo_studio.CylloActivityEditorBody">
+		<div class="d-flex studio_activity" t-att-class="props.inline ? 'flex-column' : ''">
 				<div class="cy-field__box">
 					<div class="d-flex align-items-center gap-2">
 						<i class="ri-code-box-fill cy-content-header-icon"/>
@@ -62,9 +80,10 @@
 						</div>
 					</t>
                     <t t-elif="!this.state.editable">
-						<div style="display: flex;gap: 50px;">
+						<div t-att-style="props.inline ? 'display:flex;flex-direction:column;gap:10px;' : 'display: flex;gap: 50px;'">
 							<div>
-								<div class="form-group mb-3 col-10 cy-activity-dropdown activity-add-custom-dropdown"
+								<div class="form-group mb-3 cy-activity-dropdown activity-add-custom-dropdown"
+                                     t-att-class="props.inline ? '' : 'col-10'"
                                      style="color: #111827;">
 									<label>Field</label>
                                     <CylloStudioDropdown
@@ -79,15 +98,14 @@
 								</div>
 							</div>
                             <div>
-								<button class="btn btn-primary" style="margin-top: 10px; width: 93px;
-    								height: 41px;" t-on-click="()=> this.addActivityField()">
+								<button class="btn btn-primary" t-att-style="props.inline ? 'width:100%;height:41px;' : 'margin-top: 10px; width: 93px; height: 41px;'" t-on-click="()=> this.addActivityField()">
 									Add Field
 								</button>
 							</div>
 						</div>
 					</t>
 				</div>
-				<div class="vr"/>
+				<div t-if="!props.inline" class="vr"/>
                 <div class="cy-field__box o_cw_popover border-0">
 					<div class="d-flex align-items-center gap-2">
 						<i class="ri-gallery-fill cy-content-header-icon"/>
@@ -96,13 +114,12 @@
                     <div class="my-3 cy-addable__list o_activity_view">
 						<t t-set="recordValue" t-value="props.records.length - 1"/>
                         <ul class="o_activity_record list-group list-group-flush o_cw_popover_fields_secondary cy-activity"
-                            style="max-height: 60vh !important; width: 425px">
+                            t-att-style="props.inline ? 'max-height: 60vh !important; width: 100%' : 'max-height: 60vh !important; width: 425px'">
 							<CylloActivityRecord archInfo="props.archInfo" record="props.records[recordValue]"
                                                  openRecord="props.openRecord"/>
 						</ul>
 					</div>
 				</div>
 			</div>
-		</Dialog>
 	</t>
 </templates>

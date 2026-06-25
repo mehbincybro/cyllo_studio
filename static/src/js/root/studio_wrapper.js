@@ -255,7 +255,7 @@ export class StudioWrapper extends Component {
 
         // Back navigation for the x2many breadcrumb now rendered in the navbar.
         useBus(this.env.bus, "STUDIO_BREADCRUMB_BACK", () =>
-            this.handleForm({ preventDefault: () => {} })
+            this.handleForm({ preventDefault: () => { } })
         );
 
         this.env.bus.addEventListener('X2ManyDetails', ({ detail }) => {

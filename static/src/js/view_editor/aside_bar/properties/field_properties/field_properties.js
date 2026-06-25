@@ -721,6 +721,8 @@ export class FieldProperties extends Component {
             }
             if (this.props.widget === "date" || this.props.fieldType === "date") {
                 this.widgetOptionalFields("date", this.props.options);
+            } else if (this.props.widget) {
+                this.widgetOptionalFields(this.props.widget, this.props.options);
             }
         });
 
@@ -739,6 +741,7 @@ export class FieldProperties extends Component {
     //start
     onOptionalClick({ target }) {
         this.state.optional = target.checked ? 'hide' : 'show'
+        this.autoSave();
     }
     get statusbarVisibleOptions() {
         // Use props.options if exists
@@ -857,6 +860,7 @@ export class FieldProperties extends Component {
                 this.state.placeholder = "";
             }
         }
+        this.autoSave();
     }
     getPlaceholderDisplay() {
         const val = this.state.placeholder || '';
@@ -957,6 +961,7 @@ export class FieldProperties extends Component {
     }
     domainConfirm(domain) {
         this.state.domain = domain
+        this.autoSave();
     }
     cancelField() {
         if (this.props.create) {
@@ -968,6 +973,24 @@ export class FieldProperties extends Component {
     async deleteField(el) {
         const view_id = this.props.viewId
         const view_type = this.props.viewType
+        // Resolve the field's xpath. props.path can be empty when the arch node's
+        // cy-xpath attribute wasn't captured at selection time; fall back to the
+        // live DOM element, which reliably carries cy-xpath. Without a path the
+        // backend builds `<xpath expr="/">` and the view validation fails.
+        let path = this.props.path;
+        if (!path && this.props.name) {
+            const el = document.querySelector(`[name="${this.props.name}"][cy-xpath]`);
+            path = el?.getAttribute("cy-xpath") || "";
+        }
+        if (!path) {
+            this.notification.add({
+                title: _t("Cannot Remove Field"),
+                message: "Could not locate this field in the view. Re-select the field and try again.",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+            return;
+        }
         const response = await this.rpc("cyllo_studio/delete/existing_fields", {
             method: 'delete_existing_fields',
             model: this.props.model,
@@ -976,7 +999,7 @@ export class FieldProperties extends Component {
             args: [{
                 fieldName: this.props.string,
                 model: this.props.model,
-                path: this.props.path,
+                path: path,
                 label_path: this.props.label_path
             }],
 
@@ -992,8 +1015,34 @@ export class FieldProperties extends Component {
             sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
             sessionStorage.setItem('ReDO', JSON.stringify([]));
         }
-        window.location.reload()
-        this.action.doAction('studio_reload')
+        await this.action.doAction('studio_reload')
+    }
+    /**
+     * Auto-apply a property change for an EXISTING field (edit mode).
+     * Each change persists immediately — no manual Save.
+     * New fields (create mode) keep the explicit Save button; they need a
+     * name + type before anything can be written.
+     * Saves are serialized so rapid toggles don't fire overlapping RPCs;
+     * the last change made while a save is in flight runs once it finishes.
+     */
+    async autoSave() {
+        if (!this.props.edit) {
+            return;
+        }
+        if (this._autoSaving) {
+            this._autoSavePending = true;
+            return;
+        }
+        this._autoSaving = true;
+        try {
+            await this.createField();
+        } finally {
+            this._autoSaving = false;
+            if (this._autoSavePending) {
+                this._autoSavePending = false;
+                this.autoSave();
+            }
+        }
     }
     async createField() {
         // Validate field name
@@ -1103,6 +1152,17 @@ export class FieldProperties extends Component {
                     }
                 }
             });
+        }
+        // CylloStudioDropdown-based widget options (e.g. monetary currency_field)
+        // are OWL components, not native <input>/<select>, so the DOM scan above
+        // misses them. Their selected values live in previewImage — merge them in
+        // so the option is actually written to the field's `options` attribute.
+        if (this.state.previewImage) {
+            for (const [key, val] of Object.entries(this.state.previewImage)) {
+                if (val !== undefined && val !== null && val !== "" && val !== false) {
+                    optionalFields[key] = val;
+                }
+            }
         }
         // Build the arguments object
         const attrs = {
@@ -1239,8 +1299,9 @@ export class FieldProperties extends Component {
             const modelName = sessionStorage.getItem("RelationalModel")
                 ? (Flatted.parse(sessionStorage.getItem("RelationalModel"))?.[0]?.relation || this.props.model)
                 : this.props.model;
-            if ((this.state.selectedFieldType == 'one2many' && !this.state.relatedModelField) ||
-                (['many2one', 'many2many'].includes(this.state.selectedFieldType) && !this.props.related_model)) {
+            if (!this.props.edit &&
+                ((this.state.selectedFieldType == 'one2many' && !this.state.relatedModelField) ||
+                (['many2one', 'many2many'].includes(this.state.selectedFieldType) && !this.props.related_model))) {
                 this.notification.add({
                     title: _t("Validation Error"),
                     message: "Unable to save the field.",
@@ -1287,7 +1348,7 @@ export class FieldProperties extends Component {
         } finally {
             this.env.services.ui.unblock();
             if (!hasError) {
-                window.location.reload();
+                await this.action.doAction("studio_reload");
             }
         }
     }
@@ -1387,17 +1448,21 @@ export class FieldProperties extends Component {
     handleColumnInvisibleChange(event) {
         this.state.edited = true
         this.state.column_invisible = ["false", "undefined"].includes(this.state.column_invisible) ? "true" : "false";
+        this.autoSave();
     }
     handleInvisibleChange(event) {
         this.state.edited = true
         this.state.invisible = ["false", "undefined"].includes(this.state.invisible) ? "true" : "false";
+        this.autoSave();
     }
     handleReadonlyChange(event) {
         this.state.edited = true
         this.state.readonly = ["false", "undefined"].includes(this.state.readonly) ? "true" : "false";
+        this.autoSave();
     }
     handleRequiredChange(event) {
         this.state.required = ["false", "undefined"].includes(this.state.required) ? "true" : "false";
+        this.autoSave();
     }
     handleRelatedModelChange(value) {
         this.state.edited = true
@@ -1418,12 +1483,14 @@ export class FieldProperties extends Component {
                     this.state.compute_dependencies = "";
                     this.state.compute_code = "";
                     this.state.edited = true;
+                    this.autoSave();
                     return;
                 }
                 this.state.is_computed = true;
                 this.state.compute_dependencies = deps;
                 this.state.compute_code = code;
                 this.state.edited = true;
+                this.autoSave();
             },
         });
     }
@@ -1434,6 +1501,9 @@ export class FieldProperties extends Component {
             this.state.compute_code = "";
             this.state.compute_dependencies = "";
             this.state.edited = true;
+            // Only auto-apply when disabling — enabling waits for the compute
+            // dialog (openComputeDialog) so we don't persist an empty compute.
+            this.autoSave();
         }
     }
     validateDefaultValueForType() {
@@ -1560,6 +1630,7 @@ export class FieldProperties extends Component {
         if (attribute == 'required') {
             this.state.required = expression
         }
+        this.autoSave();
     }
     get newFieldWidgets() {
         return this.state.widget_types.length ? [{
@@ -1591,7 +1662,7 @@ export class FieldProperties extends Component {
             path: this.state.finalRelated || "",
             showSearchInput: true,
             followRelations: true,
-            isDebugMode: this.env.debug || odoo.debug,
+            isDebugMode: !!(this.env.debug || odoo.debug),
             filter: (fieldDef, path) => {
                 const isRootLevel = !path || path.trim() === "";
                 if (isRootLevel) {
@@ -1623,6 +1694,7 @@ export class FieldProperties extends Component {
     handleFieldWidgetChange(value) {
         this.state.widget = value;
         this.widgetOptionalFields(this.state.widget)
+        this.autoSave();
     }
 
     //    Widget Options Start
@@ -1656,6 +1728,13 @@ export class FieldProperties extends Component {
                             widgetOptionsType_value = widgetOptionsType.name.toString();
                         }
                         var fieldValue = this.props.options?.[fieldName] || ''
+                        // The monetary currency is intrinsic to the field — when no
+                        // explicit currency_field option is set in the arch, resolve it
+                        // from the field's metadata (falling back to currency_id) so the
+                        // read-only dropdown shows the real value instead of being blank.
+                        if (fieldName === 'currency_field' && !fieldValue) {
+                            fieldValue = this.props.allFields?.[this.props.name]?.currency_field || 'currency_id';
+                        }
                         if (field.options.availableTypes && field.options.availableTypes.length > 0) {
                             const optionFields = this.state.field_type === 'many2many' ? this.state.related_model : this.existedField
                             if (optionFields) {
@@ -1676,6 +1755,19 @@ export class FieldProperties extends Component {
 
                                 // Update charFields with the filtered options (for 'monetary' widget)
                                 this.state.charFields = options;
+                                // The effective currency field may not be among the view's
+                                // own fields — add it so the read-only dropdown can display
+                                // it (e.g. currency_id even when it's not a visible column).
+                                if (fieldName === 'currency_field' && fieldValue &&
+                                    !Object.values(this.state.charFields).some(f => f.name === fieldValue)) {
+                                    this.state.charFields = {
+                                        ...this.state.charFields,
+                                        [fieldValue]: {
+                                            name: fieldValue,
+                                            string: this.props.allFields?.[fieldValue]?.string || 'Currency',
+                                        },
+                                    };
+                                }
                             }
                         }
                         var obj = field.options.label
@@ -1699,16 +1791,32 @@ export class FieldProperties extends Component {
                                 const div = document.createElement('div');
                                 div.id = fieldName + '_div'; // Use field name as ID
                                 div.innerHTML = `
-                                        <label class="cy-navbar_label" for="${fieldName}">${obj}:</label>`;
+                                        <label class="cy-navbar_label" for="${fieldName}">${obj}</label>`;
                                 container.appendChild(div);
                                 const div2 = document.createElement('div');
                                 div2.setAttribute('id', fieldName);
                                 div2.classList.add('cy-studio-custom-dropdown-image-widget', 'cy-studio-custom-dropdown');
                                 container.appendChild(div2);;
+                                // Seed previewImage with the EXPLICIT option value (from the
+                                // arch) so an unchanged dropdown is written back on save, not
+                                // dropped. Use the explicit value — not the resolved display
+                                // value — so a merely-intrinsic currency_field isn't persisted
+                                // as a redundant option (matches Odoo, which never writes it).
+                                const explicitValue = this.props.options?.[fieldName];
+                                if (explicitValue) {
+                                    this.state.previewImage = {
+                                        ...this.state.previewImage,
+                                        [fieldName]: explicitValue,
+                                    };
+                                }
+                                // Like Odoo Studio, the monetary currency field is
+                                // intrinsic to the field — show it read-only, not editable.
+                                const isReadonlyOption = fieldName === 'currency_field';
                                 await owl.mount(CylloStudioDropdown, div2, {
                                     props: {
                                         options: this.ImageWidget,
                                         defaultValue: fieldValue,
+                                        disabled: isReadonlyOption,
                                         onChange: (value) => this.AddModelWidget({
                                             [fieldName]: value
                                         })
@@ -1814,9 +1922,13 @@ export class FieldProperties extends Component {
             label: ''
         }]
         for (let value in this.state.charFields) {
+            const field = this.state.charFields[value];
+            const label = field.string || field.display_name || field.name;
             const obj = {
-                value: this.state.charFields[value].name,
-                label: this.state.charFields[value].string || this.state.charFields[value].display_name
+                value: field.name,
+                // Append the technical name so the entry reads as a field,
+                // not an empty placeholder (e.g. "Currency (currency_id)").
+                label: field.name && label !== field.name ? `${label} (${field.name})` : label
             }
             arr.push(obj)
         }
@@ -2025,13 +2137,18 @@ export class FieldProperties extends Component {
 
                 this.notification.add({
                     title: _t("Constraints Cleared"),
-                    message: "All constraints will be removed when you save the field.",
+                    message: "All constraints have been removed.",
                     type: "notification_panel",
                     notificationType: "success",
                 });
             } else {
                 this.state.constraintEnabled = false;
             }
+            // Auto-apply only when disabling/clearing constraints — enabling
+            // waits for the constraint dialog so we don't persist an empty one.
+            this.state.edited = true;
+            this.autoSave();
+            return;
         } else {
             this.state.constraintEnabled = true;
         }
@@ -2115,10 +2232,11 @@ export class FieldProperties extends Component {
 
         this.notification.add({
             title: _t("Success"),
-            message: `${messages.join(" and ")} constraint(s) added successfully. Don't forget to save the field!`,
+            message: `${messages.join(" and ")} constraint(s) added successfully.`,
             type: "notification_panel",
             notificationType: "success",
         });
+        this.autoSave();
     }
 
     //    removeConstraint(index) {

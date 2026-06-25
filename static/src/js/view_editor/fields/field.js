@@ -185,7 +185,9 @@ export class CylloField extends Field {
                     readonly: readonly,
                 };
                 propsFromNode = this.field.extractProps(fieldInfo, dynamicInfo);
-                propsFromNode.placeholder = evaluatePlaceholder(propsFromNode.placeholder, record);
+                if ('placeholder' in propsFromNode) {
+                    propsFromNode.placeholder = evaluatePlaceholder(propsFromNode.placeholder, record);
+                }
                 this.FieldPlaceholder = propsFromNode;
             }
         }
@@ -201,6 +203,7 @@ export class CylloField extends Field {
         delete props.type;
         delete props.readonly;
         delete props.striped;
+        delete props.MainPath;
 
         return {
             readonly: !this.cyStudioReadonly,
