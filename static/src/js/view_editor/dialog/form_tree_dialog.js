@@ -158,6 +158,12 @@ export class FormTreeDialog extends Component {
         }
     }
     onDiscard() {
+        this.props.onDiscard?.();
+        this.props.close();
+    }
+
+    onClose() {
+        this.props.onDiscard?.();
         this.props.close();
     }
 }

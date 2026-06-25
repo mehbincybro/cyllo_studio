@@ -63,6 +63,7 @@ import { LabelSelectionField } from '@web/views/fields/label_selection/label_sel
 import { ListActivity } from '@mail/views/web/fields/list_activity/list_activity';
 import { BadgeField } from "@web/views/fields/badge/badge_field";
 import { HandleField } from "@web/views/fields/handle/handle_field";
+import { PriorityField } from "@web/views/fields/priority/priority_field";
 // import { ListSectionAndNoteText } from "@account/components/section_and_note_fields_backend/section_and_note_fields_backend";
 import { KanbanActivity } from "@mail/views/web/fields/kanban_activity/kanban_activity";
 
@@ -236,87 +237,109 @@ export class CylloInnerGroup extends InnerGroup {
 var value = window.location.href
 var searchParams = new URLSearchParams(value.split("?")[1]);
 CylloInnerGroup.props = [...InnerGroup.props, "cy-xpath?","striped?","cy-studio-striped?"];
-patch(SelectionField, {
-    props: {
-        ...SelectionField.props,
-        striped: { type: Boolean, optional: true }
+for (const [, fieldDef] of registry.category("fields").getEntries()) {
+    const FieldComponent = fieldDef.component || fieldDef;
+    if (FieldComponent?.props) {
+        if (!('placeholder' in FieldComponent.props)) {
+            FieldComponent.props = {
+                ...FieldComponent.props,
+                placeholder: { type: String, optional: true },
+            };
+        }
+        if (!('striped' in FieldComponent.props)) {
+            FieldComponent.props = {
+                ...FieldComponent.props,
+                striped: { type: [Boolean, Number, String], optional: true },
+            };
+        }
     }
-});
-patch(Many2OneField, {
-    props: {
-        ...Many2OneField.props,
-        striped: { type: Boolean, optional: true }
-    }
-});
-patch(BooleanField, {
-    props: {
-        ...BooleanField.props,
-        striped: { type: Boolean, optional: true }
-    }
-});
-patch(Many2ManyTagsFieldColorEditable,{
-    props: {
-        ...Many2ManyTagsFieldColorEditable.props,
-        striped: { type: Boolean, optional: true }
-    }
-});
-patch(X2ManyField,{
-    props: {
-        ...X2ManyField.props,
-        striped: { type: [Boolean,Number], optional: true },
-        placeholder:{ type: [Boolean,String], optional: true}
-    }
-});
-patch(StatusBarField,{
-    props: {
-        ...StatusBarField.props,
-        striped: { type: [Boolean,Number], optional: true },
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(StatInfoField,{
-    props: {
-        ...StatInfoField.props,
-        striped: { type: [Boolean,Number], optional: true },
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(DateTimeField,{
-    props: {
-        ...DateTimeField.props,
-        striped: { type: [Boolean,Number], optional: true }
-    }
-});
-patch(CharField,{
-    props: {
-        ...CharField.props,
-        striped: { type: [Boolean,Number], optional: true }
-    }
-});
-patch(LabelSelectionField,{
-    props: {
-        ...LabelSelectionField.props,
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(ListActivity,{
-    props: {
-        ...ListActivity.props,
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(BadgeField,{
-    props: {
-        ...BadgeField.props,
-        placeholder: { type: String, optional: true}
-    }
-});
-patch(HandleField,{
-    props: {
-        ...HandleField.props,
-        placeholder: { type: String, optional: true}
-    }
-});
+}
+
+// patch(SelectionField, {
+//     props: {
+//         ...SelectionField.props,
+//         striped: { type: Boolean, optional: true }
+//     }
+// });
+// patch(Many2OneField, {
+//     props: {
+//         ...Many2OneField.props,
+//         striped: { type: Boolean, optional: true }
+//     }
+// });
+// patch(BooleanField, {
+//     props: {
+//         ...BooleanField.props,
+//         striped: { type: Boolean, optional: true }
+//     }
+// });
+// patch(Many2ManyTagsFieldColorEditable,{
+//     props: {
+//         ...Many2ManyTagsFieldColorEditable.props,
+//         striped: { type: Boolean, optional: true }
+//     }
+// });
+// patch(X2ManyField,{
+//     props: {
+//         ...X2ManyField.props,
+//         striped: { type: [Boolean,Number], optional: true },
+//         placeholder:{ type: [Boolean,String], optional: true}
+//     }
+// });
+// patch(StatusBarField,{
+//     props: {
+//         ...StatusBarField.props,
+//         striped: { type: [Boolean,Number], optional: true },
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// patch(StatInfoField,{
+//     props: {
+//         ...StatInfoField.props,
+//         striped: { type: [Boolean,Number], optional: true },
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// patch(DateTimeField,{
+//     props: {
+//         ...DateTimeField.props,
+//         striped: { type: [Boolean,Number], optional: true }
+//     }
+// });
+// patch(CharField,{
+//     props: {
+//         ...CharField.props,
+//         striped: { type: [Boolean,Number], optional: true }
+//     }
+// });
+// patch(LabelSelectionField,{
+//     props: {
+//         ...LabelSelectionField.props,
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// patch(ListActivity,{
+//     props: {
+//         ...ListActivity.props,
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// patch(BadgeField,{
+//     props: {
+//         ...BadgeField.props,
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// patch(HandleField,{
+//     props: {
+//         ...HandleField.props,
+//         placeholder: { type: String, optional: true}
+//     }
+// });
+// PriorityField.props = {
+//     ...PriorityField.props,
+//     placeholder: { type: String, optional: true },
+// };
 // patch(ListSectionAndNoteText,{
 //     props: {
 //         ...ListSectionAndNoteText.props,
