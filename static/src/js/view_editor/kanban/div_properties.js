@@ -94,6 +94,8 @@ export class DivProperties extends Component {
         this.notification = useService('effect')
         this.divRef = useRef('divRef')
         this.saveHandled = false
+        this._autoSaving = false
+        this._autoSavePending = false
 
         this.state = useState({
             div: this.props.div,
@@ -229,7 +231,7 @@ export class DivProperties extends Component {
             this.properties[propertyKey] = value
             this.oldProperties[propertyKey] = value
         }
-
+        this.autoSave()
     }
 
     handleFlex({target}){
@@ -253,6 +255,7 @@ export class DivProperties extends Component {
             this.setProperty('alignItems', '')
             this.setProperty('wrap', '')
             this.setProperty('gap', '')
+            this.autoSave()
         }
     }
 
@@ -282,79 +285,64 @@ export class DivProperties extends Component {
         return set1.size === set2.size && [...set1].every(value => set2.has(value));
     }
 
-    /**
-     * Auto-saves updated div styles and classes to backend via RPC.
-     * Supports undo/redo by updating session storage.
-     */
-    async handleAutoSave(ev) {
-        if (this.divRef.el && !this.divRef.el.contains(ev.target) ||
-    ev?.target?.classList.contains("cy-btn_save")) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if (ev.type === 'mousedown') {
-                this.saveHandled = true;
-            } else if (ev.type === 'click') {
-                if (this.saveHandled) {
-                    this.saveHandled = false;
-                    return;
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        this.doSave().finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
+    }
+
+    async doSave() {
+        this.env.services.ui.block();
+        try {
+            const classList = [...this.state.div.classList].filter(className =>
+                !className.includes('border-class') && !className.includes('cy-studio-kanban-border')
+            );
+            this.state.div.classList.remove('border-class');
+
+            let style = {};
+            for (const [key, value] of Object.entries(this.properties)) {
+                if (marginPaddingKeys.includes(key)) {
+                    style[key] = value;
                 }
             }
-            this.env.services.ui.block();
-            try {
-                const classList = [...this.state.div.classList].filter(className =>
-                    !className.includes('border-class') && !className.includes('cy-studio-kanban-border')
-                );
-                this.state.div.classList.remove('border-class')
 
-                let style = {}
-                for (const [key, value] of Object.entries(this.properties)) {
-                    if(marginPaddingKeys.includes(key)){
-                        style[key] = value
-                    }
-                }
-
-                const isSameStyle = shallowEqual(this.oldStyle, style)
-                const isSameClass = this.arraysHaveSameStrings(this.oldClassList, classList)
-                if(isSameClass && isSameStyle){
-                    if(this.viewMenu.contains(ev.target)){
-                        this.env.bus.trigger('showViewEdits')
-                    } else{
-                        this.env.bus.trigger("CLEAR-MENU");
-                    }
-                    return ;
-                }
-                const response =  await this.rpc("cyllo_studio/kanban/update/div", {
-                    model: this.props.model,
-                    view_type: this.props.viewType,
-                    view_id: this.props.viewId,
-                    path: this.props.path,
-                    properties: {
-                        class_list: classList,
-                        is_class: !isSameClass,
-                        is_style: !isSameStyle,
-                        style,
-                    }
-                });
-                if(response){
-                    let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
-                    let cleanedStr = response.replace(/\s+/g, ' ').trim();
-                    storedArray.push(cleanedStr);
-                    sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
-                    sessionStorage.setItem('ReDO', JSON.stringify([]));
-                }
-                this.env.bus.trigger("CLEAR-MENU");
-                 this.notification.add({
-                    title: _t("Success"),
-                    message: "Div properties have been saved.",
-                    type: "notification_panel",
-                    notificationType: "success",
-                });
-            } finally {
-              this.env.services.ui.unblock();
+            const isSameStyle = shallowEqual(this.oldStyle, style);
+            const isSameClass = this.arraysHaveSameStrings(this.oldClassList, classList);
+            if (isSameClass && isSameStyle) {
+                return;
             }
-            this.action.doAction("studio_reload");
+            const response = await this.rpc("cyllo_studio/kanban/update/div", {
+                model: this.props.model,
+                view_type: this.props.viewType,
+                view_id: this.props.viewId,
+                path: this.props.path,
+                properties: {
+                    class_list: classList,
+                    is_class: !isSameClass,
+                    is_style: !isSameStyle,
+                    style,
+                }
+            });
+            if (response) {
+                let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
+                let cleanedStr = response.replace(/\s+/g, ' ').trim();
+                storedArray.push(cleanedStr);
+                sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
+                sessionStorage.setItem('ReDO', JSON.stringify([]));
+            }
+            this.notification.add({
+                title: _t("Success"),
+                message: "Div properties have been saved.",
+                type: "notification_panel",
+                notificationType: "success",
+            });
+        } finally {
+            this.env.services.ui.unblock();
         }
-
+        this.action.doAction("studio_reload");
     }
     async closeDivSidebar() {
         this.env.bus.trigger('CLEAR-MENU', {

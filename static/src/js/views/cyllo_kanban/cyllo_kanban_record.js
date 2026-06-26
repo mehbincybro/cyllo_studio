@@ -295,7 +295,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         //             element.classList.remove('cy-studio-kanban-container');
         //         });
         //     }).on('drop', async(el, target, source, sibling)=>{
-        //         console.log('herlloo')
         //         const path = el.getAttribute('cy-xpath')
         //         const fieldName = el.getAttribute('name')
         //         const regex = /field(\[\d+\])?$/;
@@ -308,7 +307,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         //         try{
         //             self.env.services.ui.block();
         //             if(target == self.trashRef.el){
-        //                 console.log("hllloo")
         //                 let field = ""
         //                 if(isField){
         //                     const fieldNodes = self.props.archInfo.fieldNodes;
@@ -316,7 +314,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         //                     let isPathIncluded = nameExists.some(name => fieldNodes[name].MainPath.includes('/kanban/field'));
         //                     field = isPathIncluded ? "" : fieldName
         //                 }
-        //                 console.log("huhu")
         //                 const response = await self.rpc("cyllo_studio/kanban/remove", {
         //                     view_id: self.env.config.viewId,
         //                     view_type: self.env.config.viewType,
@@ -360,7 +357,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         // })
         //  onMounted(()=>{
         //     const self = this
-        //     console.log("hehe",self)
         //     try {
         //         const selectedXPath = sessionStorage.getItem('SelectedRibbonXPath');
         //         if (selectedXPath && this.rootRef?.el) {
@@ -431,7 +427,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         //
         //             // ✅ SHOW TRASH ON DRAG START
         //             onStart: function(evt) {
-        //                 console.log("start test")
         //                 if(evt.item.getAttribute('data-restrict')){
         //                     self.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.");
         //                     return;
@@ -550,14 +545,12 @@ export class CylloKanbanRecord extends KanbanRecord {
         //
         //     // ============ SETUP DIV SORTABLES ============
         //     divElements.forEach((element, index) => {
-        //         console.log("hqqw")
         //         var children = Array.from(element.children);
         //         var nonChildDivs = divElements.filter((otherDiv) => {
         //             return otherDiv !== element && !children.includes(otherDiv);
         //         });
         //
         //         const divContainers = [...nonChildDivs, this.trashRef.el];
-        //         console.log("ddidv",divContainers)
         //         divContainers.forEach((container) => {
         //             const existingSortable = Sortable.get(container);
         //             if (existingSortable) {
@@ -585,7 +578,6 @@ export class CylloKanbanRecord extends KanbanRecord {
         //
         //                 onStart: function(evt) {
         //                     const trash = self.trashRef.el;
-        //                     console.log("trash",trash)
         //                     if (trash) {
         //                         trash.classList.remove("opacity-0");
         //                         trash.classList.add("opacity-100");
@@ -848,7 +840,6 @@ export class CylloKanbanRecord extends KanbanRecord {
                     },
                     animation: 0,
                     onAdd: async function (evt) {
-                        console.log("TRASH onAdd:", evt.item.getAttribute('cy-xpath'));
                         hideTrash();
                         const isFromSidebar = !evt.item.getAttribute('cy-xpath');
                         if (isFromSidebar) {
@@ -884,7 +875,6 @@ export class CylloKanbanRecord extends KanbanRecord {
                     ghostClass: 'sortable-ghost',
 
                     onStart: function (evt) {
-                        console.log("FIELD onStart:", evt.item.getAttribute('cy-xpath'));
                         if (evt.item.getAttribute('data-restrict')) {
                             self.triggerWarning("Elements with 't-if', 't-elif', or 't-else' attributes cannot be moved.");
                             return;
@@ -904,14 +894,12 @@ export class CylloKanbanRecord extends KanbanRecord {
                     },
 
                     onEnd: function (evt) {
-                        console.log("FIELD onEnd:", evt.item.getAttribute('cy-xpath'));
                         hideTrash();
                         divElements.forEach(el => el.classList.remove('cy-studio-kanban-container'));
                         savedOptions?.onEnd?.call(this, evt);
                     },
 
                     onAdd: async function (evt) {
-                        console.log("FIELD onAdd to:", evt.to?.getAttribute?.('cy-xpath'), "item:", evt.item.getAttribute('cy-xpath'));
 
                         if (evt.to === trashEl) return;
                         const isFromSidebar = !evt.item.getAttribute('cy-xpath');
@@ -991,6 +979,10 @@ export class CylloKanbanRecord extends KanbanRecord {
         }
         const name = el.target.getAttribute("name") || el.srcElement.parentElement.getAttribute('name')
         if (name) {
+            // Only a real <field> placement (field-tag) carries a meaningful invisible
+            // modifier. A t-out/t-esc reference (e.g. <span t-out="record.partner_id.value"/>)
+            // renders regardless of the field declaration's invisible, so it is always visible.
+            const isFieldTag = !!el.target.getAttribute("field-tag");
             this.env.bus.trigger('KANBAN_FIELD_DETAILS', {
                 view_id: this.env.config.viewId,
                 view_type: this.env.config.viewType,
@@ -998,9 +990,9 @@ export class CylloKanbanRecord extends KanbanRecord {
                 model: this.action.currentController.props.resModel,
                 name: name,
                 path: el.target.getAttribute("cy-xpath") || el.target.parentElement.getAttribute('cy-xpath'),
-                invisible: el.target.getAttribute("invisible"),
+                invisible: isFieldTag ? (this.props.list.activeFields?.[name]?.invisible || null) : null,
                 isRestricted: getRestrictAttribute(el.target),
-                isFieldTag: !!el.target.getAttribute("field-tag"),
+                isFieldTag: isFieldTag,
                 type: "KanbanFieldProperties",
                 allfields: this.props.record.fields,
             });

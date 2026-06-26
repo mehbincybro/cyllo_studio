@@ -360,7 +360,7 @@
                     t-on-click="createField">Save</button>
                 <button t-if="props.create" class="btn btn-secondary w-100" t-on-click="cancelField">
                     Cancel</button>
-                <button t-else="" class="btn btn-secondary w-100"
+                <button t-else="" class="btn btn-danger w-100"
                     t-on-click="deleteField">Remove</button>
             </div>
         </div>

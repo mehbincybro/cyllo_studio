@@ -23,7 +23,7 @@ import { FirstPage } from '@cyllo_studio/js/new_app/new_app_templates';
  */
 
 export class StudioMenuSideBar extends MenuSideBar {
-    static template = 'cyllo_studio.StudioMenuSideBar'
+    static template = 'cyllo_studio.StudioMenuSideBar';
     setup() {
         super.setup();
         var self = this
@@ -63,7 +63,6 @@ export class StudioMenuSideBar extends MenuSideBar {
      * @param {HTMLElement} el - The container element for draggable menus
      */
     createDragulaConfig(el) {
-        console.log("menu dragged")
         const existingSortable = Sortable.get(el);
         if (existingSortable) existingSortable.destroy();
         return Sortable.create(el, {

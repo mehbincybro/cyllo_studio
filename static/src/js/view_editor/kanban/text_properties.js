@@ -57,7 +57,8 @@ export class TextProperties extends Component {
             path: null,
         });
 
-        this.saveHandled = false;
+        this._autoSaving = false;
+        this._autoSavePending = false;
         this.warningCount = 0;
         this.currentViewType = this.props?.viewDetails?.viewType || null;
         this.lastPath = null;
@@ -179,6 +180,7 @@ export class TextProperties extends Component {
         element.classList.toggle('fw-bold', this.state.isBold);
         element.classList.toggle('fst-italic', this.state.isItalic);
         element.classList.toggle('text-decoration-underline', this.state.isUnderline);
+        this.autoSave();
     }
 
     /**
@@ -227,57 +229,33 @@ export class TextProperties extends Component {
         return textDecoration.includes('underline');
     }
 
-    /**
-     * Auto-saves the text content and styles via RPC.
-     * Shows validation warnings if text is empty.
-     *
-     * @param {Event} ev - Click or mousedown event
-     */
-    async handleAutoSave(ev) {
-            ev.preventDefault();
-            ev.stopPropagation();
-            if(!this.state.string){
-                this.warningCount += 1;
-                this.notification.add({
-                    title: _t("Validation Error"),
-                    message: "Unable to save the text.",
-                    description: "Please provide a text to save",
-                    type: "notification_panel",
-                    notificationType: "warning",
-                });
-                if(this.warningCount >= 2){
-                     // Create the tooltip element if it doesn't exist
-                      let tooltip = document.getElementById('cy-studio-discard-tooltip');
-                    if (!tooltip) {
-                        tooltip = document.createElement('div');
-                        tooltip.id = 'cy-studio-discard-tooltip';
-                         tooltip.textContent = 'Click to discard changes';
-                        document.body.appendChild(tooltip);
-                    }
-                    const rect = this.action_area.getBoundingClientRect();
-                    tooltip.style.left = `${rect.left + window.scrollX + rect.width / 2}px`;
-                    tooltip.style.top = `${rect.bottom + window.scrollY + 5}px`; // Positioning below the button
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        this.doSave().finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
+    }
 
-                    tooltip.style.transform = 'translateX(-50%)';
-                    tooltip.style.opacity = '1';
-
-                    // Hide the tooltip after 3 seconds
-                    setTimeout(() => {
-                        tooltip.style.opacity = '0';
-                    }, 3000);
-                }
-                return;
-            }
-            let updatedClassList = 'cy-studio-text'; // base class for all new text
-
-            if (this.state.isBold) updatedClassList += ' fw-bold';
-            if (this.state.isItalic) updatedClassList += ' fst-italic';
-            if (this.state.isUnderline) updatedClassList += ' text-decoration-underline';
+    async doSave() {
+        if (!this.state.string) {
+            return this.notification.add({
+                title: _t("Validation Error"),
+                message: "Unable to save the text.",
+                description: "Please provide a text to save",
+                type: "notification_panel",
+                notificationType: "warning",
+            });
+        }
+        let updatedClassList = 'cy-studio-text';
+        if (this.state.isBold) updatedClassList += ' fw-bold';
+        if (this.state.isItalic) updatedClassList += ' fst-italic';
+        if (this.state.isUnderline) updatedClassList += ' text-decoration-underline';
 
         this.env.services.ui.block();
         try {
             if (this.state.is_edit) {
-                // Updating an existing element
                 const response = await this.rpc("/cyllo_studio/kanban/update/text", {
                     path: this.props.span_properties?.element.getAttribute("cy-xpath") || this.props.path,
                     view_id: this.props.span_properties?.view_id || this.props.viewDetails.viewId,
@@ -289,7 +267,6 @@ export class TextProperties extends Component {
                         class_names: updatedClassList,
                     },
                 });
-
                 if (response) {
                     const storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
                     storedArray.push(response.replace(/\s+/g, ' ').trim());
@@ -297,38 +274,25 @@ export class TextProperties extends Component {
                     sessionStorage.setItem('ReDO', JSON.stringify([]));
                 }
             } else {
-                // Adding a new element
-                let response;
-                if (this.props.viewDetails.viewType === "kanban") {
-                    response = await this.rpc("/cyllo_studio/kanban/add/text", {
-                        path: this.props.span_properties.properties?.elementInfo?.path || this.props.path,
-                        position: this.props.span_properties.properties?.elementInfo?.position || 'inside',
-                        ...this.props.viewDetails,
-                        properties: {
-                            string: this.state.string || '',
-                            class_names: updatedClassList,
-                            sibling: this.props.sibling || false,
-                            item_type: this.props.item_type || "",
-                            field_info: this.props.field_info || {},
-                            invisible: this.state.invisible,
-                        },
-                    });
-                } else {
-                    response = await this.rpc("/cyllo_studio/kanban/add/text", {
-                        path: this.props.properties?.elementInfo?.path || this.props.path,
-                        position: this.props.properties?.elementInfo?.position || 'inside',
-                        ...this.props.viewDetails,
-                        properties: {
-                            string: this.state.string || '',
-                            class_names: updatedClassList,
-                            sibling: this.props.sibling || false,
-                            item_type: this.props.item_type || "",
-                            field_info: this.props.field_info || {},
-                            invisible: this.state.invisible,
-                        },
-                    });
-                }
-
+                const addPath = this.props.viewDetails.viewType === "kanban"
+                    ? (this.props.span_properties?.properties?.elementInfo?.path || this.props.path)
+                    : (this.props.properties?.elementInfo?.path || this.props.path);
+                const addPosition = this.props.viewDetails.viewType === "kanban"
+                    ? (this.props.span_properties?.properties?.elementInfo?.position || 'inside')
+                    : (this.props.properties?.elementInfo?.position || 'inside');
+                const response = await this.rpc("/cyllo_studio/kanban/add/text", {
+                    path: addPath,
+                    position: addPosition,
+                    ...this.props.viewDetails,
+                    properties: {
+                        string: this.state.string || '',
+                        class_names: updatedClassList,
+                        sibling: this.props.sibling || false,
+                        item_type: this.props.item_type || "",
+                        field_info: this.props.field_info || {},
+                        invisible: this.state.invisible,
+                    },
+                });
                 if (response) {
                     const storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
                     storedArray.push(response.replace(/\s+/g, ' ').trim());
@@ -336,8 +300,6 @@ export class TextProperties extends Component {
                     sessionStorage.setItem('ReDO', JSON.stringify([]));
                 }
             }
-
-            // Refresh the view preview immediately
             this.env.bus.trigger("CLEAR-MENU");
             this.notification.add({
                 title: _t("Success"),
@@ -363,6 +325,7 @@ export class TextProperties extends Component {
      */
     onDomainRadioClick({ target }) {
         this.state.invisible = (this.state.invisible === 'true') ? 'false' : 'true';
+        this.autoSave();
     }
 
      /**
@@ -383,7 +346,8 @@ export class TextProperties extends Component {
                 this.state.validation = true
             },
             onConfirm: (expression) => {
-                this.state[attribute] = expression; // Set the state directly
+                this.state[attribute] = expression;
+                this.autoSave();
             }
         });
     }

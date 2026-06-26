@@ -1039,11 +1039,12 @@ class StudioMode(Controller):
               str: XML snippets representing updated field and any added placeholders.
           """
         view_rec = self.get_studio_view(args['view_id'], args['model'], args['view_type'])
+        widget = args.get('widget') or ''
+        widget_attr = f'<attribute name="widget">{widget}</attribute>' if widget else '<attribute name="widget"/>'
         view_arch = f'''
                                         <xpath expr="{args['path']}" position="attributes">
-                                           <attribute name="invisible">{args['invisible']}</attribute>
-                                            <attribute name="widget">{args['widget']}</attribute>
-
+                                           <attribute name="invisible">{args.get('invisible', 'False')}</attribute>
+                                            {widget_attr}
                                         </xpath>'''
 
         not_present_field = self.create_invisible(

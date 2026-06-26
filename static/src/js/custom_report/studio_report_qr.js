@@ -120,7 +120,6 @@ export const QrMixin = {
 
     async onQrWizardConfirm() {
         if (this.state.qr.type === 'pdf_link' && !this.state.qr.config.token) {
-            console.log('entered', this.state.reportInfo.report_name, this)
             try {
                 this.state.qr.previewLoading = true;
                 const res = await this.rpc('/cyllo_studio/generate_qr_token', {

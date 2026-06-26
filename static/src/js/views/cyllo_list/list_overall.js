@@ -157,7 +157,6 @@ export class ListOverall extends Component {
         this.props?.resModel ||
         this.props?.model ||
         null;
-    console.log("model =", model);
     if (!model) {
         this.state.recordNameOptions = [];
         this.state.currentRecName = "";

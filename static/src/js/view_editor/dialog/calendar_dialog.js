@@ -53,7 +53,6 @@ export class CalendarDialog extends Component {
         try {
             // Check if props.fields is empty or undefined
             if (!this.props.fields || Object.keys(this.props.fields).length === 0) {
-                console.log('Fields not available in props, fetching from model...');
 
                 // Fetch fields using fields_get
                 const fields = await this.rpc('/web/dataset/call_kw', {

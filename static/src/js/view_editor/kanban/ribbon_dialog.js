@@ -351,27 +351,22 @@ async handelSave() {
             ...this.props.viewDetails,
             ribbons: ribbonsToSave,
         });
-        console.log("resp",response)
         if (response) {
             // Update undo/redo history
             let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
             let cleanedStr = response.replace(/\s+/g, ' ').trim();
             storedArray.push(cleanedStr);
-            console.log("store",storedArray)
             sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
             sessionStorage.setItem('ReDO', JSON.stringify([]));
         }
 
         // Store the selected ribbon's path for restoration after reload
-        console.log("12324")
         try {
             const sel = this.state.ribbons[this.state.selectedIndex];
-            console.log("sse",sel)
             if (sel && sel.path) {
                 sessionStorage.setItem('SelectedRibbonXPath', sel.path);
             }
         } catch (e) {
-            console.log("42342")
             console.warn('Failed to store selected ribbon:', e);
         }
 

@@ -117,7 +117,6 @@ export class FormOverall extends Component {
             const result = await this.rpc("/cyllo_studio/check_view_customized", {
                 view_id: view_id,
             });
-            console.log("check_view_customized result:", result, typeof result);
             this.state.hasStudioChanges = !!result || storedUndo.length > 0;
         } catch (error) {
             console.error("check_view_customized failed:", error);
@@ -681,7 +680,6 @@ export class FormOverall extends Component {
                         }
                     }
                 } else if (el.classList.contains('kanban') || el.classList.contains('tree')) {
-                    console.log('this',this)
                     self.dialogService.add(FormTreeDialog, {
                         resModel: self.action.currentController.props.resModel,
                         isKanban: el.classList.contains('kanban'),
@@ -875,7 +873,6 @@ export class FormOverall extends Component {
     }
 
     broadcastPreviewMode = () => {
-        console.log("this.state.isPreviewMode", this.state.isPreviewMode)// ✅ ADD THIS
         this.env.bus.trigger('PREVIEW_MODE_CHANGED', {
             isPreviewMode: this.state.isPreviewMode
         });

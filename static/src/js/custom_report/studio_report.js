@@ -140,7 +140,6 @@ export class EditReport extends Component {
                     ['name', 'logo', 'street', 'city', 'phone', 'email', 'website', 'report_footer'],
                     { limit: 1, order: 'id asc' }
                 );
-                // console.log('logoooooo',companies)
                 if (companies && companies.length > 0) {
                     const co = companies[0];
                     this._companyId = co.id; // store for logo upload
@@ -172,7 +171,6 @@ export class EditReport extends Component {
 
         onMounted(async () => {
             const params = this.props.action.params || {};
-            console.log('params', params, this)
 
             // Hide the Cyllo sidebar logic per user request
             this._cyElsToRestore = [];
@@ -720,12 +718,10 @@ export class EditReport extends Component {
     }
 
     async _loadRealReport(docId) {
-        console.log('real record loading......', docId)
         const res = await this.rpc("/cyllo_studio/render_report_html", {
             report_id: this.state.reportInfo.id,
             doc_ids: [docId],
         });
-        console.log(res, 'record record....')
         if (res.success) {
             // Use the URL-based preview so Odoo's CSS/JS assets load correctly
             // inside the iframe (srcdoc breaks relative asset bundle paths).
@@ -830,7 +826,6 @@ export class EditReport extends Component {
             // returned by the backend includes current DnD changes.
             const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
             if (hasChanges && this.reportFrameRef.el) {
-                console.log("[EditSources] Pending changes detected, saving first...");
                 await this.save_changes(this);
             }
 
@@ -852,7 +847,6 @@ export class EditReport extends Component {
     _initAceEditor() {
         setTimeout(() => {
             const editorEl = this.aceEditorRef.el;
-            console.log("[EditSources] Initializing Ace. Element:", editorEl, "window.ace:", !!window.ace);
             if (editorEl && window.ace) {
                 if (this.aceEditor) {
                     this.aceEditor.destroy();
@@ -867,7 +861,6 @@ export class EditReport extends Component {
                 this.aceEditor.on('change', () => {
                     this.state.sourceCode = this.aceEditor.getValue();
                 });
-                console.log("[EditSources] Ace initialized with content length:", code.length);
             } else {
                 console.error("[EditSources] Could not initialize Ace. Element:", !!editorEl, "Lib:", !!window.ace);
                 if (!window.ace) {
@@ -1035,7 +1028,6 @@ export class EditReport extends Component {
     onPrintReport() {
         const report = this.state.reportInfo;
         const activeId = this.state.records[this.state.currentIndex];
-        console.log('reportss', report, activeId)
         if (!report.id || !activeId) return;
 
         this.action.doAction({
@@ -1159,7 +1151,6 @@ export class EditReport extends Component {
         return null;
     }
     //    async onReportPropertyChange(field, value) {
-    //        console.log('valueee',value,this)
     //        this.state.reportInfo[field] = value;
     //        await this.rpc("/web/dataset/call_kw/ir.actions.report/write", {
     //            model: "ir.actions.report",
@@ -1236,7 +1227,6 @@ export class EditReport extends Component {
         this._snippetPanel = document.getElementById('snippet-panel');
         //        this._reportFrame = document.getElementById('studio_report');
         this._reportFrame = this.reportFrameRef.el
-        console.log('test', this.reportFrameRef.el)
         if (!this._reportFrame) return;
         // Destroy any previous instances before reinitialising
         this._destroySortableInstances();
@@ -1545,7 +1535,6 @@ export class EditReport extends Component {
             },
 
             async onAdd(evt) {
-                console.log("DROP", evt);
                 const item = evt.item;
                 const fromPanel = item.dataset._fromPanel === '1';
 
@@ -2305,7 +2294,6 @@ export class EditReport extends Component {
     //
     //            // Fired when an element from ANOTHER list (panel or other zone) is dropped here
     //            onAdd: async (evt) => {
-    //                console.log('avtttt',evt)
     //                const item = evt.item;
     //                const fromPanel = item.dataset._fromPanel === '1';
     //
@@ -2465,14 +2453,12 @@ export class EditReport extends Component {
 
     // \u2500\u2500 Company Logo Upload \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     onLogoClick(ev) {
-        console.log('klloo',this.state.hideLogo,this.state.companyLogo)
         if (this.state.hideLogo && this.state.companyLogo) {
             // Restore hidden logo for this report (no file picker needed)
             this.state.hideLogo = false;
             if (this.undoManager) this.undoManager.debouncedSave();
             return;
         }
-                    console.log('testttttttt,logoo',this.state.companyLogo)
 
         if (this.state.companyLogo) {
             // Remove existing dropdown if any
@@ -2662,11 +2648,9 @@ export class EditReport extends Component {
                 }
             });
             */
-            console.log('component', component, component.reportFrameRef)
             const editedHTML = component.reportFrameRef.el.innerHTML;
 
 
-            console.log('[Cyllo Studio] Serializing HTML...', editedHTML.length, 'bytes');
             const parser = new DOMParser();
             const editedDoc = parser.parseFromString(editedHTML, 'text/html');
             const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
@@ -2677,7 +2661,6 @@ export class EditReport extends Component {
             let changes = component.getChangedElements(originalDoc, editedDoc);
 
 
-            console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
 
             // ── Logo hide/show persistence ──────────────────────────────────
             // We track whether hideLogo changed relative to what was originally loaded.
@@ -2745,12 +2728,10 @@ export class EditReport extends Component {
             if (logoOverrideTemplates.length) {
                 newTemplates = newTemplates.concat(logoOverrideTemplates);
             }
-            console.log('[Cyllo Studio] Sending templates:', newTemplates);
 
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
                 all_arch: newTemplates,
             });
-            console.log('[Cyllo Studio] Save result:', result);
 
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
@@ -2765,7 +2746,6 @@ export class EditReport extends Component {
                             record_id: sampleRecordId
                         }).then((res) => {
                             if (res && res.success) {
-                                console.log("[Cyllo Studio] Server-side thumbnail generated.");
                                 component.state.hasThumbnail = true;
                             } else {
                                 console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
@@ -2898,9 +2878,7 @@ export class EditReport extends Component {
                 && !original.hasAttribute('name'); // Zones with names are often anchors in Odoo layouts
 
             if (textChanged || innerChanged || structChanged) {
-                console.log(`[Cyllo Studio] Change detected in ${xpath}: text=${textChanged}, inner=${innerChanged}, struct=${structChanged} (rawStruct=${rawStructChanged})`);
                 if (structChanged) {
-                    console.log(`[Cyllo Studio]   - Struct check for ${xpath}: hasStructural=${hasStructuralNodes(original)}, hasChain=${hasTIfElIfChainInChildren(original)}, hasTable=${containsTable(original)}`);
                 }
                 allChanges.push({ el, xpath, template, structChanged });
             }
@@ -2927,7 +2905,6 @@ export class EditReport extends Component {
 
                     const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
                     if (attrChanged) {
-                        console.log(`[Cyllo Studio] Attribute change on child ${childXpath}: hidden=${originalHasHidden}->${editedHasHidden}, t-if=${originalTif}->${editedTif}`);
                         allChanges.push({
                             el: editedChild,
                             xpath: childXpath,
@@ -3815,7 +3792,6 @@ export class EditReport extends Component {
 
         mainInherit.xpathBlocks = mainInherit.xpathBlocks.replace('</data>', footerXml + '\n</data>');
 
-        console.log('new_inherits', new_inherits);
         return new_inherits;
     }
 

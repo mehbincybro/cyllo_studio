@@ -37,6 +37,8 @@ export class SmartButtonProperties extends Component {
         this.dialogService = useService("dialog");
         this.addDialog = useOwnedDialogs();
         this.iconRef = useRef('IconRef')
+        this._autoSaving = false;
+        this._autoSavePending = false;
         this.state = useState({
             string: this.props.string || "",
             label: this.props.properties?.string || this.props.properties?.nullString || '',
@@ -103,8 +105,19 @@ export class SmartButtonProperties extends Component {
         return (this.state.group_ids || []).map(id => String(id));
     }
 
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        const save = this.state.isNewButton ? this.addSmartButton() : this.updateSmartButton();
+        save.finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
+    }
+
     updateGroupIds(selectedStrings) {
         this.state.group_ids = selectedStrings.map(s => parseInt(s, 10));
+        this.autoSave();
     }
 
     async findGroupIds(groups) {
@@ -150,12 +163,14 @@ export class SmartButtonProperties extends Component {
         });
     }
     updateFieldType(path, field) {
-        this.state.fieldDetails = field
-        this.state.related_field = path
-        this.state.domain = '[]'
+        this.state.fieldDetails = field;
+        this.state.related_field = path;
+        this.state.domain = '[]';
+        this.autoSave();
     }
     handleInvisibleChange(event) {
-        this.state.invisible = event.target.checked ? "true" : "false"
+        this.state.invisible = event.target.checked ? "true" : "false";
+        this.autoSave();
     }
 
     async attrDomain(ev) {
@@ -169,7 +184,7 @@ export class SmartButtonProperties extends Component {
             resModel,
             fields: filteredObj,
             expression: this.state.invisible || 'false',
-            onConfirm: (domain) => this.state.invisible = domain
+            onConfirm: (domain) => { this.state.invisible = domain; this.autoSave(); }
          })
     }
 

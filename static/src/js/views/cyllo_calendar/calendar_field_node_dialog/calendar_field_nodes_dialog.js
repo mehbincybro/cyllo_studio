@@ -269,7 +269,7 @@ export class CalendarViewDialog extends CalendarCommonPopover {
         }));
         return [{
             value: false,
-            label: ''
+            label: '(None)'
         }, ...result]
     }
 

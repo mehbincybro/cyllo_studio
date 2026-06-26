@@ -116,7 +116,6 @@ export class ConstraintDialog extends Component {
             this.state.deps = pythonConstraintInfo.deps;
             this.state.code = pythonConstraintInfo.code;
             this.state.activeTab = 'python_constraints'; // Switch to Python tab if constraint exists
-            console.log("✓ Loaded Python constraint:", pythonConstraintInfo);
         }
 
         // Load SQL constraints (if you want to display them too)
@@ -127,7 +126,6 @@ export class ConstraintDialog extends Component {
             this.state.condition = firstConstraint.definition || "";
             this.state.constraintKey = firstConstraint.key || "";
             this.state.activeTab = 'sql_constraints'; // Switch to SQL tab if constraints exist
-            console.log("✓ Loaded SQL constraints:", this.props.existingConstraints);
         }
 
     } catch (error) {
@@ -156,7 +154,6 @@ async loadExistingConstraints() {
         if (pythonConstraintInfo && pythonConstraintInfo.deps && pythonConstraintInfo.code) {
             this.state.deps = pythonConstraintInfo.deps;
             this.state.code = pythonConstraintInfo.code;
-            console.log("✓ Loaded Python constraint:", pythonConstraintInfo);
         }
 
     } catch (error) {
@@ -429,7 +426,6 @@ async loadExistingConstraints() {
 
     if (sqlConstraint) {
         result.sql_constraint = sqlConstraint;
-        console.log("tte",sqlConstraint)
     }
 
     if (pythonConstraint) {

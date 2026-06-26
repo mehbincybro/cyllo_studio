@@ -208,7 +208,6 @@ export class CylloNavBar extends NavBar {
     async ReportClick() {
         this.state.configOpen = false;
         const currentController = this.action.currentController;
-        console.log('hiiii', currentController)
         const resModel = currentController.action.res_model;
         if (resModel && resModel !== 'ir.actions.report') {
             sessionStorage.setItem('cy_report_editor_origin', JSON.stringify({

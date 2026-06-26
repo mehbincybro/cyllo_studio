@@ -420,7 +420,7 @@ export class StudioWrapper extends Component {
                 classNames: detail.classNames,
                 string: detail.string,
                 is_edit: detail.is_edit,
-                invisible: detail.invisible,
+                invisible: detail.invisible || '',
             });
             this.updateViewDetails(detail);
         }
@@ -473,7 +473,7 @@ export class StudioWrapper extends Component {
                 position: detail.position || "",
                 class_name: detail.class || "",
                 string: detail?.string || "",
-                groupIds: detail?.groupIds || "",
+                groupIds: Array.isArray(detail?.groupIds) ? detail.groupIds : [],
                 icon: detail?.icon || '',
                 invisible: detail.invisible || '',
                 element: detail.element || '',
@@ -629,7 +629,7 @@ export class StudioWrapper extends Component {
                 progressAttributes: detail.progressAttributes || {},
                 ribbonElement: detail.ribbonElement || document.querySelectorAll("nonexistent-selector"),
                 isFieldTag: detail.isFieldTag,
-                invisible: detail.invisible,
+                invisible: detail.invisible || '',
                 widget: detail.widget,
             });
             Object.assign(this.fieldProperties, {
@@ -738,7 +738,7 @@ export class StudioWrapper extends Component {
                 classNames: detail.classNames,
                 string: detail.string,
                 is_edit: detail.is_edit,
-                invisible: detail.invisible,
+                invisible: detail.invisible || '',
             });
             this.updateViewDetails(detail);
         }
@@ -796,7 +796,7 @@ export class StudioWrapper extends Component {
         if (detail) {
             Object.assign(this.noteBookProperties, {
                 properties: detail.properties,
-                invisible: detail.invisible,
+                invisible: detail.invisible || '',
                 type: detail.type,
                 autofocus: detail.autofocus,
 

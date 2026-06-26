@@ -89,7 +89,6 @@ export class StatusBarDialog extends Component {
         }, () => [this.state.selectedField])
 
         useEffect(() => {
-            console.log("usefeeced")
             const self = this;
             const container = this.selectionValuesRef.el;
             if (!container) return;
@@ -119,7 +118,6 @@ export class StatusBarDialog extends Component {
      * Initializes dragula for drag-and-drop functionality on selection values
      */
     // initializeDragAndDrop() {
-    //     console.log("huererererere")
     //     const self = this;
     //
     //     // Prevent modal header from being draggable

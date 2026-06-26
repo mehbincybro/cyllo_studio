@@ -140,12 +140,10 @@ export class CylloFormController extends FormController {
                         // },
 
                         onChoose: function (evt) {
-                            console.log('onChoose triggered', evt.item);
                         },
                         onUnchoose: function (evt) {
                         },
                         onStart: function (evt) {
-                            console.log('onStart triggered', evt);
                             dragState.draggedElement = evt.item;
                             dragState.sourceContainer = evt.from;
                             dragState.initialIndex = evt.oldIndex;
@@ -195,15 +193,12 @@ export class CylloFormController extends FormController {
                         onMove: function (evt, originalEvent) {
                             const related = evt.related;
 
-                            console.log('onMove - related:', related?.className);
 
                             // Block drops on trash container and separators
                             if (related && related.classList.contains('cy-inner-trash-container')) {
-                                console.log('Blocking drop on trash');
                                 return false;
                             }
                             if (related && related.classList.contains('g-col-sm-2')) {
-                                console.log('Blocking drop on separator');
                                 return false;
                             }
 
@@ -214,7 +209,6 @@ export class CylloFormController extends FormController {
                             return true;
                         },
                         onEnd: async function (evt) {
-                            console.log(' onEnd triggered', evt);
                             const el = evt.item;
                             const elementIcon = el.querySelector(".cy-studio-field-icons");
                             elementIcon?.classList.remove("d-none");
@@ -246,10 +240,8 @@ export class CylloFormController extends FormController {
                     self.sortableInstances.push(sortableInstance);
                 });
 
-                console.log('Total sortable instances:', self.sortableInstances.length);
 
                 return () => {
-                    console.log('Cleanup: destroying instances');
                     // self.sortableInstances.forEach(instance => instance?.destroy());
                     //    self.sortableInstances.forEach(instance => {
                     //     try {
@@ -289,23 +281,18 @@ export class CylloFormController extends FormController {
 //    const target = evt.to;
 //    const source = evt.from;
 //
-//    console.log('=== DROP DEBUG START ===');
-//    console.log('Event oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex);
-//    console.log('Same container:', source === target);
 //
 //    // Get ALL children from the target container
 //    const allChildren = Array.from(target.children);
 //
 //    // Find where the dropped element currently is (Sortable has already moved it)
 //    const droppedIndex = allChildren.indexOf(el);
-//    console.log('Dropped element current index:', droppedIndex);
 //
 //    // Find the next o_wrap_field element AFTER the dropped position
 //    let sibling = null;
 //    for (let i = droppedIndex + 1; i < allChildren.length; i++) {
 //        if (allChildren[i].classList.contains('o_wrap_field')) {
 //            sibling = allChildren[i];
-//            console.log('Found sibling at index', i);
 //            break;
 //        }
 //    }
@@ -313,7 +300,6 @@ export class CylloFormController extends FormController {
 //    let path = target?.getAttribute("cy-xpath");
 //    let position = sibling ? "before" : "inside";
 //
-//    console.log('Position:', position, 'Sibling:', sibling ? 'found' : 'none');
 //
 //    // Get path from sibling if positioning "before"
 //    if (sibling) {
@@ -329,7 +315,6 @@ export class CylloFormController extends FormController {
 //
 //        if (siblingPath) {
 //            path = siblingPath;
-//            console.log('Using sibling path:', path);
 //        }
 //    }
 //
@@ -358,7 +343,6 @@ export class CylloFormController extends FormController {
 //        }
 //    }
 //
-//    console.log('Item path:', item_path);
 //
 //    // Determine direction of movement
 //    let direction = "";
@@ -369,30 +353,24 @@ export class CylloFormController extends FormController {
 //        // Use oldIndex and newIndex from Sortable
 //        if (evt.newIndex > dragState.initialIndex) {
 //            direction = "down";
-//            console.log('Direction: down');
 //        } else if (evt.newIndex < dragState.initialIndex) {
 //            direction = "up";
-//            console.log('Direction: up');
 //        }
 //    } else {
 //        // Moving between containers (left/right)
 //        if (finalX > dragState.initialX) {
 //            direction = "right";
-//            console.log('Direction: right');
 //        } else if (finalX < dragState.initialX) {
 //            direction = "left";
-//            console.log('Direction: left');
 //        }
 //    }
 //
-//    console.log('Final data:', {
 //        item_path,
 //        path,
 //        position,
 //        direction,
 //        has_multipath
 //    });
-//    console.log('=== DROP DEBUG END ===');
 //
 //    if (!path) {
 //        console.error('ERROR: No path found!');
@@ -417,7 +395,6 @@ export class CylloFormController extends FormController {
 //            'inSource': target === source,
 //        };
 //
-//        console.log('Sending RPC:', args);
 //
 //        const result = await this.rpc("/cyllo_studio/FieldPositionMove", {
 //            args
@@ -429,7 +406,6 @@ export class CylloFormController extends FormController {
 //            storedArray.push(cleanedStr);
 //            sessionStorage.setItem('UndoRedo', JSON.stringify(storedArray));
 //            sessionStorage.setItem('ReDO', JSON.stringify([]));
-//            console.log('RPC successful');
 //        }
 //    } catch (error) {
 //        console.error('RPC Error:', error);
@@ -448,7 +424,6 @@ export class CylloFormController extends FormController {
     //    const source = evt.from;
     //    const movedInsideSame = source === target;
     //
-    //    console.log('oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex, 'sameContainer:', movedInsideSame);
     //
     //    const children = Array.from(target.children);
     //    const droppedIndex = children.indexOf(el);
@@ -456,7 +431,6 @@ export class CylloFormController extends FormController {
     //        console.error('Dropped element not found in target children. Aborting.');
     //        return;
     //    }
-    //    console.log('Dropped index:', droppedIndex);
     //
     //    // Find next o_wrap_field element after the dropped index
     //    let sibling = null;
@@ -468,7 +442,6 @@ export class CylloFormController extends FormController {
     //    }
     //
     //    const position = sibling ? 'before' : 'inside';
-    //    console.log('Position decided:', position, sibling ? 'sibling found' : 'no sibling');
     //
     //    // --- 2) Resolve target path (cy-xpath) ---
     //    let targetPath = target.getAttribute('cy-xpath') || '';
@@ -480,7 +453,6 @@ export class CylloFormController extends FormController {
     //            sibling.firstElementChild?.firstElementChild?.getAttribute('cy-xpath') ||
     //            targetPath;
     //    }
-    //    console.log('Target path:', targetPath);
     //
     //    let item_path = '';
     //    let has_multipath = false;
@@ -544,7 +516,6 @@ export class CylloFormController extends FormController {
     //            direction = 'left';
     //        }
     //    }
-    //    console.log('Direction:', direction);
     //
     //    // --- 5) Validate paths before RPC ---
     //    if (!targetPath) {
@@ -568,7 +539,6 @@ export class CylloFormController extends FormController {
     //        inSource: movedInsideSame,
     //    };
     //
-    //    console.log('Sending RPC payload:', payload);
     //
     //    this.env.services.ui.block();
     //    try {
@@ -625,7 +595,6 @@ export class CylloFormController extends FormController {
         const source = evt.from;
         const movedInsideSame = source === target;
 
-        console.log('oldIndex:', evt.oldIndex, 'newIndex:', evt.newIndex, 'sameContainer:', movedInsideSame);
 
         const children = Array.from(target.children);
         const droppedIndex = children.indexOf(el);
@@ -633,7 +602,6 @@ export class CylloFormController extends FormController {
             console.error('Dropped element not found in target children. Aborting.');
             return;
         }
-        console.log('Dropped index:', droppedIndex);
 
         // Find next o_wrap_field element after the dropped index
         let sibling = null;
@@ -645,7 +613,6 @@ export class CylloFormController extends FormController {
         }
 
         const position = sibling ? 'before' : 'inside';
-        console.log('Position decided:', position, sibling ? 'sibling found' : 'no sibling');
 
         // --- 2) Resolve target path (cy-xpath) ---
         let targetPath = target.getAttribute('cy-xpath') || '';
@@ -657,7 +624,6 @@ export class CylloFormController extends FormController {
                 sibling.firstElementChild?.firstElementChild?.getAttribute('cy-xpath') ||
                 targetPath;
         }
-        console.log('Target path:', targetPath);
 
         let item_path = '';
         let has_multipath = false;
@@ -719,7 +685,6 @@ export class CylloFormController extends FormController {
                 direction = 'left';
             }
         }
-        console.log('Direction:', direction);
 
         // --- 5) Validate paths before RPC ---
         if (!targetPath) {
@@ -743,7 +708,6 @@ export class CylloFormController extends FormController {
             inSource: movedInsideSame,
         };
 
-        console.log('Sending RPC payload:', payload);
 
         this.env.services.ui.block();
         try {

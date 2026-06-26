@@ -54,9 +54,7 @@ export class OverallView extends Component {
     });
 //    onWillStart(() => {
 //      const checked = sessionStorage.getItem("invisible") === "1";
-//      console.log("cheka", checked)
 //      this.state.showInvisible = checked;
-//      console.log("this.sa", this.state.showInvisible)
 //      document.body.classList.toggle("cy-show-invisible", checked);
 //      // this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
 //    });
@@ -111,8 +109,6 @@ showInvisibleFields(ev) {
     this._applyInvisibleOverride(checked);
     document.body.classList.toggle("cy-hide-invisible", !checked);
     this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-    this.actionService.doAction("studio_reload");
-
 }
 
   /**

@@ -69,26 +69,16 @@ export class CylloListRenderer extends listView.Renderer {
        })
        this.state.invisible_session = sessionStorage.getItem("invisible");
        document.body.classList.toggle("cy-hide-invisible", !this.state.invisible_session);
-//       try {
-//    this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", !!this.state.invisible_session);
-//} catch (e) {}
+       useBus(this.env.bus, "CYLLO:SHOW_INVISIBLE_TOGGLED", (ev) => {
+           const isChecked = ev.detail ? ev.detail[0] : ev;
+           this.state.invisible_session = isChecked;
+       });
     onWillRender(()=>{
         this.state.invisible_session = sessionStorage.getItem('invisible')
     })
     onMounted(() => {
-      console.log('thato',this.env.config.viewType)
       const checked = !!sessionStorage.getItem("invisible");
       document.body.classList.toggle("cy-hide-invisible", !checked);
-      // Listen for invisible toggle and update state instantly
-      try {
- useBus(this.env.bus, "CYLLO:SHOW_INVISIBLE_TOGGLED", (ev) => {
-                const isChecked = ev.detail ? ev.detail[0] : ev;
-                console.log("is chck",isChecked)
-                this.state.invisible_session = isChecked;
-                });
-      } catch(e){
-       console.warn("Bus listener setup failed:", e);
-      }
       sessionStorage.removeItem("newListElement");
       this.env.bus.trigger("LIST_DETAILS", {
         mode: this.props.archInfo,

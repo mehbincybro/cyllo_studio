@@ -41,7 +41,7 @@ import {
 export class CylloKanbanCompiler extends KanbanCompiler {
     setup() {
         super.setup();
-        this.isKanbanView = true
+        this.isKanbanView = true;
     }
 
     /**
@@ -94,9 +94,9 @@ export class CylloKanbanCompiler extends KanbanCompiler {
      */
     compileNode(node, params = {}, evalInvisible = true) {
         const invisible_session = sessionStorage.getItem('invisible');
-//        if (invisible_session) {
+        if (invisible_session) {
             evalInvisible = false;
-//        }
+        }
         let compiledNode = super.compileNode(node, params, evalInvisible);
         if (!compiledNode) {
             return compiledNode;

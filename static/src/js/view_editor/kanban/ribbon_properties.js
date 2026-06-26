@@ -32,18 +32,23 @@ export class RibbonProperties extends Component {
             invisible: 'False',
         });
 
-        this.saveHandled = false;
+        this._autoSaving = false;
+        this._autoSavePending = false;
         onMounted(() => {
             this.action_area = document.querySelector(".o_action_manager")
         });
     }
-    /**
-    * Automatically saves the current ribbon properties via RPC.
-    * Shows a warning if the label is empty.
-    *
-    * @param {Event} ev - The triggering event (mousedown or click)
-    */
-    async handleAutoSave(ev) {
+
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        this.doSave().finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
+    }
+
+    async doSave() {
         if (!this.properties.string) {
             return this.notification.add({
                 title: _t("Validation Error"),
@@ -53,12 +58,6 @@ export class RibbonProperties extends Component {
                 notificationType: "warning",
             });
         }
-        if (ev.type === 'mousedown') {
-            this.saveHandled = true;
-        } else if (ev.type === 'click' && this.saveHandled) {
-            this.saveHandled = false;
-            return;
-        }
         this.env.services.ui.block();
         try {
             const viewType = this.props.viewDetails.viewType;
@@ -66,8 +65,6 @@ export class RibbonProperties extends Component {
                 ? "cyllo_studio/form/add/ribbon"
                 : "cyllo_studio/kanban/add/ribbon";
 
-            // Get the ribbon element for form-specific properties
-            const ribbonElement = this.props.element;
             let requestData = {
                 path: this.props.properties.elementInfo.path,
                 position: this.props.properties.elementInfo.position,
@@ -78,7 +75,6 @@ export class RibbonProperties extends Component {
                 model: this.props.viewDetails.model,
             };
 
-            // For form view updates
             if (viewType === "form") {
                 requestData = {
                     viewType: this.props.viewDetails.viewType,
@@ -90,7 +86,6 @@ export class RibbonProperties extends Component {
                     ...this.props.viewDetails,
                 };
             }
-            console.log("res", requestData["path"])
 
             const response = await this.rpc(endpoint, requestData);
 
@@ -102,7 +97,6 @@ export class RibbonProperties extends Component {
                 this.action.doAction("studio_reload");
             }
         } catch (error) {
-            console.error("Error saving ribbon:", error);
             this.notification.add({
                 title: _t("Error"),
                 message: "Failed to save ribbon",
@@ -113,7 +107,6 @@ export class RibbonProperties extends Component {
         } finally {
             this.env.services.ui.unblock();
         }
-        //    this.action.doAction("studio_reload");
     }
 
     /**
@@ -145,10 +138,6 @@ export class RibbonProperties extends Component {
      * @param {string} color - CSS class representing the color
      */
     handleSelectColor(color) {
-        //        console.log("Selected color:", color);
-        //        this.properties.color = color;
-        //        this.state.showDropdown = false;
-        //        this.props.element.firstChild.className = color;
         let span = this.props.element.querySelector("span");
         if (!span) {
             span = document.createElement("span");
@@ -159,6 +148,7 @@ export class RibbonProperties extends Component {
         this.properties.color = color;
         this.state.showDropdown = false;
         this.props.element.firstChild.className = color;
+        this.autoSave();
     }
 
     /**
@@ -201,7 +191,8 @@ export class RibbonProperties extends Component {
      * @param {Event} target - Radio input event
      */
     onDomainRadioClick({ target }) {
-        this.properties.invisible = target.checked ? 'True' : 'False'
+        this.properties.invisible = target.checked ? 'True' : 'False';
+        this.autoSave();
     }
     /**
      * Opens the ExpressionEditorDialog for editing the ribbon's domain expression.
@@ -225,7 +216,8 @@ export class RibbonProperties extends Component {
      */
     handleDomain(expression) {
         this.handleListener()
-        this.properties.invisible = expression
+        this.properties.invisible = expression;
+        this.autoSave();
     }
 
 }

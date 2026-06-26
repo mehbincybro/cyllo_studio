@@ -82,7 +82,6 @@ export class CylloNotebook extends Notebook {
         },
 
         onEnd: async function(evt) {
-            console.log("notebook worked on end");
             const view_id = self.env.config.viewId;
             const el = evt.item;
             const pagePath = el.getAttribute('cy-xpath');

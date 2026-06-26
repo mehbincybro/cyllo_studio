@@ -283,7 +283,6 @@ export class AsideBar extends Component {
     }
 
     //    get KanbanSpanProps() {
-    //        console.log("12121")
     //        return {
     //            ...(this.props.overall || {}),
     //            ...(this.props.kanbanComponent || {}),
@@ -356,14 +355,26 @@ export class AsideBar extends Component {
         };
     }
     get ButtonPropertiesProps() {
+        const buttonDetails = this.props.ButtonDetails || {};
+        const siblingDetails = this.props.sibling || {};
         return {
-            ...(this.props.ButtonDetails || {}),
-            ...(this.props.sibling || {}),
-            viewDetails: {
-                ...(this.props.viewDetails || {}),
-
-            },
-
+            viewDetails: { ...(this.props.viewDetails || {}) },
+            newButton: buttonDetails.newButton,
+            newHeader: buttonDetails.newHeader,
+            string: buttonDetails.string,
+            function_type: buttonDetails.function_type,
+            function_name: buttonDetails.function_name,
+            class_name: buttonDetails.class_name,
+            groupIds: Array.isArray(buttonDetails.groupIds) ? buttonDetails.groupIds : [],
+            invisible: buttonDetails.invisible,
+            icon: buttonDetails.icon,
+            spanxpath: buttonDetails.spanxpath,
+            path: buttonDetails.path,
+            model: buttonDetails.model,
+            properties: buttonDetails.properties,
+            sibling: siblingDetails.sibling,
+            field_info: siblingDetails.field_info,
+            item_type: siblingDetails.item_type,
         };
     }
 

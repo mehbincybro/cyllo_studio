@@ -61,7 +61,6 @@ export class ComputeDialog extends Component {
 //    }
 
     onComputeCodeChange(value) {
-        console.log("9797987")
         this.state.code = value;
         this.state.edited=true
 

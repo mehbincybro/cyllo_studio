@@ -414,6 +414,9 @@ export class ButtonProperties extends Component {
             path: this.props.path,
         });
 
+        this._autoSaving = false;
+        this._autoSavePending = false;
+
         onWillUpdateProps(async (nextProps) => {
             this.state.elementInfo = nextProps.elementInfo;
             this.state.newButton = this.props.newButton || false,
@@ -444,9 +447,9 @@ export class ButtonProperties extends Component {
         });
 
         onWillStart(async () => {
-             if (this.state.viewDetails.viewType === ["form"]) {
-                     sessionStorage.removeItem("CyStudioRelationModel");
-                 }
+            if (this.state.viewDetails.viewType === ["form"]) {
+                sessionStorage.removeItem("CyStudioRelationModel");
+            }
             if (this.buttonProperties.type == 'action') {
                 this.getInputValue(this.buttonProperties.name)
             }
@@ -487,6 +490,7 @@ export class ButtonProperties extends Component {
 
     updateGroupIds(selectedStrings) {
         this.buttonProperties.groupIds = selectedStrings.map(s => parseInt(s, 10));
+        this.autoSave();
     }
 
     async getInputValue(id) {
@@ -547,6 +551,7 @@ export class ButtonProperties extends Component {
         } else {
             this.buttonProperties.name = false;
         }
+        this.autoSave();
     }
     get getActionName() {
         const id = parseInt(this.buttonProperties.name);
@@ -627,12 +632,22 @@ export class ButtonProperties extends Component {
         }
         this.action.doAction('studio_reload')
     }
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        this.addButton().finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
+    }
+
     handleButtonFunctionChange(value) {
         const functionInfo = document.querySelector(".functionInfo");
         if (functionInfo) {
             functionInfo.classList.remove("d-none");
         }
         this.buttonProperties.name = value;
+        this.autoSave();
     }
 
     ButtonFunctionChange(array) {
@@ -647,6 +662,7 @@ export class ButtonProperties extends Component {
         target
     }) {
         this.buttonProperties[target.name] = ["false", "undefined"].includes(this.buttonProperties[target.name]) ? "true" : "false";
+        this.autoSave();
     }
 
     onDomainClick({ target }) {
@@ -661,7 +677,8 @@ export class ButtonProperties extends Component {
                 this.state.validation = true
             },
             onConfirm: (expression) => {
-                (this.buttonProperties[attribute] = expression)
+                this.buttonProperties[attribute] = expression;
+                this.autoSave();
             }
         });
     }

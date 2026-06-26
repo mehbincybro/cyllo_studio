@@ -55,7 +55,8 @@ export class KanbanFieldProperties extends Component {
     }
 
     handleInvisibleChange(event) {
-        this.state.fieldInvisible = event.target.checked ? 'True' : 'False'
+        this.state.fieldInvisible = event.target.checked ? 'True' : 'False';
+        this.autoSave();
     }
     async attrDomain(ev) {
         const parent = ev.target.closest('.cy-basedOn');
@@ -77,10 +78,11 @@ export class KanbanFieldProperties extends Component {
         });
     }
     modifier(expression, attribute) {
-        this.attribute = attribute
+        this.attribute = attribute;
         if (attribute === 'invisible') {
-            this.state.fieldInvisible = expression
+            this.state.fieldInvisible = expression;
         }
+        this.autoSave();
     }
     async defaultWidgets() {
         this.state.defaultWidgets = await this.orm.searchRead("default.widgets", [])
@@ -135,10 +137,20 @@ export class KanbanFieldProperties extends Component {
         if (!hasWidget && this.state.widget && this.state.widget !== 'False') {
             widgets.push({ value: this.state.widget, label: `(${this.state.widget})` })
         }
-        return [{ value: false, label: '' }, ...widgets];
+        return [{ value: false, label: '(None)' }, ...widgets];
     }
     handleWidget(value) {
         this.state.widget_value = value;
+        this.autoSave();
+    }
+
+    autoSave() {
+        if (this._autoSaving) { this._autoSavePending = true; return; }
+        this._autoSaving = true;
+        this.updateKanban().finally(() => {
+            this._autoSaving = false;
+            if (this._autoSavePending) { this._autoSavePending = false; this.autoSave(); }
+        });
     }
     async updateKanban() {
         const args = {
@@ -146,7 +158,7 @@ export class KanbanFieldProperties extends Component {
             view_id: this.props.viewDetails.viewId,
             view_type: this.props.viewDetails.viewType,
             path: this.props.path,
-            widget: this.state.widget_value || this.state.widget,
+            widget: this.state.widget_value || this.state.widget || '',
             invisible: this.state.fieldInvisible,
             active_fields: this.props.activeFields,
             remove_widget: this.state.widget_value === false || this.state.widget_value === '',

@@ -24,7 +24,6 @@ export class ReportCreationDialog extends owl.Component {
             this.props.context?.default_model ||
             currentController?.action?.context?.default_model ||
             null;
-        console.log(activeModel,currentController?.action?.context?.default_model, this.props.context?.default_model )
         this.state = useState({
             step: 1,
             name: "",
@@ -54,7 +53,6 @@ export class ReportCreationDialog extends owl.Component {
             );
             if (activeModel) {
                 const match = this.state.models.find(m => m.model === activeModel);
-                console.log('match',match)
                 if (match) {
                     this.state.modelId = match.id;
                     this.state.modelLabel = `${match.name} (${match.model})`;

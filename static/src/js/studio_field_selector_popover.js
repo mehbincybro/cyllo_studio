@@ -12,7 +12,6 @@ export class StudioFieldSelectorPopover extends ModelFieldSelectorPopover{
     setup(){
         super.setup();
         onWillDestroy(() => {
-            console.log("MyComponent will be destroyed!");
             this.props.complete();
         });
     }

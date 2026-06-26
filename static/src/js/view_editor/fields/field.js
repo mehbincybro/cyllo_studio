@@ -203,6 +203,7 @@ export class CylloField extends Field {
         delete props.type;
         delete props.readonly;
         delete props.striped;
+        delete props.invisible;
         delete props.MainPath;
 
         return {
@@ -415,7 +416,7 @@ export class CylloField extends Field {
                 model: this.action.currentController.props.resModel,
                 name: name,
                 path: e.target.getAttribute("cy-xpath") || e.target.parentElement.getAttribute('cy-xpath'),
-                invisible: this.props.fieldInfo.attrs?.invisible || 'False',
+                invisible: this.props.fieldInfo?.invisible || null,
                 dynamic_placeholder: this.props.fieldInfo.attrs?.dynamic_placeholder || "",
                 isRestricted: getRestrictAttribute(e.target),
                 isFieldTag: !!e.target.getAttribute("field-tag"),

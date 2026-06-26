@@ -526,7 +526,6 @@ export class FieldProperties extends Component {
                         if (constraints && constraints.length > 0) {
                             this.sqlConstraints.push(...constraints);
                             hasSqlConstraints = true;
-                            console.log(`✓ Loaded ${constraints.length} SQL constraints for ${this.props.name}`);
                         }
 
                         // Load Python constraints
@@ -543,12 +542,10 @@ export class FieldProperties extends Component {
                                     code: pythonConstraintInfo.code
                                 };
                                 hasPythonConstraint = true;
-                                console.log(`✓ Loaded Python constraint for ${this.props.name}`);
                             } else {
                                 this.state.pythonConstraint = null;
                             }
                         } catch (error) {
-                            console.log("No Python constraint found or error loading:", error);
                             this.state.pythonConstraint = null;
                         }
 
@@ -560,9 +557,7 @@ export class FieldProperties extends Component {
                         if (hasPythonConstraint) constraintTypes.push("Python");
 
                         if (constraintTypes.length > 0) {
-                            console.log(`✓ Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
                         } else {
-                            console.log(`No constraints found for ${this.props.name}`);
                         }
                     } catch (error) {
                         console.error('Error loading constraints:', error);
@@ -627,7 +622,6 @@ export class FieldProperties extends Component {
                         this.state.pythonConstraint = null;
                     }
                 } catch (error) {
-                    console.log("No Python constraint found or error loading:", error);
                     this.state.pythonConstraint = null;
                 }
 
@@ -639,7 +633,6 @@ export class FieldProperties extends Component {
                 if (hasPythonConstraint) constraintTypes.push("Python");
 
                 if (constraintTypes.length > 0) {
-                    console.log(`✓ Initial load: Field ${this.props.name} has ${constraintTypes.join(" and ")} constraints`);
                 }
             }
         });
@@ -705,7 +698,6 @@ export class FieldProperties extends Component {
                         this.state.default_value = String(defaultResult.default_value);
                     }
                 } catch (error) {
-                    console.log('Error loading default value:', error);
                 }
             }
 
@@ -795,13 +787,13 @@ export class FieldProperties extends Component {
 
         // Don't show dynamic placeholder for relational fields
         if (['many2one', 'one2many', 'many2many', 'binary', 'html'].includes(currentFieldType)) {
-            return [{ value: '', label: '' }];
+            return [{ value: '', label: '(None)' }];
         }
 
         const compatibleFields = [];
 
         // Add "None" option
-        compatibleFields.push({ value: '', label: '' });
+        compatibleFields.push({ value: '', label: '(None)' });
 
         // Filter fields by compatible types
         Object.entries(this.props.allFields || {}).forEach(([fieldName, fieldInfo]) => {
@@ -843,7 +835,6 @@ export class FieldProperties extends Component {
             if (fieldValue && typeof fieldValue === 'object' && 'display_name' in fieldValue) {
                 fieldValue = fieldValue.display_name;
             }
-            console.log('Selected field value:', fieldValue);
 
             this.state.dynamic_placeholder_field = {
                 name: value,
@@ -864,7 +855,6 @@ export class FieldProperties extends Component {
     }
     getPlaceholderDisplay() {
         const val = this.state.placeholder || '';
-        console.log('hiii', val)
         if (this.state.isPlaceholderFocused) {
             return val;
         }
@@ -881,13 +871,11 @@ export class FieldProperties extends Component {
                     : value;
             });
         }
-        console.log('vall', val)
         return val;
     }
 
     handlePlaceholderInput(ev) {
         this.state.placeholder = ev.target.value;
-        console.log('kol', this.state.placeholder)
         this.state.edited = true;
         const match = ev.target.value.match(/^{{(.*?)}}$/);
         this.state.dynamic_placeholder = match ? match[1].trim() : '';
@@ -1218,7 +1206,6 @@ export class FieldProperties extends Component {
             }
 
             if (this.state.constraintEnabled) {
-                console.log("=== EDIT MODE: Adding constraints to changedValues ===");
 
                 // Add SQL constraints if any exist
                 if (this.sqlConstraints && this.sqlConstraints.length > 0) {
@@ -1227,7 +1214,6 @@ export class FieldProperties extends Component {
                         c.definition,
                         c.message
                     ]);
-                    console.log("changedValues.sql_constraints:", changedValues.sql_constraints);
                 } else {
                     changedValues.sql_constraints = [];
                 }
@@ -1235,12 +1221,10 @@ export class FieldProperties extends Component {
                 // Add Python constraint if it exists
                 if (this.state.pythonConstraint) {
                     changedValues.python_constraint = this.state.pythonConstraint;
-                    console.log("changedValues.python_constraint:", changedValues.python_constraint);
                 } else {
                     changedValues.python_constraint = null;
                 }
             } else {
-                console.log("=== EDIT MODE: Constraints disabled, sending empty values ===");
                 changedValues.sql_constraints = [];
                 changedValues.python_constraint = null;
             }
@@ -1328,7 +1312,6 @@ export class FieldProperties extends Component {
                 });
             }
             if (response) {
-                console.log('Backend response:', response);
                 let storedArray = JSON.parse(sessionStorage.getItem('UndoRedo')) || [];
                 let cleanedStr = response.replace(/\s+/g, ' ').trim();
                 storedArray.push(cleanedStr);
@@ -1575,7 +1558,7 @@ export class FieldProperties extends Component {
             value: item.id,
             label: item.field_description + '(' + item.model_id[1] + ')'
         }));
-        return [{ value: false, label: '' }, ...result]
+        return [{ value: false, label: '(None)' }, ...result]
     }
 
     async handleRelatedModelFieldChange(value) {
@@ -1635,7 +1618,7 @@ export class FieldProperties extends Component {
     get newFieldWidgets() {
         return this.state.widget_types.length ? [{
             value: false,
-            label: ''
+            label: '(None)'
         }, ...this.state.widget_types] : this.state.widget_types
     }
 
@@ -1712,11 +1695,8 @@ export class FieldProperties extends Component {
             }
             const supportedOptions = getWidgetSupport(widget_name);
             const widgetOption = getWidgetTypes(widget_name)
-            console.log("wid", widgetOption)
-            console.log("wid", supportedOptions)
             if (supportedOptions) {
                 const container = document.getElementById('dynamic-container');
-                console.log("cont", container)
                 if (container) {
                     container.innerHTML = '';
                     supportedOptions.forEach(async field => {
@@ -1919,7 +1899,7 @@ export class FieldProperties extends Component {
     get ImageWidget() {
         const arr = [{
             value: false,
-            label: ''
+            label: '(None)'
         }]
         for (let value in this.state.charFields) {
             const field = this.state.charFields[value];
@@ -2157,8 +2137,6 @@ export class FieldProperties extends Component {
     }
 
     addConstraint(constraint) {
-        console.log("=== ADD CONSTRAINT CALLED ===");
-        console.log("Constraint received:", constraint);
 
         // Handle both SQL and Python constraints
         const hasSqlConstraint = constraint.sql_constraint;
@@ -2203,7 +2181,6 @@ export class FieldProperties extends Component {
 
             // Add SQL constraint
             this.sqlConstraints.push(sqlConstraint);
-            console.log("✓ Added SQL constraint:", sqlConstraint);
         }
 
         // Handle Python constraint
@@ -2221,7 +2198,6 @@ export class FieldProperties extends Component {
                 return;
             }
             this.state.pythonConstraint = pythonConstraint;
-            console.log("✓ Added Python constraint:", pythonConstraint);
         }
         this.state.constraintEnabled = true;
         this.state.edited = true;
@@ -2251,7 +2227,6 @@ export class FieldProperties extends Component {
     //            // Auto-disable checkbox if no constraints left
     //            if (!hasSqlConstraints && !hasPythonConstraint) {
     //                this.state.constraintEnabled = false;
-    //                console.log("All constraints removed, checkbox disabled");
     //            }
     //        }
     //    }
@@ -2280,7 +2255,6 @@ export class FieldProperties extends Component {
                     // Auto-disable checkbox if no constraints left
                     if (!hasSqlConstraints && !hasPythonConstraint) {
                         this.state.constraintEnabled = false;
-                        console.log("All constraints removed, checkbox disabled");
                     }
 
                     this.notification.add({
@@ -2321,14 +2295,12 @@ export class FieldProperties extends Component {
             // Auto-disable checkbox if no constraints left
             if (!hasSqlConstraints) {
                 this.state.constraintEnabled = false;
-                console.log("Python constraint removed, no constraints left, checkbox disabled");
             }
         }
     }
 
     // New method to clear all constraints
     clearAllConstraints() {
-        console.log("=== CLEARING ALL CONSTRAINTS ===");
 
         // Clear SQL constraints
         if (this.sqlConstraints) {
@@ -2342,7 +2314,6 @@ export class FieldProperties extends Component {
         this.state.constraintEnabled = false;
         this.state.edited = true;
 
-        console.log("✓ All constraints cleared, checkbox disabled");
     }
 
     getSQLConstraintsTuples() {

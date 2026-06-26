@@ -121,7 +121,6 @@ export class KanbanComponents extends Component {
                     animation: 150,
                     ghostClass: 'sortable-ghost-source',
                     onStart: function (evt) {
-                        console.log('check1')
                         divElements.forEach((element) => {
                             element.classList.add('cy-studio-kanban-container');
                         });
@@ -168,7 +167,6 @@ export class KanbanComponents extends Component {
                         }
                     },
                     onEnd: function (evt) {
-                        console.log('check2')
                         divElements.forEach((element) => {
                             element.classList.remove('cy-studio-kanban-container');
                         });
@@ -190,13 +188,8 @@ export class KanbanComponents extends Component {
                             pull: false,
                             put: function (to, from, dragEl) {
                                 if (dragEl.classList.contains('cy-studio-ribbon')) {
-                                    console.log("kluku")
-                                    console.log("to",to)
-                                    console.log("from",from)
-                                    console.log("drag",dragEl)
                                     return divElements[0] === targetEl;
                                 } else {
-                                    console.log("ukqu")
                                     return true;
                                 }
                             },
@@ -204,9 +197,7 @@ export class KanbanComponents extends Component {
                         },
                         animation: 150,
                         onAdd: async function (evt) {
-                            console.log('chuchcucucu')
                             const el = evt.item;
-                            console.log("hellooo")
                             const sibling = el.nextElementSibling;
                             const target = targetEl;
 
