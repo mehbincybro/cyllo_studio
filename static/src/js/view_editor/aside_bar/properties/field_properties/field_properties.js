@@ -1030,6 +1030,7 @@ export class FieldProperties extends Component {
                 this._autoSavePending = false;
                 this.autoSave();
             }
+            this.actionService.doAction("studio_reload");
         }
     }
     async createField() {
