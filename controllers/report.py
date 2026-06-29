@@ -175,28 +175,28 @@ class StudioReportController(Controller):
                                 
                                 # 1. If we are REPLACING this exact node, remove the old replacement.
                                 if position == 'replace' and old_expr == expr:
-                                    p = old_el.getparent()
-                                    if p is not None:
-                                        p.remove(old_el)
+                                    parentNode = old_el.getparent()
+                                    if parentNode is not None:
+                                        parentNode.remove(old_el)
                                 
                                 # 2. If we are modifying/replacing this node, any existing XPaths 
                                 # that target its children are now stale/invalid.
                                 elif old_expr.startswith(expr + '/'):
-                                    p = old_el.getparent()
-                                    if p is not None:
-                                        p.remove(old_el)
+                                    parentNode = old_el.getparent()
+                                    if parentNode is not None:
+                                        parentNode.remove(old_el)
 
                                 # 3. Footer-specific: if the same expr is being re-saved with ANY
                                 # position (e.g. old "inside" → new "after"), remove the old entry
                                 # to avoid stacking duplicate footer blocks.
                                 elif old_expr == expr and 'page' in expr.lower():
-                                    p = old_el.getparent()
-                                    if p is not None:
-                                        p.remove(old_el)
+                                    parentNode = old_el.getparent()
+                                    if parentNode is not None:
+                                        parentNode.remove(old_el)
                             
                             data_node.append(new_el)
-                    except Exception as e:
-                        print(f"[Cyllo Studio] Error merging into existing view: {e}")
+                    except Exception as unexpectedException:
+                        print(f"[Cyllo Studio] Error merging into existing view: {unexpectedException}")
                         # Fallback: just overwrite if merging fails
                         custom_arch.write({'arch_base': xpath_blocks})
                     new_arch = etree.tostring(root, encoding='unicode',
@@ -316,50 +316,48 @@ class StudioReportController(Controller):
             import copy
             footer_copy = copy.deepcopy(footer_el)
 
-            def _humanise(node):
+            def _humanise(footerNode):
                 """Replace t-field / t-out / t-esc with a readable placeholder span."""
                 FIELD_MAP = {
                     'company.report_footer': 'Company › Report Footer',
                     'o.name': 'Document Name',
                 }
-                PAGE_ATTRS = {'class': 'page'}
-                TOPAGE_ATTRS = {'class': 'topage'}
 
                 # t-field → replace with a placeholder chip
-                tf = node.get('t-field')
-                if tf:
-                    label = FIELD_MAP.get(tf.strip(), tf.strip())
-                    node.tag = 'span'
-                    node.text = label
-                    for a in list(node.attrib):
-                        del node.attrib[a]
-                    node.set('class', 'cy-footer-placeholder')
+                tFieldValue = footerNode.get('t-field')
+                if tFieldValue:
+                    label = FIELD_MAP.get(tFieldValue.strip(), tFieldValue.strip())
+                    footerNode.tag = 'span'
+                    footerNode.text = label
+                    for attrName in list(footerNode.attrib):
+                        del footerNode.attrib[attrName]
+                    footerNode.set('class', 'cy-footer-placeholder')
                     return
 
                 # t-out / t-esc → inline expression placeholder
                 for attr in ('t-out', 't-esc'):
-                    val = node.get(attr)
-                    if val is not None:
-                        node.tag = 'span'
-                        node.text = val.strip()
-                        for a in list(node.attrib):
-                            del node.attrib[a]
-                        node.set('class', 'cy-footer-expr')
+                    exprValue = footerNode.get(attr)
+                    if exprValue is not None:
+                        footerNode.tag = 'span'
+                        footerNode.text = exprValue.strip()
+                        for attrName in list(footerNode.attrib):
+                            del footerNode.attrib[attrName]
+                        footerNode.set('class', 'cy-footer-expr')
                         return
 
                 # t-if / t-attf-class / t-attf-style → strip qweb attrs
-                for a in list(node.attrib):
-                    if a.startswith('t-'):
-                        del node.attrib[a]
+                for attrName in list(footerNode.attrib):
+                    if attrName.startswith('t-'):
+                        del footerNode.attrib[attrName]
 
                 # <span class="page"/> → "1"  and  <span class="topage"/> → "N"
-                cls = node.get('class', '')
-                if 'page' in cls.split() and node.tag == 'span':
-                    node.text = '1'
-                elif 'topage' in cls.split() and node.tag == 'span':
-                    node.text = 'N'
+                cssClasses = footerNode.get('class', '')
+                if 'page' in cssClasses.split() and footerNode.tag == 'span':
+                    footerNode.text = '1'
+                elif 'topage' in cssClasses.split() and footerNode.tag == 'span':
+                    footerNode.text = 'N'
 
-                for child in list(node):
+                for child in list(footerNode):
                     _humanise(child)
 
             _humanise(footer_copy)
@@ -367,8 +365,8 @@ class StudioReportController(Controller):
             html = etree.tostring(footer_copy, encoding='unicode', method='html')
             return {'success': True, 'html': html}
 
-        except Exception as e:
-            return {'success': False, 'error': str(e)}
+        except Exception as unexpectedException:
+            return {'success': False, 'error': str(unexpectedException)}
 
     @route('/cyllo_studio/get_report_preview_data', auth='user', csrf=False, type='json')
     def get_report_preview_data(self, template, res_model):

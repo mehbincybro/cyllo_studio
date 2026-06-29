@@ -2364,13 +2364,14 @@ select>option {
 .cyllo-studio-report-container {
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25),
         0 2px 8px rgba(0, 0, 0, 0.12) !important;
+    overflow: visible !important;
 }
 
-/* Ensure the editable area always fills out to A4 height so short reports
-   never look cut off mid-page */
+/* The paper container owns the selected page minimum; report content can grow freely. */
 .editable-area {
-    min-height: calc(297mm - 40mm);
+    min-height: 0;
     box-sizing: border-box;
+    overflow: visible !important;
 }
 
 /* "End of Page" label below the A4 sheet */
@@ -3256,13 +3257,14 @@ input:checked+.cy-slider:before {
         0 0 0 1px rgba(0, 0, 0, 0.06),
         0 4px 16px rgba(0, 0, 0, 0.08),
         0 16px 48px rgba(0, 0, 0, 0.10) !important;
-    max-width: 794px !important;
+    max-width: none !important;
     margin: 24px auto !important;
     padding: 40px !important;
     border-top: 3px solid #9ea700 !important;
     box-sizing: border-box !important;
     position: relative !important;
     transition: all 0.3s ease !important;
+    overflow: visible !important;
 }
 
 .cyllo-end-of-page-marker span {
@@ -3276,7 +3278,8 @@ input:checked+.cy-slider:before {
     font-size: 12px !important;
     line-height: 1.6 !important;
     color: #1f2937 !important;
-    min-height: calc(297mm - 80mm) !important;
+    min-height: 0 !important;
+    overflow: visible !important;
 }
 
 .editable-area .selected,
@@ -3328,12 +3331,23 @@ body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
 .cy-canvas-area {
     background: #e8eaed !important;
     padding: 32px 24px !important;
+    max-height: none !important;
+    overflow: auto !important;
 }
 
 /* ── Section 5: White Paper ── */
 .cyllo-studio-report-container {
-    background: #ffffff;
-    max-width: 794px;
+    background-color: #ffffff;
+    background-image: repeating-linear-gradient(
+        to bottom,
+        transparent 0,
+        transparent calc(var(--cy-page-height, 297mm) - 1px),
+        rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),
+        rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm)
+    );
+    background-size: 100% var(--cy-page-height, 297mm);
+    background-repeat: repeat-y;
+    max-width: none;
     margin: 0 auto;
     padding: 40px 48px !important;
     border-radius: 2px;
@@ -3341,6 +3355,7 @@ body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
         0 0 0 1px rgba(0, 0, 0, 0.08),
         0 2px 8px rgba(0, 0, 0, 0.08),
         0 8px 32px rgba(0, 0, 0, 0.12);
+    overflow: visible;
 }
 
 /* ── Section 5: Editable area typography ── */
