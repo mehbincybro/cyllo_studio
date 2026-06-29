@@ -9,7 +9,7 @@
                 <button class="cy-back-icon-btn" title="Back to Reports" t-on-click="() => this.close_edit(this)">
                     <i class="ri-arrow-left-line"/>
                 </button>
-                <span class="cy-report-title">Quotation / Order</span>
+                <span class="cy-report-title" t-esc="state.reportInfo.name || 'Report'"/>
 
                 <div class="cy-hdr-divider"></div>
 
@@ -299,7 +299,7 @@
                     <!-- A4 / Custom Paper Container -->
 
                     <div class="cyllo-studio-report-container d-flex flex-column"
-                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm;'">
+                         t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; overflow: visible;'">
 
                         <!-- ── Report Header: Company + Partner (only in edit mode) ── -->
                         <div t-if="!state.previewMode" class="cy-report-header">
