@@ -39,6 +39,7 @@ export class KanbanFieldProperties extends Component {
             if (this.state.path !== nextProps.path) {
                 this.state.widget = nextProps.widget
                 this.state.path = nextProps.path
+                this.state.fieldInvisible = nextProps.invisible || false;
             }
         });
         onWillStart(async () => {
@@ -63,7 +64,8 @@ export class KanbanFieldProperties extends Component {
         var attribute = parent.getAttribute('data-attribute');
         var domain = '';
         if (attribute === 'invisible' && (this.state.fieldInvisible || this.props.invisible)) {
-            domain = this.state.fieldInvisible || this.props.invisible;
+            const raw = this.state.fieldInvisible || this.props.invisible;
+            domain = (raw === true || raw === 1) ? 'True' : (raw === false || raw === 0 || raw === null) ? 'False' : String(raw);
         } else {
             domain = false;
         }

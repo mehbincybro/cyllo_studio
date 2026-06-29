@@ -49,67 +49,68 @@ export class OverallView extends Component {
     this.actionService = useService("action");
     this.dialogService = useService("dialog");
     this.state = useState({
-     showInvisible: sessionStorage.getItem("invisible") === "1",
-     showOptional: sessionStorage.getItem("show_optional") === "1"
+      showInvisible: sessionStorage.getItem("invisible") === "1",
+      showOptional: sessionStorage.getItem("show_optional") === "1"
     });
-//    onWillStart(() => {
-//      const checked = sessionStorage.getItem("invisible") === "1";
-//      this.state.showInvisible = checked;
-//      document.body.classList.toggle("cy-show-invisible", checked);
-//      // this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-//    });
+    //    onWillStart(() => {
+    //      const checked = sessionStorage.getItem("invisible") === "1";
+    //      this.state.showInvisible = checked;
+    //      document.body.classList.toggle("cy-show-invisible", checked);
+    //      // this.env.bus.trigger("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
+    //    });
 
     onWillStart(() => {
-        const checked = sessionStorage.getItem("invisible") === "1";
-        this.state.showInvisible = checked;
-        document.body.classList.toggle("cy-show-invisible", checked);
-        // Optional fields are revealed by a separate toggle so "Show Invisible
-        // Elements" no longer also exposes optional columns.
-        const optionalChecked = sessionStorage.getItem("show_optional") === "1";
-        this.state.showOptional = optionalChecked;
-        document.body.classList.toggle("cy-show-optional", optionalChecked);
+      const checked = sessionStorage.getItem("invisible") === "1";
+      this.state.showInvisible = checked;
+      document.body.classList.toggle("cy-show-invisible", checked);
+      // Optional fields are revealed by a separate toggle so "Show Invisible
+      // Elements" no longer also exposes optional columns.
+      const optionalChecked = sessionStorage.getItem("show_optional") === "1";
+      this.state.showOptional = optionalChecked;
+      document.body.classList.toggle("cy-show-optional", optionalChecked);
     });
-//        onMounted(() => {
-//        const checked = sessionStorage.getItem("invisible") === "1";
-//        if (checked) {
-//            this._applyInvisibleOverride(true);
-//        }
-//    });
+    //        onMounted(() => {
+    //        const checked = sessionStorage.getItem("invisible") === "1";
+    //        if (checked) {
+    //            this._applyInvisibleOverride(true);
+    //        }
+    //    });
   }
   _applyInvisibleOverride(show) {
     if (show) {
-        document.body.classList.add("cy-show-invisible");
-        document.querySelectorAll('[invisible="1"], [invisible="True"], [invisible="true"]').forEach(el => {
-            el.style.setProperty('display', '', 'important');
-            el.setAttribute('data-cy-was-invisible', '1');
-        });
+      document.body.classList.add("cy-show-invisible");
+      document.querySelectorAll('[invisible="1"], [invisible="True"], [invisible="true"]').forEach(el => {
+        el.style.setProperty('display', '', 'important');
+        el.setAttribute('data-cy-was-invisible', '1');
+      });
     } else {
-        document.body.classList.remove("cy-show-invisible");
-        // Restore Odoo's inline hide
-        document.querySelectorAll('[data-cy-was-invisible="1"]').forEach(el => {
-            el.style.display = 'none';
-            el.removeAttribute('data-cy-was-invisible');
-        });
+      document.body.classList.remove("cy-show-invisible");
+      // Restore Odoo's inline hide
+      document.querySelectorAll('[data-cy-was-invisible="1"]').forEach(el => {
+        el.style.display = 'none';
+        el.removeAttribute('data-cy-was-invisible');
+      });
     }
-}
+  }
 
   /**
   * Toggle display of invisible fields and reload the view.
   * @param {Event} ev - The checkbox change event.
   */
 
-showInvisibleFields(ev) {
+  showInvisibleFields(ev) {
     const checked = !!ev.target.checked;
     this.state.showInvisible = checked;
     if (checked) {
-        sessionStorage.setItem("invisible", "1");
+      sessionStorage.setItem("invisible", "1");
     } else {
-        sessionStorage.removeItem("invisible");
+      sessionStorage.removeItem("invisible");
     }
     this._applyInvisibleOverride(checked);
     document.body.classList.toggle("cy-hide-invisible", !checked);
     this.env?.bus?.trigger?.("CYLLO:SHOW_INVISIBLE_TOGGLED", checked);
-}
+    this.actionService.doAction("studio_reload");
+  }
 
   /**
    * Toggle display of optional (column-options) fields. Separate from
@@ -121,12 +122,12 @@ showInvisibleFields(ev) {
     const checked = !!ev.target.checked;
     this.state.showOptional = checked;
     if (checked) {
-        sessionStorage.setItem("show_optional", "1");
+      sessionStorage.setItem("show_optional", "1");
     } else {
-        sessionStorage.removeItem("show_optional");
+      sessionStorage.removeItem("show_optional");
     }
     document.body.classList.toggle("cy-show-optional", checked);
-}
+  }
 
   /**
    * Reset the current view to its code-defined default, discarding ALL
@@ -178,7 +179,7 @@ showInvisibleFields(ev) {
           window.location.reload();
         }
       },
-      cancel: () => {},
+      cancel: () => { },
     });
   }
 
