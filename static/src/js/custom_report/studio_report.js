@@ -115,6 +115,7 @@ export class EditReport extends Component {
             showFooterEditor: false,
             companyReportFooterText: '',
             hasCustomFooter: false,
+            editIframeUrl: '',
         });
 
         // Promise resolver for the table config modal
@@ -140,6 +141,7 @@ export class EditReport extends Component {
                     ['name', 'logo', 'street', 'city', 'phone', 'email', 'website', 'report_footer'],
                     { limit: 1, order: 'id asc' }
                 );
+                // console.log('logoooooo',companies)
                 if (companies && companies.length > 0) {
                     const co = companies[0];
                     this._companyId = co.id; // store for logo upload
@@ -171,6 +173,7 @@ export class EditReport extends Component {
 
         onMounted(async () => {
             const params = this.props.action.params || {};
+            console.log('params', params, this)
 
             // Hide the Cyllo sidebar logic per user request
             this._cyElsToRestore = [];
@@ -300,8 +303,9 @@ export class EditReport extends Component {
                 this.state.hideLogo = false;
             }
 
-            this._setupReportFrame(arch || '');
-            this._setupSortable();
+            this.state.editIframeUrl = `/cyllo_studio/edit_canvas/${this._template}`;
+
+            // The iframe load event will trigger onEditIframeLoad, which will set up Sortable.
             await this._fetchPreviewData();
             requestAnimationFrame(() => this._applyPaperFormatToCanvas());
 
@@ -373,16 +377,180 @@ export class EditReport extends Component {
         el.style.userSelect = 'none';
     }
 
-    _setupReportFrame(arch) {
-        this._updateHasQr(arch);
-        this._updateHasSign(arch);
+    /**
+     * Render header inside iframe
+     */
+    _renderHeaderInIframe(iframeDoc) {
+        const headerEl = iframeDoc.querySelector('.cy-report-header');
+        if (!headerEl) return;
 
-        // Pre-clean the arch in a detached DOM to prevent visual artifacts
-        const parser = new DOMParser();
-        const tempDoc = parser.parseFromString(arch, 'text/html');
+        const logoBlock = headerEl.querySelector('.cy-logo-block');
+        if (logoBlock) {
+            let logoHtml = '';
+            if (this.state.companyLogo && !this.state.hideLogo) {
+                logoHtml = `
+                    <div class="cy-logo-wrapper" style="position: relative; display: inline-block; border-radius: 4px; overflow: hidden;"
+                         onmouseenter="this.querySelector('.cy-logo-overlay').style.opacity='1'"
+                         onmouseleave="this.querySelector('.cy-logo-overlay').style.opacity='0'">
+                        <img src="data:image/png;base64,${this.state.companyLogo}" class="cy-company-logo" alt="Company Logo" style="display: block;">
+                        <div class="cy-logo-overlay" style="position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s ease;">
+                            <i class="ri-edit-line text-white me-3" style="font-size: 20px; cursor: pointer;" title="Change Logo" data-action="change"></i>
+                            <i class="ri-eye-off-line text-warning me-3" style="font-size: 20px; cursor: pointer;" title="Hide Logo" data-action="hide"></i>
+                            <i class="ri-delete-bin-line text-danger" style="font-size: 20px; cursor: pointer;" title="Delete Logo" data-action="remove"></i>
+                        </div>
+                    </div>
+                `;
+            } else {
+                logoHtml = `
+                    <div class="cy-logo-placeholder">
+                        <i class="ri-camera-line"></i>
+                        <span>${this.state.hideLogo && this.state.companyLogo ? 'Logo hidden — click to restore' : 'Your logo'}</span>
+                    </div>
+                `;
+            }
+            logoBlock.innerHTML = logoHtml + `
+                <input type="file" class="cy-logo-input" accept="image/*" style="display:none">
+            `;
+
+            // Attach file input listener
+            const fileInput = logoBlock.querySelector('.cy-logo-input');
+            const self = this;
+            fileInput.addEventListener('change', function(e) {
+                self._handleLogoFileChange(e, iframeDoc);
+            });
+        }
+    }
+
+    /**
+     * Render footer inside iframe
+     */
+    _renderFooterInIframe(iframeDoc) {
+        const footerEl = iframeDoc.getElementById('studio_footer_preview');
+        if (!footerEl) return;
+
+        const showFooter = this.state.footerShowReportFooter;
+        const showPageNum = this.state.footerShowPageNum;
+        const showDocName = this.state.footerShowDocName;
+
+        if (!showFooter && !showPageNum) {
+            footerEl.innerHTML = '<div class="cy-footer-empty-msg">All footer elements hidden</div>';
+        } else {
+            const leftHtml = [
+                showFooter ? `<span class="cy-footer-placeholder">${this.state.companyReportFooterText || 'Company \u203A Report Footer'}</span>` : '',
+                showDocName && showFooter ? '<span class="cy-footer-separator"> &nbsp;|&nbsp; </span>' : '',
+                showDocName ? '<span class="cy-footer-placeholder">o.name</span>' : '',
+            ].join('');
+
+            const rightHtml = showPageNum
+                ? 'Page <span class="cy-footer-expr">1</span> / <span class="cy-footer-expr">N</span>'
+                : '';
+
+            footerEl.innerHTML = `
+                <div class="cy-footer-row">
+                    <div class="cy-footer-cell-left">${leftHtml}</div>
+                    <div class="cy-footer-cell-right">${rightHtml}</div>
+                </div>`;
+        }
+
+        footerEl.style.pointerEvents = 'none';
+        footerEl.style.userSelect = 'none';
+    }
+
+    async _handleLogoClickInIframe(e, iframeDoc) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (this.state.hideLogo && this.state.companyLogo) {
+            this.state.hideLogo = false;
+            if (this.undoManager) this.undoManager.debouncedSave();
+            this._renderHeaderInIframe(iframeDoc);
+            return;
+        }
+
+        const action = e.target.dataset.action;
+        if (!action) {
+            if (!this.state.companyLogo) {
+                const fileInput = iframeDoc.querySelector('.cy-logo-input');
+                if (fileInput) fileInput.click();
+            }
+            return;
+        }
+
+        if (action === 'change') {
+            const fileInput = iframeDoc.querySelector('.cy-logo-input');
+            if (fileInput) fileInput.click();
+        } else if (action === 'hide') {
+            this.state.hideLogo = true;
+            if (this.undoManager) this.undoManager.debouncedSave();
+            this._renderHeaderInIframe(iframeDoc);
+        } else if (action === 'remove') {
+            const companyId = this._companyId;
+            if (!companyId) {
+                this.notification.add('Could not determine company. Please reload and try again.', { type: 'warning' });
+                return;
+            }
+            try {
+                await this.orm.write('res.company', [companyId], { logo: false });
+                this.state.companyLogo = false;
+                this.notification.add('Company logo removed', { type: 'success' });
+                if (this.undoManager) this.undoManager.debouncedSave();
+                this._renderHeaderInIframe(iframeDoc);
+            } catch (err) {
+                this.notification.add('Failed to delete logo: ' + err.message, { type: 'danger' });
+            }
+        }
+    }
+
+    /**
+     * Handle logo file change inside iframe
+     */
+    async _handleLogoFileChange(e, iframeDoc) {
+        const file = e.target.files[0];
+        if (!file) return;
+        // Use stored company ID (this.env.company may not be available in Community)
+        const companyId = this._companyId;
+        if (!companyId) {
+            this.notification.add('Could not determine company. Please reload and try again.', { type: 'warning' });
+            return;
+        }
+        const reader = new FileReader();
+        const self = this;
+        reader.onload = async (ev) => {
+            const base64 = ev.target.result.split(',')[1];
+            try {
+                await self.orm.write('res.company', [companyId], { logo: base64 });
+                self.state.companyLogo = base64;
+                self.state.hideLogo = false;
+                if (self.undoManager) self.undoManager.debouncedSave();
+                self._renderHeaderInIframe(iframeDoc);
+                self.notification.add('Company logo updated', { type: 'success' });
+            } catch (err) {
+                self.notification.add('Failed to save logo: ' + err.message, { type: 'danger' });
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /**
+     * Update footer in iframe
+     */
+    _updateFooterInIframe() {
+        this._renderFooterPreview();
+        if (this.reportFrameRef.el && this.reportFrameRef.el.contentDocument) {
+            this._renderFooterInIframe(this.reportFrameRef.el.contentDocument);
+        }
+    }
+
+    onEditIframeLoad(ev) {
+        if (!this.reportFrameRef.el || this.reportFrameRef.el.tagName !== 'IFRAME') return;
+        const iframeDoc = this.reportFrameRef.el.contentDocument;
+        if (!iframeDoc || !iframeDoc.body) return;
+
+        const tempDoc = iframeDoc;
+        this._updateHasQr(tempDoc.body.innerHTML);
+        this._updateHasSign(tempDoc.body.innerHTML);
 
         // ── Strip all cy-custom-footer elements AND related style injections ──
-        // 1. Remove .cy-custom-footer divs (handles both old position="inside" and new position="after" formats)
         const customFooters = tempDoc.querySelectorAll('.cy-custom-footer');
         if (customFooters.length > 0) {
             const lastFooter = customFooters[customFooters.length - 1];
@@ -397,7 +565,6 @@ export class EditReport extends Component {
                 this.state.hasCustomFooter = false;
             }
 
-            // Remove ALL injected footer divs from the detached doc
             customFooters.forEach(el => el.remove());
         } else {
             this.state.footerShowReportFooter = true;
@@ -406,7 +573,6 @@ export class EditReport extends Component {
             this.state.hasCustomFooter = false;
         }
 
-        // 2. Remove any injected <style> blocks that were part of the footer format
         tempDoc.querySelectorAll('style').forEach(styleEl => {
             const txt = styleEl.textContent || '';
             const cls = styleEl.getAttribute('class') || '';
@@ -416,31 +582,64 @@ export class EditReport extends Component {
             }
         });
 
-        // 3. Remove any .footer div that is a direct sibling of .page (position="after" format)
         tempDoc.querySelectorAll('.page ~ .footer, .page + .footer').forEach(el => {
             el.remove();
         });
 
-        // Now set the cleaned HTML to the live DOM
-        this.reportFrameRef.el.innerHTML = tempDoc.body.innerHTML;
-        const editableArea = this.reportFrameRef.el;
+        // ── Inject Header and Footer into iframe ──
+        // Always create header and footer, even for empty templates
 
-        // ── Store _loadedArch AFTER cleanup so it matches the canvas DOM ──
-        this._loadedArch = editableArea.innerHTML;
+        // Create Header
+        const headerEl = tempDoc.createElement('div');
+        headerEl.className = 'cy-report-header';
+        headerEl.innerHTML = `
+            <div class="cy-company-block">
+                <div class="cy-logo-block">
+                    <div class="cy-logo-placeholder">
+                        <i class="ri-camera-line"></i>
+                        <span>Your logo</span>
+                    </div>
+                    <input type="file" class="cy-logo-input" accept="image/*" style="display:none">
+                </div>
+            </div>
+        `;
 
+        // Prepend header to body so it sits absolutely at the top (above address blocks)
+        tempDoc.body.prepend(headerEl);
+
+        // Create Footer
+        const footerEl = tempDoc.createElement('div');
+        footerEl.className = 'cy-footer-preview-wrapper mt-3';
+        footerEl.innerHTML = `
+            <div class="cy-footer-preview-area" id="studio_footer_preview"></div>
+        `;
+
+        // Append footer to body so it sits absolutely at the bottom
+        tempDoc.body.append(footerEl);
+
+        // Update header and footer with state
+        this._renderHeaderInIframe(iframeDoc);
+        this._renderFooterInIframe(iframeDoc);
+
+        // Note: For Phase 3/4, _enrichReportDOM will need to operate on iframeDoc
+        const editableArea = tempDoc.body;
         this._enrichReportDOM(editableArea);
-
-        // Re-check sign presence after enrichment (o_sign_placeholder → sign-wrapper)
         this._updateHasSign();
 
-        // Re-render footer preview after each canvas refresh
-        this._renderFooterPreview();
+        // ── Store _loadedArch AFTER enrichment so it contains cy-xpath / cy-template ──
+        // getChangedElements() diffs the edited iframe DOM against _loadedArch parsed as
+        // originalDoc.  It queries originalDoc for [cy-template][cy-xpath] nodes to find
+        // the baseline for each zone.  If _loadedArch is captured before _enrichReportDOM
+        // runs, those attributes are absent and EVERY querySelector returns null — meaning
+        // no zone is ever diffed, deletions and attribute changes are invisible, and Save
+        // silently exits with changes.length === 0 every time.
+        this._loadedArch = tempDoc.documentElement.outerHTML;
 
-        // Overflow guard observer (temporarily disabled)
-        // this._startOverflowGuardObserver();
+        this._setupIframeAutoResize(this.reportFrameRef.el);
+        this._setupSortable();
 
         this.editor = null;
-        $('[t-elif], [t-else]').hide();
+        $(editableArea).find('[t-elif], [t-else]').hide();
 
         this.undoManager = new UndoRedoManager(editableArea, {
             maxStackSize: 50,
@@ -474,16 +673,24 @@ export class EditReport extends Component {
         });
 
         const self = this;
+        const iframeWin = this.reportFrameRef.el.contentWindow;
+        const $iframe = $(iframeDoc);  // jQuery scoped to iframe document
         editableArea.addEventListener("click", function (e) {
             if (self.state.previewMode) return;
             if (self._isDragging) return;
 
             let el = e.target.nodeType === 3 ? e.target.parentElement : e.target;
             if (el.classList.contains('page')) {
-                $('.selected').removeClass('selected');
+                $iframe.find('.selected').removeClass('selected');
                 if (self.editor) self.editor.destroy();
                 // Close box props when clicking canvas background
                 self.closeBoxProps();
+                return;
+            }
+
+            // ── Handle Logo Click ──
+            if (el.closest('.cy-logo-placeholder') || el.closest('.cy-logo-wrapper')) {
+                self._handleLogoClickInIframe(e, iframeDoc);
                 return;
             }
 
@@ -493,8 +700,10 @@ export class EditReport extends Component {
                 e.stopPropagation();
                 let targetEl = el.closest('.box-section-wrapper, .table-wrapper, .field-block, .sign-wrapper');
                 const btnEl = el.closest('.box-settings-btn, .table-settings, .field-settings, .sign-settings-btn');
-                if (targetEl && window.SettingsButton) {
-                    const sb = new window.SettingsButton();
+                // Use the iframe window's SettingsButton (injected via studio-editor-undo-redo-ext.js)
+                const IframeSettingsButton = iframeWin.SettingsButton || window.SettingsButton;
+                if (targetEl && IframeSettingsButton) {
+                    const sb = new IframeSettingsButton();
                     sb.base = { options: { owner: self } };
                     sb.showPopup(targetEl, btnEl);
                 }
@@ -571,8 +780,8 @@ export class EditReport extends Component {
 
             const wasSelected = el.classList.contains('selected');
 
-            $('.selected').removeClass('selected');
-            if ($('#branchSelector').css('display') !== 'none') self.closeBranchSelector();
+            $iframe.find('.selected').removeClass('selected');
+            if ($iframe.find('#branchSelector').css('display') !== 'none') self.closeBranchSelector();
 
             let element = el;
             for (let i = 0; i <= 4 && element; i++, element = element.parentElement) {
@@ -641,7 +850,18 @@ export class EditReport extends Component {
                 el.setAttribute('contenteditable', 'true');
             }
 
-            self.editor = new MediumEditor(el, {
+            // Resolve MediumEditor and extension constructors from the iframe's
+            // own window — they are loaded via the injected <script> tags in the
+            // iframe head, NOT from the host page bundle.
+            const IframeWin = iframeWin;
+            const MEditor = IframeWin.MediumEditor || MediumEditor;
+            const IframeSettingsButton = IframeWin.SettingsButton || window.SettingsButton;
+            const IframeDeleteButton = IframeWin.DeleteButton || window.DeleteButton;
+            const IframeUndoButton = IframeWin.UndoButton || window.UndoButton;
+            const IframeRedoButton = IframeWin.RedoButton || window.RedoButton;
+            self.editor = new MEditor(el, {
+                ownerDocument: iframeDoc,
+                elementsContainer: iframeDoc.body,
                 toolbar: {
                     buttons: [
                         'bold', 'italic', 'underline', 'strikethrough',
@@ -650,10 +870,10 @@ export class EditReport extends Component {
                     // No relativeContainer — let MediumEditor float near the selected text
                 },
                 extensions: {
-                    'deleteElement': new window.DeleteButton(),
-                    'undoButton': new window.UndoButton(),
-                    'redoButton': new window.RedoButton(),
-                    'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
+                    'deleteElement': IframeDeleteButton ? new IframeDeleteButton() : null,
+                    'undoButton': IframeUndoButton ? new IframeUndoButton() : null,
+                    'redoButton': IframeRedoButton ? new IframeRedoButton() : null,
+                    'settingsButton': IframeSettingsButton ? new IframeSettingsButton() : null,
                 },
                 owner: self,
                 placeholder: false,
@@ -663,31 +883,37 @@ export class EditReport extends Component {
         });
     }
 
-    togglePreview() {
-        this.state.previewMode = !this.state.previewMode;
-        if (this.state.previewMode) {
+    async togglePreview() {
+        const enteringPreview = !this.state.previewMode;
+
+        if (enteringPreview) {
             // Destroy the medium editor if it's active
             if (this.editor) {
                 this.editor.destroy();
                 this.editor = null;
             }
             // Remove selection highlight
-            $('.selected').removeClass('selected');
+            $(this.reportFrameRef.el?.contentDocument).find('.selected').removeClass('selected');
             // Disable drag and drop
             this._destroySortableInstances();
+
+            // Auto-save before preview if changes exist
+            if (this.undoManager && this.undoManager.canUndo()) {
+                await this.save_changes(this);
+            }
+
+            // SAFELY switch state AFTER save_changes so report_frame isn't destroyed
+            this.state.previewMode = true;
+            await this._fetchPreviewData();
         } else {
+            this.state.previewMode = false;
             // Clear preview state so the editable frame is shown
             this.state.previewUrl = false;
             this.state.previewHtml = false;
-            // Re-enable drag and drop
-            setTimeout(() => {
-                this._setupReportFrame(this._loadedArch);
-                this._setupSortable();
-            }, 0);
+            // The iframe will natively reload its src when preview is toggled off,
+            // which will trigger onEditIframeLoad to set up Sortable and MediumEditor.
         }
-        if (this.state.previewMode) {
-            this._fetchPreviewData();
-        } else {
+        if (!this.state.previewMode) {
             // If we are exiting preview and source editor was ON,
             // we might need to re-init Ace to ensure it's properly sized
             // in the new layout if it's still visible.
@@ -719,17 +945,53 @@ export class EditReport extends Component {
         }
     }
 
-    async _loadRealReport(docId) {
+    async _loadRealReport(docId, _retryCount = 0) {
+        console.log('real record loading......', docId);
         const res = await this.rpc("/cyllo_studio/render_report_html", {
             report_id: this.state.reportInfo.id,
             doc_ids: [docId],
         });
+
         if (res.success) {
             // Use the URL-based preview so Odoo's CSS/JS assets load correctly
             // inside the iframe (srcdoc breaks relative asset bundle paths).
             this.state.previewUrl = res.preview_url || false;
             this.state.previewHtml = false;
+            return;
         }
+
+        // Handle a stale/deleted record gracefully: skip it and advance to the
+        // next one rather than rendering Odoo's raw error page in the iframe.
+        if (res.error === 'record_missing') {
+            // Guard against infinite recursion in case ALL records are stale.
+            const totalRecords = this.state.records.length;
+            if (_retryCount >= totalRecords) {
+                this.notification.add(
+                    'No valid records found in the preview list. All records may have been deleted.',
+                    { type: 'warning', sticky: true }
+                );
+                return;
+            }
+
+            this.notification.add(
+                res.message || 'Record no longer exists. Skipping to the next record.',
+                { type: 'warning' }
+            );
+
+            // Advance to the next record index, wrapping safely at the end.
+            const nextIndex = this.state.currentIndex + 1;
+            if (nextIndex < totalRecords) {
+                this.state.currentIndex = nextIndex;
+                await this._loadRealReport(this.state.records[nextIndex], _retryCount + 1);
+            } else {
+                // We were on the last record — no further records to try.
+                this.notification.add(
+                    'No more valid records to preview.',
+                    { type: 'warning' }
+                );
+            }
+        }
+        // For any other backend error, do nothing — leave the iframe as-is.
     }
 
     onIframeLoad(evt) {
@@ -738,6 +1000,48 @@ export class EditReport extends Component {
             const doc = iframe.contentDocument || iframe.contentWindow.document;
             if (!doc || !doc.head) return;
             const style = doc.createElement('style');
+
+            this._setupIframeAutoResize(iframe);
+
+            // ── Detect errors inside the report iframe ───────────────────────
+            const bodyText = doc.body ? (doc.body.textContent || '') : '';
+            const isRecordMissing = (
+                bodyText.includes('Record does not exist or has been deleted') ||
+                bodyText.includes('MissingError')
+            );
+            const isRenderError = (
+                doc.title === '500: Internal Server Error' ||
+                !!doc.querySelector('.oe_error_box') ||
+                bodyText.includes('Error while render the template')
+            );
+
+            if (isRecordMissing && this.state.previewMode) {
+                // The record rendered inside the iframe no longer exists in the DB.
+                // Instead of showing the "Oops!" traceback, skip transparently to the
+                // next record in the pager. _loadRealReport handles the retry cap.
+                this.notification.add(
+                    'Record no longer exists in the database. Skipping to the next record.',
+                    { type: 'warning' }
+                );
+                const nextIndex = this.state.currentIndex + 1;
+                if (nextIndex < (this.state.records || []).length) {
+                    this.state.currentIndex = nextIndex;
+                    this._loadRealReport(this.state.records[nextIndex]);
+                } else {
+                    this.notification.add('No more valid records to preview.', { type: 'warning' });
+                }
+                return;
+            }
+
+            if (isRenderError) {
+                const errMsg = doc.querySelector('.oe_error_box pre')
+                    ? doc.querySelector('.oe_error_box pre').textContent
+                    : 'Report Rendering Failed due to corrupted XML.';
+                this.env.services.notification.add('Preview Failed: ' + errMsg, { type: 'danger', sticky: true });
+                // Revert to edit mode
+                this.togglePreview();
+                return;
+            }
 
             // Check if a cy-custom-footer is present in the rendered report
             const hasCustomFooter = !!(doc.querySelector('.cy-custom-footer'));
@@ -770,7 +1074,7 @@ export class EditReport extends Component {
                 body {
                     padding-bottom: 80px !important;
                 }
-                ` : '' }
+                ` : ''}
             `;
             doc.head.appendChild(style);
 
@@ -781,6 +1085,58 @@ export class EditReport extends Component {
         } catch (e) {
             console.warn('[Cyllo Studio] Could not inject iframe CSS:', e);
         }
+    }
+
+    _setupIframeAutoResize(iframe) {
+        if (!iframe || !iframe.contentDocument) return;
+        const doc = iframe.contentDocument;
+
+        // Force hide scrollbars on the iframe document so it doesn't create dual scrolling
+        doc.documentElement.style.setProperty('overflow', 'hidden', 'important');
+        doc.body.style.setProperty('overflow', 'hidden', 'important');
+        // Ensure body height is auto so it shrinks when content shrinks
+        doc.body.style.setProperty('height', 'auto', 'important');
+
+        const resize = () => {
+            if (!iframe.contentDocument) return;
+            const b = iframe.contentDocument.body;
+            const h = iframe.contentDocument.documentElement;
+            if (b && h) {
+                // Prevent scroll jumping when temporarily resetting height
+                const parentScroll = iframe.closest('.cy-canvas-area');
+                const scrollTop = parentScroll ? parentScroll.scrollTop : 0;
+
+                // Temporarily remove height to let scrollHeight shrink to true content size
+                iframe.style.height = '0px';
+
+                // Determine the true scroll height of the internal document
+                let targetHeight = Math.max(b.scrollHeight, h.scrollHeight);
+
+                iframe.style.height = targetHeight + 'px';
+
+                // Restore scroll position
+                if (parentScroll) parentScroll.scrollTop = scrollTop;
+            }
+        };
+
+        const ro = new ResizeObserver(() => {
+            requestAnimationFrame(resize);
+        });
+        ro.observe(doc.body);
+
+        const mo = new MutationObserver(() => {
+            requestAnimationFrame(resize);
+        });
+        mo.observe(doc.body, { childList: true, subtree: true, characterData: true, attributes: true });
+
+        // Disconnect observer if iframe unloads
+        iframe.contentWindow.addEventListener('unload', () => {
+            ro.disconnect();
+            mo.disconnect();
+        }, { once: true });
+
+        // Initial resize
+        setTimeout(resize, 50);
     }
 
     onPrevRecord() {
@@ -828,6 +1184,7 @@ export class EditReport extends Component {
             // returned by the backend includes current DnD changes.
             const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
             if (hasChanges && this.reportFrameRef.el) {
+                console.log("[EditSources] Pending changes detected, saving first...");
                 await this.save_changes(this);
             }
 
@@ -849,6 +1206,7 @@ export class EditReport extends Component {
     _initAceEditor() {
         setTimeout(() => {
             const editorEl = this.aceEditorRef.el;
+            console.log("[EditSources] Initializing Ace. Element:", editorEl, "window.ace:", !!window.ace);
             if (editorEl && window.ace) {
                 if (this.aceEditor) {
                     this.aceEditor.destroy();
@@ -863,6 +1221,7 @@ export class EditReport extends Component {
                 this.aceEditor.on('change', () => {
                     this.state.sourceCode = this.aceEditor.getValue();
                 });
+                console.log("[EditSources] Ace initialized with content length:", code.length);
             } else {
                 console.error("[EditSources] Could not initialize Ace. Element:", !!editorEl, "Lib:", !!window.ace);
                 if (!window.ace) {
@@ -897,7 +1256,10 @@ export class EditReport extends Component {
             if (result && result.success) {
                 this._loadedArch = result.arch;
                 if (!this.state.previewMode) {
-                    this._setupReportFrame(result.arch);
+                    // Force iframe to reload
+                    if (this.reportFrameRef.el && this.reportFrameRef.el.tagName === 'IFRAME') {
+                        this.reportFrameRef.el.contentWindow.location.reload();
+                    }
                     this._setupSortable();
                 } else {
                     await this._fetchPreviewData();
@@ -1016,7 +1378,9 @@ export class EditReport extends Component {
             if (result && result.success) {
                 this._loadedArch = result.arch;
                 if (!this.state.previewMode) {
-                    this._setupReportFrame(result.arch);
+                    if (this.reportFrameRef.el && this.reportFrameRef.el.tagName === 'IFRAME') {
+                        this.reportFrameRef.el.contentWindow.location.reload();
+                    }
                     this._setupSortable();
                 } else {
                     await this._fetchPreviewData();
@@ -1030,6 +1394,7 @@ export class EditReport extends Component {
     onPrintReport() {
         const report = this.state.reportInfo;
         const activeId = this.state.records[this.state.currentIndex];
+        console.log('reportss', report, activeId)
         if (!report.id || !activeId) return;
 
         this.action.doAction({
@@ -1101,7 +1466,8 @@ export class EditReport extends Component {
         // Check in arch string
         const hasSignInArch = /cy-type=['"]sign['"]|o_sign_placeholder|sign-wrapper|\[\[SIGN:/.test(targetArch);
         // Check in live DOM
-        const signEls = this.reportFrameRef.el?.querySelectorAll('.sign-wrapper, [cy-type="sign"], .o_sign_placeholder');
+        const rootEl = this.reportFrameRef.el?.tagName === 'IFRAME' ? this.reportFrameRef.el.contentDocument : this.reportFrameRef.el;
+        const signEls = rootEl?.querySelectorAll('.sign-wrapper, [cy-type="sign"], .o_sign_placeholder');
         const hasSignInDom = signEls && signEls.length > 0;
         this.state.hasSign = hasSignInArch || hasSignInDom;
     }
@@ -1111,12 +1477,13 @@ export class EditReport extends Component {
         const qrRegex = /cy-type=['"]qr['"]|s_qr_block|symbology['"]\s*:\s*['"]QR['"]|['"]QR['"]\s*:\s*symbology/;
         const hasQrInArch = qrRegex.test(targetArch);
 
+        const rootEl = this.reportFrameRef.el?.tagName === 'IFRAME' ? this.reportFrameRef.el.contentDocument : this.reportFrameRef.el;
         // Check for Studio-managed QR blocks
-        const qrBlocks = this.reportFrameRef.el?.querySelectorAll('.s_qr_block, [cy-type="qr"]');
+        const qrBlocks = rootEl?.querySelectorAll('.s_qr_block, [cy-type="qr"]');
         const hasQrInDom = qrBlocks && qrBlocks.length > 0;
 
         // Also check for raw Odoo barcode widgets (img or svg) that might be QRs
-        const rawBarcodes = this.reportFrameRef.el?.querySelectorAll('img[src*="barcode"][src*="QR"], img[src*="barcode"][src*="qr"], svg[data-code-type="QR"]');
+        const rawBarcodes = rootEl?.querySelectorAll('img[src*="barcode"][src*="QR"], img[src*="barcode"][src*="qr"], svg[data-code-type="QR"]');
         const hasRawQrInDom = rawBarcodes && rawBarcodes.length > 0;
 
         if (hasQrInDom) {
@@ -1162,35 +1529,64 @@ export class EditReport extends Component {
     }
 
     _applyPaperFormatToCanvas() {
-        const editableArea = this.reportFrameRef.el;
-        const container = editableArea?.closest('.cyllo-studio-report-container');
-        if (!container || !editableArea) return;
+        // Guard: only run in edit mode — in preview the edit iframe is unmounted
+        if (this.state.previewMode) return;
+        const iframeEl = this.reportFrameRef.el;
+        if (!iframeEl) return;
+        const container = iframeEl.closest('.cyllo-studio-report-container');
+        if (!container) return;
 
         const { width, height } = this._getPaperDimensions();
         const canvasArea = container.closest('.cy-canvas-area');
-
-        container.style.height = '';
-        container.style.width = `${width}mm`;
-        container.style.minHeight = `${height}mm`;
-        container.style.overflow = 'visible';
-        container.style.setProperty('--cy-page-height', `${height}mm`);
-
-        editableArea.style.height = '';
-        editableArea.style.minHeight = '';
-        editableArea.style.overflow = 'visible';
+        const editableArea = iframeEl.tagName === 'IFRAME' ? iframeEl.contentDocument?.body : iframeEl;
 
         if (canvasArea) {
+            canvasArea.style.backgroundColor = '#e9ecef';
+            canvasArea.style.padding = '40px';
             canvasArea.style.maxHeight = '';
             canvasArea.style.overflowY = 'auto';
             canvasArea.style.overflowX = 'auto';
         }
 
+        // Size the container width to paper width, let height grow with header
+        container.style.height = 'auto';
+        container.style.width = `${width}mm`;
+        container.style.minHeight = 'auto';
+        container.style.overflow = 'visible';
+        container.style.setProperty('--cy-page-height', `${height}mm`);
+
+        // Size the iframe width to match the container exactly.
+        iframeEl.style.width = '100%';
+        iframeEl.style.maxWidth = '100%';
+        iframeEl.style.minHeight = 'auto'; // Let it shrink to fit content
+        iframeEl.style.border = 'none';
+        iframeEl.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
+        iframeEl.style.backgroundColor = 'white';
+        iframeEl.style.display = 'block';
+
+        // Apply fixed height to page elements inside the iframe
+        if (editableArea) {
+            const pageElements = editableArea.querySelectorAll('.page');
+            pageElements.forEach(page => {
+                page.style.boxSizing = 'border-box';
+                page.style.minHeight = `${height}mm`;
+                page.style.height = `${height}mm`;
+                page.style.width = `${width}mm`;
+                page.style.overflow = 'hidden';
+            });
+        }
+
         container.querySelector('.cy-page-overflow-line')?.remove();
         container.parentElement?.querySelector('.cy-overflow-warning')?.remove();
-        editableArea.querySelectorAll('.cy-overflowing').forEach(el => el.classList.remove('cy-overflowing'));
+        if (editableArea) {
+            editableArea.querySelectorAll('.cy-overflowing').forEach(el => el.classList.remove('cy-overflowing'));
+        }
         this.state.hasOverflow = false;
     }
+
+
     //    async onReportPropertyChange(field, value) {
+    //        console.log('valueee',value,this)
     //        this.state.reportInfo[field] = value;
     //        await this.rpc("/web/dataset/call_kw/ir.actions.report/write", {
     //            model: "ir.actions.report",
@@ -1265,48 +1661,44 @@ export class EditReport extends Component {
 
     _setupSortable() {
         this._snippetPanel = document.getElementById('snippet-panel');
-        //        this._reportFrame = document.getElementById('studio_report');
-        this._reportFrame = this.reportFrameRef.el
-        if (!this._reportFrame) return;
+        this._reportFrame = this.reportFrameRef.el?.contentDocument?.body;
+        if (!this._reportFrame || !this._snippetPanel) return;
+
         // Destroy any previous instances before reinitialising
         this._destroySortableInstances();
 
-        // ── 1. Sidebar panel: clone items into drop zones ────────────────────
-        const panelSortable = Sortable.create(this._snippetPanel, {
-            group: {
-                name: 'studio',
-                pull: 'clone',   // clone from panel
-                put: false,      // panel itself is source-only
-            },
-            sort: false,         // don't reorder panel items
-            animation: 150,
-            ghostClass: 'gu-transit',
-            chosenClass: 'dragging',
-            onStart: () => {
-                this._isDragging = true;
-                if (this.editor) {
-                    this.editor.destroy();
-                    this.editor = null;
-                }
-                $('.selected').removeClass('selected');
-            },
-            onEnd: () => {
-                this._isDragging = false;
-                this._justDragged = true;
-                setTimeout(() => { this._justDragged = false; }, 300);
-            },
-            onClone: (evt) => {
-                // Tag the item being dragged (the "real" drop candidate)
-                // so the onAdd handler knows it came from the panel
-                evt.item.dataset._fromPanel = '1';
-            },
-        });
-        this._sortableInstances.push(panelSortable);
+        // ── 1. Native SortableJS Sidebar ───────────────────
+        this._setupPanelSortable();
 
-        // ── 2. Each [cy-template] zone: accept drops & allow internal moves ──
+        // ── 2. Each [cy-template] zone inside the iframe: allow internal moves ──
         this._reportFrame.querySelectorAll('[cy-template]').forEach(zone => {
             this._createZoneSortable(zone);
         });
+    }
+
+    _setupPanelSortable() {
+        const self = this;
+        const panel = this._snippetPanel;
+        if (!panel) return;
+
+        const instance = Sortable.create(panel, {
+            group: {
+                name: 'studio',
+                pull: 'clone',
+                put: false,
+            },
+            sort: false,
+            animation: 150,
+            forceFallback: false, // Ensure native HTML5 Drag and Drop is used
+            onStart() {
+                self._isDragging = true;
+                if (self.editor) { self.editor.destroy(); self.editor = null; }
+            },
+            onEnd() {
+                self._isDragging = false;
+            }
+        });
+        this._sortableInstances.push(instance);
     }
 
     /**
@@ -1357,11 +1749,10 @@ export class EditReport extends Component {
             async onAdd(evt) {
                 evt.originalEvent && evt.originalEvent.stopPropagation && evt.originalEvent.stopPropagation();
                 const item = evt.item;
-                const fromPanel = item.dataset._fromPanel === '1';
+                const fromPanel = evt.from === self._snippetPanel;
                 if (!fromPanel) return;
 
                 const type = item.dataset.type;
-                delete item.dataset._fromPanel;
                 item.style.opacity = '0.7';
                 item.classList.add('awaiting-config-block');
 
@@ -1380,7 +1771,15 @@ export class EditReport extends Component {
 
                     // Init MediumEditor immediately so the node is ready to type into
                     setTimeout(() => {
-                        self.editor = new MediumEditor(item, {
+                        const ifrWin1 = self.reportFrameRef.el?.contentWindow;
+                        const ME1 = (ifrWin1 && ifrWin1.MediumEditor) || MediumEditor;
+                        const SB1 = (ifrWin1 && ifrWin1.SettingsButton) || window.SettingsButton;
+                        const DB1 = (ifrWin1 && ifrWin1.DeleteButton) || window.DeleteButton;
+                        const UB1 = (ifrWin1 && ifrWin1.UndoButton) || window.UndoButton;
+                        const RB1 = (ifrWin1 && ifrWin1.RedoButton) || window.RedoButton;
+                        self.editor = new ME1(item, {
+                            ownerDocument: self.reportFrameRef.el?.contentDocument,
+                            elementsContainer: self.reportFrameRef.el?.contentDocument?.body,
                             toolbar: {
                                 buttons: [
                                     'bold', 'italic', 'underline', 'strikethrough',
@@ -1388,10 +1787,10 @@ export class EditReport extends Component {
                                 ],
                             },
                             extensions: {
-                                'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
-                                'deleteElement': new window.DeleteButton(),
-                                'undoButton': new window.UndoButton(),
-                                'redoButton': new window.RedoButton(),
+                                'settingsButton': SB1 ? new SB1() : null,
+                                'deleteElement': DB1 ? new DB1() : null,
+                                'undoButton': UB1 ? new UB1() : null,
+                                'redoButton': RB1 ? new RB1() : null,
                             },
                             owner: self,
                             placeholder: false,
@@ -1559,8 +1958,8 @@ export class EditReport extends Component {
             },
             animation: 150,
 
-            draggable: '.table-wrapper, .box-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
-            handle: '.table-handle, .box-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"], .sign-toolbar',
+            draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
+            handle: '.table-handle, .box-drag-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"], .sign-toolbar',
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -1575,79 +1974,95 @@ export class EditReport extends Component {
             },
 
             async onAdd(evt) {
+                console.log("DROP", evt);
                 const item = evt.item;
-                const fromPanel = item.dataset._fromPanel === '1';
+                const fromPanel = evt.from === self._snippetPanel;
 
                 if (!fromPanel) return;
 
                 const type = item.dataset.type; // read BEFORE anything
-                delete item.dataset._fromPanel;
 
-                // hide or style while async runs
-                item.style.opacity = '0.7';
-                item.classList.add('awaiting-config-block');
+                await self._handleNewDrop(item, type, zone);
+            }
+        });
+        this._sortableInstances.push(instance);
+    }
 
-                if (type === 'text') {
-                    // Transform dropped snippet into an immediately-editable text node
-                    item.className = 'text-node c_new selected';
-                    item.setAttribute('contenteditable', 'true');
-                    item.innerHTML = 'Click to edit';
-                    item.style.position = '';
-                    item.style.left = '';
-                    item.style.top = '';
-                    item.style.opacity = '1';
+    async _handleNewDrop(item, type, zone) {
+        const self = this;
+        // hide or style while async runs
+        item.style.opacity = '0.7';
+        item.classList.add('awaiting-config-block');
 
-                    // Destroy any existing editor first
-                    if (self.editor) {
-                        try { self.editor.destroy(); } catch (_) { }
-                        self.editor = null;
-                    }
+        if (type === 'text') {
+            // Transform dropped snippet into an immediately-editable text node
+            item.className = 'text-node c_new selected';
+            item.setAttribute('contenteditable', 'true');
+            item.innerHTML = 'Click to edit';
+            item.style.position = '';
+            item.style.left = '';
+            item.style.top = '';
+            item.style.opacity = '1';
 
-                    // Init MediumEditor immediately so the node is ready to type into
-                    setTimeout(() => {
-                        self.editor = new MediumEditor(item, {
-                            toolbar: {
-                                buttons: [
-                                    'bold', 'italic', 'underline', 'strikethrough',
-                                    'h1', 'h3', 'quote', 'anchor', 'deleteElement', 'settingsButton',
-                                ],
-                            },
-                            extensions: {
-                                'settingsButton': window.SettingsButton ? new window.SettingsButton() : null,
-                                'deleteElement': new window.DeleteButton(),
-                                'undoButton': new window.UndoButton(),
-                                'redoButton': new window.RedoButton(),
-                            },
-                            owner: self,
-                            placeholder: false,
-                            disableExtraSpaces: true,
-                        });
-                        self.editor.selectElement(item);
-                        item.focus();
-                    }, 0);
+            // Destroy any existing editor first
+            if (self.editor) {
+                try { self.editor.destroy(); } catch (_) { }
+                self.editor = null;
+            }
 
-                    self._refreshDragHandles();
-                    return;
-                }
+            // Init MediumEditor immediately so the node is ready to type into
+            setTimeout(() => {
+                const ifrWin2 = self.reportFrameRef.el?.contentWindow;
+                const ME2 = (ifrWin2 && ifrWin2.MediumEditor) || MediumEditor;
+                const SB2 = (ifrWin2 && ifrWin2.SettingsButton) || window.SettingsButton;
+                const DB2 = (ifrWin2 && ifrWin2.DeleteButton) || window.DeleteButton;
+                const UB2 = (ifrWin2 && ifrWin2.UndoButton) || window.UndoButton;
+                const RB2 = (ifrWin2 && ifrWin2.RedoButton) || window.RedoButton;
+                self.editor = new ME2(item, {
+                    ownerDocument: self.reportFrameRef.el?.contentDocument,
+                    elementsContainer: self.reportFrameRef.el?.contentDocument?.body,
+                    toolbar: {
+                        buttons: [
+                            'bold', 'italic', 'underline', 'strikethrough',
+                            'h1', 'h3', 'quote', 'anchor', 'deleteElement', 'settingsButton',
+                        ],
+                    },
+                    extensions: {
+                        'settingsButton': SB2 ? new SB2() : null,
+                        'deleteElement': DB2 ? new DB2() : null,
+                        'undoButton': UB2 ? new UB2() : null,
+                        'redoButton': RB2 ? new RB2() : null,
+                    },
+                    owner: self,
+                    placeholder: false,
+                    disableExtraSpaces: true,
+                });
+                self.editor.selectElement(item);
+                item.focus();
+            }, 0);
 
-                if (type === 'field') {
-                    const resModel = self._resModel || self.props.action.params?.res_model || '';
+            self._refreshDragHandles();
+            return;
+        }
 
-                    const { fieldPath, fieldInfo } =
-                        await self.openFieldSelectorPopover(
-                            zone,
-                            resModel,
-                            (field) => !['one2many', 'many2many'].includes(field.type),
-                        );
+        if (type === 'field') {
+            const resModel = self._resModel || self.props.action.params?.res_model || '';
 
-                    if (!fieldPath) {
-                        item.remove(); // cancelled
-                        return;
-                    }
+            const { fieldPath, fieldInfo } =
+                await self.openFieldSelectorPopover(
+                    zone,
+                    resModel,
+                    (field) => !['one2many', 'many2many'].includes(field.type),
+                );
 
-                    // transform existing dropped node
-                    item.className = 'field-block c_new dynamic-field-wrapper';
-                    item.innerHTML = `
+            if (!fieldPath) {
+                item.remove(); // cancelled
+                return;
+            }
+
+            // transform existing dropped node
+            item.className = 'field-block c_new dynamic-field-wrapper';
+            item.innerHTML = `
                         <div class="field-handle-container" contenteditable="false">
                             <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
                             <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
@@ -1656,144 +2071,144 @@ export class EditReport extends Component {
                             <strong class="field-label" style="margin-right: 4px;">${fieldInfo.string}: </strong>
                             ${fieldInfo.type === 'binary' ? `<img t-if="doc.${fieldPath}" src="/web/static/src/img/mimetypes/image.svg" t-att-src="doc.env['ir.actions.report'].get_safe_image_data_uri(doc.${fieldPath})" style="max-width: 100%; width: 200px; height: auto; object-fit: contain;" title="${fieldInfo.string}" />` : `<span t-field="doc.${fieldPath}" title="${fieldInfo.string}">${fieldPath}</span>`}
                         </div>`;
-                    item.setAttribute('cy-type', 'dynamic');
-                    item.style.cursor = 'default';
-                    item.style.opacity = '1';
+            item.setAttribute('cy-type', 'dynamic');
+            item.style.cursor = 'default';
+            item.style.opacity = '1';
 
-                    // Internal delete handler
-                    item.querySelector('.field-delete').onclick = (e) => {
-                        e.stopPropagation();
-                        self.dialog.add(ConfirmationDialog, {
-                            body: "Are you sure you want to delete this Field?",
-                            confirm: () => item.remove(),
-                            cancel: () => { },
-                        });
-                        // if (confirm("Delete this field?")) item.remove();
-                    };
-                }
+            // Internal delete handler
+            item.querySelector('.field-delete').onclick = (e) => {
+                e.stopPropagation();
+                self.dialog.add(ConfirmationDialog, {
+                    body: "Are you sure you want to delete this Field?",
+                    confirm: () => item.remove(),
+                    cancel: () => { },
+                });
+                // if (confirm("Delete this field?")) item.remove();
+            };
+        }
 
-                if (type === 'box') {
-                    const boxId = 'box_' + Math.random().toString(36).slice(2, 10);
-                    const defaultCfg = {
-                        id: boxId,
-                        label: 'Section',
-                        style: { width: 300, height: 200, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8, marginTop: 16 },
-                        layoutMode: 'free',
-                        children: [],
-                    };
-                    item.className = 'box-section-wrapper c_new';
-                    item.setAttribute('cy-type', 'box');
-                    item.setAttribute('data-box-id', boxId);
-                    item.setAttribute('data-box-config', JSON.stringify(defaultCfg));
-                    item.style.width = defaultCfg.style.width + 'px';
-                    item.style.height = defaultCfg.style.height + 'px';
-                    item.style.marginTop = defaultCfg.style.marginTop + 'px';
-                    item.style.opacity = '1';
-                    item.style.cursor = 'default';
-                    item.innerHTML = self._buildBoxInnerHTML(defaultCfg);
+        if (type === 'box') {
+            const boxId = 'box_' + Math.random().toString(36).slice(2, 10);
+            const defaultCfg = {
+                id: boxId,
+                label: 'Section',
+                style: { width: 300, height: 200, backgroundColor: 'transparent', border: '1px solid #ccc', borderRadius: 4, padding: 8, marginTop: 16 },
+                layoutMode: 'free',
+                children: [],
+            };
+            item.className = 'box-section-wrapper c_new';
+            item.setAttribute('cy-type', 'box');
+            item.setAttribute('data-box-id', boxId);
+            item.setAttribute('data-box-config', JSON.stringify(defaultCfg));
+            item.style.width = defaultCfg.style.width + 'px';
+            item.style.height = defaultCfg.style.height + 'px';
+            item.style.marginTop = defaultCfg.style.marginTop + 'px';
+            item.style.opacity = '1';
+            item.style.cursor = 'default';
+            item.innerHTML = self._buildBoxInnerHTML(defaultCfg);
 
-                    // Wire box toolbar delete
-                    item.querySelector('.box-delete-btn').onclick = (e) => {
-                        e.stopPropagation();
-                        self.dialog.add(ConfirmationDialog, {
-                            body: 'Delete this section container and all its contents?',
-                            confirm: () => {
-                                if (self.state.showBoxProps && self._selectedBoxEl === item) {
-                                    self.closeBoxProps();
-                                }
-                                item.remove();
-                            },
-                            cancel: () => { },
-                        });
-                    };
-
-                    // Wire resize handles
-                    self._setupBoxResizeHandles(item);
-
-                    // Register inner dropzone as sortable zone
-                    const dropzone = item.querySelector('.box-dropzone');
-                    if (dropzone) {
-                        self._createBoxDropzoneSortable(dropzone);
-                    }
-                }
-
-                if (type === 'table') {
-                    const resModel = self._resModel || self.props.action.params?.res_model || '';
-                    const config = await self.openTableConfigModal(zone, resModel);
-
-                    if (!config) {
+            // Wire box toolbar delete
+            item.querySelector('.box-delete-btn').onclick = (e) => {
+                e.stopPropagation();
+                self.dialog.add(ConfirmationDialog, {
+                    body: 'Delete this section container and all its contents?',
+                    confirm: () => {
+                        if (self.state.showBoxProps && self._selectedBoxEl === item) {
+                            self.closeBoxProps();
+                        }
                         item.remove();
-                        return;
-                    }
+                    },
+                    cancel: () => { },
+                });
+            };
 
-                    // transform existing dropped node
-                    const tableHtml = self._generateTableHtml(config);
-                    item.className = 'c_new table-wrapper';
-                    item.innerHTML = `
+            // Wire resize handles
+            self._setupBoxResizeHandles(item);
+
+            // Register inner dropzone as sortable zone
+            const dropzone = item.querySelector('.box-dropzone');
+            if (dropzone) {
+                self._createBoxDropzoneSortable(dropzone);
+            }
+        }
+
+        if (type === 'table') {
+            const resModel = self._resModel || self.props.action.params?.res_model || '';
+            const config = await self.openTableConfigModal(zone, resModel);
+
+            if (!config) {
+                item.remove();
+                return;
+            }
+
+            // transform existing dropped node
+            const tableHtml = self._generateTableHtml(config);
+            item.className = 'c_new table-wrapper';
+            item.innerHTML = `
                             <div class="table-handle-container" contenteditable="false">
                                 <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
                                 <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                             </div>
                             ${tableHtml}`;
-                    item.setAttribute('cy-type', 'table');
-                    item.setAttribute('cy-config', JSON.stringify(config));
-                    item.style.cursor = 'default';
-                    item.style.opacity = '1';
+            item.setAttribute('cy-type', 'table');
+            item.setAttribute('cy-config', JSON.stringify(config));
+            item.style.cursor = 'default';
+            item.style.opacity = '1';
 
-                    // Internal delete handler
-                    item.querySelector('.table-delete').onclick = (e) => {
-                        e.stopPropagation();
-                        self.dialog.add(ConfirmationDialog, {
-                            body: "Are you sure you want to delete this table?",
-                            confirm: () => item.remove(),
-                            cancel: () => { },
-                        });
-                    };
+            // Internal delete handler
+            item.querySelector('.table-delete').onclick = (e) => {
+                e.stopPropagation();
+                self.dialog.add(ConfirmationDialog, {
+                    body: "Are you sure you want to delete this table?",
+                    confirm: () => item.remove(),
+                    cancel: () => { },
+                });
+            };
 
-                    const refreshRes = await self.rpc('/cyllo_studio/get_report_source', {
-                        template: self._template,
-                    });
-                    if (refreshRes.success) {
-                        self.state.sourceCode = refreshRes.arch;
-                        if (self.aceEditor) {
-                            self.aceEditor.setValue(refreshRes.arch, -1);
-                        }
-                    }
+            const refreshRes = await self.rpc('/cyllo_studio/get_report_source', {
+                template: self._template,
+            });
+            if (refreshRes.success) {
+                self.state.sourceCode = refreshRes.arch;
+                if (self.aceEditor) {
+                    self.aceEditor.setValue(refreshRes.arch, -1);
                 }
+            }
+        }
 
-                if (type === 'qr') {
-                    const config = await self.openQrWizard(item);
-                    if (!config) {
-                        item.remove();
-                        return;
-                    }
-                    self.insertQrBlock(item, config);
-                }
+        if (type === 'qr') {
+            const config = await self.openQrWizard(item);
+            if (!config) {
+                item.remove();
+                return;
+            }
+            self.insertQrBlock(item, config);
+        }
 
-                if (type === 'sign') {
-                    const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
-                    const defaultCfg = {
-                        role: 'customer',
-                        label: 'Authorized Signature',
-                        required: true,
-                        show_date: false,
-                        show_name: false,
-                        width: 200,
-                        height: 100,
-                        alignment: 'left',
-                    };
-                    item.className = 'sign-wrapper c_new';
-                    item.setAttribute('cy-type', 'sign');
-                    item.setAttribute('data-sign-id', signId);
-                    item.setAttribute('data-sign-config', JSON.stringify(defaultCfg));
-                    item.dataset.role = defaultCfg.role;
-                    item.style.width = defaultCfg.width + 'px';
-                    item.style.height = defaultCfg.height + 'px';
-                    item.style.opacity = '1';
-                    item.style.cursor = 'default';
-                    item.style.textAlign = defaultCfg.alignment;
+        if (type === 'sign') {
+            const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
+            const defaultCfg = {
+                role: 'customer',
+                label: 'Authorized Signature',
+                required: true,
+                show_date: false,
+                show_name: false,
+                width: 200,
+                height: 100,
+                alignment: 'left',
+            };
+            item.className = 'sign-wrapper c_new';
+            item.setAttribute('cy-type', 'sign');
+            item.setAttribute('data-sign-id', signId);
+            item.setAttribute('data-sign-config', JSON.stringify(defaultCfg));
+            item.dataset.role = defaultCfg.role;
+            item.style.width = defaultCfg.width + 'px';
+            item.style.height = defaultCfg.height + 'px';
+            item.style.opacity = '1';
+            item.style.cursor = 'default';
+            item.style.textAlign = defaultCfg.alignment;
 
-                    item.innerHTML = `
+            item.innerHTML = `
                         <div class="sign-toolbar" contenteditable="false">
                             <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
                             <span class="sign-delete-btn ri-delete-bin-line" title="Delete Signature"></span>
@@ -1809,30 +2224,26 @@ export class EditReport extends Component {
                         </div>
                     `;
 
-                    item.querySelector('.sign-delete-btn').onclick = (e) => {
-                        e.stopPropagation();
-                        self.dialog.add(ConfirmationDialog, {
-                            body: 'Delete this Signature?',
-                            confirm: () => {
-                                if (self.state.showSignProps && self._selectedSignEl === item) {
-                                    self.closeSignProps();
-                                }
-                                item.remove();
-                                self._updateHasSign();
-                            },
-                            cancel: () => { },
-                        });
-                    };
+            item.querySelector('.sign-delete-btn').onclick = (e) => {
+                e.stopPropagation();
+                self.dialog.add(ConfirmationDialog, {
+                    body: 'Delete this Signature?',
+                    confirm: () => {
+                        if (self.state.showSignProps && self._selectedSignEl === item) {
+                            self.closeSignProps();
+                        }
+                        item.remove();
+                        self._updateHasSign();
+                    },
+                    cancel: () => { },
+                });
+            };
 
-                    self._setupSignResizeHandles(item);
-                    self._updateHasSign();
-                }
-                // Re-initialize drag handles for the new zone content
-                self._refreshDragHandles();
-            }
-        });
-
-        this._sortableInstances.push(instance);
+            self._setupSignResizeHandles(item);
+            self._updateHasSign();
+        }
+        // Re-initialize drag handles for the new zone content
+        self._refreshDragHandles();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -2334,6 +2745,7 @@ export class EditReport extends Component {
     //
     //            // Fired when an element from ANOTHER list (panel or other zone) is dropped here
     //            onAdd: async (evt) => {
+    //                console.log('avtttt',evt)
     //                const item = evt.item;
     //                const fromPanel = item.dataset._fromPanel === '1';
     //
@@ -2434,6 +2846,11 @@ export class EditReport extends Component {
 
     /** Destroy all tracked SortableJS instances. */
     _destroySortableInstances() {
+        // Abort the cross-document panel drag shim listener
+        if (this._panelDragAbort) {
+            this._panelDragAbort.abort();
+            this._panelDragAbort = null;
+        }
         this._sortableInstances.forEach(s => { try { s.destroy(); } catch (_) { } });
         this._sortableInstances = [];
     }
@@ -2493,12 +2910,14 @@ export class EditReport extends Component {
 
     // \u2500\u2500 Company Logo Upload \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     onLogoClick(ev) {
+        console.log('klloo', this.state.hideLogo, this.state.companyLogo)
         if (this.state.hideLogo && this.state.companyLogo) {
             // Restore hidden logo for this report (no file picker needed)
             this.state.hideLogo = false;
             if (this.undoManager) this.undoManager.debouncedSave();
             return;
         }
+        console.log('testttttttt,logoo', this.state.companyLogo)
 
         if (this.state.companyLogo) {
             // Remove existing dropdown if any
@@ -2627,7 +3046,7 @@ export class EditReport extends Component {
         };
 
         if (this._resModel) {
-            action.domain = [['model', '=', this._resModel]];
+            action.domain = [['model', '=', this._resModel],];
         }
 
         component.action.doAction(action);
@@ -2688,9 +3107,10 @@ export class EditReport extends Component {
                 }
             });
             */
-            const editedHTML = component.reportFrameRef.el.innerHTML;
+            const frameEl = component.reportFrameRef.el;
+            const editedHTML = frameEl.tagName === 'IFRAME' ? frameEl.contentDocument.documentElement.outerHTML : frameEl.innerHTML;
 
-
+            console.log('[Cyllo Studio] Serializing HTML...', editedHTML?.length || 0, 'bytes');
             const parser = new DOMParser();
             const editedDoc = parser.parseFromString(editedHTML, 'text/html');
             const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
@@ -2701,6 +3121,7 @@ export class EditReport extends Component {
             let changes = component.getChangedElements(originalDoc, editedDoc);
 
 
+            console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
 
             // ── Logo hide/show persistence ──────────────────────────────────
             // We track whether hideLogo changed relative to what was originally loaded.
@@ -2768,10 +3189,12 @@ export class EditReport extends Component {
             if (logoOverrideTemplates.length) {
                 newTemplates = newTemplates.concat(logoOverrideTemplates);
             }
+            console.log('[Cyllo Studio] Sending templates:', newTemplates);
 
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
                 all_arch: newTemplates,
             });
+            console.log('[Cyllo Studio] Save result:', result);
 
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
@@ -2786,6 +3209,7 @@ export class EditReport extends Component {
                             record_id: sampleRecordId
                         }).then((res) => {
                             if (res && res.success) {
+                                console.log("[Cyllo Studio] Server-side thumbnail generated.");
                                 component.state.hasThumbnail = true;
                             } else {
                                 console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
@@ -2804,8 +3228,9 @@ export class EditReport extends Component {
                 if (resArch && resArch.success) {
                     component._loadedArch = resArch.arch;
                     if (!component.state.previewMode) {
-                        component._setupReportFrame(resArch.arch);
-                        component._setupSortable();
+                        if (component.reportFrameRef.el && component.reportFrameRef.el.tagName === 'IFRAME') {
+                            component.reportFrameRef.el.contentWindow.location.reload();
+                        }
                     } else {
                         await component._fetchPreviewData();
                     }
@@ -2907,7 +3332,15 @@ export class EditReport extends Component {
             };
 
             const textChanged = text(original) !== text(el);
-            const innerChanged = inner(original) !== inner(el);
+            let innerChanged = inner(original) !== inner(el);
+
+            // Protect table structures from innerHTML replacement because browsers foster QWeb tags out of tables,
+            // which destroys t-foreach/t-if loops wrapping table rows.
+            const tag = (el.tagName || '').toLowerCase();
+            if (['table', 'tbody', 'thead', 'tfoot', 'tr'].includes(tag)) {
+                innerChanged = false;
+            }
+
             const rawStructChanged = cyXpathChildren(original) !== cyXpathChildren(el);
 
             const structChanged = rawStructChanged
@@ -2918,7 +3351,9 @@ export class EditReport extends Component {
                 && !original.hasAttribute('name'); // Zones with names are often anchors in Odoo layouts
 
             if (textChanged || innerChanged || structChanged) {
+                console.log(`[Cyllo Studio] Change detected in ${xpath}: text=${textChanged}, inner=${innerChanged}, struct=${structChanged} (rawStruct=${rawStructChanged})`);
                 if (structChanged) {
+                    console.log(`[Cyllo Studio]   - Struct check for ${xpath}: hasStructural=${hasStructuralNodes(original)}, hasChain=${hasTIfElIfChainInChildren(original)}, hasTable=${containsTable(original)}`);
                 }
                 allChanges.push({ el, xpath, template, structChanged });
             }
@@ -2945,6 +3380,7 @@ export class EditReport extends Component {
 
                     const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
                     if (attrChanged) {
+                        console.log(`[Cyllo Studio] Attribute change on child ${childXpath}: hidden=${originalHasHidden}->${editedHasHidden}, t-if=${originalTif}->${editedTif}`);
                         allChanges.push({
                             el: editedChild,
                             xpath: childXpath,
@@ -2955,6 +3391,39 @@ export class EditReport extends Component {
                             tif: editedTif,
                         });
                     }
+                });
+
+            // ── Detect DELETED cy-xpath children ─────────────────────────────
+            // `inner()` explicitly skips cy-xpath children, so the normal text/
+            // inner comparison never notices when a labelled child is removed.
+            // `structChanged` covers reordering but is vetoed for .page zones and
+            // zones that contain structural QWeb nodes or tables.
+            // This pass independently checks whether any cy-xpath child that was
+            // present in the ORIGINAL zone is absent in the EDITED zone, and emits
+            // a dedicated deletion entry for it so buildInheritanceXML can issue a
+            // position="replace" with empty body (the standard Odoo deletion idiom).
+            Array.from(original.children)
+                .filter(origChild => origChild.hasAttribute('cy-xpath'))
+                .forEach(origChild => {
+                    const childXpath = origChild.getAttribute('cy-xpath');
+                    const childTemplate = origChild.getAttribute('cy-template') || template;
+
+                    // Skip if element is still present in the edited DOM
+                    const stillPresent = el.querySelector(`[cy-xpath="${CSS.escape(childXpath)}"]`);
+                    if (stillPresent) return;
+
+                    // Skip structural/QWeb nodes — deleting t-foreach rows etc. is too dangerous
+                    if (hasStructuralNodes(origChild)) return;
+                    if (hasTIfElIfChainInChildren(origChild)) return;
+
+                    console.log(`[Cyllo Studio] Deletion detected: cy-xpath child "${childXpath}" removed from zone "${xpath}"`);
+                    allChanges.push({
+                        el: origChild,          // the original node (used for template resolution)
+                        xpath: childXpath,
+                        template: childTemplate,
+                        structChanged: false,
+                        isDeleted: true,
+                    });
                 });
         });
 
@@ -3561,15 +4030,93 @@ export class EditReport extends Component {
         container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
 
         // \u2500\u2500 Enrich the report canvas logo (img[alt="Logo"] from external_layout) \u2500\u2500
-        // (Removed wrapper injection per user request, as it was breaking the address block layout)
         const reportLogoImgs = container.querySelectorAll('img[alt="Logo"], .company_logo');
         reportLogoImgs.forEach(logoImg => {
+            // Skip if already wrapped
+            if (logoImg.closest('.cy-logo-enrich-wrapper')) return;
+
+            // Create wrapper
+            const wrapper = document.createElement('div');
+            wrapper.className = 'cy-logo-enrich-wrapper';
+            wrapper.style.display = 'inline-block';
+            wrapper.style.position = 'relative';
+            wrapper.style.cursor = 'pointer';
+            wrapper.title = 'Click to manage logo';
+
+            // Add hover effects
+            wrapper.onmouseover = () => {
+                wrapper.style.outline = '2px dashed #007bff';
+                wrapper.style.outlineOffset = '2px';
+            };
+            wrapper.onmouseout = () => {
+                wrapper.style.outline = '';
+            };
+
+            // Move logo into wrapper
+            logoImg.parentNode.insertBefore(wrapper, logoImg);
+            wrapper.appendChild(logoImg);
+
+            // Add overlay buttons based on state
             if (this.state.hideLogo || logoImg.getAttribute('cy-logo-removed') === '1') {
                 logoImg.classList.add('cy-logo-hidden');
                 logoImg.style.setProperty('display', 'none', 'important');
+
+                // Add restore hint
+                const restoreHint = document.createElement('div');
+                restoreHint.className = 'cy-canvas-logo-restore-hint';
+                restoreHint.style.cssText = 'padding: 10px; border: 2px dashed #ccc; background: #f9f9f9; min-width: 100px; text-align: center; cursor: pointer;';
+                restoreHint.textContent = 'Logo hidden — click to restore';
+                wrapper.appendChild(restoreHint);
+
+                restoreHint.onclick = (e) => {
+                    e.stopPropagation();
+                    this.state.hideLogo = false;
+                    logoImg.removeAttribute('cy-logo-removed');
+                    logoImg.classList.remove('cy-logo-hidden');
+                    logoImg.style.removeProperty('display');
+                    restoreHint.remove();
+                    if (this.undoManager) this.undoManager.debouncedSave();
+                };
             } else {
                 logoImg.classList.remove('cy-logo-hidden');
                 logoImg.style.removeProperty('display');
+
+                // Add remove button
+                const removeBtn = document.createElement('button');
+                removeBtn.className = 'cy-canvas-remove-logo-btn';
+                removeBtn.innerHTML = '×';
+                removeBtn.style.cssText = 'position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #dc3545; color: white; border: none; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; z-index: 10;';
+                wrapper.appendChild(removeBtn);
+
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    this.state.hideLogo = true;
+                    logoImg.classList.add('cy-logo-hidden');
+                    logoImg.style.setProperty('display', 'none', 'important');
+                    removeBtn.remove();
+
+                    // Add restore hint
+                    const restoreHint = document.createElement('div');
+                    restoreHint.className = 'cy-canvas-logo-restore-hint';
+                    restoreHint.style.cssText = 'padding: 10px; border: 2px dashed #ccc; background: #f9f9f9; min-width: 100px; text-align: center; cursor: pointer;';
+                    restoreHint.textContent = 'Logo hidden — click to restore';
+                    wrapper.appendChild(restoreHint);
+
+                    restoreHint.onclick = (e) => {
+                        e.stopPropagation();
+                        this.state.hideLogo = false;
+                        logoImg.removeAttribute('cy-logo-removed');
+                        logoImg.classList.remove('cy-logo-hidden');
+                        logoImg.style.removeProperty('display');
+                        restoreHint.remove();
+
+                        // Re-add remove button
+                        wrapper.appendChild(removeBtn);
+                        if (this.undoManager) this.undoManager.debouncedSave();
+                    };
+
+                    if (this.undoManager) this.undoManager.debouncedSave();
+                };
             }
         });
     }
@@ -3590,8 +4137,8 @@ export class EditReport extends Component {
             await this.save_changes(this);
             this.notification.add('Footer text updated successfully for this report', { type: 'success' });
 
-            // Re-render preview strip
-            this._renderFooterPreview();
+            // Re-render preview strip and iframe footer
+            this._updateFooterInIframe();
             // Re-fetch iframe if previewing
             if (this.state.previewMode) {
                 this._fetchPreviewData();
@@ -3682,6 +4229,15 @@ export class EditReport extends Component {
                 const newNodes = Array.from(change.el.children)
                     .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
+                // ── Deletion: emit position="replace" with empty body ──────
+                // This is the standard Odoo inheritance idiom for removing a
+                // node that was defined in a parent/base template view.
+                if (change.isDeleted) {
+                    console.log(`[Cyllo Studio] Serialising deletion for xpath: ${change.xpath}`);
+                    xpathBlock += `<xpath expr="${change.xpath}" position="replace"></xpath>`;
+                    return;
+                }
+
                 if (change.structChanged) {
                     // Secondary guard: never do a full position="replace" on a zone that still has
                     // QWeb structural (t-foreach / t-set / t-if / t-elif / t-else)
@@ -3764,7 +4320,57 @@ export class EditReport extends Component {
         // template that contains the <div class="page">) — NOT the outer wrapper.
         // Using _template (wrapper) causes "cannot be located in parent view"
         // because the wrapper arch does not contain the .page div.
-        const footerTemplateKey = this._docTemplate || this._template;
+        let footerTemplateKey = this._docTemplate || this._template;
+        let pageXpath = "(//div[hasclass('page')])[1]";
+
+        // First, try to find a valid template and XPath from the changes
+        let foundValidTemplate = false;
+        if (changes && changes.length > 0) {
+            // Use the first change's template and try to find a page element from its element
+            const firstChange = changes[0];
+            footerTemplateKey = firstChange.template;
+            console.log('[Cyllo Studio] Using template from changes:', footerTemplateKey);
+
+            // Try to find page element relative to the change element
+            try {
+                let el = firstChange.el;
+                // Traverse up to find a page element or an element with cy-template
+                while (el) {
+                    if (el.classList && el.classList.contains('page') && el.hasAttribute && el.hasAttribute('cy-xpath')) {
+                        pageXpath = el.getAttribute('cy-xpath');
+                        console.log('[Cyllo Studio] Found page element from change traversal with cy-xpath:', pageXpath);
+                        foundValidTemplate = true;
+                        break;
+                    }
+                    if (el.hasAttribute && el.hasAttribute('cy-template')) {
+                        footerTemplateKey = el.getAttribute('cy-template');
+                        console.log('[Cyllo Studio] Found template from change traversal:', footerTemplateKey);
+                    }
+                    el = el.parentElement;
+                }
+
+                // If not found by traversal, try to find in the document
+                if (!foundValidTemplate && this.reportFrameRef && this.reportFrameRef.el) {
+                    let doc = this.reportFrameRef.el;
+                    if (this.reportFrameRef.el.tagName === 'IFRAME') {
+                        doc = this.reportFrameRef.el.contentDocument || this.reportFrameRef.el.contentWindow.document;
+                    }
+                    const pageEl = doc.querySelector('.page[cy-xpath]');
+                    if (pageEl) {
+                        pageXpath = pageEl.getAttribute('cy-xpath');
+                        console.log('[Cyllo Studio] Found page element in document with cy-xpath:', pageXpath);
+                        // Also get the template from the page element if available
+                        if (pageEl.hasAttribute('cy-template')) {
+                            footerTemplateKey = pageEl.getAttribute('cy-template');
+                        }
+                        foundValidTemplate = true;
+                    }
+                }
+            } catch (e) {
+                console.warn('[Cyllo Studio] Error finding page element from changes:', e);
+            }
+        }
+
         let mainInherit = new_inherits.find(h => h.key === footerTemplateKey);
         if (!mainInherit) {
             mainInherit = { key: footerTemplateKey, xpathBlocks: "<data>\n</data>" };
@@ -3799,9 +4405,10 @@ export class EditReport extends Component {
         // causes the footer to appear at the bottom of the content body and overlap
         // existing content on reports that have long content.
         let footerXml = '';
+
         if (showF || showP || showD) {
             footerXml = `
-                <xpath expr="(//div[hasclass('page')])[1]" position="after">
+                <xpath expr="${pageXpath}" position="after">
                     <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="width: 100%; font-size: 12px; padding: 8px 15px; border-top: 1px solid #e0e0e0; margin-top: 8px;">
                         <div class="row">
                             <div class="col-8 text-start cy-footer-text-content">
@@ -3824,7 +4431,7 @@ export class EditReport extends Component {
             `;
         } else {
             footerXml = `
-                <xpath expr="(//div[hasclass('page')])[1]" position="after">
+                <xpath expr="${pageXpath}" position="after">
                     <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="display: none;"/>
                 </xpath>
             `;
@@ -3832,6 +4439,7 @@ export class EditReport extends Component {
 
         mainInherit.xpathBlocks = mainInherit.xpathBlocks.replace('</data>', footerXml + '\n</data>');
 
+        console.log('new_inherits', new_inherits);
         return new_inherits;
     }
 
