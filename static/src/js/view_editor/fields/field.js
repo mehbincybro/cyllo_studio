@@ -188,6 +188,11 @@ export class CylloField extends Field {
                 if ('placeholder' in propsFromNode) {
                     propsFromNode.placeholder = evaluatePlaceholder(propsFromNode.placeholder, record);
                 }
+                // StatusBarField requires foldField to be a string; guard against
+                // boolean true saved by older Cyllo builds (fold_field checkbox bug).
+                if ('foldField' in propsFromNode && typeof propsFromNode.foldField !== 'string') {
+                    propsFromNode.foldField = propsFromNode.foldField ? 'fold' : undefined;
+                }
                 this.FieldPlaceholder = propsFromNode;
             }
         }

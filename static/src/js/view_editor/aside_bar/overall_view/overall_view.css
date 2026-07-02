@@ -7,7 +7,7 @@
     --components-container-bg: #222222;
     --components-container-color: #9EA700;
     --cy-components-column-bg: #373627;
-    --cy-components-column-color: 000000;
+    --cy-components-column-color: #BCBBA7;
     --cy-components-span: #46442d;
 
 }
@@ -73,11 +73,6 @@
 .label-text {
     margin-left: 8px;
     color: var(--checkbox-text-color);
-}
-
-.cy-overall-label {
-    color: var(--checkbox-text-color);
-
 }
 
 .checkbox-input:checked+.checkbox-label .checkbox-indicator {
@@ -171,22 +166,24 @@
     position: absolute;
 }
 
-#columnGrouping .o-dropdown--menu,
-#columnGrouping .dropdown-item {
-    background-color: #2e2e2e !important;
-    color: #d6d6d6 !important;
-    width: 15.5%;
+#columnGrouping .o-dropdown--menu {
+    background: var(--custom-dropdown-bg) !important;
+    border: 1px solid var(--input-border-color);
+    width: 89%;
     height: fit-content;
     max-height: 400px;
 }
 
-#rowGrouping .o-dropdown--menu,
-#columnGrouping .dropdown-item {
-    background-color: #2e2e2e !important;
-    color: #d6d6d6 !important;
-    width: 15.5%;
+#rowGrouping .o-dropdown--menu {
+    background: var(--custom-dropdown-bg) !important;
+    border: 1px solid var(--input-border-color);
+    width: 89%;
     height: fit-content;
     max-height: 400px;
+}
+
+#columnGrouping .dropdown-item {
+    width: 100%;
 }
 
 .kanban-input-container {
@@ -225,11 +222,72 @@
     }
 }
 
-/* Reset to Default — destructive action in the View tab */
+/* === Toggle Switch (replaces checkbox-item in all overall views) === */
+
+.cy-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.cy-toggle-label {
+    font-size: 14px !important;
+    color: var(--text-color, #e2e2e2);
+    font-family: inter, sans-serif;
+}
+
+.cy-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.cy-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.cy-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #46442d;
+    border-radius: 18px;
+    transition: background-color 0.2s ease;
+}
+
+.cy-slider::before {
+    content: "";
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    top: 3px;
+    background: #85857d;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.cy-switch input:checked+.cy-slider {
+    background-color: #3a3e00;
+}
+
+.cy-switch input:checked+.cy-slider::before {
+    transform: translateX(16px);
+    background: #9ea700;
+}
+
+/* === Reset to Default — destructive action in the View tab === */
 .cy-reset-view-wrapper {
-    margin-top: 18px;
-    padding: 14px 10px 6px;
-    border-top: 1px solid #3a3a3a;
+    padding: 16px;
+    border-top: 1px solid var(--cy-components-span);
 }
 
 .cy-reset-view-btn {

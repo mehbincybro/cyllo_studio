@@ -199,12 +199,14 @@
     margin-bottom: 8px;
 }
 
+.cy-overall-label,
 .cy-navbar_label {
-    font-size: 14px;
-    margin-bottom: 0.5rem;
-    color: var(--text-color);
-    font-family: inter, sans-serif;
-    font-weight: normal;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 8px;
 }
 
 /* Base: dark theme (used outside .cy-side-menu context) */
@@ -223,6 +225,12 @@
     &[readonly] {
         color: #85857d !important;
     }
+
+    &:focus {
+        border-color: var(--primary);
+        outline: none;
+        box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.1);
+    }
 }
 
 .overall_container_list {
@@ -237,6 +245,7 @@
 .cy-basedOn {
     gap: 3px;
     display: flex;
+    align-items: center;
     font-size: 14px;
     background-color: transparent;
     color: var(--navbar-title-color);
@@ -244,7 +253,7 @@
 }
 
 .cy-setting-icon {
-    color: var(--text-color);
+    color: var(--custom-dropdown-color);
     width: 1rem;
 }
 
@@ -398,7 +407,261 @@
     justify-content: center !important;
 }
 
-/* === 14. Media Queries ====================================== */
+/* === 14. Unified Form Element Theme ========================= */
+/*
+   Single source of truth for every input, dropdown, toggle,
+   label, and action button inside the aside bar.
+   Keeps all components visually consistent.
+*/
+
+/* --- Labels --- */
+.cy-side-menu .cy-navbar_label,
+.cy-side-menu .cy-overall-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 6px;
+}
+
+/* --- All text-style inputs (explicit types → specificity 0,2,1 max, same as exclusion rule) --- */
+/* Using explicit [type] selectors avoids :not() specificity inflation */
+.cy-side-menu input[type="text"],
+.cy-side-menu input[type="number"],
+.cy-side-menu input[type="email"],
+.cy-side-menu input[type="search"],
+.cy-side-menu input[type="url"],
+.cy-side-menu input[type="tel"],
+.cy-side-menu input[type="password"],
+.cy-side-menu input:not([type]),
+.cy-side-menu .form-control,
+.cy-side-menu select,
+.cy-side-menu textarea {
+    background-color: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    border-radius: 8px !important;
+    color: var(--text-color) !important;
+    font-size: 13px !important;
+    font-family: inter, sans-serif !important;
+    padding: 7px 10px !important;
+    width: 100%;
+    box-shadow: none !important;
+    outline: none;
+    transition: border-color 0.15s ease;
+}
+
+.cy-side-menu input[type="text"]:focus,
+.cy-side-menu input[type="number"]:focus,
+.cy-side-menu input[type="email"]:focus,
+.cy-side-menu input[type="search"]:focus,
+.cy-side-menu input:not([type]):focus,
+.cy-side-menu .form-control:focus,
+.cy-side-menu select:focus,
+.cy-side-menu textarea:focus {
+    border-color: #9ea700 !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+.cy-side-menu input:disabled,
+.cy-side-menu textarea:disabled {
+    color: #85857d !important;
+    cursor: default;
+}
+
+.cy-side-menu input::placeholder,
+.cy-side-menu textarea::placeholder {
+    color: #6b6a5a !important;
+}
+
+/* --- Reset inputs INSIDE dropdown/autocomplete wrappers (already have outer border) --- */
+.cy-side-menu .cy-studio-custom-dropdown input,
+.cy-side-menu .cy-studio-custom-dropdown select,
+.cy-side-menu .o-autocomplete input,
+.cy-side-menu .custom-dropdown input,
+.cy-side-menu .o_multi_record_selector input,
+.cy-side-menu .o_record_selector input,
+.cy-side-menu .o_model_field_selector input {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    width: auto;
+}
+
+/* --- Odoo o_input class override --- */
+.cy-side-menu .o_input {
+    background-color: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    border-radius: 8px !important;
+    color: var(--text-color) !important;
+    font-size: 13px !important;
+    box-shadow: none !important;
+}
+
+/* --- Spacing between field rows --- */
+.cy-side-menu .mb-2 {
+    margin-bottom: 12px !important;
+}
+
+.cy-side-menu .dropdown-checkbox-container {
+    margin-bottom: 12px;
+}
+
+/* --- Toggle rows (cy-toggle-row) uniform --- */
+.cy-side-menu .cy-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 0;
+    border-bottom: none;
+}
+
+.cy-side-menu .cy-toggle-label {
+    font-size: 13px;
+    color: var(--text-color);
+    font-family: inter, sans-serif;
+}
+
+/* --- Toggle rows with Based-on button (cy-prop-toggle-row) --- */
+.cy-side-menu .cy-prop-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 8px;
+    min-height: 37px;
+}
+
+.cy-side-menu .cy-prop-toggle-row .cy-toggle-label {
+    flex: 1;
+}
+
+.cy-side-menu .cy-prop-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* --- Toggle switch uniform (cy-switch / cy-slider) --- */
+.cy-side-menu .cy-switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.cy-side-menu .cy-switch input {
+    opacity: 0 !important;
+    width: 0 !important;
+    height: 0 !important;
+    position: absolute !important;
+    border: none !important;
+    padding: 0 !important;
+}
+
+.cy-side-menu .cy-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #46442d;
+    border-radius: 18px;
+    border: none !important;
+    transition: background-color 0.2s ease;
+}
+
+.cy-side-menu .cy-slider::before {
+    content: "";
+    position: absolute;
+    height: 12px;
+    width: 12px;
+    left: 3px;
+    top: 3px;
+    background: #85857d;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.cy-side-menu .cy-switch input:checked + .cy-slider {
+    background-color: #3a3e00;
+}
+
+.cy-side-menu .cy-switch input:checked + .cy-slider::before {
+    transform: translateX(16px);
+    background: #9ea700;
+}
+
+/* --- Based-on button uniform --- */
+.cy-side-menu .cy-basedOn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: transparent;
+    border: 1px solid #4b4934;
+    border-radius: 6px;
+    padding: 3px 8px;
+    color: #bcbba7;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color 0.15s, color 0.15s;
+}
+
+.cy-side-menu .cy-basedOn:hover {
+    border-color: #9ea700;
+    color: #9ea700;
+}
+
+.cy-side-menu .cy-basedOn .fa {
+    font-size: 11px;
+}
+
+/* --- Remove / Cancel / Save action buttons --- */
+.cy-side-menu .btn.btn-secondary,
+.cy-side-menu button.btn-secondary {
+    background: transparent !important;
+    border: 1px solid #4b4934 !important;
+    color: #bcbba7 !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    padding: 7px 16px !important;
+    transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.cy-side-menu .btn.btn-secondary:hover,
+.cy-side-menu button.btn-secondary:hover {
+    border-color: #ff5c5c !important;
+    color: #ff5c5c !important;
+    background: rgba(255, 92, 92, 0.06) !important;
+}
+
+.cy-side-menu .cy-btn_save {
+    background-color: #9ea700 !important;
+    border: 1px solid #9ea700 !important;
+    color: #fff !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+    padding: 7px 16px !important;
+}
+
+.cy-side-menu .cy-btn_save:hover {
+    background-color: #b5be00 !important;
+    border-color: #b5be00 !important;
+}
+
+/* --- Accordion section dividers --- */
+.cy-side-menu .cy-studio_accordion {
+    padding: 10px 0;
+    font-size: 14px !important;
+}
+
+/* === 15. Media Queries ====================================== */
 
 @media (max-width: 767px) {
     .cy-side-menu {

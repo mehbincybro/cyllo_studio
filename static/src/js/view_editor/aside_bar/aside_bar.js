@@ -393,7 +393,8 @@ export class AsideBar extends Component {
             this.state.type === "text" ||
             this.state.type === "SmartButtonProperties" ||
             this.state.type === "KanbanFieldProperties" ||
-            this.state.type === "KanbanDivProperties"
+            this.state.type === "KanbanDivProperties" ||
+            this.state.type === "notebook_details"
         );
     }
 

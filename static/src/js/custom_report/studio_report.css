@@ -3171,7 +3171,7 @@ span.badge.rounded-pill.bg-primary {
     height: 0;
 }
 
-.cy-slider {
+/* .cy-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
@@ -3193,7 +3193,7 @@ span.badge.rounded-pill.bg-primary {
     background-color: white;
     border-radius: 50%;
     transition: .4s;
-}
+} */
 
 input:checked+.cy-slider {
     background-color: #9ea700;

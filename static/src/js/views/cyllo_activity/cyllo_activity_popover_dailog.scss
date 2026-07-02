@@ -1,24 +1,16 @@
-.studio_activity{
-    .custom-dropdown.o-autocomplete .d-flex input{
-        color:#000000 !important;
+.studio_activity {
+    .activity-add-custom-dropdown .custom-dropdown.o-autocomplete ul {
+        max-height: 220px !important;
+        height: auto !important;
+    }
+}
 
-    }
-    .activity-add-custom-dropdown .custom-dropdown.o-autocomplete ul{
-          position:fixed !important;
-          margin-top:0% !important;
-          max-height: 50% !important;
-          height: 20% !important;
-        }
-    }
-    .dropdown .dropdown-toggle.btn-link{
-        pointer-events: none !important;
-        }
-    .btn-link.text-dark {
+.dropdown .dropdown-toggle.btn-link,
+.btn-link.text-dark {
     pointer-events: none !important;
-    }
+}
 
-/* Inline activity editor rendered in the Studio aside bar.
-   Mirrors .cy-side-menu-inner so it matches the other property panels. */
+/* ── Inline activity editor (aside bar) ── */
 .cy-activity-aside {
     width: 320px;
     min-width: 320px;
@@ -29,8 +21,11 @@
     color: var(--text-color);
     border-radius: 8px;
 
-    &::-webkit-scrollbar { width: 0; }
+    &::-webkit-scrollbar {
+        width: 0;
+    }
 
+    /* Sticky tab header */
     .cy-tab-header {
         display: flex;
         align-items: center;
@@ -64,17 +59,204 @@
         height: 100%;
     }
 
-    /* Stack Field Customizer above Interactive Preview, fit the narrow panel. */
+    /* Stacked layout */
     .studio_activity {
         flex-direction: column;
-        padding: 16px;
-        gap: 16px;
+        gap: 0;
     }
 
     .cy-field__box {
         width: 100%;
     }
 
+    /* ── Sections ── */
+    .cy-activity-section {
+        padding: 16px 0;
+        border-top: 1px solid #3a3824;
+
+        &:first-child {
+            border-top: none;
+        }
+
+        /* Label above field */
+        .cy-navbar_label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.7px;
+            color: #8a8972;
+            margin-bottom: 6px;
+            margin-top: 0;
+        }
+
+        /* No extra bottom margin on dropdowns */
+        .cy-studio-custom-dropdown {
+            margin-bottom: 0;
+        }
+    }
+
+    /* Display + toggles grouped card */
+    .activity-edit-custom-dropdown {
+        background: #2a2c1e;
+        border-radius: 10px;
+        border: 1px solid #3a3824;
+        padding: 12px !important;
+
+        .cy-navbar_label {
+            color: #8a8972;
+            margin-bottom: 8px;
+        }
+
+        .cy-studio-custom-dropdown {
+            margin-bottom: 10px;
+        }
+
+        .cy-toggle-row {
+            padding: 6px 0;
+            border-top: 1px solid #3a3824;
+
+            &:first-of-type {
+                border-top: none;
+            }
+
+            .cy-toggle-label {
+                font-size: 13px;
+                color: #c8c7b0;
+                font-weight: 400;
+            }
+        }
+    }
+
+    /* Section title row (icon + text) */
+    .cy-activity-section-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 2px 0;
+    }
+
+    .cy-activity-header-icon {
+        font-size: 14px;
+        color: #9ea700;
+        padding: 5px;
+        border-radius: 6px;
+    }
+
+    .cy-activity-header-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e2e2e2;
+    }
+
+    /* Warning banner */
+    .cy-activity-warning-section {
+        padding: 8px 12px !important;
+        background: rgba(198, 184, 184, 0.05);
+        border-left: 3px solid #8a7a6a !important;
+        border-top: none !important;
+        margin: 0 16px;
+        border-radius: 0 6px 6px 0;
+    }
+
+    .cy-activity-warning-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 11.5px;
+        color: #a09880;
+        line-height: 1.5;
+
+        svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+            opacity: 0.7;
+        }
+    }
+
+    /* Add Field button */
+    .cy-activity-add-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        margin-top: 8px;
+        height: 36px;
+        background: #3a3e00;
+        color: #9ea700;
+        border: none;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+
+        &:hover {
+            background: #9ea700;
+            color: #fff;
+        }
+
+        i {
+            font-size: 15px;
+        }
+    }
+
+    /* Save / Discard / Delete row */
+    .cy-activity-action-btns {
+        display: grid;
+        grid-template-columns: 1fr 1.6fr 1fr;
+        gap: 6px;
+        width: 100%;
+    }
+
+    .cy-activity-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        padding: 8px 6px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s, border-color 0.15s;
+        white-space: nowrap;
+
+        i { font-size: 13px; }
+    }
+
+    .cy-activity-btn-save {
+        background: #3a3e00;
+        color: #9ea700;
+        border: none;
+        order: 2;
+
+        &:hover { background: #9ea700; color: #fff; }
+    }
+
+    .cy-activity-btn-discard {
+        background: transparent;
+        color: #bcbba7;
+        border: 1px solid #3a3824;
+        order: 1;
+
+        &:hover { color: #e2e2e2; border-color: #6b6a50; }
+    }
+
+    .cy-activity-btn-delete {
+        background: transparent;
+        color: #6b6a50;
+        border: 1px solid #3a3824;
+        order: 3;
+
+        &:hover {
+            background: rgba(255, 92, 92, 0.08);
+            color: #ff5c5c;
+            border-color: rgba(255, 92, 92, 0.4);
+        }
+    }
+
+    /* Preview section record list */
     .o_activity_record {
         width: 100% !important;
     }

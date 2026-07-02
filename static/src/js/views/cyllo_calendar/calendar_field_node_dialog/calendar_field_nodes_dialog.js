@@ -438,14 +438,7 @@ export class CalendarViewDialog extends CalendarCommonPopover {
      * Get currently active fields in the popover
      */
     get activeFields() {
-        const fields = Object.keys(this.props.model.popoverFieldNodes);
-        const filtered = Object.keys(this.props.model.fields)
-            .filter(item => fields.includes(item))
-            .reduce((acc, field) => {
-                acc[field] = this.props.model.fields[field];
-                return acc;
-            }, {});
-        return filtered;
+        return this.props.model.activeFields;
     }
     /**
      * Get mapping of properties fields to their definition records

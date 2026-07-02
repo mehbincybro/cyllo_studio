@@ -2392,10 +2392,17 @@ class StudioMode(Controller):
             str: XML snippet representing the page update.
         """
         View = request.env['ir.ui.view'].sudo()
+        groups_attr = ''
+        if kwargs.get('group_ids'):
+            group_ids = list(map(int, kwargs['group_ids']))
+            groups_attr = ','.join(
+                request.env['res.groups'].browse(group_ids).get_external_id().values()
+            )
         form_arch_base = f'<xpath expr="/{kwargs["path"]}" position="attributes">' \
                          f'<attribute name="string">{kwargs["string"]}</attribute>' \
                          f'<attribute name="autofocus">{"autofocus" if kwargs["autofocus"] else ""}</attribute>' \
                          f'<attribute name="invisible">{unescape(escape(kwargs["invisible"]))}</attribute>' \
+                         f'<attribute name="groups">{groups_attr}</attribute>' \
                          '</xpath>'
         val = self.create_invisible([kwargs])
         not_present_field = ''
