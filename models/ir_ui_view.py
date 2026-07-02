@@ -387,7 +387,7 @@ class Model(models.AbstractModel):
                                     }
                                     .page {
                                         word-wrap: break-word;
-                                        padding: 1 px;
+                                        padding: 15mm;
                                     }
                                     /* Ensure Bootstrap tables are visible and styled */
                                     table {
@@ -564,6 +564,46 @@ class Model(models.AbstractModel):
         head_content = etree.fromstring(head_content.encode())
         for child in head_content:
             head_el.append(child)
+
+        # ── Inject MediumEditor, SortableJS and editor extensions into iframe head ──
+        # These assets must run inside the iframe's own document so that
+        # MediumEditor, Sortable, SettingsButton, DeleteButton, UndoButton, RedoButton
+        # and click-handlers all work in the correct (iframe) window context.
+        try:
+            # Resolve Odoo's report CSS bundle to get the actual hashed URL(s).
+            # This mirrors what t-call-assets="web.report_assets_common" t-js="false" does.
+            report_css_links = ''
+            try:
+                bundle = self.env['ir.qweb']._get_asset_bundle('web.report_assets_common')
+                if bundle:
+                    css_url = bundle.get_links().get('css')
+                    if css_url:
+                        report_css_links = f'<link rel="stylesheet" href="{css_url}"/>'
+            except Exception as css_err:
+                _logger.debug('[Cyllo Studio] Could not resolve report CSS bundle: %s', css_err)
+
+            asset_links = f"""<data>
+                {report_css_links}
+                <link rel="stylesheet" href="/cyllo_base/static/src/font/remixicon.css"/>
+                <link rel="stylesheet" href="/cyllo_studio/static/src/js/custom_report/studio_report.css"/>
+                <link rel="stylesheet" href="/cyllo_studio/static/src/lib/medium_editor/medium-editor.min.css"/>
+                <link rel="stylesheet" href="/cyllo_studio/static/src/lib/medium_editor/default.min.css"/>
+                <script src="/cyllo_studio/static/src/lib/sortablejs/Sortable.min.js"></script>
+                <script src="/cyllo_studio/static/src/lib/medium_editor/medium-editor.min.js"></script>
+                <script src="/cyllo_studio/static/src/lib/medium_editor/studio-editor-undo-redo-ext.js"></script>
+                <script>
+                    // Signal to the host that iframe assets are ready
+                    window.addEventListener('load', function() {{
+                        window._cylloIframeReady = true;
+                        window.parent.postMessage({{ type: 'cyllo-iframe-ready' }}, '*');
+                    }});
+                </script>
+            </data>"""
+            asset_doc = etree.fromstring(asset_links.encode())
+            for child in asset_doc:
+                head_el.append(child)
+        except Exception as e:
+            _logger.warning('[Cyllo Studio] Could not inject iframe assets: %s', e)
 
         # ── Preserve <t> QWeb tags through the HTML parse ──────────────────────
         # lxml's HTML parser does not know about <t> and silently strips the tags

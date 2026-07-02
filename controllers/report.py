@@ -255,6 +255,22 @@ class StudioReportController(Controller):
 
         except Exception as e:
             return {'success': False, 'error': str(e)}
+
+    @route('/cyllo_studio/edit_canvas/<template>', auth='user', type='http')
+    def edit_canvas(self, template, **kwargs):
+        """
+        Return the full rendered HTML document for the Studio editor iframe.
+        """
+        try:
+            view = request.env.ref(template, raise_if_not_found=False)
+            if not view:
+                return request.make_response("Template not found", status=404)
+            
+            html_content = view.get_iframe_rendered_template(template)
+            return request.make_response(html_content, headers=[('Content-Type', 'text/html')])
+        except Exception as e:
+            return request.make_response(f"Error loading canvas: {str(e)}", status=500)
+            
     @route('/cyllo_studio/save_company_footer', type='json', auth='user')
     def save_company_footer(self, company_id, footer_text):
         """Save the company report footer with sudo to prevent access errors."""
@@ -380,7 +396,8 @@ class StudioReportController(Controller):
                 return {'success': False, 'error': f'Report {template!r} not found'}
 
             # Fetch recent records from the target model
-            records = request.env[res_model].search([], limit=80)
+            # .exists() strips any records whose DB row has been deleted since the search
+            records = request.env[res_model].search([], limit=80).exists()
 
             # Fetch available paper formats with dimensions
             paper_formats = request.env['report.paperformat'].search_read(
@@ -439,7 +456,24 @@ class StudioReportController(Controller):
             if not report.exists():
                 return {'success': False, 'error': 'Report not found'}
 
-            ids_str = ','.join(str(i) for i in doc_ids)
+            # Verify that the requested document records still exist in the DB.
+            # If the record was deleted after the preview list loaded, .exists()
+            # returns an empty recordset — return a structured error so the
+            # frontend can skip it gracefully instead of letting a MissingError
+            # bubble up as an uncaught exception and an Odoo error page.
+            model = report.model
+            existing = request.env[model].browse(doc_ids).exists()
+            if not existing:
+                return {
+                    'success': False,
+                    'error': 'record_missing',
+                    'message': (
+                        'The selected record no longer exists in the database. '
+                        'It may have been deleted. Skipping to the next record.'
+                    ),
+                }
+
+            ids_str = ','.join(str(i) for i in existing.ids)
             preview_url = f'/report/html/{report.report_name}/{ids_str}'
             return {'success': True, 'preview_url': preview_url}
         except Exception as e:
