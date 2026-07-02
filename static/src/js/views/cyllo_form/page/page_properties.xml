@@ -26,10 +26,11 @@
 
             <div class="mb-2" style="margin-top: 20px;">
                 <label class="cy-navbar_label">Page Visible To</label>
-                <div class="cy-input multi-selector-container">
-                    <MultiRecordSelector resIds="state.group_ids"
-                                         resModel="'res.groups'"
-                                         update="(group_ids)=> state.group_ids = group_ids"/>
+                <div class="cy-studio-custom-dropdown cy-studio-visible-to-drop-align">
+                    <MultiSelectDropDown
+                        allValues="groupsAllValues"
+                        selectedValues="groupsSelectedValues"
+                        onUpdate="(v) => this.updateGroupIds(v)"/>
                 </div>
             </div>
 

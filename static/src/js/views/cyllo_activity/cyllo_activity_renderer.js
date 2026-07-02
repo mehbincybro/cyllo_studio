@@ -3,7 +3,6 @@ import { ActivityRenderer } from "@mail/views/web/activity/activity_renderer";
 import { CylloActivityRecord } from "./cyllo_activity_record";
 import { Component, onMounted, useState, onWillUnmount,onWillDestroy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { ActivityPopover } from "@cyllo_studio/js/views/cyllo_activity/cyllo_activity_popover_dailog";
 import { getFormattedRecord, getImageSrcFromRecordInfo, isHtmlEmpty } from "@web/views/kanban/kanban_record";
 
 /**
@@ -17,8 +16,6 @@ export class CylloActivityRenderer extends ActivityRenderer {
 		super.setup();
 		this.rpc = useService('rpc');
 		this.action = useService("action");
-		this.dialog = useService("dialog");
-        this._openDialog = this._openDialog.bind(this);
 
 		onMounted(async() => {
 		    this.env.bus.trigger("ACTIVITY_DETAILS", {
@@ -31,33 +28,13 @@ export class CylloActivityRenderer extends ActivityRenderer {
 				activityResIds: this.props.activityResIds,
 				records: this.props.records,
 			});
-			const recordId = sessionStorage.getItem('ActivityRecordId')
-            if (recordId && parseInt(recordId) === this.props.records[0].resId) {
-                sessionStorage.removeItem('ActivityRecordId')
-                this._openDialog();
-            }
-            this.env.bus.addEventListener('showActivityEdits', this._openDialog)
+            // Clear stale session record so no modal is re-opened on reload
+            sessionStorage.removeItem('ActivityRecordId');
 		});
-		onWillUnmount(() => {
-                this.env.bus.removeEventListener('showActivityEdits', this._openDialog)
-            });
-        onWillDestroy(()=>{
-            this.env.bus.trigger("ACTIVITY_REMOVED", {
-                activity:false
-            })
-          })
-	}
-	_openDialog() {
-    this.dialog.add(ActivityPopover, {
-            archInfo: this.props.archInfo,
-            model: this.props.resModel,
-            viewId: this.env.config.viewId,
-            viewType: this.env.config.viewType,
-            fields: this.props.fields,
-            activityResIds: this.props.activityResIds,
-            records: this.props.records,
+        onWillDestroy(() => {
+            this.env.bus.trigger("ACTIVITY_REMOVED", { activity: false });
         });
-}
+	}
 
 	/**
      * Show a temporary highlight message for the edit button

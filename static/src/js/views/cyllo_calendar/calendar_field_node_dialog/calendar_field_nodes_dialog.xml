@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="cyllo_studio.CalendarViewDialog">
         <CalendarDialogBox title="'Calendar'" header="true" footer="false">
@@ -65,7 +65,7 @@ Add Field
                                     </div>
                                 </div>
                                 <div class="w-100 d-flex">
-                                    <div style="width:25%;" class="mb-2">
+                                    <div style="width:25%;" class="mb-2 position-relative">
                                         <div class="align-items-center gap-2">
                                             <label for="" class="cy-navbar_label">Icon</label>
                                             <div class="form-control text-center d-flex cursor-pointer w-25 " style="align-items: center;height: 33px; width:100% !important;">
@@ -73,7 +73,7 @@ Add Field
                                                 <i t-if="state.item.options.icon" class="align-self-center text-danger ri-close-circle-fill ri-lg" t-on-click="()=>state.item.options.icon=''"/>
                                             </div>
                                         </div>
-                                        <div class="modal-content cy-sheet_icon-selectBox position-absolute overflow-auto z-index-1 w-75" style="min-height:20vh !important; height:25vh !important; overflow: scroll !important;" t-att-class="state.iconToggle ? '':'d-none'">
+                                        <div class="modal-content cy-sheet_icon-selectBox overflow-auto z-index-1" style="min-height:20vh !important; height:25vh !important; overflow: scroll !important;" t-att-class="state.iconToggle ? '':'d-none'">
                                             <div class="justify-content-between p-3 border-bottom cy-sheet_selection-box-head d-flex align-items-center">
                                                 <h5 class=" cy-sheet_selection-heading-txt">Select Icon</h5>
                                                 <span class="cy-icons cy-social_cmnt-closebtn cursor-pointer opacity-75-hover" t-on-click="()=>state.iconToggle = false">
@@ -105,7 +105,8 @@ Add Field
                                 <div t-if="['many2one', 'one2many', 'many2many'].includes(state.item.type)
                                           and state.avatarFields
                                           and Object.keys(state.avatarFields).length > 0" class="mb-2">
-                                    <!--								<div t-if="['many2one', 'one2many', 'many2many'].includes(state.item.type)"-->
+                                    <!--								<div t-if="['many2one', 'one2many',
+                                    'many2many'].includes(state.item.type)"-->
                                     <!-- class="mb-2">-->
                                     <label for="" class="cy-navbar_label">Avatar Field</label>
                                     <div class="form-control">
@@ -129,16 +130,19 @@ Add Field
                                 <!-- @todo:- check the functionality of commented attributes -->
                                 <!--                         <div t-if="state.item.type === 'many2many'" class="mb-2">-->
                                 <!--                            <label for="" class="cy-navbar_label">Write Model</label>-->
-                                <!--                            <input class="form-control" t-model="state.item.attrs.write_model"/>-->
+                                <!--                            <input class="form-control"
+                                t-model="state.item.attrs.write_model"/>-->
                                 <!--                        </div>-->
                                 <!--                        <t t-if="state.item.attrs.write_model">-->
                                 <!--                            <div class="mb-2">-->
                                 <!--                                <label for="" class="cy-navbar_label">Write Field</label>-->
-                                <!--                                <input class="form-control" t-model="state.item.attrs.write_field"/>-->
+                                <!--                                <input class="form-control"
+                                t-model="state.item.attrs.write_field"/>-->
                                 <!--                            </div>-->
                                 <!--                             <div class="mb-2">-->
                                 <!--                                <label for="" class="cy-navbar_label">Filter Field</label>-->
-                                <!--                                <input class="form-control" t-model="state.item.attrs.filter_field"/>-->
+                                <!--                                <input class="form-control"
+                                t-model="state.item.attrs.filter_field"/>-->
                                 <!--                            </div>-->
                                 <!--                        </t>-->
                                 <div class="d-flex gap-2">
@@ -171,40 +175,42 @@ Add Field
                                 <i class="ri-gallery-fill cy-content-header-icon"/>
                                 <h3 class="cy-content_header">Preview</h3>
                             </div>
-                            <ul class="list-group list-group-flush">
-                                <li t-if="date" class="list-group-item">
-                                    <i class="fa fa-fw fa-calendar text-400"/>
-                                    <span class="fw-bold ms-2" t-esc="date"/>
-                                    <small t-if="dateDuration != 'All day'">
-                                        <b t-esc="dateDuration"/>
-                                    </small>
-                                </li>
-                                <li t-if="time" class="list-group-item">
-                                    <i class="fa fa-fw fa-clock-o text-400"/>
-                                    <span class="fw-bold ms-2" t-esc="time"/>
-                                    <small t-if="timeDuration">
-                                        <b t-esc="`(${timeDuration})`"/>
-                                    </small>
-                                </li>
-                            </ul>
-                            <ul class="list-group list-group-flush o_cw_popover_fields_secondary" style="max-height: 60vh !important">
-                                <div class="pe-none" t-foreach="Object.keys(props.model.popoverFieldNodes)" t-as="fieldId" t-key="fieldId">
-                                    <t t-set="fieldInfo" t-value="props.model.popoverFieldNodes[fieldId]"/>
-                                    <li t-if="!isInvisible(fieldInfo, slot.record) or state.showInvisible" class="list-group-item flex-shrink-0 d-flex flex-wrap align-items-start my-1" t-att-class="fieldInfo.attrs.class + (isInvisible(fieldInfo, slot.record) and state.showInvisible ? ' cy-studio-striped' : '')">
-                                        <span class="fw-bold me-2" t-if="!fieldInfo.options.noLabel">
-                                            <t t-if="fieldInfo.options.icon">
-                                                <i t-attf-class="fa-fw {{fieldInfo.options.icon}} text-400"/>
-                                            </t>
-                                            <t t-else="">
-                                                <t t-esc="fieldInfo.string"/>
-                                            </t>
-                                        </span>
-                                        <div class="flex-grow-1">
-                                            <Field name="fieldInfo.name" record="slot.record" fieldInfo="fieldInfo" type="fieldInfo.widget"/>
-                                        </div>
-                                    </li>
+                            <div class="cy-calendar-event-card">
+                                <div class="cy-card-header">
+                                    <span class="cy-card-title" t-esc="props.record.title || 'Event'"/>
                                 </div>
-                            </ul>
+                                <div class="cy-card-body">
+                                    <div t-if="date" class="cy-card-row">
+                                        <i class="fa fa-fw fa-calendar cy-card-icon"/>
+                                        <span t-esc="date"/>
+                                        <small t-if="dateDuration and dateDuration != 'All day'" class="ms-1 cy-card-duration" t-esc="dateDuration"/>
+                                    </div>
+                                    <div t-if="time" class="cy-card-row">
+                                        <i class="fa fa-fw fa-clock-o cy-card-icon"/>
+                                        <span t-esc="time"/>
+                                        <small t-if="timeDuration" class="ms-1 cy-card-duration" t-esc="`(${timeDuration})`"/>
+                                    </div>
+                                    <div class="pe-none">
+                                        <t t-foreach="Object.keys(props.model.popoverFieldNodes)" t-as="fieldId" t-key="fieldId">
+                                            <t t-set="fieldInfo" t-value="props.model.popoverFieldNodes[fieldId]"/>
+                                            <div t-if="!isInvisible(fieldInfo, slot.record) or state.showInvisible"
+                                                 class="cy-card-row"
+                                                 t-att-class="isInvisible(fieldInfo, slot.record) and state.showInvisible ? 'cy-studio-striped' : ''">
+                                                <t t-if="fieldInfo.options.icon">
+                                                    <i t-attf-class="fa fa-fw {{fieldInfo.options.icon}} cy-card-icon"/>
+                                                </t>
+                                                <t t-else="">
+                                                    <i class="fa fa-fw cy-card-icon"/>
+                                                </t>
+                                                <span t-if="!fieldInfo.options.noLabel" class="cy-card-label fw-bold me-2" t-esc="fieldInfo.string"/>
+                                                <div class="flex-grow-1">
+                                                    <Field name="fieldInfo.name" record="slot.record" fieldInfo="fieldInfo" type="fieldInfo.widget"/>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </Record>
                 </div>

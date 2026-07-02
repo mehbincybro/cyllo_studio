@@ -44,6 +44,7 @@ $placeholder-color: #757575;
       color: rgba(0, 0, 0, 0.87);
       outline: none;
       background: transparent;
+      padding-top: 2px !important;
 
       &::placeholder {
         color: $placeholder-color;
@@ -97,6 +98,8 @@ $placeholder-color: #757575;
   margin-bottom: 1rem;
   padding: 0.315rem 10px;
   min-height: 35.56px;
+  cursor: pointer;
+  
 
   div.d-flex {
     background-color: transparent !important;
@@ -294,17 +297,29 @@ $placeholder-color: #757575;
 .cy-activity-dropdown {
   .custom-dropdown.o-autocomplete {
     .o-autocomplete--dropdown-menu {
-      background-color: #ffffff;
+      background-color: var(--custom-dropdown-bg) !important;
       top: unset !important;
-      left: unset !important;
-      margin-top: unset !important;
-      border: 1px solid #e2e2e2;
+      left: 0 !important;
+      margin-top: 4px !important;
+      border: 1px solid var(--input-border-color) !important;
       position: absolute !important;
-      width: 237px;
-      max-height: 40%;
+      width: 100% !important;
+      max-height: 220px;
+      overflow-y: auto;
       margin-left: 0;
       z-index: 99999 !important;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+      a {
+        color: var(--text-color) !important;
+      }
+
+      .o-autocomplete--dropdown-item a:hover,
+      .o-autocomplete--dropdown-item a.ui-state-active {
+        color: #9ea700 !important;
+        background: transparent !important;
+      }
     }
   }
 }

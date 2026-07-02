@@ -11,7 +11,7 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { evaluateBooleanExpr } from "@web/core/py_js/py";
 import { Field } from "@web/views/fields/field";
 import { Record } from "@web/model/record";
-import { Component, useExternalListener, onMounted, onWillStart, useState ,onWillDestroy} from "@odoo/owl";
+import { Component, useExternalListener, onMounted, onWillStart, useState, onWillDestroy } from "@odoo/owl";
 import { useViewCompiler } from "@web/views/view_compiler";
 import { CylloActivityCompiler } from "./cyllo_activity_compiler";
 import { Select } from "@web/core/tree_editor/tree_editor_components";
@@ -40,15 +40,15 @@ export class ActivityPopover extends Component {
 			widget: false
 		})
 
-        onWillDestroy(() => {
-            if (this.save) {
-            sessionStorage.setItem('ActivityRecordId', this.props.records[0]?.resId);
-            }
-            if (this.props.updateState) {
-                    this.props.updateState("editButton", true);
-                    this.props.updateState("edit", false);
-            }
-            });
+		onWillDestroy(() => {
+			if (this.save) {
+				sessionStorage.setItem('ActivityRecordId', this.props.records[0]?.resId);
+			}
+			if (this.props.updateState) {
+				this.props.updateState("editButton", true);
+				this.props.updateState("edit", false);
+			}
+		});
 
 
 		const { templateDocs } = this.props.archInfo;
@@ -56,68 +56,68 @@ export class ActivityPopover extends Component {
 		this.recordTemplate = templates["activity-box"];
 
 		onMounted(() => {
-    const self = this;
-    const container = document.querySelector(".cy-activity")
-        .closest('.o_activity_record')
-        .querySelector(':scope > * > * > *');
-    const dBlockElements = container.querySelectorAll(".d-block");
+			const self = this;
+			const container = document.querySelector(".cy-activity")
+				.closest('.o_activity_record')
+				.querySelector(':scope > * > * > *');
+			const dBlockElements = container.querySelectorAll(".d-block");
 
-    dBlockElements.forEach(element => {
-        const cyXpath = element.getAttribute("cy-xpath");
-    });
+			dBlockElements.forEach(element => {
+				const cyXpath = element.getAttribute("cy-xpath");
+			});
 
-    // Destroy existing sortable if any
-    const existingSortable = Sortable.get(container);
-    if (existingSortable) existingSortable.destroy();
+			// Destroy existing sortable if any
+			const existingSortable = Sortable.get(container);
+			if (existingSortable) existingSortable.destroy();
 
-    Sortable.create(container, {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
+			Sortable.create(container, {
+				animation: 150,
+				ghostClass: 'sortable-ghost',
 
-        onEnd: async function(evt) {
-            const el = evt.item;
-            const path = el.getAttribute("cy-xpath");
-            const parent = container.getAttribute("cy-xpath");
+				onEnd: async function (evt) {
+					const el = evt.item;
+					const path = el.getAttribute("cy-xpath");
+					const parent = container.getAttribute("cy-xpath");
 
-            // Get the sibling that is now after the dropped element
-            const sibling = el.nextElementSibling || null;
-            const sibling_path = sibling?.getAttribute("cy-xpath") || null;
-            sibling_path || el.previousElementSibling?.getAttribute("cy-xpath");
-            const position = sibling_path ? "before" : "after";
+					// Get the sibling that is now after the dropped element
+					const sibling = el.nextElementSibling || null;
+					const sibling_path = sibling?.getAttribute("cy-xpath") || null;
+					sibling_path || el.previousElementSibling?.getAttribute("cy-xpath");
+					const position = sibling_path ? "before" : "after";
 
-            self.env.services.ui.block();
-            try {
-                const response = await self.rpc("cyllo_studio/activity/move/field", {
-                    method: 'move_activity_field',
-                    view_id: self.props.viewId,
-                    model: self.props.model,
-                    path,
-                    position,
-                    sibling_path,
-                    parent,
-                });
-                if (response) {
-                    handleUndoRedo(response);
-                }
-            } finally {
-                self.env.services.ui.unblock();
-            }
-            self.save = true;
-            self.env.bus.trigger("RENDER_LOAD");
-        },
-    });
-})
+					self.env.services.ui.block();
+					try {
+						const response = await self.rpc("cyllo_studio/activity/move/field", {
+							method: 'move_activity_field',
+							view_id: self.props.viewId,
+							model: self.props.model,
+							path,
+							position,
+							sibling_path,
+							parent,
+						});
+						if (response) {
+							handleUndoRedo(response);
+						}
+					} finally {
+						self.env.services.ui.unblock();
+					}
+					self.save = true;
+					self.env.bus.trigger("RENDER_LOAD");
+				},
+			});
+		})
 		this.env.bus.addEventListener('ActivityFieldDetails', (ev) => {
 			this.state.widget = ev.detail.widget
 			this.state.editable = true
 			this.state.attribute = ev.detail.attributes,
-            this.state.fieldName = ev.detail.fieldName,
-            this.state.path = ev.detail.path
+				this.state.fieldName = ev.detail.fieldName,
+				this.state.path = ev.detail.path
 		});
 	}
 
 	get activityProps() {
-	    state: this.state
+		state: this.state
 	}
 
 	get allFields() {
@@ -132,7 +132,7 @@ export class ActivityPopover extends Component {
 	}
 
 	get fieldsDisplay() {
-		return [{ label: 'full', value: 'full'}, { label: 'right', value: 'right' }, { label: 'left', value: 'left' }];
+		return [{ label: 'full', value: 'full' }, { label: 'right', value: 'right' }, { label: 'left', value: 'left' }];
 	}
 
 	get displayValue() {
@@ -140,19 +140,42 @@ export class ActivityPopover extends Component {
 	}
 
 	updatedFieldDisplay(v) {
-		this.state.selectedFieldAttribute = v
+		this.state.selectedFieldAttribute = v;
+		this.autoSave();
 	}
 
 	handleFieldBold(ev) {
 		this.state.attribute.bold = ev.target.checked;
+		this.autoSave();
 	}
 
 	handleFieldMuted(ev) {
 		this.state.attribute.muted = ev.target.checked;
+		this.autoSave();
 	}
 
-	onDiscard(){
-	    this.state.editable = false;
+	async autoSave() {
+		try {
+			const response = await this.rpc("cyllo_studio/activity/save/field", {
+				view_id: this.props.viewId,
+				model: this.props.model,
+				fieldDisplay: this.state.selectedFieldAttribute || this.state.attribute?.display,
+				fieldBold: this.state.attribute.bold === "False" ? 'false' : this.state.attribute.bold,
+				fieldMuted: this.state.attribute.muted,
+				path: this.state.path,
+			});
+			if (response) {
+				handleUndoRedo(response);
+			}
+		} catch (e) {
+			// silent — user can still click Save manually
+		}
+		this.save = true;
+		this.env.bus.trigger("RENDER_LOAD");
+	}
+
+	onDiscard() {
+		this.state.editable = false;
 	}
 
 	async onSave() {
@@ -167,14 +190,14 @@ export class ActivityPopover extends Component {
 				path: this.state.path,
 			});
 			if (response) {
-				handleUndoRedo(response)
+				handleUndoRedo(response);
 			}
 		} finally {
 			this.env.services.ui.unblock();
 		}
-        this.action.doAction("studio_reload");
-        this.save=true
+		this.save = true;
 		this.state.editable = false;
+		this.env.bus.trigger("RENDER_LOAD");
 	}
 
 	async onDelete() {
@@ -197,8 +220,8 @@ export class ActivityPopover extends Component {
 		} finally {
 			this.env.services.ui.unblock();
 		}
-        this.action.doAction("studio_reload");
-        this.save=true
+		this.action.doAction("studio_reload");
+		this.save = true
 		this.state.editable = false;
 	}
 
@@ -229,8 +252,8 @@ export class ActivityPopover extends Component {
 			handleUndoRedo(response)
 		}
 		this.save = true
-        this.env.bus.trigger("RENDER_LOAD");
-//        this.action.doAction("studio_reload");
+		this.env.bus.trigger("RENDER_LOAD");
+		//        this.action.doAction("studio_reload");
 	}
 }
 

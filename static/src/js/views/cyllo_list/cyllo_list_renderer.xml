@@ -160,21 +160,27 @@
             <!-- Removed the multi selection checkbox-->
             <t t-foreach="getColumns(record)" t-as="column" t-key="column.id">
                 <t t-if="column.type === 'field'">
+                    <t t-set="isArchInvisible"
+                       t-value="evalInvisible(column.invisible, record)"/>
+                    <t t-set="isColInvisible"
+                       t-value="column.column_invisible and column.column_invisible !== 'false'"/>
                     <t t-set="isInvisible"
-                       t-value="evalInvisible(column.invisible, record) or !(column.name in record.data)"/>
+                       t-value="isArchInvisible or !(column.name in record.data)"/>
                     <td t-on-keydown="(ev) => this.onCellKeydown(ev, group, record)"
-                         t-att-class="getCellClass(column, record) + (column.optional === 'hide' ? ' cy-studio-optional' : ((isInvisible or (column.column_invisible and column.column_invisible !== 'false')) ? ' cy-studio-striped' : ''))"
+                         t-att-class="getCellClass(column, record) + (column.optional === 'hide' ? ' cy-studio-optional' : (isColInvisible ? ' cy-studio-striped' : ''))"
                         class="o_data_cell cursor-pointer" t-on-click="(ev) => this.listFieldDetails(ev,column)"
                         t-att-name="column.name" t-att-colspan="column.colspan"
                         t-att-data-tooltip="!isInvisible ? getCellTitle(column, record) : false"
                         data-tooltip-delay="1000" tabindex="-1" t-att-cy-xpath="column.MainPath"
                         t-on-mouseenter="(e)=>this.onMouseHover(e)">
-                        <t t-if="!isInvisible">
-                            <t t-if="canUseFormatter(column, record)" t-out="getFormattedValue(column, record)"/>
-                            <Field t-else="" name="column.name" record="record" type="column.widget"
-                                   class="getFieldClass(column)" fieldInfo="column"
-                                   t-props="getFieldProps(record, column)"/>
-                        </t>
+                        <div t-att-class="isArchInvisible ? 'cy-studio-cell-invisible' : ''">
+                            <t t-if="!isInvisible">
+                                <t t-if="canUseFormatter(column, record)" t-out="getFormattedValue(column, record)"/>
+                                <Field t-else="" name="column.name" record="record" type="column.widget"
+                                       class="getFieldClass(column)" fieldInfo="column"
+                                       t-props="getFieldProps(record, column)"/>
+                            </t>
+                        </div>
                     </td>
                 </t>
                 <t t-if="column.type === 'button_group'">

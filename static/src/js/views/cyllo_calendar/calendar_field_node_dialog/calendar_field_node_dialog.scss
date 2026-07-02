@@ -38,13 +38,39 @@
     width: 85%;
 }
 
-.cy-studio-custom-dropdown-dialog-calendar .d-flex {
-    width: 100%;
-    border: 1px solid #dfdfdf !important;
-    border-radius: 3px;
-    margin-bottom: 0.5rem;
-    padding: 0.25rem;
-    height: 35px;
+.cy-studio-custom-dropdown-dialog-calendar {
+    position: relative;
+
+    .d-flex {
+        width: 100%;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        padding: 0.25rem;
+        padding-left: 8px;
+        padding-right: 12px;
+        height: 35px;
+        align-items: center !important;
+    }
+
+    .custom-dropdown.o-autocomplete {
+        position: relative;
+
+        .o-autocomplete--dropdown-menu {
+            position: absolute !important;
+            top: 100% !important;
+            left: 0 !important;
+            width: 100% !important;
+            min-width: 100% !important;
+            max-height: 240px !important;
+            overflow-y: auto !important;
+            background: white !important;
+            z-index: 9999 !important;
+            border: 1px solid var(--border-color) !important;
+            border-radius: 4px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+    }
 }
 
 .cy-studio-calendar-popup .cy-sheet_icon-selectBox {
@@ -53,7 +79,7 @@
 }
 
 .cy-studio-calendar-popup .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
-    position: relative !important;
+    position: absolute !important;
     top: 100% !important;
     left: 0 !important;
     width: 100% !important;
@@ -62,6 +88,7 @@
     overflow-y: auto !important;
     background: white !important;
     z-index: 999999 !important;
+    border: 1px solid var(--border-color) !important;
 }
 
 
@@ -102,7 +129,109 @@
     background-color: white;
 }
 
+.cy-calendar-event-card {
+    border-radius: 8px;
+    background: #fff;
+    overflow: hidden;
+    border: 1px solid #e5e5e5;
+    min-width: 220px;
+
+    .cy-card-header {
+        background-color: #fde8e4;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        .cy-card-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+        }
+
+        .cy-card-close {
+            color: #888;
+            font-size: 12px;
+            cursor: default;
+            line-height: 1;
+        }
+    }
+
+    .cy-card-body {
+        padding: 10px 14px;
+
+        .cy-card-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 6px;
+            padding: 3px 0;
+            font-size: 13px;
+            color: #333;
+
+            .cy-card-icon {
+                color: #888;
+                font-size: 13px;
+                margin-top: 2px;
+                flex-shrink: 0;
+                width: 16px;
+                text-align: center;
+            }
+
+            .cy-card-label {
+                font-size: 13px;
+                color: #333;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .cy-card-duration {
+                color: #888;
+                font-size: 12px;
+            }
+        }
+    }
+
+    .cy-card-footer {
+        padding: 8px 14px 12px;
+        display: flex;
+        gap: 8px;
+        border-top: 1px solid #f0f0f0;
+
+        .cy-card-btn-edit {
+            background-color: #7c8c2c;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 5px 16px;
+            font-size: 13px;
+            cursor: default;
+        }
+
+        .cy-card-btn-delete {
+            background-color: #fff;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 5px 16px;
+            font-size: 13px;
+            cursor: default;
+        }
+    }
+}
+
 .cy-studio-calendar_field_node_dialog {
+    .cy-sheet_icon-selectBox {
+        position: absolute !important;
+        top: calc(100% + 4px) !important;
+        left: 0 !important;
+        width: 380% !important;
+        z-index: 9999 !important;
+        background: white !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    }
+
     .cy-navbar_label {
         color: #495057 !important;
     }
@@ -114,6 +243,8 @@
 
     .form-control {
         position: relative !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 8px !important;
 
 
         .dropdown .d-block {

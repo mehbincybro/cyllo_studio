@@ -7,75 +7,53 @@
             </div>
             <div class="list-container">
                 <div class="list-checkbox-group studioTree">
-                    <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck" id="canCreate" type="checkbox" name="create" style="display: none;" t-model="props.mode.activeActions.create" t-on-click="(ev)=> this.props.handleView('create',!props.mode.activeActions.create)"/>
-                        <label class="checkbox-label" for="canCreate">
-                            <span class="checkbox-indicator">
-                                <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                    <polyline points="1 5 4 8 11 1"></polyline>
-                                </svg>
-                            </span>
-                            <span class="label-text">Can Create</span>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Create</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.create"
+                                t-on-click="(ev)=> this.props.handleView('create',!props.mode.activeActions.create)"/>
+                            <span class="cy-slider"/>
                         </label>
                     </div>
-                    <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck" type="checkbox" id="canEdit" name="edit" style="display: none;" t-model="props.mode.activeActions.edit" t-on-click="(ev)=> this.props.handleView('edit',!props.mode.activeActions.edit)"/>
-                        <label class="checkbox-label" for="canEdit">
-                            <span class="checkbox-indicator">
-                                <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                    <polyline points="1 5 4 8 11 1"></polyline>
-                                </svg>
-                            </span>
-                            <span class="label-text">Can Edit</span>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Edit</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.edit"
+                                t-on-click="(ev)=> this.props.handleView('edit',!props.mode.activeActions.edit)"/>
+                            <span class="cy-slider"/>
                         </label>
                     </div>
-                    <div class="checkbox-item">
-                        <input class="checkbox-input ViewCheck d-none" type="checkbox" id="canDelete" name="delete" t-model="props.mode.activeActions.delete" t-on-click="(ev)=> this.props.handleView('delete',!props.mode.activeActions.delete)"/>
-                        <label class="checkbox-label" for="canDelete">
-                            <span class="checkbox-indicator">
-                                <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                    <polyline points="1 5 4 8 11 1"></polyline>
-                                </svg>
-                            </span>
-                            <span class="label-text">Can Delete</span>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Can Delete</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-model="props.mode.activeActions.delete"
+                                t-on-click="(ev)=> this.props.handleView('delete',!props.mode.activeActions.delete)"/>
+                            <span class="cy-slider"/>
                         </label>
                     </div>
-                    <div class="checkbox-item">
-                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showInvisibleElements" t-att-checked="props.showInvisible" t-on-click="(ev)=> this.props.showInvisibleFields(ev)" name="checkbox4"/>
-                        <label class="checkbox-label" for="showInvisibleElements">
-                            <span class="checkbox-indicator">
-                                <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                    <polyline points="1 5 4 8 11 1"></polyline>
-                                </svg>
-                            </span>
-                            <span class="label-text">Show Invisible
-                                    Elements
-                            </span>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Show Invisible Elements</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-att-checked="props.showInvisible"
+                                t-on-click="(ev)=> this.props.showInvisibleFields(ev)"/>
+                            <span class="cy-slider"/>
                         </label>
                     </div>
-                    <div class="checkbox-item">
-                        <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showOptionalFields" t-att-checked="props.showOptional" t-on-click="(ev)=> this.props.showOptionalFields(ev)" name="checkbox6"/>
-                        <label class="checkbox-label" for="showOptionalFields">
-                            <span class="checkbox-indicator">
-                                <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                    <polyline points="1 5 4 8 11 1"></polyline>
-                                </svg>
-                            </span>
-                            <span class="label-text">Show Optional
-                                    Fields
-                            </span>
+                    <div class="cy-toggle-row">
+                        <span class="cy-toggle-label">Show Optional Fields</span>
+                        <label class="cy-switch">
+                            <input type="checkbox" t-att-checked="props.showOptional"
+                                t-on-click="(ev)=> this.props.showOptionalFields(ev)"/>
+                            <span class="cy-slider"/>
                         </label>
                     </div>
                     <t t-if="props.mode.activeActions.edit">
-                        <div class="checkbox-item">
-                            <input class="checkbox-input d-none ViewCheck" type="checkbox" id="massEdit" name="checkbox5" t-model="props.mode.multiEdit" t-on-click="(ev)=> this.props.handleView('multi_edit',!props.mode.multiEdit)"/>
-                            <label class="checkbox-label" for="massEdit">
-                                <span class="checkbox-indicator">
-                                    <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                        <polyline points="1 5 4 8 11 1"></polyline>
-                                    </svg>
-                                </span>
-                                <span class="label-text">Mass Edit</span>
+                        <div class="cy-toggle-row">
+                            <span class="cy-toggle-label">Mass Edit</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.multiEdit"
+                                    t-on-click="(ev)=> this.props.handleView('multi_edit',!props.mode.multiEdit)"/>
+                                <span class="cy-slider"/>
                             </label>
                         </div>
                     </t>
@@ -145,17 +123,12 @@
                             </div>
                         </t>
 
-                        <div class="checkbox-item" t-if="defaultPosition">
-                            <input class="checkbox-input d-none ViewCheck" type="checkbox" id="showLink" name="checkbox6" t-model="props.mode.openFormView" t-on-click="(ev) => this.props.handleView('open_form_view', !props.mode.openFormView)"/>
-                            <label class="checkbox-label" for="showLink">
-                                <span class="checkbox-indicator">
-                                    <svg width="12px" height="9px" viewbox="0 0 12 9">
-                                        <polyline points="1 5 4 8 11 1"></polyline>
-                                    </svg>
-                                </span>
-                                <span class="label-text">Show Link To
-                                        Record
-                                </span>
+                        <div class="cy-toggle-row" t-if="defaultPosition">
+                            <span class="cy-toggle-label">Show Link To Record</span>
+                            <label class="cy-switch">
+                                <input type="checkbox" t-model="props.mode.openFormView"
+                                    t-on-click="(ev) => this.props.handleView('open_form_view', !props.mode.openFormView)"/>
+                                <span class="cy-slider"/>
                             </label>
                         </div>
                     </div>

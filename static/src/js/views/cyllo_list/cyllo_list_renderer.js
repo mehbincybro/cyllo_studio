@@ -533,12 +533,17 @@ export class CylloListRenderer extends listView.Renderer {
   }
 
   getCellClass(column, record) {
-    		let classes = super.getCellClass(...arguments)
-    		    if (column.widget == "handle") {
-    		        classes += ' pe-none';
-    		    }
-    		return classes
-    	}
+        let classes;
+        try {
+            classes = super.getCellClass(...arguments);
+        } catch (e) {
+            classes = '';
+        }
+        if (column.widget == "handle") {
+            classes += ' pe-none';
+        }
+        return classes;
+    }
 }
 CylloListRenderer.template = "cyllo_studio.CylloListRenderer";
 CylloListRenderer.rowsTemplate = "cyllo_studio.CylloListRenderer.Rows";

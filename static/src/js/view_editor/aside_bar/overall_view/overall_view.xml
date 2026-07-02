@@ -27,7 +27,6 @@
                 <i class="ri-loop-left-line me-1"/>
                 Reset to Default
             </button>
-            <p class="cy-reset-view-hint">Discard all Studio changes and restore the original view.</p>
         </div>
     </t>
 </templates>

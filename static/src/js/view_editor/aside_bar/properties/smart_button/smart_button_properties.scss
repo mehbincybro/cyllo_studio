@@ -95,8 +95,6 @@ $shadow-lg: 0 8px 16px $shadow-color;
   // Reset default margins and padding for children
   * {
     box-sizing: border-box;
-    margin: 0;
-    padding: 0;
   }
 
   // Set font family for all children
@@ -106,20 +104,11 @@ $shadow-lg: 0 8px 16px $shadow-color;
   // Input field styles
   .cy-input {
     width: 100%;
-    background-color: #32352a !important;
-    border: 1px solid #474a3a !important;
-    border-radius: 3px;
-    color: #BCBBA7 !important;
     transition: all 0.2s ease;
     font-size: 13px;
-    padding: 6px;
-
-    &[readonly] {
-      color: #85857d !important;
-    }
 
     &:focus {
-      border-color: #555;
+      border-color: var(--primary);
       outline: none;
       box-shadow: 0 0 0 2px rgba(85, 85, 85, 0.1);
     }

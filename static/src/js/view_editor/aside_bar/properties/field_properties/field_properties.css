@@ -5,6 +5,31 @@
     margin-bottom: 8px;
 }
 
+/* toggle rows inside field properties (may include a "Based on" button on the right) */
+.cy-prop-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 8px;
+    min-height: 37px;
+}
+
+.cy-prop-toggle-row .cy-toggle-label {
+    flex: 1;
+}
+
+.cy-prop-toggle-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* dynamic-container boolean toggles */
+#dynamic-container .cy-toggle-row {
+    padding: 8px 0 16px;
+}
+
 .cy-radio_label {
     margin-bottom: 0.5rem !important;
 }
@@ -42,6 +67,8 @@
 
 .btn_div {
     padding-bottom: 15px;
+    padding-left: 8px;
+    padding-right: 8px;
 }
 
 /* === Code Editor Styling === */

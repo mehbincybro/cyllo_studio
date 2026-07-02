@@ -36,30 +36,86 @@ import {
   onWillUnmount,
 } from "@odoo/owl";
 import { useService, useOwnedDialogs } from "@web/core/utils/hooks";
-import { MultiRecordSelector } from "@web/core/record_selectors/multi_record_selector";
 import { ExpressionEditorDialog } from "@web/core/expression_editor_dialog/expression_editor_dialog";
 import {_t} from "@web/core/l10n/translation";
 import { handleUndoRedo } from "@cyllo_studio/js/utils/undo_redo_utils";
 import {
     CylloExpressionEditorDialog
 } from "@cyllo_studio/js/view_editor/components/expression_editor_dialog/expression_editor_dialog";
+import { MultiSelectDropDown } from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
 
 
 export class PageProperties extends Component {
   setup() {
     const self = this;
     this.rpc = useService("rpc");
+    this.orm = useService("orm");
     this.action = useService("action");
     this.addDialog = useOwnedDialogs();
     this.notification = useService("effect");
     this.state = useState({
       pageProperties: this.props.properties,
       group_ids: [],
+      allGroups: {},
     });
-    onWillUpdateProps((nextProps) => {
+    onWillStart(async () => {
+        await this.loadAllGroups();
+        await this.resolveGroupIds(this.props.properties?.groups || "");
+    });
+    onWillUpdateProps(async (nextProps) => {
       this.state.pageProperties = nextProps.properties;
-        });
+      await this.resolveGroupIds(nextProps.properties?.groups || "");
+    });
+  }
+
+  async loadAllGroups() {
+    const groups = await this.orm.searchRead("res.groups", [], ["id", "full_name"], { limit: 0 });
+    this.state.allGroups = Object.fromEntries(groups.map(g => [String(g.id), g.full_name]));
+  }
+
+  async resolveGroupIds(groupsStr) {
+    if (!groupsStr) {
+      this.state.group_ids = [];
+      return;
     }
+    const xmlIds = groupsStr.split(",").map(s => s.trim()).filter(Boolean);
+    if (!xmlIds.length) {
+      this.state.group_ids = [];
+      return;
+    }
+    const records = await this.orm.searchRead(
+      "res.groups",
+      [["full_name", "in", xmlIds.map(x => x.replace(/^[\w]+\./, ""))]], // fallback: search by name fragment
+      ["id"],
+      { limit: 0 }
+    );
+    // Prefer exact match via ir.model.data
+    try {
+      const dataRecords = await this.orm.searchRead(
+        "ir.model.data",
+        [["complete_name", "in", xmlIds], ["model", "=", "res.groups"]],
+        ["res_id"],
+        { limit: 0 }
+      );
+      if (dataRecords.length) {
+        this.state.group_ids = dataRecords.map(r => r.res_id);
+        return;
+      }
+    } catch (_) {}
+    this.state.group_ids = records.map(r => r.id);
+  }
+
+  get groupsAllValues() {
+    return this.state.allGroups || {};
+  }
+
+  get groupsSelectedValues() {
+    return (this.state.group_ids || []).map(id => String(id));
+  }
+
+  updateGroupIds(selectedStrings) {
+    this.state.group_ids = selectedStrings.map(s => parseInt(s, 10));
+  }
 
 onDomainRadioClick = ({ target }) => {
     if (target.name === "autofocus") {
@@ -120,6 +176,7 @@ onDomainRadioClick = ({ target }) => {
         string: this.state.pageProperties.title,
         autofocus: this.state.pageProperties.autofocus ||'',
         invisible: this.state.pageProperties.invisible ||'',
+        group_ids: this.state.group_ids || [],
         viewType: "form",
         active_fields: this.props.viewDetails.activeFields || this.props.viewDetails.allFields,
       },
@@ -161,6 +218,6 @@ onDomainRadioClick = ({ target }) => {
 }
 
 PageProperties.components = {
-  MultiRecordSelector,
+  MultiSelectDropDown,
 };
 PageProperties.template = "cyllo_studio.PageProperties";

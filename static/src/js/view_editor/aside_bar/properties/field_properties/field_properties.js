@@ -1108,23 +1108,30 @@ export class FieldProperties extends Component {
                 let fieldValue = field.type === "checkbox" ? field.checked : field.value;
 
                 if (field.name === "fold_field") {
-                    this.orm.searchRead("ir.model.fields", [
-                        ['model', '=', this.state.relatedModel]
-                    ])
-                        .then((fields) => {
-                            const foldFieldExists = fields.some(f => f.name === 'fold');
-                            if (!foldFieldExists) {
-                                this.action.doAction({
-                                    type: 'ir.actions.client',
-                                    tag: 'display_notification',
-                                    params: {
-                                        message: 'Related model must contain fold field',
-                                        type: 'danger',
-                                        sticky: false,
-                                    },
-                                });
-                            }
-                        });
+                    // fold_field must be a string field name, not a boolean.
+                    // The checkbox UI means "use the 'fold' field" — store the name.
+                    if (field.checked) {
+                        fieldValue = "fold";
+                        this.orm.searchRead("ir.model.fields", [
+                            ['model', '=', this.state.relatedModel]
+                        ])
+                            .then((fields) => {
+                                const foldFieldExists = fields.some(f => f.name === 'fold');
+                                if (!foldFieldExists) {
+                                    this.action.doAction({
+                                        type: 'ir.actions.client',
+                                        tag: 'display_notification',
+                                        params: {
+                                            message: 'Related model must contain fold field',
+                                            type: 'danger',
+                                            sticky: false,
+                                        },
+                                    });
+                                }
+                            });
+                    } else {
+                        fieldValue = "";
+                    }
                 }
 
                 if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
@@ -1761,12 +1768,15 @@ export class FieldProperties extends Component {
                         if (field.options.type === 'field') {
                             if (fieldName === "fold_field") {
                                 const div = document.createElement('div');
-                                div.id = fieldName + '_div'; // Use field name as ID
+                                div.id = fieldName + '_div';
                                 div.innerHTML = `
-                                            <label class="cy-radio_label" for="${fieldName}">
-                                                <input class="form-check-input " type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''} >
-                                                ${obj}
-                                            </label>`;
+                                    <div class="cy-toggle-row">
+                                        <span class="cy-toggle-label">${obj}</span>
+                                        <label class="cy-switch">
+                                            <input type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''}>
+                                            <span class="cy-slider"></span>
+                                        </label>
+                                    </div>`;
                                 container.appendChild(div);
                             } else {
                                 const div = document.createElement('div');
@@ -1839,20 +1849,13 @@ export class FieldProperties extends Component {
                             const div = document.createElement('div');
                             div.id = fieldName + '_div';
                             div.innerHTML = `
-                                        <label class="cy-radio_label" for="${fieldName}">
-                                            <input class="form-check-input" type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''} onClick="(ev)=>onClickColorChangeLabel(ev)">
-                                            ${obj}
-                                        </label>
-                                    `;
-                            div.addEventListener('click', function (ev) {
-                                const label = document.getElementsByClassName('cy-radio_label')
-                                const checkbox = ev.target;
-                                if (checkbox.checked) {
-                                    ev.srcElement.parentElement.style.color = '#d3d2ba';
-                                } else {
-                                    ev.srcElement.parentElement.style.color = "#BCBBA7";
-                                }
-                            })
+                                <div class="cy-toggle-row">
+                                    <span class="cy-toggle-label">${obj}</span>
+                                    <label class="cy-switch">
+                                        <input type="checkbox" id="${fieldName}" name="${fieldName}" ${fieldValue ? 'checked' : ''}>
+                                        <span class="cy-slider"></span>
+                                    </label>
+                                </div>`;
                             container.appendChild(div);
                         } else if (field.options.type === "select") {
                             const div = document.createElement("div");
