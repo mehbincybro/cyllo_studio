@@ -226,7 +226,7 @@
                         <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
                             <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"
                                    t-att-checked="state.footerShowReportFooter"
-                                   t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._renderFooterPreview(); }"/>
+                                   t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._updateFooterInIframe(); }"/>
                             <span class="ms-2" style="font-size: 11px; color: #444;">Company Footer</span>
                         </label>
 <!--                        <label class="d-flex align-items-center mb-2" style="cursor: pointer;">-->
@@ -238,7 +238,7 @@
                         <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
                             <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"
                                    t-att-checked="state.footerShowPageNum"
-                                   t-on-change="(ev) => { state.footerShowPageNum = ev.target.checked; this._renderFooterPreview(); }"/>
+                                   t-on-change="(ev) => { state.footerShowPageNum = ev.target.checked; this._updateFooterInIframe(); }"/>
                             <span class="ms-2" style="font-size: 11px; color: #444;">Page Number</span>
                         </label>
 
@@ -301,53 +301,17 @@
                     <div class="cyllo-studio-report-container d-flex flex-column"
                          t-att-style="'width: ' + (currentPaperFormat ? currentPaperFormat.page_width : 210) + 'mm; min-height: ' + (currentPaperFormat ? currentPaperFormat.page_height : 297) + 'mm; overflow: visible;'">
 
-                        <!-- ── Report Header: Company + Partner (only in edit mode) ── -->
-                        <div t-if="!state.previewMode" class="cy-report-header">
-                            <!-- Left: Logo + Company Info -->
-                            <div class="cy-company-block">
-                                <!-- Logo Block -->
-                                <div class="cy-logo-block">
-                                    <t t-if="state.companyLogo and !state.hideLogo">
-                                        <!-- Logo is visible: show image + remove button on hover -->
-                                        <div class="cy-logo-wrapper"
-                                             t-on-mouseenter="() => { this.state.logoHovered = true; }"
-                                             t-on-mouseleave="() => { this.state.logoHovered = false; }">
-                                            <img t-att-src="'data:image/png;base64,' + state.companyLogo"
-                                                 class="cy-company-logo" alt="Company Logo"
-                                                 t-on-click="onLogoClick"/>
-                                        </div>
-                                    </t>
-                                    <t t-else="">
-                                        <!-- No logo or hidden: show placeholder -->
-                                        <div class="cy-logo-placeholder" t-on-click="onLogoClick">
-                                            <i class="ri-camera-line"/>
-                                            <span t-if="state.hideLogo and state.companyLogo">Logo hidden — click to restore</span>
-                                            <span t-else="">Your logo</span>
-                                        </div>
-                                    </t>
-                                    <input type="file" class="cy-logo-input" accept="image/*"
-                                           style="display:none" t-ref="logoInput"
-                                           t-on-change="onLogoFileChange"/>
-                                </div>
-                            </div>
-
-                        </div>
-
                         <iframe t-if="state.previewMode and state.previewUrl"
                                 class="live-report-content w-100 flex-grow-1 border-0"
+                                style="overflow: hidden; max-width: 100%; box-sizing: border-box; background: white;"
                                 t-att-src="state.previewUrl"
                                 t-on-load="onIframeLoad"/>
                         <t t-else="">
-                            <div id="studio_report" t-ref="report_frame"
-                                 class="editable-area w-100 flex-grow-1 text-dark"
-                                 style="padding: 10mm; overflow: visible; max-width: 100%; box-sizing: border-box; word-wrap: break-word; word-break: break-word;"/>
-                            <!-- Footer Preview Strip -->
-                            <div class="cy-footer-preview-wrapper mt-3">
-<!--                                <div class="cy-footer-ctrl-title mb-1">-->
-                                <!--                                    <i class="fa fa-file-text-o me-1"/>Footer Preview-->
-                                <!--                                </div>-->
-                                <div id="studio_footer_preview" class="cy-footer-preview-area"/>
-                            </div>
+                            <iframe id="report_frame" t-ref="report_frame"
+                                 class="editable-area w-100 flex-grow-1 text-dark border-0"
+                                 style="overflow: hidden; max-width: 100%; box-sizing: border-box; background: white;"
+                                 t-att-src="state.editIframeUrl"
+                                 t-on-load="onEditIframeLoad"/>
                         </t>
                     </div>
                     <!-- End of Page marker (temporarily disabled)
