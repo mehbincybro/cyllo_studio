@@ -6,22 +6,7 @@
             <div class="accordion cy-form-overall-view-field-button"
                  id="accordionExample">
                 <div class="overall_container_list cy-from-type-field">
-                    <h2 class="accordion-header" id="headingOne">
-                        <button class="accordion-button cy-heading cy-studio_accordion"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#collapseOne"
-                                aria-expanded="true"
-                                aria-controls="collapseOne">
-                            Field
-                        </button>
-                    </h2>
-
-                    <div id="collapseOne"
-                         class="accordion-collapse collapse show"
-                         aria-labelledby="headingOne"
-                         data-bs-parent="#accordionExample">
-
+                    <div>
                         <div class="mb-2">
                             <label for="" class="cy-navbar_label">Field Name
                             </label>

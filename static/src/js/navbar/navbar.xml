@@ -31,7 +31,7 @@
 							<i class="ri-tv-2-line" style="color: #9ea700;"/>
 							<span style="color: white; font-size: 14px;">Preview</span>
 						</div>
-						<button t-if="props.editButton" class="btn btn-primary cy-viewEdits" t-on-click="()=>this.handleEdit()">
+						<button t-if="props.editButton and !state.isSearchView" class="btn btn-primary cy-viewEdits" t-on-click="()=>this.handleEdit()">
 							<i class="ri-pencil-line"/>
 							Edit View
 						</button>

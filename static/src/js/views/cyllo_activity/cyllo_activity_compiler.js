@@ -107,6 +107,13 @@ export class CylloActivityCompiler extends ActivityCompiler {
             }
         }
 
+        if (el.hasAttribute("widget")) {
+            // Widget fields compile to a <Field/> component invocation, which has
+            // no plain cy-xpath DOM attribute for the selected-field highlight to
+            // target. Wrap it in a transparent span that carries one.
+            compiled = createElement("span", { "cy-xpath": el.getAttribute("cy-xpath") }, [compiled]);
+        }
+
         return compiled;
     }
 }

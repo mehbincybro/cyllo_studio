@@ -188,7 +188,7 @@ body.cy-show-optional .cy-studio-optional {
 
 .cy-field__box {
     width: 100%;
-    padding: 0 1rem 1rem;
+    padding: 0 1rem;
     height: 100%;
 }
 
@@ -282,11 +282,6 @@ body.cy-show-optional .cy-studio-optional {
     background: #fff;
 }
 
-/* Activity dropdown */
-.activity-add-custom-dropdown .d-flex {
-    width: 87%;
-}
-
 .activity-add-custom-dropdown ul {
     width: 13%;
     min-width: 100px !important;
@@ -322,12 +317,6 @@ body.cy-show-optional .cy-studio-optional {
     font-weight: 500;
 }
 
-/* Activity Field border */
-.cy-activity .d-flex:hover {
-    border: 1px solid #9EA700;
-    cursor: move !important;
-}
-
 .drop-here-container {
     display: flex;
     justify-content: center;
@@ -345,19 +334,15 @@ body.cy-show-optional .cy-studio-optional {
 }
 
 .cy-activity .d-flex,
+.cy-activity span,
 .cy-activity .d-inline-block,
 .cy-activity .d-block .d-block {
-    border: 1px solid transparent;
+    border: 2px solid transparent;
     cursor: move !important;
 }
 
-.cy-activity .d-inline-block:hover {
-    border: 1px solid #9EA700;
-    cursor: move !important;
-}
-
-.cy-activity .d-block .d-block:hover {
-    border: 1px solid #9EA700;
+.cy-activity .cy-field-selected {
+    border: 2px dashed #9EA700 !important;
     cursor: move !important;
 }
 
@@ -386,19 +371,10 @@ body.cy-show-optional .cy-studio-optional {
     position: relative;
 }
 
-/* Custom Dropdown Activity View */
-.activity-add-custom-dropdown .d-flex {
-    width: 247px !important;
-}
-
 .custom-dropdown.o-autocomplete .o-autocomplete--dropdown-menu {
     background-color: #ffffff;
     border: 1px solid #e0e0e0;
     min-width: 209px !important;
-}
-
-.activity-edit-custom-dropdown .d-flex {
-    width: 209px !important;
 }
 
 .cy-activity-edit-message {
