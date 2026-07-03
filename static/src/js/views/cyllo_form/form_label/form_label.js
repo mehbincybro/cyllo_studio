@@ -90,4 +90,8 @@ CylloFormLabel.props = {
         type: String,
         optional: true
     },
+    striped: {
+        type: Boolean,
+        optional: true
+    }
 };

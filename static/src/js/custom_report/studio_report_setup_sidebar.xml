@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <!--
-        custom_report.preview_sidebar
-        Report Setup panel shown in the left sidebar when Preview mode is active.
-        Called from the main edit_report template via:
-            <t t-call="custom_report.preview_sidebar"/>
-    -->
     <t t-name="custom_report.preview_sidebar">
         <div class="modern-preview-sidebar p-4 d-flex flex-column h-100" style="width: 330px; z-index: 10;">
             <!-- Header -->

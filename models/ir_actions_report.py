@@ -249,7 +249,6 @@ class IrActionsReport(models.Model):
                 # wkhtmltopdf is not installed
                 # the call should be catched before (cf /report/check_wkhtmltopdf) but
                 # if get_pdf is called manually (email template), the check could be
-                # bypassed
                 raise UserError(_("Unable to find Wkhtmltopdf on this system. The PDF can not be created."))
 
             # Disable the debug mode in the PDF rendering in order to not split the assets bundle
@@ -376,7 +375,6 @@ class IrActionsReport(models.Model):
         if report_model is not None:
             is_studio_preview = not data or set(data.keys()) <= {'report_type', 'context', 'discard_logo_check'}
             if is_studio_preview:
-                print("DEBUG: STAGE 1 - Studio Preview Detected for %s" % report.report_name)
                 # Use a wider date range and more states to ensure data shows up
                 start_date = '2000-01-01'
                 end_date = '2100-01-01'
@@ -409,7 +407,6 @@ class IrActionsReport(models.Model):
                             'comparison_type_value': 'month',
                         }
                     })
-                    print("DEBUG: STAGE 2 - Injected PNL/BS defaults")
 
         if report_model is not None:
             # Call the custom model to get values
@@ -443,9 +440,8 @@ class IrActionsReport(models.Model):
     def get_values(self):
         """Return metadata of available reports."""
         reports = self.search([])
-        test = self.search_read([])
-        for tes in reports:
-            qweb_view = self.env['ir.ui.view'].search([('xml_id', '=', tes.report_name)])
+        for test in reports:
+            qweb_view = self.env['ir.ui.view'].search([('xml_id', '=', test.report_name)])
         return [{'id': rec.id, 'name': rec.name, 'model_id': rec.model_id, 'model': rec.model,
                  'report_name': rec.report_name} for rec in reports]
 
@@ -459,7 +455,6 @@ class IrActionsReport(models.Model):
 
 
     # studio report testing from here
-
     def get_custom_report_page(self):
         report = self.report_name.strip()
         view = self.env.ref(report)
@@ -501,7 +496,6 @@ class IrActionsReport(models.Model):
         if editor_view:
             orphans = self.env['ir.ui.view'].search([('inherit_id', '=', editor_view.id)])
             if orphans:
-                print(f"[Cyllo Studio] Purging {len(orphans)} orphan views inheriting from edit_report")
                 orphans.sudo().unlink()
 
         # Unique identifier using timestamp

@@ -808,9 +808,8 @@ class StudioMode(Controller):
                                  <field name="{field}"/>
                              </xpath>'''
         view_node = etree.fromstring(view_rec.arch_base)
-        view_node.append(etree.fromstring(view_arch_2)) #view_arch_1 before
         view_node.append(etree.fromstring(view_arch_2))
-        combined_arch = view_arch_2   #view_arch_1+view_arch_2 before
+        combined_arch = view_arch_2
         view_rec.arch_base = (etree.tostring(view_node, pretty_print=True, encoding='unicode'))
         return combined_arch
 
@@ -1812,7 +1811,6 @@ class StudioMode(Controller):
                             _logger.info(f"Skipping Python constraint clear for base field: {field_name}")
 
             dynamic_placeholder_field = args[0].get("value", {}).get("dynamic_placeholder")
-            print("testt",dynamic_placeholder_field)
             if dynamic_placeholder_field:
                 try:
                     related_model_name = args[0].get("model") or model
@@ -2209,7 +2207,6 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the added tree field.
         """
-        print('kwargs',kwargs)
         values = {
             'name': kwargs['technical_name'],
             'field_description': kwargs['label'],
@@ -2218,7 +2215,6 @@ class StudioMode(Controller):
             'model_id': request.env['ir.model'].search(
                 [('model', '=', kwargs['model'])]).id
         }
-        print('values',values)
         if values['ttype'] == 'many2many':
             values.update({
                 'relation': request.env['ir.model'].browse(int(kwargs['related_model_id'])).model
@@ -4893,7 +4889,6 @@ class StudioMode(Controller):
                     "label": attrs.get('string'),
                     "comodel": attrs.get('relation'),
                 })
-                print("resres",result)
         return result
 
     @http.route('/cyllo_studio/get_field_compute_info', type='json', auth='user')
@@ -5251,7 +5246,6 @@ class StudioMode(Controller):
         """
         Remove all SQL constraints for a specific field from DB, ir.model.constraint, registry, and model class.
         """
-        print("hellooo")
         table_name = model_rec.model.replace('.', '_')
         cr = request.env.cr
         constraints = request.env['ir.model.constraint'].search([
