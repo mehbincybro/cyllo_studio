@@ -129,6 +129,15 @@ a[type="action"][name="254"] {
     }
 }
 
+.cy-studio .o_list_table .o_group_header {
+
+    th:not(.o_group_name),
+    td {
+
+        display: none !important;
+    }
+}
+
 .cy-thead-list th.cy-col-dragging,
 tbody td.cy-col-dragging {
     opacity: 0.1;
@@ -153,7 +162,11 @@ tbody td.cy-col-dragging {
     }
 }
 
-.cy-studio .o_list_renderer .o_list_table {
+// Only the actual Studio-editable list (CylloListRenderer, marked by its own
+// cy-thead-list header) gets the boxed/gapped look — plain admin lists opened
+// inside Studio (Access Rights, Report, Record Rules...) use the default
+// Odoo list renderer and must stay a normal, ungapped table.
+.cy-studio .o_list_renderer .o_list_table:has(.cy-thead-list) {
     border-collapse: separate !important;
     border-spacing: 6px 0 !important;
 

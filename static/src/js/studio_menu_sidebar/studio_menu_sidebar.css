@@ -579,20 +579,23 @@
     position: relative;
 }
 
+/* RecordSelector/MultiRecordSelector render their own native caret —
+   hide it so the custom thin chevron below is the only one shown. */
+.down-arrow .o_dropdown_button {
+    display: none !important;
+}
+
 .down-arrow:after {
     position: absolute;
     content: "";
-    width: 0.8rem;
-    height: 0.8rem;
-    background-image: url(./../img/arrow-down-s-line.svg);
-    right: 0;
-    top: 4px;
-}
-
-
-/* add child */
-.cy-addChild {
-    margin-top: 8px;
+    width: 6px !important;
+    height: 6px !important;
+    right: 4px !important;
+    bottom: 10px !important;
+    border-right: 1.5px solid #adb5bd;
+    border-bottom: 1.5px solid #adb5bd;
+    transform: rotate(45deg);
+    pointer-events: none;
 }
 
 .childrenList {

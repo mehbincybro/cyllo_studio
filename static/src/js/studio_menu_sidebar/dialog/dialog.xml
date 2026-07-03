@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
 	<t t-name="cyllo_studio.MenuCreationDialog" owl="1">
 		<Dialog size="'lg'" title="props.title">
@@ -29,7 +29,7 @@
 							</div>
 						</div>
 					</div>
-                    <!--					need to work in style class  -->
+                        <!--					need to work in style class  -->
                     <div class="col">
 						<div class="action-container">
 							<label for="Action">Action Type</label>
@@ -242,13 +242,13 @@
                             <div class="col-md-6">
                                 <div class="form-group mb-3">
                                     <label for="name">Name</label>
-                                    <input type="text" id="MenuName" class="form-control MenuName"
+                                    <input type="text" id="MenuName" class="o_input MenuName"
                                            t-model="state.menuName"/>
                                 </div>
 
                                 <div class="form-group mb-3">
                                     <label for="group">Group</label>
-                                    <div class="form-control MenuName">
+                                    <div class="MenuName down-arrow">
                                         <MultiRecordSelector resIds="state.group_ids"
                                                              resModel="'res.groups'"
                                                              update="(group_ids)=> state.group_ids = group_ids"/>
@@ -261,9 +261,8 @@
                                     <label>Action</label>
                                     <select id="action_type"
                                             name="Action Type"
-                                            class="form-control"
-                                            t-on-change="(ev) => this._onActionTypeChange(ev)"
-                                            style=".form-control:focus:background-color:none">
+                                            class="form-select action-type"
+                                            t-on-change="(ev) => this._onActionTypeChange(ev)">
                                         <option value="">Select an option</option>
                                         <option value="ir.actions.act_window"
                                                 t-att-selected="props.Menu.actionModel == 'ir.actions.act_window'">ir.actions.act_window</option>
@@ -279,7 +278,7 @@
                                 </div>
                                 <div class="form-group mb-3">
                                     <label for="action_name">Action Name</label>
-                                    <div class="form-control">
+                                    <div class="MenuName down-arrow">
                                     <RecordSelector resId="state.actionID"
                                                     resModel="'ir.actions.actions'"
                                                     update="(actionID)=> state.actionID = actionID"
@@ -292,9 +291,9 @@
                         <div class="form-group mt-3">
                             <div class="d-flex justify-content-between align-items-center mb-2">
                             <label>Children</label>
-                                <button class="btn btn-secondary cy-addChild" type="button"
+                                <button class="btn btn-primary" type="button"
                                         t-on-click="(e) => this.addChild(e, props.Menu)">
-                                    <i class="ri-add-circle-line"></i>
+                                    <i class="ri-add-line"></i>
                                     Add Child
                                 </button>
                             </div>
@@ -412,7 +411,7 @@
 											  <path d="M8.27616 0.630589L7.12269 1.78406H1.49527V9.85835H9.56954V4.23093L10.723 3.07746V10.4351C10.723 10.7536 10.4648 11.0118 10.1463 11.0118H0.918531C0.600012 11.0118 0.341797 10.7536 0.341797 10.4351V1.20732C0.341797 0.888798 0.600012 0.630589 0.918531 0.630589H8.27616ZM10.4262 0.111816L11.2418 0.927445L5.94021 6.22902L5.12604 6.2304L5.1246 5.4134L10.4262 0.111816Z"
                                                     fill="#505050"/>
 										  </svg>
-                                      <!--         Select Icon-->
+                                        <!--         Select Icon-->
 						          </label>
                                    <label for="file-input" class="icon-group btn btn-secondary"
                                           style="display: flex;
@@ -427,7 +426,7 @@
                                                     d="M2.04584 9.7041H11.6547V5.50022H12.8558V10.3047C12.8558 10.6363 12.587 10.9052 12.2553 10.9052H1.44528C1.11361 10.9052 0.844727 10.6363 0.844727 10.3047V5.50022H2.04584V9.7041ZM7.45084 3.69855V7.90244H6.24973V3.69855H3.24695L6.85028 0.0952148L10.4536 3.69855H7.45084Z"
                                                     fill="#505050"/>
 										</svg>
-                                       <!--                    Upload Icon-->
+                                        <!--                    Upload Icon-->
                                        <input type="file"
                                               id="file-input"
                                               accept="image/*"

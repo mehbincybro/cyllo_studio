@@ -37,6 +37,7 @@ export class CylloNavBar extends NavBar {
         this.menuService = useService("menu")
         this.notification = useService("notification")
         const prevForm = this._readPrevForm();
+        const configBc = this._readConfigBreadcrumb();
         this.state = useState({
             studioEditableList: false,
             lightMode: false,
@@ -51,6 +52,12 @@ export class CylloNavBar extends NavBar {
             bcPrev: prevForm?.ModelName || "",
             bcField: prevForm?.FieldName || "",
             isSearchView: false,
+            // Configuration sub-view breadcrumb (e.g. "Sales Orders > Access
+            // Rights") — separate from the x2many trail above since its
+            // "back" means restoring the previous action, not the parent form.
+            configBcActive: !!configBc,
+            configBcPrev: configBc?.prev || "",
+            configBcField: configBc?.field || "",
         });
         useBus(this.env.bus, 'SEARCH_VIEW_OPENED', () => {
             this.state.isSearchView = true;
@@ -60,20 +67,52 @@ export class CylloNavBar extends NavBar {
             this.props.updateState("edit", false);
         });
         useBus(this.env.bus, 'X2Many-Breadcrumbs', ({ detail }) => {
+            // A drill supersedes any Configuration sub-view trail on screen.
+            this._clearConfigBreadcrumb();
             this.state.bcPrev = detail.ModelName || "";
             this.state.bcField = detail.FieldName || "";
             this.state.bcActive = true;
         });
         // The navbar isn't reactive to controller swaps, so the model-name label
         // and breadcrumb go stale on menu navigation. UI-UPDATED fires after every
-        // action UI change: re-render to refresh currentModelName, and clear the
-        // x2many breadcrumb whenever the action itself changes (menu nav). An x2many
-        // drill re-sets the breadcrumb via X2Many-Breadcrumbs, which fires after the
-        // drill's doAction resolves, so the trail survives.
+        // action UI change — this is the ONE place that decides what the title
+        // area shows, for every possible path (forward click, chained
+        // Configuration clicks, browser back/forward, and page refresh):
+        //   - landed on a Configuration meta-view (Access Rights/Record
+        //     Rules/Reports) → (re)derive "OriginalView > SubView" from the
+        //     persisted business context, regardless of how we got here.
+        //   - landed on a real business view → clear both trails and record
+        //     it as the new business-context baseline.
+        // An x2many drill re-sets its own trail via X2Many-Breadcrumbs, which
+        // fires after the drill's doAction resolves, so it survives this.
         useBus(this.env.bus, 'ACTION_MANAGER:UI-UPDATED', () => {
             const actionId = this.action.currentController?.action?.jsId;
-            if (actionId && this._lastActionId !== null && this._lastActionId !== actionId) {
-                this._clearBreadcrumb();
+            const currentResModel = this.action.currentController?.action?.res_model;
+            const isFirstEvent = this._lastActionId === null;
+            const actionChanged = actionId && this._lastActionId !== actionId;
+
+            if (actionChanged) {
+                const configFieldName = this._metaModelToFieldName[currentResModel];
+                if (configFieldName) {
+                    const { name: businessName } = this._getBusinessContext();
+                    this._clearX2manyBreadcrumb();
+                    this._setConfigBreadcrumb(businessName, configFieldName);
+                } else if (isFirstEvent) {
+                    // First event after mount/refresh, landed directly on a
+                    // normal business view — DON'T blindly clear: an x2many
+                    // trail may have just been restored from sessionStorage
+                    // and must survive. Just record the business baseline.
+                    this._getBusinessContext();
+                } else {
+                    // Genuine navigation away, to neither a meta-view nor
+                    // (via the branch above) preserved as one.
+                    this._clearBreadcrumb();
+                }
+                // Stale from the previous action's studio-editable list (if
+                // any) — the new action's own renderer re-announces this via
+                // 'studio_editable_list' on mount if it's ALSO editable, but
+                // meanwhile this must not keep hiding the title/view-switcher.
+                this.state.studioEditableList = false;
             }
             if (actionId) {
                 this._lastActionId = actionId;
@@ -89,11 +128,19 @@ export class CylloNavBar extends NavBar {
         });
 
         this.viewChange = this.viewChange.bind(this);
+        this._metaModelToFieldName = {
+            'ir.model.access': 'Access Rights',
+            'ir.rule': 'Record Rules',
+            'ir.actions.report': 'Reports',
+        };
         // The x2many drill-down is an in-app view swap with no history entry,
-        // so any browser back/forward (popstate) leaves the drill. Reset the
-        // breadcrumb then — it re-appears via the bus event on a fresh drill.
+        // so any browser back/forward (popstate) leaves the drill with no
+        // other signal — reset the x2many trail then; it re-appears via the
+        // bus event on a fresh drill. Configuration sub-views DO go through
+        // real actions/history, so ACTION_MANAGER:UI-UPDATED already handles
+        // their lifecycle on popstate too — this must not also touch them.
         this._lastActionId = null;
-        this._onPopState = () => this._clearBreadcrumb();
+        this._onPopState = () => this._clearX2manyBreadcrumb();
         // Close the (click-opened) Configuration dropdown on any outside click.
         this._onDocClick = (ev) => {
             if (!this.state.configOpen) {
@@ -117,7 +164,9 @@ export class CylloNavBar extends NavBar {
         onPatched(() => {
             let studioViews = this.root?.el.querySelector('.cy-studio-views');
             if (studioViews) {
-                studioViews.style.display = this.state.studioEditableList ? 'none' : 'block';
+                // Configuration sub-views (Access Rights, Record Rules, Reports)
+                // only ever have one view (list) — no view type to switch between.
+                studioViews.style.display = (this.state.studioEditableList || this.state.configBcActive) ? 'none' : 'block';
             }
             if (this.state.configOpen) {
                 this.ShowMiscellaneousDrop();
@@ -147,11 +196,38 @@ export class CylloNavBar extends NavBar {
         })
     }
 
+    /**
+     * Resolve the actual business model + display name (e.g. "sale.order" /
+     * "Quotations") the Configuration menu actions (Access Rights/Record
+     * Rules/Reports) should act on and show as the breadcrumb root.
+     *
+     * currentController's model/name are wrong once one of those sub-views is
+     * already open — chaining Report → Access Rights would otherwise resolve
+     * to 'ir.actions.report' / "Reports" instead of the original business
+     * view. Whenever we ARE on a real business view, remember it; whenever
+     * we're on one of these meta views, fall back to the last remembered one
+     * instead — so the breadcrumb always roots at the true starting view,
+     * however many Configuration sub-views deep we are.
+     */
+    _getBusinessContext() {
+        const currentResModel = this.action.currentController?.action?.res_model;
+        if (currentResModel && !this._metaModelToFieldName[currentResModel]) {
+            sessionStorage.setItem('CyConfigBusinessModel', currentResModel);
+            sessionStorage.setItem('CyConfigBusinessName', this.currentModelName);
+            return { resModel: currentResModel, name: this.currentModelName };
+        }
+        return {
+            resModel: sessionStorage.getItem('CyConfigBusinessModel') || currentResModel,
+            name: sessionStorage.getItem('CyConfigBusinessName') || this.currentModelName,
+        };
+    }
+
     /** Open the Access Rights view for the current model. */
     async AccessRightsClick() {
         this.state.configOpen = false;
-        const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.model.access']);
-        this.action.doAction({
+        const { resModel } = this._getBusinessContext();
+        const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.model.access']);
+        await this.action.doAction({
             name: 'Access Rights',
             type: 'ir.actions.act_window',
             res_model: 'ir.model.access',
@@ -162,14 +238,17 @@ export class CylloNavBar extends NavBar {
                 search_default_model_id: modelId,
             },
         });
+        // The breadcrumb itself is (re)derived centrally by the
+        // ACTION_MANAGER:UI-UPDATED handler once this doAction resolves.
     }
     async EmailTemplateClick() { }
 
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
         this.state.configOpen = false;
-        const model_id = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [this.action.currentController.action.res_model, 'ir.rule']);
-        this.action.doAction({
+        const { resModel } = this._getBusinessContext();
+        const model_id = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.rule']);
+        await this.action.doAction({
             name: 'Record Rules',
             type: 'ir.actions.act_window',
             res_model: 'ir.rule',
@@ -179,6 +258,18 @@ export class CylloNavBar extends NavBar {
                 search_default_model_id: model_id[0],
             },
         });
+    }
+    /** Show the "Parent > SubView" trail in the navbar for a Configuration sub-view. */
+    _setConfigBreadcrumb(parentName, fieldName) {
+        this.state.configBcPrev = parentName || "";
+        this.state.configBcField = fieldName;
+        this.state.configBcActive = true;
+        // Persisted so the trail survives a page refresh (in-memory state
+        // doesn't) — cleared on any genuine navigation via _clearBreadcrumb.
+        sessionStorage.setItem('CyConfigBreadcrumb', JSON.stringify({
+            prev: this.state.configBcPrev,
+            field: fieldName,
+        }));
     }
 
     /** Toggle the Configuration dropdown (click-driven, not hover). */
@@ -213,8 +304,8 @@ export class CylloNavBar extends NavBar {
     async ReportClick() {
         this.state.configOpen = false;
         const currentController = this.action.currentController;
-        const resModel = currentController.action.res_model;
-        if (resModel && resModel !== 'ir.actions.report') {
+        const { resModel } = this._getBusinessContext();
+        if (resModel) {
             sessionStorage.setItem('cy_report_editor_origin', JSON.stringify({
                 res_model: resModel,
                 view_type: currentController.env?.config?.viewType || 'list',
@@ -238,7 +329,9 @@ export class CylloNavBar extends NavBar {
             action.domain = [['model', '=', resModel]];
         }
 
-        this.action.doAction(action);
+        await this.action.doAction(action);
+        // The breadcrumb itself is (re)derived centrally by the
+        // ACTION_MANAGER:UI-UPDATED handler once this doAction resolves.
     }
 
     /** Toggle light/dark mode for studio UI. */
@@ -283,16 +376,41 @@ export class CylloNavBar extends NavBar {
             return null;
         }
     }
-    /** Reset the x2many drill-down breadcrumb state. */
-    _clearBreadcrumb() {
+    /** Safely parse the persisted Configuration sub-view breadcrumb. */
+    _readConfigBreadcrumb() {
+        try {
+            return JSON.parse(sessionStorage.getItem('CyConfigBreadcrumb') || 'null');
+        } catch (_) {
+            return null;
+        }
+    }
+    /** Reset the x2many drill-down breadcrumb state only. */
+    _clearX2manyBreadcrumb() {
         this.state.bcActive = false;
         this.state.bcPrev = "";
         this.state.bcField = "";
     }
+    /** Reset the Configuration sub-view breadcrumb state only. */
+    _clearConfigBreadcrumb() {
+        this.state.configBcActive = false;
+        this.state.configBcPrev = "";
+        this.state.configBcField = "";
+        sessionStorage.removeItem('CyConfigBreadcrumb');
+    }
+    /** Reset both breadcrumb trails. */
+    _clearBreadcrumb() {
+        this._clearX2manyBreadcrumb();
+        this._clearConfigBreadcrumb();
+    }
+    /** Navigate back from the Configuration sub-view breadcrumb. */
+    configBreadcrumbBack(e) {
+        e.preventDefault();
+        window.history.back();
+    }
     /** Navigate back from the x2many breadcrumb (handled by the wrapper). */
     breadcrumbBack(e) {
         e.preventDefault();
-        this._clearBreadcrumb();
+        this._clearX2manyBreadcrumb();
         this.env.bus.trigger("STUDIO_BREADCRUMB_BACK");
     }
     viewChange(attr, value) {

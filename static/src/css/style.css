@@ -11,6 +11,19 @@
     box-shadow: rgba(0, 0, 0, 0.1) 0 1px 2px 0;
 }
 
+/* The "+ New"/Save/Discard block (.cy-top-section, from CogMenuList) now
+   renders inside .o_control_panel_breadcrumbs (see control_panel.xml) so it
+   shares the same row as the search bar. Its own Bootstrap .container class
+   still wants to grow full-width though — keep it compact instead. */
+.cy-studio .cy-top-section {
+    flex: 0 0 auto !important;
+    width: auto !important;
+}
+
+.cy-studio .o_control_panel {
+    padding-top: 16px !important;
+}
+
 /* List View */
 
 .o_list_renderer .o_list_table {
