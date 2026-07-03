@@ -158,7 +158,7 @@ patch(CylloStatusBarButtons.prototype, {
         if (
             !validateEdit(this.state, notification, "isEditingButton", "ButtonNew")||
             !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button") ||
-            !validateEdit(this.state, notification, "isEditingNewButton", "EditingNewButton") ||
+            // !validateEdit(this.state, notification, "isEditingNewButton", "EditingNewButton") ||
             !validateEdit(this.state, notification, "isStudioEdit", "EditingButton")
         ) {
             return;

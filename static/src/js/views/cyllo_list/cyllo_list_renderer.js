@@ -297,8 +297,42 @@ export class CylloListRenderer extends listView.Renderer {
     });
   }
 
-    /**
-   * Computes active columns for rendering.
+  getColumnLabel(column) {
+    const field = this.props.list.fields?.[column.name] || this.props.list._config?.fields?.[column.name];
+    return (
+      column.label ||
+      column.string ||
+      column.attrs?.string ||
+      field?.string ||
+      column.name
+        ?.split("_")
+        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+        .join(" ") ||
+      ""
+    );
+  }
+
+  isFalseModifier(value) {
+    return value === false || value === undefined || value === null || ["", "0", "false", "False"].includes(value);
+  }
+
+  isTrueModifier(value) {
+    return value === true || value === 1 || ["1", "true", "True"].includes(value);
+  }
+
+  isColumnHidden(column) {
+    const modifier = column.column_invisible;
+    if (this.isFalseModifier(modifier)) {
+      return false;
+    }
+    if (this.isTrueModifier(modifier)) {
+      return true;
+    }
+    return this.evalColumnInvisible(modifier);
+  }
+
+	    /**
+	   * Computes active columns for rendering.
    *
    * @param {Object} list - List view object.
    * @returns {Array} - Array of active/visible columns.
@@ -427,10 +461,10 @@ export class CylloListRenderer extends listView.Renderer {
     const fieldType = this.props.list._config.fields[column.name]?.type || "";
     const relational_fields =  this.props.list._config.fields[column.name]?.relation || "";
     this.env.bus.trigger("FIELDS_DETAILS", {
-      mode: column.attrs || {},
-      name: column.name || "",
-      label: column.label || "",
-      widget: column.widget || "",
+	      mode: column.attrs || {},
+	      name: column.name || "",
+	      label: this.getColumnLabel(column),
+	      widget: column.widget || "",
       options: column.options || "",
       fieldType: fieldType || "",
       context: column?.context || "",

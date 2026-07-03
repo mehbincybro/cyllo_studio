@@ -41,7 +41,7 @@
                     <OverallView t-props="OverallProps" />
                 </t>
                 <t t-if="state.type === 'ButtonProperties'">
-                    <ButtonProperties t-props="ButtonPropertiesProps" />
+                    <ButtonProperties t-props="ButtonPropertiesProps"/>
                 </t>
                 <t t-if="state.type === 'KanbanFieldProperties'">
                     <KanbanFieldProperties t-props="KanbanFieldPropertiesProps" />

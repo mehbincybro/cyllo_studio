@@ -385,7 +385,9 @@ export class ButtonProperties extends Component {
         this.action = useService("action");
         this.addDialog = useOwnedDialogs();
         this.notification = useService("effect");
-        this.actionName = useState({ value: '' });
+        // actionOptions is populated in onWillStart; [] guards against a crash
+        // if a render fires before the fetch resolves.
+        this.actionOptions = [];
         this.state = useState({
             viewDetails: this.props.viewDetails || "",
             iconToggle: false,
@@ -428,11 +430,9 @@ export class ButtonProperties extends Component {
             this.buttonProperties.invisible = nextProps.invisible || "false"
             if (nextProps.function_type == 'action') {
                 this.buttonProperties.name = parseInt(nextProps.function_name, 10);
-                this.getInputValue(nextProps.function_name)
             }
             else {
                 this.buttonProperties.name = nextProps.function_name
-                this.actionName.value = ""
             }
             if (nextProps.class_name?.startsWith('btn-')) {
                 this.state.style = 'button'
@@ -442,19 +442,11 @@ export class ButtonProperties extends Component {
             }
             this.buttonProperties.groupIds = (nextProps.groupIds && nextProps.groupIds.length > 0)
                 ? nextProps.groupIds : [];
-
-
         });
 
         onWillStart(async () => {
             if (this.state.viewDetails.viewType === ["form"]) {
                 sessionStorage.removeItem("CyStudioRelationModel");
-            }
-            if (this.buttonProperties.type == 'action') {
-                this.getInputValue(this.buttonProperties.name)
-            }
-            else {
-                this.actionName.value = ""
             }
             if (this.props.groupIds && this.props.groupIds.length > 0) {
                 this.buttonProperties.groupIds = this.props.groupIds
@@ -471,6 +463,9 @@ export class ButtonProperties extends Component {
             this.functions = await this.rpc("cyllo_studio/find/functions", {
                 model_name: this.modelName,
             });
+            // Load ir.actions.actions once at mount — actions are model-independent
+            // so no need to re-fetch on prop updates.
+            this.actionOptions = await this._loadActionOptions();
             await this.loadAllGroups();
         });
     }
@@ -493,12 +488,34 @@ export class ButtonProperties extends Component {
         this.autoSave();
     }
 
-    async getInputValue(id) {
-        const response = await this.orm.read(
-            "ir.actions.actions",
-            [parseInt(id)], ['name']
-        )
-        this.actionName.value = response[0]['name']
+    /**
+     * Fetch all available actions from ir.actions.actions.
+     * Returns a CylloStudioDropdown-compatible options array: [{value: id, label: name}, ...].
+     * Returns [] on any error so a failed fetch can't crash the dropdown.
+     * ir.actions.actions is model-independent — no getCorrectModel() filtering.
+     */
+    async _loadActionOptions() {
+        try {
+            const records = await this.orm.searchRead(
+                "ir.actions.actions",
+                [],
+                ["id", "name"],
+            );
+            return records.map(r => ({ value: r.id, label: r.name }));
+        } catch (e) {
+            console.error("[ButtonProperties] Failed to load action options:", e);
+            return [];
+        }
+    }
+
+    /**
+     * Handle action selection from the CylloStudioDropdown.
+     * Mirrors handleButtonFunctionChange in naming/structure.
+     * @param {number} value - The selected ir.actions.actions id
+     */
+    handleActionChange(value) {
+        this.buttonProperties.name = parseInt(value, 10);
+        this.autoSave();
     }
     get onStyleChange() {
         return [{
@@ -743,7 +760,7 @@ export class ButtonProperties extends Component {
                     kwargs: {
                         newHeader: this.props.newHeader,
                         path: this.props.path || this.props.properties.elementInfo?.path,
-                        position: this.props.position || this.props.properties.elementInfo?.position,
+                        position: this.props.position || this.props.properties?.elementInfo?.position,
                         groupIds: this.buttonProperties.groupIds,
                         model: await this.getCorrectModel(),
                         viewId: this.state.viewDetails.viewId,
@@ -837,7 +854,6 @@ export class ButtonProperties extends Component {
 ButtonProperties.components = {
     CustomSelection,
     CylloStudioDropdown,
-    RecordSelector,
     MultiSelectDropDown,
     IconPicker,
 };
