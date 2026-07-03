@@ -120,6 +120,13 @@ body {
     text-overflow: ellipsis;
 }
 
+/* Configuration sub-views (Access Rights, Record Rules, Reports) render a
+   normal Odoo ControlPanel with its own native breadcrumb — redundant now
+   that CylloNavBar shows the same "Parent > SubView" trail itself. */
+.cy-studio .o_breadcrumb {
+    display: none !important;
+}
+
 /* .light-studio-mode .cy-bc-trail .cy-bc-sep,
 .light-studio-mode .cy-bc-trail .cy-bc-field {
     color: #6a6a6a;

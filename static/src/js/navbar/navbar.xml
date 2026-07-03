@@ -10,6 +10,11 @@
 							<i class="ri-arrow-right-s-line cy-bc-sep"/>
 							<span class="cy-bc-field" t-esc="state.bcField"/>
 						</span>
+						<span t-elif="state.configBcActive and state.configBcPrev" class="cy-current-model cy-bc-trail">
+							<a href="#" class="cy-bc-prev" t-on-click="configBreadcrumbBack" t-esc="state.configBcPrev"/>
+							<i class="ri-arrow-right-s-line cy-bc-sep"/>
+							<span class="cy-bc-field" t-esc="state.configBcField"/>
+						</span>
 						<span t-elif="currentModelName" class="cy-current-model" t-esc="currentModelName"/>
 					</t>
 					<div class="cy-studio-views ms-2">
@@ -31,7 +36,7 @@
 							<i class="ri-tv-2-line" style="color: #9ea700;"/>
 							<span style="color: white; font-size: 14px;">Preview</span>
 						</div>
-						<button t-if="props.editButton and !state.isSearchView" class="btn btn-primary cy-viewEdits" t-on-click="()=>this.handleEdit()">
+						<button t-if="props.editButton and !state.isSearchView and !state.configBcActive" class="btn btn-primary cy-viewEdits" t-on-click="()=>this.handleEdit()">
 							<i class="ri-pencil-line"/>
 							Edit View
 						</button>
