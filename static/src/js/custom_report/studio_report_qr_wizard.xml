@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <!--
-        custom_report.qr_wizard
-        Three-step QR Code Wizard modal for the Cyllo Studio Report Editor.
-        Called from the main edit_report template via:
-            <t t-call="custom_report.qr_wizard"/>
-    -->
     <t t-name="custom_report.qr_wizard">
         <div t-if="state.showQrWizard" class="qr-wizard-overlay" t-on-click.self="onQrWizardCancel">
             <div class="qr-wizard-modal">
