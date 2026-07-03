@@ -375,6 +375,7 @@ export class AsideBar extends Component {
             sibling: siblingDetails.sibling,
             field_info: siblingDetails.field_info,
             item_type: siblingDetails.item_type,
+            position: buttonDetails.position,
         };
     }
 

@@ -11,9 +11,9 @@
                    t-ref="table" t-on-mouseleave="ev => this.tableLeave(ev)">
                 <thead class="list-thead cy-thead-list">
                     <tr class="list-tr" t-ref="list-tr">
-                        <t t-foreach="state.columns" t-as="column" t-key="column.id">
-                            <th t-if="column.type === 'field'" t-att-data-name="column.name"
-                                t-att-class="getColumnClass(column) + ' opacity-trigger-hover' + (column.optional == 'hide' ? ' cy-studio-optional' : ((column.column_invisible and column.column_invisible != 'false') ? ' cy-studio-striped' : ''))"
+	                        <t t-foreach="state.columns" t-as="column" t-key="column.id">
+	                            <th t-if="column.type === 'field'" t-att-data-name="column.name"
+	                                t-att-class="getColumnClass(column) + ' opacity-trigger-hover' + (column.optional == 'hide' ? ' cy-studio-optional' : (isColumnHidden(column) ? ' cy-studio-striped' : ''))"
                                 t-on-pointerup="onColumnTitleMouseUp"
                                 t-on-click="(ev) => this.listFieldDetails(ev,column)"
                                 t-on-mouseenter="(e)=>this.onMouseHover(e)"

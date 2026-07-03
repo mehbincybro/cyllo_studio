@@ -4,12 +4,16 @@
         <div class="button_properties">
             <div class="mb-2">
                 <label for="" class="cy-navbar_label">Label Name</label>
-                <input class="cy-input cy-input-field-align cy-studio-input-placeholder" reqired="true" type="text" id="label" name="label" placeholder="Enter the label name" autocomplete="off" t-model="buttonProperties.string" t-on-input="handleLabelChange" t-on-change="() => this.autoSave()"/>
+                <input class="cy-input cy-input-field-align cy-studio-input-placeholder" reqired="true" type="text"
+                       id="label" name="label" placeholder="Enter the label name" autocomplete="off"
+                       t-model="buttonProperties.string" t-on-input="handleLabelChange"
+                       t-on-change="() => this.autoSave()"/>
             </div>
             <div class="mb-2">
                 <label for="" class="cy-navbar_label ">Class</label>
                 <div class="cy-input-background-color cy-button-custom">
-                    <CustomSelection class="cy-selection-custom" onChange.bind="(class)=>buttonProperties.class = class" defaultClass="buttonProperties.class"/>
+                    <CustomSelection class="cy-selection-custom" onChange.bind="(class)=>buttonProperties.class = class"
+                                     defaultClass="buttonProperties.class"/>
                 </div>
                 <t t-if="props.viewDetails.viewType !== 'form'">
                     <input type="text" class="cy-input form-control " t-model="buttonProperties.class"/>
@@ -20,7 +24,8 @@
                     <label class="cy-navbar_label customCheckbox-label" for="onStyle">Style
                     </label>
                     <div class="cy-studio-custom-dropdown">
-                        <CylloStudioDropdown options="onStyleChange" defaultValue="state.style" onChange="(value) => this.handleOnStyleChange(value)" searchable="true"/>
+                        <CylloStudioDropdown options="onStyleChange" defaultValue="state.style"
+                                             onChange="(value) => this.handleOnStyleChange(value)" searchable="true"/>
                     </div>
                 </div>
             </t>
