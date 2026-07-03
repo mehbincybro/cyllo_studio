@@ -7,7 +7,7 @@
  * editing, and interaction with the Cyllo Studio Activity Popover.
  */
 import { ActivityRecord } from "@mail/views/web/activity/activity_record";
-import { Component, onMounted, useState, onWillStart } from "@odoo/owl";
+import { Component, onMounted, onPatched, onWillUpdateProps, useState, onWillStart } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { sortBy } from "@web/core/utils/arrays";
 import { useViewCompiler } from "@web/views/view_compiler";
@@ -29,6 +29,22 @@ export class CylloActivityRecord extends ActivityRecord {
 		const { templateDocs } = this.props.archInfo;
 		const templates = useViewCompiler(CylloActivityCompiler, templateDocs);
 		this.recordTemplate = templates["activity-box"];
+
+		onWillUpdateProps((nextProps) => {
+			// This instance is patched in place (no t-key) across Studio
+			// auto-save updates, so the compiled template must be rebuilt from
+			// the fresh archInfo to reflect new bold/muted/display attributes.
+			if (nextProps.archInfo) {
+				const nextTemplates = useViewCompiler(CylloActivityCompiler, nextProps.archInfo.templateDocs);
+				this.recordTemplate = nextTemplates["activity-box"];
+			}
+		});
+
+		// Notify ActivityPopover (which owns Sortable/highlight setup for the
+		// preview) every time THIS component's own rendered DOM is created or
+		// rebuilt — the one reliable signal for "the field nodes changed".
+		onMounted(() => this.env.bus.trigger("ACTIVITY_RECORD_RENDERED"));
+		onPatched(() => this.env.bus.trigger("ACTIVITY_RECORD_RENDERED"));
 	}
 
 	handleFieldWidgetClick(el,fieldName, path) {

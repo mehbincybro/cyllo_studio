@@ -8,8 +8,17 @@
 					<div class="cy-tab-pill">
 						<button class="cy-nav__link active">Activity</button>
 					</div>
+					<div class="cy-close-pill" t-on-click="closeAside">
+                        <i class="ri-close-line"></i>
+                    </div>
 				</div>
 				<t t-call="cyllo_studio.CylloActivityEditorBody"/>
+				<div class="cy-reset-view-wrapper">
+					<button class="btn cy-reset-view-btn w-100" t-on-click="resetView">
+						<i class="ri-loop-left-line me-1"/>
+						Reset to Default
+					</button>
+				</div>
 			</div>
 		</t>
 		<t t-else="">
@@ -24,12 +33,6 @@
 
 			<!-- ── Interactive Preview (always rendered — onMounted queries .cy-activity) ── -->
 			<div class="cy-field__box o_cw_popover border-0">
-				<div class="cy-activity-section">
-					<div class="cy-activity-section-header">
-						<i class="ri-gallery-fill cy-activity-header-icon"/>
-						<span class="cy-activity-header-title">Interactive Preview</span>
-					</div>
-				</div>
 				<div class="cy-activity-section cy-addable__list o_activity_view">
 					<t t-set="recordValue" t-value="props.records.length - 1"/>
 					<ul class="o_activity_record list-group list-group-flush o_cw_popover_fields_secondary cy-activity"
@@ -43,17 +46,7 @@
 
 			<!-- ── Field Customizer ── -->
 			<div class="cy-field__box">
-
-				<!-- Section header -->
-				<div class="cy-activity-section">
-					<div class="cy-activity-section-header">
-						<i class="ri-code-box-fill cy-activity-header-icon"/>
-						<span class="cy-activity-header-title">Field Customizer</span>
-					</div>
-				</div>
-
 				<t t-if="state.editable">
-
 					<!-- Widget warning -->
 					<div t-if="state.widget" class="cy-activity-section cy-activity-warning-section">
 						<div class="cy-activity-warning-row">
@@ -66,7 +59,7 @@
 					</div>
 
 					<!-- Display dropdown + Bold/Muted toggles -->
-					<div class="cy-activity-section cy-activity-dropdown activity-edit-custom-dropdown"
+					<div t-if="!state.widget" class="cy-activity-section cy-activity-dropdown activity-edit-custom-dropdown"
                          t-att-style="state.widget ? 'pointer-events: none; opacity: 0.7;' : ''">
 						<label class="cy-navbar_label">Display</label>
 						<div class="cy-studio-custom-dropdown">
@@ -98,33 +91,24 @@
 						</div>
 					</div>
 
-					<!-- Discard / Save / Delete -->
-					<div class="cy-activity-section">
-						<div class="cy-activity-action-btns">
-							<button class="cy-activity-btn cy-activity-btn-discard"
-                                    data-tooltip="Discard" t-on-click="onDiscard">
-								<i class="ri-arrow-go-back-line"/>
-								<span>Discard</span>
-							</button>
-							<button class="cy-activity-btn cy-activity-btn-save"
-                                    data-tooltip="Save" t-on-click="onSave">
-								<i class="ri-save-fill"/>
-								<span>Save</span>
-							</button>
-							<button class="cy-activity-btn cy-activity-btn-delete"
-                                    data-tooltip="Delete" t-on-click="onDelete">
-								<i class="ri-delete-bin-5-fill"/>
-								<span>Delete</span>
-							</button>
-						</div>
+					<!-- Reset to Default -->
+					<div class="cy-activity-section d-flex gap-2">
+						<button class="btn btn-danger w-100" t-on-click="onDelete">
+							<i class="ri-delete-bin-line"/>
+							Delete
+						</button>
+						<button class="btn btn-primary w-100" t-on-click="onDiscard">
+							<i class="ri-add-line"/>
+							New Field
+						</button>
 					</div>
-
 				</t>
+
 				<t t-elif="!this.state.editable">
 
 					<!-- Field selector + Add Field -->
 					<div class="cy-activity-section">
-						<label class="cy-navbar_label">Field</label>
+						<label class="cy-navbar_label">Add Field</label>
 						<div class="cy-studio-custom-dropdown cy-activity-dropdown activity-add-custom-dropdown"
                              t-att-class="props.inline ? '' : 'col-10'">
 							<CylloStudioDropdown

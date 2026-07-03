@@ -50,6 +50,10 @@ export class CylloNavBar extends NavBar {
             bcActive: sessionStorage.getItem('CyX2ManyTriggered') === 'true',
             bcPrev: prevForm?.ModelName || "",
             bcField: prevForm?.FieldName || "",
+            isSearchView: false,
+        });
+        useBus(this.env.bus, 'SEARCH_VIEW_OPENED', () => {
+            this.state.isSearchView = true;
         });
         useBus(this.env.bus, 'studio_editable_list', (res) => {
             this.state.studioEditableList = res.detail;
@@ -74,6 +78,7 @@ export class CylloNavBar extends NavBar {
             if (actionId) {
                 this._lastActionId = actionId;
             }
+            this.state.isSearchView = false;
             this.render();
         });
         useBus(this.env.bus, 'PREVIEW_MODE_CHANGED', ({ detail }) => {

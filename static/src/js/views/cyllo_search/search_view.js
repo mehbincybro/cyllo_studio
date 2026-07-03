@@ -63,6 +63,9 @@ export class SearchView extends SearchBarMenu {
   }
 
     onMounted() {
+    // Studio's own view-editor aside bar has no content for the search
+    // view — close it so a stale panel isn't left open behind this one.
+    this.env.bus.trigger("SEARCH_VIEW_OPENED");
     //starlin
     this.state.visibleSearchElement = JSON.parse(sessionStorage.getItem("showInvisibleSearch")) || false;
     const self = this;

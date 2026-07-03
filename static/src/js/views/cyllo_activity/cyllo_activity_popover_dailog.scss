@@ -47,6 +47,33 @@
         height: 35px;
     }
 
+    .cy-close-pill {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex: 0;
+        background: #373627;
+        border-radius: 8px;
+        padding: 3px;
+        gap: 2px;
+        height: 35px;
+        min-width: 35px;
+        cursor: pointer;
+
+        &:hover {
+            background-color: #46442d;
+
+            i {
+                color: #e2e2e2;
+            }
+        }
+
+        i {
+            font-size: 22px;
+            color: #b9b9b9;
+        }
+    }
+
     .cy-nav__link {
         width: 100%;
         color: #e2e2e2;
@@ -98,11 +125,6 @@
 
     /* Display + toggles grouped card */
     .activity-edit-custom-dropdown {
-        background: #2a2c1e;
-        border-radius: 10px;
-        border: 1px solid #3a3824;
-        padding: 12px !important;
-
         .cy-navbar_label {
             color: #8a8972;
             margin-bottom: 8px;
@@ -110,11 +132,14 @@
 
         .cy-studio-custom-dropdown {
             margin-bottom: 10px;
+
+            .custom-dropdown.o-autocomplete .d-flex {
+                width: 100% !important;
+            }
         }
 
         .cy-toggle-row {
-            padding: 6px 0;
-            border-top: 1px solid #3a3824;
+            padding: 6px 2px;
 
             &:first-of-type {
                 border-top: none;
@@ -124,6 +149,14 @@
                 font-size: 13px;
                 color: #c8c7b0;
                 font-weight: 400;
+            }
+        }
+    }
+
+    .activity-edit-custom-dropdown {
+        .cy-studio-custom-dropdown {
+            .custom-dropdown.o-autocomplete .d-flex {
+                width: 100% !important;
             }
         }
     }
@@ -155,8 +188,6 @@
         background: rgba(198, 184, 184, 0.05);
         border-left: 3px solid #8a7a6a !important;
         border-top: none !important;
-        margin: 0 16px;
-        border-radius: 0 6px 6px 0;
     }
 
     .cy-activity-warning-row {
@@ -202,62 +233,45 @@
     }
 
     /* Save / Discard / Delete row */
-    .cy-activity-action-btns {
-        display: grid;
-        grid-template-columns: 1fr 1.6fr 1fr;
-        gap: 6px;
-        width: 100%;
-    }
-
-    .cy-activity-btn {
+    .cy-activity-btn-reset {
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 5px;
-        padding: 8px 6px;
+        gap: 6px;
+        height: 36px;
+        background: transparent;
+        color: #c0675a;
+        border: 1px solid rgba(192, 103, 90, 0.5);
         border-radius: 8px;
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 500;
         cursor: pointer;
         transition: background 0.15s, color 0.15s, border-color 0.15s;
-        white-space: nowrap;
 
-        i { font-size: 13px; }
-    }
-
-    .cy-activity-btn-save {
-        background: #3a3e00;
-        color: #9ea700;
-        border: none;
-        order: 2;
-
-        &:hover { background: #9ea700; color: #fff; }
-    }
-
-    .cy-activity-btn-discard {
-        background: transparent;
-        color: #bcbba7;
-        border: 1px solid #3a3824;
-        order: 1;
-
-        &:hover { color: #e2e2e2; border-color: #6b6a50; }
-    }
-
-    .cy-activity-btn-delete {
-        background: transparent;
-        color: #6b6a50;
-        border: 1px solid #3a3824;
-        order: 3;
+        i {
+            font-size: 14px;
+        }
 
         &:hover {
-            background: rgba(255, 92, 92, 0.08);
-            color: #ff5c5c;
-            border-color: rgba(255, 92, 92, 0.4);
+            background: rgba(192, 103, 90, 0.1);
+            color: #e07060;
+            border-color: #c0675a;
         }
     }
 
     /* Preview section record list */
     .o_activity_record {
         width: 100% !important;
+        border: 2px dashed #fff;
+        padding-bottom: 0 !important;
+
+        .o_activity_record {
+            border: none !important;
+            padding-bottom: 8px !important;
+        }
+    }
+
+    .cy-field__box.o_cw_popover {
+        z-index: auto;
     }
 }

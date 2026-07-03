@@ -229,6 +229,7 @@ export class StudioWrapper extends Component {
         useBus(this.env.bus, "LIST_DETAILS", this.handleListDetails);
         useBus(this.env.bus, "ACTIVITY_DETAILS", this.handleActivityDetails);
         useBus(this.env.bus, "ACTIVITY_REMOVED", this.handleActivityRemoved);
+        useBus(this.env.bus, "SEARCH_VIEW_OPENED", this.closeAsideBar.bind(this));
         useBus(this.env.bus, "SELECT_NOTEBOOK", this.handleNotebookDetails);
         useBus(this.env.bus, "RENDER_LOAD", this.reload);
         useBus(this.env.bus, "FORM_DETAILS", this.handleFormDetails);
@@ -314,13 +315,29 @@ export class StudioWrapper extends Component {
     }
     /**
      * Reloads the current Studio view.
-     * Triggers 'studio_reload' action and resets editing state after 100ms.
+     * Triggers 'studio_reload' action and resets editing state after 100ms,
+     * unless the event asks to keep the aside bar open (e.g. auto-save).
      */
-    reload() {
+    reload({ detail } = {}) {
         this.action.doAction("studio_reload");
+        if (detail?.keepEdit) {
+            return;
+        }
         setTimeout(() => {
             this.props.updateState("edit", false);
         }, 100);
+    }
+    /**
+     * Closes the aside bar (Studio has no editor panel for the search
+     * view, so a currently-open panel would otherwise be left stale).
+     */
+    closeAsideBar() {
+        if (!this.props.edit) {
+            return;
+        }
+        this.state.activity_view = false;
+        this.env.bus.trigger("CLEAR-MENU", { fromClose: true });
+        this.props.updateState("edit", false);
     }
     /**
      * Handles displaying existing fields dialog.

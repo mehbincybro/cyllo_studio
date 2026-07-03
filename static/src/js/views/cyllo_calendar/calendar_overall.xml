@@ -192,7 +192,7 @@
                                     update="(resId)=> this.handleView('quick_create_view_id', resId)" />
                             </div>
                         </div>
-                        <div class="bcheckbox-can-create">
+                        <div class="bcheckbox-can-create mt-2">
                             <label for="" class="cy-navbar_label">
                                 <span>Event Limit</span>
                             </label>
