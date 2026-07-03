@@ -56,7 +56,6 @@ class StudioReportController(Controller):
                 # adjacent; any inserted element breaks compilation with:
                 #   SyntaxError: t-elif directive must be preceded by t-if or t-elif directive
                 if key in self._PROTECTED_LAYOUT_KEYS:
-                    print(f"[Cyllo Studio] Skipping protected layout template: {key}")
                     # Also clean up any accidentally created Custom_ views for this key
                     base_view = request.env.ref(key, raise_if_not_found=False)
                     if base_view:
@@ -96,7 +95,6 @@ class StudioReportController(Controller):
                     arch_el = etree.fromstring(xpath_blocks.encode('utf-8'))
 
                 except etree.XMLSyntaxError as xml_err:
-                    print(f"[Cyllo Studio] XML Syntax Error: {xml_err}\nBlocks: {xpath_blocks}")
                     return {'success': False,
                             'error': f'Invalid XML in changes: {xml_err}'}
 
@@ -125,8 +123,6 @@ class StudioReportController(Controller):
                                                     'Please Reset Report and try again.' % i
                                             )
                                         }
-
-                print(f"[Cyllo Studio] Saving changes for {key}. XPaths: {[el.get('expr') for el in arch_el]}")
 
                 # Search by KEY, which is much more reliable than name
                 custom_arch = request.env['ir.ui.view'].search(
@@ -165,7 +161,6 @@ class StudioReportController(Controller):
                             # Deduplicate within the same save operation
                             xpath_key = (expr, position)
                             if xpath_key in processed_xpaths:
-                                print(f'[Cyllo Studio] Skipping redundant XPath in same save: {expr}')
                                 continue
                             processed_xpaths.add(xpath_key)
 
@@ -196,7 +191,6 @@ class StudioReportController(Controller):
                             
                             data_node.append(new_el)
                     except Exception as unexpectedException:
-                        print(f"[Cyllo Studio] Error merging into existing view: {unexpectedException}")
                         # Fallback: just overwrite if merging fails
                         custom_arch.write({'arch_base': xpath_blocks})
                     new_arch = etree.tostring(root, encoding='unicode',
@@ -210,13 +204,13 @@ class StudioReportController(Controller):
                     clean_arch = etree.tostring(arch_el, encoding='unicode',
                                                 pretty_print=True)
                     request.env['ir.ui.view'].create({
-                        'name': f'Custom_{key}',  # Name is descriptive
-                        'key': f'Custom_{key}',  # Key is technical
+                        'name': f'Custom_{key}',
+                        'key': f'Custom_{key}',
                         'type': 'qweb',
                         'mode': 'extension',
                         'inherit_id': base_view.id,
                         'arch_base': clean_arch,
-                        'model': base_view.model,  # Model is required for inheritance to work
+                        'model': base_view.model,
                     })
             return {'success': True}
 
@@ -241,7 +235,6 @@ class StudioReportController(Controller):
             except ValueError as ve:
                 # If inheritance is broken, try to purge Custom_ views and retry once
                 if "cannot be located in parent view" in str(ve):
-                    print(f"[Cyllo Studio] Broken inheritance detected for {template}. Purging Custom_ views.")
                     custom_views = request.env['ir.ui.view'].search([
                         ('inherit_id', '=', view.id),
                         ('name', 'like', 'Custom_'),
@@ -395,7 +388,6 @@ class StudioReportController(Controller):
             if not report:
                 return {'success': False, 'error': f'Report {template!r} not found'}
 
-            # Fetch recent records from the target model
             # .exists() strips any records whose DB row has been deleted since the search
             records = request.env[res_model].search([], limit=80).exists()
 
@@ -404,7 +396,6 @@ class StudioReportController(Controller):
                 [], ['id', 'name', 'page_width', 'page_height', 'format']
             )
 
-            # ── Fetch Scan Analytics ─────────────────────────────────────────
             tokens = request.env['qr.download.token'].sudo().search([('report_id', '=', report.id)])
             total_scans = sum(tokens.mapped('scan_count'))
             
@@ -519,7 +510,6 @@ class StudioReportController(Controller):
             return request.make_response("Invalid or expired link", status=403)
 
         if token_record.require_auth and not request.session.uid:
-            # Redirect to login if auth is required
             return request.redirect(f'/web/login?redirect=/report/pdf/{report_id}/{record_id}?token={token}')
 
         report = request.env['ir.actions.report'].sudo().browse(report_id)
@@ -653,9 +643,6 @@ class StudioReportController(Controller):
             if not doc_view or not doc_view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
 
-            # Always return the base view's full combined architecture so the source editor
-            # shows the complete document XML (the Architecture tab content), including
-            # any Studio-injected fields from inherited views.
             combined_arch = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
             arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
             return {'success': True, 'arch': arch_xml, 'doc_template': doc_template}
@@ -785,11 +772,6 @@ class StudioReportController(Controller):
 
             base_view.write({'arch_base': arch})
 
-            # ── FLATTEN INHERITANCE ──────────────────────────────────────────
-            # Delete any 'Custom_' inherited views for this template. Since we
-            # just saved the full combined arch back to the base 'arch_base',
-            # these inherited views are now redundant and their xpaths might
-            # point to elements we just deleted/modified/commented out.
             custom_views = request.env['ir.ui.view'].search([
                 ('inherit_id', '=', base_view.id),
                 ('name', '=', f'Custom_{save_template}'),

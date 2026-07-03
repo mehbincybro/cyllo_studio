@@ -332,7 +332,7 @@ export class AsideBar extends Component {
         }
         setTimeout(() => {
             this.props.updateState("edit", false);
-            this.action.doAction('studio_reload');
+            // this.action.doAction('studio_reload');
         }, 400);
     }
     get noteBookPropertiesProps() {

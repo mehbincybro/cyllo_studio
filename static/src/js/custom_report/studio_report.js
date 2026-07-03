@@ -141,7 +141,6 @@ export class EditReport extends Component {
                     ['name', 'logo', 'street', 'city', 'phone', 'email', 'website', 'report_footer'],
                     { limit: 1, order: 'id asc' }
                 );
-                // console.log('logoooooo',companies)
                 if (companies && companies.length > 0) {
                     const co = companies[0];
                     this._companyId = co.id; // store for logo upload
@@ -173,7 +172,6 @@ export class EditReport extends Component {
 
         onMounted(async () => {
             const params = this.props.action.params || {};
-            console.log('params', params, this)
 
             // Hide the Cyllo sidebar logic per user request
             this._cyElsToRestore = [];
@@ -342,7 +340,6 @@ export class EditReport extends Component {
     /**
      * Render the footer preview strip.
      * Always builds clean HTML from our own template — never uses raw backend HTML
-     * to avoid centering issues caused by Odoo's .text-center class.
      * Respects state.footerShowReportFooter and state.footerShowPageNum toggles.
      */
     _renderFooterPreview() {
@@ -946,14 +943,12 @@ export class EditReport extends Component {
     }
 
     async _loadRealReport(docId, _retryCount = 0) {
-        console.log('real record loading......', docId);
         const res = await this.rpc("/cyllo_studio/render_report_html", {
             report_id: this.state.reportInfo.id,
             doc_ids: [docId],
         });
 
         if (res.success) {
-            // Use the URL-based preview so Odoo's CSS/JS assets load correctly
             // inside the iframe (srcdoc breaks relative asset bundle paths).
             this.state.previewUrl = res.preview_url || false;
             this.state.previewHtml = false;
@@ -961,7 +956,6 @@ export class EditReport extends Component {
         }
 
         // Handle a stale/deleted record gracefully: skip it and advance to the
-        // next one rather than rendering Odoo's raw error page in the iframe.
         if (res.error === 'record_missing') {
             // Guard against infinite recursion in case ALL records are stale.
             const totalRecords = this.state.records.length;
@@ -1054,7 +1048,7 @@ export class EditReport extends Component {
                     text-align: left !important;
                 }
                 ${hasCustomFooter ? `
-                /* Hide Odoo standard footer when Cyllo custom footer is present */
+                /* Hide default standard footer when Cyllo custom footer is present */
                 .footer.o_standard_footer,
                 .o_standard_footer,
                 footer.footer {
@@ -1184,7 +1178,6 @@ export class EditReport extends Component {
             // returned by the backend includes current DnD changes.
             const hasChanges = $('.c_new').length > 0 || (this.undoManager && this.undoManager.canUndo());
             if (hasChanges && this.reportFrameRef.el) {
-                console.log("[EditSources] Pending changes detected, saving first...");
                 await this.save_changes(this);
             }
 
@@ -1206,7 +1199,6 @@ export class EditReport extends Component {
     _initAceEditor() {
         setTimeout(() => {
             const editorEl = this.aceEditorRef.el;
-            console.log("[EditSources] Initializing Ace. Element:", editorEl, "window.ace:", !!window.ace);
             if (editorEl && window.ace) {
                 if (this.aceEditor) {
                     this.aceEditor.destroy();
@@ -1221,7 +1213,6 @@ export class EditReport extends Component {
                 this.aceEditor.on('change', () => {
                     this.state.sourceCode = this.aceEditor.getValue();
                 });
-                console.log("[EditSources] Ace initialized with content length:", code.length);
             } else {
                 console.error("[EditSources] Could not initialize Ace. Element:", !!editorEl, "Lib:", !!window.ace);
                 if (!window.ace) {
@@ -1394,7 +1385,6 @@ export class EditReport extends Component {
     onPrintReport() {
         const report = this.state.reportInfo;
         const activeId = this.state.records[this.state.currentIndex];
-        console.log('reportss', report, activeId)
         if (!report.id || !activeId) return;
 
         this.action.doAction({
@@ -1482,7 +1472,6 @@ export class EditReport extends Component {
         const qrBlocks = rootEl?.querySelectorAll('.s_qr_block, [cy-type="qr"]');
         const hasQrInDom = qrBlocks && qrBlocks.length > 0;
 
-        // Also check for raw Odoo barcode widgets (img or svg) that might be QRs
         const rawBarcodes = rootEl?.querySelectorAll('img[src*="barcode"][src*="QR"], img[src*="barcode"][src*="qr"], svg[data-code-type="QR"]');
         const hasRawQrInDom = rawBarcodes && rawBarcodes.length > 0;
 
@@ -1586,7 +1575,6 @@ export class EditReport extends Component {
 
 
     //    async onReportPropertyChange(field, value) {
-    //        console.log('valueee',value,this)
     //        this.state.reportInfo[field] = value;
     //        await this.rpc("/web/dataset/call_kw/ir.actions.report/write", {
     //            model: "ir.actions.report",
@@ -1974,7 +1962,6 @@ export class EditReport extends Component {
             },
 
             async onAdd(evt) {
-                console.log("DROP", evt);
                 const item = evt.item;
                 const fromPanel = evt.from === self._snippetPanel;
 
@@ -2717,84 +2704,6 @@ export class EditReport extends Component {
         }
         return '[]';
     }
-    //    _createZoneSortable(zone) {
-    //        const self = this;
-    //
-    //        const instance = Sortable.create(zone, {
-    //            group: {
-    //                name: 'studio',
-    //                pull: 'clone',   // elements can be moved out of this zone
-    //                put: true,    // elements from panel clones or other zones land here
-    //            },
-    //            animation: 150,
-    //            ghostClass: 'gu-transit',
-    //            dragClass: 'gu-mirror',
-    //
-    //            onStart: () => {
-    //                self._isDragging = true;
-    //                if (self.editor) {
-    //                    self.editor.destroy();
-    //                    self.editor = null;
-    //                }
-    //                $('.selected').removeClass('selected');
-    //            },
-    //
-    //            onEnd: () => {
-    //                self._isDragging = false;
-    //            },
-    //
-    //            // Fired when an element from ANOTHER list (panel or other zone) is dropped here
-    //            onAdd: async (evt) => {
-    //                console.log('avtttt',evt)
-    //                const item = evt.item;
-    //                const fromPanel = item.dataset._fromPanel === '1';
-    //
-    //                if (fromPanel) {
-    //                    // Remove the placeholder node SortableJS already inserted
-    //                    item.remove();
-    //                    delete item.dataset._fromPanel;
-    //
-    //                    const type = item.dataset.type;
-    //                    let html = '';
-    //
-    //                    if (type === 'field') {
-    //                        const resModel = self._resModel || self.props.action.params?.res_model || '';
-    //                        const { fieldPath, fieldInfo } = await self.openFieldSelectorPopover(
-    //                            zone, resModel,
-    //                            (field) => !['one2many', 'many2many'].includes(field.type),
-    //                        );
-    //                        if (!fieldPath) return;
-    //                        html = `<span class="c_new"
-    //                                t-field="doc.${fieldPath}"
-    //                                style="cursor:grab;"
-    //                                title="${fieldInfo.string}">${fieldPath}</span>`;
-    //                    } else if (type === 'box') {
-    //                        html = `<div class="box rounded-2 c_new"
-    //                                style="border:1px solid #000;padding:10px;cursor:grab;">
-    //                                <span>New box</span>
-    //                            </div>`;
-    //                    }
-    //
-    //                    if (html) {
-    //                        zone.insertAdjacentHTML('beforeend', html);
-    //                        // Re-wire sortable so the newly added element is draggable
-    //                        this._refreshDragHandles();
-    //                    }
-    //                }
-    //                // For existing elements moved between zones, SortableJS handles the
-    //                // DOM move automatically — nothing extra needed.
-    //            },
-    //
-    //            // After any sort/move within the same list
-    //            onEnd: () => {
-    //                // Nothing extra needed; DOM is already updated by SortableJS
-    //            },
-    //
-    //        });
-    //
-    //        this._sortableInstances.push(instance);
-    //    }
-
     /**
      * Remove orphaned <t>/<cy-qweb-t> structural nodes that the HTML parser
      * foster-parents as siblings of the table wrapper.
@@ -2910,14 +2819,12 @@ export class EditReport extends Component {
 
     // \u2500\u2500 Company Logo Upload \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     onLogoClick(ev) {
-        console.log('klloo', this.state.hideLogo, this.state.companyLogo)
         if (this.state.hideLogo && this.state.companyLogo) {
             // Restore hidden logo for this report (no file picker needed)
             this.state.hideLogo = false;
             if (this.undoManager) this.undoManager.debouncedSave();
             return;
         }
-        console.log('testttttttt,logoo', this.state.companyLogo)
 
         if (this.state.companyLogo) {
             // Remove existing dropdown if any
@@ -2950,11 +2857,9 @@ export class EditReport extends Component {
                 this.state.companyLogo = false;
                 this.notification.add('Company logo removed', { type: 'success' });
             };
-
             menu.appendChild(uploadBtn);
             menu.appendChild(deleteBtn);
             document.body.appendChild(menu);
-
             // Close on outside click
             setTimeout(() => {
                 const closeMenu = (e) => {
@@ -3074,43 +2979,9 @@ export class EditReport extends Component {
             // Ensure any pending DOM updates are finished
             await new Promise(r => setTimeout(r, 100));
 
-            // SAFETY: If a c_new element landed inside a zone, we should move it to the
-            // nearest .oe_structure anchor. This is especially critical for zones
-            // containing tables or loops, where the browser mangles the DOM structure.
-            // By moving new nodes to safe anchors, we ensure the parent zone remains
-            // structurally identical to the original, preventing a position="replace"
-            // that would corrupt QWeb directive chains.
-            // SAFETY: Commented out aggressive DOM-relocation of c_new nodes to prevent them jumping to the top of the report.
-            // Sibling-relative xpath positioning will instead be used in buildInheritanceXML to preserve exact drop positions.
-            /*
-            const frameEl = component.reportFrameRef.el;
-            frameEl.querySelectorAll('[cy-template]').forEach(zone => {
-                const newNodes = Array.from(zone.children).filter(
-                    c => !c.hasAttribute('cy-xpath') && c.classList.contains('c_new')
-                );
-                if (!newNodes.length) return;
-
-                // Find a safe anchor (.oe_structure) in this zone or its parents
-                let anchor = zone.querySelector('.oe_structure[cy-xpath]') || zone.querySelector('.oe_structure');
-
-                // If this zone IS an oe_structure, or we found one, we are good.
-                if (zone.classList.contains('oe_structure') || anchor) {
-                    if (anchor && anchor !== zone) {
-                        newNodes.forEach(node => anchor.appendChild(node));
-                    }
-                } else {
-                    // If no anchor in zone, move to the global page anchor if possible
-                    const pageAnchor = frameEl.querySelector('.page > .oe_structure') || frameEl.querySelector('.oe_structure');
-                    if (pageAnchor && pageAnchor !== zone) {
-                        newNodes.forEach(node => pageAnchor.appendChild(node));
-                    }
-                }
-            });
-            */
             const frameEl = component.reportFrameRef.el;
             const editedHTML = frameEl.tagName === 'IFRAME' ? frameEl.contentDocument.documentElement.outerHTML : frameEl.innerHTML;
 
-            console.log('[Cyllo Studio] Serializing HTML...', editedHTML?.length || 0, 'bytes');
             const parser = new DOMParser();
             const editedDoc = parser.parseFromString(editedHTML, 'text/html');
             const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
@@ -3120,8 +2991,6 @@ export class EditReport extends Component {
 
             let changes = component.getChangedElements(originalDoc, editedDoc);
 
-
-            console.log('[Cyllo Studio] Changes detected:', changes.length, changes);
 
             // ── Logo hide/show persistence ──────────────────────────────────
             // We track whether hideLogo changed relative to what was originally loaded.
@@ -3189,12 +3058,10 @@ export class EditReport extends Component {
             if (logoOverrideTemplates.length) {
                 newTemplates = newTemplates.concat(logoOverrideTemplates);
             }
-            console.log('[Cyllo Studio] Sending templates:', newTemplates);
 
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
                 all_arch: newTemplates,
             });
-            console.log('[Cyllo Studio] Save result:', result);
 
             if (result && result['success'] === true) {
                 component.notification.add("Report saved successfully", { type: "success" });
@@ -3209,7 +3076,6 @@ export class EditReport extends Component {
                             record_id: sampleRecordId
                         }).then((res) => {
                             if (res && res.success) {
-                                console.log("[Cyllo Studio] Server-side thumbnail generated.");
                                 component.state.hasThumbnail = true;
                             } else {
                                 console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
@@ -3348,13 +3214,9 @@ export class EditReport extends Component {
                 && !hasTIfElIfChainInChildren(original)
                 && !containsTable(original)
                 && !original.classList.contains('page')
-                && !original.hasAttribute('name'); // Zones with names are often anchors in Odoo layouts
+                && !original.hasAttribute('name');
 
             if (textChanged || innerChanged || structChanged) {
-                console.log(`[Cyllo Studio] Change detected in ${xpath}: text=${textChanged}, inner=${innerChanged}, struct=${structChanged} (rawStruct=${rawStructChanged})`);
-                if (structChanged) {
-                    console.log(`[Cyllo Studio]   - Struct check for ${xpath}: hasStructural=${hasStructuralNodes(original)}, hasChain=${hasTIfElIfChainInChildren(original)}, hasTable=${containsTable(original)}`);
-                }
                 allChanges.push({ el, xpath, template, structChanged });
             }
 
@@ -3380,7 +3242,6 @@ export class EditReport extends Component {
 
                     const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
                     if (attrChanged) {
-                        console.log(`[Cyllo Studio] Attribute change on child ${childXpath}: hidden=${originalHasHidden}->${editedHasHidden}, t-if=${originalTif}->${editedTif}`);
                         allChanges.push({
                             el: editedChild,
                             xpath: childXpath,
@@ -3401,7 +3262,7 @@ export class EditReport extends Component {
             // This pass independently checks whether any cy-xpath child that was
             // present in the ORIGINAL zone is absent in the EDITED zone, and emits
             // a dedicated deletion entry for it so buildInheritanceXML can issue a
-            // position="replace" with empty body (the standard Odoo deletion idiom).
+            // position="replace" with empty body.
             Array.from(original.children)
                 .filter(origChild => origChild.hasAttribute('cy-xpath'))
                 .forEach(origChild => {
@@ -3416,9 +3277,8 @@ export class EditReport extends Component {
                     if (hasStructuralNodes(origChild)) return;
                     if (hasTIfElIfChainInChildren(origChild)) return;
 
-                    console.log(`[Cyllo Studio] Deletion detected: cy-xpath child "${childXpath}" removed from zone "${xpath}"`);
                     allChanges.push({
-                        el: origChild,          // the original node (used for template resolution)
+                        el: origChild,
                         xpath: childXpath,
                         template: childTemplate,
                         structChanged: false,
@@ -4023,7 +3883,6 @@ export class EditReport extends Component {
                     confirm: () => wrapper.remove(),
                     cancel: () => { },
                 });
-                // if (confirm("Delete this field?")) wrapper.remove();
             };
         });
 
@@ -4230,10 +4089,7 @@ export class EditReport extends Component {
                     .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
 
                 // ── Deletion: emit position="replace" with empty body ──────
-                // This is the standard Odoo inheritance idiom for removing a
-                // node that was defined in a parent/base template view.
                 if (change.isDeleted) {
-                    console.log(`[Cyllo Studio] Serialising deletion for xpath: ${change.xpath}`);
                     xpathBlock += `<xpath expr="${change.xpath}" position="replace"></xpath>`;
                     return;
                 }
@@ -4257,7 +4113,7 @@ export class EditReport extends Component {
                         return c.hasAttribute('t-if') || c.hasAttribute('t-elif') || c.hasAttribute('t-else');
                     });
 
-                    // CRITICAL: If zone contains a table with QWeb directives, the browser HTML
+                    // If zone contains a table with QWeb directives, the browser HTML
                     // parser hoists <t t-foreach/t-if> out of <tbody>, breaking the t-if/t-elif
                     // sibling chain. A position="replace" on such a zone produces invalid QWeb.
                     // Always fall back to sibling-relative positioning or inside positioning in this case.
@@ -4329,7 +4185,6 @@ export class EditReport extends Component {
             // Use the first change's template and try to find a page element from its element
             const firstChange = changes[0];
             footerTemplateKey = firstChange.template;
-            console.log('[Cyllo Studio] Using template from changes:', footerTemplateKey);
 
             // Try to find page element relative to the change element
             try {
@@ -4338,13 +4193,11 @@ export class EditReport extends Component {
                 while (el) {
                     if (el.classList && el.classList.contains('page') && el.hasAttribute && el.hasAttribute('cy-xpath')) {
                         pageXpath = el.getAttribute('cy-xpath');
-                        console.log('[Cyllo Studio] Found page element from change traversal with cy-xpath:', pageXpath);
                         foundValidTemplate = true;
                         break;
                     }
                     if (el.hasAttribute && el.hasAttribute('cy-template')) {
                         footerTemplateKey = el.getAttribute('cy-template');
-                        console.log('[Cyllo Studio] Found template from change traversal:', footerTemplateKey);
                     }
                     el = el.parentElement;
                 }
@@ -4358,7 +4211,6 @@ export class EditReport extends Component {
                     const pageEl = doc.querySelector('.page[cy-xpath]');
                     if (pageEl) {
                         pageXpath = pageEl.getAttribute('cy-xpath');
-                        console.log('[Cyllo Studio] Found page element in document with cy-xpath:', pageXpath);
                         // Also get the template from the page element if available
                         if (pageEl.hasAttribute('cy-template')) {
                             footerTemplateKey = pageEl.getAttribute('cy-template');
@@ -4439,7 +4291,6 @@ export class EditReport extends Component {
 
         mainInherit.xpathBlocks = mainInherit.xpathBlocks.replace('</data>', footerXml + '\n</data>');
 
-        console.log('new_inherits', new_inherits);
         return new_inherits;
     }
 

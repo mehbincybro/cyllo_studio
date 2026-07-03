@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="custom_report.edit_report">
-<!--        <div class="d-flex flex-column w-100 bg-200" style="height: 100%;">-->
         <div class="d-flex flex-column w-100 bg-200" style="position: fixed; inset: 0; z-index: 1040;">
 
             <!-- Header -->
@@ -93,12 +92,6 @@
                 <!-- Sidebar (Editable) -->
                 <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column"
                      t-att-class="{'d-none': state.previewMode}" style="width: 300px; overflow-y: auto; z-index: 10;">
-                    
-
-
-<!--                    <div class="cy-section-label">-->
-                    <!--                        <span>Report Elements</span>-->
-                    <!--                    </div>-->
 
                     <div class="cy-section-label">
                         <span>Basic Elements</span>
@@ -229,12 +222,6 @@
                                    t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._updateFooterInIframe(); }"/>
                             <span class="ms-2" style="font-size: 11px; color: #444;">Company Footer</span>
                         </label>
-<!--                        <label class="d-flex align-items-center mb-2" style="cursor: pointer;">-->
-<!--                            <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"-->
-<!--                                   t-att-checked="state.footerShowDocName"-->
-<!--                                   t-on-change="(ev) => { state.footerShowDocName = ev.target.checked; this._renderFooterPreview(); }"/>-->
-<!--                            <span class="ms-2" style="font-size: 11px; color: #444;">Doc Name (o.name)</span>-->
-<!--                        </label>-->
                         <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
                             <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"
                                    t-att-checked="state.footerShowPageNum"
@@ -314,11 +301,6 @@
                                  t-on-load="onEditIframeLoad"/>
                         </t>
                     </div>
-                    <!-- End of Page marker (temporarily disabled)
-                    <div class="cyllo-end-of-page-marker mb-5">
-                        <span>&#8212; End of Page &#8212;</span>
-                    </div>
-                    -->
                 </div>
 
                 <!-- ── Box Properties Panel (right sidebar) ────────────────── -->
