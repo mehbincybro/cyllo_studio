@@ -157,6 +157,7 @@
             'cyllo_studio/static/src/js/control_panel/control_panel.js',
             'cyllo_studio/static/src/js/control_panel/control_panel.xml',
             'cyllo_studio/static/src/js/control_panel/cog_menu_list.xml',
+            'cyllo_studio/static/src/js/control_panel/cog_menu_list.js',
             'cyllo_studio/static/src/js/control_panel/report_creation_dialog.js',
             'cyllo_studio/static/src/js/control_panel/report_creation_dialog.xml',
 

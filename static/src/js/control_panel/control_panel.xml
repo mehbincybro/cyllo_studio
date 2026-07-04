@@ -5,11 +5,11 @@
              data-command-category="actions"
              t-att-style="
              !((!env.config.actionType &amp;&amp; env.config.viewType == 'list') || (env.config.actionType &amp;&amp; env.config.viewType == 'form'))
-				&amp;&amp; !(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule')
+				&amp;&amp; !(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule' || env?.searchModel?.resModel == 'ir.actions.report')
              ? 'display: none !important;' : ''">
             <div class="o_control_panel_main d-flex flex-wrap flex-lg-nowrap justify-content-between align-items-lg-start gap-3 flex-grow-1">
 				<div class="o_control_panel_breadcrumbs d-flex align-items-center gap-1 order-0 h-lg-100">
-					<t t-if="(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule') and !props.isSearchView"
+					<t t-if="(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule' || env?.searchModel?.resModel == 'ir.actions.report') and !props.isSearchView"
                        t-slot="control-panel-cy-form-cogs"/>
 					<!-- This div is intentionally hidden. Do not remove it, as it's used to prevent style/layout issues. -->
                     <div class="o_control_panel_main_buttons d-flex gap-1 d-empty-none d-print-none" t-ref="mainButtons"
@@ -32,7 +32,7 @@
                             <t t-slot="control-panel-always-buttons"/>
 						</div>
 					</div>
-                    <t t-if="(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule') and !props.isSearchView">
+                    <t t-if="(env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule' || env?.searchModel?.resModel == 'ir.actions.report') and !props.isSearchView">
 						<t t-if="env.config.noBreadcrumbs">
 							<section class="o_control_panel_breadcrumbs_actions d-contents">
 								<t t-slot="control-panel-additional-actions"/>
@@ -50,7 +50,7 @@
                     <!-- Spacer -->
 				</div>
                 <div t-if="(env.config.actionType &amp;&amp; env.config.viewType == 'form' || !env.config.actionType &amp;&amp; env.config.viewType == 'list'
-                		|| (env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule'))
+                		|| (env?.searchModel?.resModel == 'ir.model.access' || env?.searchModel?.resModel == 'ir.rule' || env?.searchModel?.resModel == 'ir.actions.report'))
                         and !props.isSearchView"
                      class="o_control_panel_actions d-empty-none d-flex align-items-center justify-content-start justify-content-lg-around order-2 order-lg-1 w-100 w-lg-auto">
 					<t t-slot="layout-actions"/>
@@ -61,10 +61,11 @@
 					<div class="o_cp_pager text-nowrap " role="search">
                         <Pager t-if="shouldShowPager" t-props="pagerProps"/>
 					</div>
+                    <t t-slot="control-panel-navigation-additional"/>
 				</div>
 			</div>
 		</div>
-        <div t-if="this.env.config.viewType === 'kanban' and !this.env.searchModel.context.kanban_preview_mode and !props.isSearchView"
+        <div t-if="this.env.config.viewType === 'kanban' and !this.env.searchModel.context.kanban_preview_mode and !props.isSearchView and env?.searchModel?.resModel !== 'ir.actions.report'"
              class="p-3 d-flex">
 			<Dropdown class="'mx-2'" togglerClass="'btn btn-secondary'" showCaret="true">
 				<t t-set-slot="toggler">

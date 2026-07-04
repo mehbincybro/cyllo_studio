@@ -3,6 +3,14 @@
 
 }
 
+.o_action_manager > :nth-child(2),
+.cy-left-sidebar-nav,
+.o_main_navbar.cy-top-navbar,
+.cy-left-sidebar *, .cy_menu-collapsed .cy-submenu-box {
+    transition: none !important;
+}
+
+
 .o_action_manager .o_action {
     flex-direction: column;
 }
@@ -21,7 +29,7 @@
 }
 
 .cy-studio .o_control_panel {
-    padding-top: 16px !important;
+    padding: 10px 16px !important;
 }
 
 /* List View */
