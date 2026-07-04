@@ -41,7 +41,8 @@
                 <label class="cy-navbar_label customCheckbox-label" for="defaultGroupBy">Type
                 </label>
                 <div class="cy-studio-custom-dropdown">
-                    <CylloStudioDropdown onChange="(value) => this.handleOnTypeChange(value)" options="onTypeChange" defaultValue="buttonProperties.type"/>
+                    <CylloStudioDropdown onChange="(value) => this.handleOnTypeChange(value)" options="onTypeChange"
+                                         defaultValue="buttonProperties.type"/>
                 </div>
             </div>
             <t t-if="buttonProperties.type === 'object'">
@@ -50,7 +51,9 @@
                         Function
                     </label>
                     <div class="cy-studio-custom-dropdown">
-                        <CylloStudioDropdown onChange="(value) => this.handleButtonFunctionChange(value)" options="ButtonFunctionChange(functions)" defaultValue="buttonProperties.name" searchable="true"/>
+                        <CylloStudioDropdown onChange="(value) => this.handleButtonFunctionChange(value)"
+                                             options="ButtonFunctionChange(functions)"
+                                             defaultValue="buttonProperties.name" searchable="true"/>
                     </div>
                 </div>
                 <div class="functionInfo d-none">
@@ -69,9 +72,15 @@
                 </div>
             </t>
             <t t-if="buttonProperties.type === 'action'">
-                <label for="" class="cy-navbar_label">Action</label>
-                <div class="cy-studio-custom-dropdown-action">
-                    <RecordSelector resId="buttonProperties.name" resModel="'ir.actions.actions'" update="(resId)=> buttonProperties.name = resId" domain="[['binding_model_id', '=', this.action.currentController.props.resModel]]"/>
+                <div class="dropdown-checkbox-container">
+                    <label class="cy-navbar_label customCheckbox-label">Action</label>
+                    <div class="cy-studio-custom-dropdown">
+                        <CylloStudioDropdown
+                                onChange="(value) => this.handleActionChange(value)"
+                                options="actionOptions"
+                                defaultValue="buttonProperties.name"
+                                searchable="true"/>
+                    </div>
                 </div>
             </t>
             <div class="dropdown-checkbox-container button_visible" style=" margin-top: 8px;">
