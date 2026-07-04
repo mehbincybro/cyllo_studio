@@ -19,9 +19,7 @@ import {
     useService,
     useOwnedDialogs
 } from "@web/core/utils/hooks";
-import {
-    RecordSelector
-} from "@web/core/record_selectors/record_selector";
+
 import {
     MultiSelectDropDown
 } from "@cyllo_studio/js/view_editor/dropdown/multi_select_dropdown/multi_select_dropdown";
@@ -445,7 +443,7 @@ export class ButtonProperties extends Component {
         });
 
         onWillStart(async () => {
-            if (this.state.viewDetails.viewType === ["form"]) {
+            if (this.state.viewDetails.viewType === "form") {
                 sessionStorage.removeItem("CyStudioRelationModel");
             }
             if (this.props.groupIds && this.props.groupIds.length > 0) {
