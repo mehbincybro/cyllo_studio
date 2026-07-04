@@ -94,19 +94,28 @@ export class CylloNavBar extends NavBar {
             if (actionChanged) {
                 const configFieldName = this._metaModelToFieldName[currentResModel];
                 if (configFieldName) {
+                    // _getBusinessContext() tracks the last non-meta view as
+                    // the parent regardless of whether it had a res_model, so
+                    // this is always fresh — Home/Discuss show up by name,
+                    // not a stale unrelated one from an older session.
                     const { name: businessName } = this._getBusinessContext();
                     this._clearX2manyBreadcrumb();
                     this._setConfigBreadcrumb(businessName, configFieldName);
-                } else if (isFirstEvent) {
-                    // First event after mount/refresh, landed directly on a
-                    // normal business view — DON'T blindly clear: an x2many
-                    // trail may have just been restored from sessionStorage
-                    // and must survive. Just record the business baseline.
-                    this._getBusinessContext();
                 } else {
-                    // Genuine navigation away, to neither a meta-view nor
-                    // (via the branch above) preserved as one.
-                    this._clearBreadcrumb();
+                    // Landed on a real business view. The config breadcrumb
+                    // is only ever valid while viewing a meta-view, so any
+                    // persisted one here (e.g. re-entering Studio fresh after
+                    // Exit, restored from sessionStorage on mount) is stale —
+                    // clear it unconditionally, first event or not.
+                    this._clearConfigBreadcrumb();
+                    // The x2many trail is different: it has no action/history
+                    // entry of its own, so a legitimately-restored one (from a
+                    // refresh mid-drill) IS expected on the first event and
+                    // must survive it — only clear it on later, genuine nav.
+                    if (!isFirstEvent) {
+                        this._clearX2manyBreadcrumb();
+                    }
+                    this._getBusinessContext();
                 }
                 // Stale from the previous action's studio-editable list (if
                 // any) — the new action's own renderer re-announces this via
@@ -210,15 +219,35 @@ export class CylloNavBar extends NavBar {
      * however many Configuration sub-views deep we are.
      */
     _getBusinessContext() {
-        const currentResModel = this.action.currentController?.action?.res_model;
-        if (currentResModel && !this._metaModelToFieldName[currentResModel]) {
-            sessionStorage.setItem('CyConfigBusinessModel', currentResModel);
+        const currentAction = this.action.currentController?.action;
+        const currentResModel = currentAction?.res_model;
+        // The report designer (client action "edit_report") is a sub-tool
+        // WITHIN the Reports workflow, not a real navigation away from it —
+        // it exposes its own res_model (the report's data source, e.g.
+        // account.move.line for "Aged Payable"), which must not overwrite
+        // the actual remembered parent when the user later backs out of it.
+        const isReportDesigner = currentAction?.tag === 'edit_report';
+        const isMetaView = isReportDesigner || (currentResModel && this._metaModelToFieldName[currentResModel]);
+        if (!isMetaView) {
+            // Any non-meta view is a valid breadcrumb parent, whether it has
+            // a real res_model (Quotations) or not (Home, Discuss...). Model
+            // presence only matters for RPC scoping below, not for "is this
+            // a legitimate parent to show in the trail".
+            const viewType = this.action.currentController?.env?.config?.viewType || 'list';
+            sessionStorage.setItem('CyConfigBusinessModel', currentResModel || '');
             sessionStorage.setItem('CyConfigBusinessName', this.currentModelName);
-            return { resModel: currentResModel, name: this.currentModelName };
+            sessionStorage.setItem('CyConfigBusinessViewType', viewType);
+            return { resModel: currentResModel || null, name: this.currentModelName, viewType };
         }
+        // Chaining from one Configuration sub-view to another — reuse the
+        // last remembered parent. Its name is always shown in the trail;
+        // resModel may be empty (falls back to null) if that parent itself
+        // had no model, e.g. Home/Discuss — RPC calls below then correctly
+        // scope to "all records" instead of a stale unrelated model.
         return {
-            resModel: sessionStorage.getItem('CyConfigBusinessModel') || currentResModel,
+            resModel: sessionStorage.getItem('CyConfigBusinessModel') || null,
             name: sessionStorage.getItem('CyConfigBusinessName') || this.currentModelName,
+            viewType: sessionStorage.getItem('CyConfigBusinessViewType') || 'list',
         };
     }
 
@@ -233,10 +262,14 @@ export class CylloNavBar extends NavBar {
             res_model: 'ir.model.access',
             views: [[viewId, 'list']],
             target: 'current',
-            context: {
+            // No business model to scope to (e.g. opened from the Home
+            // dashboard) — omit the default filter entirely rather than
+            // passing a falsy model_id, which search_default_* would apply
+            // literally and show zero records instead of all of them.
+            context: resModel ? {
                 default_model_id: modelId,
                 search_default_model_id: modelId,
-            },
+            } : {},
         });
         // The breadcrumb itself is (re)derived centrally by the
         // ACTION_MANAGER:UI-UPDATED handler once this doAction resolves.
@@ -253,10 +286,10 @@ export class CylloNavBar extends NavBar {
             type: 'ir.actions.act_window',
             res_model: 'ir.rule',
             views: [[model_id[1], 'list']],
-            context: {
+            context: resModel ? {
                 default_model_id: model_id[0],
                 search_default_model_id: model_id[0],
-            },
+            } : {},
         });
     }
     /** Show the "Parent > SubView" trail in the navbar for a Configuration sub-view. */
@@ -303,14 +336,10 @@ export class CylloNavBar extends NavBar {
     /** Open report view for the current model. */
     async ReportClick() {
         this.state.configOpen = false;
-        const currentController = this.action.currentController;
+        // _getBusinessContext() persists {model, name, viewType} for
+        // handleClose() to restore on Exit — no need for a separate
+        // report-specific origin record here.
         const { resModel } = this._getBusinessContext();
-        if (resModel) {
-            sessionStorage.setItem('cy_report_editor_origin', JSON.stringify({
-                res_model: resModel,
-                view_type: currentController.env?.config?.viewType || 'list',
-            }));
-        }
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.actions.report']);
 
         const action = {
@@ -318,16 +347,20 @@ export class CylloNavBar extends NavBar {
             type: 'ir.actions.act_window',
             res_model: 'ir.actions.report',
             target: 'current',
-            views: [[viewId, 'kanban']],
-            context: {
+            // A form view is required for the kanban's "+ New"/record-open
+            // actions to have somewhere to navigate to — without one they
+            // silently do nothing. `false` uses the model's default form view.
+            views: [[viewId, 'kanban'], [false, 'form']],
+            // No business model to scope to (e.g. opened from the Home
+            // dashboard) — omit the default filter so every report shows.
+            context: resModel ? {
                 default_model: resModel,
+                // Removable default filter (shown as a facet pill) — unlike
+                // a hard action.domain, clearing it lets the user see every
+                // report, not just this model's.
                 search_default_model: resModel,
-            }
+            } : {}
         };
-
-        if (resModel) {
-            action.domain = [['model', '=', resModel]];
-        }
 
         await this.action.doAction(action);
         // The breadcrumb itself is (re)derived centrally by the
@@ -427,22 +460,21 @@ export class CylloNavBar extends NavBar {
         sessionStorage.removeItem("invisible");
         const currentUrl = new URL(window.location.href);
         const currentModel = this.action.currentController?.action?.res_model;
-        if (currentModel === 'ir.actions.report') {
-            let origin = null;
-            try {
-                origin = JSON.parse(sessionStorage.getItem('cy_report_editor_origin') || 'null');
-            } catch (_) {
-                origin = null;
-            }
-            if (origin?.res_model) {
+        if (this._metaModelToFieldName[currentModel]) {
+            // Exiting from a Configuration sub-view (Access Rights/Record
+            // Rules/Reports) — land back on the real business view that was
+            // open before it, instead of leaving the user stranded on this
+            // meta-view outside Studio.
+            const originModel = sessionStorage.getItem('CyConfigBusinessModel');
+            const originViewType = sessionStorage.getItem('CyConfigBusinessViewType') || 'list';
+            if (originModel) {
                 const hashParams = new URLSearchParams(currentUrl.hash.replace(/^#/, ""));
-                hashParams.set("model", origin.res_model);
-                hashParams.set("view_type", origin.view_type || "list");
+                hashParams.set("model", originModel);
+                hashParams.set("view_type", originViewType);
                 hashParams.delete("id");
                 hashParams.delete("action");
                 currentUrl.hash = hashParams.toString();
             }
-            sessionStorage.removeItem('cy_report_editor_origin');
         }
         const studio = currentUrl.searchParams.get("studio");
         if (studio === "1") {

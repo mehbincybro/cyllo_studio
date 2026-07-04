@@ -3332,8 +3332,8 @@ input:checked+.cy-slider:before {
 }
 
 /* 4. Hide specific Studio & UI elements strictly on Report Kanban View */
-.o_n_kanban_view .o_control_panel,
-.o_n_kanban_view .o_search_panel,
+/* .o_n_kanban_view .o_control_panel,
+.o_n_kanban_view .o_search_panel, */
 .o_n_kanban_view>.p-3.d-flex>.o-dropdown {
     display: none !important;
 }

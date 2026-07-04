@@ -19,10 +19,11 @@ import {
 } from "@web/views/kanban/kanban_arch_parser";
 import { Layout } from "@web/search/layout";
 import {onWillStart, onMounted, onWillDestroy, useRef} from "@odoo/owl";
-import {useService} from "@web/core/utils/hooks";
+import {useService, useOwnedDialogs} from "@web/core/utils/hooks";
 import { serializeXML } from "@web/core/utils/xml";
 import { session } from "@web/session";
 import { addFieldDependencies, extractFieldsFromArchInfo } from "@web/model/relational_model/utils";
+import { ReportCreationDialog } from "@cyllo_studio/js/control_panel/report_creation_dialog";
 
 
 export class CylloKanbanController extends KanbanController {
@@ -31,6 +32,7 @@ export class CylloKanbanController extends KanbanController {
         this.rpc = useService('rpc')
         this.dialogService = useService("dialog");
         this.action = useService("action");
+        this.addDialog = useOwnedDialogs();
         onWillStart(async ()=>{
         if(!this.env.config.viewId){
                 await this.rpc('cyllo_studio/form/add/kanban_view',{
@@ -83,6 +85,20 @@ export class CylloKanbanController extends KanbanController {
                 document.body.classList.remove('cy-report-kanban-view-active');
             }
         });
+    }
+
+    /**
+     * The Reports kanban has no dedicated create flow of its own (no form
+     * view worth showing) — route "+ New" (from every entry point: the
+     * kanban's own button, and CogMenuList's) through the same report
+     * creation wizard the control panel's separate "+ New" button opens.
+     */
+    createRecord() {
+        if (this.props.resModel === 'ir.actions.report') {
+            this.addDialog(ReportCreationDialog, {});
+            return;
+        }
+        return super.createRecord();
     }
 
      /**
