@@ -412,7 +412,10 @@ export class CylloFormCompiler extends FormCompiler {
                 if (compiled.tagName === "ViewButton") {
                     compiled.setAttribute("defaultRank", "'btn-secondary'");
                 }
-                buttons.push(compiled);
+                buttons.push({
+                    node: compiled,
+                    invisible: getModifier(child, "invisible"),
+                });
             }
         }
         if (!hasStatusBar) {
@@ -433,10 +436,27 @@ export class CylloFormCompiler extends FormCompiler {
         if (buttonLimit) {
             statusBarButtons.setAttribute("buttonLimit", buttonLimit);
         }
-        for (const button of buttons) {
+        const invisibleSession = sessionStorage.getItem('invisible');
+        const getVisibleExpression = (buttonInfo) => {
+            const invisible = buttonInfo.invisible;
+            if (invisibleSession) {
+                return true;
+            }
+            if (!invisible || invisible === "False" || invisible === "0") {
+                return true;
+            }
+            if (invisible === "True" || invisible === "1") {
+                return false;
+            }
+            return `!__comp__.evaluateBooleanExpr(${JSON.stringify(
+                invisible
+            )}, __comp__.props.record.evalContextWithVirtualIds)`;
+        };
+        for (const buttonInfo of buttons) {
+            const button = buttonInfo.node;
             const slot = createElement("t", {
                 "t-set-slot": `button_${slotId++}`,
-                isVisible: button.getAttribute("t-if") || true,
+                isVisible: button.getAttribute("t-if") || getVisibleExpression(buttonInfo),
             });
             append(slot, button);
             append(statusBarButtons, slot);
