@@ -296,7 +296,16 @@ export const QrMixin = {
 
         placeholderEl.querySelector('.qr-delete').onclick = (e) => {
             e.stopPropagation();
-            if (confirm("Delete this QR code?")) placeholderEl.remove();
+            placeholderEl.querySelector('.qr-delete').onclick = (e) => {
+                e.stopPropagation();
+                this.env.services.dialog.add(ConfirmationDialog, {
+                    title: "Delete QR code",
+                    body: "Are you sure you want to delete this QR code?",
+                    confirmLabel: "Delete",
+                    confirm: () => placeholderEl.remove(),
+                    cancel: () => {},
+                });
+            };
         };
 
         if (mode === 'insert') {
