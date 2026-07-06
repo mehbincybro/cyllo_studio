@@ -33,42 +33,50 @@
                                 props.info and props.info?.componentProps?.type == 'grid' ||
                                 props.info?.componentProps?.type == 'form' and state.isPreviewMode" class="position-relative" style="height: 100%;">
                                     <t t-if="props.info.Component" t-component="props.info.Component" className="'o_action'" t-props="props.info.componentProps" t-key="props.info.id"/>
-                                    <!--                            <div class="cy-studio-overlay opacity-0 opacity-75-hover
-                                w-100">-->
-                                    <!--								<div class="text-center">-->
-                                    <!--									<i class="ri-lock-2-fill text-danger" style="font-size:
-                            10rem;"/>-->
-                                    <!--                                    <h2 class="fw-bolder text-danger">-->
-                                    <!--										<t t-esc="props.info?.componentProps.action?.display_name"/>-->
-                                    <!--                                        Editing Restricted !-->
-                                    <!--									</h2>-->
-                                    <!--                                    <div t-if="props.info and props.info?.componentProps?.type ==
+                                    <div class="cy-studio-overlay opacity-0 opacity-75-hover w-100" style="background: #25251a !important; height: 100% !important; pointer-events: auto; cursor: not-allowed;">
+                                        <div class="text-center">
+                                            <i class="ri-lock-2-line text-danger" style="font-size: 10rem;"/>
+                                            <h2 class="fw-bolder text-danger">
+                                                <t t-esc="props.info?.componentProps.action?.display_name"/>
+                                                Editing Restricted !
+                                            </h2>
+                                            <!--                                    <div t-if="props.info and
+                                            props.info?.componentProps?.type
+                                    ==
                             'grid'" class="mt-3">-->
-                                    <!--                                        <div class="text-warning">-->
-                                    <!--                                            <i class="ri-tools-line me-2" style="font-size: 1.5rem;"/>-->
-                                    <!--                                            <h4 class="fw-bolder text-warning mb-1 d-inline">-->
-                                    <!--                                                Grid view functionality is under development in studio.-->
-                                    <!--                                            </h4>-->
-                                    <!--                                        </div>-->
-                                    <!--                                    </div>-->
-                                    <!--                                    </div>-->
-                                    <!--                                </div>-->
-                                    <!--                          <div t-if="props.info?.componentProps?.type == 'form' and
+                                            <!--                                        <div class="text-warning">-->
+                                            <!--                                            <i class="ri-tools-line me-2" style="font-size:
+                                    1.5rem;"/>-->
+                                            <!--                                            <h4 class="fw-bolder text-warning mb-1
+                                            d-inline">-->
+                                            <!--                                                Grid view functionality is under development in
+                                            studio.-->
+                                            <!--                                            </h4>-->
+                                            <!--                                        </div>-->
+                                            <!--                                    </div>-->
+                                            <!--                                    </div>-->
+                                            <!--                                </div>-->
+                                            <!--                          <div t-if="props.info?.componentProps?.type ==
+                                            'form' and
                             state.isPreviewMode"-->
-                                    <!-- class="cy-studio-overlay opacity-0 opacity-75-hover w-100" style="pointer-events: auto; cursor: not-allowed;">-->
-                                    <!--    <div class="text-center">-->
-                                    <!--        <i class="ri-tv-2-line" style="font-size: 10rem;
+                                            <!-- class="cy-studio-overlay opacity-0 opacity-75-hover
+                                            w-100"
+                                    style="pointer-events: auto; cursor: not-allowed;">-->
+                                            <!--    <div class="text-center">-->
+                                            <!--        <i class="ri-tv-2-line" style="font-size: 10rem;
                             color:#9ea700;"/>-->
-                                    <!--&lt;!&ndash;
+                                            <!--&lt;!&ndash;
                             <h1 class="fw-bolder mb-1 d-block" style="color: green;">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;
+                                            <!--&lt;!&ndash;
                             Preview&ndash;&gt;-->
-                                    <!--&lt;!&ndash;
+                                            <!--&lt;!&ndash;
                             </h1>&ndash;&gt;-->
-                                    <!--         <h1 style="font-size: 36px; font-weight: 800; color: #9aa07a;
+                                            <!--         <h1 style="font-size: 36px; font-weight: 800;
+                                            color:
+                                    #9aa07a;
                             letter-spacing: 1px;">PREVIEW</h1>-->
-                                    <!--    </div>-->
-                                    <!--</div>-->
+                                       </div>
+                                    </div>
                                 </div>
                                 <t t-elif="props.info.Component" t-component="props.info.Component" className="'o_action'" t-props="props.info.componentProps" t-key="props.info.id"/>
                             </div>

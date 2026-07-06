@@ -1535,7 +1535,6 @@ export class EditReport extends Component {
         const editableArea = iframeEl.tagName === 'IFRAME' ? iframeEl.contentDocument?.body : iframeEl;
 
         if (canvasArea) {
-            canvasArea.style.backgroundColor = '#e9ecef';
             canvasArea.style.padding = '40px';
             canvasArea.style.maxHeight = '';
             canvasArea.style.overflowY = 'auto';
@@ -1554,7 +1553,6 @@ export class EditReport extends Component {
         iframeEl.style.maxWidth = '100%';
         iframeEl.style.minHeight = 'auto'; // Let it shrink to fit content
         iframeEl.style.border = 'none';
-        iframeEl.style.boxShadow = '0 10px 30px rgba(0,0,0,0.1)';
         iframeEl.style.backgroundColor = 'white';
         iframeEl.style.display = 'block';
 
@@ -2956,22 +2954,39 @@ export class EditReport extends Component {
         reader.readAsDataURL(file);
     }
 
+    // Name of the business view Reports was opened from (e.g. "User Dashboard",
+    // "Discuss", "Sales") — persisted by navbar.js's _getBusinessContext().
+    get businessBreadcrumbName() {
+        return sessionStorage.getItem('CyConfigBusinessName') || 'Home';
+    }
+
+    async goToBusinessParent(component) {
+        const actionId = sessionStorage.getItem('CyConfigBusinessActionId');
+        if (actionId) {
+            component.action.doAction(parseInt(actionId, 10));
+        } else {
+            this.close_edit(component);
+        }
+    }
+
     async close_edit(component) {
+        // Scope back to whatever business model Reports was opened from
+        // (persisted by navbar.js's _getBusinessContext()) — not this._resModel,
+        // which is the *edited report's own* data-source model and has nothing
+        // to do with how the Reports list should be filtered on return.
+        const businessModel = sessionStorage.getItem('CyConfigBusinessModel');
+
         const action = {
             name: 'Reports',
             type: 'ir.actions.act_window',
             res_model: 'ir.actions.report',
             target: 'current',
             views: [[false, 'kanban']],
-            context: {
-                default_model: this._resModel,
-                search_default_model: this._resModel,
-            }
+            context: businessModel ? {
+                default_model: businessModel,
+                search_default_model: businessModel,
+            } : {}
         };
-
-        if (this._resModel) {
-            action.domain = [['model', '=', this._resModel],];
-        }
 
         component.action.doAction(action);
     }

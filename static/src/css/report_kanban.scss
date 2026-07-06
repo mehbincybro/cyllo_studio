@@ -21,23 +21,29 @@
     flex-direction: column;
     align-items: center;
     padding: 0;
-    /* Remove internal padding to allow full-width thumbnail */
     border: 1px solid #E2E8F0;
     background: #FFF;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.25s ease;
+    transition: outline 0.5s ease-in-out, box-shadow 0.25s ease-in-out, transform 0.25s ease-in-out;
     height: 200px;
     width: 100%;
     position: relative;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     overflow: hidden;
-    /* Ensure rounded corners for thumbnail */
+    outline: none !important;
+}
+
+.o_kanban_renderer .o_kanban_record.oe_kanban_global_click:focus-within,
+.o_kanban_renderer .o_kanban_record.oe_kanban_global_click:focus-visible {
+    outline: none !important;
 }
 
 .cyllo_report_card:hover {
-    border-color: #9ea700;
-    box-shadow: 0 4px 12px rgba(158, 167, 0, 0.1);
+    border-color: #9ea700 !important;
+    outline: 2px solid  #9ea700 !important;
+    outline-offset: -1px;
+    box-shadow: 0 4px 12px #7070701a;
     transform: translateY(-2px);
 }
 

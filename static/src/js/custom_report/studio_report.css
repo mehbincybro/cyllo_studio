@@ -4,18 +4,21 @@
 
 /* ── Report Frame / Editable Area ─────────────────── */
 .editable-area {
-    font-family: Arial, sans-serif;
+    font-family: "Inter", Arial, sans-serif;
     font-size: 12px;
-    line-height: 1.5;
-    color: #333;
+    line-height: 1.6;
+    color: #1f2937;
+    min-height: 0;
+    box-sizing: border-box;
+    overflow: visible;
 }
 
 /* Ensure fixed page height */
 .editable-area .page {
     box-sizing: border-box;
-    min-height: 297mm; /* A4 height */
+    min-height: 297mm;
     height: 297mm;
-    width: 210mm; /* A4 width */
+    width: 210mm;
     overflow: hidden;
 }
 
@@ -32,7 +35,7 @@
     padding-bottom: 22mm;
 }
 
-.editable-area .cy-studio-page-host > .cy-footer-preview-wrapper {
+.editable-area .cy-studio-page-host>.cy-footer-preview-wrapper {
     position: absolute;
     left: 0;
     right: 0;
@@ -196,6 +199,7 @@
     border-collapse: collapse;
     table-layout: auto;
     margin-bottom: 8px;
+    page-break-inside: auto;
 }
 
 
@@ -220,15 +224,25 @@
 }
 
 .editable-area table thead th {
-    border-bottom: 1px solid #ddd;
-    font-weight: bold;
+    border-bottom: 2px solid #111827;
+    font-weight: 700;
     text-align: left;
+    background: transparent;
+    font-size: 12px;
+    color: #111827;
+    padding: 6px 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .editable-area table tfoot td,
 .editable-area table tfoot th {
-    border-top: 1px solid #ddd;
-    font-weight: bold;
+    border-top: 2px solid #111827;
+    font-weight: 700;
+    text-align: right;
+    color: #111827;
+    padding-top: 6px;
 }
 
 .editable-area table tbody tr:last-child td {
@@ -399,8 +413,8 @@
 
 /* ── Drag-over highlight ─────────────────────────── */
 .gu-over {
-    outline: 2px dashed #43a047 !important;
-    background-color: rgba(67, 160, 71, 0.05) !important;
+    outline: 2px dashed #43a047;
+    background-color: rgba(67, 160, 71, 0.05);
 }
 
 /* ── New dropped elements ────────────────────────── */
@@ -542,9 +556,6 @@
 }
 
 /* ── Page Breaks for PDF Export ───────────────────── */
-.editable-area table {
-    page-break-inside: auto;
-}
 
 .editable-area tr {
     page-break-inside: avoid;
@@ -559,9 +570,6 @@
     display: table-footer-group;
 }
 
-.editable-area .page-break {
-    page-break-before: always;
-}
 
 /* ── Preview Mode Styling overrides ───────────────────────────────────── */
 .previewing [cy-type='dynamic'] {
@@ -1197,8 +1205,10 @@
 
 /* ── Native DnD transit / dragging states ──────────── */
 .gu-transit {
-    opacity: 0.4;
-    border: 2px dashed #5b8dee !important;
+    opacity: 0.35;
+    border: 2px dashed #5b8dee;
+    outline: 2px dashed #9ab83a;
+    outline-offset: 2px;
 }
 
 .snippet-panel .snippet.dragging {
@@ -1351,11 +1361,6 @@
 }
 
 /* ── Drag states ────────────────────────────────────────────────────────────── */
-.gu-transit {
-    opacity: 0.35 !important;
-    outline: 2px dashed #9ab83a !important;
-    outline-offset: 2px !important;
-}
 
 .gu-mirror {
     opacity: 0.9 !important;
@@ -1376,9 +1381,6 @@
     position: relative;
 }
 
-.gu-over {
-    outline: 2px dashed #5b8dee;
-}
 
 .cyllo-studio-report-container,
 .d-flex.flex-column {
@@ -2388,16 +2390,24 @@ select>option {
 
 /* Strong downward shadow on the paper container to visually "ground" the page */
 .cyllo-studio-report-container {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25),
-        0 2px 8px rgba(0, 0, 0, 0.12) !important;
-    overflow: visible !important;
-}
-
-/* The paper container owns the selected page minimum; report content can grow freely. */
-.editable-area {
-    min-height: 0;
+    overflow: visible;
+    background: #ffffff;
+    border-radius: 4px;
+    max-width: none;
+    margin: 24px auto;
+    padding: 40px 48px;
+    border-top: 3px solid #9ea700;
     box-sizing: border-box;
-    overflow: visible !important;
+    position: relative;
+    transition: all 0.3s ease;
+    background-color: #ffffff;
+    background-image: repeating-linear-gradient(to bottom,
+            transparent 0,
+            transparent calc(var(--cy-page-height, 297mm) - 1px),
+            rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),
+            rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm));
+    background-size: 100% var(--cy-page-height, 297mm);
+    background-repeat: repeat-y;
 }
 
 /* "End of Page" label below the A4 sheet */
@@ -2430,63 +2440,59 @@ select>option {
 
 /* ── Report Editor Header Buttons ─────────────────────────────────────────── */
 
-.cy-report-hdr {
-    height: 56px;
-    z-index: 1000;
-}
-
 /* Back icon button */
 .cy-back-icon-btn {
-    flex: 0 0 auto !important;
-    width: 36px !important;
-    height: 36px !important;
-    padding: 0 !important;
-    border: none !important;
-    background: transparent !important;
-    color: #555 !important;
-    font-size: 18px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 50% !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-    box-shadow: none !important;
-    outline: none !important;
+    flex: 0 0 auto;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: #e2e2e2;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: none;
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 .cy-back-icon-btn:hover,
 .cy-back-icon-btn:focus {
-    background: rgba(0, 0, 0, 0.06) !important;
+    background: rgba(255, 255, 255, 0.08) !important;
     color: #9ea700 !important;
     box-shadow: none !important;
 }
 
 /* Save button - Cyllo Green */
-.cy-hdr-save {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    padding: 6px 20px !important;
-    background: #9ea700 !important;
-    border: 1px solid #9ea700 !important;
-    color: #ffffff !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    border-radius: 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-    box-shadow: 0 2px 4px rgba(158, 167, 0, 0.25) !important;
-    min-width: 0 !important;
-    white-space: nowrap !important;
+/* .cy-hdr-save {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 6px 20px;
+    background: #9ea700;
+    border: 1px solid #9ea700;
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(158, 167, 0, 0.25);
+    min-width: 0;
+    white-space: nowrap;
 }
 
 .cy-hdr-save:hover {
-    background: #8b9200 !important;
-    border-color: #8b9200 !important;
-    box-shadow: 0 4px 8px rgba(158, 167, 0, 0.35) !important;
+    background: #8b9200;
+    border-color: #8b9200;
+    box-shadow: 0 4px 8px rgba(158, 167, 0, 0.35);
 }
 
 .cy-hdr-save:disabled {
@@ -2494,37 +2500,38 @@ select>option {
     border-color: #c8ccc0 !important;
     cursor: not-allowed !important;
     opacity: 0.7 !important;
-}
+} */
 
 /* Discard button - neutral */
-.cy-hdr-discard {
-    flex: 0 0 auto !important;
-    width: auto !important;
-    padding: 6px 20px !important;
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    color: #4b5563 !important;
-    font-weight: 600 !important;
-    font-size: 14px !important;
-    border-radius: 6px !important;
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.2s ease !important;
-    cursor: pointer !important;
-    min-width: 0 !important;
-    white-space: nowrap !important;
-    box-shadow: none !important;
+/* .cy-hdr-discard {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 6px 20px;
+    background: transparent;
+    border: 1px solid #d1d5db;
+    color: #bcbba7;
+    font-weight: 600;
+    font-size: 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 0;
+    white-space: nowrap;
+    box-shadow: none;
+    border-color: #4b4934;
 }
 
 .cy-hdr-discard:hover {
-    background: #f3f4f6 !important;
-    border-color: #9ca3af !important;
-    color: #111827 !important;
-}
+    background: rgba(255, 255, 255, 0.06);
+    border-color: #4b4934;
+    color: #e2e2e2;
+} */
 
 span.badge.rounded-pill.bg-primary {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 /*justify-content: center !important;*/
@@ -2535,15 +2542,7 @@ span.badge.rounded-pill.bg-primary {
 /*box-shadow: none !important;*/
 /*}*/
 
-.cy-hdr-discard:hover {
-    background: #f3f4f6 !important;
-    border-color: #9ca3af !important;
-    color: #111827 !important;
-}
 
-span.badge.rounded-pill.bg-primary {
-    color: #ffffff !important;
-}
 
 /* ── Signature Node Styling ────────────────────────────────────────────── */
 .sign-wrapper {
@@ -2664,7 +2663,7 @@ span.badge.rounded-pill.bg-primary {
     left: 0;
     right: 0;
     height: 0;
-    border-top: 2px dashed #e53935;
+    border-top: 1px dashed #e53935;
     pointer-events: none;
     z-index: 50;
     transition: top 0.2s ease;
@@ -2895,7 +2894,7 @@ span.badge.rounded-pill.bg-primary {
    ════════════════════════════════════════════════════════════ */
 
 .cy-snippet-panel {
-    background-color: #f5f5f0 !important;
+    background: var(--background-color-bg);
     padding: 14px 12px !important;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
 }
@@ -2912,20 +2911,11 @@ span.badge.rounded-pill.bg-primary {
 }
 
 .cy-snippet-panel .cy-section-label span {
-    font-size: 9.5px;
+    font-size: 11px;
     font-weight: 700;
-    color: #8a8c8a;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    white-space: nowrap;
-    margin-right: 8px;
-}
-
-.cy-snippet-panel .cy-section-label::after {
-    content: "";
-    flex-grow: 1;
-    height: 1px;
-    background-color: #d4d4cc;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
 }
 
 .cy-snippet-panel .cy-node-card {
@@ -3086,48 +3076,45 @@ span.badge.rounded-pill.bg-primary {
     line-height: 1 !important;
 }
 
-/* 2. Top Header Bar */
-.cy-report-hdr {
-    background: #f5f5f0;
-    border-bottom: 1px solid #e8e9dc;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-    padding: 0 28px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    z-index: 1000;
-    height: 75px;
+.cy-report {
+    background: var(--body-bg);
+    position: fixed;
+    inset: 0;
+    z-index: 1040;
 }
 
-.cy-back-icon-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    background: transparent;
-    color: #6b7280;
-    font-size: 16px;
-    border: 0.5px solid #e5e7eb;
+/* 2. Top Header Bar */
+.cy-report-hdr {
+    background-color: var(--navbar-bg);
+    padding: var(--navbar-padding);
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: background 0.2s, color 0.2s;
+    justify-content: space-between;
+    padding: 8px !important;
+    min-height: 60px !important;
+    max-height: 60px !important;
+    margin-bottom: 8px;
+    border-radius: 8px;
+}
+
+.cy-report-hdr .cy-bc-trail {
+    max-width: 500px;
+}
+
+.cy-report-body {
+    border-radius: 8px;
 }
 
 .cy-back-icon-btn:hover {
-    background: #f3f4f6;
-    color: #9ea700;
-}
-
-.cy-hdr-divider {
-    width: 0.5px;
-    height: 22px;
-    background-color: #e5e7eb;
+    background: rgba(255, 255, 255, 0.08) !important;
+    color: #9ea700 !important;
+    box-shadow: none !important;
 }
 
 .cy-report-title {
     font-size: 14px;
     font-weight: 600;
-    color: #1f2937;
+    color: #e2e2e2;
     margin-right: auto;
     max-width: 300px;
     overflow: hidden;
@@ -3155,7 +3142,7 @@ span.badge.rounded-pill.bg-primary {
 .cy-preview-toggle span {
     font-size: 12px;
     font-weight: 500;
-    color: #6b7280;
+    color: #bcbba7;
 }
 
 .cy-switch-wrap {
@@ -3171,29 +3158,28 @@ span.badge.rounded-pill.bg-primary {
     height: 0;
 }
 
-/* .cy-slider {
+.cy-switch-wrap .cy-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #d1d5db;
     border-radius: 10px;
     transition: .4s;
+    height: 20px;
 }
 
-.cy-slider:before {
+.cy-switch-wrap .cy-slider:before {
     position: absolute;
     content: "";
     height: 16px;
     width: 16px;
     left: 2px;
-    bottom: 2px;
-    background-color: white;
+    top: 2px;
     border-radius: 50%;
     transition: .4s;
-} */
+}
 
 input:checked+.cy-slider {
     background-color: #9ea700;
@@ -3201,111 +3187,15 @@ input:checked+.cy-slider {
 
 input:checked+.cy-slider:before {
     transform: translateX(16px);
-}
-
-/* Header Buttons */
-.cy-hdr-actions-btn {
-    background: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    color: #374151;
-    border-radius: 6px;
-    padding: 6px 14px;
-    font-size: 13px;
-    font-weight: 500;
-    transition: background 0.2s;
-}
-
-.cy-hdr-actions-btn:hover {
-    background: #e5e7eb;
-}
-
-.cy-hdr-discard {
-    background: #ffffff;
-    border: 1px solid #d1d5db;
-    color: #4b5563;
-    border-radius: 6px;
-    padding: 6px 18px;
-    font-size: 13px;
-    font-weight: 600;
-    transition: all 0.2s;
-}
-
-.cy-hdr-discard:hover {
-    background: #f9fafb;
-    border-color: #9ca3af;
-}
-
-.cy-hdr-save {
-    background: #9ea700;
-    border: none;
-    color: #ffffff;
-    border-radius: 6px;
-    padding: 6px 22px;
-    font-size: 13px;
-    font-weight: 600;
-    box-shadow: 0 2px 4px rgba(158, 167, 0, 0.3);
-    transition: all 0.2s;
-}
-
-.cy-hdr-save:hover {
-    background: #8a9200;
-    box-shadow: 0 4px 8px rgba(158, 167, 0, 0.4);
-}
-
-.cy-hdr-icon-btn {
-    width: 34px;
-    height: 34px;
-    border-radius: 6px;
-    background: transparent;
-    color: #9ca3af;
-    border: 0.5px solid #e5e7eb;
-    font-size: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s;
-}
-
-.cy-hdr-icon-btn:hover:not(:disabled) {
-    background: #f3f4f6;
-    color: #374151;
+    background-color: #ffffff;
 }
 
 /* 3. Report Sheet Style */
 .cy-canvas-area {
-    background: #eceef0 !important;
-}
-
-.cyllo-studio-report-container {
-    background: #ffffff !important;
-    border-radius: 4px !important;
-    box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.06),
-        0 4px 16px rgba(0, 0, 0, 0.08),
-        0 16px 48px rgba(0, 0, 0, 0.10) !important;
-    max-width: none !important;
-    margin: 24px auto !important;
-    padding: 40px !important;
-    border-top: 3px solid #9ea700 !important;
-    box-sizing: border-box !important;
-    position: relative !important;
-    transition: all 0.3s ease !important;
-    overflow: visible !important;
-}
-
-.cyllo-end-of-page-marker span {
-    color: #9aa3b0 !important;
-    font-size: 11px !important;
-    letter-spacing: 0.8px !important;
-}
-
-.editable-area {
-    font-family: "Inter", Arial, sans-serif !important;
-    font-size: 12px !important;
-    line-height: 1.6 !important;
-    color: #1f2937 !important;
-    min-height: 0 !important;
-    overflow: visible !important;
+    background: #e9ecef;
+    padding: 32px 24px;
+    max-height: none;
+    overflow: auto;
 }
 
 .editable-area .selected,
@@ -3322,14 +3212,7 @@ input:checked+.cy-slider:before {
     background: rgba(158, 167, 0, 0.04) !important;
 }
 
-.cy-page-overflow-line {
-    border-top: 1px dashed #e53935 !important;
-}
 
-.cy-page-overflow-line::after {
-    background: #e53935 !important;
-    font-size: 10px !important;
-}
 
 /* 4. Hide specific Studio & UI elements strictly on Report Kanban View */
 /* .o_n_kanban_view .o_control_panel,
@@ -3353,75 +3236,11 @@ body:has(.o_n_kanban_view) .cy-nav-menu>button.cy-viewEdits {
    Sections 1-5: New UI Features
    ═══════════════════════════════════════════════════════ */
 
-/* ── Section 5: Canvas Background ── */
-.cy-canvas-area {
-    background: #e8eaed !important;
-    padding: 32px 24px !important;
-    max-height: none !important;
-    overflow: auto !important;
-}
-
-/* ── Section 5: White Paper ── */
-.cyllo-studio-report-container {
-    background-color: #ffffff;
-    background-image: repeating-linear-gradient(
-        to bottom,
-        transparent 0,
-        transparent calc(var(--cy-page-height, 297mm) - 1px),
-        rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),
-        rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm)
-    );
-    background-size: 100% var(--cy-page-height, 297mm);
-    background-repeat: repeat-y;
-    max-width: none;
-    margin: 0 auto;
-    padding: 40px 48px !important;
-    border-radius: 2px;
-    box-shadow:
-        0 0 0 1px rgba(0, 0, 0, 0.08),
-        0 2px 8px rgba(0, 0, 0, 0.08),
-        0 8px 32px rgba(0, 0, 0, 0.12);
-    overflow: visible;
-}
-
-/* ── Section 5: Editable area typography ── */
-.editable-area {
-    font-family: "Inter", Arial, sans-serif;
-    font-size: 12px;
-    line-height: 1.6;
-    color: #1f2937;
-    min-height: 0;
-    overflow: visible;
-}
-
-/* ── Section 5: Table Header ── */
-.editable-area table thead th {
-    background: transparent;
-    border-bottom: 2px solid #111827;
-    font-weight: 700;
-    font-size: 12px;
-    color: #111827;
-    padding: 6px 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
 /* ── Section 5: Table Body ── */
 .editable-area table tbody td {
     padding: 6px 8px;
     border-bottom: 1px solid #f3f4f6;
     font-size: 12px;
-}
-
-/* ── Section 5: Totals row ── */
-.editable-area table tfoot td,
-.editable-area table tfoot th {
-    text-align: right;
-    font-weight: 700;
-    color: #111827;
-    border-top: 2px solid #111827;
-    padding-top: 6px;
 }
 
 /* ── Section 1: Report Header Layout (Company + Partner) ── */
