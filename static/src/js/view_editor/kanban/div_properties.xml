@@ -17,7 +17,6 @@
             </div>
             <t t-if="state.isFlex">
                 <div class="mb-3">
-                    <label for="" class="cy-navbar_label">Flex</label>
                     <div class="container">
                         <div class="row justify-content-between">
                             <div

@@ -1,6 +1,7 @@
 /*Set all fields in to readonly
  if there any issue in field click
  please refer this css*/
+
 .cy-studio-readonly * {
     pointer-events: none !important;
 }
@@ -16,28 +17,19 @@
 
 .cy-studio-overlay {
     position: absolute;
-    /* Position the overlay absolutely within the container */
     top: 16px;
     left: 0;
     width: 100%;
-    /* Cover the entire width of the container */
     height: 100%;
-    /* Cover the entire height of the container */
     background-color: RGBA(17, 24, 39, var(--bg-opacity, 1));
-    /* Semi-transparent overlay color */
     display: flex;
-    /* Center the overlay content */
     justify-content: center;
     align-items: center;
     pointer-events: auto;
     color: white;
-    /* Text color */
     font-size: 20px;
-    /* Text size */
     z-index: 2;
-    /* Ensure the overlay is above the content */
     transition: opacity 0.3s ease;
-    /* Smooth transition effect */
 }
 
 .o_form_sheet .cy-studio-overlay {

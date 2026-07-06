@@ -237,6 +237,17 @@ export class CylloNavBar extends NavBar {
             sessionStorage.setItem('CyConfigBusinessModel', currentResModel || '');
             sessionStorage.setItem('CyConfigBusinessName', this.currentModelName);
             sessionStorage.setItem('CyConfigBusinessViewType', viewType);
+            // The action's own id (menu-driven actions, including client
+            // actions like Discuss, have one) — lets the breadcrumb "back"
+            // link re-dispatch the exact same action directly instead of
+            // relying on browser history, which drifts after any detour
+            // (e.g. opening/closing the report designer) and can replay the
+            // wrong entry.
+            if (currentAction?.id) {
+                sessionStorage.setItem('CyConfigBusinessActionId', currentAction.id);
+            } else {
+                sessionStorage.removeItem('CyConfigBusinessActionId');
+            }
             return { resModel: currentResModel || null, name: this.currentModelName, viewType };
         }
         // Chaining from one Configuration sub-view to another — reuse the
@@ -435,10 +446,21 @@ export class CylloNavBar extends NavBar {
         this._clearX2manyBreadcrumb();
         this._clearConfigBreadcrumb();
     }
-    /** Navigate back from the Configuration sub-view breadcrumb. */
+    /**
+     * Navigate back from the Configuration sub-view breadcrumb to the
+     * remembered parent action. Re-dispatches it directly by id rather than
+     * window.history.back() — browser history drifts after any detour (e.g.
+     * opening/closing the report designer) and can replay the wrong entry
+     * instead of the parent the breadcrumb link actually names.
+     */
     configBreadcrumbBack(e) {
         e.preventDefault();
-        window.history.back();
+        const actionId = sessionStorage.getItem('CyConfigBusinessActionId');
+        if (actionId) {
+            this.action.doAction(parseInt(actionId, 10));
+        } else {
+            window.history.back();
+        }
     }
     /** Navigate back from the x2many breadcrumb (handled by the wrapper). */
     breadcrumbBack(e) {

@@ -80,10 +80,11 @@ patch(ControlPanel.prototype, {
             return false;
         }
 
-        const isAccessOrRule = this.env?.searchModel?.resModel === 'ir.model.access' ||
-            this.env?.searchModel?.resModel === 'ir.rule';
+        const isMetaModel = this.env?.searchModel?.resModel === 'ir.model.access' ||
+            this.env?.searchModel?.resModel === 'ir.rule' ||
+            this.env?.searchModel?.resModel === 'ir.actions.report';
 
-        return (!this.env.config.actionType || isAccessOrRule) && !this.props.isSearchView;
+        return (!this.env.config.actionType || isMetaModel) && !this.props.isSearchView;
     }
 })
 ControlPanel.components = {
