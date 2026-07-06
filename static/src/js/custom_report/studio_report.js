@@ -328,7 +328,11 @@ export class EditReport extends Component {
         onPatched(() => {
             // Re-setup sortable if the component was patched (e.g. after modal close)
             // to ensure listeners are still attached to the live DOM elements.
-            this._setupSortable();
+            if (!this._isDragging) {
+                this._setupSortable();
+            } else {
+                this._pendingSortableRebuild = true;
+            }
             // Re-inject footer preview strip in case OWL replaced the DOM node
             this._renderFooterPreview();
             requestAnimationFrame(() => this._applyPaperFormatToCanvas());
@@ -622,6 +626,7 @@ export class EditReport extends Component {
         const editableArea = tempDoc.body;
         this._enrichReportDOM(editableArea);
         this._updateHasSign();
+        $(editableArea).find('[t-elif], [t-else]').hide();
 
         // ── Store _loadedArch AFTER enrichment so it contains cy-xpath / cy-template ──
         // getChangedElements() diffs the edited iframe DOM against _loadedArch parsed as
@@ -636,7 +641,6 @@ export class EditReport extends Component {
         this._setupSortable();
 
         this.editor = null;
-        $(editableArea).find('[t-elif], [t-else]').hide();
 
         this.undoManager = new UndoRedoManager(editableArea, {
             maxStackSize: 50,
@@ -1092,6 +1096,7 @@ export class EditReport extends Component {
         doc.body.style.setProperty('height', 'auto', 'important');
 
         const resize = () => {
+            if (this._isDragging) return; // Suppress iframe resize during drag to prevent drop sync drift
             if (!iframe.contentDocument) return;
             const b = iframe.contentDocument.body;
             const h = iframe.contentDocument.documentElement;
@@ -1682,6 +1687,10 @@ export class EditReport extends Component {
             },
             onEnd() {
                 self._isDragging = false;
+                if (self._pendingSortableRebuild) {
+                    self._pendingSortableRebuild = false;
+                    setTimeout(() => self._setupSortable(), 0);
+                }
             }
         });
         this._sortableInstances.push(instance);
@@ -1722,7 +1731,7 @@ export class EditReport extends Component {
     _createBoxDropzoneSortable(dropzone) {
         const self = this;
         const instance = Sortable.create(dropzone, {
-            group: { name: 'studio', pull: true, put: true },
+            group: { name: 'studio_box', pull: true, put: ['studio', 'studio_zone', 'studio_box'] },
             animation: 150,
             draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
             handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="qr"], .sign-toolbar',
@@ -1731,7 +1740,13 @@ export class EditReport extends Component {
                 if (self.editor) { self.editor.destroy(); self.editor = null; }
                 $('.selected').removeClass('selected');
             },
-            onEnd() { self._isDragging = false; },
+            onEnd() {
+                self._isDragging = false;
+                if (self._pendingSortableRebuild) {
+                    self._pendingSortableRebuild = false;
+                    setTimeout(() => self._setupSortable(), 0);
+                }
+            },
             async onAdd(evt) {
                 evt.originalEvent && evt.originalEvent.stopPropagation && evt.originalEvent.stopPropagation();
                 const item = evt.item;
@@ -1938,9 +1953,9 @@ export class EditReport extends Component {
 
         const instance = Sortable.create(zone, {
             group: {
-                name: 'studio',
+                name: 'studio_zone',
                 pull: true,
-                put: true,
+                put: ['studio', 'studio_zone', 'studio_box'],
             },
             animation: 150,
 
@@ -1957,6 +1972,10 @@ export class EditReport extends Component {
 
             onEnd() {
                 self._isDragging = false;
+                if (self._pendingSortableRebuild) {
+                    self._pendingSortableRebuild = false;
+                    setTimeout(() => self._setupSortable(), 0);
+                }
             },
 
             async onAdd(evt) {
@@ -3139,6 +3158,43 @@ export class EditReport extends Component {
 
     getChangedElements(originalDoc, editedDoc) {
         let allChanges = []
+
+        const hasStructuralNodes = (node) => {
+            if (!node || !node.hasAttribute) return false;
+            const attrs = ['t-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value', 't-field', 't-esc', 't-out'];
+            if (attrs.some(a => node.hasAttribute(a))) return true;
+            const tag = (node.tagName || '').toLowerCase();
+            if (tag === 't' || tag === 'cy-qweb-t') return true;
+            const selector = attrs.map(a => `t[${a}], cy-qweb-t[${a}]`).join(',') + ',t,cy-qweb-t';
+            try {
+                return !!(node.querySelector && node.querySelector(selector));
+            } catch (e) {
+                return Array.from(node.getElementsByTagName('*')).some(el => {
+                    const etag = (el.tagName || '').toLowerCase();
+                    if (etag === 't' || etag === 'cy-qweb-t') return true;
+                    return attrs.some(a => el.hasAttribute(a));
+                });
+            }
+        };
+
+        const hasTIfElIfChainInChildren = (node) => {
+            return Array.from(node.children).some(c => {
+                const tag = (c.tagName || '').toLowerCase();
+                if (tag !== 'cy-qweb-t' && tag !== 't') return false;
+                if (c.hasAttribute('t-if')) return true;
+                if (c.hasAttribute('t-elif') || c.hasAttribute('t-else')) return true;
+                return Array.from(c.children).some(gc => {
+                    const gtag = (gc.tagName || '').toLowerCase();
+                    if (gtag !== 'cy-qweb-t' && gtag !== 't') return false;
+                    return gc.hasAttribute('t-if') || gc.hasAttribute('t-elif') || gc.hasAttribute('t-else');
+                });
+            });
+        };
+
+        const containsTable = (node) => {
+            return !!(node.querySelector && node.querySelector('table'));
+        };
+
         editedDoc.querySelectorAll('[cy-template]').forEach(el => {
             const xpath = el.getAttribute('cy-xpath');
             const template = el.getAttribute('cy-template');
@@ -3151,87 +3207,34 @@ export class EditReport extends Component {
                 .map(n => n.textContent.trim()).join('');
 
             const inner = (node) => Array.from(node.children)
-                .filter(c => !c.hasAttribute('cy-xpath'))
+                .filter(c => !c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
                 .map(c => c.outerHTML.trim()).join('');
 
             const cyXpathChildren = (node) => Array.from(node.children)
                 .filter(c => c.hasAttribute('cy-xpath'))
                 .map(c => c.getAttribute('cy-xpath')).join(',');
 
-            // A zone is a "loop container" if any of its children (direct or nested)
-            // in the ORIGINAL document are QWeb structural nodes (t-foreach, t-set,
-            // t-if, t-elif, t-else, t-call). These structural nodes create loop
-            // variable scope — replacing the container in full would lose that context
-            // and cause "NoneType is not subscriptable" in QWeb at render time.
-            const hasStructuralNodes = (node) => {
-                if (!node || !node.hasAttribute) return false;
-                const attrs = ['t-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value', 't-field', 't-esc', 't-out'];
-
-                // Check the node itself first
-                if (attrs.some(a => node.hasAttribute(a))) return true;
-                const tag = (node.tagName || '').toLowerCase();
-                if (tag === 't' || tag === 'cy-qweb-t') return true;
-
-                // Check all descendants using a broad selector that catches both t and cy-qweb-t
-                const selector = attrs.map(a => `t[${a}], cy-qweb-t[${a}]`).join(',') + ',t,cy-qweb-t';
-                try {
-                    return !!(node.querySelector && node.querySelector(selector));
-                } catch (e) {
-                    // Fallback for extremely large zones if querySelector fails
-                    return Array.from(node.getElementsByTagName('*')).some(el => {
-                        const etag = (el.tagName || '').toLowerCase();
-                        if (etag === 't' || etag === 'cy-qweb-t') return true;
-                        return attrs.some(a => el.hasAttribute(a));
-                    });
-                }
-            };
-
-
-            // Check whether ANY direct child of this zone (in original) contains a
-            // t-if/t-elif/t-else chain. If a sibling carries t-elif or t-else, then
-            // replacing the zone with position="replace" would orphan those directives
-            // from their t-if, causing the QWeb SyntaxError.
-            const hasTIfElIfChainInChildren = (node) => {
-                return Array.from(node.children).some(c => {
-                    const tag = (c.tagName || '').toLowerCase();
-                    if (tag !== 'cy-qweb-t' && tag !== 't') return false;
-                    if (c.hasAttribute('t-if')) return true;
-                    if (c.hasAttribute('t-elif') || c.hasAttribute('t-else')) return true;
-                    return Array.from(c.children).some(gc => {
-                        const gtag = (gc.tagName || '').toLowerCase();
-                        if (gtag !== 'cy-qweb-t' && gtag !== 't') return false;
-                        return gc.hasAttribute('t-if') || gc.hasAttribute('t-elif') || gc.hasAttribute('t-else');
-                    });
-                });
-            };
-
-            // Also block replace if the zone contains ANY table. Tables are dangerous
-            // because browser HTML parser hoists QWeb directives out of tbody,
-            // breaking t-if/t-elif sibling chains and loop scopes.
-            const containsTable = (node) => {
-                return !!(node.querySelector && node.querySelector('table'));
-            };
-
-            const textChanged = text(original) !== text(el);
+            let textChanged = text(original) !== text(el);
             let innerChanged = inner(original) !== inner(el);
 
-            // Protect table structures from innerHTML replacement because browsers foster QWeb tags out of tables,
-            // which destroys t-foreach/t-if loops wrapping table rows.
+            const hasNewNodes = Array.from(el.children).some(c => c.classList.contains('c_new') && !c.hasAttribute('cy-xpath'));
+
             const tag = (el.tagName || '').toLowerCase();
-            if (['table', 'tbody', 'thead', 'tfoot', 'tr'].includes(tag)) {
+            const isTable = ['table', 'tbody', 'thead', 'tfoot', 'tr'].includes(tag);
+            const isDangerous = isTable || hasStructuralNodes(original) || hasTIfElIfChainInChildren(original) || original.classList.contains('page') || original.hasAttribute('name');
+
+            // Protect dangerous structures from innerHTML/text replacement because replacing them
+            // corrupts QWeb scope loops and t-if chains.
+            if (isDangerous) {
                 innerChanged = false;
+                textChanged = false;
             }
 
             const rawStructChanged = cyXpathChildren(original) !== cyXpathChildren(el);
 
-            const structChanged = rawStructChanged
-                && !hasStructuralNodes(original)
-                && !hasTIfElIfChainInChildren(original)
-                && !containsTable(original)
-                && !original.classList.contains('page')
-                && !original.hasAttribute('name');
+            const structChanged = rawStructChanged && !isDangerous;
 
-            if (textChanged || innerChanged || structChanged) {
+            if (textChanged || innerChanged || structChanged || hasNewNodes) {
                 allChanges.push({ el, xpath, template, structChanged });
             }
 
@@ -3610,7 +3613,31 @@ export class EditReport extends Component {
                 if (el.classList.length === 0) el.removeAttribute('class');
             }
 
+            if (el.hasAttribute && (el.hasAttribute('t-elif') || el.hasAttribute('t-else'))) {
+                if (el.style && el.style.display === 'none') {
+                    el.style.removeProperty('display');
+                    if (el.getAttribute('style') === '') el.removeAttribute('style');
+                }
+            }
+
             if (el.children) {
+                Array.from(el.children).forEach(child => {
+                    if (child.hasAttribute && (child.hasAttribute('t-elif') || child.hasAttribute('t-else'))) {
+                        let prev = child.previousSibling;
+                        let nodesToMove = [];
+                        while (prev) {
+                            if (prev.nodeType === 1 && (prev.hasAttribute('t-if') || prev.hasAttribute('t-elif'))) {
+                                break;
+                            }
+                            nodesToMove.unshift(prev);
+                            prev = prev.previousSibling;
+                        }
+                        if (prev && nodesToMove.length > 0) {
+                            let ref = child.nextSibling;
+                            nodesToMove.forEach(n => el.insertBefore(n, ref));
+                        }
+                    }
+                });
                 Array.from(el.children).forEach(child => clean(child));
             }
         };
