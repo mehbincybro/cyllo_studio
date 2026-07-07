@@ -83,7 +83,7 @@
 
 /* === 4. Tab Header (.cy-tab-header) ========================= */
 
-.cy-side-menu .cy-tab-header {
+.cy-tab-header {
     display: flex;
     align-items: center;
     padding: 12px;
@@ -96,7 +96,7 @@
 
 /* === 5. Tab Pill (.cy-tab-pill) ============================= */
 
-.cy-side-menu .cy-tab-pill {
+.cy-tab-pill {
     display: flex;
     flex: 1;
     background: #373627;
@@ -106,17 +106,17 @@
     height: 35px;
 }
 
-.cy-side-menu .cy-tab-pill>div {
+.cy-tab-pill>div {
     flex: 1;
 }
 
 /* === 6. Nav Links (.cy-nav__link) =========================== */
 
-.cy-side-menu .cy-window-view {
+.cy-window-view {
     background: transparent !important;
 }
 
-.cy-side-menu .cy-nav__link {
+.cy-nav__link {
     width: 100%;
     color: #b9b9b9;
     background: transparent;
@@ -132,7 +132,7 @@
     transition: all 0.15s ease;
 }
 
-.cy-side-menu .cy-nav__link.active {
+.cy-nav__link.active {
     color: #e2e2e2;
     background: #46442d;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
@@ -141,7 +141,7 @@
 
 /* === 7. Close Button (.cy-close-pill) ======================= */
 
-.cy-side-menu .cy-close-pill {
+.cy-close-pill {
     display: flex;
     justify-content: center;
     align-items: center;

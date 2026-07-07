@@ -2895,7 +2895,6 @@ span.badge.rounded-pill.bg-primary {
 
 .cy-snippet-panel {
     background: var(--background-color-bg);
-    padding: 14px 12px !important;
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
 }
 
@@ -3188,6 +3187,25 @@ input:checked+.cy-slider {
 input:checked+.cy-slider:before {
     transform: translateX(16px);
     background-color: #ffffff;
+}
+
+.cy-report-pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    background: #EEEEEE;
+    border-radius: 6px;
+
+    button.prev {
+        border-top-right-radius: 0 !important;
+        border-bottom-right-radius: 0 !important;
+    }
+
+    button.next {
+        border-top-left-radius: 0 !important;
+        border-bottom-left-radius: 0 !important;
+    }
 }
 
 /* 3. Report Sheet Style */
