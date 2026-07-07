@@ -2403,9 +2403,12 @@ select>option {
     background-color: #ffffff;
     background-image: repeating-linear-gradient(to bottom,
             transparent 0,
-            transparent calc(var(--cy-page-height, 297mm) - 1px),
-            rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),
-            rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm));
+            transparent calc(var(--cy-page-height, 297mm) - 1px));
+    /*background-image: repeating-linear-gradient(to bottom,*/
+    /*        transparent 0,*/
+    /*        transparent calc(var(--cy-page-height, 297mm) - 1px),*/
+    /*        rgba(229, 57, 53, 0.45) calc(var(--cy-page-height, 297mm) - 1px),*/
+    /*        rgba(229, 57, 53, 0.45) var(--cy-page-height, 297mm));*/
     background-size: 100% var(--cy-page-height, 297mm);
     background-repeat: repeat-y;
 }
