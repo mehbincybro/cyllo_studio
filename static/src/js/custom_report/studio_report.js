@@ -416,7 +416,7 @@ export class EditReport extends Component {
             // Attach file input listener
             const fileInput = logoBlock.querySelector('.cy-logo-input');
             const self = this;
-            fileInput.addEventListener('change', function(e) {
+            fileInput.addEventListener('change', function (e) {
                 self._handleLogoFileChange(e, iframeDoc);
             });
         }
@@ -3025,6 +3025,24 @@ export class EditReport extends Component {
 
             let changes = component.getChangedElements(originalDoc, editedDoc);
 
+            const lastFooter = originalDoc.querySelector('.cy-custom-footer:last-of-type');
+            let originalShowF = true, originalShowD = false, originalShowP = true, originalCustomText = '', originalHasCustom = false;
+            if (lastFooter) {
+                originalShowF = lastFooter.dataset.showFooter === 'true';
+                originalShowD = lastFooter.dataset.showDoc === 'true';
+                originalShowP = lastFooter.dataset.showPage === 'true';
+                originalHasCustom = lastFooter.dataset.hasCustom === 'true';
+                originalCustomText = decodeURIComponent(lastFooter.dataset.customText || '');
+            }
+
+            const footerChanged = (
+                component.state.footerShowReportFooter !== originalShowF ||
+                component.state.footerShowDocName !== originalShowD ||
+                component.state.footerShowPageNum !== originalShowP ||
+                component.state.hasCustomFooter !== originalHasCustom ||
+                (component.state.hasCustomFooter && component.state.companyReportFooterText !== originalCustomText)
+            );
+
 
             // ── Logo hide/show persistence ──────────────────────────────────
             // We track whether hideLogo changed relative to what was originally loaded.
@@ -3063,7 +3081,7 @@ export class EditReport extends Component {
                 }
             }
 
-            if (changes.length === 0 && logoOverrideTemplates.length === 0) {
+            if (changes.length === 0 && logoOverrideTemplates.length === 0 && !footerChanged) {
                 component.state.isSaving = false;
                 return;
             }
@@ -4272,9 +4290,10 @@ export class EditReport extends Component {
         }
 
         // Clean out any existing custom footer xpaths from the payload to prevent duplicates
+        let parser = new DOMParser();
+        let doc;
         try {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
+            doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
             // Remove any xpath elements that contain a cy-custom-footer descendant
             doc.querySelectorAll('xpath').forEach(xpathEl => {
                 if (xpathEl.querySelector('.cy-custom-footer') ||
@@ -4283,9 +4302,9 @@ export class EditReport extends Component {
                     xpathEl.remove();
                 }
             });
-            mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
         } catch (e) {
             console.warn('[Cyllo Studio] Error cleaning old footer xpaths:', e);
+            doc = parser.parseFromString("<data></data>", "application/xml");
         }
 
         const showF = this.state.footerShowReportFooter;
@@ -4331,7 +4350,24 @@ export class EditReport extends Component {
             `;
         }
 
-        mainInherit.xpathBlocks = mainInherit.xpathBlocks.replace('</data>', footerXml + '\n</data>');
+        try {
+            const footerDoc = parser.parseFromString(footerXml, "application/xml");
+            if (footerDoc.documentElement && footerDoc.documentElement.nodeName !== 'parsererror') {
+                doc.documentElement.appendChild(footerDoc.documentElement);
+            } else {
+                console.warn('[Cyllo Studio] Error parsing footer XML:', footerDoc.documentElement.textContent);
+            }
+            mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
+        } catch (e) {
+            console.error('[Cyllo Studio] Failed to append footer XML:', e);
+            // Fallback to string concatenation if DOM append fails
+            let serialized = new XMLSerializer().serializeToString(doc);
+            if (serialized.includes('</data>')) {
+                mainInherit.xpathBlocks = serialized.replace('</data>', footerXml + '\n</data>');
+            } else {
+                mainInherit.xpathBlocks = serialized.replace('<data/>', '<data>\n' + footerXml + '\n</data>');
+            }
+        }
 
         return new_inherits;
     }
