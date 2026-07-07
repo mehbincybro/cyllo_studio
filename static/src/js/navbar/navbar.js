@@ -101,6 +101,10 @@ export class CylloNavBar extends NavBar {
                     const { name: businessName } = this._getBusinessContext();
                     this._clearX2manyBreadcrumb();
                     this._setConfigBreadcrumb(businessName, configFieldName);
+                    // Reports/Access Rights/Record Rules have no field editor
+                    // of their own — a Field Customizer left open from the
+                    // business view underneath would otherwise linger stale.
+                    this.env.bus.trigger('CY_META_VIEW_OPENED');
                 } else {
                     // Landed on a real business view. The config breadcrumb
                     // is only ever valid while viewing a meta-view, so any

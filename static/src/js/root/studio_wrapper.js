@@ -230,6 +230,7 @@ export class StudioWrapper extends Component {
         useBus(this.env.bus, "ACTIVITY_DETAILS", this.handleActivityDetails);
         useBus(this.env.bus, "ACTIVITY_REMOVED", this.handleActivityRemoved);
         useBus(this.env.bus, "SEARCH_VIEW_OPENED", this.closeAsideBar.bind(this));
+        useBus(this.env.bus, "CY_META_VIEW_OPENED", this.closeAsideBar.bind(this));
         useBus(this.env.bus, "SELECT_NOTEBOOK", this.handleNotebookDetails);
         useBus(this.env.bus, "RENDER_LOAD", this.reload);
         useBus(this.env.bus, "FORM_DETAILS", this.handleFormDetails);

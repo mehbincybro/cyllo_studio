@@ -31,8 +31,8 @@
                         </button>
                     </t>
                     <t t-if="state.previewMode">
-                        <button class="btn btn-secondary p-0 hov">
-                            <button class="btn btn-secondary" t-on-click="onPrevRecord">
+                        <div class="cy-report-pager">
+                            <button class="btn btn-secondary prev" t-on-click="onPrevRecord">
                                 <i class="ri-arrow-left-s-line"/>
                             </button>
                             <span class="px-2">
@@ -40,10 +40,10 @@
                                 /
                                 <t t-esc="state.records.length"/>
                             </span>
-                            <button class="btn btn-secondary" t-on-click="onNextRecord">
+                            <button class="btn btn-secondary next" t-on-click="onNextRecord">
                                 <i class="ri-arrow-right-s-line"/>
                             </button>
-                        </button>
+                        </div>
                         <button class="btn btn-secondary"
                                 style="left: calc(50% + 170px);" t-on-click="onPrintReport">
                             <i class="ri-printer-line me-1"/>Print
@@ -83,8 +83,32 @@
             <!-- Body -->
             <div class="cy-report-body d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
                 <!-- Sidebar (Editable) -->
-                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column"
-                     t-att-class="{'d-none': state.previewMode}" style="width: 300px; overflow-y: auto; z-index: 10;">
+                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column" t-att-class="{'d-none': state.previewMode}" style="width: 300px; overflow-y: auto; z-index: 10;">
+                    <div class="cy-tab-header">
+                        <div class="cy-tab-pill">
+                            <div class="cy-window-view">
+                                <button t-on-click="togglePreview"
+                                    t-att-disabled="togglePreview"
+                                    class="cy-nav__link"
+                                    t-att-class="!togglePreview ? 'active' : ''">Edit</button>
+                            </div>
+                            <div>
+                                <button class="cy-nav__link" t-on-click="togglePreview"
+                                    t-att-class="togglePreview ? 'active' : ''">
+                                    Preview
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                     <div class="cy-preview-toggle d-flex align-items-center gap-2">
+                        <span>Preview</span>
+                        <label class="cy-switch-wrap m-0">
+                            <input type="checkbox" id="previewSwitch" t-on-change="togglePreview"
+                                t-att-checked="state.previewMode"/>
+                            <span class="cy-slider"></span>
+                        </label>
+                    </div>
 
                     <div class="cy-section-label">
                         <span>Basic Elements</span>
