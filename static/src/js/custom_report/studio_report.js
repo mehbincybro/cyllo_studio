@@ -1193,6 +1193,8 @@ export class EditReport extends Component {
                 this.state.sourceCode = res.arch;
                 // Store the resolved document template name so we save to the right view
                 this._docTemplate = res.doc_template || this._template;
+                // Store the record loop variable ("doc", "o", etc.) for QR/field expressions
+                this._recordVar = res.record_var || 'doc';
                 this._initAceEditor();
             } else {
                 this.notification.add(res.error, { type: "danger" });
@@ -1735,6 +1737,24 @@ export class EditReport extends Component {
             animation: 150,
             draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
             handle: '.table-handle, .box-drag-handle, .box-toolbar, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="qr"], .sign-toolbar',
+            onMove: function (evt, originalEvent) {
+                const draggedItem = evt.dragged;
+                const targetList = evt.to;
+                if (draggedItem.classList.contains('snippet')) return true;
+
+                const draggedTemplate = draggedItem.getAttribute('cy-template') || (draggedItem.closest('[cy-template]') ? draggedItem.closest('[cy-template]').getAttribute('cy-template') : null);
+                const targetTemplate = targetList.closest('[cy-template]') ? targetList.closest('[cy-template]').getAttribute('cy-template') : null;
+
+                if (draggedTemplate && targetTemplate && draggedTemplate !== targetTemplate) {
+                    if (!self._dragWarningShown) {
+                        self.notification.add("Cannot move elements across different template boundaries.", { type: "warning" });
+                        self._dragWarningShown = true;
+                        setTimeout(() => { self._dragWarningShown = false; }, 2000);
+                    }
+                    return false;
+                }
+                return true;
+            },
             onStart() {
                 self._isDragging = true;
                 if (self.editor) { self.editor.destroy(); self.editor = null; }
@@ -1961,6 +1981,24 @@ export class EditReport extends Component {
 
             draggable: '.table-wrapper, .box-section-wrapper, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"]:not(.dynamic-field-wrapper *), [cy-type="qr"], [cy-type="sign"]',
             handle: '.table-handle, .box-drag-handle, .field-handle, .dynamic-field-wrapper, .field-block, .text-node, .s_qr_block, [cy-type="dynamic"], [cy-type="qr"], .sign-toolbar',
+            onMove: function (evt, originalEvent) {
+                const draggedItem = evt.dragged;
+                const targetList = evt.to;
+                if (draggedItem.classList.contains('snippet')) return true;
+
+                const draggedTemplate = draggedItem.getAttribute('cy-template') || (draggedItem.closest('[cy-template]') ? draggedItem.closest('[cy-template]').getAttribute('cy-template') : null);
+                const targetTemplate = targetList.closest('[cy-template]') ? targetList.closest('[cy-template]').getAttribute('cy-template') : null;
+
+                if (draggedTemplate && targetTemplate && draggedTemplate !== targetTemplate) {
+                    if (!self._dragWarningShown) {
+                        self.notification.add("Cannot move elements across different template boundaries.", { type: "warning" });
+                        self._dragWarningShown = true;
+                        setTimeout(() => { self._dragWarningShown = false; }, 2000);
+                    }
+                    return false;
+                }
+                return true;
+            },
             onStart() {
                 self._isDragging = true;
                 if (self.editor) {
@@ -2836,585 +2874,781 @@ export class EditReport extends Component {
 
     // \u2500\u2500 Company Logo Upload \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500
     onLogoClick(ev) {
-        if (this.state.hideLogo && this.state.companyLogo) {
-            // Restore hidden logo for this report (no file picker needed)
-            this.state.hideLogo = false;
-            if (this.undoManager) this.undoManager.debouncedSave();
-            return;
-        }
+            if (this.state.hideLogo && this.state.companyLogo) {
+                // Restore hidden logo for this report (no file picker needed)
+                this.state.hideLogo = false;
+                if (this.undoManager) this.undoManager.debouncedSave();
+                return;
+            }
 
-        if (this.state.companyLogo) {
-            // Remove existing dropdown if any
-            const existing = document.getElementById('cy-logo-actions-menu');
-            if (existing) existing.remove();
+            if (this.state.companyLogo) {
+                // Remove existing dropdown if any
+                const existing = document.getElementById('cy-logo-actions-menu');
+                if (existing) existing.remove();
 
-            const rect = ev.currentTarget.getBoundingClientRect();
-            const menu = document.createElement('div');
-            menu.id = 'cy-logo-actions-menu';
-            menu.className = 'bg-white border rounded shadow-sm py-1 position-fixed';
-            menu.style.top = `${rect.bottom + 5}px`;
-            menu.style.left = `${rect.left}px`;
-            menu.style.zIndex = '9999';
-            menu.style.minWidth = '150px';
+                const rect = ev.currentTarget.getBoundingClientRect();
+                const menu = document.createElement('div');
+                menu.id = 'cy-logo-actions-menu';
+                menu.className = 'bg-white border rounded shadow-sm py-1 position-fixed';
+                menu.style.top = `${rect.bottom + 5}px`;
+                menu.style.left = `${rect.left}px`;
+                menu.style.zIndex = '9999';
+                menu.style.minWidth = '150px';
 
-            const uploadBtn = document.createElement('button');
-            uploadBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white';
-            uploadBtn.innerText = 'Upload New Logo';
-            uploadBtn.onclick = () => {
-                menu.remove();
-                if (this.logoInputRef.el) this.logoInputRef.el.click();
-            };
-
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white text-danger';
-            deleteBtn.innerText = 'Delete Logo';
-            deleteBtn.onclick = async () => {
-                menu.remove();
-                await this.orm.write('res.company', [this._companyId], { logo: false });
-                this.state.companyLogo = false;
-                this.notification.add('Company logo removed', { type: 'success' });
-            };
-            menu.appendChild(uploadBtn);
-            menu.appendChild(deleteBtn);
-            document.body.appendChild(menu);
-            // Close on outside click
-            setTimeout(() => {
-                const closeMenu = (e) => {
-                    if (!menu.contains(e.target)) {
-                        menu.remove();
-                        document.removeEventListener('click', closeMenu);
-                    }
+                const uploadBtn = document.createElement('button');
+                uploadBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white';
+                uploadBtn.innerText = 'Upload New Logo';
+                uploadBtn.onclick = () => {
+                    menu.remove();
+                    if (this.logoInputRef.el) this.logoInputRef.el.click();
                 };
-                document.addEventListener('click', closeMenu);
-            }, 0);
-            return;
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'dropdown-item text-start w-100 px-3 py-2 border-0 bg-white text-danger';
+                deleteBtn.innerText = 'Delete Logo';
+                deleteBtn.onclick = async () => {
+                    menu.remove();
+                    await this.orm.write('res.company', [this._companyId], { logo: false });
+                    this.state.companyLogo = false;
+                    this.notification.add('Company logo removed', { type: 'success' });
+                };
+                menu.appendChild(uploadBtn);
+                menu.appendChild(deleteBtn);
+                document.body.appendChild(menu);
+                // Close on outside click
+                setTimeout(() => {
+                    const closeMenu = (e) => {
+                        if (!menu.contains(e.target)) {
+                            menu.remove();
+                            document.removeEventListener('click', closeMenu);
+                        }
+                    };
+                    document.addEventListener('click', closeMenu);
+                }, 0);
+                return;
+            }
+
+            // No logo yet — open file picker to upload one
+            if (this.logoInputRef.el) this.logoInputRef.el.click();
         }
 
-        // No logo yet — open file picker to upload one
-        if (this.logoInputRef.el) this.logoInputRef.el.click();
-    }
+        onRemoveLogoClick(ev) {
+            // Hides the logo for THIS report only. Does NOT touch res.company.logo.
+            this.state.hideLogo = true;
+            this.state.logoHovered = false;
 
-    onRemoveLogoClick(ev) {
-        // Hides the logo for THIS report only. Does NOT touch res.company.logo.
-        this.state.hideLogo = true;
-        this.state.logoHovered = false;
-
-        // Hide visually from canvas
-        if (this.reportFrameRef && this.reportFrameRef.el) {
-            const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
-            logoImgs.forEach(logoImg => {
-                logoImg.classList.add('cy-logo-hidden');
-                logoImg.style.setProperty('display', 'none', 'important');
-            });
-        }
-        if (this.undoManager) this.undoManager.debouncedSave();
-    }
-
-    onLogoVisibilityChange(ev) {
-        const checked = ev.target.checked;
-        this.state.hideLogo = checked;
-
-        // Visual update in the canvas
-        if (this.reportFrameRef && this.reportFrameRef.el) {
-            const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
-            logoImgs.forEach(logoImg => {
-                if (checked) {
+            // Hide visually from canvas
+            if (this.reportFrameRef && this.reportFrameRef.el) {
+                const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
+                logoImgs.forEach(logoImg => {
                     logoImg.classList.add('cy-logo-hidden');
                     logoImg.style.setProperty('display', 'none', 'important');
-                } else {
-                    logoImg.classList.remove('cy-logo-hidden');
-                    logoImg.style.removeProperty('display');
-                }
-            });
+                });
+            }
+            if (this.undoManager) this.undoManager.debouncedSave();
         }
 
-        if (this.undoManager) this.undoManager.debouncedSave();
-    }
+        onLogoVisibilityChange(ev) {
+            const checked = ev.target.checked;
+            this.state.hideLogo = checked;
+
+            // Visual update in the canvas
+            if (this.reportFrameRef && this.reportFrameRef.el) {
+                const logoImgs = this.reportFrameRef.el.querySelectorAll('img[alt="Logo"], .company_logo');
+                logoImgs.forEach(logoImg => {
+                    if (checked) {
+                        logoImg.classList.add('cy-logo-hidden');
+                        logoImg.style.setProperty('display', 'none', 'important');
+                    } else {
+                        logoImg.classList.remove('cy-logo-hidden');
+                        logoImg.style.removeProperty('display');
+                    }
+                });
+            }
+
+            if (this.undoManager) this.undoManager.debouncedSave();
+        }
 
     async onLogoFileChange(ev) {
-        const file = ev.target.files[0];
-        if (!file) return;
-        // Use stored company ID (this.env.company may not be available in Community)
-        const companyId = this._companyId;
-        if (!companyId) {
-            this.notification.add('Could not determine company. Please reload and try again.', { type: 'warning' });
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = async (e) => {
-            const base64 = e.target.result.split(',')[1];
-            try {
-                await this.orm.write('res.company', [companyId], { logo: base64 });
-                this.state.companyLogo = base64;
-                this.notification.add('Company logo updated', { type: 'success' });
-            } catch (err) {
-                this.notification.add('Failed to save logo: ' + err.message, { type: 'danger' });
+            const file = ev.target.files[0];
+            if (!file) return;
+            // Use stored company ID (this.env.company may not be available in Community)
+            const companyId = this._companyId;
+            if (!companyId) {
+                this.notification.add('Could not determine company. Please reload and try again.', { type: 'warning' });
+                return;
             }
-        };
-        reader.readAsDataURL(file);
-    }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64 = e.target.result.split(',')[1];
+                try {
+                    await this.orm.write('res.company', [companyId], { logo: base64 });
+                    this.state.companyLogo = base64;
+                    this.notification.add('Company logo updated', { type: 'success' });
+                } catch (err) {
+                    this.notification.add('Failed to save logo: ' + err.message, { type: 'danger' });
+                }
+            };
+            reader.readAsDataURL(file);
+        }
 
     // Name of the business view Reports was opened from (e.g. "User Dashboard",
     // "Discuss", "Sales") — persisted by navbar.js's _getBusinessContext().
     get businessBreadcrumbName() {
-        return sessionStorage.getItem('CyConfigBusinessName') || 'Home';
-    }
+            return sessionStorage.getItem('CyConfigBusinessName') || 'Home';
+        }
 
     async goToBusinessParent(component) {
-        const actionId = sessionStorage.getItem('CyConfigBusinessActionId');
-        if (actionId) {
-            component.action.doAction(parseInt(actionId, 10));
-        } else {
-            this.close_edit(component);
+            const actionId = sessionStorage.getItem('CyConfigBusinessActionId');
+            if (actionId) {
+                component.action.doAction(parseInt(actionId, 10));
+            } else {
+                this.close_edit(component);
+            }
         }
-    }
 
     async close_edit(component) {
-        // Scope back to whatever business model Reports was opened from
-        // (persisted by navbar.js's _getBusinessContext()) — not this._resModel,
-        // which is the *edited report's own* data-source model and has nothing
-        // to do with how the Reports list should be filtered on return.
-        const businessModel = sessionStorage.getItem('CyConfigBusinessModel');
+            // Scope back to whatever business model Reports was opened from
+            // (persisted by navbar.js's _getBusinessContext()) — not this._resModel,
+            // which is the *edited report's own* data-source model and has nothing
+            // to do with how the Reports list should be filtered on return.
+            const businessModel = sessionStorage.getItem('CyConfigBusinessModel');
 
-        const action = {
-            name: 'Reports',
-            type: 'ir.actions.act_window',
-            res_model: 'ir.actions.report',
-            target: 'current',
-            views: [[false, 'kanban']],
-            context: businessModel ? {
-                default_model: businessModel,
-                search_default_model: businessModel,
-            } : {}
-        };
+            const action = {
+                name: 'Reports',
+                type: 'ir.actions.act_window',
+                res_model: 'ir.actions.report',
+                target: 'current',
+                views: [[false, 'kanban']],
+                context: businessModel ? {
+                    default_model: businessModel,
+                    search_default_model: businessModel,
+                } : {}
+            };
 
-        component.action.doAction(action);
-    }
+            component.action.doAction(action);
+        }
 
     async save_changes(component) {
-        if (component.state.hasOverflow) {
-            component.notification.add(
-                "Cannot save: content exceeds the page boundary. " +
-                "Remove or resize elements above the red line first.",
-                { type: "danger", sticky: true }
-            );
-            // this.action.doAction("studio_reload");
-            return;
-        }
-        if (component.state.isSaving) return;
-        component.state.isSaving = true;
-        try {
-            document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
-            document.querySelectorAll('[class="/"], [class=""]').forEach(el => el.removeAttribute('class'));
-            $('[t-if], [t-elif], [t-else]').removeAttr('style');
-            if (component.editor) component.editor.destroy();
-            component.editor = null;
-
-            // Ensure any pending DOM updates are finished
-            await new Promise(r => setTimeout(r, 100));
-
-            const frameEl = component.reportFrameRef.el;
-            const editedHTML = frameEl.tagName === 'IFRAME' ? frameEl.contentDocument.documentElement.outerHTML : frameEl.innerHTML;
-
-            const parser = new DOMParser();
-            const editedDoc = parser.parseFromString(editedHTML, 'text/html');
-            const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
-
-            // Normalize editedDoc by unwrapping UI shells to match originalDoc structure
-            component._cleanStudioAttrs(editedDoc.body, true);
-
-            let changes = component.getChangedElements(originalDoc, editedDoc);
-
-            const lastFooter = originalDoc.querySelector('.cy-custom-footer:last-of-type');
-            let originalShowF = true, originalShowD = false, originalShowP = true, originalCustomText = '', originalHasCustom = false;
-            if (lastFooter) {
-                originalShowF = lastFooter.dataset.showFooter === 'true';
-                originalShowD = lastFooter.dataset.showDoc === 'true';
-                originalShowP = lastFooter.dataset.showPage === 'true';
-                originalHasCustom = lastFooter.dataset.hasCustom === 'true';
-                originalCustomText = decodeURIComponent(lastFooter.dataset.customText || '');
-            }
-
-            const footerChanged = (
-                component.state.footerShowReportFooter !== originalShowF ||
-                component.state.footerShowDocName !== originalShowD ||
-                component.state.footerShowPageNum !== originalShowP ||
-                component.state.hasCustomFooter !== originalHasCustom ||
-                (component.state.hasCustomFooter && component.state.companyReportFooterText !== originalCustomText)
-            );
-
-
-            // ── Logo hide/show persistence ──────────────────────────────────
-            // We track whether hideLogo changed relative to what was originally loaded.
-            const originallyHiddenLogo = !!(component._loadedArch || '').includes('cy-logo-override');
-            const nowHidingLogo = component.state.hideLogo;
-
-            // Build a standalone mini-template that injects or removes the CSS override
-            // inside the report page div. We anchor it to the first cy-xpath node in
-            // the edited document so the XPath is always valid.
-            let logoOverrideTemplates = [];
-            if (nowHidingLogo !== originallyHiddenLogo) {
-                // Find any anchored node to get a valid cy-template
-                const anchorEl = component.reportFrameRef.el.querySelector('[cy-xpath][cy-template]');
-                const cyTemplate = anchorEl ? anchorEl.getAttribute('cy-template') : null;
-
-                if (cyTemplate && nowHidingLogo) {
-                    // Inject the override: find the page div xpath to append inside it
-                    const pageEl = component.reportFrameRef.el.querySelector('.page[cy-xpath]');
-                    const pageXpath = pageEl ? pageEl.getAttribute('cy-xpath') : null;
-                    if (pageXpath) {
-                        logoOverrideTemplates.push(
-                            `<template id="cy_logo_override_${Date.now()}" inherit_id="${cyTemplate}">` +
-                            `<xpath expr="${pageXpath}" position="inside">` +
-                            `<style class="cy-logo-override">` +
-                            `img[alt="Logo"]{display:none!important;}` +
-                            `.company_logo{display:none!important;}` +
-                            `</style>` +
-                            `</xpath>` +
-                            `</template>`
-                        );
-                    }
-                } else if (cyTemplate && !nowHidingLogo) {
-                    // The override was previously saved. We'll rely on the full content
-                    // replace (position="replace" with cleaned content) to drop it.
-                    // No separate template needed — the DOM save already excludes it.
-                }
-            }
-
-            if (changes.length === 0 && logoOverrideTemplates.length === 0 && !footerChanged) {
-                component.state.isSaving = false;
+            if (component.state.hasOverflow) {
+                component.notification.add(
+                    "Cannot save: content exceeds the page boundary. " +
+                    "Remove or resize elements above the red line first.",
+                    { type: "danger", sticky: true }
+                );
+                // this.action.doAction("studio_reload");
                 return;
             }
+            if (component.state.isSaving) return;
+            component.state.isSaving = true;
+            try {
+                document.querySelectorAll('.selected').forEach(el => el.classList.remove('selected'));
+                document.querySelectorAll('[class="/"], [class=""]').forEach(el => el.removeAttribute('class'));
+                $('[t-if], [t-elif], [t-else]').removeAttr('style');
+                if (component.editor) component.editor.destroy();
+                component.editor = null;
 
-            // ── Ensure _docTemplate is resolved before building XPaths ──
-            // _docTemplate is only set when the source editor is opened.
-            // On a fresh save we must resolve it so the footer xpath targets
-            // the correct inner document view, not the outer wrapper template.
-            if (!component._docTemplate) {
-                try {
-                    const srcRes = await component.rpc('/cyllo_studio/get_report_source', {
-                        template: component._template,
-                    });
-                    if (srcRes && srcRes.success && srcRes.doc_template) {
-                        component._docTemplate = srcRes.doc_template;
-                    } else {
-                        component._docTemplate = component._template;
-                    }
-                } catch (e) {
-                    console.warn('[Cyllo Studio] Could not resolve _docTemplate, falling back to _template:', e);
-                    component._docTemplate = component._template;
-                }
-            }
+                // Ensure any pending DOM updates are finished
+                await new Promise(r => setTimeout(r, 100));
 
-            let newTemplates = component.buildInheritanceXML(changes);
-            if (logoOverrideTemplates.length) {
-                newTemplates = newTemplates.concat(logoOverrideTemplates);
-            }
+                const frameEl = component.reportFrameRef.el;
+                const editedHTML = frameEl.tagName === 'IFRAME' ? frameEl.contentDocument.documentElement.outerHTML : frameEl.innerHTML;
 
-            const result = await component.rpc('/cyllo_studio/create/inherited_view', {
-                all_arch: newTemplates,
-            });
+                const parser = new DOMParser();
+                const editedDoc = parser.parseFromString(editedHTML, 'text/html');
+                const originalDoc = parser.parseFromString(component._loadedArch || '', 'text/html');
 
-            if (result && result['success'] === true) {
-                component.notification.add("Report saved successfully", { type: "success" });
+                // Normalize editedDoc by unwrapping UI shells to match originalDoc structure
+                component._cleanStudioAttrs(editedDoc.body, true);
 
-                // ── CAPTURE THUMBNAIL (Server-Side PDF to Image) ────
-                if (!component.state.hasThumbnail) {
-                    const sampleRecordId = component.state.records && component.state.records.length > 0 ? component.state.records[0] : null;
-                    if (sampleRecordId) {
-                        // Fire and forget - let the server generate the thumbnail quietly in the background
-                        component.rpc('/cyllo_studio/generate_report_thumbnail', {
-                            report_id: component._reportId,
-                            record_id: sampleRecordId
-                        }).then((res) => {
-                            if (res && res.success) {
-                                component.state.hasThumbnail = true;
-                            } else {
-                                console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
-                            }
-                        }).catch((e) => {
-                            console.error("[Cyllo Studio] Failed to generate thumbnail server-side:", e);
-                        });
-                    }
+                let changes = component.getChangedElements(originalDoc, editedDoc);
+
+                const lastFooter = originalDoc.querySelector('.cy-custom-footer:last-of-type');
+                let originalShowF = true, originalShowD = false, originalShowP = true, originalCustomText = '', originalHasCustom = false;
+                if (lastFooter) {
+                    originalShowF = lastFooter.dataset.showFooter === 'true';
+                    originalShowD = lastFooter.dataset.showDoc === 'true';
+                    originalShowP = lastFooter.dataset.showPage === 'true';
+                    originalHasCustom = lastFooter.dataset.hasCustom === 'true';
+                    originalCustomText = decodeURIComponent(lastFooter.dataset.customText || '');
                 }
 
-                // ── PERSISTENT SAVE: Refresh local state instead of closing ────
-                const resArch = await component.rpc('/cyllo_studio/get_arch', {
-                    template: component._template,
-                    show_placeholders: false
-                });
-                if (resArch && resArch.success) {
-                    component._loadedArch = resArch.arch;
-                    if (!component.state.previewMode) {
-                        if (component.reportFrameRef.el && component.reportFrameRef.el.tagName === 'IFRAME') {
-                            component.reportFrameRef.el.contentWindow.location.reload();
+                const footerChanged = (
+                    component.state.footerShowReportFooter !== originalShowF ||
+                    component.state.footerShowDocName !== originalShowD ||
+                    component.state.footerShowPageNum !== originalShowP ||
+                    component.state.hasCustomFooter !== originalHasCustom ||
+                    (component.state.hasCustomFooter && component.state.companyReportFooterText !== originalCustomText)
+                );
+
+
+                // ── Logo hide/show persistence ──────────────────────────────────
+                // We track whether hideLogo changed relative to what was originally loaded.
+                const originallyHiddenLogo = !!(component._loadedArch || '').includes('cy-logo-override');
+                const nowHidingLogo = component.state.hideLogo;
+
+                // Build a standalone mini-template that injects or removes the CSS override
+                // inside the report page div. We anchor it to the first cy-xpath node in
+                // the edited document so the XPath is always valid.
+                let logoOverrideTemplates = [];
+                if (nowHidingLogo !== originallyHiddenLogo) {
+                    // Find any anchored node to get a valid cy-template
+                    const anchorEl = component.reportFrameRef.el.querySelector('[cy-xpath][cy-template]');
+                    const cyTemplate = anchorEl ? anchorEl.getAttribute('cy-template') : null;
+
+                    if (cyTemplate && nowHidingLogo) {
+                        // Inject the override: find the page div xpath to append inside it
+                        const pageEl = component.reportFrameRef.el.querySelector('.page[cy-xpath]');
+                        const pageXpath = pageEl ? pageEl.getAttribute('cy-xpath') : null;
+                        if (pageXpath) {
+                            logoOverrideTemplates.push(
+                                `<template id="cy_logo_override_${Date.now()}" inherit_id="${cyTemplate}">` +
+                                `<xpath expr="${pageXpath}" position="inside">` +
+                                `<style class="cy-logo-override">` +
+                                `img[alt="Logo"]{display:none!important;}` +
+                                `.company_logo{display:none!important;}` +
+                                `</style>` +
+                                `</xpath>` +
+                                `</template>`
+                            );
                         }
-                    } else {
-                        await component._fetchPreviewData();
+                    } else if (cyTemplate && !nowHidingLogo) {
+                        // The override was previously saved. We'll rely on the full content
+                        // replace (position="replace" with cleaned content) to drop it.
+                        // No separate template needed — the DOM save already excludes it.
                     }
+                }
 
-                    // If source editor is open, refresh it too (UI -> Source sync)
-                    if (component.state.showSourceEditor) {
-                        const refreshRes = await component.rpc('/cyllo_studio/get_report_source', {
+                if (changes.length === 0 && logoOverrideTemplates.length === 0 && !footerChanged) {
+                    component.state.isSaving = false;
+                    return;
+                }
+
+                // ── Ensure _docTemplate is resolved before building XPaths ──
+                // _docTemplate is only set when the source editor is opened.
+                // On a fresh save we must resolve it so the footer xpath targets
+                // the correct inner document view, not the outer wrapper template.
+                if (!component._docTemplate) {
+                    try {
+                        const srcRes = await component.rpc('/cyllo_studio/get_report_source', {
                             template: component._template,
                         });
-                        if (refreshRes.success) {
-                            component.state.sourceCode = refreshRes.arch;
-                            if (component.aceEditor) {
-                                component.aceEditor.setValue(refreshRes.arch, -1);
-                            }
+                        if (srcRes && srcRes.success && srcRes.doc_template) {
+                            component._docTemplate = srcRes.doc_template;
+                            component._recordVar = srcRes.record_var || 'doc';
+                        } else {
+                            component._docTemplate = component._template;
+                            component._recordVar = 'doc';
+                        }
+                    } catch (e) {
+                        console.warn('[Cyllo Studio] Could not resolve _docTemplate, falling back to _template:', e);
+                        component._docTemplate = component._template;
+                        component._recordVar = 'doc';
+                    }
+                }
+
+                let newTemplates = component.buildInheritanceXML(changes);
+                if (logoOverrideTemplates.length) {
+                    newTemplates = newTemplates.concat(logoOverrideTemplates);
+                }
+
+                const templateKeys = Object.keys(groupBy(changes, 'template'));
+                if (templateKeys.length > 0) {
+                    const checkRes = await component.rpc('/cyllo_studio/check_shared_templates', {
+                        templates: templateKeys,
+                    });
+                    if (checkRes && checkRes.success && checkRes.shared_templates && checkRes.shared_templates.length > 0) {
+                        const sharedNames = checkRes.shared_templates.join(", ");
+                        const userConfirmed = await new Promise((resolve) => {
+                            component.dialog.add(ConfirmationDialog, {
+                                body: `The following templates are shared across multiple reports: ${sharedNames}. Changes will apply to all of them. Are you sure you want to save?`,
+                                confirm: () => resolve(true),
+                                cancel: () => resolve(false),
+                            });
+                        });
+                        if (!userConfirmed) {
+                            component.state.isSaving = false;
+                            return;
                         }
                     }
                 }
-            } else {
-                alert('Save failed: ' + result.error);
+
+                const result = await component.rpc('/cyllo_studio/create/inherited_view', {
+                    all_arch: newTemplates,
+                });
+
+                if (result && result['success'] === true) {
+                    component.notification.add("Report saved successfully", { type: "success" });
+
+                    // ── CAPTURE THUMBNAIL (Server-Side PDF to Image) ────
+                    if (!component.state.hasThumbnail) {
+                        const sampleRecordId = component.state.records && component.state.records.length > 0 ? component.state.records[0] : null;
+                        if (sampleRecordId) {
+                            // Fire and forget - let the server generate the thumbnail quietly in the background
+                            component.rpc('/cyllo_studio/generate_report_thumbnail', {
+                                report_id: component._reportId,
+                                record_id: sampleRecordId
+                            }).then((res) => {
+                                if (res && res.success) {
+                                    component.state.hasThumbnail = true;
+                                } else {
+                                    console.error("[Cyllo Studio] Server thumbnail error:", res ? res.error : "Unknown");
+                                }
+                            }).catch((e) => {
+                                console.error("[Cyllo Studio] Failed to generate thumbnail server-side:", e);
+                            });
+                        }
+                    }
+
+                    // ── PERSISTENT SAVE: Refresh local state instead of closing ────
+                    const resArch = await component.rpc('/cyllo_studio/get_arch', {
+                        template: component._template,
+                        show_placeholders: false
+                    });
+                    if (resArch && resArch.success) {
+                        component._loadedArch = resArch.arch;
+                        if (!component.state.previewMode) {
+                            if (component.reportFrameRef.el && component.reportFrameRef.el.tagName === 'IFRAME') {
+                                component.reportFrameRef.el.contentWindow.location.reload();
+                            }
+                        } else {
+                            await component._fetchPreviewData();
+                        }
+
+                        // If source editor is open, refresh it too (UI -> Source sync)
+                        if (component.state.showSourceEditor) {
+                            const refreshRes = await component.rpc('/cyllo_studio/get_report_source', {
+                                template: component._template,
+                            });
+                            if (refreshRes.success) {
+                                component.state.sourceCode = refreshRes.arch;
+                                if (component.aceEditor) {
+                                    component.aceEditor.setValue(refreshRes.arch, -1);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    alert('Save failed: ' + result.error);
+                }
+            } finally {
+                component.state.isSaving = false;
             }
-        } finally {
-            component.state.isSaving = false;
         }
-    }
 
-    getChangedElements(originalDoc, editedDoc) {
-        let allChanges = []
+        getChangedElements(originalDoc, editedDoc) {
+            let allChanges = []
 
-        const hasStructuralNodes = (node) => {
-            if (!node || !node.hasAttribute) return false;
-            const attrs = ['t-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value', 't-field', 't-esc', 't-out'];
-            if (attrs.some(a => node.hasAttribute(a))) return true;
-            const tag = (node.tagName || '').toLowerCase();
-            if (tag === 't' || tag === 'cy-qweb-t') return true;
-            const selector = attrs.map(a => `t[${a}], cy-qweb-t[${a}]`).join(',') + ',t,cy-qweb-t';
-            try {
-                return !!(node.querySelector && node.querySelector(selector));
-            } catch (e) {
-                return Array.from(node.getElementsByTagName('*')).some(el => {
-                    const etag = (el.tagName || '').toLowerCase();
-                    if (etag === 't' || etag === 'cy-qweb-t') return true;
-                    return attrs.some(a => el.hasAttribute(a));
+            const hasStructuralNodes = (node) => {
+                if (!node || !node.hasAttribute) return false;
+                const attrs = ['t-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value', 't-field', 't-esc', 't-out'];
+                if (attrs.some(a => node.hasAttribute(a))) return true;
+                const tag = (node.tagName || '').toLowerCase();
+                if (tag === 't' || tag === 'cy-qweb-t') return true;
+                const selector = attrs.map(a => `t[${a}], cy-qweb-t[${a}]`).join(',') + ',t,cy-qweb-t';
+                try {
+                    return !!(node.querySelector && node.querySelector(selector));
+                } catch (e) {
+                    return Array.from(node.getElementsByTagName('*')).some(el => {
+                        const etag = (el.tagName || '').toLowerCase();
+                        if (etag === 't' || etag === 'cy-qweb-t') return true;
+                        return attrs.some(a => el.hasAttribute(a));
+                    });
+                }
+            };
+
+            const hasTIfElIfChainInChildren = (node) => {
+                return Array.from(node.children).some(c => {
+                    const tag = (c.tagName || '').toLowerCase();
+                    if (tag !== 'cy-qweb-t' && tag !== 't') return false;
+                    if (c.hasAttribute('t-if')) return true;
+                    if (c.hasAttribute('t-elif') || c.hasAttribute('t-else')) return true;
+                    return Array.from(c.children).some(gc => {
+                        const gtag = (gc.tagName || '').toLowerCase();
+                        if (gtag !== 'cy-qweb-t' && gtag !== 't') return false;
+                        return gc.hasAttribute('t-if') || gc.hasAttribute('t-elif') || gc.hasAttribute('t-else');
+                    });
                 });
-            }
-        };
+            };
 
-        const hasTIfElIfChainInChildren = (node) => {
-            return Array.from(node.children).some(c => {
-                const tag = (c.tagName || '').toLowerCase();
-                if (tag !== 'cy-qweb-t' && tag !== 't') return false;
-                if (c.hasAttribute('t-if')) return true;
-                if (c.hasAttribute('t-elif') || c.hasAttribute('t-else')) return true;
-                return Array.from(c.children).some(gc => {
-                    const gtag = (gc.tagName || '').toLowerCase();
-                    if (gtag !== 'cy-qweb-t' && gtag !== 't') return false;
-                    return gc.hasAttribute('t-if') || gc.hasAttribute('t-elif') || gc.hasAttribute('t-else');
-                });
-            });
-        };
+            const containsTable = (node) => {
+                return !!(node.querySelector && node.querySelector('table'));
+            };
 
-        const containsTable = (node) => {
-            return !!(node.querySelector && node.querySelector('table'));
-        };
+            editedDoc.querySelectorAll('[cy-template]').forEach(el => {
+                const xpath = el.getAttribute('cy-xpath');
+                const template = el.getAttribute('cy-template');
+                const original = originalDoc.querySelector(
+                    `[cy-template="${template}"][cy-xpath="${xpath}"]`);
+                if (!original) return;
 
-        editedDoc.querySelectorAll('[cy-template]').forEach(el => {
-            const xpath = el.getAttribute('cy-xpath');
-            const template = el.getAttribute('cy-template');
-            const original = originalDoc.querySelector(
-                `[cy-template="${template}"][cy-xpath="${xpath}"]`);
-            if (!original) return;
+                const text = (node) => Array.from(node.childNodes)
+                    .filter(n => n.nodeType === 3)
+                    .map(n => n.textContent.trim()).join('');
 
-            const text = (node) => Array.from(node.childNodes)
-                .filter(n => n.nodeType === 3)
-                .map(n => n.textContent.trim()).join('');
+                const inner = (node) => Array.from(node.children)
+                    .filter(c => !c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
+                    .map(c => c.outerHTML.trim()).join('');
 
-            const inner = (node) => Array.from(node.children)
-                .filter(c => !c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
-                .map(c => c.outerHTML.trim()).join('');
+                const cyXpathChildren = (node) => Array.from(node.children)
+                    .filter(c => c.hasAttribute('cy-xpath'))
+                    .map(c => c.getAttribute('cy-xpath')).join(',');
 
-            const cyXpathChildren = (node) => Array.from(node.children)
-                .filter(c => c.hasAttribute('cy-xpath'))
-                .map(c => c.getAttribute('cy-xpath')).join(',');
+                let textChanged = text(original) !== text(el);
+                let innerChanged = inner(original) !== inner(el);
 
-            let textChanged = text(original) !== text(el);
-            let innerChanged = inner(original) !== inner(el);
+                const hasNewNodes = Array.from(el.children).some(c => c.classList.contains('c_new') && !c.hasAttribute('cy-xpath'));
 
-            const hasNewNodes = Array.from(el.children).some(c => c.classList.contains('c_new') && !c.hasAttribute('cy-xpath'));
+                const tag = (el.tagName || '').toLowerCase();
+                const isTable = ['table', 'tbody', 'thead', 'tfoot', 'tr'].includes(tag);
+                const isDangerous = isTable || hasStructuralNodes(original) || hasTIfElIfChainInChildren(original) || original.classList.contains('page') || original.hasAttribute('name');
 
-            const tag = (el.tagName || '').toLowerCase();
-            const isTable = ['table', 'tbody', 'thead', 'tfoot', 'tr'].includes(tag);
-            const isDangerous = isTable || hasStructuralNodes(original) || hasTIfElIfChainInChildren(original) || original.classList.contains('page') || original.hasAttribute('name');
+                // Protect dangerous structures from innerHTML/text replacement because replacing them
+                // corrupts QWeb scope loops and t-if chains.
+                if (isDangerous) {
+                    innerChanged = false;
+                    textChanged = false;
+                }
 
-            // Protect dangerous structures from innerHTML/text replacement because replacing them
-            // corrupts QWeb scope loops and t-if chains.
-            if (isDangerous) {
-                innerChanged = false;
-                textChanged = false;
-            }
+                const rawStructChanged = cyXpathChildren(original) !== cyXpathChildren(el);
 
-            const rawStructChanged = cyXpathChildren(original) !== cyXpathChildren(el);
+                const structChanged = rawStructChanged && !isDangerous;
 
-            const structChanged = rawStructChanged && !isDangerous;
+                if (textChanged || innerChanged || structChanged || hasNewNodes) {
+                    allChanges.push({ el, xpath, template, structChanged });
+                }
 
-            if (textChanged || innerChanged || structChanged || hasNewNodes) {
-                allChanges.push({ el, xpath, template, structChanged });
-            }
+                // ── Detect attribute-only changes on cy-xpath children ──
+                // When d-print-none / t-if is toggled via the editor wrappers,
+                // _cleanStudioAttrs pushes those attributes down to the underlying cy-xpath children.
+                // The inner/text comparison misses them because those nodes are excluded from diffs.
+                // We generate separate change entries directly targeting the child xpath.
+                Array.from(el.children)
+                    .filter(c => c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
+                    .forEach(editedChild => {
+                        const childXpath = editedChild.getAttribute('cy-xpath');
+                        const childTemplate = editedChild.getAttribute('cy-template') || template;
+                        const originalChild = originalDoc.querySelector(
+                            `[cy-template="${childTemplate}"][cy-xpath="${childXpath}"]`
+                        ) || originalDoc.querySelector(`[cy-xpath="${childXpath}"]`);
+                        if (!originalChild) return;
 
-            // ── Detect attribute-only changes on cy-xpath children ──
-            // When d-print-none / t-if is toggled via the editor wrappers,
-            // _cleanStudioAttrs pushes those attributes down to the underlying cy-xpath children.
-            // The inner/text comparison misses them because those nodes are excluded from diffs.
-            // We generate separate change entries directly targeting the child xpath.
-            Array.from(el.children)
-                .filter(c => c.hasAttribute('cy-xpath') && !c.classList.contains('c_new'))
-                .forEach(editedChild => {
-                    const childXpath = editedChild.getAttribute('cy-xpath');
-                    const childTemplate = editedChild.getAttribute('cy-template') || template;
-                    const originalChild = originalDoc.querySelector(
-                        `[cy-template="${childTemplate}"][cy-xpath="${childXpath}"]`
-                    ) || originalDoc.querySelector(`[cy-xpath="${childXpath}"]`);
-                    if (!originalChild) return;
+                        const editedHasHidden = editedChild.classList.contains('d-print-none');
+                        const originalHasHidden = originalChild.classList.contains('d-print-none');
+                        const editedTif = editedChild.getAttribute('t-if');
+                        const originalTif = originalChild.getAttribute('t-if');
 
-                    const editedHasHidden = editedChild.classList.contains('d-print-none');
-                    const originalHasHidden = originalChild.classList.contains('d-print-none');
-                    const editedTif = editedChild.getAttribute('t-if');
-                    const originalTif = originalChild.getAttribute('t-if');
+                        const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
+                        if (attrChanged) {
+                            allChanges.push({
+                                el: editedChild,
+                                xpath: childXpath,
+                                template: childTemplate,
+                                structChanged: false,
+                                attrOnly: true,
+                                isHidden: editedHasHidden,
+                                tif: editedTif,
+                            });
+                        }
+                    });
 
-                    const attrChanged = (editedHasHidden !== originalHasHidden) || (editedTif !== originalTif);
-                    if (attrChanged) {
+                // ── Detect DELETED cy-xpath children ─────────────────────────────
+                // `inner()` explicitly skips cy-xpath children, so the normal text/
+                // inner comparison never notices when a labelled child is removed.
+                // `structChanged` covers reordering but is vetoed for .page zones and
+                // zones that contain structural QWeb nodes or tables.
+                // This pass independently checks whether any cy-xpath child that was
+                // present in the ORIGINAL zone is absent in the EDITED zone, and emits
+                // a dedicated deletion entry for it so buildInheritanceXML can issue a
+                // position="replace" with empty body.
+                Array.from(original.children)
+                    .filter(origChild => origChild.hasAttribute('cy-xpath'))
+                    .forEach(origChild => {
+                        const childXpath = origChild.getAttribute('cy-xpath');
+                        const childTemplate = origChild.getAttribute('cy-template') || template;
+
+                        // Skip if element is still present in the edited DOM
+                        const stillPresent = el.querySelector(`[cy-xpath="${CSS.escape(childXpath)}"]`);
+                        if (stillPresent) return;
+
+                        // Skip structural/QWeb nodes — deleting t-foreach rows etc. is too dangerous
+                        if (hasStructuralNodes(origChild)) return;
+                        if (hasTIfElIfChainInChildren(origChild)) return;
+
                         allChanges.push({
-                            el: editedChild,
+                            el: origChild,
                             xpath: childXpath,
                             template: childTemplate,
                             structChanged: false,
-                            attrOnly: true,
-                            isHidden: editedHasHidden,
-                            tif: editedTif,
+                            isDeleted: true,
+                        });
+                    });
+            });
+
+
+            return allChanges.filter(change =>
+                !allChanges.some(p => p !== change && change.xpath.startsWith(p.xpath + '/'))
+            );
+        }
+
+
+        _cleanStudioAttrs(node, keepStudioAttrs = false) {
+            if (!node) return;
+            const self = this;
+            // Wrap in a temporary span to allow unwrapping the root itself
+            const temp = document.createElement('span');
+            const parent = node.parentNode;
+            const next = node.nextSibling;
+            temp.appendChild(node);
+
+            const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-type', 'cy-config'];
+            const clean = (el) => {
+                if (!el || !el.removeAttribute) return;
+
+                // ── QR Block Serialization ──
+                if (el.classList && el.classList.contains('s_qr_block')) {
+                    const configStr = el.dataset.qrConfig;
+                    if (configStr) {
+                        try {
+                            const qr = JSON.parse(configStr);
+                            const align = qr.config.align || 'center';
+                            const size = qr.config.size || 100;
+                            const qwebExpr = self._buildQrExpression(true, qr);
+
+                            el.innerHTML = '';
+                            el.style.textAlign = align;
+                            el.style.cursor = '';
+                            el.style.opacity = '';
+
+                            const img = document.createElement('img');
+                            // Use url_quote (now provided in the backend context) for safe path encoding
+                            img.setAttribute('t-att-src', `'/report/barcode/?barcode_type=QR&value=%s&width=${size}&height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')`);
+                            img.style.width = size + 'px';
+                            img.style.height = size + 'px';
+                            el.appendChild(img);
+
+                            if (qr.config.caption) {
+                                const caption = document.createElement('div');
+                                caption.style.fontSize = '8pt';
+                                caption.style.marginTop = '3px';
+                                caption.style.textAlign = 'center';
+                                caption.innerText = qr.config.caption;
+                                el.appendChild(caption);
+                            }
+
+                            el.classList.add('report-qr');
+                        } catch (e) {
+                            console.error("[Cyllo Studio] QR Serialization failed", e);
+                        }
+                    }
+                    el.classList.remove('s_qr_block', 'c_new', 'selected');
+                }
+
+                if (!keepStudioAttrs) {
+                    studioAttrs.forEach(a => el.removeAttribute(a));
+                    el.removeAttribute('onmouseover');
+                    el.removeAttribute('onmouseout');
+                    el.removeAttribute('onclick');
+                    el.removeAttribute('contenteditable');
+                    if (el.style) {
+                        if (el.style.cursor) el.style.removeProperty('cursor');
+                        if (el.style.outline) el.style.removeProperty('outline');
+                        if (el.style.opacity) el.style.removeProperty('opacity');
+                        if (el.getAttribute('style') === '') el.removeAttribute('style');
+                    }
+                    // FIX (Issue 1 — field persistence): strip UI-only classes that must
+                    // never appear in the saved QWeb arch.  c_new in particular causes
+                    // getChangedElements to treat a previously-saved field as a brand-new
+                    // drop on every subsequent save, and leaks into the PDF DOM.
+                    if (el.classList) {
+                        el.classList.remove('c_new', 'awaiting-config-block', 'selected');
+                        if (el.getAttribute('class') === '') el.removeAttribute('class');
+                    }
+                }
+
+                const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .box-toolbar, .box-resize-handles, .box-resize-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
+                handles.forEach(h => h.remove());
+
+                // Unwrap wrappers
+
+                // \u2500\u2500 Logo enrich wrapper: unwrap and persist hidden state as d-print-none \u2500\u2500
+                if (el.classList && el.classList.contains('cy-logo-enrich-wrapper')) {
+                    if (el.parentNode) {
+                        // Find the logo img inside the wrapper
+                        const img = el.querySelector('img[alt="Logo"], .company_logo');
+                        if (img) {
+                            // Convert editor-side hidden marker to d-print-none for PDF output
+                            if (img.classList.contains('cy-logo-hidden')) {
+                                img.classList.remove('cy-logo-hidden');
+                                img.classList.add('d-print-none');
+                            }
+                            // Remove UI-only elements before saving
+                            el.querySelectorAll('.cy-canvas-remove-logo-btn, .cy-canvas-logo-restore-hint').forEach(n => n.remove());
+                            // Unwrap: move img (and any siblings) back to parent
+                            const children = Array.from(el.childNodes);
+                            children.forEach(child => el.parentNode.insertBefore(child, el));
+                            el.remove();
+                            children.forEach(child => clean(child));
+                            return;
+                        }
+                    }
+                }
+
+                if (el.classList && el.classList.contains('table-wrapper')) {
+                    if (el.parentNode) {
+                        const children = Array.from(el.childNodes);
+                        const promotedChildren = [];
+
+                        const isHidden = el.classList.contains('cy-block-hidden');
+                        const isInactive = el.getAttribute('t-if') === 'False';
+                        const isPbBefore = el.classList.contains('page-break-before');
+                        const isPbAfter = el.classList.contains('page-break-after');
+
+                        children.forEach(child => {
+                            // Skip whitespace nodes introduced by the wrapper's HTML template
+                            if (child.nodeType === 3 && !child.textContent.trim()) return;
+
+                            if (child.tagName === 'TABLE' || (child.classList && child.classList.contains('table'))) {
+                                if (isHidden) child.classList.add('d-print-none');
+                                if (isInactive) child.setAttribute('t-if', 'False');
+                                if (isPbBefore) child.classList.add('page-break-before');
+                                if (isPbAfter) child.classList.add('page-break-after');
+                            }
+
+                            promotedChildren.push(child);
+                            el.parentNode.insertBefore(child, el);
+                        });
+                        el.remove();
+                        promotedChildren.forEach(child => clean(child));
+                        return;
+                    }
+                }
+                // ── Box Section Container Serialization ──
+                if (el.classList && el.classList.contains('box-section-wrapper')) {
+                    let cfg = {};
+                    try { cfg = JSON.parse(el.dataset.boxConfig || '{}'); } catch (ex) { }
+                    const s = cfg.style || {};
+                    const layoutMode = cfg.layoutMode || 'free';
+
+                    // Build the output <div class="report-section">
+                    const section = document.createElement('div');
+                    section.className = 'report-section';
+
+                    const isHidden = el.classList.contains('cy-block-hidden');
+                    const isInactive = el.getAttribute('t-if') === 'False';
+                    const isPbBefore = el.classList.contains('page-break-before');
+                    const isPbAfter = el.classList.contains('page-break-after');
+
+                    if (isHidden) section.classList.add('d-print-none');
+                    if (isInactive) section.setAttribute('t-if', 'False');
+                    if (isPbBefore) section.classList.add('page-break-before');
+                    if (isPbAfter) section.classList.add('page-break-after');
+
+                    if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
+                    if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
+                    section.setAttribute('data-box-id', cfg.id || '');
+                    section.setAttribute('data-layout-mode', layoutMode);
+
+                    let styleStr = 'position:relative;';
+                    styleStr += 'box-sizing:border-box;';
+                    if (s.width) styleStr += `width:${s.width}px;`;
+                    if (s.height) styleStr += `height:${s.height}px;`;
+                    styleStr += `background-color:${s.backgroundColor || 'transparent'};`;
+                    if (s.border && s.border !== 'none') styleStr += `border:${s.border};`;
+                    if (s.borderRadius) styleStr += `border-radius:${s.borderRadius}px;`;
+                    if (s.padding) styleStr += `padding:${s.padding}px;`;
+                    if (s.marginTop) styleStr += `margin-top:${s.marginTop}px;`;
+                    if (layoutMode === 'flow') styleStr += 'display:flex;flex-direction:column;gap:8px;align-items:flex-start;';
+                    section.setAttribute('style', styleStr);
+
+                    // Move children from the dropzone into the section
+                    const dropzone = el.querySelector('.box-dropzone');
+                    if (dropzone) {
+                        Array.from(dropzone.children).forEach(child => {
+                            const childClone = child.cloneNode(true);
+                            section.appendChild(childClone);
                         });
                     }
-                });
 
-            // ── Detect DELETED cy-xpath children ─────────────────────────────
-            // `inner()` explicitly skips cy-xpath children, so the normal text/
-            // inner comparison never notices when a labelled child is removed.
-            // `structChanged` covers reordering but is vetoed for .page zones and
-            // zones that contain structural QWeb nodes or tables.
-            // This pass independently checks whether any cy-xpath child that was
-            // present in the ORIGINAL zone is absent in the EDITED zone, and emits
-            // a dedicated deletion entry for it so buildInheritanceXML can issue a
-            // position="replace" with empty body.
-            Array.from(original.children)
-                .filter(origChild => origChild.hasAttribute('cy-xpath'))
-                .forEach(origChild => {
-                    const childXpath = origChild.getAttribute('cy-xpath');
-                    const childTemplate = origChild.getAttribute('cy-template') || template;
-
-                    // Skip if element is still present in the edited DOM
-                    const stillPresent = el.querySelector(`[cy-xpath="${CSS.escape(childXpath)}"]`);
-                    if (stillPresent) return;
-
-                    // Skip structural/QWeb nodes — deleting t-foreach rows etc. is too dangerous
-                    if (hasStructuralNodes(origChild)) return;
-                    if (hasTIfElIfChainInChildren(origChild)) return;
-
-                    allChanges.push({
-                        el: origChild,
-                        xpath: childXpath,
-                        template: childTemplate,
-                        structChanged: false,
-                        isDeleted: true,
-                    });
-                });
-        });
-
-
-        return allChanges.filter(change =>
-            !allChanges.some(p => p !== change && change.xpath.startsWith(p.xpath + '/'))
-        );
-    }
-
-
-    _cleanStudioAttrs(node, keepStudioAttrs = false) {
-        if (!node) return;
-        const self = this;
-        // Wrap in a temporary span to allow unwrapping the root itself
-        const temp = document.createElement('span');
-        const parent = node.parentNode;
-        const next = node.nextSibling;
-        temp.appendChild(node);
-
-        const studioAttrs = ['cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-type', 'cy-config'];
-        const clean = (el) => {
-            if (!el || !el.removeAttribute) return;
-
-            // ── QR Block Serialization ──
-            if (el.classList && el.classList.contains('s_qr_block')) {
-                const configStr = el.dataset.qrConfig;
-                if (configStr) {
-                    try {
-                        const qr = JSON.parse(configStr);
-                        const align = qr.config.align || 'center';
-                        const size = qr.config.size || 100;
-                        const qwebExpr = self._buildQrExpression(true, qr);
-
-                        el.innerHTML = '';
-                        el.style.textAlign = align;
-                        el.style.cursor = '';
-                        el.style.opacity = '';
-
-                        const img = document.createElement('img');
-                        // Use url_quote (now provided in the backend context) for safe path encoding
-                        img.setAttribute('t-att-src', `'/report/barcode/?barcode_type=QR&value=%s&width=${size}&height=${size}' % url_quote(str(${qwebExpr}) or 'No Data')`);
-                        img.style.width = size + 'px';
-                        img.style.height = size + 'px';
-                        el.appendChild(img);
-
-                        if (qr.config.caption) {
-                            const caption = document.createElement('div');
-                            caption.style.fontSize = '8pt';
-                            caption.style.marginTop = '3px';
-                            caption.style.textAlign = 'center';
-                            caption.innerText = qr.config.caption;
-                            el.appendChild(caption);
-                        }
-
-                        el.classList.add('report-qr');
-                    } catch (e) {
-                        console.error("[Cyllo Studio] QR Serialization failed", e);
+                    if (el.parentNode) {
+                        el.parentNode.replaceChild(section, el);
+                        // Recursively clean the children inside the new section
+                        Array.from(section.children).forEach(child => clean(child));
                     }
+                    return;
                 }
-                el.classList.remove('s_qr_block', 'c_new', 'selected');
-            }
 
-            if (!keepStudioAttrs) {
-                studioAttrs.forEach(a => el.removeAttribute(a));
-                el.removeAttribute('onmouseover');
-                el.removeAttribute('onmouseout');
-                el.removeAttribute('onclick');
-                el.removeAttribute('contenteditable');
-                if (el.style) {
-                    if (el.style.cursor) el.style.removeProperty('cursor');
-                    if (el.style.outline) el.style.removeProperty('outline');
-                    if (el.style.opacity) el.style.removeProperty('opacity');
-                    if (el.getAttribute('style') === '') el.removeAttribute('style');
+                // ── Sign Node Serialization ──
+                if (el.classList && el.classList.contains('sign-wrapper')) {
+                    let cfg = {};
+                    try { cfg = JSON.parse(el.dataset.signConfig || '{}'); } catch (ex) { }
+
+                    const role = cfg.role || 'customer';
+                    const label = cfg.label || 'Authorized Signature';
+                    const alignment = cfg.alignment || 'left';
+                    const width = cfg.width || 200;
+
+                    const section = document.createElement('div');
+                    section.className = 'o_sign_placeholder';
+
+                    const isHidden = el.classList.contains('cy-block-hidden');
+                    const isInactive = el.getAttribute('t-if') === 'False';
+                    const isPbBefore = el.classList.contains('page-break-before');
+                    const isPbAfter = el.classList.contains('page-break-after');
+
+                    if (isHidden) section.classList.add('d-print-none');
+                    if (isInactive) section.setAttribute('t-if', 'False');
+                    if (isPbBefore) section.classList.add('page-break-before');
+                    if (isPbAfter) section.classList.add('page-break-after');
+                    if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
+                    if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
+                    section.setAttribute('data-role', role);
+
+                    // Style: width + alignment, clear box-model for PDF
+                    let styleStr = `display:inline-block; width:${width}px; text-align:${alignment}; vertical-align:top; padding:4px 0;`;
+                    section.setAttribute('style', styleStr);
+
+                    // Invisible backend-detection anchor ([[SIGN:role]] in 2pt white text)
+                    const anchor = document.createElement('span');
+                    anchor.setAttribute('style', 'color:white;font-size:2pt;line-height:1px;display:block;overflow:hidden;height:1px;');
+                    anchor.textContent = `[[SIGN:${role}]]`;
+                    section.appendChild(anchor);
+
+                    // Signature line (underscores) — clean static line, no t-if/t-else
+                    const sigLine = document.createElement('div');
+                    sigLine.setAttribute('style', 'border-bottom:1px solid #333;width:80%;margin:8px auto 4px;min-height:40px;');
+                    section.appendChild(sigLine);
+
+                    // Label
+                    const labelP = document.createElement('p');
+                    labelP.setAttribute('style', 'font-weight:bold;font-size:11pt;margin:2px 0 0;');
+                    labelP.textContent = label;
+                    section.appendChild(labelP);
+
+                    if (cfg.show_date) {
+                        const dateP = document.createElement('p');
+                        dateP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
+                        dateP.textContent = 'Date: _______________';
+                        section.appendChild(dateP);
+                    }
+
+                    if (cfg.show_name) {
+                        const nameP = document.createElement('p');
+                        nameP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
+                        nameP.textContent = 'Name: _______________';
+                        section.appendChild(nameP);
+                    }
+
+                    if (el.parentNode) {
+                        el.parentNode.replaceChild(section, el);
+                        Array.from(section.children).forEach(child => clean(child));
+                    }
+                    return;
                 }
-            }
 
-            const handles = el.querySelectorAll ? Array.from(el.querySelectorAll('.table-handle, .box-handle, .box-toolbar, .box-resize-handles, .box-resize-handle, .field-handle, .tcm-delete-table, .table-toolbar, .text-handle, .resize-handle, .field-delete, .table-handle-container, .table-delete, .field-handle-container, .qr-handle-container')) : [];
-            handles.forEach(h => h.remove());
-
-            // Unwrap wrappers
-
-            // \u2500\u2500 Logo enrich wrapper: unwrap and persist hidden state as d-print-none \u2500\u2500
-            if (el.classList && el.classList.contains('cy-logo-enrich-wrapper')) {
-                if (el.parentNode) {
-                    // Find the logo img inside the wrapper
-                    const img = el.querySelector('img[alt="Logo"], .company_logo');
-                    if (img) {
-                        // Convert editor-side hidden marker to d-print-none for PDF output
-                        if (img.classList.contains('cy-logo-hidden')) {
-                            img.classList.remove('cy-logo-hidden');
-                            img.classList.add('d-print-none');
-                        }
-                        // Remove UI-only elements before saving
-                        el.querySelectorAll('.cy-canvas-remove-logo-btn, .cy-canvas-logo-restore-hint').forEach(n => n.remove());
-                        // Unwrap: move img (and any siblings) back to parent
+                // Legacy box-wrapper (old format) compat
+                if (el.classList && el.classList.contains('box-wrapper')) {
+                    if (el.parentNode) {
                         const children = Array.from(el.childNodes);
                         children.forEach(child => el.parentNode.insertBefore(child, el));
                         el.remove();
@@ -3422,374 +3656,210 @@ export class EditReport extends Component {
                         return;
                     }
                 }
-            }
+                if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block') || el.classList.contains('field-container'))) {
+                    if (el.parentNode) {
+                        const children = Array.from(el.childNodes);
+                        const promotedChildren = [];
 
-            if (el.classList && el.classList.contains('table-wrapper')) {
-                if (el.parentNode) {
-                    const children = Array.from(el.childNodes);
-                    const promotedChildren = [];
+                        const isHidden = el.classList.contains('cy-block-hidden');
+                        const isInactive = el.getAttribute('t-if') === 'False';
+                        const isPbBefore = el.classList.contains('page-break-before');
+                        const isPbAfter = el.classList.contains('page-break-after');
 
-                    const isHidden = el.classList.contains('cy-block-hidden');
-                    const isInactive = el.getAttribute('t-if') === 'False';
-                    const isPbBefore = el.classList.contains('page-break-before');
-                    const isPbAfter = el.classList.contains('page-break-after');
+                        children.forEach(child => {
+                            // Skip whitespace nodes introduced by the wrapper's HTML template
+                            if (child.nodeType === 3 && !child.textContent.trim()) return;
 
-                    children.forEach(child => {
-                        // Skip whitespace nodes introduced by the wrapper's HTML template
-                        if (child.nodeType === 3 && !child.textContent.trim()) return;
-
-                        if (child.tagName === 'TABLE' || (child.classList && child.classList.contains('table'))) {
-                            if (isHidden) child.classList.add('d-print-none');
-                            if (isInactive) child.setAttribute('t-if', 'False');
-                            if (isPbBefore) child.classList.add('page-break-before');
-                            if (isPbAfter) child.classList.add('page-break-after');
-                        }
-
-                        promotedChildren.push(child);
-                        el.parentNode.insertBefore(child, el);
-                    });
-                    el.remove();
-                    promotedChildren.forEach(child => clean(child));
-                    return;
-                }
-            }
-            // ── Box Section Container Serialization ──
-            if (el.classList && el.classList.contains('box-section-wrapper')) {
-                let cfg = {};
-                try { cfg = JSON.parse(el.dataset.boxConfig || '{}'); } catch (ex) { }
-                const s = cfg.style || {};
-                const layoutMode = cfg.layoutMode || 'free';
-
-                // Build the output <div class="report-section">
-                const section = document.createElement('div');
-                section.className = 'report-section';
-
-                const isHidden = el.classList.contains('cy-block-hidden');
-                const isInactive = el.getAttribute('t-if') === 'False';
-                const isPbBefore = el.classList.contains('page-break-before');
-                const isPbAfter = el.classList.contains('page-break-after');
-
-                if (isHidden) section.classList.add('d-print-none');
-                if (isInactive) section.setAttribute('t-if', 'False');
-                if (isPbBefore) section.classList.add('page-break-before');
-                if (isPbAfter) section.classList.add('page-break-after');
-
-                if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
-                if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
-                section.setAttribute('data-box-id', cfg.id || '');
-                section.setAttribute('data-layout-mode', layoutMode);
-
-                let styleStr = 'position:relative;';
-                styleStr += 'box-sizing:border-box;';
-                if (s.width) styleStr += `width:${s.width}px;`;
-                if (s.height) styleStr += `height:${s.height}px;`;
-                styleStr += `background-color:${s.backgroundColor || 'transparent'};`;
-                if (s.border && s.border !== 'none') styleStr += `border:${s.border};`;
-                if (s.borderRadius) styleStr += `border-radius:${s.borderRadius}px;`;
-                if (s.padding) styleStr += `padding:${s.padding}px;`;
-                if (s.marginTop) styleStr += `margin-top:${s.marginTop}px;`;
-                if (layoutMode === 'flow') styleStr += 'display:flex;flex-direction:column;gap:8px;align-items:flex-start;';
-                section.setAttribute('style', styleStr);
-
-                // Move children from the dropzone into the section
-                const dropzone = el.querySelector('.box-dropzone');
-                if (dropzone) {
-                    Array.from(dropzone.children).forEach(child => {
-                        const childClone = child.cloneNode(true);
-                        section.appendChild(childClone);
-                    });
-                }
-
-                if (el.parentNode) {
-                    el.parentNode.replaceChild(section, el);
-                    // Recursively clean the children inside the new section
-                    Array.from(section.children).forEach(child => clean(child));
-                }
-                return;
-            }
-
-            // ── Sign Node Serialization ──
-            if (el.classList && el.classList.contains('sign-wrapper')) {
-                let cfg = {};
-                try { cfg = JSON.parse(el.dataset.signConfig || '{}'); } catch (ex) { }
-
-                const role = cfg.role || 'customer';
-                const label = cfg.label || 'Authorized Signature';
-                const alignment = cfg.alignment || 'left';
-                const width = cfg.width || 200;
-
-                const section = document.createElement('div');
-                section.className = 'o_sign_placeholder';
-
-                const isHidden = el.classList.contains('cy-block-hidden');
-                const isInactive = el.getAttribute('t-if') === 'False';
-                const isPbBefore = el.classList.contains('page-break-before');
-                const isPbAfter = el.classList.contains('page-break-after');
-
-                if (isHidden) section.classList.add('d-print-none');
-                if (isInactive) section.setAttribute('t-if', 'False');
-                if (isPbBefore) section.classList.add('page-break-before');
-                if (isPbAfter) section.classList.add('page-break-after');
-                if (el.hasAttribute('cy-xpath')) section.setAttribute('cy-xpath', el.getAttribute('cy-xpath'));
-                if (el.hasAttribute('cy-template')) section.setAttribute('cy-template', el.getAttribute('cy-template'));
-                section.setAttribute('data-role', role);
-
-                // Style: width + alignment, clear box-model for PDF
-                let styleStr = `display:inline-block; width:${width}px; text-align:${alignment}; vertical-align:top; padding:4px 0;`;
-                section.setAttribute('style', styleStr);
-
-                // Invisible backend-detection anchor ([[SIGN:role]] in 2pt white text)
-                const anchor = document.createElement('span');
-                anchor.setAttribute('style', 'color:white;font-size:2pt;line-height:1px;display:block;overflow:hidden;height:1px;');
-                anchor.textContent = `[[SIGN:${role}]]`;
-                section.appendChild(anchor);
-
-                // Signature line (underscores) — clean static line, no t-if/t-else
-                const sigLine = document.createElement('div');
-                sigLine.setAttribute('style', 'border-bottom:1px solid #333;width:80%;margin:8px auto 4px;min-height:40px;');
-                section.appendChild(sigLine);
-
-                // Label
-                const labelP = document.createElement('p');
-                labelP.setAttribute('style', 'font-weight:bold;font-size:11pt;margin:2px 0 0;');
-                labelP.textContent = label;
-                section.appendChild(labelP);
-
-                if (cfg.show_date) {
-                    const dateP = document.createElement('p');
-                    dateP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
-                    dateP.textContent = 'Date: _______________';
-                    section.appendChild(dateP);
-                }
-
-                if (cfg.show_name) {
-                    const nameP = document.createElement('p');
-                    nameP.setAttribute('style', 'font-size:9pt;margin:2px 0 0;color:#555;');
-                    nameP.textContent = 'Name: _______________';
-                    section.appendChild(nameP);
-                }
-
-                if (el.parentNode) {
-                    el.parentNode.replaceChild(section, el);
-                    Array.from(section.children).forEach(child => clean(child));
-                }
-                return;
-            }
-
-            // Legacy box-wrapper (old format) compat
-            if (el.classList && el.classList.contains('box-wrapper')) {
-                if (el.parentNode) {
-                    const children = Array.from(el.childNodes);
-                    children.forEach(child => el.parentNode.insertBefore(child, el));
-                    el.remove();
-                    children.forEach(child => clean(child));
-                    return;
-                }
-            }
-            if (el.classList && (el.classList.contains('dynamic-field-wrapper') || el.classList.contains('field-block') || el.classList.contains('field-container'))) {
-                if (el.parentNode) {
-                    const children = Array.from(el.childNodes);
-                    const promotedChildren = [];
-
-                    const isHidden = el.classList.contains('cy-block-hidden');
-                    const isInactive = el.getAttribute('t-if') === 'False';
-                    const isPbBefore = el.classList.contains('page-break-before');
-                    const isPbAfter = el.classList.contains('page-break-after');
-
-                    children.forEach(child => {
-                        // Skip whitespace nodes introduced by the wrapper's HTML template
-                        if (child.nodeType === 3 && !child.textContent.trim()) return;
-
-                        if (child.classList && child.classList.contains('field-container')) {
-                            child.classList.remove('d-inline-flex', 'gap-1');
-                        }
-
-                        if (child.nodeType === 1 && !child.classList.contains('field-handle-container')) {
-                            if (isHidden) child.classList.add('d-print-none');
-                            if (isInactive) child.setAttribute('t-if', 'False');
-                            if (isPbBefore) child.classList.add('page-break-before');
-                            if (isPbAfter) child.classList.add('page-break-after');
-                        }
-
-                        promotedChildren.push(child);
-                        el.parentNode.insertBefore(child, el);
-                    });
-                    el.remove();
-                    promotedChildren.forEach(child => clean(child));
-                    return;
-                }
-            }
-
-            // Cleanup residual classes; convert editor-side hidden marker to real d-print-none
-            if (!keepStudioAttrs && el.classList) {
-                // cy-block-hidden is the editor-side marker; save as d-print-none in XML
-                if (el.classList.contains('cy-block-hidden')) {
-                    el.classList.add('d-print-none');
-                    el.classList.remove('cy-block-hidden');
-                }
-                el.classList.remove('c_new', 'selected', 'bg-white');
-                if (el.classList.length === 0) el.removeAttribute('class');
-            }
-
-            if (el.hasAttribute && (el.hasAttribute('t-elif') || el.hasAttribute('t-else'))) {
-                if (el.style && el.style.display === 'none') {
-                    el.style.removeProperty('display');
-                    if (el.getAttribute('style') === '') el.removeAttribute('style');
-                }
-            }
-
-            if (el.children) {
-                Array.from(el.children).forEach(child => {
-                    if (child.hasAttribute && (child.hasAttribute('t-elif') || child.hasAttribute('t-else'))) {
-                        let prev = child.previousSibling;
-                        let nodesToMove = [];
-                        while (prev) {
-                            if (prev.nodeType === 1 && (prev.hasAttribute('t-if') || prev.hasAttribute('t-elif'))) {
-                                break;
+                            if (child.classList && child.classList.contains('field-container')) {
+                                child.classList.remove('d-inline-flex', 'gap-1');
                             }
-                            nodesToMove.unshift(prev);
-                            prev = prev.previousSibling;
-                        }
-                        if (prev && nodesToMove.length > 0) {
-                            let ref = child.nextSibling;
-                            nodesToMove.forEach(n => el.insertBefore(n, ref));
-                        }
+
+                            if (child.nodeType === 1 && !child.classList.contains('field-handle-container')) {
+                                if (isHidden) child.classList.add('d-print-none');
+                                if (isInactive) child.setAttribute('t-if', 'False');
+                                if (isPbBefore) child.classList.add('page-break-before');
+                                if (isPbAfter) child.classList.add('page-break-after');
+                            }
+
+                            promotedChildren.push(child);
+                            el.parentNode.insertBefore(child, el);
+                        });
+                        el.remove();
+                        promotedChildren.forEach(child => clean(child));
+                        return;
                     }
-                });
-                Array.from(el.children).forEach(child => clean(child));
-            }
-        };
-        clean(node);
-
-        // Return to original position if it had one
-        if (parent) {
-            parent.insertBefore(temp.firstChild, next);
-        }
-        return temp.firstChild;
-    }
-
-    _isStructuralNode(el) {
-        if (!el || !el.hasAttribute) return false;
-        const tagName = el.tagName ? el.tagName.toLowerCase() : '';
-        if (tagName === 't' || tagName === 'cy-qweb-t') return true;
-        const qwebAttrs = ['t-foreach', 't-if', 't-elif', 't-else', 't-field', 't-esc', 't-out', 't-call'];
-        return qwebAttrs.some(attr => el.hasAttribute(attr));
-    }
-
-    _enrichReportDOM(container) {
-        // ── Enrich existing report-section boxes saved from previous edits ──
-        container.querySelectorAll('div.report-section:not(.box-section-wrapper *)').forEach(section => {
-            if (section.closest('.box-section-wrapper')) return;
-            // Extract stored config from data attrs or build default
-            let cfg;
-            try { cfg = section.dataset.boxConfig ? JSON.parse(section.dataset.boxConfig) : null; } catch (e) { cfg = null; }
-            if (!cfg) {
-                const boxId = section.dataset.boxId || ('box_' + Math.random().toString(36).slice(2, 10));
-                cfg = {
-                    id: boxId, label: section.dataset.boxLabel || 'Section',
-                    style: {
-                        width: section.offsetWidth || 300,
-                        height: section.offsetHeight || 200,
-                        backgroundColor: section.style.backgroundColor || 'transparent',
-                        border: section.style.border || '1px solid #ccc',
-                        borderRadius: parseInt(section.style.borderRadius) || 4,
-                        padding: parseInt(section.style.padding) || 8,
-                        marginTop: parseInt(section.style.marginTop) || 16,
-                    },
-                    layoutMode: section.dataset.layoutMode || 'free',
-                    children: [],
-                };
-            }
-
-            // Grab all children before replace
-            const childNodes = Array.from(section.children);
-
-            const wrapper = document.createElement('div');
-            wrapper.className = 'box-section-wrapper';
-            wrapper.setAttribute('cy-type', 'box');
-            if (section.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', section.getAttribute('cy-xpath'));
-            if (section.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', section.getAttribute('cy-template'));
-            wrapper.setAttribute('data-box-id', cfg.id);
-            wrapper.setAttribute('data-box-config', JSON.stringify(cfg));
-            wrapper.style.width = (cfg.style.width || 300) + 'px';
-            wrapper.style.height = (cfg.style.height || 200) + 'px';
-            wrapper.style.marginTop = (cfg.style.marginTop !== undefined ? cfg.style.marginTop : 16) + 'px';
-            wrapper.innerHTML = this._buildBoxInnerHTML(cfg);
-
-            section.parentNode.insertBefore(wrapper, section);
-            section.remove();
-
-            // Move original children into the new dropzone
-            const dropzone = wrapper.querySelector('.box-dropzone');
-            childNodes.forEach(child => dropzone.appendChild(child));
-
-            // Wire delete
-            wrapper.querySelector('.box-delete-btn').onclick = (e) => {
-                e.stopPropagation();
-                this.dialog.add(ConfirmationDialog, {
-                    body: 'Delete this section container and all its contents?',
-                    confirm: () => {
-                        if (this._selectedBoxEl === wrapper) this.closeBoxProps();
-                        wrapper.remove();
-                    },
-                    cancel: () => { },
-                });
-            };
-            this._setupBoxResizeHandles(wrapper);
-        });
-
-        // ── Enrich existing report-qr from previous edits ──
-        container.querySelectorAll('div.report-qr:not(.s_qr_block)').forEach(qrDiv => {
-            let qrConfig = null;
-            try {
-                if (qrDiv.dataset.qrConfig) {
-                    qrConfig = JSON.parse(qrDiv.dataset.qrConfig);
                 }
-            } catch (e) { }
 
-            if (qrConfig) {
-                this.insertQrBlock(qrDiv, qrConfig, 'enrich');
-            }
-        });
+                // Cleanup residual classes; convert editor-side hidden marker to real d-print-none
+                if (!keepStudioAttrs && el.classList) {
+                    // cy-block-hidden is the editor-side marker; save as d-print-none in XML
+                    if (el.classList.contains('cy-block-hidden')) {
+                        el.classList.add('d-print-none');
+                        el.classList.remove('cy-block-hidden');
+                    }
+                    el.classList.remove('c_new', 'selected', 'bg-white');
+                    if (el.classList.length === 0) el.removeAttribute('class');
+                }
 
-        // ── Enrich existing o_sign_placeholder from previous saves ──
-        container.querySelectorAll('div.o_sign_placeholder:not(.sign-wrapper)').forEach(placeholder => {
-            if (placeholder.closest('.sign-wrapper')) return;
-            const role = placeholder.dataset.role || 'customer';
-            // Parse existing cfg from style
-            const existingStyle = placeholder.getAttribute('style') || '';
-            const widthMatch = existingStyle.match(/width:\s*(\d+)px/);
-            const alignMatch = existingStyle.match(/text-align:\s*(\w+)/);
-            // Look for label in existing children
-            const labelEl = placeholder.querySelector('p');
-            const labelText = labelEl ? labelEl.textContent.trim() : 'Authorized Signature';
+                if (el.hasAttribute && (el.hasAttribute('t-elif') || el.hasAttribute('t-else'))) {
+                    if (el.style && el.style.display === 'none') {
+                        el.style.removeProperty('display');
+                        if (el.getAttribute('style') === '') el.removeAttribute('style');
+                    }
+                }
 
-            const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
-            const cfg = {
-                role,
-                label: labelText,
-                required: true,
-                show_date: false,
-                show_name: false,
-                width: widthMatch ? parseInt(widthMatch[1]) : 200,
-                height: 100,
-                alignment: alignMatch ? alignMatch[1] : 'left',
+                if (el.children) {
+                    Array.from(el.children).forEach(child => {
+                        if (child.hasAttribute && (child.hasAttribute('t-elif') || child.hasAttribute('t-else'))) {
+                            let prev = child.previousSibling;
+                            let nodesToMove = [];
+                            while (prev) {
+                                if (prev.nodeType === 1 && (prev.hasAttribute('t-if') || prev.hasAttribute('t-elif'))) {
+                                    break;
+                                }
+                                nodesToMove.unshift(prev);
+                                prev = prev.previousSibling;
+                            }
+                            if (prev && nodesToMove.length > 0) {
+                                let ref = child.nextSibling;
+                                nodesToMove.forEach(n => el.insertBefore(n, ref));
+                            }
+                        }
+                    });
+                    Array.from(el.children).forEach(child => clean(child));
+                }
             };
+            clean(node);
 
-            const wrapper = document.createElement('div');
-            wrapper.className = 'sign-wrapper';
-            wrapper.setAttribute('cy-type', 'sign');
-            if (placeholder.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', placeholder.getAttribute('cy-xpath'));
-            if (placeholder.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', placeholder.getAttribute('cy-template'));
-            wrapper.setAttribute('data-sign-id', signId);
-            wrapper.setAttribute('data-sign-config', JSON.stringify(cfg));
-            wrapper.dataset.role = role;
-            wrapper.style.width = cfg.width + 'px';
-            wrapper.style.height = cfg.height + 'px';
-            wrapper.style.cursor = 'default';
-            wrapper.style.textAlign = cfg.alignment;
+            // Return to original position if it had one
+            if (parent) {
+                parent.insertBefore(temp.firstChild, next);
+            }
+            return temp.firstChild;
+        }
 
-            wrapper.innerHTML = `
+        _isStructuralNode(el) {
+            if (!el || !el.hasAttribute) return false;
+            const tagName = el.tagName ? el.tagName.toLowerCase() : '';
+            if (tagName === 't' || tagName === 'cy-qweb-t') return true;
+            const qwebAttrs = ['t-foreach', 't-if', 't-elif', 't-else', 't-field', 't-esc', 't-out', 't-call'];
+            return qwebAttrs.some(attr => el.hasAttribute(attr));
+        }
+
+        _enrichReportDOM(container) {
+            // ── Enrich existing report-section boxes saved from previous edits ──
+            container.querySelectorAll('div.report-section:not(.box-section-wrapper *)').forEach(section => {
+                if (section.closest('.box-section-wrapper')) return;
+                // Extract stored config from data attrs or build default
+                let cfg;
+                try { cfg = section.dataset.boxConfig ? JSON.parse(section.dataset.boxConfig) : null; } catch (e) { cfg = null; }
+                if (!cfg) {
+                    const boxId = section.dataset.boxId || ('box_' + Math.random().toString(36).slice(2, 10));
+                    cfg = {
+                        id: boxId, label: section.dataset.boxLabel || 'Section',
+                        style: {
+                            width: section.offsetWidth || 300,
+                            height: section.offsetHeight || 200,
+                            backgroundColor: section.style.backgroundColor || 'transparent',
+                            border: section.style.border || '1px solid #ccc',
+                            borderRadius: parseInt(section.style.borderRadius) || 4,
+                            padding: parseInt(section.style.padding) || 8,
+                            marginTop: parseInt(section.style.marginTop) || 16,
+                        },
+                        layoutMode: section.dataset.layoutMode || 'free',
+                        children: [],
+                    };
+                }
+
+                // Grab all children before replace
+                const childNodes = Array.from(section.children);
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'box-section-wrapper';
+                wrapper.setAttribute('cy-type', 'box');
+                if (section.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', section.getAttribute('cy-xpath'));
+                if (section.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', section.getAttribute('cy-template'));
+                wrapper.setAttribute('data-box-id', cfg.id);
+                wrapper.setAttribute('data-box-config', JSON.stringify(cfg));
+                wrapper.style.width = (cfg.style.width || 300) + 'px';
+                wrapper.style.height = (cfg.style.height || 200) + 'px';
+                wrapper.style.marginTop = (cfg.style.marginTop !== undefined ? cfg.style.marginTop : 16) + 'px';
+                wrapper.innerHTML = this._buildBoxInnerHTML(cfg);
+
+                section.parentNode.insertBefore(wrapper, section);
+                section.remove();
+
+                // Move original children into the new dropzone
+                const dropzone = wrapper.querySelector('.box-dropzone');
+                childNodes.forEach(child => dropzone.appendChild(child));
+
+                // Wire delete
+                wrapper.querySelector('.box-delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    this.dialog.add(ConfirmationDialog, {
+                        body: 'Delete this section container and all its contents?',
+                        confirm: () => {
+                            if (this._selectedBoxEl === wrapper) this.closeBoxProps();
+                            wrapper.remove();
+                        },
+                        cancel: () => { },
+                    });
+                };
+                this._setupBoxResizeHandles(wrapper);
+            });
+
+            // ── Enrich existing report-qr from previous edits ──
+            container.querySelectorAll('div.report-qr:not(.s_qr_block)').forEach(qrDiv => {
+                let qrConfig = null;
+                try {
+                    if (qrDiv.dataset.qrConfig) {
+                        qrConfig = JSON.parse(qrDiv.dataset.qrConfig);
+                    }
+                } catch (e) { }
+
+                if (qrConfig) {
+                    this.insertQrBlock(qrDiv, qrConfig, 'enrich');
+                }
+            });
+
+            // ── Enrich existing o_sign_placeholder from previous saves ──
+            container.querySelectorAll('div.o_sign_placeholder:not(.sign-wrapper)').forEach(placeholder => {
+                if (placeholder.closest('.sign-wrapper')) return;
+                const role = placeholder.dataset.role || 'customer';
+                // Parse existing cfg from style
+                const existingStyle = placeholder.getAttribute('style') || '';
+                const widthMatch = existingStyle.match(/width:\s*(\d+)px/);
+                const alignMatch = existingStyle.match(/text-align:\s*(\w+)/);
+                // Look for label in existing children
+                const labelEl = placeholder.querySelector('p');
+                const labelText = labelEl ? labelEl.textContent.trim() : 'Authorized Signature';
+
+                const signId = 'sign_' + Math.random().toString(36).slice(2, 10);
+                const cfg = {
+                    role,
+                    label: labelText,
+                    required: true,
+                    show_date: false,
+                    show_name: false,
+                    width: widthMatch ? parseInt(widthMatch[1]) : 200,
+                    height: 100,
+                    alignment: alignMatch ? alignMatch[1] : 'left',
+                };
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'sign-wrapper';
+                wrapper.setAttribute('cy-type', 'sign');
+                if (placeholder.hasAttribute('cy-xpath')) wrapper.setAttribute('cy-xpath', placeholder.getAttribute('cy-xpath'));
+                if (placeholder.hasAttribute('cy-template')) wrapper.setAttribute('cy-template', placeholder.getAttribute('cy-template'));
+                wrapper.setAttribute('data-sign-id', signId);
+                wrapper.setAttribute('data-sign-config', JSON.stringify(cfg));
+                wrapper.dataset.role = role;
+                wrapper.style.width = cfg.width + 'px';
+                wrapper.style.height = cfg.height + 'px';
+                wrapper.style.cursor = 'default';
+                wrapper.style.textAlign = cfg.alignment;
+
+                wrapper.innerHTML = `
                 <div class="sign-toolbar" contenteditable="false">
                     <span class="sign-drag-handle ri-drag-move-line" title="Drag to move"></span>
                     <span class="sign-settings-btn ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
@@ -3806,89 +3876,89 @@ export class EditReport extends Component {
                 </div>
             `;
 
-            wrapper.querySelector('.sign-delete-btn').onclick = (e) => {
-                e.stopPropagation();
-                this.dialog.add(ConfirmationDialog, {
-                    body: 'Delete this Signature?',
-                    confirm: () => {
-                        if (this.state.showSignProps && this._selectedSignEl === wrapper) {
-                            this.closeSignProps();
-                        }
-                        wrapper.remove();
-                        this._updateHasSign();
-                    },
-                    cancel: () => { },
-                });
-            };
+                wrapper.querySelector('.sign-delete-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    this.dialog.add(ConfirmationDialog, {
+                        body: 'Delete this Signature?',
+                        confirm: () => {
+                            if (this.state.showSignProps && this._selectedSignEl === wrapper) {
+                                this.closeSignProps();
+                            }
+                            wrapper.remove();
+                            this._updateHasSign();
+                        },
+                        cancel: () => { },
+                    });
+                };
 
-            placeholder.parentNode.insertBefore(wrapper, placeholder);
-            placeholder.remove();
-            this._setupSignResizeHandles(wrapper);
-        });
+                placeholder.parentNode.insertBefore(wrapper, placeholder);
+                placeholder.remove();
+                this._setupSignResizeHandles(wrapper);
+            });
 
-        const tables = container.querySelectorAll('table:not(.table-wrapper table)');
-        tables.forEach(table => {
-            if (table.closest('.table-wrapper')) return;
-            let targetNode = table;
-            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
-                targetNode.parentElement.children.length === 1 &&
-                !targetNode.parentElement.classList.contains('page')) {
-                targetNode = targetNode.parentElement;
-            }
-            const wrapper = document.createElement('div');
-            wrapper.className = 'table-wrapper';
+            const tables = container.querySelectorAll('table:not(.table-wrapper table)');
+            tables.forEach(table => {
+                if (table.closest('.table-wrapper')) return;
+                let targetNode = table;
+                while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                    targetNode.parentElement.children.length === 1 &&
+                    !targetNode.parentElement.classList.contains('page')) {
+                    targetNode = targetNode.parentElement;
+                }
+                const wrapper = document.createElement('div');
+                wrapper.className = 'table-wrapper';
 
-            // Re-hydrate visibility state from the saved table onto the wrapper
-            const tblHidden = targetNode.classList.contains('d-print-none');
-            const tblInactive = targetNode.getAttribute('t-if') === 'False';
-            const tblPbBefore = targetNode.classList.contains('page-break-before');
-            const tblPbAfter = targetNode.classList.contains('page-break-after');
-            if (tblHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
-            if (tblInactive) { wrapper.setAttribute('t-if', 'False'); }
-            if (tblPbBefore) { wrapper.classList.add('page-break-before'); targetNode.classList.remove('page-break-before'); }
-            if (tblPbAfter) { wrapper.classList.add('page-break-after'); targetNode.classList.remove('page-break-after'); }
+                // Re-hydrate visibility state from the saved table onto the wrapper
+                const tblHidden = targetNode.classList.contains('d-print-none');
+                const tblInactive = targetNode.getAttribute('t-if') === 'False';
+                const tblPbBefore = targetNode.classList.contains('page-break-before');
+                const tblPbAfter = targetNode.classList.contains('page-break-after');
+                if (tblHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+                if (tblInactive) { wrapper.setAttribute('t-if', 'False'); }
+                if (tblPbBefore) { wrapper.classList.add('page-break-before'); targetNode.classList.remove('page-break-before'); }
+                if (tblPbAfter) { wrapper.classList.add('page-break-after'); targetNode.classList.remove('page-break-after'); }
 
-            wrapper.innerHTML = `
+                wrapper.innerHTML = `
                 <div class="table-handle-container" contenteditable="false">
                     <div class="table-handle ri-drag-move-line" title="Drag to move"></div>
                     <div class="table-settings ri-settings-3-line" title="Settings"></div>
                     <div class="table-delete ri-delete-bin-line" title="Delete Table"></div>
                 </div>`;
-            targetNode.parentNode.insertBefore(wrapper, targetNode);
-            wrapper.appendChild(targetNode);
-            wrapper.querySelector('.table-delete').onclick = (e) => {
-                e.stopPropagation();
-                this.dialog.add(ConfirmationDialog, {
-                    body: "Are you sure you want to delete this table?",
-                    confirm: async () => {
-                        this._removeOrphanedQwebElements && this._removeOrphanedQwebElements(wrapper);
-                        wrapper.remove();
-                        await this.save_changes(this);
-                    },
-                    cancel: () => { },
-                });
-            };
-        });
+                targetNode.parentNode.insertBefore(wrapper, targetNode);
+                wrapper.appendChild(targetNode);
+                wrapper.querySelector('.table-delete').onclick = (e) => {
+                    e.stopPropagation();
+                    this.dialog.add(ConfirmationDialog, {
+                        body: "Are you sure you want to delete this table?",
+                        confirm: async () => {
+                            this._removeOrphanedQwebElements && this._removeOrphanedQwebElements(wrapper);
+                            wrapper.remove();
+                            await this.save_changes(this);
+                        },
+                        cancel: () => { },
+                    });
+                };
+            });
 
-        const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]):not(.field-container [t-field]), [t-esc]:not(.field-block [t-esc]):not(.field-container [t-esc])');
-        fields.forEach(field => {
-            if (field.closest('.field-block') || field.closest('table')) return;
-            let targetNode = field;
-            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
-                targetNode.parentElement.children.length === 1 &&
-                !targetNode.parentElement.classList.contains('page')) {
-                targetNode = targetNode.parentElement;
-            }
-            const wrapper = document.createElement('div');
-            wrapper.className = 'field-block dynamic-field-wrapper';
+            const fields = container.querySelectorAll('[t-field]:not(.field-block [t-field]):not(.field-container [t-field]), [t-esc]:not(.field-block [t-esc]):not(.field-container [t-esc])');
+            fields.forEach(field => {
+                if (field.closest('.field-block') || field.closest('table')) return;
+                let targetNode = field;
+                while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                    targetNode.parentElement.children.length === 1 &&
+                    !targetNode.parentElement.classList.contains('page')) {
+                    targetNode = targetNode.parentElement;
+                }
+                const wrapper = document.createElement('div');
+                wrapper.className = 'field-block dynamic-field-wrapper';
 
-            // Re-hydrate visibility from saved element
-            const fldHidden = targetNode.classList.contains('d-print-none');
-            const fldInactive = targetNode.getAttribute('t-if') === 'False';
-            if (fldHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
-            if (fldInactive) { wrapper.setAttribute('t-if', 'False'); }
+                // Re-hydrate visibility from saved element
+                const fldHidden = targetNode.classList.contains('d-print-none');
+                const fldInactive = targetNode.getAttribute('t-if') === 'False';
+                if (fldHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+                if (fldInactive) { wrapper.setAttribute('t-if', 'False'); }
 
-            wrapper.innerHTML = `
+                wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
                     <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
                     <span class="field-settings ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
@@ -3896,123 +3966,89 @@ export class EditReport extends Component {
                 </div>
                 <div class="field-container"></div>
             `;
-            targetNode.parentNode.insertBefore(wrapper, targetNode);
-            wrapper.querySelector('.field-container').appendChild(targetNode);
-            wrapper.querySelector('.field-delete').onclick = (e) => {
-                e.stopPropagation();
-                this.dialog.add(ConfirmationDialog, {
-                    body: "Are you sure you want to delete this field?",
-                    confirm: () => wrapper.remove(),
-                    cancel: () => { },
-                });
-                // if (confirm("Delete this field?")) wrapper.remove();
-            };
-        });
+                targetNode.parentNode.insertBefore(wrapper, targetNode);
+                wrapper.querySelector('.field-container').appendChild(targetNode);
+                wrapper.querySelector('.field-delete').onclick = (e) => {
+                    e.stopPropagation();
+                    this.dialog.add(ConfirmationDialog, {
+                        body: "Are you sure you want to delete this field?",
+                        confirm: () => wrapper.remove(),
+                        cancel: () => { },
+                    });
+                    // if (confirm("Delete this field?")) wrapper.remove();
+                };
+            });
 
-        const fieldContainers = container.querySelectorAll('.field-container:not(.field-block .field-container)');
-        fieldContainers.forEach(fc => {
-            if (fc.closest('.field-block') || fc.closest('table')) return;
-            let targetNode = fc;
-            while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
-                targetNode.parentElement.children.length === 1 &&
-                !targetNode.parentElement.classList.contains('page')) {
-                targetNode = targetNode.parentElement;
-            }
-            const wrapper = document.createElement('div');
-            wrapper.className = 'field-block dynamic-field-wrapper';
+            const fieldContainers = container.querySelectorAll('.field-container:not(.field-block .field-container)');
+            fieldContainers.forEach(fc => {
+                if (fc.closest('.field-block') || fc.closest('table')) return;
+                let targetNode = fc;
+                while (targetNode.parentElement && this._isStructuralNode(targetNode.parentElement) &&
+                    targetNode.parentElement.children.length === 1 &&
+                    !targetNode.parentElement.classList.contains('page')) {
+                    targetNode = targetNode.parentElement;
+                }
+                const wrapper = document.createElement('div');
+                wrapper.className = 'field-block dynamic-field-wrapper';
 
-            // Re-hydrate visibility from saved fieldContainer
-            const fcHidden = targetNode.classList.contains('d-print-none');
-            const fcInactive = targetNode.getAttribute('t-if') === 'False';
-            if (fcHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
-            if (fcInactive) { wrapper.setAttribute('t-if', 'False'); }
+                // Re-hydrate visibility from saved fieldContainer
+                const fcHidden = targetNode.classList.contains('d-print-none');
+                const fcInactive = targetNode.getAttribute('t-if') === 'False';
+                if (fcHidden) { wrapper.classList.add('cy-block-hidden'); targetNode.classList.remove('d-print-none'); }
+                if (fcInactive) { wrapper.setAttribute('t-if', 'False'); }
 
-            wrapper.innerHTML = `
+                wrapper.innerHTML = `
                 <div class="field-handle-container" contenteditable="false">
                     <span class="field-handle ri-drag-move-line" title="Drag to move"></span>
                     <span class="field-settings ri-settings-3-line" title="Settings" style="cursor: pointer; margin: 0 4px;"></span>
                     <span class="field-delete ri-delete-bin-line" title="Delete Field"></span>
                 </div>
             `;
-            targetNode.parentNode.insertBefore(targetNode, wrapper);
-            wrapper.appendChild(targetNode);
-            wrapper.querySelector('.field-delete').onclick = (e) => {
-                e.stopPropagation();
-                this.dialog.add(ConfirmationDialog, {
-                    body: "Are you sure you want to delete this field?",
-                    confirm: () => wrapper.remove(),
-                    cancel: () => { },
-                });
-            };
-        });
-
-        container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
-
-        // \u2500\u2500 Enrich the report canvas logo (img[alt="Logo"] from external_layout) \u2500\u2500
-        const reportLogoImgs = container.querySelectorAll('img[alt="Logo"], .company_logo');
-        reportLogoImgs.forEach(logoImg => {
-            // Skip if already wrapped
-            if (logoImg.closest('.cy-logo-enrich-wrapper')) return;
-
-            // Create wrapper
-            const wrapper = document.createElement('div');
-            wrapper.className = 'cy-logo-enrich-wrapper';
-            wrapper.style.display = 'inline-block';
-            wrapper.style.position = 'relative';
-            wrapper.style.cursor = 'pointer';
-            wrapper.title = 'Click to manage logo';
-
-            // Add hover effects
-            wrapper.onmouseover = () => {
-                wrapper.style.outline = '2px dashed #007bff';
-                wrapper.style.outlineOffset = '2px';
-            };
-            wrapper.onmouseout = () => {
-                wrapper.style.outline = '';
-            };
-
-            // Move logo into wrapper
-            logoImg.parentNode.insertBefore(wrapper, logoImg);
-            wrapper.appendChild(logoImg);
-
-            // Add overlay buttons based on state
-            if (this.state.hideLogo || logoImg.getAttribute('cy-logo-removed') === '1') {
-                logoImg.classList.add('cy-logo-hidden');
-                logoImg.style.setProperty('display', 'none', 'important');
-
-                // Add restore hint
-                const restoreHint = document.createElement('div');
-                restoreHint.className = 'cy-canvas-logo-restore-hint';
-                restoreHint.style.cssText = 'padding: 10px; border: 2px dashed #ccc; background: #f9f9f9; min-width: 100px; text-align: center; cursor: pointer;';
-                restoreHint.textContent = 'Logo hidden — click to restore';
-                wrapper.appendChild(restoreHint);
-
-                restoreHint.onclick = (e) => {
+                targetNode.parentNode.insertBefore(targetNode, wrapper);
+                wrapper.appendChild(targetNode);
+                wrapper.querySelector('.field-delete').onclick = (e) => {
                     e.stopPropagation();
-                    this.state.hideLogo = false;
-                    logoImg.removeAttribute('cy-logo-removed');
-                    logoImg.classList.remove('cy-logo-hidden');
-                    logoImg.style.removeProperty('display');
-                    restoreHint.remove();
-                    if (this.undoManager) this.undoManager.debouncedSave();
+                    this.dialog.add(ConfirmationDialog, {
+                        body: "Are you sure you want to delete this field?",
+                        confirm: () => wrapper.remove(),
+                        cancel: () => { },
+                    });
                 };
-            } else {
-                logoImg.classList.remove('cy-logo-hidden');
-                logoImg.style.removeProperty('display');
+            });
 
-                // Add remove button
-                const removeBtn = document.createElement('button');
-                removeBtn.className = 'cy-canvas-remove-logo-btn';
-                removeBtn.innerHTML = '×';
-                removeBtn.style.cssText = 'position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #dc3545; color: white; border: none; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; z-index: 10;';
-                wrapper.appendChild(removeBtn);
+            container.querySelectorAll('.text-node').forEach(n => n.setAttribute('contenteditable', 'false'));
 
-                removeBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    this.state.hideLogo = true;
+            // \u2500\u2500 Enrich the report canvas logo (img[alt="Logo"] from external_layout) \u2500\u2500
+            const reportLogoImgs = container.querySelectorAll('img[alt="Logo"], .company_logo');
+            reportLogoImgs.forEach(logoImg => {
+                // Skip if already wrapped
+                if (logoImg.closest('.cy-logo-enrich-wrapper')) return;
+
+                // Create wrapper
+                const wrapper = document.createElement('div');
+                wrapper.className = 'cy-logo-enrich-wrapper';
+                wrapper.style.display = 'inline-block';
+                wrapper.style.position = 'relative';
+                wrapper.style.cursor = 'pointer';
+                wrapper.title = 'Click to manage logo';
+
+                // Add hover effects
+                wrapper.onmouseover = () => {
+                    wrapper.style.outline = '2px dashed #007bff';
+                    wrapper.style.outlineOffset = '2px';
+                };
+                wrapper.onmouseout = () => {
+                    wrapper.style.outline = '';
+                };
+
+                // Move logo into wrapper
+                logoImg.parentNode.insertBefore(wrapper, logoImg);
+                wrapper.appendChild(logoImg);
+
+                // Add overlay buttons based on state
+                if (this.state.hideLogo || logoImg.getAttribute('cy-logo-removed') === '1') {
                     logoImg.classList.add('cy-logo-hidden');
                     logoImg.style.setProperty('display', 'none', 'important');
-                    removeBtn.remove();
 
                     // Add restore hint
                     const restoreHint = document.createElement('div');
@@ -4028,307 +4064,341 @@ export class EditReport extends Component {
                         logoImg.classList.remove('cy-logo-hidden');
                         logoImg.style.removeProperty('display');
                         restoreHint.remove();
-
-                        // Re-add remove button
-                        wrapper.appendChild(removeBtn);
                         if (this.undoManager) this.undoManager.debouncedSave();
                     };
+                } else {
+                    logoImg.classList.remove('cy-logo-hidden');
+                    logoImg.style.removeProperty('display');
 
-                    if (this.undoManager) this.undoManager.debouncedSave();
-                };
-            }
-        });
-    }
+                    // Add remove button
+                    const removeBtn = document.createElement('button');
+                    removeBtn.className = 'cy-canvas-remove-logo-btn';
+                    removeBtn.innerHTML = '×';
+                    removeBtn.style.cssText = 'position: absolute; top: -8px; right: -8px; width: 20px; height: 20px; border-radius: 50%; background: #dc3545; color: white; border: none; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; z-index: 10;';
+                    wrapper.appendChild(removeBtn);
 
-    _formatCompanyInfo(co) {
-        return [
-            co.street,
-            co.city,
-            co.phone ? '\u260e ' + co.phone : '',
-            co.email ? '\u2709 ' + co.email : '',
-            co.website ? '\uD83C\uDF10 ' + co.website : ''
-        ].filter(Boolean).join('\n');
-    }
+                    removeBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        this.state.hideLogo = true;
+                        logoImg.classList.add('cy-logo-hidden');
+                        logoImg.style.setProperty('display', 'none', 'important');
+                        removeBtn.remove();
+
+                        // Add restore hint
+                        const restoreHint = document.createElement('div');
+                        restoreHint.className = 'cy-canvas-logo-restore-hint';
+                        restoreHint.style.cssText = 'padding: 10px; border: 2px dashed #ccc; background: #f9f9f9; min-width: 100px; text-align: center; cursor: pointer;';
+                        restoreHint.textContent = 'Logo hidden — click to restore';
+                        wrapper.appendChild(restoreHint);
+
+                        restoreHint.onclick = (e) => {
+                            e.stopPropagation();
+                            this.state.hideLogo = false;
+                            logoImg.removeAttribute('cy-logo-removed');
+                            logoImg.classList.remove('cy-logo-hidden');
+                            logoImg.style.removeProperty('display');
+                            restoreHint.remove();
+
+                            // Re-add remove button
+                            wrapper.appendChild(removeBtn);
+                            if (this.undoManager) this.undoManager.debouncedSave();
+                        };
+
+                        if (this.undoManager) this.undoManager.debouncedSave();
+                    };
+                }
+            });
+        }
+
+        _formatCompanyInfo(co) {
+            return [
+                co.street,
+                co.city,
+                co.phone ? '\u260e ' + co.phone : '',
+                co.email ? '\u2709 ' + co.email : '',
+                co.website ? '\uD83C\uDF10 ' + co.website : ''
+            ].filter(Boolean).join('\n');
+        }
 
     async saveCompanyFooter() {
-        try {
-            this.state.hasCustomFooter = true;
-            await this.save_changes(this);
-            this.notification.add('Footer text updated successfully for this report', { type: 'success' });
+            try {
+                this.state.hasCustomFooter = true;
+                await this.save_changes(this);
+                this.notification.add('Footer text updated successfully for this report', { type: 'success' });
 
-            // Re-render preview strip and iframe footer
-            this._updateFooterInIframe();
-            // Re-fetch iframe if previewing
-            if (this.state.previewMode) {
-                this._fetchPreviewData();
+                // Re-render preview strip and iframe footer
+                this._updateFooterInIframe();
+                // Re-fetch iframe if previewing
+                if (this.state.previewMode) {
+                    this._fetchPreviewData();
+                }
+            } catch (e) {
+                console.error('[Cyllo Studio] Save footer error:', e);
+                this.notification.add('Failed to update report footer', { type: 'danger' });
             }
-        } catch (e) {
-            console.error('[Cyllo Studio] Save footer error:', e);
-            this.notification.add('Failed to update report footer', { type: 'danger' });
         }
-    }
 
-    // ──────────────────────────────────────────────────────────────────────────
-    // Box Section: Resize Handles
-    // ──────────────────────────────────────────────────────────────────────────
+        // ──────────────────────────────────────────────────────────────────────────
+        // Box Section: Resize Handles
+        // ──────────────────────────────────────────────────────────────────────────
 
-    /**
-     * Wire up pointer-based resize logic for all 8 handles on a box wrapper.
-     * Stores result back into data-box-config.
-     */
+        /**
+         * Wire up pointer-based resize logic for all 8 handles on a box wrapper.
+         * Stores result back into data-box-config.
+         */
 
-    _buildNewNodesXpath(change, newNodes) {
-        if (!newNodes || !newNodes.length) return "";
-        const children = Array.from(change.el.children);
-        let xpathBlock = "";
-        let currentGroup = [];
-
-        const processGroup = (group) => {
-            if (!group.length) return;
-            let groupContent = "";
-            group.forEach(node => {
-                const cloned = node.cloneNode(true);
-                const cleaned = this._cleanStudioAttrs(cloned);
-                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
-                groupContent += content;
-            });
-
-            const firstNodeIndex = children.indexOf(group[0]);
-            const lastNodeIndex = children.indexOf(group[group.length - 1]);
-
-            // Find next sibling with cy-xpath
-            let nextSibling = null;
-            for (let i = lastNodeIndex + 1; i < children.length; i++) {
-                if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
-                    nextSibling = children[i];
-                    break;
-                }
-            }
-
-            if (nextSibling) {
-                xpathBlock += `<xpath expr="${nextSibling.getAttribute('cy-xpath')}" position="before">${groupContent}</xpath>`;
-                return;
-            }
-
-            // Find prev sibling with cy-xpath
-            let prevSibling = null;
-            for (let i = firstNodeIndex - 1; i >= 0; i--) {
-                if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
-                    prevSibling = children[i];
-                    break;
-                }
-            }
-
-            if (prevSibling) {
-                xpathBlock += `<xpath expr="${prevSibling.getAttribute('cy-xpath')}" position="after">${groupContent}</xpath>`;
-                return;
-            }
-
-            // Fallback to parent inside
-            xpathBlock += `<xpath expr="${change.xpath}" position="inside">${groupContent}</xpath>`;
-        };
-
-        children.forEach(child => {
-            if (child.classList.contains('c_new') && !child.hasAttribute('cy-xpath')) {
-                currentGroup.push(child);
-            } else {
-                processGroup(currentGroup);
-                currentGroup = [];
-            }
-        });
-        processGroup(currentGroup);
-        return xpathBlock;
-    }
-
-    buildInheritanceXML(changes) {
-        let new_inherits = [];
-        for (const [key, items] of Object.entries(groupBy(changes, 'template'))) {
+        _buildNewNodesXpath(change, newNodes) {
+            if (!newNodes || !newNodes.length) return "";
+            const children = Array.from(change.el.children);
             let xpathBlock = "";
-            items.forEach(change => {
-                const newNodes = Array.from(change.el.children)
-                    .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
+            let currentGroup = [];
 
-                // ── Deletion: emit position="replace" with empty body ──────
-                if (change.isDeleted) {
-                    xpathBlock += `<xpath expr="${change.xpath}" position="replace"></xpath>`;
+            const processGroup = (group) => {
+                if (!group.length) return;
+                let groupContent = "";
+                group.forEach(node => {
+                    const cloned = node.cloneNode(true);
+                    const cleaned = this._cleanStudioAttrs(cloned);
+                    let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                    groupContent += content;
+                });
+
+                const firstNodeIndex = children.indexOf(group[0]);
+                const lastNodeIndex = children.indexOf(group[group.length - 1]);
+
+                // Find next sibling with cy-xpath
+                let nextSibling = null;
+                for (let i = lastNodeIndex + 1; i < children.length; i++) {
+                    if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
+                        nextSibling = children[i];
+                        break;
+                    }
+                }
+
+                if (nextSibling) {
+                    xpathBlock += `<xpath expr="${nextSibling.getAttribute('cy-xpath')}" position="before">${groupContent}</xpath>`;
                     return;
                 }
 
-                if (change.structChanged) {
-                    // Secondary guard: never do a full position="replace" on a zone that still has
-                    // QWeb structural (t-foreach / t-set / t-if / t-elif / t-else)
-                    // descendants in the live DOM.
-                    const structuralAttrs = [
-                        't-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value'
-                    ];
-                    const hasStructuralDescendant = structuralAttrs.some(attr =>
-                        change.el.querySelector(`cy-qweb-t[${attr}], t[${attr}]`)
-                    );
+                // Find prev sibling with cy-xpath
+                let prevSibling = null;
+                for (let i = firstNodeIndex - 1; i >= 0; i--) {
+                    if (children[i].hasAttribute('cy-xpath') && !children[i].classList.contains('c_new')) {
+                        prevSibling = children[i];
+                        break;
+                    }
+                }
 
-                    // Extra check: if ANY direct child of this zone is a t-if/t-elif/
-                    // t-else node, never replace the zone — the sibling chain would break.
-                    const hasConditionalChainChild = Array.from(change.el.children).some(c => {
-                        const tag = (c.tagName || '').toLowerCase();
-                        if (tag !== 'cy-qweb-t' && tag !== 't') return false;
-                        return c.hasAttribute('t-if') || c.hasAttribute('t-elif') || c.hasAttribute('t-else');
-                    });
+                if (prevSibling) {
+                    xpathBlock += `<xpath expr="${prevSibling.getAttribute('cy-xpath')}" position="after">${groupContent}</xpath>`;
+                    return;
+                }
 
-                    // If zone contains a table with QWeb directives, the browser HTML
-                    // parser hoists <t t-foreach/t-if> out of <tbody>, breaking the t-if/t-elif
-                    // sibling chain. A position="replace" on such a zone produces invalid QWeb.
-                    // Always fall back to sibling-relative positioning or inside positioning in this case.
-                    const hasQwebTable = !!(change.el.querySelector && change.el.querySelector(
-                        'table t[t-foreach], table t[t-if], table t[t-elif], ' +
-                        'table cy-qweb-t[t-foreach], table cy-qweb-t[t-if], table cy-qweb-t[t-elif]'
-                    ));
+                // Fallback to parent inside
+                xpathBlock += `<xpath expr="${change.xpath}" position="inside">${groupContent}</xpath>`;
+            };
 
-                    if (hasStructuralDescendant || hasConditionalChainChild || hasQwebTable) {
-                        // Fall back to saving only genuinely new user-added nodes with precise sibling positioning
+            children.forEach(child => {
+                if (child.classList.contains('c_new') && !child.hasAttribute('cy-xpath')) {
+                    currentGroup.push(child);
+                } else {
+                    processGroup(currentGroup);
+                    currentGroup = [];
+                }
+            });
+            processGroup(currentGroup);
+            return xpathBlock;
+        }
+
+        buildInheritanceXML(changes) {
+            let new_inherits = [];
+            for (const [key, items] of Object.entries(groupBy(changes, 'template'))) {
+                let xpathBlock = "";
+                items.forEach(change => {
+                    const newNodes = Array.from(change.el.children)
+                        .filter(child => !child.hasAttribute('cy-xpath') && child.classList.contains('c_new'));
+
+                    // ── Deletion: emit position="replace" with empty body ──────
+                    if (change.isDeleted) {
+                        xpathBlock += `<xpath expr="${change.xpath}" position="replace"></xpath>`;
+                        return;
+                    }
+
+                    if (change.structChanged) {
+                        // Secondary guard: never do a full position="replace" on a zone that still has
+                        // QWeb structural (t-foreach / t-set / t-if / t-elif / t-else)
+                        // descendants in the live DOM.
+                        const structuralAttrs = [
+                            't-foreach', 't-set', 't-if', 't-elif', 't-else', 't-call', 't-as', 't-value'
+                        ];
+                        const hasStructuralDescendant = structuralAttrs.some(attr =>
+                            change.el.querySelector(`cy-qweb-t[${attr}], t[${attr}]`)
+                        );
+
+                        // Extra check: if ANY direct child of this zone is a t-if/t-elif/
+                        // t-else node, never replace the zone — the sibling chain would break.
+                        const hasConditionalChainChild = Array.from(change.el.children).some(c => {
+                            const tag = (c.tagName || '').toLowerCase();
+                            if (tag !== 'cy-qweb-t' && tag !== 't') return false;
+                            return c.hasAttribute('t-if') || c.hasAttribute('t-elif') || c.hasAttribute('t-else');
+                        });
+
+                        // If zone contains a table with QWeb directives, the browser HTML
+                        // parser hoists <t t-foreach/t-if> out of <tbody>, breaking the t-if/t-elif
+                        // sibling chain. A position="replace" on such a zone produces invalid QWeb.
+                        // Always fall back to sibling-relative positioning or inside positioning in this case.
+                        const hasQwebTable = !!(change.el.querySelector && change.el.querySelector(
+                            'table t[t-foreach], table t[t-if], table t[t-elif], ' +
+                            'table cy-qweb-t[t-foreach], table cy-qweb-t[t-if], table cy-qweb-t[t-elif]'
+                        ));
+
+                        if (hasStructuralDescendant || hasConditionalChainChild || hasQwebTable) {
+                            // Fall back to saving only genuinely new user-added nodes with precise sibling positioning
+                            xpathBlock += this._buildNewNodesXpath(change, newNodes);
+                            return;
+                        }
+
+                        const clonedZone = change.el.cloneNode(true);
+                        const cleaned = this._cleanStudioAttrs(clonedZone);
+                        let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
+                        xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
+                        return;
+                    }
+
+
+                    if (newNodes.length) {
                         xpathBlock += this._buildNewNodesXpath(change, newNodes);
                         return;
                     }
 
-                    const clonedZone = change.el.cloneNode(true);
-                    const cleaned = this._cleanStudioAttrs(clonedZone);
+                    // ── Attribute-only change (visibility/t-if on existing cy-xpath element) ──
+                    if (change.attrOnly) {
+                        // change.isHidden = cy-block-hidden was on wrapper (maps to d-print-none in saved XML)
+                        // change.tif = t-if value on the wrapper
+                        if (change.isHidden) {
+                            xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" add="d-print-none" separator=" "/></xpath>`;
+                        } else {
+                            xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" remove="d-print-none" separator=" "/></xpath>`;
+                        }
+                        if (change.tif === 'False') {
+                            xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if">False</attribute></xpath>`;
+                        } else {
+                            // Clear t-if if previously set to False
+                            xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if"/></xpath>`;
+                        }
+                        return;
+                    }
+
+                    if (this._isStructuralNode(change.el)) return;
+                    const cloned = change.el.cloneNode(true);
+                    const cleaned = this._cleanStudioAttrs(cloned);
                     let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
                     xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
-                    return;
+                });
+                if (xpathBlock.trim()) {
+                    new_inherits.push({ key, xpathBlocks: `<data>\n${xpathBlock}\n</data>` });
                 }
-
-
-                if (newNodes.length) {
-                    xpathBlock += this._buildNewNodesXpath(change, newNodes);
-                    return;
-                }
-
-                // ── Attribute-only change (visibility/t-if on existing cy-xpath element) ──
-                if (change.attrOnly) {
-                    // change.isHidden = cy-block-hidden was on wrapper (maps to d-print-none in saved XML)
-                    // change.tif = t-if value on the wrapper
-                    if (change.isHidden) {
-                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" add="d-print-none" separator=" "/></xpath>`;
-                    } else {
-                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="class" remove="d-print-none" separator=" "/></xpath>`;
-                    }
-                    if (change.tif === 'False') {
-                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if">False</attribute></xpath>`;
-                    } else {
-                        // Clear t-if if previously set to False
-                        xpathBlock += `<xpath expr="${change.xpath}" position="attributes"><attribute name="t-if"/></xpath>`;
-                    }
-                    return;
-                }
-
-                if (this._isStructuralNode(change.el)) return;
-                const cloned = change.el.cloneNode(true);
-                const cleaned = this._cleanStudioAttrs(cloned);
-                let content = new XMLSerializer().serializeToString(cleaned).replace(/ xmlns="[^"]*"/g, "").replace(/<br>/gi, '<br/>');
-                xpathBlock += `<xpath expr="${change.xpath}" position="replace">${content}</xpath>`;
-            });
-            if (xpathBlock.trim()) {
-                new_inherits.push({ key, xpathBlocks: `<data>\n${xpathBlock}\n</data>` });
             }
-        }
 
 
-        // ── INJECT CUSTOM FOOTER XPATH ──
-        // The footer must be anchored to the *document* template (the inner
-        // template that contains the <div class="page">) — NOT the outer wrapper.
-        // Using _template (wrapper) causes "cannot be located in parent view"
-        // because the wrapper arch does not contain the .page div.
-        let footerTemplateKey = this._docTemplate || this._template;
-        let pageXpath = "(//div[hasclass('page')])[1]";
+            // ── INJECT CUSTOM FOOTER XPATH ──
+            // The footer must be anchored to the *document* template (the inner
+            // template that contains the <div class="page">) — NOT the outer wrapper.
+            // Using _template (wrapper) causes "cannot be located in parent view"
+            // because the wrapper arch does not contain the .page div.
+            let footerTemplateKey = this._docTemplate || this._template;
+            let pageXpath = "(//div[hasclass('page')])[1]";
 
-        // First, try to find a valid template and XPath from the changes
-        let foundValidTemplate = false;
-        if (changes && changes.length > 0) {
-            // Use the first change's template and try to find a page element from its element
-            const firstChange = changes[0];
-            footerTemplateKey = firstChange.template;
+            // First, try to find a valid template and XPath from the changes
+            let foundValidTemplate = false;
+            if (changes && changes.length > 0) {
+                // Use the first change's template and try to find a page element from its element
+                const firstChange = changes[0];
+                footerTemplateKey = firstChange.template;
 
-            // Try to find page element relative to the change element
-            try {
-                let el = firstChange.el;
-                // Traverse up to find a page element or an element with cy-template
-                while (el) {
-                    if (el.classList && el.classList.contains('page') && el.hasAttribute && el.hasAttribute('cy-xpath')) {
-                        pageXpath = el.getAttribute('cy-xpath');
-                        foundValidTemplate = true;
-                        break;
-                    }
-                    if (el.hasAttribute && el.hasAttribute('cy-template')) {
-                        footerTemplateKey = el.getAttribute('cy-template');
-                    }
-                    el = el.parentElement;
-                }
-
-                // If not found by traversal, try to find in the document
-                if (!foundValidTemplate && this.reportFrameRef && this.reportFrameRef.el) {
-                    let doc = this.reportFrameRef.el;
-                    if (this.reportFrameRef.el.tagName === 'IFRAME') {
-                        doc = this.reportFrameRef.el.contentDocument || this.reportFrameRef.el.contentWindow.document;
-                    }
-                    const pageEl = doc.querySelector('.page[cy-xpath]');
-                    if (pageEl) {
-                        pageXpath = pageEl.getAttribute('cy-xpath');
-                        // Also get the template from the page element if available
-                        if (pageEl.hasAttribute('cy-template')) {
-                            footerTemplateKey = pageEl.getAttribute('cy-template');
+                // Try to find page element relative to the change element
+                try {
+                    let el = firstChange.el;
+                    // Traverse up to find a page element or an element with cy-template
+                    while (el) {
+                        if (el.classList && el.classList.contains('page') && el.hasAttribute && el.hasAttribute('cy-xpath')) {
+                            pageXpath = el.getAttribute('cy-xpath');
+                            foundValidTemplate = true;
+                            break;
                         }
-                        foundValidTemplate = true;
+                        if (el.hasAttribute && el.hasAttribute('cy-template')) {
+                            footerTemplateKey = el.getAttribute('cy-template');
+                        }
+                        el = el.parentElement;
                     }
+
+                    // If not found by traversal, try to find in the document
+                    if (!foundValidTemplate && this.reportFrameRef && this.reportFrameRef.el) {
+                        let doc = this.reportFrameRef.el;
+                        if (this.reportFrameRef.el.tagName === 'IFRAME') {
+                            doc = this.reportFrameRef.el.contentDocument || this.reportFrameRef.el.contentWindow.document;
+                        }
+                        const pageEl = doc.querySelector('.page[cy-xpath]');
+                        if (pageEl) {
+                            pageXpath = pageEl.getAttribute('cy-xpath');
+                            // Also get the template from the page element if available
+                            if (pageEl.hasAttribute('cy-template')) {
+                                footerTemplateKey = pageEl.getAttribute('cy-template');
+                            }
+                            foundValidTemplate = true;
+                        }
+                    }
+                } catch (e) {
+                    console.warn('[Cyllo Studio] Error finding page element from changes:', e);
                 }
-            } catch (e) {
-                console.warn('[Cyllo Studio] Error finding page element from changes:', e);
             }
-        }
 
-        let mainInherit = new_inherits.find(h => h.key === footerTemplateKey);
-        if (!mainInherit) {
-            mainInherit = { key: footerTemplateKey, xpathBlocks: "<data>\n</data>" };
-            new_inherits.push(mainInherit);
-        }
+            let mainInherit = new_inherits.find(h => h.key === footerTemplateKey);
+            if (!mainInherit) {
+                mainInherit = { key: footerTemplateKey, xpathBlocks: "<data>\n</data>" };
+                new_inherits.push(mainInherit);
+            }
 
-        // Clean out any existing custom footer xpaths from the payload to prevent duplicates
-        let parser = new DOMParser();
-        let doc;
-        try {
-            doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
-            // Remove any xpath elements that contain a cy-custom-footer descendant
-            doc.querySelectorAll('xpath').forEach(xpathEl => {
-                if (xpathEl.querySelector('.cy-custom-footer') ||
-                    xpathEl.querySelector('div[class*="cy-custom-footer"]') ||
-                    (xpathEl.getAttribute('expr') || '').includes('page')) {
-                    xpathEl.remove();
-                }
-            });
-        } catch (e) {
-            console.warn('[Cyllo Studio] Error cleaning old footer xpaths:', e);
-            doc = parser.parseFromString("<data></data>", "application/xml");
-        }
+            // Clean out any existing custom footer xpaths from the payload to prevent duplicates
+            let parser = new DOMParser();
+            let doc;
+            try {
+                doc = parser.parseFromString(mainInherit.xpathBlocks, "application/xml");
+                // Remove any xpath elements that contain a cy-custom-footer descendant
+                doc.querySelectorAll('xpath').forEach(xpathEl => {
+                    if (xpathEl.querySelector('.cy-custom-footer') ||
+                        xpathEl.querySelector('div[class*="cy-custom-footer"]') ||
+                        (xpathEl.getAttribute('expr') || '').includes('page')) {
+                        xpathEl.remove();
+                    }
+                });
+            } catch (e) {
+                console.warn('[Cyllo Studio] Error cleaning old footer xpaths:', e);
+                doc = parser.parseFromString("<data></data>", "application/xml");
+            }
 
-        const showF = this.state.footerShowReportFooter;
-        const showD = this.state.footerShowDocName;
-        const showP = this.state.footerShowPageNum;
+            const showF = this.state.footerShowReportFooter;
+            const showD = this.state.footerShowDocName;
+            const showP = this.state.footerShowPageNum;
 
-        const encodedText = this.state.hasCustomFooter ? encodeURIComponent(this.state.companyReportFooterText || '') : '';
+            const encodedText = this.state.hasCustomFooter ? encodeURIComponent(this.state.companyReportFooterText || '') : '';
 
-        // IMPORTANT: Use position="after" on the .page div so the footer is rendered
-        // BELOW the page content, not appended inside it. Using position="inside"
-        // causes the footer to appear at the bottom of the content body and overlap
-        // existing content on reports that have long content.
-        let footerXml = '';
+            // IMPORTANT: Use position="after" on the .page div so the footer is rendered
+            // BELOW the page content, not appended inside it. Using position="inside"
+            // causes the footer to appear at the bottom of the content body and overlap
+            // existing content on reports that have long content.
+            let footerXml = '';
 
-        if (showF || showP || showD) {
-            footerXml = `
+            if (showF || showP || showD) {
+                footerXml = `
                 <xpath expr="${pageXpath}" position="after">
                     <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="width: 100%; font-size: 12px; padding: 8px 15px; border-top: 1px solid #e0e0e0; margin-top: 8px;">
                         <div class="row">
                             <div class="col-8 text-start cy-footer-text-content">
                                 <t t-if="${showF ? 'True' : 'False'}">
                                     ${this.state.hasCustomFooter
-                    ? `<span>${this.state.companyReportFooterText}</span>`
-                    : '<span t-field="res_company.report_footer"/>'}
+                        ? `<span>${this.state.companyReportFooterText}</span>`
+                        : '<span t-field="res_company.report_footer"/>'}
                                 </t>
                                 <t t-if="${showF && showD ? 'True' : 'False'}"><span> | </span></t>
                                 <t t-if="${showD ? 'True' : 'False'}"><span t-esc="o.name"/></t>
@@ -4342,100 +4412,100 @@ export class EditReport extends Component {
                     <style class="cy-footer-hide-std">.footer.o_standard_footer, footer.o_standard_footer { display: none !important; }</style>
                 </xpath>
             `;
-        } else {
-            footerXml = `
+            } else {
+                footerXml = `
                 <xpath expr="${pageXpath}" position="after">
                     <div class="footer cy-custom-footer" data-show-footer="${showF}" data-show-doc="${showD}" data-show-page="${showP}" data-has-custom="${this.state.hasCustomFooter ? 'true' : 'false'}" data-custom-text="${encodedText}" style="display: none;"/>
                 </xpath>
             `;
-        }
-
-        try {
-            const footerDoc = parser.parseFromString(footerXml, "application/xml");
-            if (footerDoc.documentElement && footerDoc.documentElement.nodeName !== 'parsererror') {
-                doc.documentElement.appendChild(footerDoc.documentElement);
-            } else {
-                console.warn('[Cyllo Studio] Error parsing footer XML:', footerDoc.documentElement.textContent);
             }
-            mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
-        } catch (e) {
-            console.error('[Cyllo Studio] Failed to append footer XML:', e);
-            // Fallback to string concatenation if DOM append fails
-            let serialized = new XMLSerializer().serializeToString(doc);
-            if (serialized.includes('</data>')) {
-                mainInherit.xpathBlocks = serialized.replace('</data>', footerXml + '\n</data>');
-            } else {
-                mainInherit.xpathBlocks = serialized.replace('<data/>', '<data>\n' + footerXml + '\n</data>');
+
+            try {
+                const footerDoc = parser.parseFromString(footerXml, "application/xml");
+                if (footerDoc.documentElement && footerDoc.documentElement.nodeName !== 'parsererror') {
+                    doc.documentElement.appendChild(footerDoc.documentElement);
+                } else {
+                    console.warn('[Cyllo Studio] Error parsing footer XML:', footerDoc.documentElement.textContent);
+                }
+                mainInherit.xpathBlocks = new XMLSerializer().serializeToString(doc);
+            } catch (e) {
+                console.error('[Cyllo Studio] Failed to append footer XML:', e);
+                // Fallback to string concatenation if DOM append fails
+                let serialized = new XMLSerializer().serializeToString(doc);
+                if (serialized.includes('</data>')) {
+                    mainInherit.xpathBlocks = serialized.replace('</data>', footerXml + '\n</data>');
+                } else {
+                    mainInherit.xpathBlocks = serialized.replace('<data/>', '<data>\n' + footerXml + '\n</data>');
+                }
             }
+
+            return new_inherits;
         }
 
-        return new_inherits;
-    }
-
-    _removeTableToolbar() {
-        document.querySelectorAll('.table-toolbar').forEach(t => t.remove());
-    }
-
-    _setupTextNodeEvents(textNode) { }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Overflow Guard – Page Boundary Indicator
-    // ─────────────────────────────────────────────────────────────────────────
-
-    /**
-     * Inject (or move) the red page-boundary line inside the paper container
-     * and show/hide the sticky overflow warning based on whether content
-     * exceeds the boundary.
-     *
-     * The boundary is calculated from the current paper format height minus
-     * the top padding (20mm default), converted to pixels via the container's
-     * own pixel height / mm ratio so it is always accurate regardless of zoom.
-     */
-
-    _updateOverflowGuard() {
-        this._applyPaperFormatToCanvas();
-    }
-
-    /**
-     * Attach a MutationObserver to the report frame so the overflow guard
-     * re-evaluates automatically whenever content changes.
-     * Called once from _setupReportFrame.
-     */
-    _startOverflowGuardObserver() {
-        if (this._overflowObserver) {
-            this._overflowObserver.disconnect();
+        _removeTableToolbar() {
+            document.querySelectorAll('.table-toolbar').forEach(t => t.remove());
         }
 
-        const editableArea = this.reportFrameRef.el;
-        if (!editableArea) return;
+        _setupTextNodeEvents(textNode) { }
 
-        // Debounce to avoid flooding on heavy DOM mutations
-        let debounceTimer = null;
-        const check = () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => this._updateOverflowGuard(), 150);
-        };
+        // ─────────────────────────────────────────────────────────────────────────
+        // Overflow Guard – Page Boundary Indicator
+        // ─────────────────────────────────────────────────────────────────────────
 
-        this._overflowObserver = new MutationObserver(check);
-        this._overflowObserver.observe(editableArea, {
-            childList: true,
-            subtree: true,
-            characterData: true,
-            attributes: true,
-            attributeFilter: ['style', 'class'],
-        });
+        /**
+         * Inject (or move) the red page-boundary line inside the paper container
+         * and show/hide the sticky overflow warning based on whether content
+         * exceeds the boundary.
+         *
+         * The boundary is calculated from the current paper format height minus
+         * the top padding (20mm default), converted to pixels via the container's
+         * own pixel height / mm ratio so it is always accurate regardless of zoom.
+         */
 
-        // Also re-check whenever the window is resized (zoom change, etc.)
-        if (this._overflowResizeHandler) {
-            window.removeEventListener('resize', this._overflowResizeHandler);
+        _updateOverflowGuard() {
+            this._applyPaperFormatToCanvas();
         }
-        this._overflowResizeHandler = check;
-        window.addEventListener('resize', this._overflowResizeHandler);
 
-        // Initial check after the frame is painted
-        requestAnimationFrame(() => this._updateOverflowGuard());
+        /**
+         * Attach a MutationObserver to the report frame so the overflow guard
+         * re-evaluates automatically whenever content changes.
+         * Called once from _setupReportFrame.
+         */
+        _startOverflowGuardObserver() {
+            if (this._overflowObserver) {
+                this._overflowObserver.disconnect();
+            }
+
+            const editableArea = this.reportFrameRef.el;
+            if (!editableArea) return;
+
+            // Debounce to avoid flooding on heavy DOM mutations
+            let debounceTimer = null;
+            const check = () => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => this._updateOverflowGuard(), 150);
+            };
+
+            this._overflowObserver = new MutationObserver(check);
+            this._overflowObserver.observe(editableArea, {
+                childList: true,
+                subtree: true,
+                characterData: true,
+                attributes: true,
+                attributeFilter: ['style', 'class'],
+            });
+
+            // Also re-check whenever the window is resized (zoom change, etc.)
+            if (this._overflowResizeHandler) {
+                window.removeEventListener('resize', this._overflowResizeHandler);
+            }
+            this._overflowResizeHandler = check;
+            window.addEventListener('resize', this._overflowResizeHandler);
+
+            // Initial check after the frame is painted
+            requestAnimationFrame(() => this._updateOverflowGuard());
+        }
     }
-}
 
 // ── Apply focused mixins ─────────────────────────────────────────────────────
 // QR wizard and Box section methods live in dedicated files to keep

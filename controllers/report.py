@@ -134,12 +134,9 @@ class StudioReportController(Controller):
                         # Heal any previously saved corruption
                         self._strip_studio_attrs(root)
 
-                        # ── Sync Model ───────────────────────────────────────
-                        # Ensure the custom arch has the same model as the base
-                        # view, otherwise Odoo's _get_combined_arch will skip it.
-                        base_view = request.env.ref(key, raise_if_not_found=False)
-                        if base_view and base_view.model and custom_arch.model != base_view.model:
-                            custom_arch.write({'model': base_view.model})
+
+                        if custom_arch.model:
+                            custom_arch.sudo().write({'model': False})
 
                         data_nodes = root.xpath('//data')
                         if not data_nodes:
@@ -203,6 +200,7 @@ class StudioReportController(Controller):
                                 'error': f'Base view {key!r} not found'}
                     clean_arch = etree.tostring(arch_el, encoding='unicode',
                                                 pretty_print=True)
+
                     request.env['ir.ui.view'].create({
                         'name': f'Custom_{key}',
                         'key': f'Custom_{key}',
@@ -210,7 +208,6 @@ class StudioReportController(Controller):
                         'mode': 'extension',
                         'inherit_id': base_view.id,
                         'arch_base': clean_arch,
-                        'model': base_view.model,
                     })
             return {'success': True}
 
@@ -636,6 +633,10 @@ class StudioReportController(Controller):
         Fetch the raw XML arch of the *document* template (the real content template,
         not the outer wrapper).  Also returns the resolved template name so the
         frontend can pass it back on save.
+
+        Also returns ``record_var``: the name of the foreach loop variable (t-as)
+        used in the wrapper template, e.g. ``"o"`` for Employee Resume or ``"doc"``
+        for most standard reports. Defaults to ``"doc"`` if not found.
         """
         try:
             doc_view, doc_template = self._resolve_doc_template(template)
@@ -645,7 +646,27 @@ class StudioReportController(Controller):
 
             combined_arch = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
             arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
-            return {'success': True, 'arch': arch_xml, 'doc_template': doc_template}
+
+            # Detect the record variable name used in the docs foreach loop.
+            # Walk the wrapper template's arch to find the first t-foreach="docs" or
+            # t-foreach="doc_ids" and return its t-as value.
+            record_var = 'doc'  # safe default for all standard reports
+            try:
+                wrapper_view = request.env.ref(template, raise_if_not_found=False)
+                if wrapper_view and wrapper_view.exists():
+                    wrapper_arch_src = wrapper_view.arch_base or wrapper_view.arch
+                    if wrapper_arch_src:
+                        wrapper_root = etree.fromstring(wrapper_arch_src.encode('utf-8'))
+                        for el in wrapper_root.iter():
+                            foreach_val = el.get('t-foreach', '')
+                            t_as = el.get('t-as', '')
+                            if foreach_val in ('docs', 'doc_ids') and t_as:
+                                record_var = t_as
+                                break
+            except Exception:
+                pass
+
+            return {'success': True, 'arch': arch_xml, 'doc_template': doc_template, 'record_var': record_var}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
@@ -783,6 +804,46 @@ class StudioReportController(Controller):
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
+    def _get_all_tcall_targets(self, template_name, max_depth=8):
+        """
+        Recursively discover all t-call targets reachable from the given template.
+        Returns a set of template names.
+        """
+        cache = set()
+        def _traverse(name, depth):
+            if depth > max_depth or name in cache:
+                return
+            cache.add(name)
+            view = request.env.ref(name, raise_if_not_found=False)
+            if not view:
+                return
+            try:
+                arch = view._get_combined_arch()
+            except Exception:
+                return
+            for node in list(arch.xpath(".//t[@t-call]")):
+                called_name = node.get("t-call")
+                if not called_name or called_name in self._LAYOUT_CALLS:
+                    continue
+                _traverse(called_name, depth + 1)
+        _traverse(template_name, 0)
+        return cache
+
+    @route('/cyllo_studio/check_shared_templates', auth='user', csrf=False, type='json')
+    def check_shared_templates(self, templates):
+        """
+        Check how many top-level reports/actions reference the given templates.
+        Returns a list of templates that are shared (referenced by >1 view).
+        """
+        shared = []
+        for template in templates:
+            callers = request.env['ir.ui.view'].sudo().search_count([
+                ('arch_db', 'ilike', f't-call="{template}"')
+            ])
+            if callers > 1:
+                shared.append(template)
+        return {'success': True, 'shared_templates': shared}
+
     @route('/cyllo_studio/reset_report_source', auth='user', csrf=False, type='json')
     def reset_report_source(self, template, include_header_footer=False):
         """
@@ -824,13 +885,19 @@ class StudioReportController(Controller):
                 # Hard-reset: restores arch from the module XML file on disk
                 doc_view.sudo().reset_arch(mode='hard')
 
-            # Unconditionally delete any custom inherited views on top of the doc template or its children
-            custom_views = request.env['ir.ui.view'].search([
-                ('inherit_id', 'child_of', doc_view.id),
-                '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
-            ])
-            if custom_views:
-                custom_views.sudo().unlink()
+            all_templates = self._get_all_tcall_targets(template)
+            all_templates.add(template)
+
+            for tpl in all_templates:
+                tpl_view = request.env.ref(tpl, raise_if_not_found=False)
+                if not tpl_view:
+                    continue
+                custom_views = request.env['ir.ui.view'].search([
+                    ('inherit_id', 'child_of', tpl_view.id),
+                    '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+                ])
+                if custom_views:
+                    custom_views.sudo().unlink()
 
             if include_header_footer:
                 # Also reset the outer wrapper if it has an arch_fs
