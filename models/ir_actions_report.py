@@ -486,7 +486,6 @@ class IrActionsReport(models.Model):
         for xpath in broken_xpaths:
             bad_views = self.env['ir.ui.view'].search([('arch_db', 'like', xpath)])
             if bad_views:
-                print(f"[Cyllo Studio] Purging {len(bad_views)} broken views containing XPath: {xpath}")
                 bad_views.sudo().unlink()
 
         # Also purge anything inheriting from the Studio editor itself, just in case
@@ -546,7 +545,6 @@ class IrActionsReport(models.Model):
         view = self.env['ir.ui.view'].create({
             'name': name,
             'type': 'qweb',
-            'model': model_rec.model,
             'arch': view_arch,
             'key': xml_id,
         })

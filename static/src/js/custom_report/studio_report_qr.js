@@ -200,7 +200,9 @@ export const QrMixin = {
     _buildQrExpression(forQWeb = false, qrState = null) {
         const type = qrState ? qrState.type : this.state.qr.type;
         const config = qrState ? qrState.config : this.state.qr.config;
-        const obj = 'doc'; // Always use 'doc' to match the blank report iterator
+        // Use the record loop variable detected from the wrapper template (e.g. 'o' for
+        // Employee Resume, 'doc' for standard reports).  Falls back to 'doc' if unknown.
+        const obj = this._recordVar || 'doc';
 
         /**
          * Determine whether a string value looks like a Python field expression

@@ -36,6 +36,7 @@
         'views/ir_model_fields.xml',
         'views/qr_analytics_views.xml',
         'views/report_template_library_views.xml',
+        'views/hr_employee_cv_overrides.xml',
     ],
     'assets': {
     'web_editor.backend_assets_wysiwyg': [

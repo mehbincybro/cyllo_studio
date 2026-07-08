@@ -619,13 +619,11 @@ class Model(models.AbstractModel):
             main_el.append(child)
 
         # footer_el = custom_doc.xpath('//t[@t-name="web.external_layout_standard"]//div[contains(@t-attf-class, "o_standard_footer")]')
-        # print('footer_el',footer_el)
         # footer_el = footer_el[0] if footer_el else None
         # if footer_el is not None and footer_el.getparent() is not None:
         #     footer_el.getparent().remove(footer_el)
         #     main_el.append(footer_el)
         final_html = etree.tostring(container_doc, encoding='unicode', method='html')
-        # print('final_html', final_html)
 
         # ── Restore <cy-qweb-t ...> back to real <t ...> ─────────────────────
         final_html = re.sub(r'<cy-qweb-t(\s|>|/)', r'<t\1', final_html)
