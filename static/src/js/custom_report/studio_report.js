@@ -8,6 +8,7 @@ import { useService } from "@web/core/utils/hooks";
 import { loadJS } from "@web/core/assets";
 import { usePopover } from "@web/core/popover/popover_hook";
 import { groupBy } from "@web/core/utils/arrays";
+import { debounce } from "@web/core/utils/timing";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { QrMixin } from "@cyllo_studio/js/custom_report/studio_report_qr";
 import { BoxMixin } from "@cyllo_studio/js/custom_report/studio_report_box";
@@ -43,6 +44,7 @@ export class EditReport extends Component {
         this.orm = useService("orm");
         this.notification = useService("notification");
         this.dialog = useService("dialog");
+        this._debouncedSaveCompanyFooter = debounce(() => this.saveCompanyFooter(true), 800);
 
         this.state = useState({
             previewMode: false,
@@ -1653,7 +1655,7 @@ export class EditReport extends Component {
     // ─────────────────────────────────────────────────────────────────────────
 
     _setupSortable() {
-        this._snippetPanel = document.getElementById('snippet-panel');
+        this._snippetPanel = document.querySelector('#snippet-panel .cy-report-section');
         this._reportFrame = this.reportFrameRef.el?.contentDocument?.body;
         if (!this._reportFrame || !this._snippetPanel) return;
 
@@ -1682,6 +1684,9 @@ export class EditReport extends Component {
             },
             sort: false,
             animation: 150,
+            draggable: '.cy-node-card',
+            filter: 'input, textarea, button, .cy-switch-wrap, .cy-slider',
+            preventOnFilter: false,
             forceFallback: false, // Ensure native HTML5 Drag and Drop is used
             onStart() {
                 self._isDragging = true;
@@ -4120,11 +4125,13 @@ export class EditReport extends Component {
             ].filter(Boolean).join('\n');
         }
 
-    async saveCompanyFooter() {
-            try {
-                this.state.hasCustomFooter = true;
-                await this.save_changes(this);
+    async saveCompanyFooter(silent = false) {
+        try {
+            this.state.hasCustomFooter = true;
+            await this.save_changes(this);
+            if (!silent) {
                 this.notification.add('Footer text updated successfully for this report', { type: 'success' });
+            }
 
                 // Re-render preview strip and iframe footer
                 this._updateFooterInIframe();

@@ -83,39 +83,33 @@
             <!-- Body -->
             <div class="cy-report-body d-flex flex-grow-1 overflow-hidden" t-att-class="{'previewing': state.previewMode}">
                 <!-- Sidebar (Editable) -->
-                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column" t-att-class="{'d-none': state.previewMode}" style="width: 300px; overflow-y: auto; z-index: 10;">
+                <div id="snippet-panel" class="cy-snippet-panel border-end d-flex flex-column" style="width: 320px; overflow-y: auto;">
+
                     <div class="cy-tab-header">
                         <div class="cy-tab-pill">
                             <div class="cy-window-view">
-                                <button t-on-click="togglePreview"
-                                    t-att-disabled="togglePreview"
+                                <button
                                     class="cy-nav__link"
-                                    t-att-class="!togglePreview ? 'active' : ''">Edit</button>
+                                    t-att-class="togglePreview ? 'active' : ''">Edit</button>
                             </div>
                             <div>
                                 <button class="cy-nav__link" t-on-click="togglePreview"
-                                    t-att-class="togglePreview ? 'active' : ''">
+                                    t-att-class="!togglePreview ? 'active' : ''">
                                     Preview
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                     <div class="cy-preview-toggle d-flex align-items-center gap-2">
-                        <span>Preview</span>
-                        <label class="cy-switch-wrap m-0">
-                            <input type="checkbox" id="previewSwitch" t-on-change="togglePreview"
-                                t-att-checked="state.previewMode"/>
-                            <span class="cy-slider"></span>
-                        </label>
-                    </div>
+                    <div class="cy-report-section" t-att-class="{'d-none': state.previewMode}">
+
 
                     <div class="cy-section-label">
                         <span>Basic Elements</span>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="box" title="Box">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-layout-2-line"></i>
                         </div>
@@ -123,18 +117,11 @@
                             <div class="cy-node-label">Box</div>
                             <div class="cy-node-desc">Layout container</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="field" title="Dynamic Field">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-file-list-line"></i>
                         </div>
@@ -142,18 +129,11 @@
                             <div class="cy-node-label">Dynamic Field</div>
                             <div class="cy-node-desc">Field from a record</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="table" title="Table">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-table-line"></i>
                         </div>
@@ -161,18 +141,11 @@
                             <div class="cy-node-label">Table</div>
                             <div class="cy-node-desc">Rows &amp; columns</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="text" title="Text">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-text"></i>
                         </div>
@@ -180,18 +153,11 @@
                             <div class="cy-node-label">Text</div>
                             <div class="cy-node-desc">Static text block</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="qr" title="QR Code">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-qr-code-line"></i>
                         </div>
@@ -199,18 +165,11 @@
                             <div class="cy-node-label">QR Code</div>
                             <div class="cy-node-desc">Scannable link</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
                     <div class="cy-node-card snippet" data-type="sign" title="Signature">
-                        <div class="cy-node-accent"></div>
+   
                         <div class="cy-node-icon-wrap">
                             <i class="ri-pen-nib-line"></i>
                         </div>
@@ -218,68 +177,61 @@
                             <div class="cy-node-label">Signature</div>
                             <div class="cy-node-desc">Sign-off field</div>
                         </div>
-                        <div class="cy-node-drag-grip">
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                            <div class="cy-dot"></div>
-                        </div>
+                        <i class="ri-draggable"></i>
                     </div>
 
-                    <!-- Footer Settings -->
-                    <div class="cy-section-label mt-2">
+                        <!-- Footer Settings -->
+                    <div class="cy-section-label">
                         <span>Footer Settings</span>
                     </div>
-                    <div class="d-flex flex-column px-3 pb-3">
-                        <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
-                            <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"
-                                   t-att-checked="state.footerShowReportFooter"
-                                   t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._updateFooterInIframe(); }"/>
-                            <span class="ms-2" style="font-size: 11px; color: #444;">Company Footer</span>
-                        </label>
-                        <label class="d-flex align-items-center mb-2" style="cursor: pointer;">
-                            <input type="checkbox" style="width: 13px; height: 13px; accent-color: #9ea700;"
-                                   t-att-checked="state.footerShowPageNum"
-                                   t-on-change="(ev) => { state.footerShowPageNum = ev.target.checked; this._updateFooterInIframe(); }"/>
-                            <span class="ms-2" style="font-size: 11px; color: #444;">Page Number</span>
-                        </label>
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="cy-toggle-label">Company Footer</span>
+                            <label class="cy-switch-wrap m-0">
+                                <input type="checkbox"
+                                       t-att-checked="state.footerShowReportFooter"
+                                       t-on-change="(ev) => { state.footerShowReportFooter = ev.target.checked; this._updateFooterInIframe(); }"/>
+                                <span class="cy-slider"></span>
+                            </label>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="cy-toggle-label">Page Number</span>
+                            <label class="cy-switch-wrap m-0">
+                                <input type="checkbox"
+                                       t-att-checked="state.footerShowPageNum"
+                                       t-on-change="(ev) => { state.footerShowPageNum = ev.target.checked; this._updateFooterInIframe(); }"/>
+                                <span class="cy-slider"></span>
+                            </label>
+                        </div>
 
-                        <div class="mt-2 pt-2 border-top">
-                            <label class="d-block mb-1"
-                                   style="font-size: 10px; font-weight: 600; color: #6c757d; text-transform: uppercase;">Footer Text</label>
-                            <textarea class="form-control form-control-sm mb-2" rows="2"
+                        <div class="pt-2">
+                            <label class="cy-snippet-report-label">Footer Text</label>
+                            <textarea class="cy-footer-textarea" rows="2"
                                       t-model="state.companyReportFooterText"
-                                      t-on-change="(ev) => state.companyReportFooterText = ev.target.value"
-                                      style="font-size: 11px;"></textarea>
-                            <button class="btn btn-sm text-white w-100"
-                                    style="background: #9ea700; font-size: 11px; font-weight: 600;"
-                                    t-on-click="saveCompanyFooter">
-                                Save Text
-                            </button>
+                                      t-on-input="(ev) => { state.companyReportFooterText = ev.target.value; this._debouncedSaveCompanyFooter(); }"></textarea>
                         </div>
                     </div>
 
-                    <!-- Technical Actions -->
+                        <!-- Technical Actions -->
                     <div class="cy-section-label">
                         <span>Technical Tools</span>
                     </div>
                     <div class="cy-tech-tools">
-                        <button class="cy-tech-btn btn-edit-sources" t-on-click="onEditSources">
-                            <i class="ri-code-s-slash-line"></i>
+                        <button class="btn btn-primary w-100" t-on-click="onEditSources">
+                            <i class="ri-code-s-slash-line me-1"></i>
                             <span>Edit Sources</span>
                         </button>
-                        <button class="cy-tech-btn btn-reset-report" t-on-click="onResetReport">
-                            <i class="ri-refresh-line"></i>
+                        <button class="btn btn-danger w-100" t-on-click="onResetReport">
+                            <i class="ri-refresh-line me-1"></i>
                             <span>Reset Report</span>
                         </button>
                     </div>
-                </div>
+                    </div>
 
-                <!-- Properties Sidebar (Preview) — defined in studio_report_setup_sidebar.xml -->
+
+                    <!-- Properties Sidebar (Preview) — defined in studio_report_setup_sidebar.xml -->
                 <t t-if="state.previewMode and !state.showSourceEditor" t-call="custom_report.preview_sidebar"/>
-
+</div>
                 <!-- Source Editor -->
 
                 <div t-if="state.showSourceEditor" class="source-editor-container d-flex flex-column border-end bg-dark"

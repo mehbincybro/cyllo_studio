@@ -49,6 +49,7 @@
             'cyllo_studio/static/src/js/systray/systray.css',
             'cyllo_studio/static/src/js/systray/systray_icon.js',
             'cyllo_studio/static/src/js/systray/systray_icon.xml',
+            'cyllo_studio/static/src/js/views/cyllo_kanban/report_thumbnail_lazy.js',
 
             ('include', 'web_editor.assets_wysiwyg'),
             ('include', 'cyllo_studio.assets_backend'),

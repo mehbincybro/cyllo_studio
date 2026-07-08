@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="custom_report.preview_sidebar">
-        <div class="modern-preview-sidebar p-4 d-flex flex-column h-100" style="width: 330px; z-index: 10;">
+        <div class="modern-preview-sidebar d-flex flex-column">
             <!-- Header -->
-            <div class="mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+            <div class="pb-2">
                 <div class="d-flex align-items-center gap-2">
                     <i class="fa fa-sliders text-primary fs-5"/>
                     <h6 class="text-uppercase m-0 fw-bolder tracking-wider fs-6">Report Setup</h6>
@@ -12,19 +12,19 @@
             </div>
 
             <!-- Report Identity -->
-            <div class="props-group mb-4">
+            <div class="props-group">
                 <label class="modern-label mb-2 d-block">Report Identity</label>
                 <div class="modern-input-wrapper mb-3">
-                    <i class="fa fa-file-text-o input-icon"/>
+                    <i class="ri-article-line input-icon"/>
                     <input type="text" class="modern-input form-control"
-                           placeholder="Report Name..."
-                           t-att-value="state.reportInfo.name"
-                           t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
+                        placeholder="Report Name..."
+                        t-att-value="state.reportInfo.name"
+                        t-on-change="(ev) => this.onReportPropertyChange('name', ev.target.value)"/>
                 </div>
 
                 <label class="modern-label mb-2 d-block mt-3">Paper Format</label>
                 <div class="modern-input-wrapper">
-                    <i class="fa fa-file-pdf-o input-icon"/>
+                    <i class="ri-file-pdf-2-line input-icon"/>
                     <select class="modern-select form-select"
                             t-on-change="(ev) => this.onReportPropertyChange('paperformat_id', ev.target.value)">
                         <option t-foreach="state.paperFormats" t-as="fmt" t-key="fmt.id"
@@ -37,14 +37,14 @@
             </div>
 
             <!-- Options -->
-            <div class="props-group mb-4 border-top border-secondary border-opacity-25 pt-4">
-                <label class="modern-label mb-3 d-block">Options</label>
+            <div class="props-group">
+                <label class="modern-label mt-3 mb-2 d-block">Options</label>
 
-                <div class="modern-toggle-card mb-3">
+                <div class="modern-toggle-card mb-2">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="fw-bold fs-7">Print Menu</div>
-                            <div class="small text-muted" style="font-size: 10px;">Visible in standard menu</div>
+                            <div class="modern-toggle-card-heading">Print Menu</div>
+                            <div class="modern-toggle-card-subtitle" style="font-size: 10px;">Visible in standard menu</div>
                         </div>
                         <div class="form-check form-switch m-0">
                             <input class="form-check-input custom-switch" type="checkbox" id="showPrintMenu"
@@ -56,8 +56,8 @@
                 <div class="modern-toggle-card">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <div class="fw-bold fs-7">Save Attachment</div>
-                            <div class="small text-muted" style="font-size: 10px;">Cache rendered PDF logic</div>
+                            <div class="modern-toggle-card-heading">Save Attachment</div>
+                            <div class="modern-toggle-card-subtitle" style="font-size: 10px;">Cache rendered PDF logic</div>
                         </div>
                         <div class="form-check form-switch m-0">
                             <input class="form-check-input custom-switch" type="checkbox" id="reloadAttach"
@@ -69,9 +69,8 @@
             </div>
 
 
-
             <!-- Action Buttons -->
-            <div class="action-buttons d-flex flex-column gap-2 mt-4 pt-4 border-top border-secondary border-opacity-25">
+            <div class="action-buttons d-flex flex-column gap-2">
                 <button class="btn modern-action-btn primary-action"
                         t-on-click="onEditSources">
                     <i class="fa fa-code me-2"/>
