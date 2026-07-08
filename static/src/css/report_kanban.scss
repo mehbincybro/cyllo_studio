@@ -41,7 +41,7 @@
 
 .cyllo_report_card:hover {
     border-color: #9ea700 !important;
-    outline: 2px solid  #9ea700 !important;
+    outline: 2px solid #9ea700 !important;
     outline-offset: -1px;
     box-shadow: 0 4px 12px #7070701a;
     transform: translateY(-2px);
@@ -79,19 +79,21 @@
     justify-content: center;
     align-items: flex-start;
     /* Align to top to show report headers */
-    background: #f8fafc;
-    border-bottom: 1px solid #f1f5f9;
+    background: transparent;
+    border: none;
 }
 
 .cyllo_report_thumbnail {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     /* Ensure full report is visible */
-    object-position: center;
-    padding: 10px;
+    object-position: top;
+    padding: 0;
     /* Small padding for a "floating" paper look */
     transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    border: none;
+    
 }
 
 .cyllo_report_card:hover .cyllo_report_thumbnail {

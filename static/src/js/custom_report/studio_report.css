@@ -1040,28 +1040,21 @@
 
 /* ── Modern Preview Sidebar Styling (Light Theme) ──────────────────────── */
 .modern-preview-sidebar {
-    background: #f5f5f0;
-    color: #334155;
-    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.05);
-    /* Soft shadow on the left */
-    border-right: 1px solid #e2e8f0;
+    padding: 0 16px;
 }
 
 .modern-preview-sidebar .tracking-wider {
     letter-spacing: 1px;
 }
 
-.modern-preview-sidebar .fs-7 {
-    font-size: 13px;
-    color: #1e293b;
-}
-
 .modern-label {
-    font-size: 10px;
+    display: block;
+    font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #64748b;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 6px;
 }
 
 .modern-input-wrapper {
@@ -1073,7 +1066,7 @@
 .modern-input-wrapper .input-icon {
     position: absolute;
     left: 12px;
-    color: #94a3b8;
+    color: var(--text-color) !important;
     font-size: 13px;
     pointer-events: none;
     z-index: 2;
@@ -1081,37 +1074,40 @@
 
 .modern-preview-sidebar .modern-input,
 .modern-preview-sidebar .modern-select {
-    background: #ffffff !important;
-    border: 1px solid #cbd5e1 !important;
-    color: #0f172a !important;
+    background: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
+    color: var(--text-color) !important;
     font-size: 13px;
-    padding: 10px 12px 10px 36px;
+    font-family: inter, system-ui, sans-serif;
+    padding: 0.44rem 12px 0.44rem 36px;
     border-radius: 8px;
     transition: all 0.2s ease-in-out;
-    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    box-shadow: none;
+}
+
+.modern-preview-sidebar .modern-input::placeholder {
+    color: #85857d;
 }
 
 .modern-preview-sidebar .modern-input:focus,
 .modern-preview-sidebar .modern-select:focus {
-    background: #ffffff !important;
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), inset 0 1px 2px rgba(0, 0, 0, 0.02);
+    background: var(--input-background-color) !important;
+    border-color: #9ea700 !important;
+    box-shadow: 0 0 0 2px rgba(158, 167, 0, 0.15);
     outline: none;
 }
 
 .modern-preview-sidebar .modern-select {
     appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/200.svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23bcbba7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
     background-size: 14px;
 }
 
-
-
 .modern-toggle-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: var(--input-background-color) !important;
+    border: 1px solid var(--input-border-color) !important;
     border-radius: 10px;
     padding: 12px 16px;
     transition: all 0.2s ease;
@@ -1121,6 +1117,19 @@
 .modern-toggle-card:hover {
     background: #f8fafc;
     border-color: #cbd5e1;
+}
+
+.modern-toggle-card-heading {
+    font-size: 14px;
+    font-weight: 600;
+    color: #e2e2e2;
+    line-height: 1.2;
+}
+
+.modern-toggle-card-subtitle {
+    font-size: 12px;
+    color: #b9b9b9;
+    line-height: 1.2;
 }
 
 .custom-switch {
@@ -2901,31 +2910,58 @@ span.badge.rounded-pill.bg-primary {
     font-family: system-ui, -apple-system, "Segoe UI", sans-serif !important;
 }
 
+.cy-report-section {
+    padding: 0 16px;
+}
+
 .cy-snippet-panel .cy-section-label {
     display: flex;
     align-items: center;
-    margin-top: 18px;
-    margin-bottom: 12px;
+    margin-top: 20px;
+    margin-bottom: 8px;
 }
 
 .cy-snippet-panel .cy-section-label:first-child {
-    margin-top: 0;
+    margin-top: 8px;
 }
 
 .cy-snippet-panel .cy-section-label span {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.6px;
-    color: #bcbba7;
+    color: var(--text-color, #e2e2e2);
+}
+
+.cy-footer-textarea {
+    width: 100%;
+    border: 1px solid var(--input-border-color);
+    background-color: var(--input-background-color);
+    border-radius: 8px;
+    padding: 0.44rem 10px;
+    color: var(--text-color) !important;
+    font-size: 12px;
+    font-family: inter, system-ui, sans-serif;
+    font-weight: normal;
+    resize: none;
+}
+
+.cy-footer-textarea:focus {
+    outline: none;
+    border-color: #9ea700;
+    box-shadow: none;
+}
+
+.cy-footer-textarea::placeholder {
+    color: #85857d;
 }
 
 .cy-snippet-panel .cy-node-card {
     position: relative;
     display: flex;
     align-items: center;
-    background: #ffffff;
-    border: 1px solid #e8e9dc;
+    border: 1px solid var(--input-border-color) !important;
+    background-color: var(--input-background-color) !important;
     border-radius: 10px;
     padding: 9px 10px;
     gap: 10px;
@@ -2940,21 +2976,8 @@ span.badge.rounded-pill.bg-primary {
     cursor: grabbing;
 }
 
-.cy-snippet-panel .cy-node-accent {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background-color: #9ea700;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
 .cy-snippet-panel .cy-node-card:hover {
-    border-color: #c8ca80;
-    box-shadow: 0 3px 10px rgba(158, 167, 0, 0.12);
-    transform: translateX(2px);
+    border-color: #c8ca80 !important;
 }
 
 .cy-snippet-panel .cy-node-card:hover .cy-node-accent {
@@ -2967,17 +2990,18 @@ span.badge.rounded-pill.bg-primary {
     justify-content: center;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background-color: #f3f4e0;
+    border-radius: 4px;
     color: #9ea700;
     font-size: 15px;
     flex-shrink: 0;
-    transition: background-color 0.2s ease;
 }
 
-.cy-snippet-panel .cy-node-card:hover .cy-node-icon-wrap {
-    background-color: #e8ea9a;
+.cy-snippet-panel .cy-node-icon-wrap i {
+    font-size: 28px !important;
+    color: #9ea700 !important;
+    line-height: 1 !important;
 }
+
 
 .cy-snippet-panel .cy-node-text {
     flex-grow: 1;
@@ -2988,83 +3012,43 @@ span.badge.rounded-pill.bg-primary {
 .cy-snippet-panel .cy-node-label {
     font-size: 12.5px;
     font-weight: 600;
-    color: #2c2e1a;
+    color: #e2e2e2;
     line-height: 1.2;
 }
 
 .cy-snippet-panel .cy-node-desc {
-    font-size: 10px;
-    color: #8a8c70;
+    font-size: 12px;
+    color: #b9b9b9;
     margin-top: 1px;
     line-height: 1.2;
 }
 
-.cy-snippet-panel .cy-node-drag-grip {
-    display: flex;
-    flex-wrap: wrap;
-    width: 8.5px;
-    /* 3px + 2.5px gap + 3px */
-    gap: 2.5px;
+.cy-snippet-panel .cy-node-card .ri-draggable {
+    font-size: 20px;
+    color: #c8ca80;
     opacity: 0;
     transition: opacity 0.2s ease;
-    flex-shrink: 0;
-    justify-content: space-between;
 }
 
-.cy-snippet-panel .cy-node-card:hover .cy-node-drag-grip {
+.cy-snippet-panel .cy-node-card:hover .ri-draggable {
     opacity: 1;
 }
 
-.cy-snippet-panel .cy-dot {
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background-color: #b0b280;
+.cy-snippet-report-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: #bcbba7;
+    margin-bottom: 6px;
 }
 
 .cy-snippet-panel .cy-tech-tools {
     display: flex;
     flex-direction: row;
     gap: 7px;
-    margin-top: 14px;
-}
-
-.cy-snippet-panel .cy-tech-btn {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 5px;
-    background-color: #f3f4f6;
-    border-radius: 8px;
-    padding: 8px 6px;
-    font-size: 11px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-}
-
-.cy-snippet-panel .btn-edit-sources {
-    border: 1.5px solid #9ea700;
-    color: #9ea700;
-}
-
-.cy-snippet-panel .btn-edit-sources:hover {
-    background-color: #e8ea9a;
-    border-color: #8a9200;
-    color: #8a9200;
-}
-
-.cy-snippet-panel .btn-reset-report {
-    border: 1.5px solid #c0392b;
-    color: #c0392b;
-}
-
-.cy-snippet-panel .btn-reset-report:hover {
-    background-color: #fde2e0;
-    border-color: #a93226;
-    color: #a93226;
+    margin-top: 8px;
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -3072,12 +3056,6 @@ span.badge.rounded-pill.bg-primary {
    ════════════════════════════════════════════════════════════ */
 
 /* 1. Sidebar Icons Override */
-.cy-snippet-panel .cy-node-icon-wrap i {
-    font-size: 15px !important;
-    color: #9ea700 !important;
-    line-height: 1 !important;
-}
-
 .cy-report {
     background: var(--body-bg);
     position: fixed;

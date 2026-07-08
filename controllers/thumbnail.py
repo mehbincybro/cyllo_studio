@@ -39,15 +39,24 @@ class ReportThumbnailController(http.Controller):
     def generate_report_thumbnail(self, report_id=None, record_id=None, **kwargs):
         """
         Generate a thumbnail by rendering the report PDF and converting the first page to an image.
+        If record_id is not given, use any existing record of the report's model (lazy kanban call).
         """
-        if not report_id or not record_id:
-            return {'success': False, 'error': 'Missing report_id or record_id'}
+        if not report_id:
+            return {'success': False, 'error': 'Missing report_id'}
 
         Report = request.env['ir.actions.report'].sudo()
         report = Report.browse(int(report_id)).exists()
 
         if not report:
             return {'success': False, 'error': 'Report not found'}
+
+        if not record_id:
+            if not report.model:
+                return {'success': False, 'error': 'no_record'}
+            sample = request.env[report.model].sudo().search([], limit=1)
+            if not sample:
+                return {'success': False, 'error': 'no_record'}
+            record_id = sample.id
 
         try:
             # 1. Generate PDF using Odoo's native QWeb engine
