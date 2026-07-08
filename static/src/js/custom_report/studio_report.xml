@@ -90,11 +90,12 @@
                             <div class="cy-window-view">
                                 <button
                                     class="cy-nav__link"
-                                    t-att-class="togglePreview ? 'active' : ''">Edit</button>
+                                    t-on-click="togglePreview"
+                                    t-att-class="!state.previewMode ? 'active' : ''">Edit</button>
                             </div>
                             <div>
                                 <button class="cy-nav__link" t-on-click="togglePreview"
-                                    t-att-class="!togglePreview ? 'active' : ''">
+                                    t-att-class="state.previewMode ? 'active' : ''">
                                     Preview
                                 </button>
                             </div>

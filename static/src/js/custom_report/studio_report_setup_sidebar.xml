@@ -2,18 +2,9 @@
 <templates id="template" xml:space="preserve">
     <t t-name="custom_report.preview_sidebar">
         <div class="modern-preview-sidebar d-flex flex-column">
-            <!-- Header -->
-            <div class="pb-2">
-                <div class="d-flex align-items-center gap-2">
-                    <i class="fa fa-sliders text-primary fs-5"/>
-                    <h6 class="text-uppercase m-0 fw-bolder tracking-wider fs-6">Report Setup</h6>
-                </div>
-                <p class="small text-muted mt-2 mb-0" style="font-size: 11px;">Configure rendering and actions</p>
-            </div>
-
             <!-- Report Identity -->
-            <div class="props-group">
-                <label class="modern-label mb-2 d-block">Report Identity</label>
+            <div class="props-group mt-2">
+                <label class="modern-label mb-2 d-block">Report Name</label>
                 <div class="modern-input-wrapper mb-3">
                     <i class="ri-article-line input-icon"/>
                     <input type="text" class="modern-input form-control"
@@ -71,15 +62,13 @@
 
             <!-- Action Buttons -->
             <div class="action-buttons d-flex flex-column gap-2">
-                <button class="btn modern-action-btn primary-action"
-                        t-on-click="onEditSources">
-                    <i class="fa fa-code me-2"/>
-                    <span class="fw-bold tracking-wider">EDIT SOURCES</span>
+                <button class="btn btn-primary w-100" t-on-click="onEditSources">
+                    <i class="ri-code-s-slash-line me-1"></i>
+                    <span>Edit Sources</span>
                 </button>
-                <button class="btn modern-action-btn danger-action"
-                        t-on-click="onResetReport">
-                    <i class="fa fa-refresh me-2"/>
-                    <span class="fw-bold tracking-wider">RESET REPORT</span>
+                <button class="btn btn-danger w-100" t-on-click="onResetReport">
+                    <i class="ri-refresh-line me-1"></i>
+                    <span>Reset Report</span>
                 </button>
             </div>
 

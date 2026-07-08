@@ -1404,39 +1404,6 @@
     margin-top: 12px;
 }
 
-.action-buttons .btn {
-    flex: 1;
-    border: none;
-    border-radius: 6px;
-    padding: 8px 10px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: 0.4px;
-    transition: all 0.2s ease;
-}
-
-/* Edit Sources */
-.btn-edit {
-    background: #9ea700;
-    color: white;
-}
-
-.btn-edit:hover {
-    background: #8b9300;
-    color: white;
-}
-
-/* Reset Report */
-.btn-reset {
-    background: #e85e6a;
-    color: white;
-}
-
-.btn-reset:hover {
-    background: #d45561;
-    color: white;
-}
-
 /* Preview Paper Format */
 select>option {
     background: #000000 !important;
