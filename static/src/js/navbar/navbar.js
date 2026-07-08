@@ -269,6 +269,7 @@ export class CylloNavBar extends NavBar {
     /** Open the Access Rights view for the current model. */
     async AccessRightsClick() {
         this.state.configOpen = false;
+        this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();
         const [modelId, viewId] = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.model.access']);
         await this.action.doAction({
@@ -294,6 +295,7 @@ export class CylloNavBar extends NavBar {
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
         this.state.configOpen = false;
+        this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();
         const model_id = await this.orm.call("ir.model", "cyllo_get_studio_action_acl", [resModel, 'ir.rule']);
         await this.action.doAction({
@@ -351,6 +353,7 @@ export class CylloNavBar extends NavBar {
     /** Open report view for the current model. */
     async ReportClick() {
         this.state.configOpen = false;
+        this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         // _getBusinessContext() persists {model, name, viewType} for
         // handleClose() to restore on Exit — no need for a separate
         // report-specific origin record here.
