@@ -1,0 +1,100 @@
+.ribbon_properties {
+    background-color: unset; // Dark background for contrast
+    border-radius: 8px;
+    margin: 9px 12px 0px 17px;
+    color: #BCBBA7; // Light text color for readability
+
+    .cy-navbar_label {
+        font-size: 16px;
+        font-weight: bold;
+        color: #BCBBA7;
+        margin-bottom: 5px;
+        display: block;
+    }
+    .round label{
+        margin-top: 8px;
+    }
+
+    .overall_container_list{
+        padding:0px;
+        }
+    .cy-input {
+       width: 100%;
+    border: 1px solid #474a3a;
+    background-color: #32352a;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+    color: #BCBBA7 !important;
+    font-size: 13px;
+    font-family: inter, sans-serif;
+    font-weight: normal;
+    }
+
+    .cy-input.cursor-pointer {
+       width: 100%;
+    border: 1px solid #474a3a;
+    background-color: #32352a;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+    color: #BCBBA7 !important;
+    font-size: 13px;
+    font-family: inter, sans-serif;
+    font-weight: normal;
+    }
+    .form-control:focus{
+        box-shadow:none;
+        }
+
+    .position-absolute {
+        position: absolute;
+        top: 85%;
+        right: 0;
+        margin-top: 12px;
+        width: 101% !important;
+        left: 0px;
+        border-radius:3px;
+    }
+
+    .w-100 {
+        width: 100%;
+    }
+
+    .opacity-75-hover {
+        opacity: 0.75;
+        &:hover {
+            opacity: 1;
+        }
+    }
+
+    .can_create_label {
+        font-size: 14px;
+        color: #BCBBA7;
+    }
+
+    .cy-basedOn {
+        padding: 5px 10px;
+        cursor: pointer;
+    }
+
+
+
+    .p-1, .p-2 {
+        padding: 1px; // Adjust padding values as needed
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .justify-content-between {
+        justify-content: space-between;
+    }
+
+    .align-items-center {
+        align-items: center;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
+}

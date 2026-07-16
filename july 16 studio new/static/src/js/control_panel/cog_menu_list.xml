@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <t t-name="cyllo_studio.CogMenuList" t-inherit="cyllo_web.CogMenuList" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class, 'cy-top-section')]" position="replace">
+            <t log="'Itemmmm', hasItems"/>
+            <div class="container cy-top-section p-0" t-ref="resize">
+                <div class="row cog-menu" style="padding-top: 0 !important;">
+                    <div class="col">
+                        <ul class="navbar-nav flex-row flex-wrap gap-4">
+                            <li class="nav-item" t-if="props.canCreate and !(isNew or displayButtons)" t-on-click="handleReportCreate" accesskey="C">
+                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-add-line"/>New</a>
+                            </li>
+                            <li class="nav-item" t-if="props.canEdit and (isNew or displayButtons)" t-on-click="props.saveButtonClicked">
+                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-save-line"/>Save</a>
+                            </li>
+                            <li class="nav-item" t-if="props.canEdit and (isNew or displayButtons)" t-on-click="props.discard">
+                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-eraser-line"/>Discard</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</odoo>

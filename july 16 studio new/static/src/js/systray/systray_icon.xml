@@ -1,0 +1,14 @@
+<templates xml:space="preserve">
+    <t t-inherit="cyllo_web.Systray" t-inherit-mode="extension">
+        <xpath expr="//t[@t-foreach='state.alwaysItems']" position="before">
+            <div class="cy-right-header-menugroup-item o_sticky_icon cy-systray-parent-class me-1"
+                 t-attf-class="#{!isAdmin ? 'disabled-studio' : ''}">
+                <div class="new_icon">
+                    <a class="toggle-icon o_icon" type="button" t-on-click="_onClick" tabindex="0" aria-expanded="false">
+                        <i id="cyllo_studio" class="ri-tools-fill cy-icons cy-stray-icon-sp" role="img" aria-label="Studio"/>
+                    </a>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
