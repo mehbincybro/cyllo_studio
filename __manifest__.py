@@ -29,6 +29,7 @@
     'depends': ['web', 'web_hierarchy', 'mail', 'cyllo_base', 'cyllo_web'],
     'data': [
         'security/ir.model.access.csv',
+        'security/studio_group.xml',
         'views/open_studio_action.xml',
         'views/ir_actions_report_views.xml',
         'views/ir_model_access_views.xml',
@@ -36,7 +37,6 @@
         'views/ir_model_fields.xml',
         'views/qr_analytics_views.xml',
         'views/report_template_library_views.xml',
-        'views/hr_employee_cv_overrides.xml',
     ],
     'assets': {
     'web_editor.backend_assets_wysiwyg': [

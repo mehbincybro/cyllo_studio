@@ -309,7 +309,7 @@
                         <button t-if="state.qr.step === 3" class="qr-btn-primary px-4" t-on-click="onQrWizardConfirm">Insert QR</button>
                     </div>
                 </div>
-            </div><!-- /.qr-wizard-modal -->
-        </div><!-- /.qr-wizard-overlay -->
+            </div>
+        </div>
     </t>
 </templates>

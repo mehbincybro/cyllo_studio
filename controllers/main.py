@@ -7,7 +7,7 @@
 #    Author: Cyllo(<https://www.cyllo.com>)
 #
 #    You can modify it under the terms of the GNU LESSER
-#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#    GENERAL PUBLIC LICENSE (LGPL   v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -26,7 +26,7 @@ import xml.etree.ElementTree as ET
 from odoo import http, api, _, tools
 import json
 import ast
-from odoo.exceptions import ValidationError, AccessError,UserError
+from odoo.exceptions import ValidationError, AccessError, UserError
 from odoo.osv.expression import TERM_OPERATORS_NEGATION
 from odoo.http import Controller, route, request, _logger
 from odoo import Command
@@ -187,6 +187,7 @@ class StudioMode(Controller):
          Returns:
             dict: A dictionary containing the ID, model, type, and name of the newly created view.
         """
+        self.is_studio_user()
         view_arch = """<tree>
            <field name="id"/>
        </tree>"""
@@ -201,20 +202,19 @@ class StudioMode(Controller):
     def is_studio_user(self):
         """
         Checks if the current user is a studio user and has the necessary access rights.
-
-        Raises:
-            AccessError: If the user does not have 'base.group_erp_manager' access.
         """
         studio = request.session.get('studio')
         is_studio_debug = bool(studio) and '1' in studio
-        is_erp_manager = request.env.user.has_group('base.group_erp_manager')
-        if is_erp_manager and not is_studio_debug:
-            '''multi tab case may be in session deosn't have debug = studio
-            so we need to manualy  debug session in to studio to not get an error'''
+        is_studio_user = request.env.user.has_group('cyllo_studio.group_cyllo_studio_user')
+        if is_studio_user and not is_studio_debug:
             request.session.studio = '1'
-
-        if not is_erp_manager:
+        if not is_studio_user:
             raise AccessError(_("You don't have the access to this request."))
+
+    def is_studio_admin(self):
+        self.is_studio_user()
+        if not request.env.user.has_group('cyllo_studio.group_cyllo_studio_admin'):
+            raise AccessError(_("You need administrator access to make this structural change."))
 
     def get_studio_view(self, view_id, model, view_type):
         """
@@ -232,8 +232,9 @@ class StudioMode(Controller):
                     odoo.models.Model: The Studio view record.
                 """
         self.is_studio_user()
-        view_rec = request.env['ir.ui.view'].search([('inherit_id', '=', view_id)], order='priority desc, id desc',
-                                                    limit='1')
+        view_rec = request.env['ir.ui.view'].sudo().search([('inherit_id', '=', view_id)],
+                                                           order='priority desc, id desc',
+                                                           limit='1')
         if not view_rec.is_studio:
             priority = view_rec.priority + 1 if len(view_rec) == 1 else 16
             view_rec = view_rec.sudo().create(
@@ -500,6 +501,7 @@ class StudioMode(Controller):
         Returns:
             list or bool: A list of method names, or a boolean if `check_unusual_days` is True.
         """
+        self.is_studio_user()
         model = request.env[model_name]
         model_class = type(model)
 
@@ -553,6 +555,7 @@ class StudioMode(Controller):
         Returns:
             None
         """
+        self.is_studio_user()
         data, = args
         view_type = 'tree' if data['viewType'] == 'list' else data['viewType']
         act_window_id = request.env['ir.actions.act_window'].browse(data['actionId'])
@@ -609,6 +612,7 @@ class StudioMode(Controller):
         Returns:
             None
         """
+        self.is_studio_user()
         data, = args
         view_type = 'tree' if data['siblingType'] == 'list' else data['siblingType']
         act_window_id = request.env['ir.actions.act_window'].browse(data['actionId'])
@@ -648,6 +652,7 @@ class StudioMode(Controller):
             args (list): A list containing a dictionary with an 'invisible' key.
             kwargs (dict): Additional keyword arguments.
         """
+        self.is_studio_user()
         if args[0].get('invisible') is True:
             request.session['invisible'] = 'True'
         else:
@@ -665,6 +670,7 @@ class StudioMode(Controller):
         Returns:
             str: An XML string representing the changes made.
         """
+        self.is_studio_user()
         model = args[0].get('model')
         view_type = args[0].get('view_type')
         view_id = args[0].get('view_id')
@@ -706,6 +712,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML string representing the added/modified element.
         """
+        self.is_studio_user()
         pivot_arch_base = f'''<xpath expr="//pivot" position="{kwargs['position']}">'''
         if kwargs['position'] == 'inside':
             pivot_arch_base += f'''<field name="{kwargs['name']}" type="{kwargs['item_type']}"  '''
@@ -734,6 +741,7 @@ class StudioMode(Controller):
         Returns:
             str: An XML string representing the added fields.
         """
+        self.is_studio_user()
         model = args[0].get('model')
         view_type = args[0].get('view_type')
         view_id = args[0].get('view_id')
@@ -758,6 +766,7 @@ class StudioMode(Controller):
         Returns:
             list: A list of dictionaries, where each dictionary contains the 'id', 'model', and 'name' of a model.
         """
+        self.is_studio_user()
         Model = request.env['ir.model']
         non_abstract_non_transient_models = []
 
@@ -798,6 +807,7 @@ class StudioMode(Controller):
         Returns:
             str: A combined XML string representing the added field.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         # view_arch_1 = f'''
         #                      <xpath expr="{x2many}" position="inside">
@@ -831,6 +841,7 @@ class StudioMode(Controller):
         Returns:
             str: An XML string representing the added text element.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(viewId, model, viewType)
 
         # Check if the 'invisible' property is set to a non-false value.
@@ -884,6 +895,7 @@ class StudioMode(Controller):
         Returns:
             str: An XML string representing the updated text element.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = f'''
                                    <xpath expr="/{path}" position="replace">
@@ -912,6 +924,7 @@ class StudioMode(Controller):
         Returns:
             str: An XML string representing the added ribbon.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(viewId, model, viewType)
 
         view_arch = f'''
@@ -959,6 +972,7 @@ class StudioMode(Controller):
         Returns:
             None
         """
+        self.is_studio_user()
         view_id = kwargs.get("viewId")
         view_type = kwargs.get("viewType")
         model = kwargs.get("model")
@@ -1037,6 +1051,7 @@ class StudioMode(Controller):
           Returns:
               str: XML snippets representing updated field and any added placeholders.
           """
+        self.is_studio_user()
         view_rec = self.get_studio_view(args['view_id'], args['model'], args['view_type'])
         widget = args.get('widget') or ''
         widget_attr = f'<attribute name="widget">{widget}</attribute>' if widget else '<attribute name="widget"/>'
@@ -1079,6 +1094,7 @@ class StudioMode(Controller):
            Returns:
                str: XML string representing the deletions applied to the view.
            """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_node = etree.fromstring(view_rec.arch_base)
 
@@ -1127,6 +1143,7 @@ class StudioMode(Controller):
             Returns:
                 str: XML snippet representing the added <div> element.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = f'''
                              <xpath expr="/{path}" position="{position}">
@@ -1158,6 +1175,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the updated <div> element.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = f'''
                          <xpath expr="/{path}" position="attributes">
@@ -1192,6 +1210,7 @@ class StudioMode(Controller):
             Returns:
                 None: Updates the view directly.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = '''
                               <xpath expr="//kanban/templates" position="inside">
@@ -1223,6 +1242,7 @@ class StudioMode(Controller):
            Returns:
                None: Updates the view directly.
            """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = '''
                           <xpath expr="//t[@t-name='kanban-menu']" position="replace"/>
@@ -1247,6 +1267,7 @@ class StudioMode(Controller):
         Returns:
             None: Updates the view directly.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_node = etree.fromstring(view_rec.arch_base)
         if not has_field:
@@ -1289,6 +1310,7 @@ class StudioMode(Controller):
         Returns:
             None: Updates the view directly.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = f'''
                              <xpath expr="/{path}" position="replace"/>
@@ -1301,6 +1323,7 @@ class StudioMode(Controller):
     @route('/cyllo_studio/kanban/add/progressbar', type="json", auth="user",
            csrf=False)
     def add_kanban_progressbar(self, view_id, view_type, model, properties):
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         color_dict = {key: value for key, value in properties.get('colors', [])}
         view_arch = f'''
@@ -1332,6 +1355,7 @@ class StudioMode(Controller):
         Returns:
             None: Updates the view directly.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = '''
                            <xpath expr="//progressbar" position="attributes">
@@ -1358,6 +1382,7 @@ class StudioMode(Controller):
         Returns:
             None: Updates the view directly.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = '''
                            <xpath expr="//progressbar" position="replace"/>
@@ -1382,6 +1407,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the attribute update.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         arch_base = f'''                       
                         <xpath expr="//kanban" position="attributes">
@@ -1410,6 +1436,7 @@ class StudioMode(Controller):
         Returns:
             str: XML representing the removed element and field.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_node = etree.fromstring(view_rec.arch_base)
 
@@ -1450,6 +1477,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the move operation.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         view_arch = f'''
                           <xpath expr="/{sibling_path}" position="{position}">
@@ -1463,6 +1491,7 @@ class StudioMode(Controller):
     @route('/cyllo_studio/form/remove/text_element', type="json", auth="user",
            csrf=False)
     def remove_form_text_element(self, view_id, view_type, model, path):
+        self.is_studio_user()
         arch_base = f'<xpath expr="/{path}" position="replace"/>'
         view_rec = self.get_studio_view(view_id, model, view_type)
         node = etree.fromstring(view_rec.arch_base)
@@ -1482,6 +1511,7 @@ class StudioMode(Controller):
         Returns:
             None: Creates the Kanban view and updates XML IDs in `ir.model.data`.
         """
+        self.is_studio_user()
         model_id = request.env['ir.model']._get_id(model)
         kanban = etree.fromstring(arch)
 
@@ -1545,6 +1575,7 @@ class StudioMode(Controller):
             Returns:
                 str: XML snippet representing the move operation.
             """
+        self.is_studio_user()
         if not kwargs['path']:
             kwargs['path'] = '/tree'
         tree_arch_base = f'<xpath expr="/{kwargs["path"]}" position="{kwargs["position"]}">' \
@@ -1564,6 +1595,7 @@ class StudioMode(Controller):
 
     @http.route('/cyllo_studio/reset_view', type='json', auth='user')
     def reset_view(self, model, view_type, view_id):
+        self.is_studio_user()
 
         base_view = request.env['ir.ui.view'].browse(int(view_id))
 
@@ -1580,18 +1612,20 @@ class StudioMode(Controller):
 
     @http.route('/cyllo_studio/get_deactivated_views', type='json', auth='user')
     def get_deactivated_views(self, view_id):
+        self.is_studio_user()
         base_view = request.env['ir.ui.view'].browse(int(view_id))
         studio_views = request.env['ir.ui.view'].with_context(active_test=False).search([
             ('inherit_id', '=', base_view.id),
             ('name', 'ilike', 'Cyllo Studio'),
             ('active', '=', False),
         ])
-        return [{'id': v.id, 'name': v.name,'write_date': v.write_date.strftime('%Y-%m-%d %H:%M') if v.write_date else '',
-        'create_date': v.create_date.strftime('%Y-%m-%d %H:%M') if v.create_date else ''} for v in studio_views]
-
+        return [
+            {'id': v.id, 'name': v.name, 'write_date': v.write_date.strftime('%Y-%m-%d %H:%M') if v.write_date else '',
+             'create_date': v.create_date.strftime('%Y-%m-%d %H:%M') if v.create_date else ''} for v in studio_views]
 
     @http.route('/cyllo_studio/activate_single_view', type='json', auth='user')
     def activate_single_view(self, view_id, base_view_id):
+        self.is_studio_user()
         # First, deactivate ALL currently active studio views for this base view
         base_view = request.env['ir.ui.view'].browse(int(base_view_id))
 
@@ -1614,6 +1648,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/preview_view', type='json', auth='user')
     def preview_view(self, view_id, base_view_id):
         """Temporarily swap active studio view for preview - stores previous state in session"""
+        self.is_studio_user()
         base_view = request.env['ir.ui.view'].browse(int(base_view_id))
 
         # Store currently active studio view IDs in session for revert
@@ -1640,6 +1675,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/cancel_preview', type='json', auth='user')
     def cancel_preview(self):
         """Revert to previously active studio views before preview"""
+        self.is_studio_user()
         previous_ids = request.session.get('cy_preview_previous_active', [])
         base_view_id = request.session.get('cy_preview_base_view_id')
 
@@ -1667,8 +1703,10 @@ class StudioMode(Controller):
         request.session.pop('cy_preview_base_view_id', None)
 
         return True
+
     @http.route('/cyllo_studio/reactivate_view', type='json', auth='user')
     def reactivate_view(self, view_id):
+        self.is_studio_user()
 
         base_view = request.env['ir.ui.view'].browse(int(view_id))
 
@@ -1686,6 +1724,7 @@ class StudioMode(Controller):
 
     @http.route('/cyllo_studio/check_view_customized', type='json', auth='user')
     def check_view_customized(self, view_id):
+        self.is_studio_user()
         studio_view = request.env['ir.ui.view'].search([
             ('inherit_id', '=', int(view_id)),
             ('name', 'ilike', 'Cyllo Studio')
@@ -1708,6 +1747,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the new or updated field(s).
         """
+        self.is_studio_admin()
         keys_to_escape = {'placeholder', 'help', 'invisible', 'readonly', 'required'}
         xpath_blocks = []
 
@@ -1794,21 +1834,21 @@ class StudioMode(Controller):
                             elif field_rec:
                                 _logger.info(f"Skipping Python constraint write for base field: {field_name}")
             if args[0].get("value", {}).get("python_constraint") is None:
-                    _clear_model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
-                    if _clear_model_rec and field_name:
-                        field_rec = request.env['ir.model.fields'].search([
-                            ('model_id', '=', _clear_model_rec.id),
-                            ('name', '=', field_name),
-                        ], limit=1)
-                        # Only clear Python constraints from custom (manual) fields
-                        if field_rec and field_rec.state == 'manual':
-                            field_rec.write({
-                                'constraint_code': False,
-                                'constraint_fields': False,
-                            })
-                            _logger.info(f"✓ Removed Python constraint from field {field_name}")
-                        elif field_rec:
-                            _logger.info(f"Skipping Python constraint clear for base field: {field_name}")
+                _clear_model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
+                if _clear_model_rec and field_name:
+                    field_rec = request.env['ir.model.fields'].search([
+                        ('model_id', '=', _clear_model_rec.id),
+                        ('name', '=', field_name),
+                    ], limit=1)
+                    # Only clear Python constraints from custom (manual) fields
+                    if field_rec and field_rec.state == 'manual':
+                        field_rec.write({
+                            'constraint_code': False,
+                            'constraint_fields': False,
+                        })
+                        _logger.info(f"✓ Removed Python constraint from field {field_name}")
+                    elif field_rec:
+                        _logger.info(f"Skipping Python constraint clear for base field: {field_name}")
 
             dynamic_placeholder_field = args[0].get("value", {}).get("dynamic_placeholder")
             if dynamic_placeholder_field:
@@ -1888,18 +1928,19 @@ class StudioMode(Controller):
                         field_rec.write({
                             "compute": False,
                             "depends": False,
-                            "related":False,
+                            "related": False,
                             "store": field_rec.store,
                             "readonly": False,
                         })
 
             for key, value in args[0]['value'].items():
                 if key and value is not None:
-                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible', 'dynamic_placeholder'):
+                    if key in ('domain', 'context', 'invisible', 'readonly', 'required', 'column_invisible',
+                               'dynamic_placeholder'):
                         attributes += f'''<attribute name="{key}">{escape(str(value))}</attribute>'''
                     # elif key == 'field_info':
                     elif key in ('field_info', 'compute_dependencies', 'is_computed', 'compute', 'depends',
-                                     'compute_code', 'default_value','sql_constraints'):
+                                 'compute_code', 'default_value', 'sql_constraints'):
                         continue
                     else:
                         attributes += f'''<attribute name="{key}">{escape(str(value))}</attribute>'''
@@ -2071,15 +2112,15 @@ class StudioMode(Controller):
 
                 elif args[0].get('edit') and 'default_value' in args[0].get('value', {}):
                     if args[0]['value']['default_value'] == '' and field_name_for_default:
-                            field = request.env['ir.model.fields']._get(model, field_name_for_default)
-                            defaults = request.env['ir.default'].search([
-                                ('field_id', '=', field.id),
-                                ('user_id', '=', False),
-                                ('company_id', '=', False),
-                                ('condition', '=', False),
-                            ])
-                            if defaults:
-                                defaults.unlink()
+                        field = request.env['ir.model.fields']._get(model, field_name_for_default)
+                        defaults = request.env['ir.default'].search([
+                            ('field_id', '=', field.id),
+                            ('user_id', '=', False),
+                            ('company_id', '=', False),
+                            ('condition', '=', False),
+                        ])
+                        if defaults:
+                            defaults.unlink()
 
         form_arch_base = "".join(xpath_blocks)
         view_rec = self.get_studio_view(view_id, model, view_type)
@@ -2129,6 +2170,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the removed fields.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         form_node = etree.fromstring(view_rec.arch_base)
         name1 = str(args[0]['model']) + ".form." + "edit.field." + args[0][
@@ -2174,6 +2216,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the added component.
         """
+        self.is_studio_user()
         form_arch_base = f'<xpath expr="/{args[0]["path"]}" position="{args[0]["position"]}">' \
                          f'{args[0]["item"]}' \
                          '</xpath>'
@@ -2207,6 +2250,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the added tree field.
         """
+        self.is_studio_user()
         values = {
             'name': kwargs['technical_name'],
             'field_description': kwargs['label'],
@@ -2312,6 +2356,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the field attribute updates.
         """
+        self.is_studio_admin()
         if args[0]['edit']:
             form_arch_combined = f"""
                    <xpath expr='/{args[0]["cy_path"]}' position='attributes'>
@@ -2351,6 +2396,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the new page.
         """
+        self.is_studio_user()
         view = request.env['ir.ui.view'].sudo()
         if not kwargs['view_id']:
             kwargs['view_id'] = view.default_view(kwargs['model'],
@@ -2387,6 +2433,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the page update.
         """
+        self.is_studio_user()
         View = request.env['ir.ui.view'].sudo()
         groups_attr = ''
         if kwargs.get('group_ids'):
@@ -2445,6 +2492,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the page move.
         """
+        self.is_studio_user()
         view = request.env['ir.ui.view'].sudo()
         if not kwargs['view_id']:
             kwargs['view_id'] = view.default_view(kwargs['model'],
@@ -2476,6 +2524,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the deleted page.
         """
+        self.is_studio_user()
         view = request.env['ir.ui.view'].sudo()
 
         form_arch_base = f'''<xpath expr="{args[0]['path']}" position="replace"/>'''
@@ -2511,6 +2560,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the smart button.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(kwargs['view_id'], kwargs['model'], 'form')
         model_id = request.env['ir.model'].search(
             [('model', '=', kwargs['model'])])
@@ -2594,6 +2644,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the updated smart button.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(kwargs['view_id'], kwargs['model'], 'form')
         group_ids = list(map(int, kwargs['groups']))
         groups = ','.join(request.env['res.groups'].browse(group_ids).get_external_id().values())
@@ -2642,6 +2693,7 @@ class StudioMode(Controller):
         Returns:
             str: XML snippet representing the removed button and any associated fields.
         """
+        self.is_studio_user()
         form_arch = f'''<xpath expr="{kwargs['path']}" position="replace"/>'''
         view_rec = self.get_studio_view(kwargs['view_id'], kwargs['model'], 'form')
         form_node = etree.fromstring(view_rec.arch_base)
@@ -2667,6 +2719,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to move the smart button.
             """
+        self.is_studio_user()
         view = request.env['ir.ui.view'].sudo()
         if not kwargs['view_id']:
             kwargs['view_id'] = view.default_view(kwargs['model'],
@@ -2707,6 +2760,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to add the button.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(kwargs['viewId'], kwargs['model'],
                                         kwargs['viewType'])
         group_ids = list(map(int, kwargs.pop('groupIds')))
@@ -2802,6 +2856,7 @@ class StudioMode(Controller):
             Returns:
                 str: The combined XML patch string used for the update.
             """
+        self.is_studio_user()
         original_path = kwargs['path']
 
         normalized_path = original_path
@@ -2876,6 +2931,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used for deletion.
             """
+        self.is_studio_user()
         view_id = kwargs.get('view_id')
         model = kwargs.get('model')
         view_type = kwargs.get('viewType')
@@ -2905,6 +2961,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used for deletion.
         """
+        self.is_studio_user()
         view_arch = f'''<xpath expr="/{kwargs['path']}" position="replace"/>'''
         view_rec = self.get_studio_view(kwargs['view_id'], kwargs['model'], kwargs['viewType'])
         form_node = etree.fromstring(view_rec.arch_base)
@@ -2930,6 +2987,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to move the button.
         """
+        self.is_studio_user()
         form_arch_base = f'<xpath expr="/{kwargs["path"]}" position="{kwargs["position"]}">' \
                          f'<xpath expr="/{kwargs["buttonPath"]}" position="move"/>' \
                          '</xpath>'
@@ -2971,6 +3029,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to add the status bar.
         """
+        self.is_studio_user()
         if args['is_new']:
             model_id = request.env['ir.model']._get_id(args['model'])
             request.env['ir.model.fields'].create({
@@ -3011,7 +3070,8 @@ class StudioMode(Controller):
         if kwargs['defaultValue']:
             field_id = request.env['ir.model.fields'].search(
                 [('name', '=', args['field']), ('model', '=', args['model'])], limit=1)
-            request.env['ir.default'].create({'field_id': field_id.id, 'json_value': f'"{kwargs["defaultValue"]}"'})
+            request.env['ir.default'].sudo().create(
+                {'field_id': field_id.id, 'json_value': f'"{kwargs["defaultValue"]}"'})
 
         form_arch_base += '/></xpath>'
         view_rec = self.get_studio_view(args['view_id'], args['model'], args['view_type'])
@@ -3044,6 +3104,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to add the avatar field.
         """
+        self.is_studio_user()
         if is_new:
             model_id = request.env['ir.model']._get_id(model)
 
@@ -3088,6 +3149,7 @@ class StudioMode(Controller):
         Returns:
             dict: A dictionary containing the updated view information, including the number of items and the XML patches.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(args['view_id'], args['model'], 'form')
         form_arch_base = f'<xpath expr="/{args["path"]}" position="{args["position"]}">'
         if args['has_multipath']:
@@ -3128,6 +3190,7 @@ class StudioMode(Controller):
         Returns:
             list: A list of integer IDs for the specified groups.
         """
+        self.is_studio_user()
         groups = groups.split(',')
         groups = [item.strip() for item in groups]
         return [request.env.ref(i).id for i in groups]
@@ -3149,6 +3212,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to add the filter.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         properties['name'] = properties['string'].lower().replace(' ', '_') + str(uuid.uuid4())[:4]
 
@@ -3193,6 +3257,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to add the search field.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         position = "inside" if path == "/search" else "after"
 
@@ -3231,6 +3296,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to add the separator.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         search_arch = f'''<xpath expr="{sibling_path}" position="after">
                 <separator/>
@@ -3257,6 +3323,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to add the group-by filter.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         name = properties['field'].lower().replace(' ', '_') + str(uuid.uuid4())[:4]
         context = {
@@ -3298,6 +3365,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used for deletion.
         """
+        self.is_studio_user()
         pivot_arch_base = f'<xpath expr="/{path}" position="replace"/>'
         view_rec = self.get_studio_view(view_id, model, view_type)
         pivot_node = etree.fromstring(view_rec.arch_base)
@@ -3325,6 +3393,7 @@ class StudioMode(Controller):
         Returns:
             str: The XML patch string used to edit the element.
         """
+        self.is_studio_user()
         graph_arch_base = f'''<xpath expr="//graph" position="{position}">'''
         if position == 'inside':
             graph_arch_base += f'''<field name="{name}" '''
@@ -3375,6 +3444,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used for deletion.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         graph_node = etree.fromstring(view_rec.arch_base)
 
@@ -3402,6 +3472,7 @@ class StudioMode(Controller):
             Returns:
                 int: The ID of the newly created graph view record.
             """
+        self.is_studio_user()
         model_id = request.env['ir.model']._get_id(model)
         tree = etree.fromstring(arch)
 
@@ -3443,6 +3514,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used for deletion.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'calendar')
         calendar_arch = f'''
                    <xpath expr="/{path}" position="replace"/>
@@ -3470,6 +3542,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to add the field.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'calendar')
         not_present_fields = self.create_invisible(
             [{**properties, **extra_data}])
@@ -3504,6 +3577,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to move the item.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'calendar')
         calendar_arch = f'''
                <xpath expr="/{sibling_path}" position="{position}">
@@ -3529,6 +3603,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to update the attributes.
             """
+        self.is_studio_user()
         if name == 'quick_create_view_id':
             calendar_arch = f'''
                         <xpath expr="//calendar" position="attributes">
@@ -3566,6 +3641,7 @@ class StudioMode(Controller):
             Returns:
                 str: The combined XML patch string used to add the field and update the class.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, view_type)
         activity_node = etree.fromstring(view_rec.arch_base)
         activity_arch = f'''
@@ -3591,6 +3667,7 @@ class StudioMode(Controller):
                 arch (str): The XML string of the activity view.
                 model (str): The model name for the new view.
             """
+        self.is_studio_user()
         model_id = request.env['ir.model']._get_id(model)
         activity = etree.fromstring(arch)
 
@@ -3640,6 +3717,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch string used to move the field.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'activity')
         activity_arch = ''
         if sibling_path:
@@ -3671,6 +3749,7 @@ class StudioMode(Controller):
                 fieldBold (bool): True to make the field text bold.
                 fieldMuted (bool): True to mute the field text.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'activity')
         view_arch = f'''
                            <xpath expr="/{path}" position="attributes">
@@ -3696,6 +3775,7 @@ class StudioMode(Controller):
             Returns:
                 bool: True if the model has mail thread or activity functionality, False otherwise.
             """
+        self.is_studio_user()
         model_id = request.env['ir.model']._get_id(model)
         model_rec = request.env['ir.model'].browse(model_id)
         if model_rec.state == 'manual':
@@ -3723,6 +3803,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used to add the chatter.
             """
+        self.is_studio_user()
         # FIXME: issue on adding new chatter in base model that does not have one
         form_arch_base = f'<xpath expr="/{path}" position="{position}">'
         if position == 'inside':
@@ -3758,6 +3839,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for deletion.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'activity')
         activity_node = etree.fromstring(view_rec.arch_base)
 
@@ -3793,6 +3875,7 @@ class StudioMode(Controller):
             Returns:
                 None: The function modifies the view directly.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(int(view_id), model, view_type)
         xpath_count = arch.count("<xpath")
         xpath_close_count = arch.count('</xpath>') or arch.count("/>")
@@ -3822,6 +3905,7 @@ class StudioMode(Controller):
             Returns:
                 None: The function modifies the view directly.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(int(view_id), model, view_type)
         root = etree.fromstring(view_rec.arch)
         xpath_elements = root.findall(".//xpath")
@@ -3864,6 +3948,7 @@ class StudioMode(Controller):
             Returns:
                 dict: A status report of the operation.
             """
+        self.is_studio_user()
         for key, value in kwargs['MenuPosition'].items():
             if isinstance(value, list):
                 if not value or value[0] is None:
@@ -3894,6 +3979,7 @@ class StudioMode(Controller):
             Returns:
                 None: The function modifies the menu directly.
             """
+        self.is_studio_user()
         menu = request.env['ir.ui.menu'].browse(int(kwargs['Menu']['id']))
         menu.name = kwargs['MenuName']
         if kwargs['ParentMenu']['id'] and kwargs.get('isCreate'):
@@ -3943,6 +4029,8 @@ class StudioMode(Controller):
             Returns:
                 None: The function creates records directly.
             """
+        # self.is_studio_admin()
+        self.is_studio_user()
         if kwargs['resId']:
             model = request.env['ir.model'].browse(kwargs['resId'])
             model_action = request.env['ir.actions.act_window'].create({
@@ -4088,6 +4176,7 @@ class StudioMode(Controller):
         Returns:
             dict: Result message indicating success or failure.
         """
+        self.is_studio_admin()
         try:
             # Ensure valid menuId
             if not menuId:
@@ -4126,6 +4215,7 @@ class StudioMode(Controller):
             Returns:
                 tuple: A tuple of updated record IDs and information.
             """
+        self.is_studio_admin()
         module_id = kwargs['state'].get('module_id')
         position = kwargs['state'].get('position')
 
@@ -4207,6 +4297,8 @@ class StudioMode(Controller):
             Returns:
                 tuple: A tuple of created record IDs and information.
             """
+        self.is_studio_user()
+        # self.is_studio_admin()
         module_id = kwargs['state'].get('module_id')
         position = kwargs['state'].get('position')
 
@@ -4288,6 +4380,8 @@ class StudioMode(Controller):
             Returns:
                 tuple: A tuple of the created record IDs and information.
             """
+        self.is_studio_user()
+        # self.is_studio_admin()
         module_id = kwargs['state'].get('module_id')
         position = kwargs['state'].get('position')
 
@@ -4384,7 +4478,7 @@ class StudioMode(Controller):
             'model_id': model_id.id,
         })
 
-        request.env['ir.default'].create({
+        request.env['ir.default'].sudo().create({
             'field_id': active_field.id,
             'json_value': json.dumps(True)
         })
@@ -4404,6 +4498,7 @@ class StudioMode(Controller):
             Returns:
                 None: The function modifies the menu directly.
             """
+        self.is_studio_user()
         parentmenu = request.env['ir.ui.menu'].browse(int(kwargs['ParentMenu']['id']))
         parentmenu.is_studio = True
         parentmenu.name = kwargs['MenuName']
@@ -4436,6 +4531,7 @@ class StudioMode(Controller):
             Returns:
                 int: The ID of the newly created search view record.
             """
+        self.is_studio_user()
         arch_element = etree.fromstring(arch)
         model_id = request.env['ir.model']._get_id(model)
 
@@ -4474,6 +4570,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for the update.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         if properties.get('groupIds'):
             properties['groups'] = ','.join(
@@ -4508,6 +4605,7 @@ class StudioMode(Controller):
             Returns:
                 str: The combined XML patch used for deletion.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'form')
         form_node = etree.fromstring(view_rec.arch_base)
         form_arch = ''
@@ -4541,6 +4639,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for deletion.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         remove_arch = f"<xpath expr = '{path}' position='replace'/>"
 
@@ -4571,6 +4670,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used to move the item.
             """
+        self.is_studio_user()
         if ("separator" in (perv_path or "")) and ("separator" in (next_path or "")):
             return
         if "separator" in path:
@@ -4606,6 +4706,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for the update.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
 
         if properties.get('groupIds'):
@@ -4638,6 +4739,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for the update.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
 
         if properties.get('groupIds'):
@@ -4670,6 +4772,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used to add the search panel.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         search_arch = f'''<xpath expr="//search" position="inside">
                 <searchpanel/>
@@ -4694,6 +4797,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for the update.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
 
         if properties.get('groupIds'):
@@ -4730,6 +4834,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used to add the field.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         search_arch = f"""<xpath expr = '{path}' position='inside'>
                 <field name='{properties['field']}'"""
@@ -4769,6 +4874,7 @@ class StudioMode(Controller):
             Returns:
                 str: The XML patch used for the update.
             """
+        self.is_studio_user()
         view_rec = self.get_studio_view(view_id, model, 'search')
         if properties.get('groupIds'):
             properties['groups'] = ','.join(
@@ -4801,6 +4907,7 @@ class StudioMode(Controller):
             Returns:
                 None: The function modifies the session directly.
             """
+        self.is_studio_user()
         request.session[key] = value
         # # ----------------------------------------------------------------------------------------------------
 
@@ -4816,6 +4923,7 @@ class StudioMode(Controller):
                 tuple: A tuple containing the model name, and boolean flags for whether the model is auto, abstract,and
                         transient. Returns None if the action is not found.
             """
+        self.is_studio_user()
         action = request.env["ir.actions.act_window"].browse(menuActionId)
         if not action:
             return None
@@ -4837,6 +4945,7 @@ class StudioMode(Controller):
                    - name (str): Technical field name.
                    - label (str): Display label of the field.
            """
+        self.is_studio_user()
         if not model:
             return []
         fields = request.env[model].fields_get()
@@ -4861,6 +4970,7 @@ class StudioMode(Controller):
             Returns:
                 dict | None: An action to reload the client UI if successful, otherwise None.
         """
+        self.is_studio_user()
         if not model or not field:
             return None
         model_rec = request.env['ir.model'].sudo().search([('model', '=', model)], limit=1)
@@ -4880,6 +4990,7 @@ class StudioMode(Controller):
         """
         Returns all many2one fields of the given model.
         """
+        self.is_studio_user()
         fields = request.env[model].fields_get()
         result = []
         for name, attrs in fields.items():
@@ -4894,6 +5005,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/get_field_compute_info', type='json', auth='user')
     def get_field_compute_info(self, model, field_name):
         """Get compute and dependencies information for a specific field."""
+        self.is_studio_user()
         try:
             model_rec = request.env["ir.model"].search([("model", "=", model)], limit=1)
             if not model_rec:
@@ -4933,13 +5045,14 @@ class StudioMode(Controller):
                   - Parsed JSON value if available.
                   - None if no default is defined.
         """
+        self.is_studio_user()
         # New columns / buttons have no field name yet — JSON-RPC drops the
         # undefined key, so guard against missing args instead of crashing.
         if not model or not field_name:
             return None
         field = request.env['ir.model.fields']._get(model, field_name)
 
-        default = request.env['ir.default'].search([
+        default = request.env['ir.default'].sudo().search([
             ('field_id', '=', field.id),
             ('user_id', '=', False),
             ('company_id', '=', False),
@@ -4969,11 +5082,12 @@ class StudioMode(Controller):
                   - {"success": True} when default is removed.
                   - {"error": "field_not_found"} if the field does not exist.
         """
+        self.is_studio_user()
         field = request.env['ir.model.fields']._get(model, field_name)
         if not field:
             return {"error": "field_not_found"}
         if value in (None, "", "null", "undefined"):
-            request.env['ir.default'].search([
+            request.env['ir.default'].sudo().search([
                 ('field_id', '=', field.id),
                 ('user_id', '=', False),
                 ('company_id', '=', False),
@@ -4988,7 +5102,7 @@ class StudioMode(Controller):
             except Exception:
                 pass
 
-        request.env['ir.default'].set(
+        request.env['ir.default'].sudo().set(
             model_name=model,
             field_name=field_name,
             value=value,
@@ -5016,6 +5130,7 @@ class StudioMode(Controller):
         Returns:
             str: XML string representing the added ribbon.
         """
+        self.is_studio_user()
         view_rec = self.get_studio_view(viewId, model, viewType)
         # arch = f"""
         #     <xpath expr="/{path}" position="{position}">
@@ -5062,6 +5177,7 @@ class StudioMode(Controller):
         Update ribbon elements inside FORM view.
         Handles both editing and deletion of ribbons while preserving invisible expressions.
         """
+        self.is_studio_user()
         view_id = kwargs.get("viewId")
         view_type = kwargs.get("viewType")
         model = kwargs.get("model")
@@ -5228,7 +5344,8 @@ class StudioMode(Controller):
                     try:
                         ModelClass = type(request.env[model_rec.model])
                         sql_constraints = list(getattr(ModelClass, '_sql_constraints', []))
-                        sql_constraints = [constraint_tuple for constraint_tuple in sql_constraints if constraint_tuple[0] != base_name]
+                        sql_constraints = [constraint_tuple for constraint_tuple in sql_constraints if
+                                           constraint_tuple[0] != base_name]
                         sql_constraints.append((base_name, definition, msg_str))
                         ModelClass._sql_constraints = sql_constraints
 
@@ -5281,6 +5398,7 @@ class StudioMode(Controller):
         """
         Get SQL constraints for a specific field
         """
+        self.is_studio_user()
         try:
             result = []
             table_name = model.replace('.', '_')
@@ -5311,6 +5429,7 @@ class StudioMode(Controller):
         """
         Get Python constraint for a specific field
         """
+        self.is_studio_user()
         try:
             model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
             if not model_rec:
@@ -5319,7 +5438,7 @@ class StudioMode(Controller):
                 ('model_id', '=', model_rec.id),
                 ('name', '=', field_name),
             ], limit=1)
-            
+
             if not field_rec:
                 return None
             if field_rec.constraint_code and field_rec.constraint_fields:
@@ -5337,6 +5456,7 @@ class StudioMode(Controller):
         Check for NULL and empty values in a field
         Returns count of NULL values, empty values, and total records
         """
+        self.is_studio_user()
         try:
             _logger.info(f"Checking data for {model}.{field_name}")
             model_rec = request.env[model]
@@ -5373,6 +5493,7 @@ class StudioMode(Controller):
         """
         Remove a single SQL constraint by key from DB, ir.model.constraint, registry, and model class.
         """
+        self.is_studio_user()
         model_rec = request.env['ir.model'].search([('model', '=', model)], limit=1)
         if not model_rec:
             return {'success': False, 'error': 'Model not found'}
@@ -5412,6 +5533,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/get_button_limit', type='json', auth='user')
     def get_button_limit(self, view_id, model):
         """Get the current button_limit value from header"""
+        self.is_studio_user()
         try:
             view = request.env['ir.ui.view'].sudo().browse(view_id)
             if not view or view.type != 'form':
@@ -5438,6 +5560,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/set_button_limit', type='json', auth='user')
     def set_button_limit(self, view_id, model, button_limit):
         """Set or update the button_limit attribute on header"""
+        self.is_studio_user()
         try:
             button_limit = int(button_limit)
             if button_limit <= 0:
@@ -5477,6 +5600,7 @@ class StudioMode(Controller):
     @http.route('/cyllo_studio/remove_button_limit', type='json', auth='user')
     def remove_button_limit(self, view_id, model):
         """Remove the button_limit attribute from header"""
+        self.is_studio_user()
         try:
             view = request.env['ir.ui.view'].sudo().browse(view_id)
             if not view or view.type != 'form':

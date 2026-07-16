@@ -741,9 +741,3 @@ div[data-drag="1"]:empty {
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.15));
 }
 
-
-/* SortableJS Drag Placeholder */
-.sortable-ghost {
-    width: 100% !important;
-    min-width: 100% !important;
-}

@@ -512,7 +512,7 @@
                           right: 15px;
                           cursor: pointer;
                           font-size: 16px;"/>
-                <div id="branchOptions"></div>
+                <div id="branchOptions"/>
             </div>
             <!-- Reset Report Dialog -->
             <div t-if="state.showResetDialog"

@@ -14,15 +14,31 @@ class StudioReportController(Controller):
     A controller for Odoo Studio report, handling saving of modifications.
     """
 
-    @staticmethod
-    def _strip_studio_attrs(tree):
+    def is_studio_user(self):
+        studio = request.session.get('studio')
+        is_studio_debug = bool(studio) and '1' in studio
+        is_studio_user = request.env.user.has_group('cyllo_studio.group_cyllo_studio_user')
+        if is_studio_user and not is_studio_debug:
+            request.session.studio = '1'
+        if not is_studio_user:
+            from odoo.exceptions import AccessError
+            from odoo import _
+            raise AccessError(_("You don't have the access to this request."))
+
+    def is_studio_admin(self):
+        self.is_studio_user()
+        if not request.env.user.has_group('cyllo_studio.group_cyllo_studio_admin'):
+            from odoo.exceptions import AccessError
+            from odoo import _
+            raise AccessError(_("You don't have the admin access to perform this structural change."))
+    def _strip_studio_attrs(self, tree):
         """
         Walk every element in *tree* and remove all studio-injected
         attributes that must never appear in saved QWeb templates.
         This is the authoritative server-side cleanup that catches any
         attrs the browser cleanup may have missed.
         """
-        REMOVE_ATTRS = {'cy-xpath', 'cy-template', 'cy-type', 'draggable'}
+        REMOVE_ATTRS = {'cy-xpath', 'cy-template', 'cy-type', 'draggable', 'data-cy-new-field'}
         for el in tree.iter():
             for attr in REMOVE_ATTRS:
                 el.attrib.pop(attr, None)
@@ -42,20 +58,35 @@ class StudioReportController(Controller):
            type='json')
     def create_inherited_view(self, all_arch):
         """
+        with open("/tmp/studio_payload.txt", "a") as f:
+            f.write("\n\n" + repr(all_arch))
         Create or update inherited QWeb views from the report editor.
         Each item in all_arch has:
           - key:        external ID of the base template
           - xpathBlocks: XML string with <data><xpath ...>...</xpath></data>
         """
+        self.is_studio_user()
         try:
+            skipped_protected = []
             for arch in all_arch:
                 key = arch['key']
-
                 # Guard: never create/modify XPath overrides on protected layout templates.
                 # These templates contain t-if/t-else sibling chains that QWeb requires to stay
                 # adjacent; any inserted element breaks compilation with:
                 #   SyntaxError: t-elif directive must be preceded by t-if or t-elif directive
                 if key in self._PROTECTED_LAYOUT_KEYS:
+                    # Log a visible warning so this silent-drop is traceable in the server log.
+                    # Previously this was a silent continue — save returned {success: True} but
+                    # wrote nothing, causing mysterious save-then-revert on reports whose
+                    # address/layout zones carry cy-template matching a protected key.
+                    import logging as _logging
+                    _logging.getLogger(__name__).warning(
+                        '[Cyllo Studio] create_inherited_view: skipping protected layout key %r '
+                        '— changes targeting this template are silently ignored to prevent '
+                        'QWeb t-elif/t-else chain corruption. '
+                        'Frontend should anchor new nodes to the document sub-template instead.',
+                        key
+                    )
                     # Also clean up any accidentally created Custom_ views for this key
                     base_view = request.env.ref(key, raise_if_not_found=False)
                     if base_view:
@@ -65,6 +96,7 @@ class StudioReportController(Controller):
                         ])
                         if stale:
                             stale.unlink()
+                    skipped_protected.append(key)
                     continue
                 xpath_blocks = re.sub(r'<br\s*>', '<br/>', arch['xpathBlocks'])
 
@@ -89,7 +121,6 @@ class StudioReportController(Controller):
                 # parser doesn't strip them; the JS serializer sends them as-is.
                 xpath_blocks = re.sub(r'<cy-qweb-t(\s|>|/)', r'<t\1', xpath_blocks)
                 xpath_blocks = xpath_blocks.replace('</cy-qweb-t>', '</t>')
-
                 # Parse and validate
                 try:
                     arch_el = etree.fromstring(xpath_blocks.encode('utf-8'))
@@ -161,19 +192,50 @@ class StudioReportController(Controller):
                                 continue
                             processed_xpaths.add(xpath_key)
 
+                            # Is the incoming node the Cyllo custom footer block?
+                            # The footer is re-emitted on *every* save anchored to the
+                            # page div (expr=page, position="after"). We must dedupe it
+                            # by CONTENT, never by its expr — otherwise the page-anchored
+                            # footer would collide with the field xpaths below it.
+                            new_el_str = etree.tostring(new_el, encoding='unicode')
+                            new_el_is_footer = (
+                                'cy-custom-footer' in new_el_str
+                                or 'cy-footer-hide-std' in new_el_str
+                            )
+
                             # Purge logic:
                             for old_el in list(root.xpath('//*[@expr]')):
                                 old_expr = old_el.get('expr', '')
-                                
+
+                                # 0. Footer dedup: when the incoming node is our custom
+                                # footer, drop any previously-saved custom-footer xpath
+                                # (regardless of its expr/position) so footers do not stack.
+                                if new_el_is_footer:
+                                    old_el_str = etree.tostring(old_el, encoding='unicode')
+                                    if ('cy-custom-footer' in old_el_str
+                                            or 'cy-footer-hide-std' in old_el_str):
+                                        parentNode = old_el.getparent()
+                                        if parentNode is not None:
+                                            parentNode.remove(old_el)
+                                    # A footer never invalidates field xpaths — skip the
+                                    # replace/child-purge rules entirely for it.
+                                    continue
+
                                 # 1. If we are REPLACING this exact node, remove the old replacement.
                                 if position == 'replace' and old_expr == expr:
                                     parentNode = old_el.getparent()
                                     if parentNode is not None:
                                         parentNode.remove(old_el)
-                                
-                                # 2. If we are modifying/replacing this node, any existing XPaths 
+
+                                # 2. If we are REPLACING this node, any existing XPaths
                                 # that target its children are now stale/invalid.
-                                elif old_expr.startswith(expr + '/'):
+                                # This MUST be gated on position="replace": inserting a
+                                # sibling (before/after), inserting inside, or changing
+                                # attributes does NOT invalidate the node's descendants.
+                                # Previously this fired for every position, so the always
+                                # page-anchored footer (position="after") wiped every field
+                                # xpath under the page on the 2nd+ save.
+                                elif position == 'replace' and old_expr.startswith(expr + '/'):
                                     parentNode = old_el.getparent()
                                     if parentNode is not None:
                                         parentNode.remove(old_el)
@@ -185,7 +247,7 @@ class StudioReportController(Controller):
                                     parentNode = old_el.getparent()
                                     if parentNode is not None:
                                         parentNode.remove(old_el)
-                            
+
                             data_node.append(new_el)
                     except Exception as unexpectedException:
                         # Fallback: just overwrite if merging fails
@@ -200,7 +262,6 @@ class StudioReportController(Controller):
                                 'error': f'Base view {key!r} not found'}
                     clean_arch = etree.tostring(arch_el, encoding='unicode',
                                                 pretty_print=True)
-
                     request.env['ir.ui.view'].create({
                         'name': f'Custom_{key}',
                         'key': f'Custom_{key}',
@@ -209,6 +270,15 @@ class StudioReportController(Controller):
                         'inherit_id': base_view.id,
                         'arch_base': clean_arch,
                     })
+            if skipped_protected:
+                return {
+                    'success': True,
+                    'warning': (
+                        'Some changes were skipped because they targeted protected layout '
+                        'templates that cannot be safely overridden via XPath inheritance.'
+                    ),
+                    'skipped_protected': skipped_protected,
+                }
             return {'success': True}
 
         except Exception as e:
@@ -221,11 +291,12 @@ class StudioReportController(Controller):
         Called by the frontend when arch is lost after a browser page refresh
         (ir.actions.client params are not persisted across refreshes).
         """
+        self.is_studio_user()
         try:
             view = request.env.ref(template)
             if not view.exists():
                 return {'success': False, 'error': f'Template {template!r} not found'}
-            
+
             try:
                 arch = view.get_iframe_rendered_template(template, show_placeholders=show_placeholders)
                 return {'success': True, 'arch': arch}
@@ -251,19 +322,21 @@ class StudioReportController(Controller):
         """
         Return the full rendered HTML document for the Studio editor iframe.
         """
+        self.is_studio_user()
         try:
             view = request.env.ref(template, raise_if_not_found=False)
             if not view:
-                return request.make_response("Template not found", status=404)
-            
+                    return request.make_response("Template not found", status=404)
+
             html_content = view.get_iframe_rendered_template(template)
             return request.make_response(html_content, headers=[('Content-Type', 'text/html')])
         except Exception as e:
             return request.make_response(f"Error loading canvas: {str(e)}", status=500)
-            
+
     @route('/cyllo_studio/save_company_footer', type='json', auth='user')
     def save_company_footer(self, company_id, footer_text):
         """Save the company report footer with sudo to prevent access errors."""
+        self.is_studio_user()
         try:
             if not request.env.user.has_group('base.group_user'):
                 return {'success': False, 'error': 'Unauthorized'}
@@ -286,6 +359,7 @@ class StudioReportController(Controller):
         (e.g. "Company > Report Footer") rather than trying to evaluate QWeb
         expressions which require a real record context.
         """
+        self.is_studio_user()
         try:
             layout = request.env.ref('web.external_layout_standard', raise_if_not_found=False)
             if not layout:
@@ -380,6 +454,7 @@ class StudioReportController(Controller):
         Fetch records, report properties, and available paper formats for the preview sidebar.
         Also includes QR scan analytics summary.
         """
+        self.is_studio_user()
         try:
             report = request.env['ir.actions.report'].search([('report_name', '=', template)], limit=1)
             if not report:
@@ -395,14 +470,14 @@ class StudioReportController(Controller):
 
             tokens = request.env['qr.download.token'].sudo().search([('report_id', '=', report.id)])
             total_scans = sum(tokens.mapped('scan_count'))
-            
+
             recent_scans_data = request.env['qr.scan.event'].sudo().search_read(
                 [('report_id', '=', report.id)],
                 ['scanned_at', 'ip_address', 'record_id'],
                 limit=5,
                 order='scanned_at desc'
             )
-            
+
             # Resolve record names for recent scans
             for scan in recent_scans_data:
                 if scan['record_id']:
@@ -421,12 +496,23 @@ class StudioReportController(Controller):
                     'paperformat_id': report.paperformat_id.id if report.paperformat_id else False,
                     'attachment_use': report.attachment_use,
                 },
+                'pricelist_preview_blocked': bool(
+                    (
+                        report.report_name in {
+                            'product.report_pricelist',
+                            'product.report_pricelist_page',
+                        }
+                        or report.model == 'product.pricelist'
+                    )
+                    and not request.env.user.has_group('product.group_product_pricelist')
+                ),
                 'record_ids': records.ids,
                 'paper_formats': paper_formats,
                 'analytics': {
                     'total_scans': total_scans,
                     'recent_scans': recent_scans_data,
-                }
+                },
+                'record_var': self._get_record_var(template),
             }
         except Exception as e:
             return {'success': False, 'error': str(e)}
@@ -439,10 +525,15 @@ class StudioReportController(Controller):
         Using Odoo's native /report/html/ route ensures the report is fully styled
         (Odoo asset bundles load correctly) and all QWeb field values are resolved.
         """
+        self.is_studio_user()
         try:
             report = request.env['ir.actions.report'].browse(report_id)
             if not report.exists():
                 return {'success': False, 'error': 'Report not found'}
+
+            blocked = request.env['ir.actions.report']._get_studio_preview_report_block(report)
+            if blocked:
+                return blocked
 
             # Verify that the requested document records still exist in the DB.
             # If the record was deleted after the preview list loaded, .exists()
@@ -472,6 +563,7 @@ class StudioReportController(Controller):
         """
         Generate a reusable token for a report template.
         """
+        self.is_studio_user()
         try:
             report = request.env['ir.actions.report'].search([('report_name', '=', template)], limit=1)
             if not report:
@@ -495,6 +587,7 @@ class StudioReportController(Controller):
         """
         Download the PDF for a specific report and record using a token.
         """
+        self.is_studio_user()
         if not token:
             return request.make_response("Missing token", status=403)
 
@@ -571,6 +664,7 @@ class StudioReportController(Controller):
         These cause QWeb SyntaxErrors like 't-elif must be preceded by t-if'.
         Call this to repair the database after such an error occurs.
         """
+        self.is_studio_user()
         removed = []
         try:
             for key in self._PROTECTED_LAYOUT_KEYS:
@@ -627,6 +721,29 @@ class StudioReportController(Controller):
         except Exception:
             return None, template
 
+    def _get_record_var(self, template):
+        """
+        Detect the record variable name used in the docs foreach loop.
+        Walk the wrapper template's arch to find the first t-foreach="docs" or
+        t-foreach="doc_ids" and return its t-as value.
+        """
+        record_var = 'doc'
+        try:
+            wrapper_view = request.env.ref(template, raise_if_not_found=False)
+            if wrapper_view and wrapper_view.exists():
+                wrapper_arch_src = wrapper_view.arch_base or wrapper_view.arch
+                if wrapper_arch_src:
+                    wrapper_root = etree.fromstring(wrapper_arch_src.encode('utf-8'))
+                    for el in wrapper_root.iter():
+                        foreach_val = el.get('t-foreach', '')
+                        t_as = el.get('t-as', '')
+                        if foreach_val in ('docs', 'doc_ids') and t_as:
+                            record_var = t_as
+                            break
+        except Exception:
+            pass
+        return record_var
+
     @route('/cyllo_studio/get_report_source', auth='user', csrf=False, type='json')
     def get_report_source(self, template):
         """
@@ -638,6 +755,7 @@ class StudioReportController(Controller):
         used in the wrapper template, e.g. ``"o"`` for Employee Resume or ``"doc"``
         for most standard reports. Defaults to ``"doc"`` if not found.
         """
+        self.is_studio_user()
         try:
             doc_view, doc_template = self._resolve_doc_template(template)
 
@@ -648,23 +766,7 @@ class StudioReportController(Controller):
             arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
 
             # Detect the record variable name used in the docs foreach loop.
-            # Walk the wrapper template's arch to find the first t-foreach="docs" or
-            # t-foreach="doc_ids" and return its t-as value.
-            record_var = 'doc'  # safe default for all standard reports
-            try:
-                wrapper_view = request.env.ref(template, raise_if_not_found=False)
-                if wrapper_view and wrapper_view.exists():
-                    wrapper_arch_src = wrapper_view.arch_base or wrapper_view.arch
-                    if wrapper_arch_src:
-                        wrapper_root = etree.fromstring(wrapper_arch_src.encode('utf-8'))
-                        for el in wrapper_root.iter():
-                            foreach_val = el.get('t-foreach', '')
-                            t_as = el.get('t-as', '')
-                            if foreach_val in ('docs', 'doc_ids') and t_as:
-                                record_var = t_as
-                                break
-            except Exception:
-                pass
+            record_var = self._get_record_var(template)
 
             return {'success': True, 'arch': arch_xml, 'doc_template': doc_template, 'record_var': record_var}
         except Exception as e:
@@ -728,6 +830,7 @@ class StudioReportController(Controller):
 
     @route('/cyllo_studio/save_report_template', auth='user', csrf=False, type='json')
     def save_report_template(self, template, name, description='', category=''):
+        self.is_studio_admin()
         try:
             name = (name or '').strip()
             if not name:
@@ -750,6 +853,7 @@ class StudioReportController(Controller):
 
     @route('/cyllo_studio/export_report_template', auth='user', csrf=False, type='json')
     def export_report_template(self, template):
+        self.is_studio_admin()
         try:
             report, doc_template, payload = self._build_template_payload(template)
             filename = f"{(report.name or 'report_template').replace('/', '_')}_template.json"
@@ -769,6 +873,7 @@ class StudioReportController(Controller):
         returned by ``get_report_source``; if not supplied we fall back to
         auto-detecting it again.
         """
+        self.is_studio_admin()
         try:
             # Resolve which template to actually save to
             save_template = doc_template or template
@@ -835,6 +940,7 @@ class StudioReportController(Controller):
         Check how many top-level reports/actions reference the given templates.
         Returns a list of templates that are shared (referenced by >1 view).
         """
+        self.is_studio_user()
         shared = []
         for template in templates:
             callers = request.env['ir.ui.view'].sudo().search_count([
@@ -850,6 +956,7 @@ class StudioReportController(Controller):
         Reset the document template's arch back to its factory / module defaults
         by calling ir.ui.view.reset_arch(mode='hard').
         """
+        self.is_studio_admin()
         try:
             doc_view, doc_template = self._resolve_doc_template(template)
             if not doc_view or not doc_view.exists():
@@ -917,3 +1024,16 @@ class StudioReportController(Controller):
             return {'success': True, 'arch': fresh_arch}
         except Exception as e:
             return {'success': False, 'error': str(e)}
+            if wrapper_view and wrapper_view.exists():
+                if wrapper_view.arch_fs:
+                    wrapper_view.sudo().reset_arch(mode='hard')
+
+                wrapper_custom_views = request.env['ir.ui.view'].search([
+                    ('inherit_id', 'child_of', wrapper_view.id),
+                    '|', ('name', 'like', 'Custom_'), ('key', 'like', 'Custom_'),
+                ])
+                if wrapper_custom_views:
+                    wrapper_custom_views.sudo().unlink()
+
+            fresh_arch = doc_view.arch_base
+            return {'success': True, 'arch': fresh_arch}

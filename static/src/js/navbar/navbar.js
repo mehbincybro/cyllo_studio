@@ -39,6 +39,7 @@ export class CylloNavBar extends NavBar {
         const prevForm = this._readPrevForm();
         const configBc = this._readConfigBreadcrumb();
         this.state = useState({
+            isSystemAdmin: this.env.services.user.hasGroup("base.group_system"),
             studioEditableList: false,
             lightMode: false,
             isStudioEdit: false,
@@ -268,6 +269,13 @@ export class CylloNavBar extends NavBar {
 
     /** Open the Access Rights view for the current model. */
     async AccessRightsClick() {
+        if (!this.state.isSystemAdmin) {
+            this.notification.add("Contact your System Administrator.", {
+                title: "Access Denied",
+                type: "danger",
+            });
+            return;
+        }
         this.state.configOpen = false;
         this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();
@@ -294,6 +302,13 @@ export class CylloNavBar extends NavBar {
 
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
+        if (!this.state.isSystemAdmin) {
+            this.notification.add("Contact your System Administrator.", {
+                title: "Access Denied",
+                type: "danger",
+            });
+            return;
+        }
         this.state.configOpen = false;
         this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();

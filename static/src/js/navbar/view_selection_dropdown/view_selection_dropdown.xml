@@ -30,7 +30,7 @@
                                             t-att-checked="state.activatedViews.includes('list')"
                                             t-on-click="(e) => this.onClickBox(e)" />
                                     </span>
-                                    <i class="ri-align-justify cy-view-icon" />
+                                    <i class="ri-table-line"/>
                                     <span class="cy-item-text">List</span>
                                 </label>
                                 <t
