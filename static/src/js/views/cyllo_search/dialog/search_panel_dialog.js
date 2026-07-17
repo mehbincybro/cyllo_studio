@@ -120,9 +120,7 @@ export class SearchPanelDialog extends Component {
           this.env.services.ui.unblock();
         }
 //        this.action.doAction("studio_reload");
-//-----------------changed----------------
         window.location.reload()
-//        --------------------------
     }
 
     this.props.close();

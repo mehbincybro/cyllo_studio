@@ -673,7 +673,7 @@ class Model(models.AbstractModel):
         if template_name in cache:
             return cache[template_name]
 
-        view = self.env.ref(template_name)
+        view = self.env.ref(template_name, raise_if_not_found=False)
         if not view:
             return f"<!-- missing template: {template_name} -->"
 

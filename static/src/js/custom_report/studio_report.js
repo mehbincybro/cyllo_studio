@@ -324,6 +324,17 @@ export class EditReport extends Component {
         });
 
         onWillUnmount(() => {
+            // Tear down drag/editor machinery so listeners/instances don't leak
+            // when the editor component is destroyed.
+            try { this._destroySortableInstances(); } catch (_) { }
+            if (this.undoManager) {
+                try { this.undoManager.destroy(); } catch (_) { }
+                this.undoManager = null;
+            }
+            if (this.editor) {
+                try { this.editor.destroy(); } catch (_) { }
+                this.editor = null;
+            }
             if (this._cyElsToRestore && this._cyElsToRestore.length > 0) {
                 this._cyElsToRestore.forEach(item => {
                     if (item.display !== undefined) item.el.style.display = item.display;
@@ -670,6 +681,13 @@ export class EditReport extends Component {
 
         this.editor = null;
 
+        // Destroy the previous manager before creating a new one. onEditIframeLoad
+        // runs again after every save/reset (the iframe is reloaded), and the
+        // manager attaches a keydown handler to the host document that is only
+        // removed in destroy() — without this, handlers accumulate on each reload.
+        if (this.undoManager) {
+            try { this.undoManager.destroy(); } catch (_) { }
+        }
         this.undoManager = new UndoRedoManager(editableArea, {
             maxStackSize: 50,
             debounceTime: 300,
@@ -964,6 +982,7 @@ export class EditReport extends Component {
             this.state.paperFormats = data.paper_formats;
             this.state.analytics = data.analytics || { total_scans: 0, recent_scans: [], tracking_enabled: false };
             this._recordVar = data.record_var || 'doc';
+            this._recordBased = data.record_based;
 
             // Rely purely on the DOM/arch to decide visibility.
             this._updateHasQr();
@@ -979,6 +998,9 @@ export class EditReport extends Component {
             }
 
             if (this.state.records.length > 0) {
+                // Reset the pager to the first record so the pager index stays in
+                // sync with the record actually shown after a re-fetch.
+                this.state.currentIndex = 0;
                 this._loadRealReport(this.state.records[0]);
             }
         }
@@ -1241,6 +1263,7 @@ export class EditReport extends Component {
                 this._docTemplate = res.doc_template || this._template;
                 // Store the record loop variable ("doc", "o", etc.) for QR/field expressions
                 this._recordVar = res.record_var || 'doc';
+                this._recordBased = res.record_based;
                 this._initAceEditor();
             } else {
                 this.notification.add(res.error, { type: "danger" });
@@ -1874,6 +1897,7 @@ export class EditReport extends Component {
                 }
 
                 if (type === 'field') {
+                    if (!self._canBindDynamicField()) { item.remove(); return; }
                     const resModel = self._resModel || '';
                     const { fieldPath, fieldInfo } = await self.openFieldSelectorPopover(dropzone, resModel, (f) => !['one2many', 'many2many'].includes(f.type));
                     if (!fieldPath) { item.remove(); return; }
@@ -2136,6 +2160,7 @@ export class EditReport extends Component {
         }
 
         if (type === 'field') {
+            if (!self._canBindDynamicField()) { item.remove(); return; }
             const resModel = self._resModel || self.props.action.params?.res_model || '';
 
             const { fieldPath, fieldInfo } =
@@ -2899,9 +2924,44 @@ export class EditReport extends Component {
         this._refreshDragHandles();
     }
 
+    /**
+     * Dynamic fields are inserted as `t-field="<recordVar>.<field>"`, which only
+     * renders when the report iterates a document *record* (a `t-foreach="docs"`
+     * loop). The whole family of Cyllo financial reports (Aged Payable/Receivable,
+     * P&L, Balance Sheet, Trial Balance, Bank/Cash Book, Partner Ledger, Tax) is
+     * model-less: they pass hand-built dicts and never expose `doc`, so a bound
+     * field 500s at render with `KeyError: 'doc'` and the preview reports
+     * "corrupted XML". `_recordBased` (from _detect_record_context on the server)
+     * is false for exactly these reports — refuse the drop with a clear pointer to
+     * Edit Sources / QWeb inheritance instead of silently corrupting the template.
+     *
+     * Only blocks when we positively know the report is NOT record-based
+     * (`=== false`); an undefined flag (detection didn't run) is left permissive.
+     */
+    _canBindDynamicField() {
+        if (this._recordBased === false) {
+            this.notification.add(
+                "This report can't take drag-and-drop fields: it renders custom data with no " +
+                "document record in scope, so a dropped field can't be bound and the preview would " +
+                "fail. Add columns via “Edit Sources” or a module-level QWeb inheritance instead.",
+                { type: "warning", sticky: true }
+            );
+            return false;
+        }
+        return true;
+    }
+
     async openFieldSelectorPopover(targetEl, resModel, filter) {
+        // The report canvas is an <iframe>; `targetEl` (the drop zone) lives in the
+        // iframe document, but the popover service renders in the host-document
+        // overlay and positions via getBoundingClientRect() in host coordinates.
+        // Anchoring to an in-iframe element mis-positions the popover (or prevents
+        // it opening), which is why dropped fields appeared to do nothing. Anchor to
+        // the host-side iframe element so the field selector reliably opens; the
+        // dropped node is still inserted at its dropped position by the caller.
+        const hostAnchor = (this.reportFrameRef && this.reportFrameRef.el) || targetEl;
         return new Promise((resolve) => {
-            this.popover.add(targetEl, StudioFieldSelectorPopover, {
+            this.popover.add(hostAnchor, StudioFieldSelectorPopover, {
                 resModel,
                 update: async (path) => { path = path; },
                 showSearchInput: true,
@@ -3184,6 +3244,7 @@ export class EditReport extends Component {
                     if (srcRes && srcRes.success && srcRes.doc_template) {
                         component._docTemplate = srcRes.doc_template;
                         component._recordVar = srcRes.record_var || 'doc';
+                        component._recordBased = srcRes.record_based;
                     } else {
                         component._docTemplate = component._template;
                         component._recordVar = 'doc';
@@ -3220,7 +3281,6 @@ export class EditReport extends Component {
                     // }
                 }
             }
-            const newInherits = component.buildInheritanceXML(changes);
             const result = await component.rpc('/cyllo_studio/create/inherited_view', {
                 all_arch: newTemplates,
             });
@@ -3293,7 +3353,7 @@ export class EditReport extends Component {
                     }
                 }
             } else {
-                alert('Save failed: ' + result.error);
+                alert('Save failed: ' + ((result && result.error) || 'Unknown error'));
             }
         } finally {
             component.state.isSaving = false;
@@ -4651,7 +4711,7 @@ export class EditReport extends Component {
                             <div class="col-8 text-start cy-footer-text-content">
                                 <t t-if="${showF ? 'True' : 'False'}">
                                     ${this.state.hasCustomFooter
-                    ? `<span>${this.state.companyReportFooterText}</span>`
+                    ? `<span>${escapeHtml(this.state.companyReportFooterText)}</span>`
                     : '<span t-field="res_company.report_footer"/>'}
                                 </t>
                                 <t t-if="${showF && showD ? 'True' : 'False'}"><span> | </span></t>

@@ -123,7 +123,7 @@ export class CylloKanbanController extends KanbanController {
         config: modelConfig,
         state: this.props.state?.modelState,
         limit: archInfo.limit || limit || 40,
-        groupsLimit: Number.MAX_SAFE_INTEGER, // no limit
+        groupsLimit: Number.MAX_SAFE_INTEGER,
         countLimit: archInfo.countLimit,
         defaultGroupBy,
         defaultOrderBy: archInfo.defaultOrder,

@@ -27,6 +27,7 @@ import re
 import werkzeug
 
 from lxml import etree
+from markupsafe import escape
 from PIL import Image
 
 from collections import OrderedDict
@@ -192,7 +193,6 @@ class IrActionsReport(models.Model):
                     return view_obj._render_template(template, values).encode()
             raise
 
-
     def _render_qweb_html(self, report_ref, docids, data=None):
         """Render QWeb report to HTML."""
         if not data:
@@ -285,7 +285,8 @@ class IrActionsReport(models.Model):
             additional_context = {'debug': False, 'report_type': 'pdf'}
 
             html = \
-            self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[0]
+                self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[
+                    0]
 
             bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(
                 **additional_context)._prepare_html(html, report_model=report_sudo.model)
@@ -524,9 +525,11 @@ class IrActionsReport(models.Model):
     def get_values(self):
         """Return metadata of available reports."""
         reports = self.search([])
-        for test in reports:
-            qweb_view = self.env['ir.ui.view'].search([('xml_id', '=', test.report_name)])
-        return [{'id': rec.id, 'name': rec.name, 'model_id': rec.model_id, 'model': rec.model,
+        # NB: return ``model_id`` as an int id — a Many2one recordset is not
+        # JSON-serializable and broke this method over jsonrpc. The previous
+        # ``for test in reports`` loop searched a non-stored field, overwrote
+        # its result each iteration and used it nowhere, so it was removed.
+        return [{'id': rec.id, 'name': rec.name, 'model_id': rec.model_id.id, 'model': rec.model,
                  'report_name': rec.report_name} for rec in reports]
 
     @api.model
@@ -535,8 +538,6 @@ class IrActionsReport(models.Model):
         qweb_code = self.env['ir.ui.view'].search(
             [('name', 'ilike', data['report_name'].split('.')[1]), ('type', '=', 'qweb')])
         return [{'arch': views.arch} for views in qweb_code]
-
-
 
     # studio report testing from here
     def get_custom_report_page(self):
@@ -566,16 +567,24 @@ class IrActionsReport(models.Model):
 
         # Nuclear Cleanup: Remove any inherited views that might be blocking the system
         # (specifically those targeting the Studio editor or common layouts that are broken)
+        # Scope the match to inherited qweb views that actually carry these paths as an
+        # xpath *expression* (expr="..."). The previous domain matched the raw substring
+        # anywhere in arch_db and was unscoped, so any unrelated view whose stored arch
+        # happened to contain the substring would be unlinked (DB-wide data loss).
         broken_xpaths = ['/t/div[1]/div[3]/div/ul/div[1]/div', '/t/div[1]/div[3]/div/ul']
         for xpath in broken_xpaths:
-            bad_views = self.env['ir.ui.view'].search([('arch_db', 'like', xpath)])
+            bad_views = self.env['ir.ui.view'].search([
+                ('type', '=', 'qweb'),
+                ('inherit_id', '!=', False),
+                ('arch_db', 'like', f'expr="{xpath}"'),
+            ])
             if bad_views:
                 bad_views.sudo().unlink()
 
         # Also purge anything inheriting from the Studio editor itself, just in case
         editor_view = self.env.ref('cyllo_studio.edit_report', raise_if_not_found=False)
         if not editor_view:
-             editor_view = self.env['ir.ui.view'].search([('name', '=', 'edit_report')], limit=1)
+            editor_view = self.env['ir.ui.view'].search([('name', '=', 'edit_report')], limit=1)
         if editor_view:
             orphans = self.env['ir.ui.view'].search([('inherit_id', '=', editor_view.id)])
             if orphans:
@@ -604,8 +613,8 @@ class IrActionsReport(models.Model):
                                 <div class="oe_structure"/>
                                 <div class="row">
                                     <div class="col-12">
-                                        <h2 class="text-center mt-4">{name}</h2>
-                                        <p class="text-muted text-center">New Report for {model_rec.name}</p>
+                                        <h2 class="text-center mt-4">{escape(name)}</h2>
+                                        <p class="text-muted text-center">New Report for {escape(model_rec.name)}</p>
                                     </div>
                                 </div>
                                 <div class="oe_structure"/>

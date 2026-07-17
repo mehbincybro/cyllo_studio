@@ -109,16 +109,16 @@ div[name="delay_from"] {
     flex-direction: row !important;
     width: auto !important;
     height: auto !important;
-    min-width: 500px !important; // ← CHANGED
-    min-height: 25px !important; // ← CHANGED
+    min-width: 500px !important;
+    min-height: 25px !important;
     justify-content: center !important;
     align-items: center !important;
     gap: 8px !important;
     /* ← NEW */
     padding: 8px 12px !important;
     opacity: 0.95 !important;
-    background-color: transparent !important; // ✅ CHANGED FROM: white
-    //     border: none !important;                      // ✅ CHANGED FROM: 1px solid #ddd
+    background-color: transparent !important;
+    //     border: none !important;
     border-radius: 4px !important;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3) !important;
 

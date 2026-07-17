@@ -512,7 +512,6 @@ export class FormOverall extends Component {
                 sortableInstances.push(sortableInstance);
             });
 
-            // 6. Initialize Target Sortables
             const targetContainers = [form, ...Array.from(form_tabs), ...Array.from(innerGroup)].filter(Boolean);
             targetContainers.forEach(target => {
                 const sortableInstance = Sortable.create(target, {
@@ -563,26 +562,6 @@ export class FormOverall extends Component {
                             el.remove();
                         }
                     }
-                    // onAdd: async (evt) => {
-                    //     const el = evt.item;
-                    //     const targetEl = evt.to;
-                    //     // Bug fix: evt.nextSibling from SortableJS can be a text node,
-                    //     // a sortable ghost/placeholder, or a non-cy-xpath element.
-                    //     // Walk forward until we find a real element carrying cy-xpath
-                    //     // so that "position=before" lands on the correct backend node.
-                    //     let rawSibling = evt.nextSibling;
-                    //     while (
-                    //         rawSibling &&
-                    //         (rawSibling.nodeType !== 1 ||
-                    //          !rawSibling.getAttribute('cy-xpath'))
-                    //     ) {
-                    //         rawSibling = rawSibling.nextElementSibling || rawSibling.nextSibling;
-                    //     }
-                    //     // Exclude the just-dropped element itself if it ended up as its own sibling
-                    //     const sibling = rawSibling === el ? null : (rawSibling || null);
-                    //     applyGhostAppearance(el, el);
-                    //     await handleDrop(el, targetEl, sibling);
-                    // }
                 });
                 sortableInstances.push(sortableInstance);
             });
@@ -644,9 +623,6 @@ export class FormOverall extends Component {
                             self.action.doAction('studio_reload');
                         }
                     } else if (el.classList.contains('field')) {
-                        // Bug fix: In o_inner_group grid, cy-xpath sits directly on the
-                        // row wrapper (sibling itself), NOT on its first child.
-                        // Priority: sibling[cy-xpath] → sibling.firstElementChild[cy-xpath] → target[cy-xpath]
                         const fieldPath = sibling ? getXpath(sibling) : getXpath(target);
                         self.env.bus.trigger("FIELDS_DETAILS", { cy_path: fieldPath, position, create: true, type: "Properties" });
                     } else {

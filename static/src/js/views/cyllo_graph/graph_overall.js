@@ -54,9 +54,7 @@ import {
 import {
     AccordionItem
 } from "@web/core/dropdown/accordion_item";
-import {
-    _t
-} from "@web/core/l10n/translation";
+
 
 export class GraphOverall extends Component {
     static template = "cyllo_studio.GraphOverall";

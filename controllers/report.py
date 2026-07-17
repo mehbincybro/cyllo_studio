@@ -2,7 +2,7 @@
 import json
 import re
 from lxml import etree
-import base64
+from markupsafe import escape
 
 from odoo.http import Controller, route, request
 from odoo import fields
@@ -252,12 +252,18 @@ class StudioReportController(Controller):
                     except Exception as unexpectedException:
                         # Fallback: just overwrite if merging fails
                         custom_arch.write({'arch_base': xpath_blocks})
-                    new_arch = etree.tostring(root, encoding='unicode',
-                                              pretty_print=True)
-                    custom_arch.write({'arch_base': new_arch})
+                    else:
+                        # Only serialize/write the merged tree when the merge
+                        # succeeded. Previously this ran unconditionally, so it
+                        # clobbered the fallback write and — if the exception
+                        # fired before ``root`` was bound — raised NameError that
+                        # was swallowed by the outer handler.
+                        new_arch = etree.tostring(root, encoding='unicode',
+                                                  pretty_print=True)
+                        custom_arch.write({'arch_base': new_arch})
                 else:
-                    base_view = request.env.ref(key)
-                    if not base_view.exists():
+                    base_view = request.env.ref(key, raise_if_not_found=False)
+                    if not base_view or not base_view.exists():
                         return {'success': False,
                                 'error': f'Base view {key!r} not found'}
                     clean_arch = etree.tostring(arch_el, encoding='unicode',
@@ -486,6 +492,9 @@ class StudioReportController(Controller):
                 else:
                     scan['record_name'] = "Unknown"
 
+            # Loop variable + whether the report is record-based (see _detect_record_context).
+            record_var, record_based = self._detect_record_context(template)
+
             return {
                 'success': True,
                 'report': {
@@ -512,7 +521,8 @@ class StudioReportController(Controller):
                     'total_scans': total_scans,
                     'recent_scans': recent_scans_data,
                 },
-                'record_var': self._get_record_var(template),
+                'record_var': record_var,
+                'record_based': record_based,
             }
         except Exception as e:
             return {'success': False, 'error': str(e)}
@@ -586,8 +596,13 @@ class StudioReportController(Controller):
     def download_report_pdf(self, report_id, record_id, token=None, **kwargs):
         """
         Download the PDF for a specific report and record using a token.
+
+        This is a public route: authorization is enforced by the token itself
+        (existence + ``is_valid()`` below) and by ``require_auth`` (which forces
+        login). It must NOT call ``is_studio_user()`` — the QR code is scanned by
+        public/portal recipients who are not Studio users, and gating the route
+        on that group raised AccessError for exactly its intended audience.
         """
-        self.is_studio_user()
         if not token:
             return request.make_response("Missing token", status=403)
 
@@ -721,13 +736,27 @@ class StudioReportController(Controller):
         except Exception:
             return None, template
 
-    def _get_record_var(self, template):
+    def _detect_record_context(self, template):
         """
-        Detect the record variable name used in the docs foreach loop.
-        Walk the wrapper template's arch to find the first t-foreach="docs" or
-        t-foreach="doc_ids" and return its t-as value.
+        Inspect the wrapper template and report whether it renders a *document
+        record* and, if so, under which loop variable.
+
+        Returns a ``(record_var, record_based)`` tuple:
+          - ``record_var``  – the ``t-as`` name of the ``t-foreach="docs"`` /
+            ``t-foreach="doc_ids"`` loop (e.g. ``"o"``), defaulting to ``"doc"``.
+          - ``record_based`` – ``True`` only when such a loop actually exists.
+
+        ``record_based`` is the discriminator Studio needs: standard reports
+        loop over a recordset, so a dropped field can be bound as
+        ``t-field="<record_var>.<field>"``. Custom-data reports — the whole
+        family of Cyllo financial reports (Aged, P&L, Trial Balance, Ledgers,
+        Tax) that pass hand-built dicts and never expose ``doc`` — have no such
+        loop; binding a field to ``doc`` there raises ``KeyError: 'doc'`` at
+        render. Those reports must be edited via Edit Sources / QWeb inheritance
+        instead, and the editor uses this flag to refuse the drop up front.
         """
         record_var = 'doc'
+        record_based = False
         try:
             wrapper_view = request.env.ref(template, raise_if_not_found=False)
             if wrapper_view and wrapper_view.exists():
@@ -739,9 +768,15 @@ class StudioReportController(Controller):
                         t_as = el.get('t-as', '')
                         if foreach_val in ('docs', 'doc_ids') and t_as:
                             record_var = t_as
+                            record_based = True
                             break
         except Exception:
             pass
+        return record_var, record_based
+
+    def _get_record_var(self, template):
+        """Backward-compatible accessor: the loop variable name only."""
+        record_var, _ = self._detect_record_context(template)
         return record_var
 
     @route('/cyllo_studio/get_report_source', auth='user', csrf=False, type='json')
@@ -765,10 +800,12 @@ class StudioReportController(Controller):
             combined_arch = doc_view._get_combined_arch().xpath('//t[@t-name]')[0]
             arch_xml = etree.tostring(combined_arch, encoding='unicode', pretty_print=True)
 
-            # Detect the record variable name used in the docs foreach loop.
-            record_var = self._get_record_var(template)
+            # Detect the record variable name used in the docs foreach loop,
+            # and whether the report is record-based at all (see _detect_record_context).
+            record_var, record_based = self._detect_record_context(template)
 
-            return {'success': True, 'arch': arch_xml, 'doc_template': doc_template, 'record_var': record_var}
+            return {'success': True, 'arch': arch_xml, 'doc_template': doc_template,
+                    'record_var': record_var, 'record_based': record_based}
         except Exception as e:
             return {'success': False, 'error': str(e)}
 
@@ -978,7 +1015,7 @@ class StudioReportController(Controller):
                                         <h2 class="text-center mt-4">
                                             <span t-esc="doc.name or doc.display_name or ''"/>
                                         </h2>
-                                        <p class="text-muted text-center">New Report for {model_name}</p>
+                                        <p class="text-muted text-center">New Report for {escape(model_name)}</p>
                                     </div>
                                 </div>
                                 <div class="oe_structure"/>
