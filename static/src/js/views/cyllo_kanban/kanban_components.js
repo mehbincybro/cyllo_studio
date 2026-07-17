@@ -143,11 +143,7 @@ export class KanbanComponents extends Component {
                             });
                         }
 
-                        // clone.classList.remove('cy-studio-icon', 'bg-secondary', 'rounded', 'px-2', 'py-1', 'border', 'border-white', 'text-white', 'cy-component-container', 'kanban-component-text');
-                        // clone.removeAttribute('data-tooltip');
-                        // if (clone.classList.contains('cy-studio-field') || clone.classList.contains('cy-studio-button') || clone.classList.contains('cy-studio-text') || clone.classList.contains('cy-studio-div')) {
-                        //     clone.classList.add('border-class', 'd-flex', 'justify-content-around', 'align-items-center');
-                        clone.classList.remove('cy-studio-icon', 'bg-secondary', 'rounded', 'px-2', 'py-1', 'border', 'border-white', 'text-white', 'cy-component-container', 'kanban-component-text');
+                       clone.classList.remove('cy-studio-icon', 'bg-secondary', 'rounded', 'px-2', 'py-1', 'border', 'border-white', 'text-white', 'cy-component-container', 'kanban-component-text');
                        clone.removeAttribute('data-tooltip');
                        if (clone.classList.contains('cy-studio-field')) {
                            clone.classList.add('border-class', 'd-flex', 'justify-content-around', 'align-items-center')
@@ -304,17 +300,13 @@ export class KanbanComponents extends Component {
                     });
                 });
 
-                // return () => {
-                //     sourceSortable.destroy();
-                //     targetSortables.forEach(s => s.destroy());
-                // };
                 return () => {
-    try { sourceSortable.destroy(); } catch(e) {}
-    targetSortables.forEach(s => {
-        try {
-            if (s.el) s.destroy();
-        } catch(e) {}
-    });
+                try { sourceSortable.destroy(); } catch(e) {}
+                    targetSortables.forEach(s => {
+                try {
+                    if (s.el) s.destroy();
+                } catch(e) {}
+                });
 };
             }
         },

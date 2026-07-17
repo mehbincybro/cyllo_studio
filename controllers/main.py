@@ -26,8 +26,7 @@ import xml.etree.ElementTree as ET
 from odoo import http, api, _, tools
 import json
 import ast
-from odoo.exceptions import ValidationError, AccessError, UserError
-from odoo.osv.expression import TERM_OPERATORS_NEGATION
+from odoo.exceptions import ValidationError, AccessError,UserError
 from odoo.http import Controller, route, request, _logger
 from odoo import Command
 from lxml import etree
@@ -215,7 +214,6 @@ class StudioMode(Controller):
         self.is_studio_user()
         if not request.env.user.has_group('cyllo_studio.group_cyllo_studio_admin'):
             raise AccessError(_("You need administrator access to make this structural change."))
-
     def get_studio_view(self, view_id, model, view_type):
         """
                 Retrieves or creates an Odoo Studio view for a given model and view type.

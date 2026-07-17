@@ -315,10 +315,10 @@ export class KanbanOverall extends Component {
              }
 
         this.notification.add({
-        title: _t("Success"),
-        message: "Progressbar deleted.",
-        type: "notification_panel",
-        notificationType: "success",
+            title: _t("Success"),
+            message: "Progressbar deleted.",
+            type: "notification_panel",
+            notificationType: "success",
         });
         } finally {
         this.env.services.ui.unblock();

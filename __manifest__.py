@@ -41,7 +41,6 @@
     'assets': {
     'web_editor.backend_assets_wysiwyg': [
             'cyllo_studio/static/src/js/custom_report/studio_report.js',
-# 'cyllo_studio/static/src/js/custom_report/studio_report.js'
         ],
         'web.assets_backend': [
             'cyllo_studio/static/src/js/report_view.js',
@@ -54,14 +53,6 @@
             ('include', 'web_editor.assets_wysiwyg'),
             ('include', 'cyllo_studio.assets_backend'),
         ],
-        # 'web.assets_backend': [
-        #     'cyllo_studio/static/src/js/report_view.js',
-        #     'cyllo_studio/static/src/xml/report_view.xml',
-        #     'cyllo_studio/static/src/js/systray/systray.css',
-        #     'cyllo_studio/static/src/js/systray/systray_icon.js',
-        #     'cyllo_studio/static/src/js/systray/systray_icon.xml',
-        #     ('include', 'cyllo_studio.assets_backend')
-        # ],
         'cyllo_studio.assets_backend': [
             'cyllo_studio/static/src/lib/medium_editor/medium-editor.min.js',
             'cyllo_studio/static/src/lib/medium_editor/studio-editor-undo-redo-ext.js',
@@ -200,7 +191,6 @@
             'cyllo_studio/static/src/js/view_editor/aside_bar/dialog/*.js',
             'cyllo_studio/static/src/js/view_editor/aside_bar/dialog/*.xml',
             'cyllo_studio/static/src/js/view_editor/aside_bar/dialog/*.css',
-            'cyllo_studio/static/src/js/view_editor/aside_bar/dialog/*.scss',
             'cyllo_studio/static/src/js/views/cyllo_list/*.js',
             'cyllo_studio/static/src/js/views/cyllo_list/*.xml',
             'cyllo_studio/static/src/js/views/cyllo_list/*.scss',
@@ -306,8 +296,8 @@
             'cyllo_studio/static/src/js/preview/*.js',
             'cyllo_studio/static/src/js/preview/*.xml',
 
-            'cyllo_studio/static/src/js/control_panel/UndoRedo/UndoRedo.js',
-            'cyllo_studio/static/src/js/control_panel/UndoRedo/UndoRedo.xml',
+            # 'cyllo_studio/static/src/js/control_panel/UndoRedo/UndoRedo.js',
+            # 'cyllo_studio/static/src/js/control_panel/UndoRedo/UndoRedo.xml',
             'cyllo_studio/static/src/js/utils/undo_redo_utils.js',
             'cyllo_studio/static/src/js/utils/display_notification.js',
             'cyllo_studio/static/src/js/utils/client_action.js',

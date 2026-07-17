@@ -3,7 +3,6 @@
 	<t t-name="cyllo_studio.CylloActivityViewHeader">
 		<thead>
 			<tr>
-				<th></th>
                 <th t-foreach="activeColumns" t-as="type" t-key="type.id"
                     class="o_activity_type_cell p-3"
                     t-attf-class="{{ activeFilter.activityTypeId === type.id ? 'o_activity_filter_' + activeFilter.progressValue.active : '' }}"

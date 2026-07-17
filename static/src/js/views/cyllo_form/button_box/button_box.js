@@ -235,6 +235,6 @@ ButtonBox.props = {
     striped: {
         type: Boolean,
         optional: true
-    }, // Add the `striped` prop
+    },
 }
 ButtonBox.template = 'cyllo_studio.ButtonBox'

@@ -239,7 +239,10 @@ export const QrMixin = {
                 baseUrlStr = `'${safeUrl}'`;
             }
 
-            const s = `${baseUrlStr} `;
+            // Include the configured portal path + record id so the QR points at
+            // the record's portal page instead of the site root. (Previously `path`
+            // was computed and then never used.)
+            const s = `${baseUrlStr} + '${path}' + str(${obj}.id)`;
             if (config.tokenType === 'auto') return s + ` + '?' + ${obj}._get_share_url()`;
             return s;
         }
@@ -298,16 +301,13 @@ export const QrMixin = {
 
         placeholderEl.querySelector('.qr-delete').onclick = (e) => {
             e.stopPropagation();
-            placeholderEl.querySelector('.qr-delete').onclick = (e) => {
-                e.stopPropagation();
-                this.env.services.dialog.add(ConfirmationDialog, {
-                    title: "Delete QR code",
-                    body: "Are you sure you want to delete this QR code?",
-                    confirmLabel: "Delete",
-                    confirm: () => placeholderEl.remove(),
-                    cancel: () => {},
-                });
-            };
+            this.env.services.dialog.add(ConfirmationDialog, {
+                title: "Delete QR code",
+                body: "Are you sure you want to delete this QR code?",
+                confirmLabel: "Delete",
+                confirm: () => placeholderEl.remove(),
+                cancel: () => {},
+            });
         };
 
         if (mode === 'insert') {

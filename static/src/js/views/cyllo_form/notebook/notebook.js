@@ -68,8 +68,6 @@ export class CylloNotebook extends Notebook {
     Sortable.create(page, {
         animation: 150,
         ghostClass: 'sortable-ghost',
-
-        // Prevent the "add page" element from being dragged
         filter: '.add-page',
         preventOnFilter: true,
 
@@ -193,7 +191,6 @@ export class CylloNotebook extends Notebook {
                     }
 
             if (
-//                !validateEdit(this.state, notification, "isEditingButton", "Button ") ||
                 !validateEdit(this.state, notification, "isEditingSmartButton", "Smart Button") ||
                 !validateEdit(this.state, notification, "isStudioEdit", "Editing")
             ) {

@@ -85,7 +85,7 @@ export class PageProperties extends Component {
     }
     const records = await this.orm.searchRead(
       "res.groups",
-      [["full_name", "in", xmlIds.map(x => x.replace(/^[\w]+\./, ""))]], // fallback: search by name fragment
+      [["full_name", "in", xmlIds.map(x => x.replace(/^[\w]+\./, ""))]],
       ["id"],
       { limit: 0 }
     );
@@ -162,7 +162,6 @@ onDomainRadioClick = ({ target }) => {
 
   async updatePage() {
     const view_id = this.props.viewDetails.viewId;
-    //@error invisible domain with not existing field
    const response = await this.rpc("cyllo_studio/update/page", {
       method: "update_page",
       model: this.props.viewDetails.model,

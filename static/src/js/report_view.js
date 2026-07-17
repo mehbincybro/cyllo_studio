@@ -19,9 +19,7 @@
  */
 import { registry } from '@web/core/registry';
 import { Layout } from "@web/search/layout";
-import { useModel } from "@web/model/model";
 import { SearchBar } from "@web/search/search_bar/search_bar";
-import { useSearchBarToggler } from "@web/search/search_bar/search_bar_toggler";
 import { CogMenu } from "@web/search/cog_menu/cog_menu";
 import { useService } from "@web/core/utils/hooks";
 import { useState } from "@odoo/owl";

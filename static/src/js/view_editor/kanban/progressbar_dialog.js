@@ -17,7 +17,7 @@
  *   - Odoo core services (rpc, action, effect/notification)
  */
 import { Dialog } from "@web/core/dialog/dialog";
-const { Component, onWillStart, useState, useEffect, onMounted, onWillUnmount, useRef } = owl;
+const { Component, useState, onMounted, onWillUnmount } = owl;
 import {useService} from "@web/core/utils/hooks";
 import { sortBy } from "@web/core/utils/arrays";
 import {_t} from "@web/core/l10n/translation";

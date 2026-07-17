@@ -38,9 +38,6 @@ import {
 	CylloStudioDropdown
 } from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";
 import {
-	_t
-} from "@web/core/l10n/translation";
-import {
 	sortBy
 } from "@web/core/utils/arrays";
 import {

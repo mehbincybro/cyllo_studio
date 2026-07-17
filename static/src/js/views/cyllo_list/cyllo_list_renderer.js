@@ -138,16 +138,15 @@ export class CylloListRenderer extends listView.Renderer {
          if (!isDraggableTh(source)) return;
 
          const startX = ev.clientX;
-         const startY = ev.clientY;          // FIX: store Y for 2-D threshold
+         const startY = ev.clientY;
          let started = false;
          let ghost = null;
          let dropTarget = null;
-         let dropPosition = 'before';        // FIX: replaces dropAfterLast bool
+         let dropPosition = 'before';
 
          // Column index of the source th — computed once, reused in all helpers
          const srcColIdx = [...treeEl.querySelectorAll('th')].indexOf(source);
 
-         // FIX: dim th + every td in the source column while dragging
          const setSourceDimmed = (dim) => {
            source.classList.toggle('cy-col-dragging', dim);
            if (!table || srcColIdx < 0) return;
@@ -159,7 +158,6 @@ export class CylloListRenderer extends listView.Renderer {
 
          const onMove = (e) => {
            if (!started) {
-             // FIX: 2-D distance threshold — avoids accidental drags on vertical jitter
              if (Math.hypot(e.clientX - startX, e.clientY - startY) < 5) return;
              started = true;
              const r = source.getBoundingClientRect();
@@ -194,7 +192,6 @@ export class CylloListRenderer extends listView.Renderer {
            ghost.style.setProperty('left', `${e.clientX}px`, 'important');
            ghost.style.setProperty('top',  `${e.clientY}px`, 'important');
 
-           // FIX: hide ghost before elementFromPoint so it never intercepts the hit-test
            ghost.style.visibility = 'hidden';
            const under = document.elementFromPoint(e.clientX, e.clientY);
            ghost.style.visibility = '';
@@ -233,7 +230,7 @@ export class CylloListRenderer extends listView.Renderer {
            document.removeEventListener('pointermove', onMove);
            document.removeEventListener('pointerup', onUp);
            if (ghost) ghost.remove();
-           setSourceDimmed(false);          // FIX: clears both th and td dimming
+           setSourceDimmed(false);
            clearIndicator();
            if (!started || !dropTarget) return;
 
@@ -245,7 +242,6 @@ export class CylloListRenderer extends listView.Renderer {
              self.env.bus.trigger("CLEAR-MENU");
            }
 
-           // FIX: block UI during RPC so user can't trigger a second move
            self.env.services.ui.block();
            try {
              const response = await self.rpc("/cyllo_studio/move/tree", {
@@ -258,7 +254,7 @@ export class CylloListRenderer extends listView.Renderer {
                args: [],
                kwargs: {
                  path:      siblingField,
-                 position:  dropPosition,   // FIX: no more redundant view_id variable
+                 position:  dropPosition,
                  fieldPath,
                  viewType:  self.env.config.viewType,
                  view_id:   self.env.config.viewId,
@@ -338,33 +334,10 @@ export class CylloListRenderer extends listView.Renderer {
    * @returns {Array} - Array of active/visible columns.
    */
     getActiveColumns(list) {
-//        const invisible_session = sessionStorage.getItem('invisible');
-//        return this.allColumns.filter((col) => {
-//            if (!invisible_session) {
-//                if (list.isGrouped && col.widget === "handle") {
-//                    return false; // no handle column if the list is grouped
-//                }
-//                if (col.optional === 'hide') {
-//                    return false
-//                }
-//                if (col.optional && !this.optionalActiveFields[col.name]) {
-//                    return false;
-//                }
-//                if (this.evalColumnInvisible(col.column_invisible)) {
-//                    return false;
-//                }
-//            }
-//            return true;
-//        });
-//    }
     return this.allColumns.filter((col) => {
         if (list.isGrouped && col.widget === "handle") {
             return false; // no handle column if the list is grouped
         }
-
-        // Don't filter out optional or invisible columns
-        // Let them render with the cy-studio-striped class
-
         return true;
     });
 }
