@@ -13,7 +13,7 @@ import {
     MenuConfigurationDialog
 } from "@cyllo_studio/js/studio_menu_sidebar/dialog/dialog";
 
-import { MenuSideBar } from "@cyllo_base/js/menu_sidebar";
+import { MenuSideBar } from "@cyllo_studio/js/studio_menu_sidebar/menu_sidebar";
 import { FirstPage } from '@cyllo_studio/js/new_app/new_app_templates';
 
 /**

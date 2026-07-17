@@ -21,3 +21,7 @@
 #############################################################################
 from . import controllers
 from . import models
+
+
+def post_init_hook(env):
+    env['ir.model.fields']._load_all_constraints()

@@ -5,7 +5,7 @@
                  t-attf-class="#{!isAdmin ? 'disabled-studio' : ''}">
                 <div class="new_icon">
                     <a class="toggle-icon o_icon" type="button" t-on-click="_onClick" tabindex="0" aria-expanded="false">
-                        <i id="cyllo_studio" class="ri-tools-fill cy-icons cy-stray-icon-sp" role="img" aria-label="Studio"/>
+                        <i id="cyllo_studio" class="ri-tools-fill cy-icons px-2" role="img" data-tooltip="Go to Studio"/>
                     </a>
                 </div>
             </div>
