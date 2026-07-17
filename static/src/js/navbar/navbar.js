@@ -520,15 +520,9 @@ export class CylloNavBar extends NavBar {
                 currentUrl.hash = hashParams.toString();
             }
         }
-        const studio = currentUrl.searchParams.get("studio");
-        if (studio === "1") {
-            currentUrl.searchParams.delete("studio");
-            history.replaceState(null, "", currentUrl.toString());
-        }
-        currentUrl.searchParams.set("studio", "");
-        window.location.href = currentUrl.toString();
+        currentUrl.searchParams.delete("studio");
         RemoveSessions()
-        setTimeout(() => window.location.reload(), 500);
+        window.location.href = currentUrl.toString();
     }
     async undoChange() {
         const storage = JSON.parse(sessionStorage.getItem('UndoRedo') || '[]');

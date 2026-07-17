@@ -39,7 +39,7 @@ class View(models.Model):
     _inherit = 'ir.ui.view'
 
     is_studio = fields.Boolean(string='Studio Field', default=False,
-                               help="View created through Studio", ondelete='cascade')
+                               help="View created through Studio")
 
     def _postprocess_access_rights(self, tree):
         """

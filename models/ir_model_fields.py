@@ -59,20 +59,6 @@ class IrModel(models.Model):
             'is_studio': True
         })
 
-    def _auto_init(self):
-        """Called after table creation - inject constraints here"""
-        res = super(IrModel, self)._auto_init()
-
-        # Only load constraints after module is installed
-        # Skip during module upgrade/installation
-        if not self._context.get('module'):
-            try:
-                self._load_all_constraints()
-            except Exception as e:
-                _logger.warning(f"Could not load constraints during init: {e}")
-
-        return res
-
     @api.model
     def _load_all_constraints(self):
         """Load all studio constraints into their models"""

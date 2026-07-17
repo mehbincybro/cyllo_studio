@@ -32,9 +32,6 @@ import {
     AsideBar
 } from "@cyllo_studio/js/view_editor/aside_bar/aside_bar";
 import {
-    MenuSideBar
-} from "@cyllo_base/js/menu_sidebar";
-import {
     StudioMenuSideBar
 } from "@cyllo_studio/js/studio_menu_sidebar/studio_menu_sidebar";
 import {

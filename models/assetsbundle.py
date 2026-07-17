@@ -27,8 +27,8 @@ from odoo.http import request
 from odoo.tools.constants import STYLE_EXTENSIONS, SCRIPT_EXTENSIONS
 
 rx_css_import = re.compile("(@import[^;{]+;?)", re.M)
-rx_preprocess_imports = re.compile("""(@import\s?['"]([^'"]+)['"](;?))""")
-rx_css_split = re.compile("\/\*\! ([a-f0-9-]+) \*\/")
+rx_preprocess_imports = re.compile(r"""(@import\s?['"]([^'"]+)['"](;?))""")
+rx_css_split = re.compile(r"\/\*\! ([a-f0-9-]+) \*\/")
 
 TRACKED_BUNDLES = ['web.assets_web']
 

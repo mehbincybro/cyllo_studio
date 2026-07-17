@@ -27,6 +27,7 @@
     'maintainer': "Cyllo",
     'website': "https://www.cyllo.com",
     'depends': ['web', 'web_hierarchy', 'mail', 'cyllo_base', 'cyllo_web'],
+    'post_init_hook': 'post_init_hook',
     'data': [
         'security/ir.model.access.csv',
         'security/studio_group.xml',
@@ -105,6 +106,9 @@
             'cyllo_studio/static/src/js/studio_menu_sidebar/dialog/dialog.js',
             'cyllo_studio/static/src/js/studio_menu_sidebar/dialog/dialog.xml',
             'cyllo_studio/static/src/js/studio_menu_sidebar/dialog/dialog.scss',
+            'cyllo_studio/static/src/js/studio_menu_sidebar/menu_sidebar.css',
+            'cyllo_studio/static/src/js/studio_menu_sidebar/menu_sidebar.js',
+            'cyllo_studio/static/src/js/studio_menu_sidebar/menu_sidebar.xml',
             'cyllo_studio/static/src/js/studio_menu_sidebar/studio_menu_sidebar.css',
             'cyllo_studio/static/src/js/studio_menu_sidebar/studio_menu_sidebar.js',
             'cyllo_studio/static/src/js/studio_menu_sidebar/studio_menu_sidebar.xml',

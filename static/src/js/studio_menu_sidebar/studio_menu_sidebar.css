@@ -29,7 +29,8 @@
 
     .cy-new-app-icon {
         background: #363827;
-        width: 40px;
+        width: 45px;
+        height: 45px;
     }
 
     .cy-new-app-icon:hover {
@@ -38,15 +39,14 @@
 }
 
 .cy-new-app-icon {
-    font-size: 34px;
+    font-size: 36px;
     line-height: 1;
-    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     box-shadow: none !important;
     background: transparent;
-    border-radius: 5px;
+    border-radius: 8px;
 }
 
 /* parent dialog */

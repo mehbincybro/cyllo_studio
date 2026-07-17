@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <t t-name="cyllo_studio.StudioMenuSideBar" t-inherit="cyllo_base.MenuSideBarNew" owl="1">
+    <t t-name="cyllo_studio.StudioMenuSideBar" t-inherit="cyllo_studio.MenuSideBarNew" owl="1">
         <xpath expr="//div[hasclass('cy-left-sidebar')]/ul/t[@t-foreach='this.state.apps']/li" position="attributes">
             <attribute name="class" add="cy-menuLi" separator=" "/>
             <attribute name="class" add="cy-ParentMenuDrag" separator=" "/>
@@ -84,12 +84,12 @@
                 </li>
             </t>
         </xpath>
-        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]/t[@t-foreach='this.state.menus']/t[@t-if='dropCheck(menu)']/li/t[@t-call='cyllo_base.Accordian']" position="inside">
+        <xpath expr="//div[hasclass('cy-submenu-box')]/ul[hasclass('cy-submenu-lists')]/t[@t-foreach='this.state.menus']/t[@t-if='dropCheck(menu)']/li/t[@t-call='cyllo_studio.Accordian']" position="inside">
             <t t-set="ParentMenu" t-value="menu"/>
             <t t-set="isParent" t-value="true"/>
         </xpath>
     </t>
-    <t t-inherit="cyllo_base.Accordian" t-inherit-mode="extension" owl="1">
+    <t t-inherit="cyllo_studio.Accordian" t-inherit-mode="extension" owl="1">
         <xpath expr="//a[hasclass('cy-accordian')]" position="replace">
             <div class="menu-draggable" t-att-menu_id="menu.id">
                 <div class="sidebar_container_list" t-on-contextmenu="studioOpenContextMenu" t-attf-style="background-image: {{ParentMenu and (ParentMenu.active and 'none' or 'repeating-linear-gradient(45deg, #FFFFFF10, #FFFFFF10 5px, #00000010 5px, #00000010 10px)') or 'none'}};">
@@ -126,7 +126,7 @@
         <xpath expr="//ul[@t-on-contextmenu='openContextMenu']" position="attributes">
             <attribute name="class" add="children_content" separator=" "/>
         </xpath>
-        <xpath expr="//ul/t[@t-if='menuChildren']/t[@t-foreach='menuChildren']/t[@t-if='ch_menu.childrenTree &amp;&amp; ch_menu.childrenTree.length']/t[@t-call='cyllo_base.Accordian']" position="inside">
+        <xpath expr="//ul/t[@t-if='menuChildren']/t[@t-foreach='menuChildren']/t[@t-if='ch_menu.childrenTree &amp;&amp; ch_menu.childrenTree.length']/t[@t-call='cyllo_studio.Accordian']" position="inside">
             <t t-set="ParentMenu" t-value="ch_menu"/>
             <t t-set="isParent" t-value="false"/>
         </xpath>

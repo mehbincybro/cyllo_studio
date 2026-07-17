@@ -58,12 +58,6 @@
     height: 100%;
     border-radius: 8px;
     flex: 1;
-
-    /* .menuListFixed .cy_active_main_menu .cy-image,
-    .menuListFixed .cy_active_main_menu a>i,
-    .menuListFixed .cy_active_main_menu .cy-svg-container {
-        box-shadow: none !important;
-    } */
 }
 
 .cy-studio .cy-left-sidebar {
@@ -439,7 +433,7 @@ body.cy-show-optional .cy-studio-optional {
 }
 
 /* ribbon-dialog checkbox */
-*Overall Component*/ .checkbox-can-create .can_create_label {
+.checkbox-can-create .can_create_label {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;

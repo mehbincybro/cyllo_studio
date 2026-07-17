@@ -8,13 +8,13 @@
                     <div class="col">
                         <ul class="navbar-nav flex-row flex-wrap gap-4">
                             <li class="nav-item" t-if="props.canCreate and !(isNew or displayButtons)" t-on-click="handleReportCreate" accesskey="C">
-                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-add-line"/>New</a>
+                                <a class="btn btn-outline-secondary nav-link cy-navitem-list border-0" href="#"><i class="ri-add-line"/>New</a>
                             </li>
                             <li class="nav-item" t-if="props.canEdit and (isNew or displayButtons)" t-on-click="props.saveButtonClicked">
-                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-save-line"/>Save</a>
+                                <a class="btn btn-outline-secondary nav-link cy-navitem-list border-0" href="#"><i class="ri-save-line"/>Save</a>
                             </li>
                             <li class="nav-item" t-if="props.canEdit and (isNew or displayButtons)" t-on-click="props.discard">
-                                <a class="nav-link cy-navitem-list" href="#"><i class="ri-eraser-line"/>Discard</a>
+                                <a class="btn btn-outline-secondary nav-link cy-navitem-list border-0" href="#"><i class="ri-eraser-line"/>Discard</a>
                             </li>
                         </ul>
                     </div>
