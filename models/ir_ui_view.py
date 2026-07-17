@@ -54,7 +54,7 @@ class View(models.Model):
         studio = request.session.studio
         is_not_studio_debug = '1' not in studio if studio else True
         # Check if the user is not part of the 'base.group_erp_manager' group
-        is_not_erp_manager = not request.env.user.has_group('base.group_erp_manager')
+        is_not_erp_manager = not request.env.user.has_group('cyllo_studio.group_cyllo_studio_user')
 
         if is_not_studio_debug or is_not_erp_manager:
             return super()._postprocess_access_rights(tree)
@@ -338,7 +338,7 @@ class Model(models.AbstractModel):
         result = super().get_view(view_id, view_type, **options)
         studio = request.session.studio
         is_not_studio_debug = '1' not in studio if studio else True
-        is_not_erp_manager = not request.env.user.has_group('base.group_erp_manager')
+        is_not_erp_manager = not request.env.user.has_group('cyllo_studio.group_cyllo_studio_user')
 
         if is_not_studio_debug or is_not_erp_manager:
             return result
@@ -673,7 +673,7 @@ class Model(models.AbstractModel):
         if template_name in cache:
             return cache[template_name]
 
-        view = self.env.ref(template_name)
+        view = self.env.ref(template_name, raise_if_not_found=False)
         if not view:
             return f"<!-- missing template: {template_name} -->"
 
@@ -692,12 +692,35 @@ class Model(models.AbstractModel):
                 if 'cy-template' not in node.attrib:
                     node.set("cy-template", template_name)
 
+        # Layout/wrapper templates that must NOT be expanded inline.
+        # Expanding these causes duplication: their content is inserted BEFORE the
+        # t-call node's original children (e.g. <div class="page">) without removing
+        # those children — so the doc template body appears twice in the editor.
+        # The studio editor injects its own header/footer separately (onEditIframeLoad),
+        # so we only need to expand the actual report document sub-templates.
+        _SKIP_EXPANSION = {
+            'web.html_container',
+            'web.external_layout',
+            'web.external_layout_standard',
+            'web.external_layout_boxed',
+            'web.external_layout_clean',
+            'web.external_layout_background',
+            'web.external_layout_bold',
+            'web.external_layout_striped',
+            'web.basic_layout',
+            'web.internal_layout',
+            'web.address_layout',
+        }
+
         # Find all <t t-call="..."> nodes
         for node in list(root.xpath(".//t[@t-call]")):
             called_name = node.get("t-call")
-            # Skip global layout or report wrappers
-            if not called_name or called_name in ["web.html_container",
-                                                  "{{company.external_report_layout_id.sudo().key}}"]:
+            # Skip global layout/wrapper templates and dynamic layout expressions
+            if not called_name:
+                continue
+            if called_name in _SKIP_EXPANSION:
+                continue
+            if called_name.startswith('{{'):
                 continue
 
             expanded = self._expand_template_for_iframe(

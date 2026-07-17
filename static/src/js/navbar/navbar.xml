@@ -48,7 +48,7 @@
 							</button>
 							<div class="cy-miscellaneous_card" t-att-class="state.configOpen ? 'show' : ''">
 								<div class="menubar">
-									<div class="menu-item" t-on-click="AccessRightsClick">
+									<div class="menu-item" t-if="state.isSystemAdmin" t-on-click="AccessRightsClick">
 										<div class="icon">
 											<i class="ri-user-settings-line"></i>
 										</div>
@@ -76,7 +76,7 @@
 											<i class="ri-arrow-right-s-line"></i>
 										</span>
 									</div>
-									<div class="menu-item" t-on-click="RecordRuleClick">
+									<div class="menu-item" t-if="state.isSystemAdmin" t-on-click="RecordRuleClick">
 										<div class="icon">
 											<i class="ri-file-lock-line"></i>
 										</div>

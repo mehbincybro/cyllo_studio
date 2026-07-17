@@ -19,7 +19,6 @@ import {FormRenderer} from "@web/views/form/form_renderer";
 const {onMounted} = owl;
 import {StatusBar} from "@cyllo_studio/js/views/cyllo_form/status_bar/statusbar";
 import {ChatterComponent} from "@cyllo_studio/js/views/cyllo_form/chatter/chatter_component";
-import {StatusBarButtons} from '@web/views/form/status_bar_buttons/status_bar_buttons';
 import {CylloStatusBarButtons} from "@cyllo_base/js/status_bar_buttons";
 import {CylloInnerGroup} from "@cyllo_studio/js/views/cyllo_form/form_group/form_group";
 import {CylloField} from "@cyllo_studio/js/view_editor/fields/field";

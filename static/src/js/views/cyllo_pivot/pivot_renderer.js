@@ -20,10 +20,7 @@
  * components (e.g., editors, sidebars).
  */
 import {
-    useRef,
-    onPatched,
     onMounted,
-    useState
 } from "@odoo/owl";
 import {
     PivotRenderer

@@ -1,16 +1,27 @@
 # -*- coding: utf-8 -*-
 import base64
-import fitz
 from odoo import http
 from odoo.http import request
 
 
 class ReportThumbnailController(http.Controller):
+
+    def _check_studio_user(self):
+        """Ensure the caller is a Cyllo Studio user, consistent with the other
+        studio controllers. These endpoints write report_thumbnail (sudo) and
+        can trigger a sudo PDF render, so they must not be open to any
+        authenticated user."""
+        if not request.env.user.has_group('cyllo_studio.group_cyllo_studio_user'):
+            from odoo.exceptions import AccessError
+            from odoo import _
+            raise AccessError(_("You don't have the access to this request."))
+
     @http.route('/cyllo_studio/save_report_thumbnail', type='json', auth='user')
     def save_report_thumbnail(self, report_id=None, report_name=None, image_base64=None, **kwargs):
         """
         Save a base64 image as the thumbnail for a specific report.
         """
+        self._check_studio_user()
         if not image_base64:
             return {'success': False, 'error': 'Missing image data'}
 
@@ -41,8 +52,17 @@ class ReportThumbnailController(http.Controller):
         Generate a thumbnail by rendering the report PDF and converting the first page to an image.
         If record_id is not given, use any existing record of the report's model (lazy kanban call).
         """
+        self._check_studio_user()
         if not report_id:
             return {'success': False, 'error': 'Missing report_id'}
+
+        # Import PyMuPDF lazily so a missing optional dependency does not break
+        # module import (which would also take down save_report_thumbnail, which
+        # does not need fitz).
+        try:
+            import fitz
+        except ImportError:
+            return {'success': False, 'error': 'PyMuPDF (fitz) is not installed'}
 
         Report = request.env['ir.actions.report'].sudo()
         report = Report.browse(int(report_id)).exists()

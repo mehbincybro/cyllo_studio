@@ -12,7 +12,7 @@ import {
 patch(Systray.prototype, {
     setup() {
         super.setup();
-        this.isAdmin = this.env.services.user.hasGroup("base.group_system");
+        this.isAdmin = this.env.services.user.hasGroup("cyllo_studio.group_cyllo_studio_user");
     },
     async _onClick() {
         sessionStorage.setItem('UndoRedo', JSON.stringify([]));

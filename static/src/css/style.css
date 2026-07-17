@@ -439,7 +439,8 @@ body.cy-show-optional .cy-studio-optional {
 }
 
 /* ribbon-dialog checkbox */
-*Overall Component*/ .checkbox-can-create .can_create_label {
+/*Overall Component*/
+.checkbox-can-create .can_create_label {
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
@@ -739,11 +740,4 @@ div[data-drag="1"]:empty {
     pointer-events: none;
     transform: scale(.98);
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.15));
-}
-
-
-/* SortableJS Drag Placeholder */
-.sortable-ghost {
-    width: 100% !important;
-    min-width: 100% !important;
 }

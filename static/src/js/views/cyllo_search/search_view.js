@@ -29,7 +29,6 @@ import { SearchBarMenu } from "@web/search/search_bar_menu/search_bar_menu";
 import { onMounted, useRef, useState } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
-import { DomainSelectorDialog } from "@web/core/domain_selector_dialog/domain_selector_dialog";
 import { FilterDomainSelectorDialog } from "./dialog/filter_domain_selector_dialog";
 import { GroupByDialog } from "./dialog/groupby_dialog";
 import { SearchFieldDialog } from "./dialog/search_field_dialog";

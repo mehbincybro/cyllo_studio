@@ -27,6 +27,7 @@ import re
 import werkzeug
 
 from lxml import etree
+from markupsafe import escape
 from PIL import Image
 
 from collections import OrderedDict
@@ -94,6 +95,28 @@ class IrActionsReport(models.Model):
                 raise ValueError("Fetching report %r: type %s, expected ir.actions.report" % (report_ref, report._name))
             return report.sudo()
         raise ValueError("Fetching report %r: report not found" % report_ref)
+
+    def _get_studio_preview_report_block(self, report):
+        """Return a structured preview block when Studio should skip rendering.
+
+        Currently this is limited to the pricelist report so other previews keep
+        their existing flow.
+        """
+        pricelist_report_names = {
+            'product.report_pricelist',
+            'product.report_pricelist_page',
+        }
+        if report.report_name not in pricelist_report_names and report.model != 'product.pricelist':
+            return None
+        if self.env.user.has_group('product.group_product_pricelist'):
+            return None
+        return {
+            'success': False,
+            'error': 'pricelist_disabled',
+            'message': _(
+                'Please enable Pricelists in Settings > Sales > Pricing before previewing this report.'
+            ),
+        }
 
     # Protected layout template keys — Custom_ XPath overrides on these break
     # the t-if/t-else sibling chain and cause QWebException at compile time.
@@ -170,7 +193,6 @@ class IrActionsReport(models.Model):
                     return view_obj._render_template(template, values).encode()
             raise
 
-
     def _render_qweb_html(self, report_ref, docids, data=None):
         """Render QWeb report to HTML."""
         if not data:
@@ -192,7 +214,10 @@ class IrActionsReport(models.Model):
         """
         if self.env.context.get('cyllo_studio_pdf') and request and request.httprequest:
             return request.httprequest.host_url.rstrip('/')
-        return super()._get_report_url(layout=layout)
+        return self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+        # if self.env.context.get('cyllo_studio_pdf') and request and request.httprequest:
+        #     return request.httprequest.host_url.rstrip('/')
+        # return super()._get_report_url(layout=layout)
 
     def _render_qweb_pdf_prepare_streams(self, report_ref, data, res_ids=None):
         """Prepare and split PDF streams for the given report."""
@@ -260,7 +285,8 @@ class IrActionsReport(models.Model):
             additional_context = {'debug': False, 'report_type': 'pdf'}
 
             html = \
-            self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[0]
+                self.with_context(**additional_context)._render_qweb_html(report_ref, all_res_ids_wo_stream, data=data)[
+                    0]
 
             bodies, html_ids, header, footer, specific_paperformat_args = self.with_context(
                 **additional_context)._prepare_html(html, report_model=report_sudo.model)
@@ -375,56 +401,115 @@ class IrActionsReport(models.Model):
         if report_model is not None:
             is_studio_preview = not data or set(data.keys()) <= {'report_type', 'context', 'discard_logo_check'}
             if is_studio_preview:
-                # Use a wider date range and more states to ensure data shows up
-                start_date = '2000-01-01'
-                end_date = '2100-01-01'
+                from datetime import date
+                from dateutil.relativedelta import relativedelta
+                today = date.today()
+                start_of_month = today.replace(day=1)
+                end_of_month = (start_of_month + relativedelta(months=1)) - relativedelta(days=1)
+                start_date_str = start_of_month.strftime('%Y-%m-%d')
+                end_date_str = end_of_month.strftime('%Y-%m-%d')
+                today_str = today.strftime('%Y-%m-%d')
 
-                # Defaults for Partner Ledger
-                if 'partner_ledger' in report.report_name:
+                company_ids = self.env.company.ids
+
+                # Defaults for Aged Receivable
+                if 'aged_receivable' in report.report_name:
                     data.update({
-                        'partner_id': docids or [],
-                        'startDate': start_date,
-                        'endDate': end_date,
-                        'parent_state': ['posted', 'draft'],
-                        'account_type': ['Receivable', 'Payable'],
+                        'partners': [],
+                        'date': today_str,
+                        'company_ids': company_ids,
+                        'account_type': 'asset_receivable',
                         'report_name': report.name,
                     })
-                    print("DEBUG: STAGE 2 - Injected Partner Ledger defaults. docids len=%s" % len(docids))
-                # Defaults for PNL / Balance Sheet
-                elif 'profit_n_loss' in report.report_name or 'balance_sheet' in report.report_name:
+                # Defaults for Aged Payable
+                elif 'aged_payable' in report.report_name:
+                    data.update({
+                        'partners': [],
+                        'date': today_str,
+                        'company_ids': company_ids,
+                        'account_type': 'liability_payable',
+                        'report_name': report.name,
+                    })
+                # Defaults for Partner Ledger
+                elif 'partner_ledger' in report.report_name:
+                    data.update({
+                        'partner_id': docids or [],
+                        'startDate': start_date_str,
+                        'endDate': end_date_str,
+                        'parent_state': None,
+                        'account_type': [],
+                        'report_name': report.name,
+                        'company_id': company_ids,
+                    })
+                # Defaults for Bank Book
+                elif 'report_bank_book' in report.report_name:
+                    data.update({
+                        'partners': [],
+                        'startDate': start_date_str,
+                        'endDate': end_date_str,
+                        'accounts': [],
+                        'parent_state': ['posted'],
+                        'account_type': 'bank',
+                        'report_name': report.name,
+                    })
+                # Defaults for Cash Book
+                elif 'report_cash_book' in report.report_name:
+                    data.update({
+                        'partners': [],
+                        'startDate': start_date_str,
+                        'endDate': end_date_str,
+                        'accounts': [],
+                        'parent_state': ['posted'],
+                        'account_type': 'cash',
+                        'report_name': report.name,
+                    })
+                # Defaults for General Ledger
+                elif 'general_ledger' in report.report_name:
+                    data.update({
+                        'journal_ids': [],
+                        'analytic_ids': [],
+                        'target_move': ['posted'],
+                        'start_date': start_date_str,
+                        'end_date': end_date_str,
+                        'filter_type': 'month',
+                        'get_filters': True,
+                    })
+                # Defaults for Tax Report
+                elif 'tax_report' in report.report_name:
+                    data.update({
+                        'report_name': report.name,
+                        'period_data': [f"{start_date_str} to {end_date_str}"],
+                        'filters': {
+                            'startDate': start_date_str,
+                            'endDate': end_date_str,
+                            'options': ['posted', 'draft'],
+                            'company': self.env.company.ids,
+                            'report_type': 'generic',
+                        },
+                        'args': [1, 'month'],
+                    })
+                # Defaults for PNL / Balance Sheet / Trial Balance
+                elif 'profit_n_loss' in report.report_name or 'balance_sheet' in report.report_name or 'trial_balance' in report.report_name:
                     data.update({
                         'reportName': report.name,
                         'filterBy': '',
                         'periods': {},
                         'filterData': {
-                            'start_date': start_date,
-                            'end_date': end_date,
+                            'start_date': start_date_str,
+                            'end_date': end_date_str,
                             'journal_ids': [],
                             'account_ids': [],
                             'analytic_ids': [],
                             'target_move': ['posted', 'draft'],
                             'comparison_value': 1,
                             'comparison_type_value': 'month',
+                            'options': ['posted', 'draft'],
                         }
                     })
 
         if report_model is not None:
             # Call the custom model to get values
             res_values = report_model._get_report_values(docids, data=data)
-
-            # DEBUG LOGGING of result
-            if 'partner_ledger' in report.report_name:
-                pt = res_values.get('partner_totals', {})
-                print("DEBUG: STAGE 3 - Partner Ledger Values: partner_totals len=%s" % len(pt))
-                if not pt:
-                    print("DEBUG: STAGE 3.1 - partner_totals is empty. Searching for any partner with entries...")
-                    # Fallback: find any partner with entries if the filter yielded nothing
-                    any_partners = self.env['partner.ledger.report'].get_partner()
-                    if any_partners:
-                        print("DEBUG: STAGE 4 - Found any_partners: %s" % any_partners[:5])
-                        data['partner_id'] = any_partners[:5]
-                        res_values = report_model._get_report_values(docids, data=data)
-                        print("DEBUG: STAGE 5 - Re-fetch with any_partners: partner_totals len=%s" % len(res_values.get('partner_totals', {})))
 
             data.update(res_values)
         else:
@@ -440,9 +525,11 @@ class IrActionsReport(models.Model):
     def get_values(self):
         """Return metadata of available reports."""
         reports = self.search([])
-        for test in reports:
-            qweb_view = self.env['ir.ui.view'].search([('xml_id', '=', test.report_name)])
-        return [{'id': rec.id, 'name': rec.name, 'model_id': rec.model_id, 'model': rec.model,
+        # NB: return ``model_id`` as an int id — a Many2one recordset is not
+        # JSON-serializable and broke this method over jsonrpc. The previous
+        # ``for test in reports`` loop searched a non-stored field, overwrote
+        # its result each iteration and used it nowhere, so it was removed.
+        return [{'id': rec.id, 'name': rec.name, 'model_id': rec.model_id.id, 'model': rec.model,
                  'report_name': rec.report_name} for rec in reports]
 
     @api.model
@@ -451,8 +538,6 @@ class IrActionsReport(models.Model):
         qweb_code = self.env['ir.ui.view'].search(
             [('name', 'ilike', data['report_name'].split('.')[1]), ('type', '=', 'qweb')])
         return [{'arch': views.arch} for views in qweb_code]
-
-
 
     # studio report testing from here
     def get_custom_report_page(self):
@@ -482,16 +567,24 @@ class IrActionsReport(models.Model):
 
         # Nuclear Cleanup: Remove any inherited views that might be blocking the system
         # (specifically those targeting the Studio editor or common layouts that are broken)
+        # Scope the match to inherited qweb views that actually carry these paths as an
+        # xpath *expression* (expr="..."). The previous domain matched the raw substring
+        # anywhere in arch_db and was unscoped, so any unrelated view whose stored arch
+        # happened to contain the substring would be unlinked (DB-wide data loss).
         broken_xpaths = ['/t/div[1]/div[3]/div/ul/div[1]/div', '/t/div[1]/div[3]/div/ul']
         for xpath in broken_xpaths:
-            bad_views = self.env['ir.ui.view'].search([('arch_db', 'like', xpath)])
+            bad_views = self.env['ir.ui.view'].search([
+                ('type', '=', 'qweb'),
+                ('inherit_id', '!=', False),
+                ('arch_db', 'like', f'expr="{xpath}"'),
+            ])
             if bad_views:
                 bad_views.sudo().unlink()
 
         # Also purge anything inheriting from the Studio editor itself, just in case
         editor_view = self.env.ref('cyllo_studio.edit_report', raise_if_not_found=False)
         if not editor_view:
-             editor_view = self.env['ir.ui.view'].search([('name', '=', 'edit_report')], limit=1)
+            editor_view = self.env['ir.ui.view'].search([('name', '=', 'edit_report')], limit=1)
         if editor_view:
             orphans = self.env['ir.ui.view'].search([('inherit_id', '=', editor_view.id)])
             if orphans:
@@ -520,8 +613,8 @@ class IrActionsReport(models.Model):
                                 <div class="oe_structure"/>
                                 <div class="row">
                                     <div class="col-12">
-                                        <h2 class="text-center mt-4">{name}</h2>
-                                        <p class="text-muted text-center">New Report for {model_rec.name}</p>
+                                        <h2 class="text-center mt-4">{escape(name)}</h2>
+                                        <p class="text-muted text-center">New Report for {escape(model_rec.name)}</p>
                                     </div>
                                 </div>
                                 <div class="oe_structure"/>

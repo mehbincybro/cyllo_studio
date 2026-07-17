@@ -37,7 +37,6 @@
  */
 import { Component, onWillStart, useState, useEffect } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { RecordSelector } from "@web/core/record_selectors/record_selector";
 import { Dialog } from "@web/core/dialog/dialog";
 import { sortBy } from "@web/core/utils/arrays";
 import { CylloStudioDropdown } from "@cyllo_studio/js/view_editor/dropdown/CylloStudioDropdown";

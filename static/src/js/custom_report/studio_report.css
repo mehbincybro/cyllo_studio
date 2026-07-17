@@ -18,7 +18,7 @@
     box-sizing: border-box;
     min-height: 297mm;
     height: 297mm;
-    width: 210mm;
+    /*width: 210mm;*/
     overflow: hidden;
 }
 

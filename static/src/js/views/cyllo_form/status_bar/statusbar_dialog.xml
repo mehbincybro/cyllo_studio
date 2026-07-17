@@ -47,30 +47,6 @@
                                 />
                             </div>
                         </div>
-	                    <!--                                                <div t-if="state.isManualField"-->
-	                    <!--                                                     class=" mb-4">-->
-	                    <!--                                                    <label for=""-->
-	                    <!--                                                           class="cy-modal_label">-->
-	                    <!--                                                        Values</label>-->
-	                    <!--                                                    <div t-if="state.reRender"-->
-	                    <!--                                                         class="cy-scrollable-content">-->
-	                    <!--                                                        <div t-ref="cy-existingSelection">-->
-	                    <!--                                                            <t t-foreach="state.values"-->
-	                    <!--                                                               t-as="value"-->
-	                    <!--                                                               t-key="value_index">-->
-	                    <!--                                                               <SelectionFieldValue-->
-	                    <!--                                                                       value="value[1]"-->
-	                    <!--                                                                       index="value_index"-->
-	                    <!--                                                                       checkSelectionValues.bind="checkSelectionValues"-->
-	                    <!--                                                                       changeValue.bind="changeSelectionValue"-->
-	                    <!--                                                                       deleteValue.bind="deleteSelectionValue"/>-->
-	                    <!--                                                            </t>-->
-	                    <!--                                                        </div>-->
-	                    <!--                                                    </div>-->
-	                    <!--                                                    <button class="btn btn-primary mb-2 px-4"-->
-	                    <!--                                                            t-on-click="addSelectionValue">Add-->
-	                    <!--                                                    </button>-->
-	                    <!--                                                </div>-->
 	                    <div class="mb-4">
                             <label for=""
                                    class="cy-modal_label">

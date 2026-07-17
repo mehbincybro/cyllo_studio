@@ -117,10 +117,6 @@ export class FieldProperties extends Component {
             type: Number,
             optional: true
         },
-        type: {
-            type: String,
-            optional: true
-        },
         create: {
             type: Boolean,
             optional: true
@@ -191,10 +187,6 @@ export class FieldProperties extends Component {
         },
         options: {
             type: Object,
-            optional: true
-        },
-        label_path: {
-            type: String,
             optional: true
         },
         position: {
@@ -1282,7 +1274,6 @@ export class FieldProperties extends Component {
                 selectionValues: this.state.selectionValues,
                 related_model_field: related_model_field,
                 active_fields: this.props.activeFields,
-                optional_fields: optionalFields || {},
             };
         }
         this.env.services.ui.block();
@@ -1329,6 +1320,10 @@ export class FieldProperties extends Component {
         } catch (error) {
             hasError = true;
             console.error('Error creating field:', error);
+            const errName = error?.data?.name || error?.exceptionName;
+            if (errName === 'odoo.exceptions.AccessError') {
+                throw error;
+            }
             this.notification.add({
                 title: _t("Error"),
                 message: "Failed to save the field",
@@ -1922,80 +1917,6 @@ export class FieldProperties extends Component {
         this.state.previewImage = { ...this.state.previewImage, ...value }
     }
 
-    //    get multiSelectDropDown() {
-    //        const fieldInfo = this.existingFields[this.state.field_name]?.selection
-    //        let allValues = {}
-    //        if (fieldInfo) {
-    //            allValues = fieldInfo.reduce((obj, [key, value]) => {
-    //            obj[key] = value;
-    //            return obj
-    //            }, {})
-    //        }
-    //        return {
-    //        selectedValues: this.state.optionVisible || [],
-    //        allValues: allValues,
-    //        onUpdate: (value) => {
-    //        this.state.optionVisible = value
-    //        }
-    //        }
-    //        }
-    //    get multiSelectDropDown() {
-    //        const values = this.state.field === 'existing' ? this.state.values : this.state.selectionValues;
-    //
-    //        // Build allValues object from selection values
-    //        let allValues = {};
-    //        if (this.state.field === 'existing') {
-    //            // For existing fields, values are in [key, label] format
-    //            // We use key (technical name) as the value to store
-    //            values.forEach(item => {
-    //                if (Array.isArray(item) && item.length >= 2) {
-    //                    const key = item[0];   // technical name (e.g., 'draft', 'sent')
-    //                    const label = item[1]; // display name (e.g., 'Draft', 'Sent')
-    //                    allValues[key] = label; // key -> label mapping for display
-    //                }
-    //            });
-    //        } else {
-    //            // For new fields, values are simple strings
-    //            values.forEach(item => {
-    //                if (item) {
-    //                    allValues[item] = item;
-    //                }
-    //            });
-    //        }
-    //
-    //        return {
-    //            selectedValues: [...new Set(this.state.SelectedOptions)],
-    //            allValues,
-    //            onUpdate: (value) => {
-    //                this.state.SelectedOptions = value;
-    //                // Store as comma-separated keys
-    //                this.StatusBarValues.statusbarVisible = value.join(',');
-    //                this.state.edited = true;
-    //            },
-    //        };
-    //    }
-    //    get multiSelectDropDown(){
-    //        const values = this.state.field == 'existing' ? this.state.values : this.state.selectionValues
-    //        let allValues = values.reduce((acc, item) => {
-    //            if (this.state.field == 'existing'){
-    //                acc[item[0]] = item[1];
-    //            }else{
-    //                acc[item] = item;
-    //            }
-    //          return acc;
-    //        }, {});
-    //
-    //        return {
-    //          selectedValues:  [...new Set(this.state.SelectedOptions)],
-    //          allValues,
-    //          onUpdate: (value)=> {
-    //            this.state.SelectedOptions = value
-    //            this.StatusBarValues.statusbarVisible = value.join(', ')
-    //
-    //          },
-    //        }
-    //    }
-
     get multiSelectDropDown() {
         const values = this.state.field === 'existing' ? (this.state.values || []) : (this.state.selectionValues || []);
 
@@ -2029,6 +1950,7 @@ export class FieldProperties extends Component {
                 this.state.SelectedOptions = value;
                 this.StatusBarValues.statusbarVisible = value.join(',');
                 this.state.edited = true;
+                this.autoSave();
             },
         };
     }

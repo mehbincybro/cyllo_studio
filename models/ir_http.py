@@ -32,6 +32,6 @@ class IrHttp(models.AbstractModel):
         studio = request.httprequest.args.get('studio')
         if studio is not None:
             user = request.env.user.browse(request.session.uid)
-            if not user.has_group('base.group_erp_manager'):
+            if not user.has_group('cyllo_studio.group_cyllo_studio_user'):
                 studio = '0'
             request.session.studio = studio if studio == '1' else '0'

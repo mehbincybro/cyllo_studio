@@ -20,6 +20,19 @@ import {
 } from '@cyllo_studio/js/new_app/new_app_templates';
 import { RemoveSessions } from '@cyllo_studio/js/root/studio_utils';
 
+// Reports that are technical building blocks (label/barcode sheets) rather
+// than user-editable documents. They stay fully functional (Print menu,
+// rendering) but are hidden from the Studio Reports kanban so the list stays
+// focused on real, customizable reports. Matched by report_name (stable
+// across databases). Mirrors the blacklist Odoo's own web_studio applies.
+const STUDIO_REPORT_BLACKLIST = [
+    "product.report_producttemplatelabel_dymo",       // Product Label (PDF)
+    "product.report_producttemplatelabel2x7",          // Product Label 2x7 (PDF)
+    "product.report_producttemplatelabel4x7",          // Product Label 4x7 (PDF)
+    "product.report_producttemplatelabel4x12",         // Product Label 4x12 (PDF)
+    "product.report_producttemplatelabel4x12noprice",  // Product Label 4x12 No Price (PDF)
+];
+
 /**
  * CylloNavBar extends the standard Odoo NavBar to integrate
  * Cyllo Studio functionality, including undo/redo support,
@@ -39,6 +52,7 @@ export class CylloNavBar extends NavBar {
         const prevForm = this._readPrevForm();
         const configBc = this._readConfigBreadcrumb();
         this.state = useState({
+            isSystemAdmin: this.env.services.user.hasGroup("base.group_system"),
             studioEditableList: false,
             lightMode: false,
             isStudioEdit: false,
@@ -268,6 +282,13 @@ export class CylloNavBar extends NavBar {
 
     /** Open the Access Rights view for the current model. */
     async AccessRightsClick() {
+        if (!this.state.isSystemAdmin) {
+            this.notification.add("Contact your System Administrator.", {
+                title: "Access Denied",
+                type: "danger",
+            });
+            return;
+        }
         this.state.configOpen = false;
         this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();
@@ -294,6 +315,13 @@ export class CylloNavBar extends NavBar {
 
     /** Open Record Rules view for the current model. */
     async RecordRuleClick() {
+        if (!this.state.isSystemAdmin) {
+            this.notification.add("Contact your System Administrator.", {
+                title: "Access Denied",
+                type: "danger",
+            });
+            return;
+        }
         this.state.configOpen = false;
         this.env.bus.trigger('CLEAR-MENU', { fromClose: true });
         const { resModel } = this._getBusinessContext();
@@ -365,6 +393,10 @@ export class CylloNavBar extends NavBar {
             type: 'ir.actions.act_window',
             res_model: 'ir.actions.report',
             target: 'current',
+            // Hard filter (not a removable facet): technical label/barcode
+            // reports never belong in the Studio Reports list, regardless of
+            // the model facet. They remain available in the Print menu.
+            domain: [["report_name", "not in", STUDIO_REPORT_BLACKLIST]],
             // A form view is required for the kanban's "+ New"/record-open
             // actions to have somewhere to navigate to — without one they
             // silently do nothing. `false` uses the model's default form view.
@@ -565,7 +597,7 @@ export class CylloNavBar extends NavBar {
         sessionStorage.setItem('ReDO', JSON.stringify(redoStack));
         this.action.doAction("studio_reload");
         this.env.bus.trigger('resetProperties');
-        window.location.reload();
+        // window.location.reload();
     }
 
     async redoChange() {
@@ -612,7 +644,7 @@ export class CylloNavBar extends NavBar {
         sessionStorage.setItem('UndoRedo', JSON.stringify(undoStack));
         this.action.doAction("studio_reload");
         this.env.bus.trigger('resetProperties');
-        window.location.reload();
+        // window.location.reload();
     }
 
 }

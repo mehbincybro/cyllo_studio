@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-import hashlib
 import uuid
-from datetime import timedelta
 from odoo import api, fields, models
 
 

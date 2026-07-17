@@ -174,49 +174,14 @@ export class CylloFormCompiler extends FormCompiler {
         super.setup();
         this.rpc = useService("rpc");
     }
-    /**
-    * Compile an individual field element.
-    * Handles dynamic labels and attaches references for Studio editing.
-    * @param {Element} el - Field element.
-    * @param {Record<string, any>} params - Compilation parameters.
-    * @returns {Element} - Compiled field element.
-    */
-
-    //    compileField(el, params) {
-    //        const field = super.compileField(el, params);
-    //        const fieldName = el.getAttribute("name");
-    //        const fieldString = el.getAttribute("string");
-    //        const fieldId = el.getAttribute("field_id");
-    //        const contextViewRef = el.getAttribute("context");
-    //        const labelsForAttr = el.getAttribute("id") || fieldName;
-    //        const labels = this.getLabels(labelsForAttr);
-    //        const dynamicLabel = (label) => {
-    //            const formLabel = this.createLabelFromField(fieldId, fieldName, fieldString, label, {
-    //                ...params,
-    //                currentFieldArchNode: el,
-    //            });
-    //            if (formLabel) {
-    //                label.replaceWith(formLabel);
-    //            } else {
-    //                label.remove();
-    //            }
-    //            return formLabel;
-    //        };
-    //        for (const label of labels) {
-    //            dynamicLabel(label);
-    //        }
-    //        this.encounteredFields[fieldName] = dynamicLabel;
-    //        return field;
-    //    }
-    //
-    //    /**
-    //     * Compile a generic node.
-    //     * Adds handling for invisible nodes, stripes, dynamic click events, and field extraction.
-    //     * @param {Element} node - The node to compile.
-    //     * @param {Record<string, any>} params - Compilation parameters.
-    //     * @param {boolean} evalInvisible - Whether to evaluate invisible nodes.
-    //     * @returns {Element} - Compiled node.
-    //     */
+       /**
+        * Compile a generic node.
+        * Adds handling for invisible nodes, stripes, dynamic click events, and field extraction.
+        * @param {Element} node - The node to compile.
+        * @param {Record<string, any>} params - Compilation parameters.
+        * @param {boolean} evalInvisible - Whether to evaluate invisible nodes.
+        * @returns {Element} - Compiled node.
+        */
     compileNode(node, params = {}, evalInvisible = false) {
         const invisible_session = sessionStorage.getItem('invisible');
         //        if (invisible_session) {
@@ -500,12 +465,6 @@ export class CylloFormCompiler extends FormCompiler {
             }
 
             const invisible = getModifier(child, "invisible");
-            //                const invisible_session =  sessionStorage.getItem('invisible');
-            //                if(!invisible_session){
-            //                    if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
-            //                        continue;
-            //                    }
-            //                }
 
             const mainSlot = createElement("t", {
                 "t-set-slot": `item_${slotId++}`,
@@ -766,12 +725,6 @@ export class CylloFormCompiler extends FormCompiler {
                 continue;
             }
             const invisible = getModifier(child, "invisible");
-            //            if(!invisible_session){
-            //                if (!params.compileInvisibleNodes && (invisible === "True" || invisible === "1")) {
-            //                    continue;
-            //                }
-            //            }
-
 
             const pageSlot = createElement("t");
             append(noteBook, pageSlot);
@@ -829,13 +782,7 @@ export class CylloFormCompiler extends FormCompiler {
             //            if(invisible_session){
             pageSlot.setAttribute("isVisible", true);
             pageSlot.setAttribute("invisibleStriped", `!${isVisibleExpr}`)
-            //            }else{
-            //            pageSlot.setAttribute("isVisible", isVisibleExpr);
-            //            }
-            //            pageSlot.setAttribute("isVisible", "true");
-            //if (invisible === "True" || invisible === "1") {
-            //    pageSlot.setAttribute("striped", "'cy-studio-striped'");
-            //}
+
             for (const contents of child.children) {
                 append(pageSlot, this.compileNode(contents, { ...params, currentSlot: pageSlot }));
             }
